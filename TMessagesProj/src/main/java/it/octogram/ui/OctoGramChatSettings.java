@@ -47,7 +47,6 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
     private int stickerSizeRow;
     private int stickerSizeDividerRow;
     private int chatHeaderRow;
-    private int mediaSwipeByTapRow;
     private int jumpChannelRow;
     private int showGreetings;
     private int hideKeyboardRow;
@@ -103,12 +102,7 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == mediaSwipeByTapRow) {
-            OctoConfig.toggleMediaFlipByTap();
-            if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(OctoConfig.mediaFlipByTap);
-            }
-        } else if (position == jumpChannelRow) {
+        if (position == jumpChannelRow) {
             OctoConfig.toggleJumpChannel();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(OctoConfig.jumpChannel);
@@ -329,7 +323,6 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
         }
 
         chatHeaderRow = rowCount++;
-        mediaSwipeByTapRow = rowCount++;
         jumpChannelRow = rowCount++;
         showGreetings = rowCount++;
         playGifAsVideoRow = rowCount++;
@@ -403,9 +396,7 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                 case SWITCH:
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     textCheckCell.setEnabled(true, null);
-                    if (position == mediaSwipeByTapRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("FlipMediaByTapping", R.string.FlipMediaByTapping), OctoConfig.mediaFlipByTap, true);
-                    } else if (position == jumpChannelRow) {
+                    if (position == jumpChannelRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("JumpToNextChannel", R.string.JumpToNextChannel), OctoConfig.jumpChannel, true);
                     } else if (position == showGreetings) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("GreetingSticker", R.string.GreetingSticker), OctoConfig.showGreetings, true);
@@ -574,7 +565,7 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
             } else if (position == chatHeaderRow || position == foldersHeaderRow || position == audioVideoHeaderRow ||
                     position == messageMenuHeaderRow || position == stickerSizeHeaderRow || position == cameraTypeHeaderRow) {
                 return ViewType.HEADER;
-            } else if (position == mediaSwipeByTapRow || position == jumpChannelRow || position == hideKeyboardRow ||
+            } else if (position == jumpChannelRow || position == hideKeyboardRow ||
                     position == playGifAsVideoRow || position == showFolderWhenForwardRow ||
                     position == rearCameraStartingRow || position == showGreetings || position == cameraXOptimizeRow ||
                     position == proximitySensorRow || position == suppressionRow || position == turnSoundOnVDKeyRow ||
