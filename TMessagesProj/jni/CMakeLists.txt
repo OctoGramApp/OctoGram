@@ -314,7 +314,7 @@ include(${CMAKE_HOME_DIRECTORY}/voip/CMakeLists.txt)
 #ping
 include(${CMAKE_HOME_DIRECTORY}/ping/CMakeLists.txt)
 
-set(NATIVE_LIB "owl.43")
+set(NATIVE_LIB "owl.45")
 
 #tmessages
 add_library(${NATIVE_LIB} SHARED

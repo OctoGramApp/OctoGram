@@ -74,6 +74,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
@@ -96,6 +97,7 @@ import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Adapters.FiltersView;
 import org.telegram.ui.Cells.AudioPlayerCell;
 import org.telegram.ui.ChatActivity;
+import org.telegram.ui.Components.Forum.ForumUtilities;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 
@@ -1466,11 +1468,12 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
             Bundle args = new Bundle();
             args.putBoolean("onlySelect", true);
             args.putInt("dialogsType", DialogsActivity.DIALOGS_TYPE_FORWARD);
+            args.putBoolean("canSelectTopics", true);
             DialogsActivity fragment = new DialogsActivity(args);
             final ArrayList<MessageObject> fmessages = new ArrayList<>();
             fmessages.add(messageObject);
             fragment.setDelegate((fragment1, dids, message, param, topicsFragment) -> {
-                if (dids.size() > 1 || dids.get(0) .dialogId== UserConfig.getInstance(currentAccount).getClientUserId() || message != null) {
+                if (dids.size() > 1 || dids.get(0).dialogId == UserConfig.getInstance(currentAccount).getClientUserId() || message != null) {
                     for (int a = 0; a < dids.size(); a++) {
                         long did = dids.get(a).dialogId;
                         if (message != null) {
@@ -1480,7 +1483,8 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
                     }
                     fragment1.finishFragment();
                 } else {
-                    long did = dids.get(0).dialogId;
+                    MessagesStorage.TopicKey topicKey = dids.get(0);
+                    long did = topicKey.dialogId;
                     Bundle args1 = new Bundle();
                     args1.putBoolean("scrollToTopOnResume", true);
                     if (DialogObject.isEncryptedDialog(did)) {
@@ -1490,10 +1494,15 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
                     } else {
                         args1.putLong("chat_id", -did);
                     }
-                    NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.closeChats);
                     ChatActivity chatActivity = new ChatActivity(args1);
+                    if (topicKey.topicId != 0) {
+                        ForumUtilities.applyTopic(chatActivity, topicKey);
+                    }
                     if (parentActivity.presentFragment(chatActivity, true, false)) {
                         chatActivity.showFieldPanelForForward(true, fmessages);
+                        if (topicKey.topicId != 0) {
+                            fragment1.removeSelfFromStack();
+                        }
                     } else {
                         fragment1.finishFragment();
                     }
@@ -2007,7 +2016,13 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
             } else {
                 optionsButton.setVisibility(View.VISIBLE);
             }
-            if (MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId())) {
+            final long dialogId = messageObject.getDialogId();
+            final boolean noforwards = (
+                dialogId < 0 && MessagesController.getInstance(currentAccount).isChatNoForwards(-dialogId) ||
+                MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId()) ||
+                messageObject.messageOwner.noforwards
+            );
+            if (noforwards) {
                 optionsButton.hideSubItem(1);
                 optionsButton.hideSubItem(2);
                 optionsButton.hideSubItem(5);
@@ -2301,7 +2316,7 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
             EditTextBoldCursor editText = searchItem.getSearchField();
             editText.setCursorColor(getThemedColor(Theme.key_player_actionBarTitle));
 
-            repeatButton.setIconColor(getThemedColor((String) repeatButton.getTag()));
+            repeatButton.setIconColor(getThemedColor((Integer) repeatButton.getTag()));
             Theme.setSelectorDrawableColor(repeatButton.getBackground(), getThemedColor(Theme.key_listSelector), true);
 
             optionsButton.setIconColor(getThemedColor(Theme.key_player_button));

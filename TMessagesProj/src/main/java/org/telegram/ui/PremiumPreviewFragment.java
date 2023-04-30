@@ -250,7 +250,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     }
 
     {
-        tiersGradientTools = new PremiumGradient.PremiumGradientTools(Theme.key_premiumGradient1, Theme.key_premiumGradient2, null, null);
+        tiersGradientTools = new PremiumGradient.PremiumGradientTools(Theme.key_premiumGradient1, Theme.key_premiumGradient2, -1, -1);
         tiersGradientTools.exactly = true;
         tiersGradientTools.x1 = 0;
         tiersGradientTools.y1 = 0f;
@@ -664,10 +664,13 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
 
         if (tier == null) {
             forcePremium = true;
-            for (TLRPC.TL_premiumSubscriptionOption option : fragment.getAccountInstance().getMediaDataController().getPremiumPromo().period_options) {
-                if (option.months == 1) {
-                    tier = new SubscriptionTier(option);
-                    break;
+            TLRPC.TL_help_premiumPromo promo = fragment.getAccountInstance().getMediaDataController().getPremiumPromo();
+            if (promo != null) {
+                for (TLRPC.TL_premiumSubscriptionOption option : promo.period_options) {
+                    if (option.months == 1) {
+                        tier = new SubscriptionTier(option);
+                        break;
+                    }
                 }
             }
         }
@@ -680,7 +683,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             if (activity instanceof LaunchActivity) {
                 LaunchActivity launchActivity = (LaunchActivity) activity;
 
-                if (selectedTier.subscriptionOption.bot_url == null) {
+                if (selectedTier == null || selectedTier.subscriptionOption == null || selectedTier.subscriptionOption.bot_url == null) {
                     if (!TextUtils.isEmpty(fragment.getMessagesController().premiumBotUsername)) {
                         launchActivity.setNavigateToPremiumBot(true);
                         launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + fragment.getMessagesController().premiumBotUsername + "?start=" + source)));

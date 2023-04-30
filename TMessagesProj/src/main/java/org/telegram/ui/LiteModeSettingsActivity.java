@@ -78,6 +78,8 @@ public class LiteModeSettingsActivity extends BaseFragment {
 
     Bulletin restrictBulletin;
 
+    private int FLAGS_CHAT;
+
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
@@ -142,6 +144,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
         });
 
         fragmentView = contentView;
+        FLAGS_CHAT = AndroidUtilities.isTablet() ? (LiteMode.FLAGS_CHAT & ~LiteMode.FLAG_CHAT_FORUM_TWOCOLUMN) : LiteMode.FLAGS_CHAT;
 
         updateItems();
 
@@ -168,12 +171,49 @@ public class LiteModeSettingsActivity extends BaseFragment {
             return 0;
         } else if (flags == LiteMode.FLAGS_ANIMATED_EMOJI) {
             return 1;
-        } else if (flags == LiteMode.FLAGS_CHAT) {
+        } else if (flags == FLAGS_CHAT) {
             return 2;
         }
         return -1;
     }
 
+    public void setExpanded(int flags, boolean expand) {
+        int i = getExpandedIndex(flags);
+        if (i == -1) {
+            return;
+        }
+        expanded[i] = expand;
+        updateValues();
+        updateItems();
+    }
+
+    public void scrollToType(int type) {
+        for (int i = 0; i < items.size(); i++) {
+            Item item = items.get(i);
+            if (item.type == type) {
+                highlightRow(i);
+                break;
+            }
+        }
+    }
+
+    public void scrollToFlags(int flags) {
+        for (int i = 0; i < items.size(); i++) {
+            Item item = items.get(i);
+            if (item.flags == flags) {
+                highlightRow(i);
+                break;
+            }
+        }
+    }
+
+    private void highlightRow(int index) {
+        RecyclerListView.IntReturnCallback callback = () -> {
+            layoutManager.scrollToPositionWithOffset(index, AndroidUtilities.dp(60));
+            return index;
+        };
+        listView.highlightRow(callback);
+    }
 
     private ArrayList<Item> oldItems = new ArrayList<>();
     private ArrayList<Item> items = new ArrayList<>();
@@ -206,10 +246,12 @@ public class LiteModeSettingsActivity extends BaseFragment {
             items.add(Item.asCheckbox(LocaleController.getString("LiteOptionsAutoplayReactions"), LiteMode.FLAG_ANIMATED_EMOJI_REACTIONS));
             items.add(Item.asCheckbox(LocaleController.getString("LiteOptionsAutoplayChat"), LiteMode.FLAG_ANIMATED_EMOJI_CHAT));
         }
-        items.add(Item.asSwitch(R.drawable.msg2_ask_question, LocaleController.getString("LiteOptionsChat"), LiteMode.FLAGS_CHAT));
+        items.add(Item.asSwitch(R.drawable.msg2_ask_question, LocaleController.getString("LiteOptionsChat"), FLAGS_CHAT));
         if (expanded[2]) {
             items.add(Item.asCheckbox(LocaleController.getString("LiteOptionsBackground"), LiteMode.FLAG_CHAT_BACKGROUND));
-            items.add(Item.asCheckbox(LocaleController.getString("LiteOptionsTopics"), LiteMode.FLAG_CHAT_FORUM_TWOCOLUMN));
+            if (!AndroidUtilities.isTablet()) {
+                items.add(Item.asCheckbox(LocaleController.getString("LiteOptionsTopics"), LiteMode.FLAG_CHAT_FORUM_TWOCOLUMN));
+            }
             items.add(Item.asCheckbox(LocaleController.getString("LiteOptionsSpoiler"), LiteMode.FLAG_CHAT_SPOILER));
             if (SharedConfig.getDevicePerformanceClass() >= SharedConfig.PERFORMANCE_CLASS_AVERAGE) {
                 items.add(Item.asCheckbox(LocaleController.getString("LiteOptionsBlur"), LiteMode.FLAG_CHAT_BLUR));
@@ -280,7 +322,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
     private static final int VIEW_TYPE_CHECKBOX = 4;
     private static final int VIEW_TYPE_SWITCH2 = 5;
 
-    private static final int SWITCH_TYPE_SMOOTH_TRANSITIONS = 0;
+    public static final int SWITCH_TYPE_SMOOTH_TRANSITIONS = 1;
 
     private class Adapter extends AdapterWithDiffUtils {
 
@@ -349,11 +391,11 @@ public class LiteModeSettingsActivity extends BaseFragment {
                 boolean top = position > 0 && items.get(position - 1).viewType != VIEW_TYPE_INFO;
                 boolean bottom = position + 1 < items.size() && items.get(position + 1).viewType != VIEW_TYPE_INFO;
                 if (top && bottom) {
-                    textInfoPrivacyCell.setBackground(Theme.getThemedDrawable(getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
+                    textInfoPrivacyCell.setBackground(Theme.getThemedDrawableByKey(getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                 } else if (top) {
-                    textInfoPrivacyCell.setBackground(Theme.getThemedDrawable(getContext(), R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                    textInfoPrivacyCell.setBackground(Theme.getThemedDrawableByKey(getContext(), R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                 } else if (bottom) {
-                    textInfoPrivacyCell.setBackground(Theme.getThemedDrawable(getContext(), R.drawable.greydivider_top, Theme.key_windowBackgroundGrayShadow));
+                    textInfoPrivacyCell.setBackground(Theme.getThemedDrawableByKey(getContext(), R.drawable.greydivider_top, Theme.key_windowBackgroundGrayShadow));
                 } else {
                     textInfoPrivacyCell.setBackground(null);
                 }
@@ -1011,6 +1053,6 @@ public class LiteModeSettingsActivity extends BaseFragment {
         super.onFragmentDestroy();
         LiteMode.savePreference();
         AnimatedEmojiDrawable.updateAll();
-        Theme.reloadWallpaper();
+        Theme.reloadWallpaper(true);
     }
 }

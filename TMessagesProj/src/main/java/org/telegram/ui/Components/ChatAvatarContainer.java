@@ -86,7 +86,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
     private int onlineCount = -1;
     private int currentConnectionState;
     private CharSequence lastSubtitle;
-    private String lastSubtitleColorKey;
+    private int lastSubtitleColorKey = -1;
     private Integer overrideSubtitleColor;
 
     private SharedMediaLayout.SharedMediaPreloader sharedMediaPreloader;
@@ -896,7 +896,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         }
     }
 
-    public String getLastSubtitleColorKey() {
+    public int getLastSubtitleColorKey() {
         return lastSubtitleColorKey;
     }
 
@@ -1054,7 +1054,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
                 lastSubtitle = null;
                 if (overrideSubtitleColor != null) {
                     subtitleTextView.setTextColor(overrideSubtitleColor);
-                } else if (lastSubtitleColorKey != null) {
+                } else if (lastSubtitleColorKey >= 0) {
                     subtitleTextView.setTextColor(getThemedColor(lastSubtitleColorKey));
                     subtitleTextView.setTag(lastSubtitleColorKey);
                 }
@@ -1085,7 +1085,6 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         sb.append("\n");
         sb.append(subtitleTextView.getText());
         info.setContentDescription(sb);
-        setContentDescription(sb);
         if (info.isClickable() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             info.addAction(new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, LocaleController.getString("OpenProfile", R.string.OpenProfile)));
         }
@@ -1102,9 +1101,8 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         return avatarImageView;
     }
 
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
+    private int getThemedColor(int key) {
+        return Theme.getColor(key, resourcesProvider);
     }
 
     public void updateColors() {

@@ -1,24 +1,25 @@
 package org.telegram.messenger;
 
-import org.telegram.tgnet.ConnectionsManager;
-
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class FileLoaderPriorityQueue {
 
-    private final int maxActiveOperationsCount;
+    public static final int TYPE_SMALL = 0;
+    public static final int TYPE_LARGE = 1;
     String name;
+    int type;
+    int currentAccount;
 
-    ArrayList<FileLoadOperation> allOperations = new ArrayList<>();
+    private ArrayList<FileLoadOperation> allOperations = new ArrayList<>();
 
     private int PRIORITY_VALUE_MAX = (1 << 20);
     private int PRIORITY_VALUE_NORMAL = (1 << 16);
     private int PRIORITY_VALUE_LOW = 0;
 
-    FileLoaderPriorityQueue(String name, int maxActiveOperationsCount) {
+    FileLoaderPriorityQueue(int currentAccount, String name, int type) {
+        this.currentAccount = currentAccount;
         this.name = name;
-        this.maxActiveOperationsCount = maxActiveOperationsCount;
+        this.type = type;
     }
 
     public void add(FileLoadOperation operation) {
@@ -27,7 +28,7 @@ public class FileLoaderPriorityQueue {
         }
         int index = -1;
         for (int i = 0; i < allOperations.size(); i++) {
-            if (allOperations.get(i) == operation || Objects.equals(allOperations.get(i).getFileName(), (operation.getFileName()))) {
+            if (allOperations.get(i) == operation) {
                 allOperations.remove(i);
                 i--;
             }
@@ -49,14 +50,16 @@ public class FileLoaderPriorityQueue {
         if (operation == null) {
             return;
         }
-        allOperations.remove(operation);
-        operation.cancel();
+        if (allOperations.remove(operation)) {
+            operation.cancel();
+        }
     }
 
     public void checkLoadingOperations() {
         int activeCount = 0;
         int lastPriority = 0;
         boolean pauseAllNextOperations = false;
+        int max = type == TYPE_LARGE ? MessagesController.getInstance(currentAccount).largeQueueMaxActiveOperations : MessagesController.getInstance(currentAccount).smallQueueMaxActiveOperations;
         for (int i = 0; i < allOperations.size(); i++) {
             FileLoadOperation operation = allOperations.get(i);
             if (i > 0 && !pauseAllNextOperations) {
@@ -64,7 +67,11 @@ public class FileLoaderPriorityQueue {
                     pauseAllNextOperations = true;
                 }
             }
-            if (!pauseAllNextOperations && i < maxActiveOperationsCount) {
+            if (operation.preFinished) {
+                //operation will not use connections
+                //just skip
+                max++;
+            } else if (!pauseAllNextOperations && i < max) {
                 operation.start();
                 activeCount++;
             } else {
@@ -76,15 +83,18 @@ public class FileLoaderPriorityQueue {
         }
     }
 
-    public void remove(FileLoadOperation operation) {
+    public boolean remove(FileLoadOperation operation) {
         if (operation == null) {
-            return;
+            return false;
         }
-        ConnectionsManager connectionsManager = ConnectionsManager.getInstance(operation.currentAccount);
-        if (connectionsManager != null && connectionsManager.getConnectionState() == ConnectionsManager.ConnectionStateWaitingForNetwork) {
-            operation.cancel();
-        }
-        allOperations.remove(operation);
+        return allOperations.remove(operation);
     }
 
+    public int getCount() {
+        return allOperations.size();
+    }
+
+    public int getPosition(FileLoadOperation fileLoadOperation) {
+        return allOperations.indexOf(fileLoadOperation);
+    }
 }

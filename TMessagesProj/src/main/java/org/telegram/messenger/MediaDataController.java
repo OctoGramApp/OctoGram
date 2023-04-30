@@ -53,7 +53,6 @@ import org.telegram.SQLite.SQLiteException;
 import org.telegram.SQLite.SQLitePreparedStatement;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
 import org.telegram.messenger.ringtone.RingtoneUploader;
-import org.telegram.messenger.support.SparseLongArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.RequestDelegate;
@@ -4307,6 +4306,7 @@ public class MediaDataController extends BaseController {
                 }
             }
         }
+        boolean recreateShortcuts = Build.VERSION.SDK_INT >= 30;
         Utilities.globalQueue.postRunnable(() -> {
             try {
                 if (SharedConfig.directShareHash == null) {
@@ -4314,19 +4314,58 @@ public class MediaDataController extends BaseController {
                     ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE).edit().putString("directShareHash2", SharedConfig.directShareHash).commit();
                 }
 
-                ShortcutManagerCompat.removeAllDynamicShortcuts(ApplicationLoader.applicationContext);
+                ArrayList<String> shortcutsToUpdate = new ArrayList<>();
+                ArrayList<String> newShortcutsIds = new ArrayList<>();
+                ArrayList<String> shortcutsToDelete = new ArrayList<>();
 
+                if (recreateShortcuts) {
+                    ShortcutManagerCompat.removeAllDynamicShortcuts(ApplicationLoader.applicationContext);
+                } else {
+                    List<ShortcutInfoCompat> currentShortcuts = ShortcutManagerCompat.getDynamicShortcuts(ApplicationLoader.applicationContext);
+                    if (currentShortcuts != null && !currentShortcuts.isEmpty()) {
+                        newShortcutsIds.add("compose");
+                        for (int a = 0; a < hintsFinal.size(); a++) {
+                            TLRPC.TL_topPeer hint = hintsFinal.get(a);
+                            newShortcutsIds.add("did3_" + MessageObject.getPeerId(hint.peer));
+                        }
+                        for (int a = 0; a < currentShortcuts.size(); a++) {
+                            String id = currentShortcuts.get(a).getId();
+                            if (!newShortcutsIds.remove(id)) {
+                                shortcutsToDelete.add(id);
+                            }
+                            shortcutsToUpdate.add(id);
+                        }
+                        if (newShortcutsIds.isEmpty() && shortcutsToDelete.isEmpty()) {
+                            return;
+                        }
+                    }
+
+                    if (!shortcutsToDelete.isEmpty()) {
+                        ShortcutManagerCompat.removeDynamicShortcuts(ApplicationLoader.applicationContext, shortcutsToDelete);
+                    }
+                }
 
                 Intent intent = new Intent(ApplicationLoader.applicationContext, LaunchActivity.class);
                 intent.setAction("new_dialog");
                 ArrayList<ShortcutInfoCompat> arrayList = new ArrayList<>();
-                ShortcutManagerCompat.pushDynamicShortcut(ApplicationLoader.applicationContext, new ShortcutInfoCompat.Builder(ApplicationLoader.applicationContext, "compose")
+                ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(ApplicationLoader.applicationContext, "compose")
                         .setShortLabel(LocaleController.getString("NewConversationShortcut", R.string.NewConversationShortcut))
                         .setLongLabel(LocaleController.getString("NewConversationShortcut", R.string.NewConversationShortcut))
                         .setIcon(IconCompat.createWithResource(ApplicationLoader.applicationContext, R.drawable.shortcut_compose))
                         .setRank(0)
                         .setIntent(intent)
-                        .build());
+                        .build();
+                if (recreateShortcuts) {
+                    ShortcutManagerCompat.pushDynamicShortcut(ApplicationLoader.applicationContext, shortcut);
+                } else {
+                    arrayList.add(shortcut);
+                    if (shortcutsToUpdate.contains("compose")) {
+                        ShortcutManagerCompat.updateShortcuts(ApplicationLoader.applicationContext, arrayList);
+                    } else {
+                        ShortcutManagerCompat.addDynamicShortcuts(ApplicationLoader.applicationContext, arrayList);
+                    }
+                    arrayList.clear();
+                }
 
 
                 HashSet<String> category = new HashSet<>(1);
@@ -4421,7 +4460,18 @@ public class MediaDataController extends BaseController {
                     } else {
                         builder.setIcon(IconCompat.createWithResource(ApplicationLoader.applicationContext, R.drawable.shortcut_user));
                     }
-                    ShortcutManagerCompat.pushDynamicShortcut(ApplicationLoader.applicationContext, builder.build());
+
+                    if (recreateShortcuts) {
+                        ShortcutManagerCompat.pushDynamicShortcut(ApplicationLoader.applicationContext, builder.build());
+                    } else {
+                        arrayList.add(builder.build());
+                        if (shortcutsToUpdate.contains(id)) {
+                            ShortcutManagerCompat.updateShortcuts(ApplicationLoader.applicationContext, arrayList);
+                        } else {
+                            ShortcutManagerCompat.addDynamicShortcuts(ApplicationLoader.applicationContext, arrayList);
+                        }
+                        arrayList.clear();
+                    }
                 }
             } catch (Throwable ignore) {
 
@@ -5947,6 +5997,9 @@ public class MediaDataController extends BaseController {
                 newRun.flags = TextStyleSpan.FLAG_STYLE_URL;
                 newRun.urlEntity = entity;
             }
+            if (entity instanceof TLRPC.TL_messageEntityTextUrl) {
+                newRun.flags |= TextStyleSpan.FLAG_STYLE_TEXT_URL;
+            }
 
             newRun.flags &= allowedFlags;
 
@@ -6242,7 +6295,7 @@ public class MediaDataController extends BaseController {
         return entities;
     }
 
-    private CharSequence parsePattern(CharSequence cs, Pattern pattern, List<TLRPC.MessageEntity> entities, GenericProvider<Void, TLRPC.MessageEntity> entityProvider) {
+    private CharSequence parsePattern(CharSequence cs, Pattern pattern, ArrayList<TLRPC.MessageEntity> entities, GenericProvider<Void, TLRPC.MessageEntity> entityProvider) {
         Matcher m = pattern.matcher(cs);
         int offset = 0;
         while (m.find()) {
@@ -6262,12 +6315,26 @@ public class MediaDataController extends BaseController {
                 TLRPC.MessageEntity entity = entityProvider.provide(null);
                 entity.offset = m.start() - offset;
                 entity.length = gr.length();
+
+                removeOffset4After(entity.offset, entity.offset + entity.length, entities);
                 entities.add(entity);
             }
 
             offset += m.end() - m.start() - gr.length();
         }
         return cs;
+    }
+
+    private static void removeOffset4After(int start, int end, ArrayList<TLRPC.MessageEntity> entities) {
+        int count = entities.size();
+        for (int a = 0; a < count; a++) {
+            TLRPC.MessageEntity entity = entities.get(a);
+            if (entity.offset > end) {
+                entity.offset -= 4;
+            } else if (entity.offset > start) {
+                entity.offset -= 2;
+            }
+        }
     }
 
     //---------------- MESSAGES END ----------------
@@ -6916,8 +6983,8 @@ public class MediaDataController extends BaseController {
         ringtoneDataStore.onRingtoneUploaded(filePath, document, error);
     }
 
-    public void checkRingtones() {
-        ringtoneDataStore.loadUserRingtones();
+    public void checkRingtones(boolean force) {
+        ringtoneDataStore.loadUserRingtones(force);
     }
 
     public boolean saveToRingtones(TLRPC.Document document) {
@@ -6963,10 +7030,12 @@ public class MediaDataController extends BaseController {
                 TLRPC.Document document = premiumPreviewStickers.get(i == 2 ? premiumPreviewStickers.size() - 1 : i);
                 if (MessageObject.isPremiumSticker(document)) {
                     ImageReceiver imageReceiver = new ImageReceiver();
+                    imageReceiver.setAllowLoadingOnAttachedOnly(false);
                     imageReceiver.setImage(ImageLocation.getForDocument(document), null, null, "webp", null, 1);
                     ImageLoader.getInstance().loadImageForImageReceiver(imageReceiver);
 
                     imageReceiver = new ImageReceiver();
+                    imageReceiver.setAllowLoadingOnAttachedOnly(false);
                     imageReceiver.setImage(ImageLocation.getForDocument(MessageObject.getPremiumStickerAnimation(document), document), null, null, null, "tgs", null, 1);
                     ImageLoader.getInstance().loadImageForImageReceiver(imageReceiver);
                 }
@@ -7444,7 +7513,7 @@ public class MediaDataController extends BaseController {
             }
             for (int i = 0; i < len; ++i) {
                 String emoji = result.get(i).emoji;
-                if (emoji == null) {
+                if (TextUtils.isEmpty(emoji)) {
                     continue;
                 }
                 animatedEmoji.clear();
@@ -7454,8 +7523,9 @@ public class MediaDataController extends BaseController {
                             try {
                                 long documentId = Long.parseLong(Emoji.recentEmoji.get(j).substring(9));
                                 TLRPC.Document document = AnimatedEmojiDrawable.findDocument(currentAccount, documentId);
+                                String emoticon = MessageObject.findAnimatedEmojiEmoticon(document, null);
                                 if (document != null &&
-                                    emoji.equals(MessageObject.findAnimatedEmojiEmoticon(document, null)) &&
+                                    emoticon != null && emoticon.contains(emoji) &&
                                     (isPremium || MessageObject.isFreeEmoji(document))
                                 ) {
                                     animatedEmoji.add(document);
@@ -7471,7 +7541,39 @@ public class MediaDataController extends BaseController {
                 if (animatedEmoji.size() < maxAnimatedPerEmoji && emojiPacks[0] != null) {
                     for (int j = 0; j < emojiPacks[0].size(); ++j) {
                         TLRPC.TL_messages_stickerSet set = emojiPacks[0].get(j);
-                        if (set != null && set.documents != null) {
+                        if (set != null && set.packs != null) {
+                            for (int k = 0; k < set.packs.size(); ++k) {
+                                TLRPC.TL_stickerPack pack = set.packs.get(k);
+                                if (pack != null && pack.emoticon != null && pack.emoticon.contains(emoji)) {
+                                    for (int d = 0; d < pack.documents.size(); ++d) {
+                                        long documentId = pack.documents.get(d);
+                                        TLRPC.Document document = null;
+                                        for (int d2 = 0; d2 < set.documents.size(); ++d2) {
+                                            TLRPC.Document doc = set.documents.get(d2);
+                                            if (doc != null && doc.id == documentId) {
+                                                document = doc;
+                                                break;
+                                            }
+                                        }
+                                        if (document != null && document.attributes != null && !animatedEmoji.contains(document)) {
+                                            boolean duplicate = false;
+                                            for (int l = 0; l < animatedEmoji.size(); ++l) {
+                                                if (animatedEmoji.get(l).id == document.id) {
+                                                    duplicate = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (!duplicate) {
+                                                animatedEmoji.add(document);
+                                                if (animatedEmoji.size() >= maxAnimatedPerEmoji) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (set != null && set.documents != null) {
                             for (int d = 0; d < set.documents.size(); ++d) {
                                 TLRPC.Document document = set.documents.get(d);
                                 if (document != null && document.attributes != null && !animatedEmoji.contains(document)) {
@@ -7484,7 +7586,7 @@ public class MediaDataController extends BaseController {
                                         }
                                     }
 
-                                    if (attribute != null && emoji.equals(attribute.alt) && (isPremium || attribute.free || set.set != null && set.set.short_name != null && set.set.short_name.equals(topicIconsName))) {
+                                    if (attribute != null && !TextUtils.isEmpty(attribute.alt) && attribute.alt.contains(emoji) && (isPremium || attribute.free || set.set != null && set.set.short_name != null && set.set.short_name.equals(topicIconsName))) {
                                         boolean duplicate = false;
                                         for (int l = 0; l < animatedEmoji.size(); ++l) {
                                             if (animatedEmoji.get(l).id == document.id) {
@@ -7529,7 +7631,7 @@ public class MediaDataController extends BaseController {
                                     }
                                 }
 
-                                if (attribute != null && emoji.equals(attribute.alt) && (isPremium || attribute.free || set.set != null && set.set.short_name != null && set.set.short_name.equals(topicIconsName))) {
+                                if (attribute != null && !TextUtils.isEmpty(attribute.alt) && attribute.alt.contains(emoji) && (isPremium || attribute.free || set.set != null && set.set.short_name != null && set.set.short_name.equals(topicIconsName))) {
                                     boolean duplicate = false;
                                     for (int l = 0; l < animatedEmoji.size(); ++l) {
                                         if (animatedEmoji.get(l).id == document.id) {
@@ -7676,7 +7778,7 @@ public class MediaDataController extends BaseController {
         final int type = 1; // default
         if (!emojiStatusesFromCacheFetched[type]) {
             fetchEmojiStatuses(type, true);
-        } else if (/*emojiStatusesHash[type] == 0 || */emojiStatusesFetchDate[type] == null || (System.currentTimeMillis() / 1000 - emojiStatusesFetchDate[type]) > 60 * 30) {
+        } else if (emojiStatuses[type] == null || emojiStatusesFetchDate[type] != null && (System.currentTimeMillis() / 1000 - emojiStatusesFetchDate[type]) > 60 * 30) {
             fetchEmojiStatuses(type, false);
         }
         return emojiStatuses[type];
@@ -7686,7 +7788,7 @@ public class MediaDataController extends BaseController {
         final int type = 0; // recent
         if (!emojiStatusesFromCacheFetched[type]) {
             fetchEmojiStatuses(type, true);
-        } else if (/*emojiStatusesHash[type] == 0 || */emojiStatusesFetchDate[type] == null || (System.currentTimeMillis() / 1000 - emojiStatusesFetchDate[type]) > 60 * 30) {
+        } else if (emojiStatuses[type] == null || emojiStatusesFetchDate[type] != null && (System.currentTimeMillis() / 1000 - emojiStatusesFetchDate[type]) > 60 * 30) {
             fetchEmojiStatuses(type, false);
         }
         return emojiStatuses[type];

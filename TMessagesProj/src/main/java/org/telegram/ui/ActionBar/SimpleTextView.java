@@ -243,7 +243,8 @@ public class SimpleTextView extends View implements Drawable.Callback {
         if (forceEllipsizeByGradientLeft != null) {
             ellipsizeLeft = forceEllipsizeByGradientLeft;
         } else {
-            ellipsizeLeft = getAlignment() == Layout.Alignment.ALIGN_NORMAL && LocaleController.isRTL || getAlignment() == Layout.Alignment.ALIGN_OPPOSITE && !LocaleController.isRTL;
+            ellipsizeLeft = false;
+//            ellipsizeLeft = getAlignment() == Layout.Alignment.ALIGN_NORMAL && LocaleController.isRTL || getAlignment() == Layout.Alignment.ALIGN_OPPOSITE && !LocaleController.isRTL;
         }
         if ((fadeEllpsizePaint == null || fadeEllpsizePaintWidth != AndroidUtilities.dp(ellipsizeByGradientWidthDp) || ellipsizeByGradientLeft != ellipsizeLeft) && ellipsizeByGradient) {
             if (fadeEllpsizePaint == null) {
@@ -420,7 +421,7 @@ public class SimpleTextView extends View implements Drawable.Callback {
                 spoilersPool.addAll(spoilers);
                 spoilers.clear();
                 if (layout != null && layout.getText() instanceof Spannable) {
-                    SpoilerEffect.addSpoilers(this, layout, spoilersPool, spoilers);
+                    SpoilerEffect.addSpoilers(this, layout, -2, -2, spoilersPool, spoilers);
                 }
                 calcOffset(width);
             } catch (Exception ignore) {
@@ -618,12 +619,17 @@ public class SimpleTextView extends View implements Drawable.Callback {
             return false;
         }
         text = value;
-        if (!(text == null && value == null || text != null && text.equals(value))) {
-            scrollingOffset = 0;
-        }
         currentScrollDelay = SCROLL_DELAY_MS;
         recreateLayoutMaybe();
         return true;
+    }
+
+    public void resetScrolling() {
+        scrollingOffset = 0;
+    }
+
+    public void copyScrolling(SimpleTextView textView) {
+        scrollingOffset = textView.scrollingOffset;
     }
 
     public void setDrawablePadding(int value) {
@@ -834,7 +840,7 @@ public class SimpleTextView extends View implements Drawable.Callback {
         }
 
         if (layout != null) {
-            if (rightDrawableOutside || ellipsizeByGradient) {
+            if (rightDrawableOutside || ellipsizeByGradient || paddingRight > 0) {
                 canvas.save();
                 canvas.clipRect(0, 0, getMaxTextWidth() - paddingRight - AndroidUtilities.dp(rightDrawable != null && !(rightDrawable instanceof AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable) && rightDrawableOutside ? 2 : 0), getMeasuredHeight());
             }
@@ -912,7 +918,7 @@ public class SimpleTextView extends View implements Drawable.Callback {
             }
             updateScrollAnimation();
             Emoji.emojiDrawingUseAlpha = true;
-            if (rightDrawableOutside) {
+            if (rightDrawableOutside || ellipsizeByGradient || paddingRight > 0) {
                 canvas.restore();
             }
         }
@@ -921,7 +927,7 @@ public class SimpleTextView extends View implements Drawable.Callback {
         }
 
         if (rightDrawable != null && rightDrawableOutside) {
-            int x = Math.min(textOffsetX + textWidth + drawablePadding + (scrollingOffset == 0 ? -nextScrollX : (int) -scrollingOffset) + nextScrollX, getMaxTextWidth() - paddingRight + drawablePadding - AndroidUtilities.dp(4));
+            int x = Math.min(textOffsetX + textWidth + drawablePadding + (scrollingOffset == 0 ? -nextScrollX : (int) -scrollingOffset) + nextScrollX, getMaxTextWidth() - paddingRight + drawablePadding);
             int dw = (int) (rightDrawable.getIntrinsicWidth() * rightDrawableScale);
             int dh = (int) (rightDrawable.getIntrinsicHeight() * rightDrawableScale);
             int y;

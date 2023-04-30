@@ -285,6 +285,9 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         if (reqForumId != 0 && reqId != 0) {
             return;
         }
+        if (lastMessagesSearchId != lastSearchId) {
+            return;
+        }
         if (delegate != null && delegate.getSearchForumDialogId() != 0 && !localMessagesSearchEndReached) {
             searchForumMessagesInternal(lastMessagesSearchString, lastMessagesSearchId);
         } else {
@@ -457,7 +460,7 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
         req.filter = new TLRPC.TL_inputMessagesFilterEmpty();
         req.flags |= 1;
         req.folder_id = folderId;
-        if (query.equals(lastMessagesSearchString) && !searchResultMessages.isEmpty()) {
+        if (query.equals(lastMessagesSearchString) && !searchResultMessages.isEmpty() && lastMessagesSearchId == lastSearchId) {
             MessageObject lastMessage = searchResultMessages.get(searchResultMessages.size() - 1);
             req.offset_id = lastMessage.getId();
             req.offset_rate = nextSearchRate;
@@ -469,7 +472,8 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             req.offset_peer = new TLRPC.TL_inputPeerEmpty();
         }
         lastMessagesSearchString = query;
-        final int currentReqId = ++lastReqId;
+        lastReqId++;
+        final int currentReqId = lastReqId;
         reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
             final ArrayList<MessageObject> messageObjects = new ArrayList<>();
             if (error == null) {
@@ -571,6 +575,7 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             dialogsType != DialogsActivity.DIALOGS_TYPE_USERS_ONLY &&
             dialogsType != DialogsActivity.DIALOGS_TYPE_CHANNELS_ONLY &&
             dialogsType != DialogsActivity.DIALOGS_TYPE_GROUPS_ONLY &&
+            dialogsType != DialogsActivity.DIALOGS_TYPE_BOT_SHARE &&
             dialogsType != DialogsActivity.DIALOGS_TYPE_IMPORT_HISTORY_GROUPS &&
             dialogsType != DialogsActivity.DIALOGS_TYPE_BOT_REQUEST_PEER
         );
@@ -1034,7 +1039,8 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
                 searchResultHashtags.clear();
             }
 
-            final int searchId = ++lastSearchId;
+            lastSearchId++;
+            final int searchId = lastSearchId;
             waitingResponseCount = 3;
             globalSearchCollapsed = true;
             phoneCollapsed = true;
@@ -1738,7 +1744,7 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             case VIEW_TYPE_ADD_BY_PHONE: {
                 String str = (String) getItem(position);
                 TextCell cell = (TextCell) holder.itemView;
-                cell.setColors(null, Theme.key_windowBackgroundWhiteBlueText2);
+                cell.setColors(-1, Theme.key_windowBackgroundWhiteBlueText2);
                 cell.setText(LocaleController.formatString("AddContactByPhone", R.string.AddContactByPhone, PhoneFormat.getInstance().format("+" + str)), false);
                 break;
             }

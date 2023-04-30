@@ -1756,7 +1756,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             getWindow().setNavigationBarColor(0xff000000);
         }
         scrollNavBar = true;
-        navBarColorKey = null;
+        navBarColorKey = -1;
 
         scrimPaint = new Paint() {
             @Override
@@ -4988,7 +4988,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             scheduleButtonTextView.setSingleLine(true);
             scheduleButtonTextView.setEllipsize(TextUtils.TruncateAt.END);
             scheduleButtonTextView.setGravity(Gravity.CENTER);
-            scheduleButtonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(4), 0, 0x3f000000));
+            scheduleButtonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(8), 0, 0x3f000000));
             scheduleButtonTextView.setTextColor(0xffffffff);
             scheduleButtonTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
             scheduleButtonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -5119,7 +5119,11 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                     calendar.setTimeInMillis(date);
                     int year = calendar.get(Calendar.YEAR);
                     if (year == currentYear) {
-                        return LocaleController.getInstance().formatterScheduleDay.format(date);
+                        return (
+                            LocaleController.getInstance().formatterWeek.format(date) +
+                            " " +
+                            LocaleController.getInstance().formatterScheduleDay.format(date)
+                        );
                     } else {
                         return LocaleController.getInstance().formatterScheduleYear.format(date);
                     }
@@ -7141,7 +7145,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
     }
 
     private boolean showMenuForCell(View rendererCell) {
-        if (itemAnimator.isRunning()) {
+        if (itemAnimator.isRunning() || getContext() == null) {
             return false;
         }
         if (avatarPriviewTransitionInProgress || avatarsPreviewShowed) {
@@ -7207,6 +7211,9 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
 
         boolean showWithAvatarPreview = !isLandscapeMode && !isTabletMode && !AndroidUtilities.isInMultiwindow;
         TLRPC.TL_groupCallParticipant participant = view.getParticipant();
+        if (participant == null) {
+            return false;
+        }
 
         Rect rect = new Rect();
 
@@ -7953,12 +7960,12 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             int type = holder.getItemViewType();
             if (type == VIEW_TYPE_PARTICIPANT) {
                 GroupCallUserCell cell = (GroupCallUserCell) holder.itemView;
-                String key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
+                int key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
                 cell.setGrayIconColor(key, Theme.getColor(key));
                 cell.setDrawDivider(holder.getAdapterPosition() != getItemCount() - 2);
             } else if (type == VIEW_TYPE_CALL_INVITED) {
                 GroupCallInvitedCell cell = (GroupCallInvitedCell) holder.itemView;
-                String key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
+                int key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
                 cell.setGrayIconColor(key, Theme.getColor(key));
                 cell.setDrawDivider(holder.getAdapterPosition() != getItemCount() - 2);
             }

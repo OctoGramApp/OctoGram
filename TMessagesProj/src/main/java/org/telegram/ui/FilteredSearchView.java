@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
@@ -42,6 +43,7 @@ import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.UserObject;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -258,7 +260,7 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
     public final LinearLayoutManager layoutManager;
     private final FlickerLoadingView loadingView;
     private boolean firstLoading = true;
-    private int animationIndex = -1;
+    private AnimationNotificationsLocker notificationsLocker = new AnimationNotificationsLocker();
     public int keyboardHeight;
     private final ChatActionCell floatingDateView;
 
@@ -421,19 +423,33 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
     }
 
     public static CharSequence createFromInfoString(MessageObject messageObject) {
+        return createFromInfoString(messageObject, true);
+    }
+
+    public static CharSequence createFromInfoString(MessageObject messageObject, boolean includeChat) {
+        if (messageObject == null) {
+            return "";
+        }
         if (arrowSpan == null) {
-            arrowSpan = new SpannableStringBuilder("-");
-            arrowSpan.setSpan(new ColoredImageSpan(ContextCompat.getDrawable(ApplicationLoader.applicationContext, R.drawable.search_arrow).mutate()), 0, 1, 0);
+            arrowSpan = new SpannableStringBuilder(">");
+            Drawable arrowDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, R.drawable.attach_arrow_right).mutate();
+            ColoredImageSpan span = new ColoredImageSpan(arrowDrawable, ColoredImageSpan.ALIGN_CENTER);
+            arrowDrawable.setBounds(0, AndroidUtilities.dp(1), AndroidUtilities.dp(13), AndroidUtilities.dp(1 + 13));
+            arrowSpan.setSpan(span, 0, arrowSpan.length(), 0);
         }
         CharSequence fromName = null;
         TLRPC.User user = messageObject.messageOwner.from_id.user_id != 0 ? MessagesController.getInstance(UserConfig.selectedAccount).getUser(messageObject.messageOwner.from_id.user_id) : null;
-        TLRPC.Chat chatFrom = messageObject.messageOwner.from_id.chat_id != 0 ? MessagesController.getInstance(UserConfig.selectedAccount).getChat(messageObject.messageOwner.peer_id.chat_id) : null;
+        TLRPC.Chat chatFrom = null, chatTo = null;
+        chatFrom = messageObject.messageOwner.from_id.chat_id != 0 ? MessagesController.getInstance(UserConfig.selectedAccount).getChat(messageObject.messageOwner.peer_id.chat_id) : null;
         if (chatFrom == null) {
             chatFrom = messageObject.messageOwner.from_id.channel_id != 0 ? MessagesController.getInstance(UserConfig.selectedAccount).getChat(messageObject.messageOwner.peer_id.channel_id) : null;
         }
-        TLRPC.Chat chatTo = messageObject.messageOwner.peer_id.channel_id != 0 ? MessagesController.getInstance(UserConfig.selectedAccount).getChat(messageObject.messageOwner.peer_id.channel_id) : null;
+        chatTo = messageObject.messageOwner.peer_id.channel_id != 0 ? MessagesController.getInstance(UserConfig.selectedAccount).getChat(messageObject.messageOwner.peer_id.channel_id) : null;
         if (chatTo == null) {
             chatTo = messageObject.messageOwner.peer_id.chat_id != 0 ? MessagesController.getInstance(UserConfig.selectedAccount).getChat(messageObject.messageOwner.peer_id.chat_id) : null;
+        }
+        if (!ChatObject.isChannelAndNotMegaGroup(chatTo) && !includeChat) {
+            chatTo = null;
         }
         if (user != null && chatTo != null) {
             CharSequence chatTitle = chatTo.title;
@@ -446,12 +462,14 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
             chatTitle = Emoji.replaceEmoji(chatTitle, null, AndroidUtilities.dp(12), false);
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
             spannableStringBuilder
-                    .append(ContactsController.formatName(user.first_name, user.last_name))
-                    .append(' ').append(arrowSpan).append(' ')
+                    .append(Emoji.replaceEmoji(UserObject.getFirstName(user), null, AndroidUtilities.dp(12), false))
+                    .append(' ')
+                    .append(arrowSpan)
+                    .append(' ')
                     .append(chatTitle);
             fromName = spannableStringBuilder;
         } else if (user != null) {
-            fromName = ContactsController.formatName(user.first_name, user.last_name);
+            fromName = Emoji.replaceEmoji(UserObject.getUserName(user), null, AndroidUtilities.dp(12), false);
         } else if (chatFrom != null) {
             CharSequence chatTitle = chatFrom.title;
             if (ChatObject.isForum(chatFrom)) {
@@ -779,10 +797,10 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
                                 animatorSet.addListener(new AnimatorListenerAdapter() {
                                     @Override
                                     public void onAnimationEnd(Animator animation) {
-                                        NotificationCenter.getInstance(currentAccount).onAnimationFinish(animationIndex);
+                                        notificationsLocker.unlock();
                                     }
                                 });
-                                animationIndex = NotificationCenter.getInstance(currentAccount).setAnimationInProgress(animationIndex, null);
+                                notificationsLocker.lock();
                                 animatorSet.start();
 
                                 if (finalProgressView != null && finalProgressView.getParent() == null) {
