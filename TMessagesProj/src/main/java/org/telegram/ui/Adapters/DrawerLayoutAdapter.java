@@ -35,9 +35,9 @@ import org.telegram.ui.Components.SideMenultItemAnimator;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.MenuOrderController;
-import it.owlgram.android.PasscodeController;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.MenuOrderController;
+import it.octogram.android.PasscodeController;
 
 public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
 
@@ -257,8 +257,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             return;
         }
         int eventType = Theme.getEventType();
-        if (OwlConfig.eventType > 0) {
-            eventType = OwlConfig.eventType - 1;
+        if (OctoConfig.eventType > 0) {
+            eventType = OctoConfig.eventType - 1;
         }
         int newGroupIcon;
         int newSecretIcon;
@@ -358,7 +358,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                     case "settings":
                         items.add(new Item(8, data.text, settingsIcon));
                         break;
-                    case "owlgram_settings":
+                    case "octogram_settings":
                         items.add(new Item(201, data.text, settingsIcon));
                         break;
                     case "invite_friends":

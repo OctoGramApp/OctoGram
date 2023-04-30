@@ -53,8 +53,6 @@ import org.telegram.ui.ActionBar.Theme;
 
 import java.util.List;
 
-import it.owlgram.android.entities.EntitiesHelper;
-
 public class EditTextCaption extends EditTextBoldCursor {
 
     private static final int ACCESSIBILITY_ACTION_SHARE = 0x10000000;

@@ -92,8 +92,8 @@ import org.telegram.ui.Components.UndoView;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import it.owlgram.ui.Components.Dialogs.IconSelectorAlert;
-import it.owlgram.android.FolderIconController;
+import it.octogram.ui.Components.Dialogs.IconSelectorAlert;
+import it.octogram.android.FolderIconController;
 
 public class FilterCreateActivity extends BaseFragment {
 

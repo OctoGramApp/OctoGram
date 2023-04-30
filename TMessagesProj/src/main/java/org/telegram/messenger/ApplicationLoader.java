@@ -32,7 +32,6 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.tgnet.ConnectionsManager;
@@ -42,7 +41,7 @@ import org.telegram.ui.LauncherIconController;
 
 import java.io.File;
 
-import it.owlgram.android.camera.CameraXUtils;
+import it.octogram.android.camera.CameraXUtils;
 
 public class ApplicationLoader extends Application {
 

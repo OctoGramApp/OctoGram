@@ -27,7 +27,6 @@ import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -89,8 +88,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
-import it.owlgram.android.StoreUtils;
-import it.owlgram.android.OwlConfig;
+import it.octogram.android.StoreUtils;
 
 public class  MessagesController extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 

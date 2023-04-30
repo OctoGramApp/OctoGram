@@ -73,7 +73,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import it.owlgram.android.PasscodeController;
+import it.octogram.android.PasscodeController;
 
 public class PasscodeView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
     private final static float BACKGROUND_SPRING_STIFFNESS = 300f;

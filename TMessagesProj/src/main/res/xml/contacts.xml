@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android">
     <ContactsDataKind android:icon="@mipmap/ic_launcher_round"
-        android:mimeType="vnd.android.cursor.item/vnd.it.owlgram.android.android.profile"
+        android:mimeType="vnd.android.cursor.item/vnd.it.octogram.android.android.profile"
         android:summaryColumn="data2"
         android:detailColumn="data3"
         android:detailSocialSummary="true"/>
     <ContactsDataKind android:icon="@mipmap/ic_launcher_round"
-        android:mimeType="vnd.android.cursor.item/vnd.it.owlgram.android.android.call"
+        android:mimeType="vnd.android.cursor.item/vnd.it.octogram.android.android.call"
         android:summaryColumn="data2"
         android:detailColumn="data3"
         android:detailSocialSummary="true"/>
     <ContactsDataKind android:icon="@mipmap/ic_launcher_round"
-        android:mimeType="vnd.android.cursor.item/vnd.it.owlgram.android.android.call.video"
+        android:mimeType="vnd.android.cursor.item/vnd.it.octogram.android.android.call.video"
         android:summaryColumn="data2"
         android:detailColumn="data3"
         android:detailSocialSummary="true"/>

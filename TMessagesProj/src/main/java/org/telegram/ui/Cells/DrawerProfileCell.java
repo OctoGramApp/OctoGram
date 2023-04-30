@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -23,20 +22,13 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import androidx.palette.graphics.Palette;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
@@ -45,8 +37,6 @@ import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.ImageLocation;
-import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
@@ -74,7 +64,8 @@ import org.telegram.ui.Components.Reactions.AnimatedEmojiEffect;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Components.SnowflakesEffect;
 import org.telegram.ui.ThemeActivity;
-import it.owlgram.android.OwlConfig;
+
+import it.octogram.android.OctoConfig;
 
 import java.util.ArrayList;
 
@@ -121,28 +112,28 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         imageReceiver.setCrossfadeWithOldImage(true);
         imageReceiver.setForceCrossfade(true);
         imageReceiver.setDelegate((imageReceiver, set, thumb, memCache) -> {
-            if (OwlConfig.avatarBackgroundDarken || OwlConfig.avatarBackgroundBlur) {
+            if (OctoConfig.avatarBackgroundDarken || OctoConfig.avatarBackgroundBlur) {
                 if (thumb) {
                     return;
                 }
                 ImageReceiver.BitmapHolder bmp = imageReceiver.getBitmapSafe();
                 if (bmp != null) {
                     new Thread(() -> {
-                        int width_percentage = ((bmp.bitmap.getWidth()) * (100 - OwlConfig.blurIntensity)) / 100;
-                        int height_percentage = ((bmp.bitmap.getHeight()) * (100 - OwlConfig.blurIntensity)) / 100;
-                        int width = OwlConfig.avatarBackgroundBlur ? width_percentage : bmp.bitmap.getWidth();
-                        int height = OwlConfig.avatarBackgroundBlur ? height_percentage : bmp.bitmap.getHeight();
+                        int width_percentage = ((bmp.bitmap.getWidth()) * (100 - OctoConfig.blurIntensity)) / 100;
+                        int height_percentage = ((bmp.bitmap.getHeight()) * (100 - OctoConfig.blurIntensity)) / 100;
+                        int width = OctoConfig.avatarBackgroundBlur ? width_percentage : bmp.bitmap.getWidth();
+                        int height = OctoConfig.avatarBackgroundBlur ? height_percentage : bmp.bitmap.getHeight();
                         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                         Canvas canvas = new Canvas(bitmap);
                         canvas.drawBitmap(bmp.bitmap, null, new Rect(0, 0, width, height), new Paint(Paint.FILTER_BITMAP_FLAG));
-                        if (OwlConfig.avatarBackgroundBlur) {
+                        if (OctoConfig.avatarBackgroundBlur) {
                             try {
                                 Utilities.stackBlurBitmap(bitmap, 3);
                             } catch (Exception e) {
                                 FileLog.e(e);
                             }
                         }
-                        if (OwlConfig.avatarBackgroundDarken) {
+                        if (OctoConfig.avatarBackgroundDarken) {
                             final Palette palette = Palette.from(bmp.bitmap).generate();
                             Paint paint = new Paint();
                             paint.setColor((palette.getDarkMutedColor(0xFF547499) & 0x00FFFFFF) | 0x44000000);
@@ -602,13 +593,13 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             sunDrawable.setLayerColor("Path 5.**", currentMoonColor);
             sunDrawable.commitApplyLayerColors();
         }
-        if(AndroidUtilities.isLight(colorBackground) && OwlConfig.showGradientColor && OwlConfig.avatarAsDrawerBackground) {
+        if(AndroidUtilities.isLight(colorBackground) && OctoConfig.showGradientColor && OctoConfig.avatarAsDrawerBackground) {
             nameTextView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
         } else {
             nameTextView.setTextColor(Theme.getColor(Theme.key_chats_menuName));
         }
         if (avatarAsDrawerBackground || useImageBackground) {
-            if(AndroidUtilities.isLight(colorBackground) && OwlConfig.showGradientColor && OwlConfig.avatarAsDrawerBackground) {
+            if(AndroidUtilities.isLight(colorBackground) && OctoConfig.showGradientColor && OctoConfig.avatarAsDrawerBackground) {
                 phoneTextView.getTextView().setTextColor(AndroidUtilities.getTransparentColor(Theme.getColor(Theme.key_dialogTextBlack), 0.4f));
             } else {
                 phoneTextView.getTextView().setTextColor(Theme.getColor(Theme.key_chats_menuPhone));
@@ -647,7 +638,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             if (shadowView.getVisibility() != visibility) {
                 shadowView.setVisibility(visibility);
             }
-            if(AndroidUtilities.isLight(colorBackground) && OwlConfig.showGradientColor && OwlConfig.avatarAsDrawerBackground) {
+            if(AndroidUtilities.isLight(colorBackground) && OctoConfig.showGradientColor && OctoConfig.avatarAsDrawerBackground) {
                 phoneTextView.getTextView().setTextColor(AndroidUtilities.getTransparentColor(Theme.getColor(Theme.key_dialogTextBlack), 0.4f));
             } else {
                 phoneTextView.getTextView().setTextColor(Theme.getColor(Theme.key_chats_menuPhoneCats));
@@ -691,7 +682,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             }
             invalidate();
         }
-        if (((Theme.getEventType() == 0 && OwlConfig.eventType == 0) || OwlConfig.eventType == 1) && OwlConfig.showSnowFalling) {
+        if (((Theme.getEventType() == 0 && OctoConfig.eventType == 0) || OctoConfig.eventType == 1) && OctoConfig.showSnowFalling) {
             snowflakesEffect.onDraw(this, canvas);
         }
     }
@@ -766,7 +757,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         }
         animatedStatus.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         status.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
-        if (!OwlConfig.hidePhoneNumber) {
+        if (!OctoConfig.hidePhoneNumber) {
             phoneTextView.setText(PhoneFormat.getInstance().format("+" + user.phone));
         } else if (!TextUtils.isEmpty(user.username)) {
             phoneTextView.setText("@" + user.username);
@@ -776,16 +767,16 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         AvatarDrawable avatarDrawable = new AvatarDrawable(user);
         avatarDrawable.setColor(Theme.getColor(Theme.key_avatar_backgroundInProfileBlue));
         avatarImageView.setForUserOrChat(user, avatarDrawable);
-        if (OwlConfig.avatarAsDrawerBackground) {
+        if (OctoConfig.avatarAsDrawerBackground) {
             ImageLocation imageLocation = ImageLocation.getForUser(user, ImageLocation.TYPE_BIG);
             avatarAsDrawerBackground = imageLocation != null;
             imageReceiver.setImage(imageLocation, "512_512", null, null, new ColorDrawable(0x00000000), 0, null, user, 1);
-            if(OwlConfig.showGradientColor) {
+            if(OctoConfig.showGradientColor) {
                 gradientBackground.setVisibility(VISIBLE);
             } else {
                 gradientBackground.setVisibility(INVISIBLE);
             }
-            if(OwlConfig.showAvatarImage) {
+            if(OctoConfig.showAvatarImage) {
                 avatarImageView.setVisibility(VISIBLE);
             } else {
                 avatarImageView.setVisibility(INVISIBLE);
@@ -810,7 +801,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     }
 
     public void updateColors() {
-        if (Theme.getEventType() == 0 && OwlConfig.eventType == 0 || OwlConfig.eventType == 1) {
+        if (Theme.getEventType() == 0 && OctoConfig.eventType == 0 || OctoConfig.eventType == 1) {
             snowflakesEffect.updateColors();
         }
         if (animatedStatus != null) {

@@ -111,14 +111,14 @@ android {
         variant.outputs.all { output ->
             def abi = output.getFilter('ABI')
             if (abi == null) abi = 'universal'
-            outputFileName = "OwlGram-Huawei-${defaultConfig.versionName}-${defaultConfig.versionCode}-${abi}.apk"
+            outputFileName = "OctoGram-Huawei-${defaultConfig.versionName}-${defaultConfig.versionCode}-${abi}.apk"
             def abiVersionCode = project.ext.abiCodes.get(abi)
             output.versionCodeOverride = defaultConfig.versionCode * 10 + abiVersionCode
         }
     }
 
     defaultConfig {
-        applicationId "it.owlgram.android"
+        applicationId "it.octogram.android"
         minSdkVersion 21
         targetSdkVersion 32
         versionName APP_VERSION_NAME

@@ -112,8 +112,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.owlgram.ui.Components.SendOptionsMenuLayout;
-import it.owlgram.android.utils.ForwardContext;
+import it.octogram.ui.Components.SendOptionsMenuLayout;
+import it.octogram.android.utils.ForwardContext;
 
 public class ShareAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 

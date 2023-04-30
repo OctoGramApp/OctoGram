@@ -27,7 +27,6 @@ import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Base64;
-import android.util.Log;
 
 import androidx.collection.LongSparseArray;
 
@@ -74,9 +73,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import it.owlgram.android.MessageHelper;
-import it.owlgram.android.entities.syntax_highlight.SyntaxHighlight;
-import it.owlgram.ui.DoNotTranslateSettings;
+import it.octogram.android.MessageHelper;
+import it.octogram.android.entities.syntax_highlight.SyntaxHighlight;
+import it.octogram.ui.DoNotTranslateSettings;
 
 public class MessageObject {
 

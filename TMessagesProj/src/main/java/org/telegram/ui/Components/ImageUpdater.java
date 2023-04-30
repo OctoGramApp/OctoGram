@@ -26,7 +26,6 @@ import android.util.Pair;
 import android.view.View;
 
 import androidx.core.content.FileProvider;
-import androidx.exifinterface.media.ExifInterface;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -64,7 +63,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import it.owlgram.android.PermissionsUtils;
+import it.octogram.android.PermissionsUtils;
 
 public class ImageUpdater implements NotificationCenter.NotificationCenterDelegate, PhotoCropActivity.PhotoEditActivityDelegate {
     private final static int ID_TAKE_PHOTO = 0,

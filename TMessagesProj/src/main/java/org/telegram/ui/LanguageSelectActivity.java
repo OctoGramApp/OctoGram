@@ -58,7 +58,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Timer;
 
-import it.owlgram.ui.OwlgramGeneralSettings;
+import it.octogram.ui.OctoGramGeneralSettings;
 
 public class LanguageSelectActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -231,7 +231,7 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                     }
                     return;
                 } else if (view instanceof TextCell) {
-                    presentFragment(new OwlgramGeneralSettings());
+                    presentFragment(new OctoGramGeneralSettings());
                     return;
                 }
                 if (getParentActivity() == null || parentLayout == null || !(view instanceof TextRadioCell)) {

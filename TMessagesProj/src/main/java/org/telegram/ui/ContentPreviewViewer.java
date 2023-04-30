@@ -71,8 +71,8 @@ import org.telegram.ui.Components.SuggestEmojiView;
 
 import java.util.ArrayList;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.MessageHelper;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.MessageHelper;
 
 public class ContentPreviewViewer {
 
@@ -741,7 +741,7 @@ public class ContentPreviewViewer {
 
     private boolean canSend(View view) {
         boolean isGif = view instanceof ContextLinkCell && ((ContextLinkCell) view).isGif();
-        return !OwlConfig.confirmSending.sendGifs && isGif || !OwlConfig.confirmSending.sendStickers && !isGif;
+        return !OctoConfig.confirmSending.sendGifs && isGif || !OctoConfig.confirmSending.sendStickers && !isGif;
     }
 
     public boolean onTouch(MotionEvent event, final RecyclerListView listView, final int height, final Object listener, ContentPreviewViewerDelegate contentPreviewViewerDelegate, Theme.ResourcesProvider resourcesProvider) {

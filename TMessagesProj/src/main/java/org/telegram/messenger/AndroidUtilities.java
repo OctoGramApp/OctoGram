@@ -200,8 +200,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.ui.Components.Dialogs.ImportSettingsDialog;
+import it.octogram.android.OctoConfig;
+import it.octogram.ui.Components.Dialogs.ImportSettingsDialog;
 
 public class AndroidUtilities {
     public final static int LIGHT_STATUS_BAR_OVERLAY = 0x0f000000, DARK_STATUS_BAR_OVERLAY = 0x33000000;
@@ -1764,7 +1764,7 @@ public class AndroidUtilities {
         synchronized (typefaceCache) {
             if (!typefaceCache.containsKey(assetPath)) {
                 try {
-                    if (OwlConfig.useSystemFont) {
+                    if (OctoConfig.useSystemFont) {
                         Typeface t = null;
                         switch (assetPath) {
                             case "fonts/rmedium.ttf":
@@ -3418,9 +3418,9 @@ public class AndroidUtilities {
             f = FileLoader.getInstance(UserConfig.selectedAccount).getPathToMessage(message.messageOwner);
         }
         if (f != null && f.exists()) {
-            int statusConf = OwlConfig.isValidFileSettings(message);
-            if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith("owl") && statusConf >= OwlConfig.VALID_CONFIGURATION) {
-                if (statusConf == OwlConfig.VALID_CONFIGURATION) {
+            int statusConf = OctoConfig.isValidFileSettings(message);
+            if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith("octo") && statusConf >= OctoConfig.VALID_CONFIGURATION) {
+                if (statusConf == OctoConfig.VALID_CONFIGURATION) {
                     new ImportSettingsDialog(parentFragment, message).checkCanShowDialog();
                 } else {
                     BulletinFactory.of(parentFragment).createSimpleBulletin(R.raw.gigagroup_convert, LocaleController.getString("UpdateToImport", R.string.UpdateToImport), true).show();

@@ -57,8 +57,6 @@ import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.drawable.IconCompat;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -71,7 +69,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -79,7 +76,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
-import it.owlgram.android.OwlConfig;
+import it.octogram.android.OctoConfig;
 
 public class NotificationsController extends BaseController {
 
@@ -3815,7 +3812,7 @@ public class NotificationsController extends BaseController {
                     .setGroupSummary(true)
                     .setShowWhen(true)
                     .setWhen(((long) lastMessageObject.messageOwner.date) * 1000)
-                    .setColor(OwlConfig.getNotificationColor());
+                    .setColor(OctoConfig.getNotificationColor());
 
             long[] vibrationPattern = null;
             Uri sound = null;
@@ -4605,7 +4602,7 @@ public class NotificationsController extends BaseController {
                     .setContentText(text.toString())
                     .setAutoCancel(true)
                     .setNumber(messageObjects.size())
-                    .setColor(OwlConfig.getNotificationColor())
+                    .setColor(OctoConfig.getNotificationColor())
                     .setGroupSummary(false)
                     .setWhen(date)
                     .setShowWhen(true)

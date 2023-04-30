@@ -207,28 +207,28 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import it.owlgram.android.StoreUtils;
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.magic.OWLENC;
-import it.owlgram.ui.Components.Dialogs.UpdateAlertDialog;
-import it.owlgram.android.Crashlytics;
-import it.owlgram.android.CustomEmojiController;
-import it.owlgram.android.utils.ForwardContext;
-import it.owlgram.android.LanguageController;
-import it.owlgram.android.MonetThemeController;
-import it.owlgram.android.StickersUtils;
-import it.owlgram.android.updates.UpdateSignaling;
-import it.owlgram.ui.OwlgramAppearanceSettings;
-import it.owlgram.ui.OwlgramChatSettings;
-import it.owlgram.ui.OwlgramExperimentalSettings;
-import it.owlgram.ui.OwlgramGeneralSettings;
-import it.owlgram.ui.OwlgramSettings;
-import it.owlgram.ui.DatacenterActivity;
-import it.owlgram.android.http.FileDownloader;
-import it.owlgram.android.updates.ApkInstaller;
-import it.owlgram.android.updates.AppDownloader;
-import it.owlgram.android.updates.PlayStoreAPI;
-import it.owlgram.android.updates.UpdateManager;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
+import it.octogram.android.magic.OWLENC;
+import it.octogram.ui.Components.Dialogs.UpdateAlertDialog;
+import it.octogram.android.Crashlytics;
+import it.octogram.android.CustomEmojiController;
+import it.octogram.android.utils.ForwardContext;
+import it.octogram.android.LanguageController;
+import it.octogram.android.MonetThemeController;
+import it.octogram.android.StickersUtils;
+import it.octogram.android.updates.UpdateSignaling;
+import it.octogram.ui.OctoGramAppearanceSettings;
+import it.octogram.ui.OctoGramChatSettings;
+import it.octogram.ui.OctoGramExperimentalSettings;
+import it.octogram.ui.OctoGramGeneralSettings;
+import it.octogram.ui.OctoGramSettings;
+import it.octogram.ui.DatacenterActivity;
+import it.octogram.android.http.FileDownloader;
+import it.octogram.android.updates.ApkInstaller;
+import it.octogram.android.updates.AppDownloader;
+import it.octogram.android.updates.PlayStoreAPI;
+import it.octogram.android.updates.UpdateManager;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
     public final static String EXTRA_FORCE_NOT_INTERNAL_APPS = "force_not_internal_apps";
@@ -631,7 +631,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 } else if (id == 15) {
                     showSelectStatusDialog();
                 } else if (id == 201) {
-                    presentFragment(new OwlgramSettings());
+                    presentFragment(new OctoGramSettings());
                     drawerLayoutContainer.closeDrawer(false);
                 } else if (id == 202) {
                     Bundle args = new Bundle();
@@ -2604,8 +2604,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         } else {
                                             open_settings = 1;
                                         }
-                                    } else if (url.startsWith("tg:owl") || url.startsWith("tg://owl")) {
-                                        ProfileActivity.startOwlSound();
+                                    } else if (url.startsWith("tg:octo") || url.startsWith("tg://octo")) {
+                                        ProfileActivity.startOctoSound();
                                     } else if (url.startsWith("tg:update") || url.startsWith("tg://update")) {
                                         checkAppUpdate(true);
                                     } else if (url.startsWith("tg:stocwddo") || url.startsWith("tg://stocwddo")) {
@@ -2636,17 +2636,17 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             bulletin.show();
                                         });
                                     } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
-                                        if (!OwlConfig.unlockedChupa) {
+                                        if (!OctoConfig.unlockedChupa) {
                                             BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
                                             AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.CHUPA, null);
                                             layout.textView.setText(LocaleController.getString("UnlockedHiddenChupaIcon", R.string.UnlockedHiddenChupaIcon));
                                             fireworksOverlay.start();
                                             layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
-                                            OwlConfig.unlockChupa();
+                                            OctoConfig.unlockChupa();
                                         }
                                     } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OwlgramExperimentalSettings(), false, false));
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OctoGramExperimentalSettings(), false, false));
                                         if (AndroidUtilities.isTablet()) {
                                             actionBarLayout.showLastFragment();
                                             rightActionBarLayout.showLastFragment();
@@ -2655,7 +2655,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             drawerLayoutContainer.setAllowOpenDrawer(true, false);
                                         }
                                     } else if (url.startsWith("tg:chat") || url.startsWith("tg://chat")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OwlgramChatSettings(), false, false));
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OctoGramChatSettings(), false, false));
                                         if (AndroidUtilities.isTablet()) {
                                             actionBarLayout.showLastFragment();
                                             rightActionBarLayout.showLastFragment();
@@ -2664,7 +2664,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             drawerLayoutContainer.setAllowOpenDrawer(true, false);
                                         }
                                     } else if (url.startsWith("tg:general") || url.startsWith("tg://general")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OwlgramGeneralSettings(), false, false));
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OctoGramGeneralSettings(), false, false));
                                         if (AndroidUtilities.isTablet()) {
                                             actionBarLayout.showLastFragment();
                                             rightActionBarLayout.showLastFragment();
@@ -2673,7 +2673,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             drawerLayoutContainer.setAllowOpenDrawer(true, false);
                                         }
                                     } else if (url.startsWith("tg:appearance") || url.startsWith("tg://appearance")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OwlgramAppearanceSettings(), false, false));
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new OctoGramAppearanceSettings(), false, false));
                                         if (AndroidUtilities.isTablet()) {
                                             actionBarLayout.showLastFragment();
                                             rightActionBarLayout.showLastFragment();
@@ -2812,9 +2812,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             NotificationCenter.getInstance(intentAccount[0]).postNotificationName(NotificationCenter.closeChats);
                                             push_user_id = userId;
                                             @SuppressLint("Range") String mimeType = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
-                                            if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.it.owlgram.android.android.call")) {
+                                            if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.it.octogram.android.android.call")) {
                                                 audioCallUser = true;
-                                            } else if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.it.owlgram.android.android.call.video")) {
+                                            } else if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.it.octogram.android.android.call.video")) {
                                                 videoCallUser = true;
                                             }
                                         }
@@ -5018,10 +5018,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     UpdateManager.installUpdate(LaunchActivity.this);
                 } else {
                     try {
-                        if(OwlConfig.updateData.isPresent()) {
-                            OWLENC.UpdateAvailable update = OwlConfig.updateData.get();
+                        if(OctoConfig.updateData.isPresent()) {
+                            OWLENC.UpdateAvailable update = OctoConfig.updateData.get();
                             if (FileDownloader.downloadFile(LaunchActivity.this, "appUpdate", UpdateManager.apkFile(), update.fileLink))
-                                OwlConfig.saveOldVersion(update.version);
+                                OctoConfig.saveOldVersion(update.version);
                         }
                     } catch (Exception ignored){}
                 }
@@ -5167,12 +5167,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     updateSizeTextView.animate().alpha(0.0f).scaleX(0.0f).scaleY(0.0f).setDuration(180).start();
                 } else {
                     try {
-                        if(OwlConfig.updateData.isPresent()) {
-                            OWLENC.UpdateAvailable updateAvailable = OwlConfig.updateData.get();
+                        if(OctoConfig.updateData.isPresent()) {
+                            OWLENC.UpdateAvailable updateAvailable = OctoConfig.updateData.get();
                             if(updateAvailable.version > BuildVars.BUILD_VERSION) {
                                 createUpdateUI();
                                 updateLayoutIcon.setIcon(MediaActionDrawable.ICON_DOWNLOAD, true, true);
-                                updateTextView.setText(LocaleController.getString("UpdateOwlGram", R.string.UpdateOwlGram));
+                                updateTextView.setText(LocaleController.getString("UpdateOctoGram", R.string.UpdateOctoGram));
                                 updateSizeTextView.setTag(null);
                                 updateSizeTextView.animate().alpha(1.0f).scaleX(1.0f).scaleY(1.0f).setDuration(180).start();
                                 updateSizeTextView.setText(AndroidUtilities.formatFileSize(updateAvailable.fileSize));
@@ -5200,7 +5200,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     }
 
     public void checkAppUpdate(boolean force) {
-        if((!OwlConfig.notifyUpdates && !force) || UserConfig.getActivatedAccountsCount() == 0 || !StoreUtils.isFromCheckableStore() && StoreUtils.isDownloadedFromAnyStore()) {
+        if((!OctoConfig.notifyUpdates && !force) || UserConfig.getActivatedAccountsCount() == 0 || !StoreUtils.isFromCheckableStore() && StoreUtils.isDownloadedFromAnyStore()) {
             return;
         }
         UpdateManager.isDownloadedUpdate(result -> {
@@ -5232,27 +5232,27 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     public void onSuccess(Object updateResult) {
                         if(updateResult instanceof OWLENC.UpdateAvailable) {
                             OWLENC.UpdateAvailable updateAvailable = (OWLENC.UpdateAvailable) updateResult;
-                            long passed_time = (new Date().getTime() - OwlConfig.lastUpdateCheck) / 1000;
-                            if(passed_time >= 3600 * 2 || OwlConfig.lastUpdateStatus != 1 && !updateAvailable.isReminded() || force) {
-                                OwlConfig.updateData.set(updateAvailable);
-                                OwlConfig.applyUpdateData();
-                                OwlConfig.applyUpdateData();
-                                OwlConfig.remindUpdate(-1);
+                            long passed_time = (new Date().getTime() - OctoConfig.lastUpdateCheck) / 1000;
+                            if(passed_time >= 3600 * 2 || OctoConfig.lastUpdateStatus != 1 && !updateAvailable.isReminded() || force) {
+                                OctoConfig.updateData.set(updateAvailable);
+                                OctoConfig.applyUpdateData();
+                                OctoConfig.applyUpdateData();
+                                OctoConfig.remindUpdate(-1);
                                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.appUpdateAvailable);
                                 if (StoreUtils.isFromPlayStore()) {
                                     PlayStoreAPI.openUpdatePopup(LaunchActivity.this);
                                 } else {
                                     new UpdateAlertDialog(LaunchActivity.this, updateAvailable).show();
                                 }
-                                OwlConfig.saveUpdateStatus(1);
-                                OwlConfig.saveLastUpdateCheck();
+                                OctoConfig.saveUpdateStatus(1);
+                                OctoConfig.saveLastUpdateCheck();
                                 updateAppUpdateViews();
                             }
                         } else {
                             if (updateResult instanceof UpdateManager.UpdateNotAvailable && force) {
                                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.formatString("NoUpdateAvailable", R.string.NoUpdateAvailable));
                             }
-                            OwlConfig.saveUpdateStatus(0);
+                            OctoConfig.saveUpdateStatus(0);
                         }
                     }
 
@@ -7343,7 +7343,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         showVoiceChatTooltip(mute ? UndoView.ACTION_VOIP_SOUND_MUTED : UndoView.ACTION_VOIP_SOUND_UNMUTED);
                     }
                 }
-            } else if ((OwlConfig.turnSoundOnVDKey || event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP) && (!mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0)) {
+            } else if ((OctoConfig.turnSoundOnVDKey || event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP) && (!mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0)) {
                 BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
                 if (fragment instanceof ChatActivity) {
                     if (((ChatActivity) fragment).maybePlayVisibleVideo()) {

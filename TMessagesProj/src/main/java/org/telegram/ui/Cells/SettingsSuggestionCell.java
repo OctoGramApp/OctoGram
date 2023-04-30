@@ -24,7 +24,7 @@ import org.telegram.ui.Components.TextStyleSpan;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.Components.spoilers.SpoilersTextView;
 
-import it.owlgram.android.OwlConfig;
+import it.octogram.android.OctoConfig;
 
 public class SettingsSuggestionCell extends LinearLayout {
 
@@ -96,7 +96,7 @@ public class SettingsSuggestionCell extends LinearLayout {
             String phoneNumber = PhoneFormat.getInstance().format("+" + user.phone);
             String phoneText = LocaleController.formatString("CheckPhoneNumber", R.string.CheckPhoneNumber, phoneNumber);
             SpannableString phoneChars = new SpannableString(phoneText);
-            if (OwlConfig.hidePhoneNumber) {
+            if (OctoConfig.hidePhoneNumber) {
                 TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
                 run.flags |= TextStyleSpan.FLAG_STYLE_SPOILER;
                 TextStyleSpan result = new TextStyleSpan(run);

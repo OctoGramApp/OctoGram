@@ -180,8 +180,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import it.owlgram.android.translator.Translator;
-
 public class ArticleViewer implements NotificationCenter.NotificationCenterDelegate {
 
     private Activity parentActivity;

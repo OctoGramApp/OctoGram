@@ -43,7 +43,7 @@ import org.telegram.ui.ChatBackgroundDrawable;
 
 import java.util.ArrayList;
 
-import it.owlgram.android.OwlConfig;
+import it.octogram.android.OctoConfig;
 
 public class SizeNotifierFrameLayout extends FrameLayout {
 
@@ -493,7 +493,7 @@ public class SizeNotifierFrameLayout extends FrameLayout {
     }
 
     private void checkSnowflake(Canvas canvas) {
-        if ((Theme.canStartHolidayAnimation() || OwlConfig.eventType == 1) && OwlConfig.showSnowFalling && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BACKGROUND)) {
+        if ((Theme.canStartHolidayAnimation() || OctoConfig.eventType == 1) && OctoConfig.showSnowFalling && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BACKGROUND)) {
             if (snowflakesEffect == null) {
                 snowflakesEffect = new SnowflakesEffect(1);
             }

@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.entities.HTMLKeeper;
-import it.owlgram.android.MessageHelper;
-import it.owlgram.ui.DoNotTranslateSettings;
-import it.owlgram.android.translator.BaseTranslator;
-import it.owlgram.android.translator.Translator;
-import it.owlgram.android.translator.TranslatorHelper;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.entities.HTMLKeeper;
+import it.octogram.android.MessageHelper;
+import it.octogram.ui.DoNotTranslateSettings;
+import it.octogram.android.translator.BaseTranslator;
+import it.octogram.android.translator.Translator;
+import it.octogram.android.translator.TranslatorHelper;
 
 public class TranslateController extends BaseController {
 
@@ -70,14 +70,14 @@ public class TranslateController extends BaseController {
     }
 
     public boolean isFeatureAvailable() {
-        return !(!UserConfig.getInstance(currentAccount).isPremium() && OwlConfig.translationProvider == Translator.PROVIDER_TELEGRAM);
+        return !(!UserConfig.getInstance(currentAccount).isPremium() && OctoConfig.translationProvider == Translator.PROVIDER_TELEGRAM);
     }
 
     private Boolean chatTranslateEnabled;
     private Boolean contextTranslateEnabled;
 
     public boolean isChatTranslateEnabled() {
-        return OwlConfig.translateEntireChat;
+        return OctoConfig.translateEntireChat;
     }
 
     public boolean isContextTranslateEnabled() {
@@ -240,11 +240,11 @@ public class TranslateController extends BaseController {
             lang = "no";
         }
         return lang;*/
-        return Translator.getTranslator(OwlConfig.translationProvider).getCurrentTargetLanguage();
+        return Translator.getTranslator(OctoConfig.translationProvider).getCurrentTargetLanguage();
     }
 
     public void setDialogTranslateTo(long dialogId, int topicId, String language) {
-        if (TextUtils.equals(OwlConfig.translationTarget, language)) {
+        if (TextUtils.equals(OctoConfig.translationTarget, language)) {
             return;
         }
 
@@ -269,7 +269,7 @@ public class TranslateController extends BaseController {
             translatingDialogs.remove(getIdWithTopic(dialogId, topicId));
         }
         NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.dialogTranslate, dialogId, false);
-        OwlConfig.setTranslationTarget(language);
+        OctoConfig.setTranslationTarget(language);
     }
 
     public void updateDialogFull(long dialogId) {
@@ -514,7 +514,7 @@ public class TranslateController extends BaseController {
     public void applyTranslationResult(MessageObject messageObject, BaseTranslator.Result result) {
         messageObject.messageOwner.originalLanguage = result.sourceLanguage;
         messageObject.messageOwner.translatedToLanguage = getDialogTranslateTo(messageObject.getDialogId());
-        messageObject.messageOwner.translationProvider = OwlConfig.translationProvider;
+        messageObject.messageOwner.translationProvider = OctoConfig.translationProvider;
         if (result.translation instanceof String || result.translation instanceof TLRPC.TL_textWithEntities) {
             TLRPC.TL_textWithEntities textWithEntities;
             if (result.translation instanceof String) {
@@ -543,8 +543,8 @@ public class TranslateController extends BaseController {
     }
 
     public static boolean isValidTranslation(TLRPC.Message messageOwner) {
-        return TextUtils.equals(Translator.getTranslator(OwlConfig.translationProvider).getCurrentTargetLanguage(), messageOwner.translatedToLanguage)
-                && OwlConfig.translationProvider == messageOwner.translationProvider;
+        return TextUtils.equals(Translator.getTranslator(OctoConfig.translationProvider).getCurrentTargetLanguage(), messageOwner.translatedToLanguage)
+                && OctoConfig.translationProvider == messageOwner.translationProvider;
     }
 
     private boolean isRestrictedLanguage(MessageObject messageObject) {

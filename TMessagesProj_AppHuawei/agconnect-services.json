@@ -27,7 +27,7 @@
 		"project_id":"99536292102119386",
 		"app_id":"105849965",
 		"api_key":"DAEDAMBKL6txQqonWSvNmEs29veFkzur/ws41tPpZV/zsxLF210TzBtc5qmAYKAYtoTfbll1204J3OqPVWsyJ/Ntr2D2moyHt1VKlQ==",
-		"package_name":"it.owlgram.android"
+		"package_name":"it.octogram.android"
 	},
 	"oauth_client":{
 		"client_id":"105849965",
@@ -35,17 +35,17 @@
 	},
 	"app_info":{
 		"app_id":"105849965",
-		"package_name":"it.owlgram.android"
+		"package_name":"it.octogram.android"
 	},
 	"configuration_version":"3.0",
 	"appInfos":[
 		{
-			"package_name":"it.owlgram.android",
+			"package_name":"it.octogram.android",
 			"client":{
 				"app_id":"105849965"
 			},
 			"app_info":{
-				"package_name":"it.owlgram.android",
+				"package_name":"it.octogram.android",
 				"app_id":"105849965"
 			},
 			"oauth_client":{

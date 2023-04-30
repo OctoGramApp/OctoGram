@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">OwlGram</string>
-    <string name="AppNameBeta">OwlGram Beta</string>
+    <string name="AppName">OctoGram</string>
+    <string name="AppNameBeta">OctoGram Beta</string>
     <string name="LanguageName">Italiano</string>
     <string name="English">Inglese</string>
     <string name="LanguageNameInEnglish">Italian</string>
@@ -1096,7 +1096,7 @@
     <string name="URL">URL</string>
     <string name="MapPreviewProvider">Anteprima mappa</string>
     <string name="MapPreviewProviderTitle">Anteprima mappa</string>
-    <string name="MapPreviewProviderTelegram">OwlGram</string>
+    <string name="MapPreviewProviderTelegram">OctoGram</string>
     <string name="MapPreviewProviderGoogle">Google</string>
     <string name="MapPreviewProviderYandex">Yandex</string>
     <string name="MapPreviewProviderNobody">Nessuna anteprima</string>
@@ -1275,8 +1275,8 @@
     <string name="NotificationGroupFew">%1$s ha inviato %3$s nel gruppo %2$s</string>
     <string name="NotificationGroupAlbum">%1$s ha inviato un album nel gruppo %2$s</string>
     <string name="NotificationGroupForwardedFew">%1$s ha inoltrato %3$s nel gruppo %2$s</string>
-    <string name="NotificationHiddenName">OwlGram</string>
-    <string name="NotificationHiddenChatName">OwlGram</string>
+    <string name="NotificationHiddenName">OctoGram</string>
+    <string name="NotificationHiddenChatName">OctoGram</string>
     <string name="NotificationHiddenChatUserName">Utente</string>
     <string name="NotificationHiddenMessage">Nuovo messaggio</string>
     <string name="Reply">Rispondi</string>
@@ -1341,7 +1341,7 @@
     <string name="NotificationActionPinnedGeoLiveUser">%1$s ha fissato una posizione in tempo reale</string>
     <string name="NotificationActionPinnedGifUser">%1$s ha fissato una GIF</string>
     <string name="NotificationActionPinnedMusicUser">%1$s ha fissato un file audio</string>
-    <string name="SecretChatName">OwlGram</string>
+    <string name="SecretChatName">OctoGram</string>
     <!--contacts view-->
     <string name="SelectContact">Seleziona contatto</string>
     <string name="SelectContacts">Seleziona contatti</string>
@@ -2027,7 +2027,7 @@
     <string name="Emoji">Emoji</string>
     <string name="LargeEmoji">Emoji grandi</string>
     <string name="EmojiUseDefault">Usa emoji di default</string>
-    <string name="TelegramVersion">Owlgram per Android %1$s</string>
+    <string name="TelegramVersion">OctoGram per Android %1$s</string>
     <string name="DebugMenu">Menu debug</string>
     <string name="DebugSendLogs">Invia i log</string>
     <string name="DebugSendLastLogs">Invia gli ultimi log</string>
@@ -3366,7 +3366,7 @@
     <string name="ViewMessageStatistic">Statistiche messaggio</string>
     <string name="ViewMessage">Apri messaggio</string>
     <!--Intro view-->
-    <string name="Page1Title">OwlGram</string>
+    <string name="Page1Title">OctoGram</string>
     <string name="Page2Title">Veloce</string>
     <string name="Page3Title">Gratis</string>
     <string name="Page4Title">Sicuro</string>

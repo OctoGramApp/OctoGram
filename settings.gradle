@@ -13,7 +13,7 @@ dependencyResolutionManagement {
         maven { url 'https://jitpack.io' }
     }
 }
-rootProject.name = "OwlGram"
+rootProject.name = "OctoGram"
 include ':TMessagesProj'
 include ':TMessagesProj_App'
 //include ':TMessagesProj_AppHuawei'

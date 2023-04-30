@@ -35,7 +35,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
-import it.owlgram.android.PermissionsUtils;
+import it.octogram.android.PermissionsUtils;
 
 public class WallpaperUpdater {
 

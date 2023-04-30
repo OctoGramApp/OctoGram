@@ -63,8 +63,8 @@ import org.telegram.ui.Components.UndoView;
 
 import java.util.ArrayList;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.FolderIconController;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.FolderIconController;
 
 public class FiltersSetupActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -618,11 +618,11 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
             if (position == folderStyleTitlesRow || position == folderStyleEmojiRow || position == folderStyleEmojiTitlesRow) {
                 int oldRow = getCurrentSelectedStylePosition();
                 if (position == folderStyleTitlesRow) {
-                    OwlConfig.setTabMode(0);
+                    OctoConfig.setTabMode(0);
                 } else if (position == folderStyleEmojiRow) {
-                    OwlConfig.setTabMode(2);
+                    OctoConfig.setTabMode(2);
                 } else {
-                    OwlConfig.setTabMode(1);
+                    OctoConfig.setTabMode(1);
                 }
                 RadioCell oldRadioCell = (RadioCell) listView.getChildAt(oldRow);
                 RadioCell currRadioCell = (RadioCell) listView.getChildAt(position);
@@ -665,7 +665,7 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
     }
 
     private int getCurrentSelectedStylePosition() {
-        switch (OwlConfig.tabMode) {
+        switch (OctoConfig.tabMode) {
             case 0:
                 return folderStyleTitlesRow;
             case 1:
@@ -1014,11 +1014,11 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                 case 6: {
                     RadioCell radioCell = (RadioCell) holder.itemView;
                     if (position == folderStyleTitlesRow) {
-                        radioCell.setText(LocaleController.getString("FoldersTypeTitles", R.string.FoldersTypeTitles), OwlConfig.tabMode == OwlConfig.TAB_TYPE_TEXT, true);
+                        radioCell.setText(LocaleController.getString("FoldersTypeTitles", R.string.FoldersTypeTitles), OctoConfig.tabMode == OctoConfig.TAB_TYPE_TEXT, true);
                     } else if (position == folderStyleEmojiRow) {
-                        radioCell.setText(LocaleController.getString("FoldersTypeIcons", R.string.FoldersTypeIcons), OwlConfig.tabMode == OwlConfig.TAB_TYPE_ICON, true);
+                        radioCell.setText(LocaleController.getString("FoldersTypeIcons", R.string.FoldersTypeIcons), OctoConfig.tabMode == OctoConfig.TAB_TYPE_ICON, true);
                     } else if (position == folderStyleEmojiTitlesRow) {
-                        radioCell.setText(LocaleController.getString("FoldersTypeIconsTitles", R.string.FoldersTypeIconsTitles), OwlConfig.tabMode == OwlConfig.TAB_TYPE_MIX, true);
+                        radioCell.setText(LocaleController.getString("FoldersTypeIconsTitles", R.string.FoldersTypeIconsTitles), OctoConfig.tabMode == OctoConfig.TAB_TYPE_MIX, true);
                     }
                     break;
                 }

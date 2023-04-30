@@ -95,11 +95,11 @@
 -keep class com.huawei.updatesdk.**{ *; }
 -keep class com.huawei.hms.**{ *; }
 
-# Keep OwlConfig fields name
--keepnames class it.owlgram.android.OwlConfig { <fields>; }
+# Keep OctoConfig fields name
+-keepnames class it.octogram.android.OctoConfig { <fields>; }
 
 # Keep all classes and fiels name of Magic Objects
--keepattributes InnerClasses, EnclosingMethod -keepnames class it.owlgram.android.magic.** { <fields>; }
+-keepattributes InnerClasses, EnclosingMethod -keepnames class it.octogram.android.magic.** { <fields>; }
 
 # Keep all classes of Apache Commons
 -keep class org.apache.commons.text.** { *; }

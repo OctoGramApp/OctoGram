@@ -93,7 +93,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.safetynet.SafetyNet;
-import com.google.zxing.common.detector.MathUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -178,8 +177,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.PasscodeController;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.PasscodeController;
 
 @SuppressLint("HardwareIds")
 public class LoginActivity extends BaseFragment {
@@ -475,7 +474,7 @@ public class LoginActivity extends BaseFragment {
         });
 
         if (UserConfig.getActivatedAccountsCount() == 0) {
-            OwlConfig.updateCurrentVersion();
+            OctoConfig.updateCurrentVersion();
         }
 
         currentDoneType = DONE_TYPE_FLOATING;
@@ -2340,7 +2339,7 @@ public class LoginActivity extends BaseFragment {
                 if (index1 != -1 && index2 != -1 && index1 != index2) {
                     text.replace(index2, index2 + 1, "");
                     text.replace(index1, index1 + 1, "");
-                    text.setSpan(new URLSpanNoUnderline("https://owlgram.org/terms"), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    text.setSpan(new URLSpanNoUnderline("https://octogram.app/terms"), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 privacyView.setText(text);
                 privacyLayout.addView(privacyView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 56, Gravity.LEFT | Gravity.BOTTOM, 14, 0, 70, 32));

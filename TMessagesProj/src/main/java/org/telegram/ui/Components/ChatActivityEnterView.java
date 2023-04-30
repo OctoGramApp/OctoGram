@@ -163,11 +163,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.entities.EntitiesHelper;
-import it.owlgram.android.MessageHelper;
-import it.owlgram.android.translator.BaseTranslator;
-import it.owlgram.android.translator.Translator;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.entities.EntitiesHelper;
+import it.octogram.android.MessageHelper;
+import it.octogram.android.translator.BaseTranslator;
+import it.octogram.android.translator.Translator;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate {
 
@@ -2042,9 +2042,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                         if (!hasRecordVideo || calledRecordRunnable) {
                             startedDraggingX = -1;
                             if (hasRecordVideo && isInVideoMode()) {
-                                delegate.needStartRecordVideo(OwlConfig.confirmSending.sendVideo ? 3 : 1, true, 0);
+                                delegate.needStartRecordVideo(OctoConfig.confirmSending.sendVideo ? 3 : 1, true, 0);
                         } else {
-                            if (OwlConfig.confirmSending.sendAudio) {
+                            if (OctoConfig.confirmSending.sendAudio) {
                                 MediaController.getInstance().stopRecording(2, true, 0);
                             } else {
                                 if (recordingAudioVideo && isInScheduleMode()) {
@@ -2054,7 +2054,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                             }
                             delegate.needStartRecordAudio(0);
                         }
-                        if (!OwlConfig.confirmSending.sendAudio && !OwlConfig.confirmSending.sendVideo) {
+                        if (!OctoConfig.confirmSending.sendAudio && !OctoConfig.confirmSending.sendVideo) {
                             recordingAudioVideo = false;
                             messageTransitionIsRunning = false;
                             AndroidUtilities.runOnUIThread(moveToSendStateRunnable = () -> {
@@ -2135,23 +2135,23 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                             startedDraggingX = -1;
                             if (hasRecordVideo && isInVideoMode()) {
                                 CameraController.getInstance().cancelOnInitRunnable(onFinishInitCameraRunnable);
-                                delegate.needStartRecordVideo(OwlConfig.confirmSending.sendVideo ? 3 : 1, true, 0);
+                                delegate.needStartRecordVideo(OctoConfig.confirmSending.sendVideo ? 3 : 1, true, 0);
                         } else if (!sendVoiceEnabled) {
                             delegate.needShowMediaBanHint();
                         } else {
-                            if (!OwlConfig.confirmSending.sendAudio) {
+                            if (!OctoConfig.confirmSending.sendAudio) {
                                 if (recordingAudioVideo && isInScheduleMode()) {
                                     AlertsCreator.createScheduleDatePickerDialog(parentActivity, parentFragment.getDialogId(), (notify, scheduleDate) -> MediaController.getInstance().stopRecording(1, notify, scheduleDate), () -> MediaController.getInstance().stopRecording(0, false, 0), resourcesProvider);
                                 }
                             }
                             delegate.needStartRecordAudio(0);
-                            if (!OwlConfig.confirmSending.sendAudio) {
+                            if (!OctoConfig.confirmSending.sendAudio) {
                                 MediaController.getInstance().stopRecording(isInScheduleMode() ? 3 : 1, true, 0);
                             } else {
                                 MediaController.getInstance().stopRecording(2, true, 0);
                             }
                         }
-                        if (!OwlConfig.confirmSending.sendAudio && !OwlConfig.confirmSending.sendVideo) {
+                        if (!OctoConfig.confirmSending.sendAudio && !OctoConfig.confirmSending.sendVideo) {
                             recordingAudioVideo = false;
                             messageTransitionIsRunning = false;
                             AndroidUtilities.runOnUIThread(moveToSendStateRunnable = () -> {
@@ -3555,9 +3555,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                     sendPopupLayout.addView(sendWithoutMarkdownButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
                 }
 
-                if (OwlConfig.showTranslate) {
+                if (OctoConfig.showTranslate) {
                     ActionBarMenuSubItem preSentTranslateButton = new ActionBarMenuSubItem(getContext(), false, false, resourcesProvider);
-                    String languageText = Translator.getTranslator(OwlConfig.translationProvider).getCurrentTargetKeyboardLanguage().toUpperCase();
+                    String languageText = Translator.getTranslator(OctoConfig.translationProvider).getCurrentTargetKeyboardLanguage().toUpperCase();
                     preSentTranslateButton.setTextAndIcon(LocaleController.getString("TranslateMessage", R.string.TranslateMessage) + " (" + languageText + ")", R.drawable.msg_translate);
                     preSentTranslateButton.setMinimumWidth(AndroidUtilities.dp(196));
                     preSentTranslateButton.setOnClickListener(v -> {
@@ -3571,7 +3571,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                             sendPopupWindow.dismiss();
                         }
                         Translator.showTranslationTargetSelector(getContext(), true, () -> {
-                            String language = Translator.getTranslator(OwlConfig.translationProvider).getCurrentTargetKeyboardLanguage().toUpperCase();
+                            String language = Translator.getTranslator(OctoConfig.translationProvider).getCurrentTargetKeyboardLanguage().toUpperCase();
                             preSentTranslateButton.setTextAndIcon(LocaleController.getString("TranslateMessage", R.string.TranslateMessage) + " (" + language + ")", R.drawable.msg_translate);
                             translatePreSend();
                         }, resourcesProvider);
@@ -7819,7 +7819,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             defPeer = delegate.getSendAsPeers().peers.get(0).peer;
         }
         boolean isVisible = defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
-            !isEditingMessage() && !isRecordingAudioVideo() && !OwlConfig.hideSendAsChannel && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE);
+            !isEditingMessage() && !isRecordingAudioVideo() && !OctoConfig.hideSendAsChannel && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE);
         if (isVisible) {
             createSenderSelectView();
         }

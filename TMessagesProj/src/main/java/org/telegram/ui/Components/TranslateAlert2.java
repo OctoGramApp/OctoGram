@@ -50,7 +50,6 @@ import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
@@ -64,10 +63,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.entities.HTMLKeeper;
-import it.owlgram.android.translator.Translator;
-import it.owlgram.android.translator.TranslatorHelper;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.entities.HTMLKeeper;
+import it.octogram.android.translator.Translator;
+import it.octogram.android.translator.TranslatorHelper;
 
 public class TranslateAlert2 extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
@@ -1131,11 +1130,11 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
     }
 
     public static String getToLanguage() {
-        return OwlConfig.translationTarget;
+        return OctoConfig.translationTarget;
     }
 
     public static void setToLanguage(String toLang) {
-        OwlConfig.setTranslationTarget(toLang);
+        OctoConfig.setTranslationTarget(toLang);
     }
 
     public static void resetToLanguage() {

@@ -4,7 +4,7 @@
 
 #include <netinet/ip_icmp.h>
 
-#define LOG_TAG "owlgram/native/ping"
+#define LOG_TAG "octogram/native/ping"
 
 #define PING_MSG "Echo Hello 12345\0"
 #define PING_MSG_SIZE strlen(PING_MSG) + 1

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">OwlGram</string>
-    <string name="AppNameBeta">OwlGram Beta</string>
+    <string name="AppName">OctoGram</string>
+    <string name="AppNameBeta">OctoGram Beta</string>
     <string name="LanguageName">العربية</string>
     <string name="English">الإنجليزية</string>
     <string name="LanguageNameInEnglish">Arabic</string>
@@ -1096,7 +1096,7 @@
     <string name="URL">الرابط</string>
     <string name="MapPreviewProvider">مزود معاينة الخرائط</string>
     <string name="MapPreviewProviderTitle">مزود معاينة الخرائط</string>
-    <string name="MapPreviewProviderTelegram">OwlGram</string>
+    <string name="MapPreviewProviderTelegram">OctoGram</string>
     <string name="MapPreviewProviderGoogle">جوجل</string>
     <string name="MapPreviewProviderYandex">ياندكس</string>
     <string name="MapPreviewProviderNobody">بلا معاينات</string>
@@ -1275,8 +1275,8 @@
     <string name="NotificationGroupFew">أرسل %1$s %3$s لمجموعة %2$s</string>
     <string name="NotificationGroupAlbum">أرسل %1$s حُزمة وسائط لمجموعة %2$s</string>
     <string name="NotificationGroupForwardedFew">أعاد %1$s تحويل %3$s لمجموعة %2$s</string>
-    <string name="NotificationHiddenName">OwlGram</string>
-    <string name="NotificationHiddenChatName">OwlGram</string>
+    <string name="NotificationHiddenName">OctoGram</string>
+    <string name="NotificationHiddenChatName">OctoGram</string>
     <string name="NotificationHiddenChatUserName">مستخدم</string>
     <string name="NotificationHiddenMessage">رسالة جديدة</string>
     <string name="Reply">رد</string>
@@ -1341,7 +1341,7 @@
     <string name="NotificationActionPinnedGeoLiveUser">ثبّت %1$s موقعًا مباشرًا</string>
     <string name="NotificationActionPinnedGifUser">ثبّت %1$s صورة متحركة</string>
     <string name="NotificationActionPinnedMusicUser">ثبّت %1$s ملفًا صوتيًا</string>
-    <string name="SecretChatName">OwlGram</string>
+    <string name="SecretChatName">OctoGram</string>
     <!--contacts view-->
     <string name="SelectContact">اختر جهة اتصال</string>
     <string name="SelectContacts">تحديد جهات اتصال</string>
@@ -2027,7 +2027,7 @@
     <string name="Emoji">الرموز التعبيرية</string>
     <string name="LargeEmoji">رموز تعبيرية كبيرة</string>
     <string name="EmojiUseDefault">استخدم الرموز التعبيرية الافتراضية</string>
-    <string name="TelegramVersion">Owlgram للأندرويد %1$s</string>
+    <string name="TelegramVersion">OctoGram للأندرويد %1$s</string>
     <string name="DebugMenu">قائمة المعالجة</string>
     <string name="DebugSendLogs">إرسال السجلات</string>
     <string name="DebugSendLastLogs">إرسال أحدث السجلات</string>
@@ -3366,7 +3366,7 @@
     <string name="ViewMessageStatistic">إحصائيات المنشور</string>
     <string name="ViewMessage">فتح الرسالة</string>
     <!--Intro view-->
-    <string name="Page1Title">OwlGram</string>
+    <string name="Page1Title">OctoGram</string>
     <string name="Page2Title">سريع</string>
     <string name="Page3Title">مجاني</string>
     <string name="Page4Title">آمن</string>

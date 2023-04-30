@@ -91,9 +91,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.media.VideoUtils;
-import it.owlgram.android.entities.EntitiesHelper;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.media.VideoUtils;
+import it.octogram.android.entities.EntitiesHelper;
 
 public class SendMessagesHelper extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 
@@ -6338,9 +6338,9 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     public TLRPC.TL_photo generatePhotoSizes(TLRPC.TL_photo photo, String path, Uri imageUri) {
-        int maxSize = OwlConfig.sendLargePhotos ? 2560 : 1280;
+        int maxSize = OctoConfig.sendLargePhotos ? 2560 : 1280;
         Bitmap bitmap = ImageLoader.loadBitmap(path, imageUri, maxSize, maxSize, true);
-        if (bitmap == null && OwlConfig.sendLargePhotos) {
+        if (bitmap == null && OctoConfig.sendLargePhotos) {
             bitmap = ImageLoader.loadBitmap(path, imageUri, 1280, 1280, true);
         }
         if (bitmap == null) {
@@ -7298,9 +7298,9 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             File bigFile = FileLoader.getInstance(accountInstance.getCurrentAccount()).getPathToAttach(bigSize, false);
             boolean bigExists = bigFile.exists();
             if (!smallExists || !bigExists) {
-                int maxSize = OwlConfig.sendLargePhotos ? 2560 : 1280;
+                int maxSize = OctoConfig.sendLargePhotos ? 2560 : 1280;
                 Bitmap bitmap = ImageLoader.loadBitmap(path, uri, maxSize, maxSize, true);
-                if (bitmap == null && OwlConfig.sendLargePhotos) {
+                if (bitmap == null && OctoConfig.sendLargePhotos) {
                     bitmap = ImageLoader.loadBitmap(path, uri, 1280, 1280, true);
                 }
                 if (bitmap == null) {
@@ -8303,7 +8303,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         int compressionsCount = VideoUtils.getCompressionsCount(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight);
         float maxSize = VideoUtils.getMaxSize(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight, compressionsCount -1);
 
-        int selectedCompression = OwlConfig.lastSelectedCompression;
+        int selectedCompression = OctoConfig.lastSelectedCompression;
 
         if (selectedCompression > compressionsCount) {
             selectedCompression = compressionsCount;

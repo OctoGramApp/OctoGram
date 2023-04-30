@@ -30,7 +30,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.transition.Visibility;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TypedValue;
@@ -118,8 +117,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import it.owlgram.android.OwlConfig;
-import it.owlgram.android.utils.ForwardContext;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.ForwardContext;
 
 @SuppressWarnings("unchecked")
 public class SharedMediaLayout extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
@@ -1565,10 +1564,10 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             actionModeLayout.addView(forwardNoQuoteItem, new LinearLayout.LayoutParams(AndroidUtilities.dp(54), ViewGroup.LayoutParams.MATCH_PARENT));
             actionModeViews.add(forwardNoQuoteItem);
             forwardNoQuoteItem.setOnClickListener(v -> onActionBarItemClick(v, forward_noquote));
-            forwardNoQuoteItem.setVisibility(OwlConfig.contextMenu.noQuoteForward ? View.VISIBLE:View.GONE);
+            forwardNoQuoteItem.setVisibility(OctoConfig.contextMenu.noQuoteForward ? View.VISIBLE:View.GONE);
 
             forwardItem = new ActionBarMenuItem(context, null, getThemedColor(Theme.key_actionBarActionModeDefaultSelector), getThemedColor(Theme.key_actionBarActionModeDefaultIcon), false);
-            forwardItem.setIcon(OwlConfig.contextMenu.noQuoteForward ? R.drawable.msg_forward_quote:R.drawable.msg_forward);
+            forwardItem.setIcon(OctoConfig.contextMenu.noQuoteForward ? R.drawable.msg_forward_quote:R.drawable.msg_forward);
             forwardItem.setContentDescription(LocaleController.getString("Forward", R.string.Forward));
             forwardItem.setDuplicateParentStateEnabled(false);
             actionModeLayout.addView(forwardItem, new LinearLayout.LayoutParams(AndroidUtilities.dp(54), ViewGroup.LayoutParams.MATCH_PARENT));
