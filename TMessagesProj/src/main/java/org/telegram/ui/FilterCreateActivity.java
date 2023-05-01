@@ -862,7 +862,7 @@ public class FilterCreateActivity extends BaseFragment {
     }
 
     private void save(boolean progress, Runnable after) {
-        saveFilterToServer(filter, newFilterFlags, newFilterName, newAlwaysShow, newNeverShow, newPinned, creatingNew, false, hasUserChanged, true, progress, this, () -> {
+        saveFilterToServer(filter, newFilterFlags, newFilterName, filter.emoticon, newAlwaysShow, newNeverShow, newPinned, creatingNew, false, hasUserChanged, true, progress, this, () -> {
 
             hasUserChanged = false;
             creatingNew = false;
@@ -1448,11 +1448,7 @@ public class FilterCreateActivity extends BaseFragment {
                     holder.itemView.setBackground(Theme.getThemedDrawableByKey(mContext, divider ? R.drawable.greydivider : R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     break;
                 }
-                case 2: {
-                    PollEditTextCell cell = (PollEditTextCell) holder.itemView;
-                    cell.setIcon(FolderIconController.getTabIcon(newFilterEmoticon));
-                    break;
-                }
+                // TODO: Missing VIEW_TYPE_SET_ICON
                 case VIEW_TYPE_BUTTON: {
                     ButtonCell buttonCell = (ButtonCell) holder.itemView;
                     buttonCell.setRed(item.isRed);

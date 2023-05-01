@@ -43,7 +43,7 @@ public class UpdateCheckCell extends RelativeLayout {
         titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
         titleTextView.setMaxLines(Integer.MAX_VALUE);
         titleTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-        String linkTextColorKey = Theme.key_windowBackgroundWhiteLinkText;
+        int linkTextColorKey = Theme.key_windowBackgroundWhiteLinkText;
         titleTextView.setLinkTextColor(Theme.getColor(linkTextColorKey));
         titleTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         layout.addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 23, 8, 23, 0));

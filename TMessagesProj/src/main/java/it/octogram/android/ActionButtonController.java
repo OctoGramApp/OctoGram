@@ -152,7 +152,7 @@ public class ActionButtonController {
         return data.size();
     }
 
-    private String getColor(String id) {
+    private int getColor(String id) {
         switch (id) {
             case "leave":
             case "stop":
@@ -171,7 +171,7 @@ public class ActionButtonController {
         String text = null;
         int icon = -1;
         if (id != null) {
-            String color = getColor(id);
+            int color = getColor(id);
             switch (id) {
                 case "camera":
                     text = LocaleController.getString("AccDescrProfilePicture", R.string.AccDescrProfilePicture);
@@ -296,9 +296,9 @@ public class ActionButtonController {
         public final String id;
         public final String text;
         public final int icon;
-        public final String color;
+        public final int color;
 
-        public ActionButtonInfo(String id, String text, int icon, String color) {
+        public ActionButtonInfo(String id, String text, int icon, int color) {
             this.id = id;
             this.text = text;
             this.icon = icon;

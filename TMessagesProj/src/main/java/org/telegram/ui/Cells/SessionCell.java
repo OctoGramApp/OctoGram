@@ -295,7 +295,7 @@ public class SessionCell extends FrameLayout {
         }
         String deviceModel = session.device_model.toLowerCase();
         int iconId;
-        int colorKey, colorKey2;
+        int colorKey = 0, colorKey2 = 0, colorValue = 0;
         if (deviceModel.contains("safari")) {
             iconId = R.drawable.device_web_safari;
             colorKey = Theme.key_avatar_backgroundPink;
@@ -355,7 +355,7 @@ public class SessionCell extends FrameLayout {
         Drawable iconDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, iconId).mutate();
         iconDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_avatar_text), PorterDuff.Mode.SRC_IN));
         Drawable bgDrawable;
-        if (colorKey != null) {
+        if (colorKey != 0) {
             bgDrawable = new CircleGradientDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey), Theme.getColor(colorKey2));
         } else {
             bgDrawable = new CircleGradientDrawable(AndroidUtilities.dp(42), colorValue, colorValue);

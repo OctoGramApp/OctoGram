@@ -10583,7 +10583,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         } else if (which == attach_gallery) {
             if (!PermissionsUtils.isImagesAndVideoPermissionGranted()) {
-                PermissionsUtils.requestImagesAndVideoPermission(getParentActivity());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PermissionsUtils.requestImagesAndVideoPermission(getParentActivity());
+                }
                 return;
             }
             boolean allowGifs;
@@ -26656,7 +26658,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     temp.deleteOnExit();
                 }
                 if (messageCell != null) {
-                    checkAutoDownloadMessage(selectedObject);
+                    // TODO: Urgent Fix to checkAutoDownloadMessage(selectedObject);
                     messageCell.updateButtonState(false, true, false);
                 }
                 break;

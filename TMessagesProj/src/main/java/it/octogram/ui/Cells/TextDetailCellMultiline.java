@@ -39,7 +39,7 @@ public class TextDetailCellMultiline extends LinearLayout {
         spoilersTextView.setTextSize(16);
         spoilersTextView.setMaxLines(Integer.MAX_VALUE);
         spoilersTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-        String linkTextColorKey = Theme.key_windowBackgroundWhiteLinkText;
+        int linkTextColorKey = Theme.key_windowBackgroundWhiteLinkText;
         spoilersTextView.setLinkTextColor(Theme.getColor(linkTextColorKey));
         spoilersTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         addView(spoilersTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 23, 8, 23, 0));

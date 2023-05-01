@@ -36,7 +36,7 @@ public class ActionPanel extends LinearLayout {
         getButtons().forEach(BaseButtonCell::updateColors);
     }
 
-    public void addItem(String text, int icon, String color) {
+    public void addItem(String text, int icon, int color) {
         addView(getButton(getContext(), text, icon, color));
     }
 
@@ -44,7 +44,7 @@ public class ActionPanel extends LinearLayout {
         removeAllViews();
     }
 
-    public BaseButtonCell getButton(Context context, String text, int iconId, String color) {
+    public BaseButtonCell getButton(Context context, String text, int iconId, int color) {
         BaseButtonCell buttonCell = ButtonCell.getCurrentButtonCell(context, resourcesProvider, text, iconId, color);
         int buttonId = (int) getButtons().count();
         buttonCell.setOnClickDelegate(() -> {

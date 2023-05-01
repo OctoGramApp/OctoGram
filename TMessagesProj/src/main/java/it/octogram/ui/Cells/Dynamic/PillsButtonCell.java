@@ -26,15 +26,15 @@ import org.telegram.ui.Components.RLottieImageView;
 
 @SuppressLint("ViewConstructor")
 public class PillsButtonCell extends BaseButtonCell {
-    private final String[] colors;
+    private final int[] colors;
     private final TextView tv;
     private final CardView cardView;
     private final ImageView mt;
 
     @SuppressLint("ClickableViewAccessibility")
-    public PillsButtonCell(Context context, Theme.ResourcesProvider resourcesProvider, String text, int iconId, String color) {
+    public PillsButtonCell(Context context, Theme.ResourcesProvider resourcesProvider, String text, int iconId, int color) {
         super(context, resourcesProvider);
-        colors = new String[]{
+        colors = new int[]{
                 color,
                 Theme.key_windowBackgroundWhiteBlackText,
         };

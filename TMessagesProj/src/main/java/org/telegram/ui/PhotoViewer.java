@@ -12384,6 +12384,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             } else {
                 menuItem.showSubItem(gallery_menu_save);
             }
+            TLRPC.Photo avatar = avatarsArr.get(switchingToIndex);
             if (!noforwards && avatar.video_sizes.isEmpty()) {
                 menuItem.showSubItem(gallery_menu_copy);
             } else {

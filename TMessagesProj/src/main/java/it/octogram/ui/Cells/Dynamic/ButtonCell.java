@@ -9,7 +9,7 @@ import org.telegram.ui.ActionBar.Theme;
 import it.octogram.android.OctoConfig;
 
 public class ButtonCell {
-    public static BaseButtonCell getCurrentButtonCell(Context context, Theme.ResourcesProvider resourcesProvider, String text, int iconId, String color) {
+    public static BaseButtonCell getCurrentButtonCell(Context context, Theme.ResourcesProvider resourcesProvider, String text, int iconId, int color) {
         switch (OctoConfig.buttonStyleType) {
             case 1:
                 return new RoundedButtonCell(context, resourcesProvider, text, iconId, color);

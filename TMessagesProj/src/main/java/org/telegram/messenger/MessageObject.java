@@ -2587,7 +2587,7 @@ public class MessageObject {
         TranslateController translateController = MessagesController.getInstance(currentAccount).getTranslateController();
         if (
             TranslateController.isTranslatable(this) &&
-            translateController.isTranslatingDialog(getDialogId()) &&
+            translateController.isTranslatingDialog(getDialogId(), 0) &&
             messageOwner != null &&
             isDoneTranslation() &&
             messageOwner.translatedText != null &&

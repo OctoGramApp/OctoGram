@@ -1,5 +1,6 @@
 package org.telegram.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
@@ -304,6 +305,7 @@ public class SessionBottomSheet extends BottomSheet {
 
     }
 
+    @SuppressLint("ResourceType")
     private void setAnimation(TLRPC.TL_authorization session, RLottieImageView imageView) {
         String platform = session.platform.toLowerCase();
         String app_name = session.app_name.toLowerCase();
@@ -312,7 +314,7 @@ public class SessionBottomSheet extends BottomSheet {
         }
         String deviceModel = session.device_model.toLowerCase();
         int iconId;
-        int colorKey, colorKey2;
+        int colorKey = 0, colorKey2 = 0;
         int colorValue = 0;
         boolean animation = true;
 
@@ -377,7 +379,7 @@ public class SessionBottomSheet extends BottomSheet {
                 colorKey2 = Theme.key_avatar_background2Pink;
             }
         }
-        int defaultColor = colorKey != null ? Theme.getColor(colorKey) : colorValue;
+        int defaultColor = colorKey != 0 ? Theme.getColor(colorKey) : colorValue;
         imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), defaultColor));
 //        imageView.setBackground(new SessionCell.CircleGradientDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey), Theme.getColor(colorKey2)));
         if (animation) {

@@ -147,7 +147,7 @@ public class DatacenterStatus extends LinearLayout {
             textView.setText(spannableString);
             ipTextView.setText(DCHelper.getDCIp(dcId));
             String statusText;
-            String colorKey;
+            int colorKey;
             if (status == 0) {
                 statusText = LocaleController.getString("Unavailable", R.string.Unavailable);
                 colorKey = Theme.key_windowBackgroundWhiteRedText4;

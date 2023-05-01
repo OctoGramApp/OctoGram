@@ -74,13 +74,24 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
     private UndoView undoView;
 
     private boolean orderChanged;
-
     private boolean showAllChats;
+
+    private int filterHelpRow;
     private int folderStyleHeaderRow;
     private int folderStyleTitlesRow;
     private int folderStyleEmojiTitlesRow;
     private int folderStyleEmojiRow;
     private int folderStyleSectionRow;
+    private int recommendedHeaderRow;
+    private int recommendedStartRow;
+    private int recommendedEndRow;
+    private int recommendedSectionRow;
+    private int filtersHeaderRow;
+    private int filtersStartRow;
+    private int filtersEndRow;
+    private int createFilterRow;
+    private int createSectionRow;
+    private int rowCount = 0;
 
     private boolean ignoreUpdates;
 
@@ -502,9 +513,8 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         oldItems.addAll(items);
         items.clear();
 
-        // TODO: FIX updateRows
-
         ArrayList<TLRPC.TL_dialogFilterSuggested> suggestedFilters = getMessagesController().suggestedFilters;
+        ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
         rowCount = 0;
         filterHelpRow = rowCount++;
         folderStyleHeaderRow = rowCount++;
@@ -521,6 +531,16 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
             recommendedEndRow = rowCount;
             recommendedSectionRow = rowCount++;
         }
+        /* TODO: Fix this
+        items.add(ItemInner.asHint());
+        if (!suggestedFilters.isEmpty() && dialogFilters.size() < 10) {
+            items.add(ItemInner.asHeader(LocaleController.getString("FilterRecommended", R.string.FilterRecommended)));
+            for (int i = 0; i < suggestedFilters.size(); ++i) {
+                items.add(ItemInner.asSuggested(suggestedFilters.get(i)));
+            }
+            items.add(ItemInner.asShadow(null));
+        }
+         */
         if (!dialogFilters.isEmpty()) {
             filtersSectionStart = items.size();
             items.add(ItemInner.asHeader(LocaleController.getString("Filters", R.string.Filters)));
@@ -952,10 +972,9 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                         if (suggested.filter.exclude_muted) {
                             filter.flags |= MessagesController.DIALOG_FILTER_FLAG_EXCLUDE_MUTED;
                         }
-                        // TODO: BugFix with folder icon
                         filter.emoticon = FolderIconController.getEmoticonData(filter.flags)[1];
-                        ignoreUpdates = true;
-                        FilterCreateActivity.saveFilterToServer(filter, filter.flags, filter.name, filter.emoticon, filter.alwaysShow, filter.neverShow, filter.pinnedDialogs, true, true, true, true, false, FiltersSetupActivity.this, () -> {
+                        //ignoreUpdates = true;
+                        FilterCreateActivity.saveFilterToServer(filter, filter.flags, filter.name, filter.emoticon, filter.alwaysShow, filter.neverShow, filter.pinnedDialogs, true, true, true, true, true, FiltersSetupActivity.this, () -> {
                             getMessagesController().suggestedFilters.remove(suggested);
                             getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
                         });
@@ -976,13 +995,7 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
             switch (holder.getItemViewType()) {
                 case VIEW_TYPE_HEADER: {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
-                    if (position == filtersHeaderRow) {
-                        headerCell.setText(LocaleController.getString("Filters", R.string.Filters));
-                    } else if (position == recommendedHeaderRow) {
-                        headerCell.setText(LocaleController.getString("FilterRecommended", R.string.FilterRecommended));
-                    } else if (position == folderStyleHeaderRow) {
-                        headerCell.setText(LocaleController.getString("FoldersType", R.string.FoldersType));
-                    }
+                    headerCell.setText(item.text);
                     break;
                 }
                 case VIEW_TYPE_FILTER: {
@@ -1027,20 +1040,8 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
 
         @Override
         public int getItemViewType(int position) {
-            if (position == filtersHeaderRow || position == recommendedHeaderRow || position == folderStyleHeaderRow) {
-                return 0;
-            } else if (position == filterHelpRow) {
-                return 1;
-            } else if (position >= filtersStartRow && position < filtersEndRow) {
-                return 2;
-            } else if (position == createSectionRow || position == recommendedSectionRow || position == folderStyleSectionRow) {
-                return 3;
-            } else if (position == createFilterRow) {
-                return 4;
-            } else if (position == folderStyleTitlesRow || position == folderStyleEmojiTitlesRow || position == folderStyleEmojiRow) {
-                return 6;
-            } else {
-                return 5;
+            if (position < 0 || position >= items.size()) {
+                return VIEW_TYPE_SHADOW;
             }
             ItemInner item = items.get(position);
             if (item == null) {

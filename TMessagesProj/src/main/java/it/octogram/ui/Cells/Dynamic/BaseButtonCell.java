@@ -25,7 +25,7 @@ abstract public class BaseButtonCell extends LinearLayout {
     abstract public ThemeInfo getTheme();
     abstract public void updateColors();
 
-    protected static int getThemedColor(String key) {
+    protected static int getThemedColor(int key) {
         return Theme.getColor(key, resourcesProvider);
     }
 
