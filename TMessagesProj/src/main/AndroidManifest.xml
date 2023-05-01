@@ -254,8 +254,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.MonetIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/owl_gram_fm"
-            android:roundIcon="@mipmap/owl_gram_fm"
+            android:icon="@mipmap/octo_gram_fm"
+            android:roundIcon="@mipmap/octo_gram_fm"
             android:exported="true">
 
             <intent-filter>
@@ -358,7 +358,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/vnd.it.owlgram.android.android.profile"/>
+                <data android:mimeType="vnd.android.cursor.item/vnd.it.octogram.android.android.profile"/>
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
@@ -395,8 +395,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/vnd.it.owlgram.android.android.call"/>
-                <data android:mimeType="vnd.android.cursor.item/vnd.it.owlgram.android.android.call.video"/>
+                <data android:mimeType="vnd.android.cursor.item/vnd.it.octogram.android.android.call"/>
+                <data android:mimeType="vnd.android.cursor.item/vnd.it.octogram.android.android.call.video"/>
             </intent-filter>
         </activity-alias>
         <activity
@@ -459,7 +459,7 @@
 <!--            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"-->
 <!--            android:hardwareAccelerated="@bool/useHardwareAcceleration"-->
 <!--            android:windowSoftInputMode="adjustPan">-->
-<!--            <intent-filter android:icon="@mipmap/owl_gram" android:roundIcon="@mipmap/owl_gram_round">-->
+<!--            <intent-filter android:icon="@mipmap/octo_gram" android:roundIcon="@mipmap/octo_gram_round">-->
 <!--                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>-->
 <!--            </intent-filter>-->
 <!--        </activity>-->
@@ -492,9 +492,9 @@
                   android:exported="true"
                 android:theme="@style/Theme.TMessages.TransparentWithAlerts"/>
         <activity
-            android:name="it.owlgram.android.utils.AppRestartHelper"
+            android:name="it.octogram.android.utils.AppRestartHelper"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:process=":owlgram"
+            android:process=":octogram"
             android:exported="false"
             />
 
