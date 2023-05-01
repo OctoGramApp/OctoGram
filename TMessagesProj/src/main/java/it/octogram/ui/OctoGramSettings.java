@@ -42,7 +42,7 @@ public class OctoGramSettings extends BaseSettingsActivity {
     private int groupUpdatesRow;
     private int sourceCodeRow;
     private int supportTranslationRow;
-    private int supportDonationRow;
+    //private int supportDonationRow;
     private int bugReportRow;
 
     @Override
@@ -112,9 +112,9 @@ public class OctoGramSettings extends BaseSettingsActivity {
             presentFragment(new OctoGramUpdateSettings());
         } else if (position == experimentalSettingsRow) {
             presentFragment(new OctoGramExperimentalSettings());
-        } else if (position == supportDonationRow) {
+        /*} else if (position == supportDonationRow) {
             Browser.openUrl(getParentActivity(), "https://donations.octogram.app/");
-        } else if (position == appearanceSettingsRow) {
+        */} else if (position == appearanceSettingsRow) {
             presentFragment(new OctoGramAppearanceSettings());
         } else if (position == bugReportRow) {
             AndroidUtilities.addToClipboard(Crashlytics.getReportMessage() + "\n\n#bug");
@@ -141,7 +141,7 @@ public class OctoGramSettings extends BaseSettingsActivity {
         groupUpdatesRow = rowCount++;
         sourceCodeRow = rowCount++;
         supportTranslationRow = rowCount++;
-        supportDonationRow = rowCount++;
+        //supportDonationRow = rowCount++;
         bugReportRow = rowCount++;
     }
 
@@ -190,9 +190,9 @@ public class OctoGramSettings extends BaseSettingsActivity {
                     textDetailCell.setMultilineDetail(true);
                     if (position == supportTranslationRow) {
                         textDetailCell.setTextAndValueAndIcon(LocaleController.getString("TranslateOcto", R.string.TranslateOcto), LocaleController.getString("TranslateOctoDesc", R.string.TranslateOctoDesc), R.drawable.round_translate_white_28, true);
-                    } else if (position == supportDonationRow) {
+                    /*} else if (position == supportDonationRow) {
                         textDetailCell.setTextAndValueAndIcon(LocaleController.getString("Donate", R.string.Donate), LocaleController.getString("DonateDesc", R.string.DonateDesc), R.drawable.round_favorite_border_white, true);
-                    } else if (position == sourceCodeRow) {
+                    */} else if (position == sourceCodeRow) {
                         String commitInfo = String.format("%s commit, %s", BuildConfig.GIT_COMMIT_HASH, LocaleController.formatDateAudio(BuildConfig.GIT_COMMIT_DATE, false));
                         textDetailCell.setTextAndValueAndIcon(LocaleController.getString("SourceCode", R.string.SourceCode), commitInfo, R.drawable.outline_source_white_28, true);
                     } else if (position == bugReportRow) {
@@ -217,7 +217,7 @@ public class OctoGramSettings extends BaseSettingsActivity {
                 return ViewType.TEXT_CELL;
             } else if (position == categoryHeaderRow || position == infoHeaderRow) {
                 return ViewType.HEADER;
-            } else if (position == supportTranslationRow || position == supportDonationRow || position == sourceCodeRow || position == bugReportRow) {
+            } else if (position == supportTranslationRow || /*position == supportDonationRow ||*/ position == sourceCodeRow || position == bugReportRow) {
                 return ViewType.DETAILED_SETTINGS;
             }
             throw new IllegalArgumentException("Invalid position");

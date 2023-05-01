@@ -9,7 +9,7 @@
         <item name="android:colorPrimary">@color/splash_background</item>
         <item name="android:navigationBarColor">@color/splash_navigation_bar</item>
         <item name="android:forceDarkAllowed">false</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/octo_splash_320</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/tg_splash_320</item>
         <item name="android:windowSplashScreenAnimationDuration">@integer/splash_screen_duration</item>
         <item name="android:windowSplashScreenBackground">?android:windowBackground</item>
     </style>

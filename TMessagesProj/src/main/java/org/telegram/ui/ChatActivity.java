@@ -26701,7 +26701,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     ArrayList<TLRPC.MessageEntity> entities = getMediaDataController().getEntities(cs, true);
                     getSendMessagesHelper().sendMessage(spannableString.toString(), dialog_id, selectedObject, threadMessageObject, null, false, entities, null, null, true, 0, null, false);
                 }
-                if (OctoConfig.unlockedSecretIcon >= 4) {
+                /*if (OctoConfig.unlockedSecretIcon >= 4) {
                     AppIconBulletinLayout layout = new AppIconBulletinLayout(getParentActivity(), LauncherIconController.LauncherIcon.FOXGRAM, getResourceProvider());
                     layout.textView.setText(LocaleController.getString("UnlockedHiddenFoxIcon", R.string.UnlockedHiddenFoxIcon));
                     fireworksOverlay.start();
@@ -26710,7 +26710,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     OctoConfig.setUnlockedSecretIcon(-1);
                 } else if (OctoConfig.unlockedSecretIcon >= 0) {
                     OctoConfig.setUnlockedSecretIcon(OctoConfig.unlockedSecretIcon + 1);
-                }
+                }*/
                 break;
             case OPTION_SEND_NOW: {
                 if (!checkSlowMode(chatActivityEnterView.getSendButton())) {
