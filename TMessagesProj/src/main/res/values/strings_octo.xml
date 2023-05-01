@@ -14,9 +14,9 @@
     <string name="ExperimentalDesc">Try experimental features. Some may not work correctly.</string>
     <string name="DisableExperimentalAlert">Are you sure you want to disable experimental settings?\n\nNote that this will disable the Monet Icon.</string>
     <string name="OfficialChannel">Official Channel</string>
-    <string name="ChannelUsername">OctoGram</string>
+    <string name="ChannelUsername">OctoGramApp</string>
     <string name="OfficialGroup">Official Group</string>
-    <string name="GroupUsername">OctoGramForum</string>
+    <string name="GroupUsername">OctoGramChat</string>
     <string name="SourceCode">View Source Code</string>
     <string name="TranslateOcto">Translate OctoGram</string>
     <string name="TranslateOctoDesc">Help us translate OctoGram into your language</string>
