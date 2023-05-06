@@ -310,8 +310,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
     private ImageView backButtonView, proxyButtonView;
     private RadialProgressView radialProgressView;
-
-    private ImageView proxyButtonView;
     private ProxyDrawable proxyDrawable;
 
     // Open animation stuff
