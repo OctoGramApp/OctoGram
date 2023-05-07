@@ -60,7 +60,7 @@ android {
     signingConfigs {
         if (signingProperties.getProperty("storeFile") != null) {
             sign {
-                storeFile file(signingProperties.getProperty("storeFile"))
+                storeFile file(signingProperties.getProperty("keyPath"))
                 storePassword signingProperties.getProperty("storePassword")
                 keyAlias signingProperties.getProperty("keyAlias")
                 keyPassword signingProperties.getProperty("keyPassword")

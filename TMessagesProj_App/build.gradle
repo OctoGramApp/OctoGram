@@ -31,7 +31,7 @@ android {
     signingConfigs {
         if (signingProperties.size() > 0) {
             sign {
-                storeFile file(project.rootProject.file(Paths.get("TMessagesProj", "config", "release.jks")))
+                storeFile file(signingProperties.getProperty("keyPath"))
                 storePassword signingProperties.getProperty("storePassword")
                 keyAlias signingProperties.getProperty("keyAlias")
                 keyPassword signingProperties.getProperty("keyPassword")
