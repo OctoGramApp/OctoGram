@@ -37,12 +37,15 @@ public class LauncherIconController {
         DEFAULT("DefaultIcon", R.drawable.ic_launcher_background, R.drawable.icon_launcher_foreground, R.string.AppIconDefault),
         DEVELOPER("DeveloperIcon", R.drawable.iconc_1_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconDeveloper),
         AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconAqua),
-        //FOXGRAM("FoxgramIcon", R.drawable.icon_7_launcher_background, R.drawable.icon_7_launcher_foreground, R.string.AppIconFoxgram, false, true),
-        RAINBOW("RainbowIcon", R.drawable.icon_8_launcher_background, R.drawable.icon_launcher_foreground, R.string.AppIconRainbow),
         MONO_BLACK("MonoBlackIcon", R.drawable.iconc_2_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconMonoBlack),
         ARCTIC("ArcticIcon", R.drawable.iconc_3_background_sa, R.drawable.iconc_3_launcher_foreground, R.string.AppIconArctic),
-        CHUPA("ChupaIcon", R.drawable.iconc_3_background_sa, R.mipmap.icon_9_launcher_foreground, R.string.AppIconChupa, false, true),
-        // VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, -1, R.string.AppIconVintage),
+        /*
+        Disabled Icon
+         - CHUPA("ChupaIcon", R.drawable.iconc_3_background_sa, R.mipmap.icon_9_launcher_foreground, R.string.AppIconChupa, false, true),
+         - VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, -1, R.string.AppIconVintage),
+         - FOXGRAM("FoxGramIcon", R.drawable.icon_7_launcher_background, R.drawable.icon_launcher_foreground, R.string.AppIconFoxgram, false, true),
+         - RAINBOW("RainbowIcon", R.drawable.icon_8_launcher_background, R.drawable.icon_launcher_foreground, R.string.AppIconRainbow),
+        */
         MONET("MonetIcon", -1, -1, R.string.MonetIcon, false, true),
         PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground, R.string.AppIconPremium, true),
         TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconTurbo, true),

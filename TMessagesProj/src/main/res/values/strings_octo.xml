@@ -62,7 +62,7 @@
     <string name="AppIconMonoBlack" comment="AppIconMonoBlack">Mono Black</string>
     <string name="AppIconDeveloper" comment="AppIconDeveloper">Developer</string>
     <string name="AppIconArctic" comment="AppIconArctic">Arctic</string>
-    <string name="AppIconFoxgram" comment="AppIconFoxgram">Shy Fox</string>
+    <!--<string name="AppIconFoxgram" comment="AppIconFoxgram">Shy Fox</string>-->
     <string name="UnlockedHiddenFoxIcon">Oh… Congratulations! You unlocked the little shy fox icon.</string>
     <string name="AppIconRainbow" comment="AppIconRainbow">Rainbow</string>
     <string name="AppIconChupa" comment="AppIconChupa">Chupa</string>

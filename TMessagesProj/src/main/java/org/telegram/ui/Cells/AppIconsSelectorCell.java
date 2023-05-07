@@ -166,7 +166,8 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
         for (int i = 0; i < availableIcons.size(); i++) {
             LauncherIconController.LauncherIcon icon = availableIcons.get(i);
             if (icon.hidden && !LauncherIconController.isEnabled(icon)) {
-                /*if (icon == LauncherIconController.LauncherIcon.FOXGRAM && OctoConfig.unlockedSecretIcon == -1) {
+                /* Disabled Icon
+                if (icon == LauncherIconController.LauncherIcon.FOXGRAM && OctoConfig.unlockedSecretIcon == -1) {
                     continue;
                 } else if (icon == LauncherIconController.LauncherIcon.CHUPA && OctoConfig.unlockedChupa) {
                     continue;

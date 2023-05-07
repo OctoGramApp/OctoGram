@@ -122,6 +122,7 @@
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity-alias>
 
+        <!--
         <activity-alias
             android:enabled="false"
             android:name="org.telegram.messenger.VintageIcon"
@@ -137,6 +138,7 @@
             </intent-filter>
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity-alias>
+        -->
 
         <activity-alias
             android:enabled="false"
@@ -266,9 +268,10 @@
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity-alias>
 
+        <!--
         <activity-alias
             android:enabled="false"
-            android:name="org.telegram.messenger.FoxgramIcon"
+            android:name="org.telegram.messenger.FoxGramIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
             android:icon="@mipmap/icon_7_launcher"
             android:roundIcon="@mipmap/icon_7_launcher_round"
@@ -313,6 +316,7 @@
             </intent-filter>
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity-alias>
+        -->
 
         <activity
             android:name="org.telegram.ui.LaunchActivity"

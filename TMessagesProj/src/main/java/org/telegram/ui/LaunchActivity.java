@@ -1686,7 +1686,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         return handleIntent(intent, isNew, restore, fromPassword, progress, true);
     }
 
-    @SuppressLint("Range")
+    @SuppressLint({"Range", "SetTextI18n"})
     private boolean handleIntent(Intent intent, boolean isNew, boolean restore, boolean fromPassword, Browser.Progress progress, boolean rebuildFragments) {
         if (AndroidUtilities.handleProxyIntent(this, intent)) {
             return true;
@@ -2604,8 +2604,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         } else {
                                             open_settings = 1;
                                         }
-                                    } else if (url.startsWith("tg:octo") || url.startsWith("tg://octo")) {
+                                    /*} else if (url.startsWith("tg:octo") || url.startsWith("tg://octo")) {
                                         ProfileActivity.startOctoSound();
+                                     */
                                     } else if (url.startsWith("tg:update") || url.startsWith("tg://update")) {
                                         checkAppUpdate(true);
                                     } else if (url.startsWith("tg:stocwddo") || url.startsWith("tg://stocwddo")) {
@@ -2619,7 +2620,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         layout.titleTextView.setSingleLine(false);
                                         Bulletin bulletin = Bulletin.make(fragment, layout, Bulletin.DURATION_LONG);
                                         bulletin.show();
-                                    } else if (url.startsWith("tg:laky") || url.startsWith("tg://laky")) {
+                                    /*} else if (url.startsWith("tg:laky") || url.startsWith("tg://laky")) {
                                         BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
                                         new StickersUtils().getStickerAsync(currentAccount, "ArcticFox", 7, document -> {
                                             StickerSetBulletinLayout layout = new StickerSetBulletinLayout(fragment.getParentActivity(), null, StickerSetBulletinLayout.TYPE_EMPTY, document, fragment.getResourceProvider());
@@ -2635,6 +2636,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             Bulletin bulletin = Bulletin.make(fragment, layout, Bulletin.DURATION_LONG);
                                             bulletin.show();
                                         });
+
                                     } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
                                         if (!OctoConfig.unlockedChupa) {
                                             BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
@@ -2645,6 +2647,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
                                             OctoConfig.unlockChupa();
                                         }
+                                    */
                                     } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
                                         AndroidUtilities.runOnUIThread(() -> presentFragment(new OctoGramExperimentalSettings(), false, false));
                                         if (AndroidUtilities.isTablet()) {
@@ -5325,16 +5328,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     if (visibleDialog == localeDialog) {
                         BaseFragment fragment = actionBarLayout == null ? null : actionBarLayout.getLastFragment();
                         try {
-                            String shorname = LocaleController.getInstance().getCurrentLocaleInfo().shortName;
+                            String shortname = LocaleController.getInstance().getCurrentLocaleInfo().shortName;
                             if (fragment != null) {
                                 BulletinFactory.of(fragment).createSimpleBulletin(
                                     R.raw.msg_translate,
-                                    getStringForLanguageAlert(shorname.equals("en") ? englishLocaleStrings : systemLocaleStrings, "ChangeLanguageLater", R.string.ChangeLanguageLater)
+                                    getStringForLanguageAlert(shortname.equals("en") ? englishLocaleStrings : systemLocaleStrings, "ChangeLanguageLater", R.string.ChangeLanguageLater)
                                 ).setDuration(Bulletin.DURATION_PROLONG).show();
                             } else {
                                 BulletinFactory.of(Bulletin.BulletinWindow.make(LaunchActivity.this), null).createSimpleBulletin(
                                     R.raw.msg_translate,
-                                    getStringForLanguageAlert(shorname.equals("en") ? englishLocaleStrings : systemLocaleStrings, "ChangeLanguageLater", R.string.ChangeLanguageLater)
+                                    getStringForLanguageAlert(shortname.equals("en") ? englishLocaleStrings : systemLocaleStrings, "ChangeLanguageLater", R.string.ChangeLanguageLater)
                                 ).setDuration(Bulletin.DURATION_PROLONG).show();
                             }
                         } catch (Exception e) {
