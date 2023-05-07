@@ -15,20 +15,14 @@ will be used from Homebrew if installed, otherwise it will be used the one in th
 ```
 MAPS_API_KEY=<your-api-key>
 ```
-
-## 🔗 Redirect
-🇬🇧 **English**  
-├ [English Channel](<https://telegram.dog/OctoGramApp>)  
-└ [English Group](<http://telegram.dog/OctoGramChat>)
-
-🔗 **Download**  
-├ [Stable Releases](<https://telegram.dog/OctoGramApks>)  
-└ [Beta Releases](<https://telegram.dog/OctoGramBeta>)
-
-## ✏️ Credits
+[![Updates](https://img.shields.io/badge/Updates-Telegram-blue.svg)](https://t.me/OctoGramApp)
+[![Support](https://img.shields.io/badge/Support-Telegram-blue.svg)](https://t.me/OctoGramGroup)<br>
+![Latest](https://img.shields.io/github/v/release/OctoGramApp/OctoGram?display_name=tag&include_prereleases)
+![Downloads](https://img.shields.io/github/downloads/OctoGramApp/OctoGram/total)
+## ✏️  Thanks to the following projects:
 • [**Nekogram**](<https://gitlab.com/Nekogram/Nekogram>)  
 • [**CatoGramX**](<https://github.com/CatogramX/CatogramX>)  
-• [**OwlGram**](<http://github.com/OwlGramDev/OwlGram>)
+## And Thanks To [**OwlGram**](<http://github.com/OwlGramDev/OwlGram>)
 
 [*Licensed under GNU GPL-2.0*](<https://github.com/OctoGramApp/OctoGram/blob/master/LICENSE>)
 
