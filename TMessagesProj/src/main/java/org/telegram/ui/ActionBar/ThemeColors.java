@@ -3,7 +3,6 @@ package org.telegram.ui.ActionBar;
 import static org.telegram.ui.ActionBar.Theme.*;
 
 import android.graphics.Color;
-import android.util.Log;
 import android.util.SparseArray;
 
 import androidx.core.graphics.ColorUtils;
@@ -23,6 +22,7 @@ public class ThemeColors {
         defaultColors[key_dialogTextBlack] = 0xff222222;
         defaultColors[key_dialogTextLink] = 0xff2678b6;
         defaultColors[key_dialogLinkSelection] = 0x3362a9e3;
+        defaultColors[key_dialogTextRed] = 0xffcd5a5a;
         defaultColors[key_dialogTextBlue] = 0xff2f8cc9;
         defaultColors[key_dialogTextBlue2] = 0xff3a95d5;
         defaultColors[key_dialogTextBlue4] = 0xff19a7e8;
@@ -32,6 +32,7 @@ public class ThemeColors {
         defaultColors[key_dialogTextGray4] = 0xffb3b3b3;
         defaultColors[key_dialogTextHint] = 0xff979797;
         defaultColors[key_dialogIcon] = 0xff676b70;
+        defaultColors[key_dialogRedIcon] = 0xffe14d4d;
         defaultColors[key_dialogGrayLine] = 0xffd2d2d2;
         defaultColors[key_dialogTopBackground] = 0xff6fb2e5;
         defaultColors[key_dialogInputField] = 0xffdbdbdb;
@@ -93,6 +94,11 @@ public class ThemeColors {
         defaultColors[key_windowBackgroundWhiteGrayText6] = 0xff757575;
         defaultColors[key_windowBackgroundWhiteGrayText7] = 0xffc6c6c6;
         defaultColors[key_windowBackgroundWhiteGrayText8] = 0xff6d6d72;
+        defaultColors[key_windowBackgroundWhiteRedText] = 0xffcd5a5a;
+        defaultColors[key_windowBackgroundWhiteRedText2] =  0xffdb5151;
+        defaultColors[key_windowBackgroundWhiteRedText3] =  0xffd24949;
+        defaultColors[key_windowBackgroundWhiteRedText4] =  0xffcf3030;
+        defaultColors[key_windowBackgroundWhiteRedText5] =  0xffed3939;
         defaultColors[key_windowBackgroundWhiteBlackText] = 0xff222222;
         defaultColors[key_windowBackgroundWhiteHintText] = 0xffa8a8a8;
         defaultColors[key_windowBackgroundWhiteValueText] = 0xff3a95d5;
@@ -250,6 +256,9 @@ public class ThemeColors {
         defaultColors[key_chats_menuTopBackgroundCats] = 0xff598fba;
         defaultColors[key_chats_archivePullDownBackground] = 0xffc6c9cc;
         defaultColors[key_chats_archivePullDownBackgroundActive] = 0xff66a9e0;
+
+        defaultColors[key_octogram_purple] = 0xff485696;
+        defaultColors[key_octogram_purple2] = 0xff9060a7;
 
         defaultColors[key_chat_attachCheckBoxCheck] = 0xffffffff;
         defaultColors[key_chat_attachCheckBoxBackground] = 0xff39b2f7;
@@ -627,6 +636,38 @@ public class ThemeColors {
         defaultColors[key_undo_cancelColor] = 0xff85caff;
         defaultColors[key_undo_infoColor] = 0xffffffff;
 
+        defaultColors[key_code_high_light_annotation] = 0x00000000;
+        defaultColors[key_code_high_light_atrule] = 0xFF0077AA;
+        defaultColors[key_code_high_light_attr_name] = 0xFF669900;
+        defaultColors[key_code_high_light_attr_value] =0xFF0077AA;
+        defaultColors[key_code_high_light_boolean] =0xFF990055;
+        defaultColors[key_code_high_light_builtin] =0xFF669900;
+        defaultColors[key_code_high_light_cdata] =0xFF708090;
+        defaultColors[key_code_high_light_char] =0xFF669900;
+        defaultColors[key_code_high_light_class_name] =0xFFDD4A68;
+        defaultColors[key_code_high_light_comment] =0xFF708090;
+        defaultColors[key_code_high_light_constant] =0xFF990055;
+        defaultColors[key_code_high_light_deleted] =0xFF990055;
+        defaultColors[key_code_high_light_delimiter] =0x00000000;
+        defaultColors[key_code_high_light_doctype] =0xFF708090;
+        defaultColors[key_code_high_light_entity] =0xFF9A6E3A;
+        defaultColors[key_code_high_light_function] =0xFFDD4A68;
+        defaultColors[key_code_high_light_important] =0xFFEE9900;
+        defaultColors[key_code_high_light_inserted] =0xFF669900;
+        defaultColors[key_code_high_light_keyword] =0xFF0077AA;
+        defaultColors[key_code_high_light_number] =0xFF990055;
+        defaultColors[key_code_high_light_operator] =0xFF9A6E3A;
+        defaultColors[key_code_high_light_prolog] =0xFF708090;
+        defaultColors[key_code_high_light_property] =0xFF990055;
+        defaultColors[key_code_high_light_punctuation] =0xFF999999;
+        defaultColors[key_code_high_light_regex] =0xFFEE9900;
+        defaultColors[key_code_high_light_selector] =0xFF669900;
+        defaultColors[key_code_high_light_string] =0xFF669900;
+        defaultColors[key_code_high_light_symbol] =0xFF990055;
+        defaultColors[key_code_high_light_tag] =0xFF990055;
+        defaultColors[key_code_high_light_url] =0xFF9A6E3A;
+        defaultColors[key_code_high_light_variable] =0xFFEE9900;
+
         defaultColors[key_chat_outTextSelectionHighlight] = 0x2E3F9923;
         defaultColors[key_chat_inTextSelectionHighlight] = 0x5062A9E3;
         defaultColors[key_chat_TextSelectionCursor] = 0xFF419FE8;
@@ -771,6 +812,7 @@ public class ThemeColors {
         colorKeysMap.put(key_dialogTextBlack, "dialogTextBlack");
         colorKeysMap.put(key_dialogTextLink, "dialogTextLink");
         colorKeysMap.put(key_dialogLinkSelection, "dialogLinkSelection");
+        colorKeysMap.put(key_dialogTextRed, "dialogTextRed");
         colorKeysMap.put(key_dialogTextBlue, "dialogTextBlue");
         colorKeysMap.put(key_dialogTextBlue2, "dialogTextBlue2");
         colorKeysMap.put(key_dialogTextBlue4, "dialogTextBlue4");
@@ -1413,6 +1455,39 @@ public class ThemeColors {
         colorKeysMap.put(key_undo_background, "undo_background");
         colorKeysMap.put(key_undo_cancelColor, "undo_cancelColor");
         colorKeysMap.put(key_undo_infoColor, "undo_infoColor");
+
+        colorKeysMap.put(key_code_high_light_annotation, "code_high_light_annotation");
+        colorKeysMap.put(key_code_high_light_atrule, "code_high_light_atrule");
+        colorKeysMap.put(key_code_high_light_attr_name, "code_high_light_attr_name");
+        colorKeysMap.put(key_code_high_light_attr_value, "code_high_light_attr_value");
+        colorKeysMap.put(key_code_high_light_boolean, "code_high_light_boolean");
+        colorKeysMap.put(key_code_high_light_builtin, "code_high_light_builtin");
+        colorKeysMap.put(key_code_high_light_cdata, "code_high_light_cdata");
+        colorKeysMap.put(key_code_high_light_char, "code_high_light_char");
+        colorKeysMap.put(key_code_high_light_class_name, "code_high_light_class_name");
+        colorKeysMap.put(key_code_high_light_comment, "code_high_light_comment");
+        colorKeysMap.put(key_code_high_light_constant, "code_high_light_constant");
+        colorKeysMap.put(key_code_high_light_deleted, "code_high_light_deleted");
+        colorKeysMap.put(key_code_high_light_delimiter, "code_high_light_delimiter");
+        colorKeysMap.put(key_code_high_light_doctype, "code_high_light_doctype");
+        colorKeysMap.put(key_code_high_light_entity, "code_high_light_entity");
+        colorKeysMap.put(key_code_high_light_function, "code_high_light_function");
+        colorKeysMap.put(key_code_high_light_important, "code_high_light_important");
+        colorKeysMap.put(key_code_high_light_inserted, "code_high_light_inserted");
+        colorKeysMap.put(key_code_high_light_keyword, "code_high_light_keyword");
+        colorKeysMap.put(key_code_high_light_number, "code_high_light_number");
+        colorKeysMap.put(key_code_high_light_operator, "code_high_light_operator");
+        colorKeysMap.put(key_code_high_light_prolog, "code_high_light_prolog");
+        colorKeysMap.put(key_code_high_light_property, "code_high_light_property");
+        colorKeysMap.put(key_code_high_light_punctuation, "code_high_light_punctuation");
+        colorKeysMap.put(key_code_high_light_regex, "code_high_light_regex");
+        colorKeysMap.put(key_code_high_light_selector, "code_high_light_selector");
+        colorKeysMap.put(key_code_high_light_string, "code_high_light_string");
+        colorKeysMap.put(key_code_high_light_symbol, "code_high_light_symbol");
+        colorKeysMap.put(key_code_high_light_tag, "code_high_light_tag");
+        colorKeysMap.put(key_code_high_light_url, "code_high_light_url");
+        colorKeysMap.put(key_code_high_light_variable, "code_high_light_variable");
+
         colorKeysMap.put(key_sheet_scrollUp, "key_sheet_scrollUp");
         colorKeysMap.put(key_sheet_other, "key_sheet_other");
         colorKeysMap.put(key_player_actionBarSelector, "player_actionBarSelector");

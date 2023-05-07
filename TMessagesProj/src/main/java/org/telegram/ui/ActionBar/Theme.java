@@ -3249,6 +3249,7 @@ public class Theme {
     public static final int key_dialogTextBlack = colorsCount++;
     public static final int key_dialogTextLink = colorsCount++;
     public static final int key_dialogLinkSelection = colorsCount++;
+    public static final int key_dialogTextRed = colorsCount++;
     public static final int key_dialogTextBlue = colorsCount++;
     public static final int key_dialogTextBlue2 = colorsCount++;
     public static final int key_dialogTextBlue4 = colorsCount++;
@@ -3274,6 +3275,7 @@ public class Theme {
     public static final int key_dialogButtonSelector = colorsCount++;
     public static final int key_dialogIcon = colorsCount++;
     public static final int key_dialogGrayLine = colorsCount++;
+    public static final int key_dialogRedIcon = colorsCount++;
     public static final int key_dialogTopBackground = colorsCount++;
     public static final int key_dialogCameraIcon = colorsCount++;
     public static final int key_dialog_inlineProgressBackground = colorsCount++;
@@ -3296,7 +3298,6 @@ public class Theme {
     public static final int key_windowBackgroundChecked = colorsCount++;
     public static final int key_windowBackgroundCheckText = colorsCount++;
     public static final int key_windowBackgroundWhiteRedText3 = colorsCount++;
-    public static final int key_dialogTextRed = colorsCount++;
     public static final int key_windowBackgroundWhiteRedText4 = colorsCount++;
     public static final int key_windowBackgroundWhiteGreenText2 = colorsCount++;
     public static final int key_switch2TrackChecked = colorsCount++;
@@ -3324,6 +3325,9 @@ public class Theme {
     public static final int key_windowBackgroundWhiteGrayText7 = colorsCount++;
     public static final int key_windowBackgroundWhiteGrayText8 = colorsCount++;
     public static final int key_windowBackgroundWhiteBlackText = colorsCount++;
+    public static final int key_windowBackgroundWhiteRedText = colorsCount++;
+    public static final int key_windowBackgroundWhiteRedText2 = colorsCount++;
+    public static final int key_windowBackgroundWhiteRedText5 = colorsCount++;
     public static final int key_windowBackgroundWhiteHintText = colorsCount++;
     public static final int key_windowBackgroundWhiteValueText = colorsCount++;
     public static final int key_windowBackgroundWhiteLinkText = colorsCount++;
@@ -3501,6 +3505,9 @@ public class Theme {
     public static final int key_chats_archivePullDownBackgroundActive = colorsCount++;
     public static final int key_chats_tabUnreadActiveBackground = colorsCount++;
     public static final int key_chats_tabUnreadUnactiveBackground = colorsCount++;
+
+    public static final int key_octogram_purple = colorsCount++;
+    public static final int key_octogram_purple2 = colorsCount++;
 
     public static final int key_chat_attachCheckBoxCheck = colorsCount++;
     public static final int key_chat_attachCheckBoxBackground = colorsCount++;
@@ -3893,9 +3900,6 @@ public class Theme {
     public static final int key_stickers_menu = colorsCount++;
     public static final int key_stickers_menuSelector = colorsCount++;
 
-    public static final int key_windowBackgroundWhiteRedText2 = colorsCount++;
-
-    public static final int key_dialogRedIcon = colorsCount++;
     public static final int key_changephoneinfo_image2 = colorsCount++;
 
     public static final int key_groupcreate_hintText = colorsCount++;
@@ -3950,67 +3954,36 @@ public class Theme {
 
     // CUSTOM HIGHLIGHTS BASED ON PRISM4
     public static final int key_code_high_light_annotation = colorsCount++;
-    //"code_high_light_annotation";
     public static final int key_code_high_light_atrule = colorsCount++;
-    //"code_high_light_atrule";
     public static final int key_code_high_light_attr_name = colorsCount++;
-    //"code_high_light_attr_name";
     public static final int key_code_high_light_attr_value = colorsCount++;
-    //"code_high_light_attr_value";
     public static final int key_code_high_light_boolean = colorsCount++;
-    //"code_high_light_boolean";
     public static final int key_code_high_light_builtin = colorsCount++;
-    //"code_high_light_builtin";
     public static final int key_code_high_light_cdata = colorsCount++;
-    //"code_high_light_cdata";
     public static final int key_code_high_light_char = colorsCount++;
-    //"code_high_light_char";
     public static final int key_code_high_light_class_name = colorsCount++;
-    //"code_high_light_class_name";
     public static final int key_code_high_light_comment = colorsCount++;
-    //"code_high_light_comment";
     public static final int key_code_high_light_constant = colorsCount++;
-    //"code_high_light_constant";
     public static final int key_code_high_light_deleted = colorsCount++;
-    //"code_high_light_deleted";
     public static final int key_code_high_light_delimiter = colorsCount++;
-    //"code_high_light_delimiter";
     public static final int key_code_high_light_doctype = colorsCount++;
-    //"code_high_light_doctype";
     public static final int key_code_high_light_entity = colorsCount++;
-    //"code_high_light_entity";
     public static final int key_code_high_light_function = colorsCount++;
-    //"code_high_light_function";
-    public static final int key_code_high_light_important = colorsCount++;
-    //"code_high_light_important";
+    public static final int key_code_high_light_important =colorsCount++;
     public static final int key_code_high_light_inserted = colorsCount++;
-    //"code_high_light_inserted";
     public static final int key_code_high_light_keyword = colorsCount++;
-    //"code_high_light_keyword";
     public static final int key_code_high_light_number = colorsCount++;
-    //"code_high_light_number";
     public static final int key_code_high_light_operator = colorsCount++;
-    //"code_high_light_operator";
     public static final int key_code_high_light_prolog = colorsCount++;
-    //"code_high_light_prolog";
     public static final int key_code_high_light_property = colorsCount++;
-    //"code_high_light_property";
     public static final int key_code_high_light_punctuation = colorsCount++;
-    //"code_high_light_punctuation";
     public static final int key_code_high_light_regex = colorsCount++;
-    //"code_high_light_regex";
     public static final int key_code_high_light_selector = colorsCount++;
-    //"code_high_light_selector";
     public static final int key_code_high_light_string = colorsCount++;
-    //"code_high_light_string";
     public static final int key_code_high_light_symbol = colorsCount++;
-    //"code_high_light_symbol";
     public static final int key_code_high_light_tag = colorsCount++;
-    //"code_high_light_tag";
     public static final int key_code_high_light_url = colorsCount++;
-    //"code_high_light_url";
     public static final int key_code_high_light_variable = colorsCount++;
-    //"code_high_light_variable";
 
     //ununsed
     public static final int key_player_actionBarSelector = colorsCount++;
