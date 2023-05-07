@@ -259,7 +259,8 @@ public class OctoGramUpdateSettings extends BaseSettingsActivity {
                             if (PlayStoreAPI.updateDownloaded()) {
                                 PlayStoreAPI.installUpdate();
                             } else if (StoreUtils.isFromPlayStore() && !PlayStoreAPI.updateDownloaded() && OctoConfig.lastUpdateStatus == 1 && updateAvailable != null) {
-                                PlayStoreAPI.openUpdatePopup(getParentActivity());
+                                UpdateManager.showToast("Update not available for the version downloaded from the Play Store!");
+                                //PlayStoreAPI.openUpdatePopup(getParentActivity());
                             } else if (!AppDownloader.updateDownloaded()) {
                                 checkUpdates();
                             }

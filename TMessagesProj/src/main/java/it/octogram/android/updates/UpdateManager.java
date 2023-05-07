@@ -31,6 +31,10 @@ import it.octogram.android.magic.OWLENC;
 
 public class UpdateManager {
 
+    public static void showToast(final String message) {
+        Context mContext = ApplicationLoader.applicationContext;
+        AndroidUtilities.runOnUIThread(() -> Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show());
+    }
     public static boolean checkingForChangelogs = false;
 
     public static void isDownloadedUpdate(UpdateUICallback updateUICallback) {
