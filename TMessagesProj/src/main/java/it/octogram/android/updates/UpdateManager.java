@@ -1,7 +1,9 @@
 package it.octogram.android.updates;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.widget.Toast;
 
 import androidx.core.util.Pair;
 
