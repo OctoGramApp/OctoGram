@@ -11,6 +11,7 @@
 
     <!--THEMES-->
 
+    <!--
     <style name="Theme.TMessages.Start" parent="@android:style/Theme.Material">
         <item name="android:actionBarStyle">@style/ActionBar.Transparent.TMessages.Start</item>
         <item name="android:colorBackground">#1f2732</item>
@@ -31,5 +32,5 @@
         <item name="android:logo">@drawable/transparent</item>
         <item name="android:title">""</item>
     </style>
-
+    -->
 </resources>
