@@ -3543,7 +3543,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 BuildVars.DEBUG_PRIVATE_VERSION ? LocaleController.getString(R.string.DebugMenuClearWebViewCache) : null,
                                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? LocaleController.getString(SharedConfig.debugWebView ? R.string.DebugMenuDisableWebViewDebug : R.string.DebugMenuEnableWebViewDebug) : null,
                                 (AndroidUtilities.isTabletInternal() && BuildVars.DEBUG_PRIVATE_VERSION) ? (SharedConfig.forceDisableTabletMode ? "Enable tablet mode" : "Disable tablet mode") : null,
-                                BuildVars.DEBUG_PRIVATE_VERSION ? LocaleController.getString(SharedConfig.isFloatingDebugActive ? R.string.FloatingDebugDisable : R.string.FloatingDebugEnable) : null,
+                                LocaleController.getString(SharedConfig.isFloatingDebugActive ? R.string.FloatingDebugDisable : R.string.FloatingDebugEnable),
                                 BuildVars.DEBUG_PRIVATE_VERSION ? "Force remove premium suggestions" : null,
                                 BuildVars.DEBUG_PRIVATE_VERSION ? "Share device info" : null,
                                 BuildVars.DEBUG_PRIVATE_VERSION ? "Force performance class" : null,
