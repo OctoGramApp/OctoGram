@@ -772,7 +772,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             loadTexture(R.drawable.intro_octo, 21);
             loadTexture(v -> {
                 Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                paint.setColor(0xFF4285F4); // It's logo color, it should not be colored by the theme
+                paint.setColor(0xFF3D348B); // It's logo color, it should not be colored by the theme
                 int size = AndroidUtilities.dp(ICON_HEIGHT_DP);
                 Bitmap bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
                 Canvas c = new Canvas(bm);
