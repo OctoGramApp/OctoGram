@@ -39,6 +39,11 @@ public class LauncherIconController {
         AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconAqua),
         MONO_BLACK("MonoBlackIcon", R.drawable.iconc_2_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconMonoBlack),
         ARCTIC("ArcticIcon", R.drawable.iconc_3_background_sa, R.drawable.iconc_3_launcher_foreground, R.string.AppIconArctic),
+        MONET("MonetIcon", -1, -1, R.string.MonetIcon, false, true),
+        PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground, R.string.AppIconPremium, true),
+        TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconTurbo, true),
+        NOX("NoxIcon", R.drawable.icon_2_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconNox, true);
+
         /*
         Disabled Icon
          - CHUPA("ChupaIcon", R.drawable.iconc_3_background_sa, R.mipmap.icon_9_launcher_foreground, R.string.AppIconChupa, false, true),
@@ -46,10 +51,6 @@ public class LauncherIconController {
          - FOXGRAM("FoxGramIcon", R.drawable.icon_7_launcher_background, R.drawable.icon_launcher_foreground, R.string.AppIconFoxgram, false, true),
          - RAINBOW("RainbowIcon", R.drawable.icon_8_launcher_background, R.drawable.icon_launcher_foreground, R.string.AppIconRainbow),
         */
-        MONET("MonetIcon", -1, -1, R.string.MonetIcon, false, true),
-        PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground, R.string.AppIconPremium, true),
-        TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconTurbo, true),
-        NOX("NoxIcon", R.drawable.icon_2_background_sa, R.drawable.icon_launcher_foreground, R.string.AppIconNox, true);
 
         public final String key;
         public final int background;
