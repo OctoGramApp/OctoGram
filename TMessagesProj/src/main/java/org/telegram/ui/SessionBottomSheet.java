@@ -362,8 +362,7 @@ public class SessionBottomSheet extends BottomSheet {
             iconId = R.raw.android_30;
             if (app_name.contains("octogram")) {
                 animation = false;
-                colorKey = Theme.key_octogram_purple;
-                colorKey2 = Theme.key_octogram_purple2;
+                colorValue = Color.parseColor("#3D348B");
                 iconId = R.drawable.device_octogram;
             } else {
                 colorKey = Theme.key_avatar_backgroundGreen;
