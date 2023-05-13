@@ -300,6 +300,7 @@
             </intent-filter>
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity-alias>
+        -->
 
         <activity-alias
             android:enabled="false"
@@ -316,7 +317,6 @@
             </intent-filter>
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity-alias>
-        -->
 
         <activity
             android:name="org.telegram.ui.LaunchActivity"

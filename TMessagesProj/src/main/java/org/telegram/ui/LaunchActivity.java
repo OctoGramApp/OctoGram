@@ -2637,6 +2637,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             bulletin.show();
                                         });
 
+                                    */
                                     } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
                                         if (!OctoConfig.unlockedChupa) {
                                             BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
@@ -2647,7 +2648,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
                                             OctoConfig.unlockChupa();
                                         }
-                                    */
                                     } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
                                         AndroidUtilities.runOnUIThread(() -> presentFragment(new OctoGramExperimentalSettings(), false, false));
                                         if (AndroidUtilities.isTablet()) {
