@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Locale;
 
 public class Crashlytics implements Thread.UncaughtExceptionHandler {
     private final Thread.UncaughtExceptionHandler defaultUEH;
@@ -115,6 +116,7 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
                 CameraName = "Unknown";
         }
         String source = StoreUtils.isFromPlayStore() ? "Play Store" : StoreUtils.isFromHuaweiStore() ? "Huawei Store" : "APK";
+        Locale locale = LocaleController.getInstance().getCurrentLocale();
         return "Steps to reproduce\n" +
                 "Write here the steps to reproduce\n\n" +
                 "Details\n" +
@@ -126,7 +128,8 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
                 "Performance Class: " + getPerformanceClassString() + "\n" +
                 "Locale: " + LocaleController.getSystemLocaleStringIso639() + "\n" +
                 "Download Source: " + source + "\n" +
-                "Camera: " + CameraName;
+                "Camera: " + CameraName + "\n" +
+                "AppLanguage: " + locale.getLanguage() + "-r" + ((locale.getCountry().equals("")) ? "" : locale.getCountry());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
