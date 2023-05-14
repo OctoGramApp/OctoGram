@@ -257,7 +257,7 @@ public class ThemeColors {
         defaultColors[key_chats_archivePullDownBackground] = 0xffc6c9cc;
         defaultColors[key_chats_archivePullDownBackgroundActive] = 0xff66a9e0;
 
-        defaultColors[key_octogram_purple] = 0xff6A5ACD;
+        defaultColors[key_octogram_purple] = 0xff485696;
         defaultColors[key_octogram_purple2] = 0xffBA55D3;
 
         defaultColors[key_chat_attachCheckBoxCheck] = 0xffffffff;

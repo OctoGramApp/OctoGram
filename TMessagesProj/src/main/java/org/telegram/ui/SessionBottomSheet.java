@@ -314,7 +314,7 @@ public class SessionBottomSheet extends BottomSheet {
         }
         String deviceModel = session.device_model.toLowerCase();
         int iconId;
-        int colorKey, colorKey2;
+        int colorKey = 0, colorKey2 = 0;
         int colorValue = 0;
         boolean animation = true;
 
@@ -362,7 +362,8 @@ public class SessionBottomSheet extends BottomSheet {
             iconId = R.raw.android_30;
             if (app_name.contains("octogram")) {
                 animation = false;
-                colorValue = Color.parseColor("#3D348B");
+                colorKey = Theme.key_octogram_purple;
+                colorKey2 = Theme.key_octogram_purple;
                 iconId = R.drawable.device_octogram;
             } else {
                 colorKey = Theme.key_avatar_backgroundGreen;

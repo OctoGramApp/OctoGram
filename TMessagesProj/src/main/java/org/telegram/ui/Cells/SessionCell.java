@@ -335,7 +335,8 @@ public class SessionCell extends FrameLayout {
         } else if (platform.contains("android")) {
             iconId = deviceModel.contains("tab") ? R.drawable.device_tablet_android : R.drawable.device_phone_android;
             if (app_name.contains("octogram")) {
-                colorValue = Color.parseColor("#3D348B");
+                colorKey = Theme.key_octogram_purple;
+                colorKey2 = Theme.key_octogram_purple;
                 iconId = R.drawable.device_phone_octogram;
             } else {
                 colorKey = Theme.key_avatar_backgroundGreen;
