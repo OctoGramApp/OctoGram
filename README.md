@@ -16,7 +16,7 @@ will be used from Homebrew if installed, otherwise it will be used the one in th
 MAPS_API_KEY=<your-api-key>
 ```
 [![Updates](https://img.shields.io/badge/Updates-Telegram-blue.svg)](https://t.me/OctoGramApp)
-[![Support](https://img.shields.io/badge/Support-Telegram-blue.svg)](https://t.me/OctoGramGroup)<br>
+[![Support](https://img.shields.io/badge/Support-Telegram-blue.svg)](https://t.me/OctoGramChat)<br>
 ![Latest](https://img.shields.io/github/v/release/OctoGramApp/OctoGram?display_name=tag&include_prereleases)
 ![Downloads](https://img.shields.io/github/downloads/OctoGramApp/OctoGram/total)
 ## ✏️  Thanks to the following projects:
