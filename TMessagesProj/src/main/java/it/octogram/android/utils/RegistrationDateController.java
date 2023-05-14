@@ -59,7 +59,7 @@ public class RegistrationDateController {
         if (dateResult == null) {
             return "Unknown";
         }
-        return String.format("~%s", DATE_FORMAT.format(dateResult));
+        return String.format("~ %s", DATE_FORMAT.format(dateResult));
     }
 
     private static JSONObject loadAgesFromJson(Context context) throws IOException, JSONException {
