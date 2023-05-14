@@ -15,9 +15,12 @@ import android.widget.FrameLayout;
 import androidx.core.util.Supplier;
 
 import org.telegram.ui.Components.BackButtonMenu;
+import org.telegram.ui.LNavigation.LNavigation;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import it.octogram.android.OctoConfig;
 
 public interface INavigationLayout {
     int REBUILD_FLAG_REBUILD_LAST = 1, REBUILD_FLAG_REBUILD_ONLY_LAST = 2;
@@ -80,7 +83,7 @@ public interface INavigationLayout {
     void setPulledDialogs(List<BackButtonMenu.PulledDialog> pulledDialogs);
 
     static INavigationLayout newLayout(Context context) {
-        return new ActionBarLayout(context);
+        return OctoConfig.altNav ? new LNavigation(context) : new ActionBarLayout(context);
     }
 
     static INavigationLayout newLayout(Context context, Supplier<BottomSheet> supplier) {

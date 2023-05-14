@@ -21,6 +21,7 @@ import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.Components.StickerImageView;
@@ -47,6 +48,7 @@ public class OctoGramExperimentalSettings extends BaseSettingsActivity {
     private int downloadSpeedBoostRow;
     private int uploadSpeedBoostRow;
     private int bottomSpaceRow;
+    private int alternativeNav;
 
     @Override
     protected String getActionBarTitle() {
@@ -59,6 +61,14 @@ public class OctoGramExperimentalSettings extends BaseSettingsActivity {
             OctoConfig.toggleBetterAudioQuality();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(OctoConfig.betterAudioQuality);
+            }
+        } else if (position == alternativeNav) {
+            OctoConfig.toggleAltNav();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(OctoConfig.altNav);
+            }
+            if (OctoConfig.altNav) {
+                BulletinFactory.of(OctoGramExperimentalSettings.this).createErrorBulletin(LocaleController.getString("RestartAppToApplyChanges", R.string.RestartAppToApplyChanges), getResourceProvider()).show();
             }
         } else if (position == maxRecentStickersRow) {
             int[] counts = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200};
@@ -141,6 +151,7 @@ public class OctoGramExperimentalSettings extends BaseSettingsActivity {
         headerImageRow = -1;
         headerExperimental = -1;
         betterAudioCallRow = -1;
+        alternativeNav = -1;
         sendLargePhotosRow = -1;
         reduceCameraXLatency = -1;
         maxRecentStickersRow = -1;
@@ -157,6 +168,7 @@ public class OctoGramExperimentalSettings extends BaseSettingsActivity {
             headerImageRow = rowCount++;
             headerExperimental = rowCount++;
             betterAudioCallRow = rowCount++;
+            alternativeNav = rowCount++;
             sendLargePhotosRow = rowCount++;
             reduceCameraXLatency = rowCount++;
             if (Build.VERSION.SDK_INT == Build.VERSION_CODES.S || Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2) {
@@ -187,6 +199,8 @@ public class OctoGramExperimentalSettings extends BaseSettingsActivity {
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     if (position == betterAudioCallRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("MediaStreamVoip", R.string.MediaStreamVoip), OctoConfig.betterAudioQuality, true);
+                    } else if (position == alternativeNav) {
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("AlternativeNav", R.string.AlternativeNav), LocaleController.getString("AlternativeNavDesc", R.string.AlternativeNavDesc), OctoConfig.altNav, true, true);
                     } else if (position == checkBoxExperimentalRow) {
                         boolean isEnabled = OctoConfig.isDevOptEnabled();
                         textCheckCell.setDrawCheckRipple(true);
@@ -280,7 +294,7 @@ public class OctoGramExperimentalSettings extends BaseSettingsActivity {
             if (position == downloadDividersRow) {
                 return ViewType.SHADOW;
             } else if (position == betterAudioCallRow || position == checkBoxExperimentalRow || position == monetIconRow ||
-                    position == uploadSpeedBoostRow || position == sendLargePhotosRow || position == reduceCameraXLatency) {
+                    position == uploadSpeedBoostRow || position == alternativeNav || position == sendLargePhotosRow || position == reduceCameraXLatency) {
                 return ViewType.SWITCH;
             } else if (position == headerImageRow) {
                 return ViewType.IMAGE_HEADER;

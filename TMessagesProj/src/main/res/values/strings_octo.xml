@@ -334,4 +334,6 @@
     <string name="TranslateInfo">Manage your translation and auto-translation preferences in OctoGram settings.</string>
     <string name="RegistrationDate">Registration Date</string>
     <string name="ShowRegistrationDate">Show Registration Date in Profiles</string>
+    <string name="AlternativeNav">Alternative Navigation</string>
+    <string name="AlternativeNavDesc">Activate old Telegram animations while navigating the user interface.</string>
 </resources>

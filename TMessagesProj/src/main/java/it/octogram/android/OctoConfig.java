@@ -117,6 +117,7 @@ public class OctoConfig extends SettingsController {
     public static int unlockedSecretIcon;
     public static int lastSelectedCompression;
     public static boolean showRegistrationDate;
+    public static boolean altNav;
 
     static {
         loadConfig(true);
@@ -228,6 +229,7 @@ public class OctoConfig extends SettingsController {
             uploadSpeedBoost = getBoolean("uploadSpeedBoost" + dS, false);
             reduceCameraXLatency = getBoolean("reduceCameraXLatency" + dS, false);
             sendLargePhotos = getBoolean("sendLargePhotos" + dS, false);
+            altNav = getBoolean("altNav" + dS, false);
             configLoaded = true;
             migrate();
         }
@@ -261,10 +263,6 @@ public class OctoConfig extends SettingsController {
 
     public static void toggleConfirmCall() {
         putValue("confirmCall", confirmCall ^= true);
-    }
-
-    public static void toggleMediaFlipByTap() {
-        putValue("mediaFlipByTap", mediaFlipByTap ^= true);
     }
 
     public static void toggleJumpChannel() {
@@ -404,6 +402,10 @@ public class OctoConfig extends SettingsController {
 
     public static void toggleReduceCameraXLatency() {
         putValue("reduceCameraXLatency", reduceCameraXLatency ^= true);
+    }
+
+    public static void toggleAltNav() {
+        putValue("altNav", altNav ^= true);
     }
 
     public static void toggleHideTimeOnSticker() {
