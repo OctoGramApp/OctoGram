@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import it.octogram.android.entities.EntitiesHelper;
+import it.octogram.android.utils.RegistrationDateController;
 import it.octogram.android.utils.DCHelper;
 import it.octogram.ui.Cells.DetailsPreviewMessages;
 import it.octogram.ui.Cells.TextDetailCellMultiline;
@@ -50,6 +51,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
 
     private int aboutInfoHeaderRow;
     private int nameUserHeaderRow;
+    private int registrationDateHeaderRow;
     private int idUserHeaderRow;
     private int dcRow;
     private int usernameRow;
@@ -228,6 +230,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         rowCount = 0;
         aboutInfoHeaderRow = -1;
         nameUserHeaderRow = -1;
+        registrationDateHeaderRow = -1;
         idUserHeaderRow = -1;
         usernameRow = -1;
         dcRow = -1;
@@ -306,6 +309,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                 dcRow = rowCount++;
             }
             idUserHeaderRow = rowCount++;
+            registrationDateHeaderRow = rowCount++;
             aboutDividerRow = rowCount++;
         }
         messageHeaderRow = rowCount++;
@@ -499,6 +503,9 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                             full_name += " " + fromUser.last_name;
                         }
                         textDetailCell.setTextWithEmojiAndValue(full_name, LocaleController.getString("FullName", R.string.FullName), true);
+                    } else if (position == registrationDateHeaderRow) {
+                        String regDate = RegistrationDateController.getRegistrationDate(fromUserInfo.tID);
+                        textDetailCell.setTextWithEmojiAndValue(regDate, LocaleController.getString("RegistrationDate", R.string.RegistrationDate), true);
                     } else if (position == usernameRow) {
                         textDetailCell.setTextAndValue("@" + UserObject.getPublicUsername(fromUser), LocaleController.getString("Username", R.string.Username), true);
                     } else if (position == messageIdRow) {
@@ -646,7 +653,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     position == forwardUserHeaderRow || position == repliedMessageHeaderRow || position == repliedUserHeaderRow ||
                     position == groupHeaderRow || position == fileHeaderRow) {
                 return 2;
-            } else if (position == idUserHeaderRow || position == nameUserHeaderRow || position == usernameRow ||
+            } else if (position == idUserHeaderRow || position == nameUserHeaderRow || position == usernameRow || position == registrationDateHeaderRow ||
                     position == messageIdRow || position == messageTextRow || position == messageDateRow ||
                     position == forwardMessageDateRow || position == forwardUserIdRow || position == forwardUserUsernameRow ||
                     position == forwardUserNameRow || position == repliedMessageTextRow || position == repliedMessageDateRow ||

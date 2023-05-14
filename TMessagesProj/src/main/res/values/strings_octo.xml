@@ -332,4 +332,6 @@
     <string name="ZeroShutterLagDesc">Minimize latency when taking photos by capturing multiple frames quickly before and after the shutter button is pressed</string>
     <string name="BrokenBackupDetail">Unable to export your backup. Please contact us via our <![CDATA[<a href="https://t.me/%1$s">Support Group</a>]]>.</string>
     <string name="TranslateInfo">Manage your translation and auto-translation preferences in OctoGram settings.</string>
+    <string name="RegistrationDate">Registration Date</string>
+    <string name="ShowRegistrationDate">Show Registration Date in Profiles</string>
 </resources>

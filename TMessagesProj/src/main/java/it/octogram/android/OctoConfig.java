@@ -116,6 +116,7 @@ public class OctoConfig extends SettingsController {
     public static int downloadSpeedBoost;
     public static int unlockedSecretIcon;
     public static int lastSelectedCompression;
+    public static boolean showRegistrationDate;
 
     static {
         loadConfig(true);
@@ -213,6 +214,7 @@ public class OctoConfig extends SettingsController {
             emojiPackSelected = getString("emojiPackSelected", "default");
             lastSelectedCompression = getInt("lastSelectedCompression", 3);
             translateEntireChat = getBoolean("translateEntireChat", false);
+            showRegistrationDate = getBoolean("showRegistrationDate", true);
             confirmSending.readParams(getByteArray("confirmSending"), magicException);
             contextMenu.readParams(getByteArray("contextMenu"), magicException);
 
@@ -426,6 +428,10 @@ public class OctoConfig extends SettingsController {
 
     public static void toggleTranslateEntireChat() {
         putValue("translateEntireChat", translateEntireChat ^= true);
+    }
+
+    public static void toggleShowCreationDate() {
+        putValue("showRegistrationDate", showRegistrationDate ^= true);
     }
 
     public static void toggleSendLargePhotos() {

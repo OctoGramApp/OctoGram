@@ -56,6 +56,7 @@ public class OctoGramGeneralSettings extends BaseSettingsActivity {
     private int doNotTranslateSelectRow;
     private int autoTranslateRow;
     private int keepMarkdownRow;
+    private int showRegistrationDateRow;
     private int divisorTranslationRow;
     private int hintTranslation1;
     private int hintTranslation2;
@@ -157,6 +158,12 @@ public class OctoGramGeneralSettings extends BaseSettingsActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(OctoConfig.accentAsNotificationColor);
             }
+        } else if (position == showRegistrationDateRow) {
+            OctoConfig.toggleShowCreationDate();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(OctoConfig.showRegistrationDate);
+                reloadInterface();
+            }
         } else if (position == idTypeRow) {
             ArrayList<String> arrayList = new ArrayList<>();
             ArrayList<Integer> types = new ArrayList<>();
@@ -228,6 +235,7 @@ public class OctoGramGeneralSettings extends BaseSettingsActivity {
         dcIdSettingsHeaderRow = rowCount++;
         dcStyleSelectorRow = rowCount++;
         dcIdRow = rowCount++;
+        showRegistrationDateRow = rowCount++;
         idTypeRow = rowCount++;
         divisorDCIdRow = rowCount++;
         hintIdRow = rowCount++;
@@ -276,6 +284,8 @@ public class OctoGramGeneralSettings extends BaseSettingsActivity {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("HidePhoneOthers", R.string.HidePhoneOthers), LocaleController.getString("HidePhoneOthersDesc", R.string.HidePhoneOthersDesc), OctoConfig.hideContactNumber, true, true);
                     } else if (position == dcIdRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("ShowID_DC", R.string.ShowID_DC), OctoConfig.showIDAndDC, true);
+                    } else if (position == showRegistrationDateRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString("ShowRegistrationDate", R.string.ShowRegistrationDate), OctoConfig.showRegistrationDate, true);
                     } else if (position == confirmCallSwitchRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("ConfirmCalls", R.string.ConfirmCalls), LocaleController.getString("ConfirmCallsDesc", R.string.ConfirmCallsDesc), OctoConfig.confirmCall, true, true);
                     } else if (position == notificationAccentRow) {
@@ -475,8 +485,8 @@ public class OctoGramGeneralSettings extends BaseSettingsActivity {
             } else if (position == privacyHeaderRow || position == translationHeaderRow || position == callHeaderRow ||
                     position == dcIdSettingsHeaderRow || position == notificationHeaderRow) {
                 return ViewType.HEADER;
-            } else if (position == phoneNumberSwitchRow || position == phoneContactsSwitchRow || position == dcIdRow ||
-                    position == confirmCallSwitchRow || position == notificationAccentRow || position == keepMarkdownRow ||
+            } else if (position == phoneNumberSwitchRow || position == phoneContactsSwitchRow || position == showRegistrationDateRow || position == dcIdRow ||
+            position == confirmCallSwitchRow || position == notificationAccentRow || position == keepMarkdownRow ||
                     position == showTranslateButtonRow || position == translateEntireChatRow) {
                 return ViewType.SWITCH;
             } else if (position == translationProviderSelectRow || position == destinationLanguageSelectRow || position == deepLFormalityRow ||
@@ -598,6 +608,7 @@ public class OctoGramGeneralSettings extends BaseSettingsActivity {
             put(++pointer, dcIdSettingsHeaderRow, sparseIntArray);
             put(++pointer, dcStyleSelectorRow, sparseIntArray);
             put(++pointer, dcIdRow, sparseIntArray);
+            put(++pointer, showRegistrationDateRow, sparseIntArray);
             put(++pointer, idTypeRow, sparseIntArray);
             put(++pointer, divisorDCIdRow, sparseIntArray);
             put(++pointer, hintIdRow, sparseIntArray);
