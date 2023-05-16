@@ -66,6 +66,7 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
     private int audioVideoDividerRow;
     private int audioVideoHeaderRow;
     private int rearCameraStartingRow;
+    private int enableCameraPreviewRow;
     private int confirmSendRow;
     private int confirmSendGifsRow;
     private int confirmSendStickersRow;
@@ -131,6 +132,11 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
             OctoConfig.toggleUseRearCamera();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(OctoConfig.useRearCamera);
+            }
+        } else if (position == enableCameraPreviewRow) {
+            YukiConfig.toggleCameraPreview();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(YukiConfig.useCameraPreview);
             }
         } else if (position == showAddToSMRow) {
             OctoConfig.contextMenu.toggleSaveMessage();
@@ -339,6 +345,7 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
         turnSoundOnVDKeyRow = rowCount++;
         proximitySensorRow = rowCount++;
         rearCameraStartingRow = rowCount++;
+        enableCameraPreviewRow = rowCount++;
         confirmSendRow = rowCount++;
         if (confirmSendExpanded) {
             confirmSendStickersRow = rowCount++;
@@ -407,7 +414,9 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                     } else if (position == showFolderWhenForwardRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("FoldersWhenForwarding", R.string.FoldersWhenForwarding), OctoConfig.showFolderWhenForward, true);
                     } else if (position == rearCameraStartingRow) {
-                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseRearRoundVideos", R.string.UseRearRoundVideos), LocaleController.getString("UseRearRoundVideosDesc", R.string.UseRearRoundVideosDesc), OctoConfig.useRearCamera, true, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseRearRoundVideos", R.string.UseRearRoundVideos), LocaleController.getString("UseRearRoundVideosDesc", R.string.UseRearRoundVideosDesc), YukiConfig.useRearCamera, true, true);
+                    } else if (position == enableCameraPreviewRow) {
+                        textCheckCell.setTextAndCheck(LocaleController.getString("UseCameraPreview", R.string.UseCameraPreview), YukiConfig.useCameraPreview, true);
                     } else if (position == hideAllTabRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("HideAllChatsFolder", R.string.HideAllChatsFolder), OctoConfig.hideAllTab, true);
                     } else if (position == cameraXOptimizeRow) {
@@ -567,7 +576,8 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                 return ViewType.HEADER;
             } else if (position == jumpChannelRow || position == hideKeyboardRow ||
                     position == playGifAsVideoRow || position == showFolderWhenForwardRow ||
-                    position == rearCameraStartingRow || position == showGreetings || position == cameraXOptimizeRow ||
+                    position == rearCameraStartingRow || position == enableCameraPreviewRow ||
+                    position == showGreetings || position == cameraXOptimizeRow ||
                     position == proximitySensorRow || position == suppressionRow || position == turnSoundOnVDKeyRow ||
                     position == openArchiveOnPullRow || position == hideTimeOnStickerRow || position == onlineStatusRow ||
                     position == hideAllTabRow || position == hideSendAsChannelRow) {
