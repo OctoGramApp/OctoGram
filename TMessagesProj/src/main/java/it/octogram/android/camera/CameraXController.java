@@ -386,6 +386,7 @@ public class CameraXController {
 
     @SuppressLint("UnsafeExperimentalUsageError")
     public void setExposureCompensation(float value) {
+        if (camera == null) return;
         if (!camera.getCameraInfo().getExposureState().isExposureCompensationSupported()) return;
         Range<Integer> evRange = camera.getCameraInfo().getExposureState().getExposureCompensationRange();
         int index = (int) (mix(evRange.getLower().floatValue(), evRange.getUpper().floatValue(), value) + 0.5f);
