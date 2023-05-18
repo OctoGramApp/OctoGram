@@ -1337,10 +1337,12 @@ public class LNavigation extends FrameLayout implements INavigationLayout, Float
             lastFragment.onTransitionAnimationStart(false, true);
             if (newLastFragment != null) {
                 newLastFragment.setPaused(false);
+                newLastFragment.onTransitionAnimationStart(true, false);
             }
 
             if (swipeProgress == 0) {
                 customAnimation = lastFragment.onCustomTransitionAnimation(false, () -> {
+                    lastFragment.onTransitionAnimationEnd(false, true);
                     onCloseAnimationEnd(lastFragment, newLastFragment);
 
                     customAnimation = null;
@@ -2210,7 +2212,7 @@ public class LNavigation extends FrameLayout implements INavigationLayout, Float
             for (int i = 0; i < getChildCount(); i++) {
                 View child = getChildAt(i);
                 if (!(child instanceof ActionBar)) {
-                    FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) child.getLayoutParams();
+                    LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
                     if (child.getFitsSystemWindows()) {
                         child.layout(layoutParams.leftMargin, layoutParams.topMargin, layoutParams.leftMargin + child.getMeasuredWidth(), layoutParams.topMargin + child.getMeasuredHeight());
                     } else {
