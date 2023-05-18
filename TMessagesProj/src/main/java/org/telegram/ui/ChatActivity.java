@@ -14171,7 +14171,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                         return 10;
                                     } else if (mime.endsWith("/xml")) {
                                         return 5;
-                                    } else if (messageObject.getDocumentName().toLowerCase().endsWith("octo") && OctoConfig.isValidFileSettings(messageObject) >= OctoConfig.VALID_CONFIGURATION) {
+                                    } else if (messageObject.getDocumentName().toLowerCase().endsWith("octo") || messageObject.getDocumentName().toLowerCase().endsWith("yuki") || messageObject.getDocumentName().toLowerCase().endsWith("owl") && OctoConfig.isValidFileSettings(messageObject) >= OctoConfig.VALID_CONFIGURATION) {
                                         return 207;
                                     } else if (!messageObject.isNewGif() && mime.endsWith("/mp4") || mime.endsWith("/png") || mime.endsWith("/jpg") || mime.endsWith("/jpeg")) {
                                         return 6;
@@ -30650,7 +30650,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                 }
                 int statusConf = OctoConfig.isValidFileSettings(message);
-                if (message.getDocumentName().toLowerCase().endsWith("octo") && statusConf >= OctoConfig.VALID_CONFIGURATION) {
+                if (message.getDocumentName().toLowerCase().endsWith("octo") || message.getDocumentName().toLowerCase().endsWith("yuki") || message.getDocumentName().toLowerCase().endsWith("owl") && statusConf >= OctoConfig.VALID_CONFIGURATION) {
                     if (statusConf == OctoConfig.VALID_CONFIGURATION) {
                         new ImportSettingsDialog(ChatActivity.this, message).checkCanShowDialog();
                     } else {
