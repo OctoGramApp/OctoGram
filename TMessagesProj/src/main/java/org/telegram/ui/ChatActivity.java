@@ -105,6 +105,7 @@ import androidx.core.text.HtmlCompat;
 import androidx.dynamicanimation.animation.FloatValueHolder;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
+import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.ChatListItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManagerFixed;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -114,11 +115,13 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import com.google.android.exoplayer2.util.Log;
 import com.google.zxing.common.detector.MathUtils;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.BuildVars;
@@ -326,6 +329,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.updates.UpdateManager;
 import it.octogram.ui.Components.EmojiSetBulletinLayout;
 import it.octogram.ui.Components.Dialogs.ImportSettingsDialog;
 import it.octogram.android.CustomEmojiController;
@@ -5477,6 +5481,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     scrollingChatListView = false;
                     checkTextureViewPosition = false;
                     hideFloatingDateView(true);
+                    checkAutoDownloadMessages(scrollUp);
                     if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW) {
                         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.startAllHeavyOperations, 512);
                     }
@@ -10422,6 +10427,128 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         showDialog(chatAttachAlert);
     }
 
+    ArrayList<MessageObject> preloadingMessages = new ArrayList<>();
+    ArrayList<MessageObject> preloadingMessagesTmp = new ArrayList<>();
+    SparseArray<MessageObject> attachedMessaesTmp = new SparseArray<>();
+
+    private void checkAutoDownloadMessages(boolean scrollUp) {
+        if (chatListView == null || !chatListViewAttached || SharedConfig.deviceIsLow()) {
+            return;
+        }
+        preloadingMessagesTmp.clear();
+        preloadingMessagesTmp.addAll(preloadingMessages);
+        preloadingMessages.clear();
+        attachedMessaesTmp.clear();
+        int count = chatListView.getChildCount();
+        int firstMessagePosition = -1;
+        int lastMessagePosition = -1;
+        for (int a = 0; a < count; a++) {
+            View child = chatListView.getChildAt(a);
+            if (!(child instanceof ChatMessageCell)) {
+                continue;
+            }
+            RecyclerListView.ViewHolder holder = chatListView.findContainingViewHolder(child);
+            if (holder != null) {
+                int p = holder.getAdapterPosition();
+                if (firstMessagePosition == -1) {
+                    firstMessagePosition = p;
+                }
+                lastMessagePosition = p;
+            }
+            ChatMessageCell cell = (ChatMessageCell) child;
+            MessageObject object = cell.getMessageObject();
+            attachedMessaesTmp.put(object.getId(), object);
+        }
+        if (firstMessagePosition != -1) {
+            int lastPosition;
+            if (scrollUp) {
+                firstMessagePosition = lastPosition = lastMessagePosition;
+                firstMessagePosition = Math.min(firstMessagePosition + 10, chatAdapter.messagesEndRow);
+                for (int a = lastPosition, N = messages.size(); a < firstMessagePosition; a++) {
+                    int n = a - chatAdapter.messagesStartRow;
+                    if (n < 0 || n >= N) {
+                        continue;
+                    }
+                    preloadingMessagesTmp.remove(messages.get(n));
+                    preloadingMessages.add(messages.get(n));
+                    checkAutoDownloadMessage(messages.get(n));
+                }
+            } else {
+                lastPosition = Math.max(firstMessagePosition - 20, chatAdapter.messagesStartRow);
+                for (int a = firstMessagePosition - 1, N = messages.size(); a >= lastPosition; a--) {
+                    int n = a - chatAdapter.messagesStartRow;
+                    if (n < 0 || n >= N) {
+                        continue;
+                    }
+                    preloadingMessagesTmp.remove(messages.get(n));
+                    preloadingMessages.add(messages.get(n));
+                    checkAutoDownloadMessage(messages.get(n));
+                }
+            }
+        }
+        for (int i = 0; i < preloadingMessagesTmp.size(); i++) {
+            MessageObject object = preloadingMessagesTmp.get(i);
+            if (attachedMessaesTmp.get(object.getId()) != null) {
+                continue;
+            }
+            cancelPreload(object);
+        }
+        showNoSoundHint();
+    }
+
+    private void cancelPreload(MessageObject object) {
+        TLRPC.Document document = object.getDocument();
+        TLRPC.PhotoSize photo = document == null ? FileLoader.getClosestPhotoSizeWithSize(object.photoThumbs, AndroidUtilities.getPhotoSize()) : null;
+        if (document == null && photo == null) {
+            return;
+        }
+        if (object.putInDownloadsStore || DownloadController.getInstance(currentAccount).isDownloading(object.messageOwner.id)) {
+            return;
+        }
+        if (document != null) {
+            getFileLoader().cancelLoadFile(document);
+        } else {
+            ImageLocation.getForObject(photo, object.photoThumbsObject);
+            getFileLoader().cancelLoadFile(ImageLocation.getForObject(photo, object.photoThumbsObject).location, null);
+        }
+    }
+
+    private void checkAutoDownloadMessage(MessageObject object) {
+//        if (object.mediaExists) {
+//            return;
+//        }
+//        TLRPC.Message message = object.messageOwner;
+//        int canDownload = getDownloadController().canDownloadMedia(message);
+//        if (canDownload == 0) {
+//            return;
+//        }
+//        TLRPC.Document document = object.getDocument();
+//        TLRPC.PhotoSize photo = document == null ? FileLoader.getClosestPhotoSizeWithSize(object.photoThumbs, AndroidUtilities.getPhotoSize()) : null;
+//        if (document == null && photo == null) {
+//            return;
+//        }
+//        if (canDownload == 2 || canDownload == 1 && object.isVideo()) {
+////            if (document != null && currentEncryptedChat == null && !object.shouldEncryptPhotoOrVideo() && object.canStreamVideo()) {
+////                getFileLoader().loadFile(document, object, FileLoader.PRIORITY_LOW, 10);
+////            }
+//        } else {
+//            if (document != null) {
+//                getFileLoader().loadFile(document, object, FileLoader.PRIORITY_LOW, MessageObject.isVideoDocument(document) && object.shouldEncryptPhotoOrVideo() ? 2 : 0);
+//            } else {
+//                getFileLoader().loadFile(ImageLocation.getForObject(photo, object.photoThumbsObject), object, null, FileLoader.PRIORITY_LOW, object.shouldEncryptPhotoOrVideo() ? 2 : 0);
+//            }
+//        }
+    }
+
+    public void clearMessagesPreloading() {
+        for (int i = 0; i < preloadingMessages.size(); i++) {
+            MessageObject object = preloadingMessages.get(i);
+            cancelPreload(object);
+        }
+        preloadingMessages.clear();
+    }
+
+
     private void showFloatingDateView(boolean scroll) {
         if (floatingDateView == null) {
             return;
@@ -13887,6 +14014,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             invalidateMessagesVisiblePart();
             updateTextureViewPosition(false, false);
 
+            if (!scrollingChatListView) {
+                checkAutoDownloadMessages(false);
+            }
             notifyHeightChanged();
         }
 
@@ -16542,6 +16672,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         } else if (id == NotificationCenter.didUpdateConnectionState) {
             int state = ConnectionsManager.getInstance(account).getConnectionState();
+            if (state == ConnectionsManager.ConnectionStateConnected) {
+                checkAutoDownloadMessages(false);
+            }
         } else if (id == NotificationCenter.chatOnlineCountDidLoad) {
             Long chatId = (Long) args[0];
             if (chatInfo == null || currentChat == null || currentChat.id != chatId) {
@@ -26658,7 +26791,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     temp.deleteOnExit();
                 }
                 if (messageCell != null) {
-                    // TODO: Urgent Fix to checkAutoDownloadMessage(selectedObject);
+                    checkAutoDownloadMessage(selectedObject);
                     messageCell.updateButtonState(false, true, false);
                 }
                 break;
