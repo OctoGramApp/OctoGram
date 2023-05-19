@@ -7550,6 +7550,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void createTranslateButton() {
+        if (OctoConfig.translationProvider != Translator.PROVIDER_TELEGRAM && !OctoConfig.translateEntireChat) {
+            return;
+        }
         if (translateButton != null || getContext() == null) {
             return;
         }

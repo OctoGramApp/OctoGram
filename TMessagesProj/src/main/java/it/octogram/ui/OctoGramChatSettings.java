@@ -134,9 +134,9 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                 ((TextCheckCell) view).setChecked(OctoConfig.useRearCamera);
             }
         } else if (position == enableCameraPreviewRow) {
-            YukiConfig.toggleCameraPreview();
+            OctoConfig.toggleCameraPreview();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(YukiConfig.useCameraPreview);
+                ((TextCheckCell) view).setChecked(OctoConfig.useCameraPreview);
             }
         } else if (position == showAddToSMRow) {
             OctoConfig.contextMenu.toggleSaveMessage();
@@ -414,9 +414,9 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                     } else if (position == showFolderWhenForwardRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("FoldersWhenForwarding", R.string.FoldersWhenForwarding), OctoConfig.showFolderWhenForward, true);
                     } else if (position == rearCameraStartingRow) {
-                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseRearRoundVideos", R.string.UseRearRoundVideos), LocaleController.getString("UseRearRoundVideosDesc", R.string.UseRearRoundVideosDesc), YukiConfig.useRearCamera, true, true);
+                        textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseRearRoundVideos", R.string.UseRearRoundVideos), LocaleController.getString("UseRearRoundVideosDesc", R.string.UseRearRoundVideosDesc), OctoConfig.useRearCamera, true, true);
                     } else if (position == enableCameraPreviewRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("UseCameraPreview", R.string.UseCameraPreview), YukiConfig.useCameraPreview, true);
+                        textCheckCell.setTextAndCheck(LocaleController.getString("UseCameraPreview", R.string.UseCameraPreview), OctoConfig.useCameraPreview, true);
                     } else if (position == hideAllTabRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("HideAllChatsFolder", R.string.HideAllChatsFolder), OctoConfig.hideAllTab, true);
                     } else if (position == cameraXOptimizeRow) {

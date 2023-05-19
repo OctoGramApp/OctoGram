@@ -37,7 +37,6 @@ public class OctoConfig extends SettingsController {
     public static boolean fullTime;
     public static boolean roundedNumbers;
     public static boolean confirmCall;
-    public static boolean mediaFlipByTap;
     public static boolean jumpChannel;
     public static boolean hideKeyboard;
     public static boolean gifAsVideo;
@@ -147,7 +146,6 @@ public class OctoConfig extends SettingsController {
             fullTime = getBoolean("fullTime", false);
             roundedNumbers = getBoolean("roundedNumbers", true);
             confirmCall = getBoolean("confirmCall", true);
-            mediaFlipByTap = getBoolean("mediaFlipByTap", true);
             jumpChannel = getBoolean("jumpChannel", true);
             hideKeyboard = getBoolean("hideKeyboard", false);
             gifAsVideo = getBoolean("gifAsVideo", false);
