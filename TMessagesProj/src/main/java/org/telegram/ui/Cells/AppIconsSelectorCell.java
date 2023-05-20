@@ -173,6 +173,9 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
                 if (icon == LauncherIconController.LauncherIcon.CHUPA && OctoConfig.unlockedChupa) {
                     continue;
                 }
+                if (icon == LauncherIconController.LauncherIcon.YUKI && OctoConfig.unlockedYuki) {
+                    continue;
+                }
                 availableIcons.remove(i);
                 i--;
             }

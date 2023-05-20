@@ -66,7 +66,9 @@
     <string name="UnlockedHiddenFoxIcon">Oh… Congratulations! You unlocked the little shy fox icon.</string>
     <string name="AppIconRainbow" comment="AppIconRainbow">Rainbow</string>
     <string name="AppIconChupa" comment="AppIconChupa">Chupa</string>
+    <string name="AppIconYuki" comment="AppIconYuki">Yuki</string>
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
+    <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
     <string name="ClassicIcon">Classic</string>
     <string name="HidePhone">Hide Your Phone Number</string>
     <string name="HidePhoneDesc">It will be hidden from settings and side menu</string>

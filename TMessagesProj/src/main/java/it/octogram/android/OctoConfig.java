@@ -80,6 +80,7 @@ public class OctoConfig extends SettingsController {
     public static boolean hideTimeOnSticker;
     public static boolean showStatusInChat;
     public static boolean unlockedChupa;
+    public static boolean unlockedYuki;
     public static boolean hideAllTab;
     public static boolean hideSendAsChannel;
     public static boolean hideCustomEmojis;
@@ -210,6 +211,7 @@ public class OctoConfig extends SettingsController {
             showStatusInChat = getBoolean("showStatusInChat", false);
             unlockedSecretIcon = getInt("unlockedSecretIcon", 0);
             unlockedChupa = getBoolean("unlockedChupa", false);
+            unlockedYuki = getBoolean("unlockedYuki", false);
             hideAllTab = getBoolean("hideAllTab", false);
             hideSendAsChannel = getBoolean("hideSendAsChannel", false);
             hideCustomEmojis = getBoolean("hideCustomEmojis", false);
@@ -453,6 +455,10 @@ public class OctoConfig extends SettingsController {
 
     public static void unlockChupa() {
         putValue("unlockedChupa", unlockedChupa = true);
+    }
+
+    public static void unlockYuki() {
+        putValue("unlockedYuki", unlockedYuki = true);
     }
 
     public static void setUnlockedSecretIcon(int value) {

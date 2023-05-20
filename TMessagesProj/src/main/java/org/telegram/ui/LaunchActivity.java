@@ -2648,6 +2648,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
                                             OctoConfig.unlockChupa();
                                         }
+                                    } else if (url.startsWith("tg:yukigram") || url.startsWith("tg://yukigram")) {
+                                        if (!OctoConfig.unlockedYuki) {
+                                            BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
+                                            AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.YUKI, null);
+                                            layout.textView.setText(LocaleController.getString("UnlockedHiddenYukiIcon", R.string.UnlockedHiddenYukiIcon));
+                                            fireworksOverlay.start();
+                                            layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                            Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
+                                            OctoConfig.unlockYuki();
+                                        }
                                     } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
                                         AndroidUtilities.runOnUIThread(() -> presentFragment(new OctoGramExperimentalSettings(), false, false));
                                         if (AndroidUtilities.isTablet()) {
