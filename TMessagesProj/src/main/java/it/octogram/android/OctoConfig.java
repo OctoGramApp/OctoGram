@@ -82,6 +82,7 @@ public class OctoConfig extends SettingsController {
     public static boolean unlockedChupa;
     public static boolean hideAllTab;
     public static boolean hideSendAsChannel;
+    public static boolean hideCustomEmojis;
     public static boolean showNameInActionBar;
     public static boolean sendLargePhotos;
     public static boolean reduceCameraXLatency;
@@ -211,6 +212,7 @@ public class OctoConfig extends SettingsController {
             unlockedChupa = getBoolean("unlockedChupa", false);
             hideAllTab = getBoolean("hideAllTab", false);
             hideSendAsChannel = getBoolean("hideSendAsChannel", false);
+            hideCustomEmojis = getBoolean("hideCustomEmojis", false);
             showNameInActionBar = getBoolean("showNameInActionBar", false);
             emojiPackSelected = getString("emojiPackSelected", "default");
             lastSelectedCompression = getInt("lastSelectedCompression", 3);
@@ -427,6 +429,10 @@ public class OctoConfig extends SettingsController {
 
     public static void toggleHideSendAsChannel() {
         putValue("hideSendAsChannel", hideSendAsChannel ^= true);
+    }
+
+    public static void toggleHideCustomEmojis() {
+        putValue("hideCustomEmojis", hideCustomEmojis ^= true);
     }
 
     public static void toggleShowNameInActionBar() {
