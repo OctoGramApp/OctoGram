@@ -199,7 +199,6 @@
     <string name="SwipeToPiP">Swipe up to Picture-in-Picture</string>
     <string name="SwipeToPiPDesc">Swipe up in the video player to open the video in Picture-in-Picture mode</string>
     <string name="DisableProximityEvents">Disable Proximity Events</string>
-    <string name="HideCustomEmojis">Hide Custom Emojis</string>
     <string name="RestartAppToApplyChanges">Restart app to apply changes.</string>
     <string name="UseRearRoundVideos">Start with Rear Camera</string>
     <string name="UseRearRoundVideosDesc">Record video messages with the rear camera instead of the front camera</string>

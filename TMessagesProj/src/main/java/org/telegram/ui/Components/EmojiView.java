@@ -146,8 +146,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import it.octogram.android.OctoConfig;
-
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     private final static int TAB_EMOJI = 0;
@@ -1644,8 +1642,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             }
         });
 
-        allowAnimatedEmoji = !OctoConfig.hideCustomEmojis;
-        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, allowAnimatedEmoji, 0, fragment != null ? () -> {
+        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, needAnimatedEmoji, 0, fragment != null ? () -> {
             if (delegate != null) {
                 delegate.onEmojiSettingsClick(emojiAdapter.frozenEmojiPacks);
             }

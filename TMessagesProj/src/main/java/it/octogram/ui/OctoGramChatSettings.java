@@ -80,7 +80,6 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
     private int cameraXQualityRow;
     private int cameraAdviseRow;
     private int proximitySensorRow;
-    private int hideCustomEmojisRow;
     private int suppressionRow;
     private int turnSoundOnVDKeyRow;
     private int openArchiveOnPullRow;
@@ -213,11 +212,6 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                 ((TextCheckCell) view).setChecked(OctoConfig.disableProximityEvents);
             }
             restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
-        } else if (position == hideCustomEmojisRow) {
-            OctoConfig.toggleHideCustomEmojis();
-            if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(OctoConfig.hideCustomEmojis);
-            }
         } else if (position == suppressionRow) {
             OctoConfig.toggleVoicesAgc();
             if (view instanceof TextCheckCell) {
@@ -350,7 +344,6 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
         }
         turnSoundOnVDKeyRow = rowCount++;
         proximitySensorRow = rowCount++;
-        hideCustomEmojisRow = rowCount++;
         rearCameraStartingRow = rowCount++;
         enableCameraPreviewRow = rowCount++;
         confirmSendRow = rowCount++;
@@ -430,8 +423,6 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("PerformanceMode", R.string.PerformanceMode), LocaleController.getString("PerformanceModeDesc", R.string.PerformanceModeDesc), OctoConfig.useCameraXOptimizedMode, true, true);
                     } else if (position == proximitySensorRow) {
                         textCheckCell.setTextAndCheck(LocaleController.getString("DisableProximityEvents", R.string.DisableProximityEvents), OctoConfig.disableProximityEvents, true);
-                    } else if (position == hideCustomEmojisRow) {
-                        textCheckCell.setTextAndCheck(LocaleController.getString("HideCustomEmojis", R.string.HideCustomEmojis), OctoConfig.hideCustomEmojis, true);
                     } else if (position == suppressionRow) {
                         textCheckCell.setTextAndValueAndCheck(LocaleController.getString("VoiceEnhancements", R.string.VoiceEnhancements), LocaleController.getString("VoiceEnhancementsDesc", R.string.VoiceEnhancementsDesc), OctoConfig.voicesAgc, true, true);
                     } else if (position == turnSoundOnVDKeyRow) {
@@ -587,8 +578,7 @@ public class OctoGramChatSettings extends BaseSettingsActivity implements Notifi
                     position == playGifAsVideoRow || position == showFolderWhenForwardRow ||
                     position == rearCameraStartingRow || position == enableCameraPreviewRow ||
                     position == showGreetings || position == cameraXOptimizeRow ||
-                    position == proximitySensorRow || position == hideCustomEmojisRow ||
-                    position == suppressionRow || position == turnSoundOnVDKeyRow ||
+                    position == proximitySensorRow || position == suppressionRow || position == turnSoundOnVDKeyRow ||
                     position == openArchiveOnPullRow || position == hideTimeOnStickerRow || position == onlineStatusRow ||
                     position == hideAllTabRow || position == hideSendAsChannelRow) {
                 return ViewType.SWITCH;
