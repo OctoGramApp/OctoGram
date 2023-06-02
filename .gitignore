@@ -4,3 +4,8 @@ build/
 obj/
 *.iml
 local.properties
+TMessagesProj/.cxx/
+TMessagesProj_App/debug/
+.DS_Store
+octogram-release.jks
+signing.properties
