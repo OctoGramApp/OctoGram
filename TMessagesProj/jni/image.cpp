@@ -1068,7 +1068,8 @@ JNIEXPORT void Java_org_telegram_messenger_Utilities_drawDitheredGradient(JNIEnv
     }
 }
 
-JNIEXPORT jint Java_org_telegram_messenger_Utilities_saveProgressiveJpeg(JNIEnv *env, jclass clazz, jobject bitmap, jint width, jint height, jint stride, jint quality, jstring path) {
+// OctoGram - removed mozjpeg because of compilation issues
+/*JNIEXPORT jint Java_org_telegram_messenger_Utilities_saveProgressiveJpeg(JNIEnv *env, jclass clazz, jobject bitmap, jint width, jint height, jint stride, jint quality, jstring path) {
     if (!bitmap || !path || !width || !height || !stride || stride != width * 4) {
         return 0;
     }
@@ -1124,7 +1125,7 @@ JNIEXPORT jint Java_org_telegram_messenger_Utilities_saveProgressiveJpeg(JNIEnv 
     AndroidBitmap_unlockPixels(env, bitmap);
     return jpegSize;
 
-    /*struct jpeg_compress_struct cinfo;
+    *//*struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
@@ -1169,8 +1170,8 @@ JNIEXPORT jint Java_org_telegram_messenger_Utilities_saveProgressiveJpeg(JNIEnv 
     fclose(f);
 
     jpeg_destroy_compress(&cinfo);
-    return outSize;*/
-}
+    return outSize;*//*
+}*/
 
 std::vector<std::pair<float, float>> gatherPositions(std::vector<std::pair<float, float>> list, int phase) {
     std::vector<std::pair<float, float>> result(4);
