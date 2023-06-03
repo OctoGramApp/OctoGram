@@ -3,14 +3,48 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        maven { url 'https://developer.huawei.com/repo/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.3'
-        classpath 'com.google.gms:google-services:4.3.10'
-        classpath 'com.huawei.agconnect:agcp:1.6.0.300'
+        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath 'com.google.gms:google-services:4.3.15'
     }
 }
+
+subprojects {
+    afterEvaluate {
+        android {
+            compileSdkVersion 33
+            buildToolsVersion '33.0.2'
+            ndkVersion '23.2.8568313'
+
+            lint {
+                checkReleaseBuilds false
+                disable 'MissingTranslation', 'ExtraTranslation', 'BlockedPrivateApi'
+            }
+
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_11
+                targetCompatibility JavaVersion.VERSION_11
+
+                coreLibraryDesugaringEnabled true
+            }
+
+            defaultConfig {
+                minSdkVersion 21
+                targetSdkVersion 33
+            }
+        }
+
+        dependencies {
+            coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
+        }
+    }
+}
+
 repositories {
     google()
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
 }
