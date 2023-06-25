@@ -57,7 +57,7 @@ public class DatacenterHeader extends LinearLayout {
         spannableStringBuilder.append(".  ").append(LocaleController.getString("WebVersion", R.string.WebVersion));
         spannableStringBuilder.setSpan(new ColoredImageSpan(Objects.requireNonNull(ContextCompat.getDrawable(getContext(), R.drawable.web_access))), 0, 1, 0);
         buttonTextView.setText(spannableStringBuilder);
-        buttonTextView.setOnClickListener(view -> Browser.openUrl(AndroidUtilities.findActivity(context), "https://status.octogram.app/"));
+        buttonTextView.setOnClickListener(view -> Browser.openUrl(AndroidUtilities.findActivity(context), "https://octogram.app/dcstatus"));
 
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed)));

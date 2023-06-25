@@ -65,7 +65,7 @@ public class UpdateManager {
             @Override
             public void run() {
                 try {
-                    String url = String.format("https://app.octogram.app/get_changelogs?lang=%s&version=%s", locale.getLanguage(), BuildVars.BUILD_VERSION);
+                    String url = String.format("https://assets.octogram.site/OTAUpdates/changelog_lang_%s_version_%s", locale.getLanguage(), BuildVars.BUILD_VERSION);
                     JSONObject obj = new JSONObject(new StandardHTTPRequest(url).request());
                     String changelog_text = obj.getString("changelogs");
                     if (!changelog_text.equals("null")) {
@@ -133,7 +133,7 @@ public class UpdateManager {
                             abi = "universal";
                             break;
                     }
-                    String url = String.format(locale, "https://app.octogram.app/version?lang=%s&beta=%s&abi=%s", locale.getLanguage(), betaMode, URLEncoder.encode(abi, StandardCharsets.UTF_8.name()));
+                    String url = String.format(locale, "https://assets.octogram.site/OTAUpdates/update_lang_%s_beta_%s_abi_%s", locale.getLanguage(), betaMode, URLEncoder.encode(abi, StandardCharsets.UTF_8.name()));
                     JSONObject obj = new JSONObject(new StandardHTTPRequest(url).request());
                     String update_status = obj.getString("status");
                     if (update_status.equals("no_updates")) {

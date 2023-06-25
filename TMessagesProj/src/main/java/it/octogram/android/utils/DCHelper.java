@@ -15,6 +15,9 @@ import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
@@ -178,19 +181,22 @@ public class DCHelper {
                 public void run() {
                 while (isRunning) {
                     try {
-                        String url = "https://app.octogram.app/dc_status";
+                        String url = String.format("https://assets.octogram.site/DCStatus/dc_status.json?%s", Math.random() * 1000000);
                         JSONObject obj = new JSONObject(new StandardHTTPRequest(url).request());
                         JSONArray listDatacenters = obj.getJSONArray("status");
                         int refreshTimeIn = obj.getInt("refresh_in_time");
                         DatacenterList infoArrayList = new DatacenterList();
+                        List<DatacenterInfo> datacenters = new ArrayList<>();
                         for (int i = 0; i < listDatacenters.length(); i++) {
                             JSONObject dcInfo = listDatacenters.getJSONObject(i);
                             int dcID = dcInfo.getInt("dc_id");
                             int status = dcInfo.getInt("dc_status");
                             int ping = StandardHTTPRequest.ping(DCHelper.getDCIp(dcID));
-                            infoArrayList.add(new DatacenterInfo(dcID, status, ping));
+                            datacenters.add(new DatacenterInfo(dcID, status, ping));
                             SystemClock.sleep(25);
                         }
+                        Collections.sort(datacenters, Comparator.comparingInt(dc -> dc.dcID));
+                        infoArrayList.addAll(datacenters);
                         if (updateCallback != null) {
                             AndroidUtilities.runOnUIThread(() -> updateCallback.onUpdate(infoArrayList));
                         }

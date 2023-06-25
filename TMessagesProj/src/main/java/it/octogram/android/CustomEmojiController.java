@@ -207,7 +207,7 @@ public class CustomEmojiController {
                     emojiPacksInfo.addAll(tmp);
                     AndroidUtilities.runOnUIThread(listener::onLoaded);
                     try {
-                        String json = new StandardHTTPRequest(String.format("https://app.octogram.app/emoji_packs?noCache=%s",  Math.random() * 10000)).request();
+                        String json = new StandardHTTPRequest(String.format("https://assets.octogram.site/EmojiPacks/emoji_packs.json?%s",  Math.random() * 10000)).request();
                         preferences.edit().putString("emoji_packs", json).apply();
                         invalidateCache(true);
                         emojiPacksInfo.addAll(loadFromJson(json));

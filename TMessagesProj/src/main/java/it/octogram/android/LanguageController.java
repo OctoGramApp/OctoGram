@@ -39,7 +39,7 @@ public class LanguageController {
                         LocaleController.addLocaleValue(getLocaleFileStrings(fileFromLang));
                         AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface));
                     }
-                    String url = String.format("https://app.octogram.app/language_version?lang=%s", langCode);
+                    String url = String.format("https://assets.octogram.site/LanguagePacks/version_%s.json?%s", locale.getLanguage(), Math.random() * 1000000);
                     JSONObject obj = new JSONObject(new StandardHTTPRequest(url).request());
                     if (!obj.has("error")) {
                         String remoteMD5 = obj.getString("md5");
@@ -61,7 +61,7 @@ public class LanguageController {
     }
 
     private static void loadRemoteLanguage(String langCode) throws IOException, JSONException {
-        String url = String.format("https://app.octogram.app/language_pack?lang=%s", langCode);
+        String url = String.format("https://assets.octogram.site/LanguagePacks/%s.json?%s", langCode.replace("-r", ""), Math.random() * 1000000);
         JSONObject obj = new JSONObject(new StandardHTTPRequest(url).request());
         if (!obj.has("error")) {
             saveInternalFile(langCode, obj);
