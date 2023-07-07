@@ -14,7 +14,11 @@ import it.octogram.android.preferences.tgkit.TGKitSettingsFragment;
 public class PreferencesNavigator {
 
     public static TGKitSettingsFragment navigateToPreferences(Context context) {
-        return new TGKitSettingsFragment(new TestPreferences(), context);
+        return new TGKitSettingsFragment(new OctoMainPreferences(), context);
+    }
+
+    public static TGKitSettingsFragment navigateToGeneralPreferences(Context context) {
+        return new TGKitSettingsFragment(new OctoGeneralSettings(), context);
     }
 
 }

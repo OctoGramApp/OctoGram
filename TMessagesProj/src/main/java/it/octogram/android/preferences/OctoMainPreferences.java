@@ -22,7 +22,7 @@ import it.octogram.android.preferences.tgkit.preference.types.TGKitFooterRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextDetailRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextIconRow;
 
-public class TestPreferences implements BasePreferencesEntry {
+public class OctoMainPreferences implements BasePreferencesEntry {
 
     @Override
     public OctoPreferences getPreferences(Context context) {
@@ -31,7 +31,9 @@ public class TestPreferences implements BasePreferencesEntry {
                 .sticker(context, "UtyaDuck", 31, true, "Welcome to the OctoGram Settings! Here you can customize your experience with the app.")
                 .category("Settings", new ArrayList<>() {
                     {
-                        add(new TGKitTextIconRow("General", true, R.drawable.msg_media, null));
+                        add(new TGKitTextIconRow("General", true, R.drawable.msg_media, bf1 -> {
+                            bf1.presentFragment(PreferencesNavigator.navigateToGeneralPreferences(context));
+                        }));
                         add(new TGKitTextIconRow("Translator", true, R.drawable.msg_translate, null));
                         add(new TGKitTextIconRow("Appearance", true, R.drawable.msg_colors, null));
                         add(new TGKitTextIconRow("Updates", true, R.drawable.msg_photo_rotate, null));
