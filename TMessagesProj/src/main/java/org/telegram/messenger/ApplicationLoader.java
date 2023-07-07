@@ -256,11 +256,7 @@ public class ApplicationLoader extends Application {
         }
 
         NativeLoader.initNativeLibs(ApplicationLoader.applicationContext);
-        try {
-            ConnectionsManager.native_setJava(false);
-        } catch (UnsatisfiedLinkError error) {
-            throw new RuntimeException("can't load native libraries " +  Build.CPU_ABI + " lookup folder " + NativeLoader.getAbiFolder());
-        }
+        ConnectionsManager.native_setJava(false);
         new ForegroundDetector(this) {
             @Override
             public void onActivityStarted(Activity activity) {
