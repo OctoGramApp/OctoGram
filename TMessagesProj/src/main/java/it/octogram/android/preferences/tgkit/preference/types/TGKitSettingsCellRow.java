@@ -22,7 +22,7 @@ public class TGKitSettingsCellRow extends TGKitPreference {
 
     @Override
     public TGPType getType() {
-        return TGPType.TEXT_ICON;
+        return TGPType.SETTINGS_CELL;
     }
 
     public void setDivider(boolean divider) {

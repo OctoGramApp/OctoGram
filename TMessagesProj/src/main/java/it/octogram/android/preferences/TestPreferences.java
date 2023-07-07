@@ -7,21 +7,38 @@
  */
 package it.octogram.android.preferences;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.view.Gravity;
+import android.widget.LinearLayout;
+
+import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.Components.StickerImageView;
 
 import java.util.ArrayList;
 
 import it.octogram.android.preferences.tgkit.preference.OctoPreferences;
+import it.octogram.android.preferences.tgkit.preference.types.TGKitHeaderRow;
+import it.octogram.android.preferences.tgkit.preference.types.TGKitSectionRow;
+import it.octogram.android.preferences.tgkit.preference.types.TGKitSettingsCellRow;
+import it.octogram.android.preferences.tgkit.preference.types.TGKitStickerHeaderRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextDetailRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextIconRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitFooterRow;
 
-public class TestPreferences implements BasePreferencesEntry {
+public class TestPreferences implements BasePreferencesEntry  {
 
     @Override
-    public OctoPreferences getPreferences(BaseFragment bf) {
+    public OctoPreferences getPreferences(Context context) {
+        String footer = "OctoGram v" + BuildConfig.OCTO_VERSION + ". Thank you for your interest in the project :)";
         return OctoPreferences.builder("OctoGram Settings")
+                .sticker(context, "UtyaDuck", 31, true, "Welcome to the OctoGram Settings! Here you can customize your experience with the app.")
                 .category("Settings", new ArrayList<>() {
                     {
                         add(new TGKitTextIconRow("General", true, R.drawable.msg_media, null));
@@ -33,12 +50,20 @@ public class TestPreferences implements BasePreferencesEntry {
                 })
                 .category("Info", new ArrayList<>() {
                     {
-                        add(new TGKitTextIconRow("Official Channel", true, R.drawable.msg_translate, null));
-                        add(new TGKitTextDetailRow("View the source code", "view source", true, null));
-                        add(new TGKitTextIconRow("Translate OctoGram", true, R.drawable.msg_colors, null));
+                        add(new TGKitTextDetailRow("Official Channel", "Stay informed about new updates", true, R.drawable.msg_channel, bf1 -> {
+                            MessagesController.getInstance(bf1.getCurrentAccount()).openByUserName("OctoGramApp", bf1, 1);
+                        }));
+                        add(new TGKitTextDetailRow("Contribute to OctoGram", "Help us creating a better app if you are a developer", true, R.drawable.msg_warning, bf1 -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/OctoGramApp/OctoGram"));
+                            bf1.getParentActivity().startActivity(browserIntent);
+                        }));
+                        add(new TGKitTextDetailRow("Translate OctoGram", "Help us translating OctoGram in your language", true, R.drawable.msg_translate, bf1 -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://crowdin.com/project/octogram"));
+                            bf1.getParentActivity().startActivity(browserIntent);
+                        }));
                     }
                 })
-                .add(new TGKitFooterRow("OctoGram", null))
+                .add(new TGKitFooterRow(footer, null))
                 .build();
     }
 }

@@ -9,7 +9,7 @@ package it.octogram.android.preferences.tgkit.preference.types;
 
 public enum TGPType {
     SECTION(0, false),
-    SETTINGS_CELL(2, true),
+    SETTINGS_CELL(2, false),
     HEADER(2, false),
     SWITCH(3, true),
     TEXT_DETAIL(4, true),
@@ -17,7 +17,8 @@ public enum TGPType {
     SLIDER(6, true),
     LIST(7, true),
     HINT(8, true),
-    FOOTER(14, true);
+    FOOTER(14, true),
+    STICKER_HEADER(15, false);
 
     public final int adapterType;
     public final boolean enabled;

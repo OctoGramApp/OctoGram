@@ -7,21 +7,30 @@
  */
 package it.octogram.android.preferences.tgkit;
 
+import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
+
 import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.HeaderCell;
@@ -38,16 +47,17 @@ import org.telegram.ui.Components.RecyclerListView;
 import java.util.ArrayList;
 
 import it.octogram.android.preferences.BasePreferencesEntry;
+import it.octogram.android.preferences.tgkit.cells.StickerSliderCell;
 import it.octogram.android.preferences.tgkit.preference.OctoPreferences;
 import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
+import it.octogram.android.preferences.tgkit.preference.types.TGKitFooterRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitListPreference;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitSettingsCellRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitSliderPreference;
+import it.octogram.android.preferences.tgkit.preference.types.TGKitStickerHeaderRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitSwitchPreference;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextDetailRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextIconRow;
-import it.octogram.android.preferences.tgkit.cells.StickerSliderCell;
-import it.octogram.android.preferences.tgkit.preference.types.TGKitFooterRow;
 
 public class TGKitSettingsFragment extends BaseFragment {
     private final OctoPreferences settings;
@@ -56,9 +66,9 @@ public class TGKitSettingsFragment extends BaseFragment {
     private RecyclerListView listView;
     private int rowCount;
 
-    public TGKitSettingsFragment(BasePreferencesEntry entry) {
+    public TGKitSettingsFragment(BasePreferencesEntry entry, Context context) {
         super();
-        this.settings = entry.getProcessedPrefs(this);
+        this.settings = entry.getProcessedPrefs(context);
     }
 
     @Override
@@ -99,7 +109,7 @@ public class TGKitSettingsFragment extends BaseFragment {
 
         listView = new RecyclerListView(context);
         listView.setVerticalScrollBarEnabled(false);
-        listView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+        listView.setLayoutManager(new LinearLayoutManager(context, VERTICAL, false));
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT));
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener((view, position, x, y) -> {
@@ -111,6 +121,9 @@ public class TGKitSettingsFragment extends BaseFragment {
                 }
             } else if (pref instanceof TGKitTextIconRow) {
                 TGKitTextIconRow preference = ((TGKitTextIconRow) pref);
+                if (preference.listener != null) preference.listener.onClick(this);
+            } else if (pref instanceof TGKitTextDetailRow) {
+                TGKitTextDetailRow preference = ((TGKitTextDetailRow) pref);
                 if (preference.listener != null) preference.listener.onClick(this);
             } else if (pref instanceof TGKitFooterRow) {
                 TGKitFooterRow preference = ((TGKitFooterRow) pref);
@@ -223,6 +236,7 @@ public class TGKitSettingsFragment extends BaseFragment {
                     break;
                 }
                 case 4: {
+                    ((TGKitTextDetailRow) positions.get(position)).bindCell((TextDetailSettingsCell) holder.itemView);
                     TextDetailSettingsCell settingsCell = (TextDetailSettingsCell) holder.itemView;
                     settingsCell.setMultilineDetail(true);
                     ((TGKitTextDetailRow) positions.get(position)).bindCell(settingsCell);
@@ -247,6 +261,27 @@ public class TGKitSettingsFragment extends BaseFragment {
                 case 8:
                 case 14: {
                     ((TextInfoPrivacyCell) holder.itemView).setText(positions.get(position).title);
+                    break;
+                }
+                case 15: {
+                    TGKitStickerHeaderRow pref = (TGKitStickerHeaderRow) positions.get(position);
+                    LinearLayout linearLayout = (LinearLayout) holder.itemView;
+
+                    linearLayout.removeAllViews();
+
+                    linearLayout.addView(pref.getStickerView(), LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 20, 0, 0));
+
+                    if (pref.getDescription() != null) {
+                        TextView textView = new TextView(mContext);
+                        textView.setGravity(Gravity.CENTER_HORIZONTAL);
+                        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+                        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+                        textView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
+                        textView.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection));
+                        textView.setText(pref.getDescription());
+                        textView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
+                        linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 36, 26, 36, 0));
+                    }
                 }
             }
         }
@@ -319,6 +354,14 @@ public class TGKitSettingsFragment extends BaseFragment {
                     cell.getTextView().setPadding(0, AndroidUtilities.dp(14), 0, AndroidUtilities.dp(14));
                     view = cell;
                     view.setBackgroundDrawable(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
+                    break;
+                case 15:
+                    LinearLayout layout = new LinearLayout(mContext);
+                    layout.setGravity(Gravity.CENTER_HORIZONTAL);
+                    layout.setOrientation(VERTICAL);
+                    view = layout;
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
             }
             if (view == null) {
                 throw new RuntimeException("wrong viewType");

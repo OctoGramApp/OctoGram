@@ -7,12 +7,11 @@
  */
 package it.octogram.android.preferences;
 
-import org.telegram.ui.ActionBar.BaseFragment;
+import android.content.Context;
 
 import java.util.List;
 
 import it.octogram.android.preferences.tgkit.preference.OctoPreferences;
-import it.octogram.android.preferences.tgkit.preference.TGKitCategory;
 import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitListPreference;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitSettingsCellRow;
@@ -21,8 +20,8 @@ import it.octogram.android.preferences.tgkit.preference.types.TGKitTextDetailRow
 
 public interface BasePreferencesEntry {
 
-    default OctoPreferences getProcessedPrefs(BaseFragment bf) {
-        OctoPreferences preferences = getPreferences(bf);
+    default OctoPreferences getProcessedPrefs(Context context) {
+        OctoPreferences preferences = getPreferences(context);
         List<TGKitPreference> preferenceList = preferences.getPreferences();
 
         for (TGKitPreference preference : preferenceList) {
@@ -44,6 +43,6 @@ public interface BasePreferencesEntry {
         return preferences;
     }
 
-    OctoPreferences getPreferences(BaseFragment bf);
+    OctoPreferences getPreferences(Context context);
 
 }

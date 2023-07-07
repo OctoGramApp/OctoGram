@@ -7,12 +7,14 @@
  */
 package it.octogram.android.preferences;
 
+import android.content.Context;
+
 import it.octogram.android.preferences.tgkit.TGKitSettingsFragment;
 
 public class PreferencesNavigator {
 
-    public static TGKitSettingsFragment navigateToPreferences() {
-        return new TGKitSettingsFragment(new TestPreferences());
+    public static TGKitSettingsFragment navigateToPreferences(Context context) {
+        return new TGKitSettingsFragment(new TestPreferences(), context);
     }
 
 }

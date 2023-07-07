@@ -3325,7 +3325,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == notificationRow) {
                 presentFragment(new NotificationsSettingsActivity());
             } else if (position == octoGramMainSettingsRow) {
-                presentFragment(PreferencesNavigator.navigateToPreferences());
+                presentFragment(PreferencesNavigator.navigateToPreferences(getContext()));
             }else if (position == privacyRow) {
                 presentFragment(new PrivacySettingsActivity().setCurrentPassword(currentPassword));
             } else if (position == dataRow) {
@@ -9375,7 +9375,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == notificationRow) {
                         textCell.setTextAndIcon(LocaleController.getString("NotificationsAndSounds", R.string.NotificationsAndSounds), R.drawable.msg2_notifications, true);
                     } else if (position == octoGramMainSettingsRow) {
-                        textCell.setTextAndIcon("OctoGram Settings", R.drawable.msg_settings_14, true);
+                        textCell.setTextAndIcon("OctoGram Settings", R.drawable.msg_settings, true);
                     }else if (position == privacyRow) {
                         textCell.setTextAndIcon(LocaleController.getString("PrivacySettings", R.string.PrivacySettings), R.drawable.msg2_secret, true);
                     } else if (position == dataRow) {
