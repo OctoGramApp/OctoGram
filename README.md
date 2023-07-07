@@ -1,39 +1,39 @@
-## Telegram messenger for Android
+<img src="https://raw.githubusercontent.com/OctoGramApp/website/main/assets/icons/applogo.png" width="150" align="left"/>
 
-[Telegram](https://telegram.org) is a messaging app with a focus on speed and security. It’s superfast, simple and free.
-This repo contains the official source code for [Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger).
+# 🐙 OctoGram
+*[Licensed under the GNU General Public License v2.0](https://github.com/OctoGramApp/OctoGram/blob/main/LICENSE)*
 
-## Creating your Telegram Application
+[![Updates](https://img.shields.io/badge/Updates-Telegram-blue.svg)](https://t.me/octogramapp)
+[![Support](https://img.shields.io/badge/Support-Telegram-blue.svg)](https://t.me/octogramchat)
+![Latest](https://img.shields.io/github/v/release/OctoGramApp/OctoGram?display_name=tag&include_prereleases)
+![Downloads](https://img.shields.io/github/downloads/OctoGramApp/OctoGram/total)
 
-We welcome all developers to use our API and source code to create applications on our platform.
-There are several things we require from **all developers** for the moment.
+OctoGram is an open-source messaging platform that serves as an alternative to Telegram.<br></br>
 
-1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application.
+## Compilation guide
+To reproduce the build of OctoGram is only needed ccache (**already installed in "Tools" folder**), on macOs
+will be used from Homebrew if installed, otherwise it will be used the one in the "Tools" folder.
+
+1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application and put it [**here**](https://github.com/OctoGramApp/OctoGram/blob/main/TMessagesProj/src/main/java/it/octogram/Extra.java.example) (remember to **rename** Extra.java.example to Extra.java).
 2. Please **do not** use the name Telegram for your app — or make sure your users understand that it is unofficial.
 3. Kindly **do not** use our standard logo (white paper plane in a blue circle) as your app's logo.
-3. Please study our [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of your users' data and privacy.
-4. Please remember to publish **your** code too in order to comply with the licences.
+4. Please study our [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of your users' data and privacy.
+5. Please remember to publish **your** code too in order to comply with the licences.
+6. Add your google-services.json file to the [**root of the project**](https://github.com/OctoGramApp/OctoGram/tree/main/TMessagesProj_App).
+7. Add the following to your `local.properties` file:
+```
+MAPS_API_KEY=<your-api-key>
+```
+8. Add the following to your `signing.properties` file:
+```
+storePassword=<your-keystore-password>
+keyAlias=<your-keystore-alias>
+keyPath=<your-keystore-file-path>
+keyPassword=<your-keystore-password>
+```
 
-### API, Protocol documentation
-
-Telegram API manuals: https://core.telegram.org/api
-
-MTproto protocol manuals: https://core.telegram.org/mtproto
-
-### Compilation Guide
-
-**Note**: In order to support [reproducible builds](https://core.telegram.org/reproducible-builds), this repo contains dummy release.keystore,  google-services.json and filled variables inside BuildVars.java. Before publishing your own APKs please make sure to replace all these files with your own.
-
-You will require Android Studio 3.4, Android NDK rev. 20 and Android SDK 8.1
-
-1. Download the Telegram source code from https://github.com/DrKLO/Telegram ( git clone https://github.com/DrKLO/Telegram.git )
-2. Copy your release.keystore into TMessagesProj/config
-3. Fill out RELEASE_KEY_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD in gradle.properties to access your  release.keystore
-4.  Go to https://console.firebase.google.com/, create two android apps with application IDs org.telegram.messenger and org.telegram.messenger.beta, turn on firebase messaging and download google-services.json, which should be copied to the same folder as TMessagesProj.
-5. Open the project in the Studio (note that it should be opened, NOT imported).
-6. Fill out values in TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java – there’s a link for each of the variables showing where and which data to obtain.
-7. You are ready to compile Telegram.
-
-### Localization
-
-We moved all translations to https://translations.telegram.org/en/android/. Please use it.
+## Thanks to the following projects:
+- [Telegram](https://github.com/DrKLO/Telegram)
+- [Catogram X](https://github.com/CatogramX/CatogramX)
+- [Nekogram](https://gitlab.com/Nekogram/Nekogram)
+- [OwlGram](https://github.com/OwlGramDev/OwlGram)
