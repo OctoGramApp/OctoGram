@@ -10,33 +10,23 @@ package it.octogram.android.preferences;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.view.Gravity;
-import android.widget.LinearLayout;
 
 import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
-import org.telegram.messenger.UserConfig;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.Components.StickerImageView;
 
 import java.util.ArrayList;
 
 import it.octogram.android.preferences.tgkit.preference.OctoPreferences;
-import it.octogram.android.preferences.tgkit.preference.types.TGKitHeaderRow;
-import it.octogram.android.preferences.tgkit.preference.types.TGKitSectionRow;
-import it.octogram.android.preferences.tgkit.preference.types.TGKitSettingsCellRow;
-import it.octogram.android.preferences.tgkit.preference.types.TGKitStickerHeaderRow;
+import it.octogram.android.preferences.tgkit.preference.types.TGKitFooterRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextDetailRow;
 import it.octogram.android.preferences.tgkit.preference.types.TGKitTextIconRow;
-import it.octogram.android.preferences.tgkit.preference.types.TGKitFooterRow;
 
-public class TestPreferences implements BasePreferencesEntry  {
+public class TestPreferences implements BasePreferencesEntry {
 
     @Override
     public OctoPreferences getPreferences(Context context) {
-        String footer = "OctoGram v" + BuildConfig.OCTO_VERSION + ". Thank you for your interest in the project :)";
+        String footer = "OctoGram v" + BuildConfig.BUILD_VERSION_STRING + ". Thank you for your interest in the project :)";
         return OctoPreferences.builder("OctoGram Settings")
                 .sticker(context, "UtyaDuck", 31, true, "Welcome to the OctoGram Settings! Here you can customize your experience with the app.")
                 .category("Settings", new ArrayList<>() {

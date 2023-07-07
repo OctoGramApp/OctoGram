@@ -10,7 +10,6 @@ package it.octogram.android.preferences.tgkit.preference.types;
 import androidx.annotation.Nullable;
 
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
 
 import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
@@ -18,6 +17,8 @@ import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
 public class TGKitTextDetailRow extends TGKitPreference {
     public String detail;
     public boolean divider;
+    @Nullable
+    public TGTIListener listener;
     private int icon = -1;
 
     public TGKitTextDetailRow(String title, String detail, boolean divider, @Nullable TGTIListener listener) {
@@ -34,9 +35,6 @@ public class TGKitTextDetailRow extends TGKitPreference {
         this.icon = icon;
         this.listener = listener;
     }
-
-    @Nullable
-    public TGTIListener listener;
 
     @Override
     public TGPType getType() {

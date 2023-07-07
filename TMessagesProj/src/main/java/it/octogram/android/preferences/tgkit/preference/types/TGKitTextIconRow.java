@@ -15,6 +15,10 @@ import org.telegram.ui.Cells.TextCell;
 import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
 
 public class TGKitTextIconRow extends TGKitPreference {
+    @Nullable
+    public String value = null;
+    @Nullable
+    public TGTIListener listener;
     private boolean divider = false;
     private int icon = -1;
 
@@ -31,16 +35,10 @@ public class TGKitTextIconRow extends TGKitPreference {
         this.listener = listener;
     }
 
-    @Nullable
-    public String value = null;
-
     public TGKitTextIconRow setValue(String value) {
         this.value = value;
         return this;
     }
-
-    @Nullable
-    public TGTIListener listener;
 
     public void bindCell(TextCell cell) {
         if (icon != -1 && value != null) {

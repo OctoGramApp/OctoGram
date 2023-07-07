@@ -16,6 +16,8 @@ import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
 public class TGKitSwitchPreference extends TGKitPreference {
     public TGSPContract contract;
     public boolean divider = false;
+    @Nullable
+    public String summary;
 
     public TGKitSwitchPreference(String title, @Nullable String summary, TGSPContract contract, boolean divider) {
         this.title = title;
@@ -23,9 +25,6 @@ public class TGKitSwitchPreference extends TGKitPreference {
         this.contract = contract;
         this.divider = divider;
     }
-
-    @Nullable
-    public String summary;
 
     @Override
     public TGPType getType() {

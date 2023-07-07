@@ -10,8 +10,6 @@ package it.octogram.android.preferences.tgkit;
 import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import android.content.Context;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -26,11 +24,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.HeaderCell;

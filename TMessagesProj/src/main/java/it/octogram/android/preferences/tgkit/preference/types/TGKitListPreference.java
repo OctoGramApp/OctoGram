@@ -80,13 +80,11 @@ public class TGKitListPreference extends TGKitPreference {
     public void contractIcons(List<Triple<Integer, String, Integer>> options, String value, Function<Integer, Void> valueSetter) {
         contract = new TGTLContract() {
             @Override
-            public void setValue(int id) {
-                valueSetter.apply(id);
-            }
-
-            @Override
             public String getValue() {
                 return value;
+            }            @Override
+            public void setValue(int id) {
+                valueSetter.apply(id);
             }
 
             @Override
@@ -103,6 +101,8 @@ public class TGKitListPreference extends TGKitPreference {
             public boolean hasIcons() {
                 return true;
             }
+
+
         };
 
     }
@@ -110,13 +110,11 @@ public class TGKitListPreference extends TGKitPreference {
     public void contract(List<Pair<Integer, String>> options, String value, Function<Integer, Void> valueSetter) {
         contract = new TGTLContract() {
             @Override
-            public void setValue(int id) {
-                valueSetter.apply(id);
-            }
-
-            @Override
             public String getValue() {
                 return value;
+            }            @Override
+            public void setValue(int id) {
+                valueSetter.apply(id);
             }
 
             @Override
@@ -133,31 +131,32 @@ public class TGKitListPreference extends TGKitPreference {
             public boolean hasIcons() {
                 return false;
             }
+
+
         };
 
-    }
-
-
-    public void setDivider(boolean divider) {
-        this.divider = divider;
-    }
-
-    public void setContract(TGTLContract contract) {
-        this.contract = contract;
     }
 
     public boolean getDivider() {
         return divider;
     }
 
+    public void setDivider(boolean divider) {
+        this.divider = divider;
+    }
+
     public TGTLContract getContract() {
         return contract;
     }
 
-    public interface TGTLContract {
-        void setValue(int id);
+    public void setContract(TGTLContract contract) {
+        this.contract = contract;
+    }
 
+    public interface TGTLContract {
         String getValue();
+
+        void setValue(int id);
 
         List<Pair<Integer, String>> getOptions();
 
