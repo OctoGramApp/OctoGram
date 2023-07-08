@@ -17,7 +17,6 @@ import org.telegram.ui.Components.AlertsCreator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
 import kotlin.Triple;
@@ -26,6 +25,12 @@ public class TGKitListPreference extends TGKitPreference {
 
     private boolean divider = false;
     private TGTLContract contract;
+
+    public TGKitListPreference(String title, TGTLContract contract, boolean divider) {
+        this.title = title;
+        this.contract = contract;
+        this.divider = divider;
+    }
 
     @Override
     public TGPType getType() {
@@ -75,66 +80,6 @@ public class TGKitListPreference extends TGKitPreference {
         fragment.setVisibleDialog(dialog);
 
         dialog.show();
-    }
-
-    public void contractIcons(List<Triple<Integer, String, Integer>> options, String value, Function<Integer, Void> valueSetter) {
-        contract = new TGTLContract() {
-            @Override
-            public String getValue() {
-                return value;
-            }            @Override
-            public void setValue(int id) {
-                valueSetter.apply(id);
-            }
-
-            @Override
-            public List<Pair<Integer, String>> getOptions() {
-                return new ArrayList<>();
-            }
-
-            @Override
-            public List<Triple<Integer, String, Integer>> getOptionsIcons() {
-                return options;
-            }
-
-            @Override
-            public boolean hasIcons() {
-                return true;
-            }
-
-
-        };
-
-    }
-
-    public void contract(List<Pair<Integer, String>> options, String value, Function<Integer, Void> valueSetter) {
-        contract = new TGTLContract() {
-            @Override
-            public String getValue() {
-                return value;
-            }            @Override
-            public void setValue(int id) {
-                valueSetter.apply(id);
-            }
-
-            @Override
-            public List<Pair<Integer, String>> getOptions() {
-                return options;
-            }
-
-            @Override
-            public List<Triple<Integer, String, Integer>> getOptionsIcons() {
-                return new ArrayList<>();
-            }
-
-            @Override
-            public boolean hasIcons() {
-                return false;
-            }
-
-
-        };
-
     }
 
     public boolean getDivider() {

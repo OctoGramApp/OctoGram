@@ -9,8 +9,6 @@ package it.octogram.android.preferences.tgkit.preference.types;
 
 import androidx.annotation.Nullable;
 
-import java.util.function.Function;
-
 import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
 
 public class TGKitSwitchPreference extends TGKitPreference {
@@ -35,23 +33,10 @@ public class TGKitSwitchPreference extends TGKitPreference {
         this.divider = divider;
     }
 
-    public void contract(boolean value, Function<Boolean, Void> setValue) {
-        contract = new TGSPContract() {
-            @Override
-            public boolean getPreferenceValue() {
-                return value;
-            }
-
-            @Override
-            public void toggleValue() {
-                setValue.apply(!value);
-            }
-        };
-    }
-
     public interface TGSPContract {
         boolean getPreferenceValue();
 
         void toggleValue();
     }
+
 }
