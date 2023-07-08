@@ -109,6 +109,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.octogram.android.utils.PermissionsUtils;
+
 public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayout implements NotificationCenter.NotificationCenterDelegate {
 
     private static final int VIEW_TYPE_AVATAR_CONSTRUCTOR = 4;
@@ -738,11 +740,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     }
                     return;
                 } else if (noGalleryPermissions) {
-                    try {
-                        fragment.getParentActivity().requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE);
-                    } catch (Exception ignore) {
-
-                    }
+                    PermissionsUtils.requestImagesAndVideoPermission(parentAlert.baseFragment.getParentActivity());
                     return;
                 }
             }
@@ -2900,7 +2898,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
 
     public void checkStorage() {
         if (noGalleryPermissions && Build.VERSION.SDK_INT >= 23) {
-            noGalleryPermissions = parentAlert.baseFragment.getParentActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+            noGalleryPermissions = !PermissionsUtils.isImagesAndVideoPermissionGranted();
             if (!noGalleryPermissions) {
                 loadGalleryPhotos();
             }
@@ -3255,7 +3253,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
         }
         if (Build.VERSION.SDK_INT >= 23) {
-            noGalleryPermissions = parentAlert.getContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+            noGalleryPermissions = !PermissionsUtils.isImagesAndVideoPermissionGranted();
         }
         if (galleryAlbumEntry != null) {
             for (int a = 0; a < Math.min(100, galleryAlbumEntry.photos.size()); a++) {
