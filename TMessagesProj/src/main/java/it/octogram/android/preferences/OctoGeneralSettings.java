@@ -183,7 +183,109 @@ public class OctoGeneralSettings implements BasePreferencesEntry {
                         }, true)
                 ))
                 .category("Media", List.of(
+                        new TGKitSwitchPreference("Noise suppression in calls", "Enables noise suppression and voice normalization while in a call", new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.activeNoiseSuppression.getValue();
+                            }
 
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.activeNoiseSuppression);
+                            }
+                        }, true),
+                        new TGKitSwitchPreference("Unmute videos with volume down", "Unmute a video by pressing the volume down button", new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.unmuteVideosWithVolumeDown.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.unmuteVideosWithVolumeDown);
+                            }
+                        }, true),
+                        new TGKitSwitchPreference("Disable proximity events", null, new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.disableProximityEvents.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.disableProximityEvents);
+                            }
+                        }, true),
+                        new TGKitSwitchPreference("Start with rear camera", "Record video messages with the rear camera instead of the front camera", new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.startWithRearCamera.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.startWithRearCamera);
+                            }
+                        }, true),
+                        new TGKitSwitchPreference("Disable camera preview", "Disables camera preview in the attachments menu", new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.disableCameraPreview.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.disableCameraPreview);
+                            }
+                        }, true),
+                        new TGKitSwitchPreference("Hide sent time on stickers", null, new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.hideSentTimeOnStickers.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.hideSentTimeOnStickers);
+                            }
+                        }, true)
+                ))
+                .category("Chat folders", List.of(
+                        new TGKitSwitchPreference("Hide all chats folders", null, new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.hideChatFolders.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.hideChatFolders);
+                            }
+                        }, true),
+                        new TGKitSwitchPreference("Hide folders when forwarding", null, new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.hideFoldersWhenForwarding.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.hideFoldersWhenForwarding);
+                            }
+                        }, true)
+                ))
+                .category("Notifications", List.of(
+                        new TGKitSwitchPreference("Accent color as notification color", null, new TGKitSwitchPreference.TGSPContract() {
+                            @Override
+                            public boolean getPreferenceValue() {
+                                return OctoConfig.accentColorAsNotificationColor.getValue();
+                            }
+
+                            @Override
+                            public void toggleValue() {
+                                OctoConfig.toggleBooleanSetting(OctoConfig.accentColorAsNotificationColor);
+                            }
+                        }, true)
                 ))
                 .build();
     }
