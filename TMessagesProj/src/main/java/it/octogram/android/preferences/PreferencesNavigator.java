@@ -21,4 +21,8 @@ public class PreferencesNavigator {
         return new TGKitSettingsFragment(new OctoGeneralSettings(), context);
     }
 
+    public static TGKitSettingsFragment navigateToTranslatorPreferences(Context context) {
+        return new TGKitSettingsFragment(new OctoTranslatorPreferences(), context);
+    }
+
 }
