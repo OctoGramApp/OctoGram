@@ -28,7 +28,7 @@ public class OctoMainPreferences implements BasePreferencesEntry {
     public OctoPreferences getPreferences(Context context) {
         String footer = "OctoGram v" + BuildConfig.BUILD_VERSION_STRING + ". Thank you for your interest in the project :)";
         return OctoPreferences.builder("OctoGram Settings")
-                .sticker(context, "UtyaDuck", 31, true, "Welcome to the OctoGram Settings! Here you can customize your experience with the app.")
+                .sticker(context, R.raw.utyan_robot, true, "Welcome to the OctoGram Settings! Here you can customize your experience with the app.")
                 .category("Settings", new ArrayList<>() {
                     {
                         add(new TGKitTextIconRow("General", true, R.drawable.msg_media, bf1 -> {

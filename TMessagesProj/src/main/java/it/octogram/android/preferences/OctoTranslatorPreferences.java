@@ -10,6 +10,8 @@ package it.octogram.android.preferences;
 
 import android.content.Context;
 
+import org.telegram.messenger.R;
+
 import java.util.List;
 
 import it.octogram.android.preferences.tgkit.preference.OctoPreferences;
@@ -19,7 +21,7 @@ public class OctoTranslatorPreferences implements BasePreferencesEntry {
     @Override
     public OctoPreferences getPreferences(Context context) {
         return OctoPreferences.builder("Translator Settings")
-                .sticker(context, "GoldUtya", 29, true, "Welcome to the OctoGram Translator Settings! Here you can customize your translating experience.")
+                .sticker(context, R.raw.utyan_translator, true, "Welcome to the OctoGram Translator Settings! Here you can customize your translating experience.")
                 .category("Translate messages", List.of(
 
                 ))

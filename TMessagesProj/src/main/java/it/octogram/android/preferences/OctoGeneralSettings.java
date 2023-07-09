@@ -11,6 +11,8 @@ package it.octogram.android.preferences;
 import android.content.Context;
 import android.util.Pair;
 
+import org.telegram.messenger.R;
+
 import java.util.List;
 
 import it.octogram.android.OctoConfig;
@@ -24,7 +26,7 @@ public class OctoGeneralSettings implements BasePreferencesEntry {
     @Override
     public OctoPreferences getPreferences(Context context) {
         return OctoPreferences.builder("General Settings")
-                .sticker(context, "UtyaDuck", 32, true, "Here you can customize your general experience with the app, as well as privacy.")
+                .sticker(context, R.raw.utyan_umbrella, true, "Here you can customize your general experience with the app, as well as privacy.")
                 .category("Privacy", List.of(
                         new TGKitSwitchPreference("Hide phone number", "Hide your phone number from the settings and side menu", new TGKitSwitchPreference.TGSPContract() {
                             @Override

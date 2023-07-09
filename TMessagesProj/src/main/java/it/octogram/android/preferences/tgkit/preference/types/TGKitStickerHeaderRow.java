@@ -2,21 +2,19 @@ package it.octogram.android.preferences.tgkit.preference.types;
 
 import androidx.annotation.Nullable;
 
-import org.telegram.ui.Components.StickerImageView;
-
 import it.octogram.android.preferences.tgkit.preference.TGKitPreference;
 
 public class TGKitStickerHeaderRow extends TGKitPreference {
 
-    private final StickerImageView stickerView;
+    private final Object stickerView;
     private final String description;
 
-    public TGKitStickerHeaderRow(StickerImageView stickerView, @Nullable String description) {
+    public TGKitStickerHeaderRow(Object stickerView, @Nullable String description) {
         this.stickerView = stickerView;
         this.description = description;
     }
 
-    public StickerImageView getStickerView() {
+    public Object getStickerView() {
         return stickerView;
     }
 

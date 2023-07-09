@@ -265,7 +265,7 @@ public class TGKitSettingsFragment extends BaseFragment {
 
                     linearLayout.removeAllViews();
 
-                    linearLayout.addView(pref.getStickerView(), LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 20, 0, 0));
+                    linearLayout.addView((View) pref.getStickerView(), LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 20, 0, 0));
 
                     if (pref.getDescription() != null) {
                         TextView textView = new TextView(mContext);
