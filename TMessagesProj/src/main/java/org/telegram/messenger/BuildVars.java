@@ -17,8 +17,6 @@ import com.android.billingclient.api.ProductDetails;
 
 import java.util.Objects;
 
-import it.octogram.android.StoreUtils;
-
 public class BuildVars {
 
     public static boolean DEBUG_VERSION = BuildConfig.DEBUG_PRIVATE_VERSION;
