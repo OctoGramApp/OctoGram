@@ -38,6 +38,7 @@ public class OctoMainPreferences implements BasePreferencesEntry {
                             bf1.presentFragment(PreferencesNavigator.navigateToTranslatorPreferences(context));
                         }));
                         add(new TGKitTextIconRow("Appearance", true, R.drawable.msg_colors, null));
+                        add(new TGKitTextIconRow("Camera", true, R.drawable.msg_camera, null));
                         add(new TGKitTextIconRow("Updates", true, R.drawable.msg_photo_rotate, null));
                         add(new TGKitTextIconRow("Experiments", true, R.drawable.msg_colors, null));
                     }
