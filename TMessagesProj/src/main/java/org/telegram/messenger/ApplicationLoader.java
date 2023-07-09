@@ -29,10 +29,9 @@ import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
-import androidx.multidex.MultiDex;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.tgnet.ConnectionsManager;
@@ -66,6 +65,7 @@ public class ApplicationLoader extends Application {
     public static volatile boolean mainInterfacePausedStageQueue = true;
     public static boolean canDrawOverlays;
     public static volatile long mainInterfacePausedStageQueueTime;
+    public static boolean hasPlayServices;
 
     private static PushListenerController.IPushListenerServiceProvider pushProvider;
     private static IMapsProvider mapsProvider;
@@ -74,7 +74,6 @@ public class ApplicationLoader extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        MultiDex.install(this);
     }
 
     public static ILocationServiceProvider getLocationServiceProvider() {
@@ -199,7 +198,7 @@ public class ApplicationLoader extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        hasPlayServices = checkPlayServices();
         SharedConfig.loadConfig();
         SharedPrefsHelper.init(applicationContext);
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) { //TODO improve account
@@ -285,7 +284,7 @@ public class ApplicationLoader extends Application {
         if (preferences.contains("pushService")) {
             enabled = preferences.getBoolean("pushService", true);
         } else {
-            enabled = MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("keepAliveService", false);
+            enabled = MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("keepAliveService", !ApplicationLoader.hasPlayServices);
         }
         if (enabled) {
             try {
@@ -325,9 +324,9 @@ public class ApplicationLoader extends Application {
         }, 1000);
     }
 
-    private boolean checkPlayServices() {
+    private static boolean checkPlayServices() {
         try {
-            int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+            int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(ApplicationLoader.applicationContext);
             return resultCode == ConnectionResult.SUCCESS;
         } catch (Exception e) {
             FileLog.e(e);

@@ -1,0 +1,4 @@
+storePassword=OctoGramAndroidPswd
+keyAlias=octogram
+keyPath=/home/octogram/release.jks
+keyPassword=OctoGramAndroidPswd
