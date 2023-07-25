@@ -81,8 +81,11 @@ public class OctoConfig {
                     ConfigProperty<Boolean> booleanProperty = (ConfigProperty<Boolean>) property;
                     booleanProperty.setValue(PREFS.getBoolean(booleanProperty.getKey(), booleanProperty.getValue()));
                 } else if (property.getValue() instanceof String) {
-                    ConfigProperty<String> booleanProperty = (ConfigProperty<String>) property;
-                    booleanProperty.setValue(PREFS.getString(booleanProperty.getKey(), booleanProperty.getValue()));
+                    ConfigProperty<String> stringProperty = (ConfigProperty<String>) property;
+                    stringProperty.setValue(PREFS.getString(stringProperty.getKey(), stringProperty.getValue()));
+                } else if (property.getValue() instanceof Integer) {
+                    ConfigProperty<Integer> integerProperty = (ConfigProperty<Integer>) property;
+                    integerProperty.setValue(PREFS.getInt(integerProperty.getKey(), integerProperty.getValue()));
                 }
             }
         }
@@ -101,6 +104,14 @@ public class OctoConfig {
 
         SharedPreferences.Editor editor = PREFS.edit();
         editor.putString(property.getKey(), property.getValue());
+        editor.apply();
+    }
+
+    public void updateIntegerSetting(ConfigProperty<Integer> property, int value) {
+        property.setValue(value);
+
+        SharedPreferences.Editor editor = PREFS.edit();
+        editor.putInt(property.getKey(), property.getValue());
         editor.apply();
     }
 
