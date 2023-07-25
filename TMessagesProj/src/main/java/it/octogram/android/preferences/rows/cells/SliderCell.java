@@ -1,11 +1,4 @@
-/*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
- *
- * Copyright OctoGram, 2023.
- */
-package it.octogram.android.preferences.tgkit.cells;
+package it.octogram.android.preferences.rows.cells;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -19,16 +12,19 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.SeekBarView;
 
-import it.octogram.android.preferences.tgkit.preference.types.TGKitSliderPreference;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.rows.impl.SliderRow;
 
-public class GenericSliderCell extends FrameLayout {
+public class SliderCell extends FrameLayout {
+
     private final SeekBarView sizeBar;
     private final TextPaint textPaint;
-    private TGKitSliderPreference.TGSLContract contract;
+
+    private SliderRow sliderRow;
     private int startRadius;
     private int endRadius;
 
-    public GenericSliderCell(Context context) {
+    public SliderCell(Context context) {
         super(context);
 
         setWillNotDraw(false);
@@ -41,7 +37,7 @@ public class GenericSliderCell extends FrameLayout {
         sizeBar.setDelegate(new SeekBarView.SeekBarViewDelegate() {
             @Override
             public void onSeekBarDrag(boolean stop, float progress) {
-                contract.setValue(Math.round(startRadius + (endRadius - startRadius) * progress));
+                OctoConfig.INSTANCE.updateIntegerSetting(sliderRow.getPreferenceValue(), Math.round(startRadius + (endRadius - startRadius) * progress));
                 requestLayout();
             }
 
@@ -53,23 +49,22 @@ public class GenericSliderCell extends FrameLayout {
         addView(sizeBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 38, Gravity.START | Gravity.TOP, 5, 5, 39, 0));
     }
 
-    public GenericSliderCell setContract(TGKitSliderPreference.TGSLContract contract) {
-        this.contract = contract;
-        this.startRadius = contract.getMin();
-        this.endRadius = contract.getMax();
-        return this;
+    public void setSliderRow(SliderRow sliderRow) {
+        this.sliderRow = sliderRow;
+        this.startRadius = sliderRow.getMin();
+        this.endRadius = sliderRow.getMax();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         textPaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteValueText));
-        canvas.drawText(String.valueOf(contract.getPreferenceValue()), getMeasuredWidth() - AndroidUtilities.dp(39), AndroidUtilities.dp(28), textPaint);
+        canvas.drawText("" + sliderRow.getPreferenceValue().getValue(), getMeasuredWidth() - AndroidUtilities.dp(39), AndroidUtilities.dp(28), textPaint);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), heightMeasureSpec);
-        sizeBar.setProgress((contract.getPreferenceValue() - startRadius) / (float) (endRadius - startRadius));
+        sizeBar.setProgress((sliderRow.getPreferenceValue().getValue() - startRadius) / (float) (endRadius - startRadius));
     }
 
     @Override
@@ -77,4 +72,5 @@ public class GenericSliderCell extends FrameLayout {
         super.invalidate();
         sizeBar.invalidate();
     }
+
 }

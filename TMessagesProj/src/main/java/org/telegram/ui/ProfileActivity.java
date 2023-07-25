@@ -239,7 +239,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import it.octogram.android.preferences.PreferencesNavigator;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 
 public class ProfileActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, SharedMediaLayout.SharedMediaPreloaderDelegate, ImageUpdater.ImageUpdaterDelegate, SharedMediaLayout.Delegate {
     private final static int PHONE_OPTION_CALL = 0,
@@ -3325,7 +3326,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == notificationRow) {
                 presentFragment(new NotificationsSettingsActivity());
             } else if (position == octoGramMainSettingsRow) {
-                presentFragment(PreferencesNavigator.navigateToPreferences(getContext()));
+                presentFragment(new PreferencesFragment(getContext(), new OctoMainSettingsUI()));
             }else if (position == privacyRow) {
                 presentFragment(new PrivacySettingsActivity().setCurrentPassword(currentPassword));
             } else if (position == dataRow) {
