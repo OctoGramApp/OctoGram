@@ -123,6 +123,8 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
+import it.octogram.android.OctoConfig;
+
 @TargetApi(18)
 public class InstantCameraView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -138,7 +140,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private ImageView muteImageView;
     private float progress;
     private CameraInfo selectedCamera;
-    private boolean isFrontface = true;
+    private boolean isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
     private volatile boolean cameraReady;
     private AnimatorSet muteAnimation;
     private TLRPC.InputFile file;
@@ -579,7 +581,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             textureOverlayView.setImageResource(R.drawable.icplaceholder);
         }
         cameraReady = false;
-        isFrontface = true;
+        isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
         selectedCamera = null;
         recordedTime = 0;
         progress = 0;

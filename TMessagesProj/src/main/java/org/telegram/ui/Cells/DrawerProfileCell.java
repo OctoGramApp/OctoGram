@@ -8,6 +8,7 @@
 
 package org.telegram.ui.Cells;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -70,6 +72,9 @@ import org.telegram.ui.Components.SnowflakesEffect;
 import org.telegram.ui.ThemeActivity;
 
 import java.util.ArrayList;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
 
 public class DrawerProfileCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -667,6 +672,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     private int lastAccount = -1;
     private TLRPC.User lastUser = null;
     private Drawable premiumStar = null;
+    @SuppressLint("SetTextI18n")
     public void setUser(TLRPC.User user, boolean accounts) {
         int account = UserConfig.selectedAccount;
         if (account != lastAccount) {
@@ -710,7 +716,19 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         }
         animatedStatus.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         status.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
-        phoneTextView.setText(PhoneFormat.getInstance().format("+" + user.phone));
+        if (OctoConfig.INSTANCE.hidePhoneNumber.getValue()) {
+            if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue()) {
+                String phoneNumber = user.phone;
+                String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
+                phoneTextView.setText(String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry)));
+            } else {
+                phoneTextView.setText(LocaleController.getString("MobileHidden", R.string.MobileHidden));
+            }
+        } else {
+            String phoneNumber = user.phone;
+            String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
+            phoneTextView.setText(String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry)));
+        }
         AvatarDrawable avatarDrawable = new AvatarDrawable(user);
         avatarDrawable.setColor(Theme.getColor(Theme.key_avatar_backgroundInProfileBlue));
         avatarImageView.setForUserOrChat(user, avatarDrawable);

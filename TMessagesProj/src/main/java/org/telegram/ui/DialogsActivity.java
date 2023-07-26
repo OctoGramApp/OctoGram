@@ -218,6 +218,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import it.octogram.android.OctoConfig;
+
 public class DialogsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, FloatingDebugProvider {
 
     public final static boolean DISPLAY_SPEEDOMETER_IN_DOWNLOADS_SEARCH = true;
@@ -2112,6 +2114,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                 parentPage.archivePullViewState = ARCHIVE_ITEM_STATE_SHOWED;
                                 if (AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
                                     AndroidUtilities.makeAccessibilityAnnouncement(LocaleController.getString(R.string.AccDescrArchivedChatsShown));
+                                }
+                                if (OctoConfig.INSTANCE.openArchiveOnPull.getValue()) {
+                                    AndroidUtilities.runOnUIThread(() -> {
+                                        Bundle args = new Bundle();
+                                        args.putInt("folderId", 1);
+                                        args.putBoolean("onlySelect", onlySelect);
+                                        DialogsActivity dialogsActivity = new DialogsActivity(args);
+                                        dialogsActivity.setDelegate(delegate);
+                                        presentFragment(dialogsActivity, onlySelect);
+                                    }, 200);
                                 }
                             }
                         }

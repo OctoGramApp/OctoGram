@@ -11,6 +11,7 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 
@@ -39,6 +40,13 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.hideOtherPhoneNumber)
                             .title("Hide other people's phone number")
                             .description("Hide other people's phone number from their profile")
+                            .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.showFakePhoneNumber)
+                            .title("Show fake phone number")
+                            .description("Show a fake phone number in your profile")
+                            .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.promptBeforeCalling)
@@ -69,7 +77,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .description("Allows to swipe up from a channel to jump to next one")
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideGreetingSticker)
+                            .preferenceValue(OctoConfig.INSTANCE.showGreetingSticker)
                             .showIf(OctoConfig.INSTANCE.jumpToNextChannel)
                             .title("Hide greeting sticker")
                             .description("Hides the greeting sticker when messaging a new contact")
@@ -86,7 +94,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideSendAsChannel)
-                            .title("Hide \"Send as channel\"")
+                            .title(LocaleController.getString(R.string.HideSendAsChannel))
                             .description("Hides the send as channel action near the keyboard")
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -140,12 +148,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title("Hide folders when forwarding")
                             .build());
                 })
-                .category("Notifications", category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
-                            .title("Accent color as notification color")
-                            .build());
-                })
+                .category("Notifications", category -> category.row(new SwitchRow.SwitchRowBuilder()
+                        .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
+                        .title("Accent color as notification color")
+                        .build()))
                 .build();
     }
 

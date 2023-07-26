@@ -105,6 +105,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.media.AudioEnhance;
 import it.octogram.android.utils.PermissionsUtils;
 
 public class MediaController implements AudioManager.OnAudioFocusChangeListener, NotificationCenter.NotificationCenterDelegate, SensorEventListener {
@@ -1060,7 +1063,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 }
                 proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
                 PowerManager powerManager = (PowerManager) ApplicationLoader.applicationContext.getSystemService(Context.POWER_SERVICE);
-                proximityWakeLock = powerManager.newWakeLock(0x00000020, "telegram:proximity_lock");
+                proximityWakeLock = OctoConfig.INSTANCE.disableProximityEvents.getValue() ? null:powerManager.newWakeLock(0x00000020, "telegram:proximity_lock");
             } catch (Exception e) {
                 FileLog.e(e);
             }
@@ -1583,7 +1586,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
     }
 
     private boolean isNearToSensor(float value) {
-        return value < 5.0f && value != proximitySensor.getMaximumRange();
+        return !OctoConfig.INSTANCE.disableProximityEvents.getValue() && value < 5.0f && value != proximitySensor.getMaximumRange();
     }
 
     public boolean isRecordingOrListeningByProximity() {
@@ -3807,6 +3810,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 recordReplyingTopMsg = replyToTopMsg;
                 recordReplyingStory = replyStory;
                 fileBuffer.rewind();
+                AudioEnhance.initVoiceEnhancements(audioRecorder);
 
                 audioRecorder.startRecording();
             } catch (Exception e) {
@@ -3817,6 +3821,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 recordingAudioFile.delete();
                 recordingAudioFile = null;
                 try {
+                    AudioEnhance.releaseVoiceEnhancements();
                     audioRecorder.release();
                     audioRecorder = null;
                 } catch (Exception e2) {
@@ -3933,6 +3938,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             requestAudioFocus(false);
         }
         try {
+            AudioEnhance.releaseVoiceEnhancements();
             if (audioRecorder != null) {
                 audioRecorder.release();
                 audioRecorder = null;

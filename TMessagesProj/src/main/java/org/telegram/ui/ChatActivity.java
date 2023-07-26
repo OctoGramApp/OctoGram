@@ -324,6 +324,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.PermissionsUtils;
 
 @SuppressWarnings("unchecked")
@@ -5043,7 +5044,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             imageReceiver.setAlpha(1f);
                         }
                         imageReceiver.setVisible(true, false);
-                        imageReceiver.draw(canvas);
+                        cell.drawStatusWithImage(canvas, imageReceiver, AndroidUtilities.dp(7));
                         canvas.restore();
 
                         if (!replaceAnimation && child.getTranslationY() != 0) {
@@ -5341,7 +5342,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (!foundTopView) {
                     scrolled = super.scrollVerticallyBy(dy, recycler, state);
                 }
-                if (dy > 0 && scrolled == 0 && ChatObject.isChannel(currentChat) && !currentChat.megagroup && chatListView.getScrollState() == RecyclerView.SCROLL_STATE_DRAGGING && !chatListView.isFastScrollAnimationRunning() && !chatListView.isMultiselect() && reportType < 0) {
+                if (OctoConfig.INSTANCE.jumpToNextChannel.getValue() && !inPreviewMode && dy > 0 && scrolled == 0 && ChatObject.isChannel(currentChat) && !currentChat.megagroup && chatListView.getScrollState() == RecyclerView.SCROLL_STATE_DRAGGING && !chatListView.isFastScrollAnimationRunning() && !chatListView.isMultiselect() && reportType < 0) {
                     if (pullingDownOffset == 0 && pullingDownDrawable != null) {
                         pullingDownDrawable.updateDialog();
                     }
@@ -5458,6 +5459,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         wasManualScroll = true;
                         scrollingChatListView = true;
                     } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                        if (OctoConfig.INSTANCE.hideKeyboardOnScroll.getValue()) {
+                            AndroidUtilities.hideKeyboard(getParentActivity().getCurrentFocus());
+                        }
                         pollHintCell = null;
                         wasManualScroll = true;
                         scrollingFloatingDate = true;
@@ -25019,7 +25023,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         contentView.addView(emptyViewContainer, 1, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
 
         int distance = getArguments().getInt("nearby_distance", -1);
-        if ((distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked) {
+        if (OctoConfig.INSTANCE.showGreetingSticker.getValue() && (distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked) {
             greetingsViewContainer = new ChatGreetingsView(getContext(), currentUser, distance, currentAccount, preloadedGreetingsSticker, themeDelegate);
             greetingsViewContainer.setListener((sticker) -> {
                 animatingDocuments.put(sticker, 0);

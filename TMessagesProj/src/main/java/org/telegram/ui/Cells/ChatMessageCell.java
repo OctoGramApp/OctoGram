@@ -181,6 +181,8 @@ import java.util.Locale;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.OctoConfig;
+
 public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate, ImageReceiver.ImageReceiverDelegate, DownloadController.FileDownloadProgressListener, TextSelectionHelper.SelectableView, NotificationCenter.NotificationCenterDelegate {
     private final static int TIME_APPEAR_MS = 200;
     private final static int UPLOADING_ALLOWABLE_ERROR = 1024 * 1024;
@@ -1408,6 +1410,30 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (roundVideoPlayingDrawable != null) {
             roundVideoPlayingDrawable.setResourcesProvider(resourcesProvider);
         }
+    }
+
+    public void drawStatusWithImage(Canvas canvas, ImageReceiver imageReceiver, int radius) {
+        int x = Math.round(imageReceiver.getImageX2());
+        int y = Math.round(imageReceiver.getImageY2());
+        int circleRadius = radius - AndroidUtilities.dp(2.25f);
+        int spaceLeft = radius - circleRadius;
+        int xCenterRegion = x - spaceLeft;
+        int yCenterRegion = y - spaceLeft;
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Theme.getColor(Theme.key_chats_onlineCircle));
+        String formatUserStatus = currentUser != null ? LocaleController.formatUserStatus(this.currentAccount, currentUser) : "";
+        if (!OctoConfig.INSTANCE.showOnlineStatus.getValue() || currentUser == null || currentUser.bot || !formatUserStatus.equals(LocaleController.getString("Online", R.string.Online))) {
+            imageReceiver.draw(canvas);
+            return;
+        }
+        canvas.save();
+        Path p = new Path();
+        p.addCircle(x - radius, y - radius, radius, Path.Direction.CW);
+        p.toggleInverseFillType();
+        canvas.clipPath(p);
+        imageReceiver.draw(canvas);
+        canvas.restore();
+        canvas.drawCircle(xCenterRegion - circleRadius, yCenterRegion - circleRadius, circleRadius, paint);
     }
 
     private void createPollUI() {
@@ -15960,6 +15986,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     public void drawTime(Canvas canvas, float alpha, boolean fromParent) {
         if (!drawFromPinchToZoom && delegate != null && delegate.getPinchToZoomHelper() != null && delegate.getPinchToZoomHelper().isInOverlayModeFor(this) && shouldDrawTimeOnMedia()) {
+            return;
+        }
+        if (OctoConfig.INSTANCE.hideSentTimeOnStickers.getValue() && currentMessageObject.isAnyKindOfSticker() && !isDrawSelectionBackground()) {
             return;
         }
         for (int i = 0; i < 2; i++) {

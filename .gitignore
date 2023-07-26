@@ -17,3 +17,4 @@ signing.properties
 .DS_Store
 google-services.json
 agconnect-services.json
+output-metadata.json

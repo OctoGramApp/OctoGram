@@ -37,46 +37,39 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                 .sticker(context, R.raw.utyan_robot, true, "Welcome to the OctoGram Settings! Here you can customize your experience with the app.")
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                fragment.presentFragment(new PreferencesFragment(context, new OctoGeneralSettingsUI()));
-                            })
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show();
-                            })
+                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
                             .icon(R.drawable.msg_translate)
                             .title(LocaleController.formatString("Translator", R.string.Translator))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show();
-                            })
-                            .icon(R.drawable.msg_colors)
+                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .icon(R.drawable.settings_appearance)
                             .title(LocaleController.formatString("Appearance", R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show();
-                            })
+                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
                             .icon(R.drawable.msg_camera)
                             .title(LocaleController.formatString("ChatCamera", R.string.ChatCamera))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show();
-                            })
-                            .icon(R.drawable.msg_photo_rotate)
+                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .icon(R.drawable.outline_science_white)
+                            .title(LocaleController.formatString("Experimental", R.string.Updates))
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .icon(R.drawable.round_update_white_28)
                             .title(LocaleController.formatString("Updates", R.string.Updates))
                             .build());
                 })
                 .category(LocaleController.formatString("OctoMainSettingsInfoCategory", R.string.OctoMainSettingsInfoCategory), category -> {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> {
-                                MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1);
-                            })
+                            .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
                             .icon(R.drawable.msg_channel)
                             .title(LocaleController.formatString("OfficialChannel", R.string.OfficialChannel))
                             .description(LocaleController.formatString("OfficialChannel_Desc", R.string.OfficialChannel_Desc))
@@ -86,9 +79,9 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/OctoGramApp/OctoGram"));
                                 fragment.getParentActivity().startActivity(browserIntent);
                             })
-                            .icon(R.drawable.msg_warning)
-                            .title(LocaleController.formatString("ContributeOcto", R.string.ContributeOcto))
-                            .description(LocaleController.formatString("ContributeOcto_Desc", R.string.ContributeOcto_Desc))
+                            .icon(R.drawable.outline_source_white_28)
+                            .title(LocaleController.formatString("SourceCode", R.string.SourceCode))
+                            .description(String.format("%s commit, %s", BuildConfig.GIT_COMMIT_HASH, LocaleController.formatDateAudio(BuildConfig.GIT_COMMIT_DATE, false)))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> {

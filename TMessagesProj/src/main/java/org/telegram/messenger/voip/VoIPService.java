@@ -146,6 +146,8 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import it.octogram.android.OctoConfig;
+
 @SuppressLint("NewApi")
 public class VoIPService extends Service implements SensorEventListener, AudioManager.OnAudioFocusChangeListener, VoIPController.ConnectionStateListener, NotificationCenter.NotificationCenterDelegate {
 
@@ -3761,7 +3763,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
 		Sensor proximity = sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 		try {
-			if (proximity != null) {
+			if (!OctoConfig.INSTANCE.disableProximityEvents.getValue() && proximity != null) {
 				proximityWakelock = ((PowerManager) getSystemService(Context.POWER_SERVICE)).newWakeLock(PROXIMITY_SCREEN_OFF_WAKE_LOCK, "telegram-voip-prx");
 				sm.registerListener(this, proximity, SensorManager.SENSOR_DELAY_NORMAL);
 			}
