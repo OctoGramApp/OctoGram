@@ -721,6 +721,14 @@ public class AndroidUtilities {
         }
     }
 
+    public static String capitalize(String name){
+        String capitalizeString = "";
+        if(!name.trim().equals("")){
+            capitalizeString = name.substring(0,1).toUpperCase() + name.substring(1);
+        }
+        return capitalizeString;
+    }
+
     private static class LinkSpec {
         String url;
         int start;
