@@ -8,7 +8,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.Cells.TextDetailSettingsCell;
+import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AlertsCreator;
 
 import java.util.ArrayList;
@@ -20,7 +20,6 @@ import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
 import it.octogram.android.preferences.rows.Clickable;
-import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
 import kotlin.Triple;
 
 public class ListRow extends BaseRow implements Clickable {
@@ -78,8 +77,9 @@ public class ListRow extends BaseRow implements Clickable {
                 (dialogInterface, sel) -> {
                     int id = idArray.get(sel);
                     OctoConfig.INSTANCE.updateStringSetting(currentValue, options.get(id).second);
-                    if (view instanceof TextDetailSettingsCell)
-                        ((TextDetailSettingsCell) view).setTextAndValue(getTitle(), currentValue.getValue(), hasDivider());
+                    if (view instanceof TextSettingsCell) {
+                        ((TextSettingsCell) view).setTextAndValue(getTitle(), currentValue.getValue(), hasDivider());
+                    }
                 }
         );
 

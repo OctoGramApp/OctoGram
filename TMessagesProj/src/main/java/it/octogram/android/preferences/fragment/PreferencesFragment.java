@@ -39,6 +39,7 @@ import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
+import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
@@ -206,7 +207,6 @@ public class PreferencesFragment extends BaseFragment {
                     view = new TextCheckCell(context);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
-                case LIST:
                 case TEXT_DETAIL:
                     view = new TextDetailSettingsCell(context);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
@@ -217,6 +217,10 @@ public class PreferencesFragment extends BaseFragment {
                     break;
                 case SLIDER:
                     view = new SliderCell(context);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
+                case LIST:
+                    view = new TextSettingsCell(context);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case FOOTER:
@@ -282,10 +286,9 @@ public class PreferencesFragment extends BaseFragment {
                     ((SliderCell) holder.itemView).setSliderRow((SliderRow) positions.get(position));
                     break;
                 case LIST:
-                    TextDetailSettingsCell detailSettingsCell = (TextDetailSettingsCell) holder.itemView;
+                    TextSettingsCell listCell = (TextSettingsCell) holder.itemView;
                     ListRow listRow = (ListRow) positions.get(position);
-                    detailSettingsCell.setMultilineDetail(true);
-                    detailSettingsCell.setTextAndValue(listRow.getTitle(), listRow.getCurrentValue().getValue(), listRow.hasDivider());
+                    listCell.setTextAndValue(listRow.getTitle(), listRow.getCurrentValue().getValue(), true, listRow.hasDivider());
                     break;
                 case FOOTER:
                     ((TextInfoPrivacyCell) holder.itemView).setText(positions.get(position).getTitle());
