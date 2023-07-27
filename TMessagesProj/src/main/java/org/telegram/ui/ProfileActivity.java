@@ -5176,9 +5176,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             popupWindow.showAtLocation(getFragmentView(), 0, (int) px, (int) py);
             popupWindow.dimBehind();
             return true;
-        } else if (position == registrationDataRow && (getUserInfo() != null)) {
+        } else if (position == registrationDataRow && (userId != 0)) {
             try {
-                String date = RegistrationDateController.getRegistrationDate(getUserInfo().id);
+                String date = RegistrationDateController.getRegistrationDate(userId);
                 AndroidUtilities.addToClipboard(date);
                 BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
             } catch (Exception e) {
@@ -9298,7 +9298,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                         detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), isTopic);
                     } else if (position == registrationDataRow) {
-                        if (!isChat()) {
+                        if (!isChat() && userId != 0) {
                             detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId), LocaleController.getString(R.string.RegistrationDate), true);
                             break;
                         }
