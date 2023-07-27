@@ -245,6 +245,7 @@ import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.RegistrationDateController;
 
 public class ProfileActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, SharedMediaLayout.SharedMediaPreloaderDelegate, ImageUpdater.ImageUpdaterDelegate, SharedMediaLayout.Delegate {
     private final static int PHONE_OPTION_CALL = 0,
@@ -501,6 +502,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int userInfoRow;
     private int channelInfoRow;
     private int usernameRow;
+    private int registrationDataRow;
     private int notificationsDividerRow;
     private int notificationsRow;
     private int notificationsSimpleRow;
@@ -5144,6 +5146,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             popupWindow.showAtLocation(getFragmentView(), 0, (int) px, (int) py);
             popupWindow.dimBehind();
             return true;
+        } else if (position == registrationDataRow && (getUserInfo() != null)) {
+            try {
+                String date = RegistrationDateController.getRegistrationDate(getUserInfo().id);
+                AndroidUtilities.addToClipboard(date);
+                BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
         } else if (position == channelInfoRow || position == userInfoRow || position == locationRow || position == bioRow) {
             if (position == bioRow && (userInfo == null || TextUtils.isEmpty(userInfo.about))) {
                 return false;
@@ -7132,6 +7142,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         locationRow = -1;
         channelInfoRow = -1;
         usernameRow = -1;
+        registrationDataRow = -1;
         settingsTimerRow = -1;
         settingsKeyRow = -1;
         notificationsDividerRow = -1;
@@ -7190,6 +7201,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 numberRow = rowCount++;
                 setUsernameRow = rowCount++;
                 bioRow = rowCount++;
+
+                if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat()){
+                    // Profile Settings
+                    registrationDataRow = rowCount++;
+                }
 
                 octoGramShadowRow = rowCount++;
                 octoGramSettingsRow = rowCount++;
@@ -7258,7 +7274,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (user != null && username != null) {
                     usernameRow = rowCount++;
                 }
-                if (phoneRow != -1 || userInfoRow != -1 || usernameRow != -1) {
+
+                if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat()){
+                    // General User Info
+                    registrationDataRow = rowCount++;
+                }
+
+                if (phoneRow != -1 || userInfoRow != -1 || usernameRow != -1 || registrationDataRow != -1) {
                     notificationsDividerRow = rowCount++;
                 }
                 if (userId != getUserConfig().getClientUserId()) {
@@ -9229,6 +9251,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             usernames = new ArrayList<>();
                         }
                         detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), isTopic);
+                    } else if (position == registrationDataRow) {
+                        if (!isChat()) {
+                            detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId), LocaleController.getString(R.string.RegistrationDate), true);
+                            break;
+                        }
                     } else if (position == locationRow) {
                         if (chatInfo != null && chatInfo.location instanceof TLRPC.TL_channelLocation) {
                             TLRPC.TL_channelLocation location = (TLRPC.TL_channelLocation) chatInfo.location;
@@ -9658,7 +9685,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         position == faqRow || position == policyRow || position == sendLogsRow || position == sendLastLogsRow ||
                         position == clearLogsRow || position == switchBackendRow || position == setAvatarRow ||
                         position == addToGroupButtonRow || position == premiumRow || position == liteModeRow ||
-                        position == octoGramMainSettingsRow;
+                        position == octoGramMainSettingsRow || position == registrationDataRow;
             }
             if (holder.itemView instanceof UserCell) {
                 UserCell userCell = (UserCell) holder.itemView;
@@ -9686,7 +9713,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (position == infoHeaderRow || position == membersHeaderRow || position == settingsSectionRow2 ||
                     position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == octoGramSettingsRow) {
                 return VIEW_TYPE_HEADER;
-            } else if (position == phoneRow || position == locationRow || position == numberRow) {
+            } else if (position == phoneRow || position == locationRow || position == numberRow || position == registrationDataRow) {
                 return VIEW_TYPE_TEXT_DETAIL;
             } else if (position == usernameRow || position == setUsernameRow) {
                 return VIEW_TYPE_TEXT_DETAIL_MULTILINE;
@@ -10912,6 +10939,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             put(++pointer, userInfoRow, sparseIntArray);
             put(++pointer, channelInfoRow, sparseIntArray);
             put(++pointer, usernameRow, sparseIntArray);
+            put(++pointer, registrationDataRow, sparseIntArray);
             put(++pointer, notificationsDividerRow, sparseIntArray);
             put(++pointer, reportDividerRow, sparseIntArray);
             put(++pointer, notificationsRow, sparseIntArray);
