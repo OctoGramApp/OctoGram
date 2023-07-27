@@ -21,7 +21,6 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.ListRow;
-import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
@@ -45,7 +44,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showFakePhoneNumber)
                             .title("Show fake phone number")
-                            .description("Show a fake phone number in your profile")
+                            .description("Show a fake phone number in your profile. " +
+                                    "This fake phone number is only showed to yourself! If you disable phone privacy, people will see your real phone number.")
                             .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
