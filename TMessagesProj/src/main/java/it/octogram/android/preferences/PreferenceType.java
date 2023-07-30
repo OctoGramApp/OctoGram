@@ -12,6 +12,7 @@ public enum PreferenceType {
     TEXT_ICON(5, true),
     SLIDER(6, true),
     LIST(7, true),
+    SLIDER_CHOOSE(8, true),
     FOOTER(14, true),
     STICKER_HEADER(15, false),
 

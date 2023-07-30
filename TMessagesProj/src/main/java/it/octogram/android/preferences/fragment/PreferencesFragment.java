@@ -43,9 +43,11 @@ import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.SlideChooseView;
 
 import java.util.List;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferenceType;
@@ -53,6 +55,7 @@ import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
 import it.octogram.android.preferences.rows.cells.SliderCell;
 import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
@@ -223,6 +226,10 @@ public class PreferencesFragment extends BaseFragment {
                     view = new TextSettingsCell(context);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
+                case SLIDER_CHOOSE:
+                    view = new SlideChooseView(context);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
                 case FOOTER:
                     TextInfoPrivacyCell cell = new TextInfoPrivacyCell(context, 10);
                     cell.getTextView().setGravity(Gravity.CENTER_HORIZONTAL);
@@ -289,6 +296,15 @@ public class PreferencesFragment extends BaseFragment {
                     TextSettingsCell listCell = (TextSettingsCell) holder.itemView;
                     ListRow listRow = (ListRow) positions.get(position);
                     listCell.setTextAndValue(listRow.getTitle(), listRow.getCurrentValue().getValue(), true, listRow.hasDivider());
+                    break;
+                case SLIDER_CHOOSE:
+                    SlideChooseView slideChooseView = (SlideChooseView) holder.itemView;
+                    SliderChooseRow sliderRow = (SliderChooseRow) positions.get(position);
+                    slideChooseView.setCallback(index -> {
+                        int id = sliderRow.getIds().get(index);
+                        OctoConfig.INSTANCE.updateStringSetting(sliderRow.getCurrentValue(), sliderRow.getOptions().get(id).second);
+                    });
+                    slideChooseView.setOptions(sliderRow.getIntValue(), sliderRow.getValues());
                     break;
                 case FOOTER:
                     ((TextInfoPrivacyCell) holder.itemView).setText(positions.get(position).getTitle());
