@@ -8,7 +8,7 @@
 
 package it.octogram.android.preferences.rows;
 
-import it.octogram.android.config.ConfigProperty;
+import it.octogram.android.ConfigProperty;
 
 public abstract class BaseRowBuilder<T> {
 

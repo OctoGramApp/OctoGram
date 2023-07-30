@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023.
  */
 
-package it.octogram.android.config;
+package it.octogram.android;
 
 public class ConfigProperty<T> {
 
@@ -26,7 +26,7 @@ public class ConfigProperty<T> {
         return value;
     }
 
-    public void setValue(T newValue) {
+    protected void setValue(T newValue) {
         value = newValue;
     }
 }

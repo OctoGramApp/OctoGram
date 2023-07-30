@@ -14,8 +14,6 @@ import org.telegram.messenger.ApplicationLoader;
 
 import java.util.List;
 
-import it.octogram.android.config.ConfigProperty;
-
 
 /*
  * Super big TODO list:

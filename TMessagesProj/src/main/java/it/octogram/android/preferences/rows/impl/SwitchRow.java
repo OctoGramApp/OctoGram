@@ -9,7 +9,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextCheckCell;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.config.ConfigProperty;
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;

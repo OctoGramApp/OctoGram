@@ -1,9 +1,8 @@
 package it.octogram.android.preferences.rows.impl;
 
-import it.octogram.android.config.ConfigProperty;
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
-import it.octogram.android.preferences.rows.BaseRowBuilder;
 import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
 
 public class SliderRow extends BaseRow {

@@ -2,7 +2,7 @@ package it.octogram.android.preferences.rows;
 
 import androidx.annotation.Nullable;
 
-import it.octogram.android.config.ConfigProperty;
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.preferences.PreferenceType;
 
 public abstract class BaseRow {
