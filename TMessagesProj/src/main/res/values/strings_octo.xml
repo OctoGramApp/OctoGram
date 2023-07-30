@@ -12,6 +12,7 @@
     <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
     <string name="Translator">Translator</string>
     <string name="Updates">Updates</string>
+    <string name="Experiments">Experiments</string>
     <string name="FeatureCurrentlyUnavailable">This feature is currently unavailable. :(</string>
 
     <string name="OctoMainSettingsInfoCategory">Info</string>

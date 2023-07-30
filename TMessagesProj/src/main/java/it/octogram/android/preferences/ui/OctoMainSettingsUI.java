@@ -59,7 +59,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
                             .icon(R.drawable.outline_science_white)
-                            .title(LocaleController.formatString("Experimental", R.string.Updates))
+                            .title(LocaleController.formatString("Experiments", R.string.Experiments))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
