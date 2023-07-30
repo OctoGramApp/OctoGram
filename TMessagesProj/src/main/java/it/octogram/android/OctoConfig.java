@@ -70,7 +70,7 @@ public class OctoConfig {
             showGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus, hideCustomEmojis,
             activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera, disableCameraPreview,
             hideSentTimeOnStickers, hideChatFolders, hideFoldersWhenForwarding, accentColorAsNotificationColor, showFakePhoneNumber,
-            voiceAgc, openArchiveOnPull, cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter
+            voiceAgc, openArchiveOnPull, cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution
     );
 
 
