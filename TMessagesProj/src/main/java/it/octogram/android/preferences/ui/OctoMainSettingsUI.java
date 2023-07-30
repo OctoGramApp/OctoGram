@@ -52,7 +52,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("Appearance", R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoCameraSettingsUI())))
                             .icon(R.drawable.msg_camera)
                             .title(LocaleController.formatString("ChatCamera", R.string.ChatCamera))
                             .build());
