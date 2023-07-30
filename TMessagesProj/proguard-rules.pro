@@ -131,6 +131,8 @@
 -dontwarn org.jetbrains.annotations.Nullable
 -dontwarn androidx.camera.extensions.**
 -dontwarn javax.script.**
+-dontwarn com.google.j2objc.annotations.RetainedWith
+-dontwarn com.google.j2objc.annotations.Weak
 
 -repackageclasses
 -allowaccessmodification
