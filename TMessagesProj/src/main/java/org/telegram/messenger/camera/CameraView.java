@@ -96,8 +96,10 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
+import it.octogram.android.BaseCameraView;
+
 @SuppressLint("NewApi")
-public class CameraView extends FrameLayout implements TextureView.SurfaceTextureListener, CameraController.ICameraView {
+public class CameraView extends BaseCameraView implements TextureView.SurfaceTextureListener, CameraController.ICameraView {
 
     public boolean WRITE_TO_FILE_IN_BACKGROUND = true;
 
