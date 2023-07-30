@@ -69,7 +69,10 @@
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
 
-    <string name="OctoCameraSettings">OctoCameraSettings</string>
+    <string name="RestrictionReason">Restriction Reason</string>
+    <string name="RegistrationDate">Registration Date</string>
+    <string name="OctoGramVersion">OctoGram %1$s\nBased on Telegram %2$s</string>
+    <string name="OctoCameraSettings">OctoCamera Settings</string>
     <string name="OctoCameraSettingsHeader">Here you can customize your camera experience with the app</string>
     <string name="UseCameraX">Use CameraX</string>
     <string name="UseCameraX_Desc">Use CameraX instead of the legacy API</string>
@@ -331,7 +334,6 @@
     <string name="FoldersTypeIcons">Icons</string>
     <string name="FoldersTypeIconsTitles">Icons with Titles</string>
     <string name="ChooseFolderIcon">Choose an Icon</string>
-    <string name="OctoGramVersion">OctoGram %1$s\nBased on Telegram %2$s</string>
     <string name="MutualContact">Mutual Contact</string>
     <string name="MutualContactDesc">**%s** and you have added each other in the contacts list.</string>
     <string name="JumpToBeginning">Jump to Beginning</string>
@@ -351,7 +353,6 @@
     <string name="UserRestrictionsNoSendGifs">no GIFs</string>
     <string name="UserRestrictionsNoSendGames">no games</string>
     <string name="UserRestrictionsNoSendInlineBots">no inline bots</string>
-    <string name="RestrictionReason">Restriction Reason</string>
     <string name="AppLinkNotVerifiedTitle">App links not verified</string>
     <string name="AppLinkNotVerifiedMessage">For Android 12 and newer, you need to manually add link to verified links in order to open t.me links in OctoGram.</string>
     <string name="SendWithoutMarkdown">Send without markdown</string>
@@ -412,7 +413,6 @@
     <string name="ZeroShutterLagDesc">Minimize latency when taking photos by capturing multiple frames quickly before and after the shutter button is pressed</string>
     <string name="BrokenBackupDetail">Unable to export your backup. Please contact us via our <![CDATA[<a href="https://t.me/%1$s">Support Group</a>]]>.</string>
     <string name="TranslateInfo">Manage your translation and auto-translation preferences in OctoGram settings.</string>
-    <string name="RegistrationDate">Registration Date</string>
     <string name="ShowRegistrationDate">Show Registration Date in Profiles</string>
     <string name="AlternativeNav">Alternative Navigation</string>
     <string name="AlternativeNavDesc">Activate old Telegram animations while navigating the user interface.</string>
