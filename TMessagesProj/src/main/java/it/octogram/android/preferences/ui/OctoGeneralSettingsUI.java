@@ -27,130 +27,129 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
 
     @Override
     public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
-        return OctoPreferences.builder("General Settings")
-                .sticker(context, R.raw.utyan_umbrella, true, "Here you can customize your general experience with the app, as well as privacy.")
-                .category("Privacy", category -> {
+        return OctoPreferences.builder(LocaleController.formatString("OctoGeneralSettings", R.string.OctoGeneralSettings))
+                .sticker(context, R.raw.utyan_umbrella, true, LocaleController.formatString("OctoGeneralSettingsHeader", R.string.OctoGeneralSettingsHeader))
+                .category(LocaleController.formatString("PrivacyHeader", R.string.PrivacyHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hidePhoneNumber)
-                            .title("Hide phone number")
-                            .description("Hide your phone number from other users")
+                            .title(LocaleController.formatString("HidePhoneNumber", R.string.HidePhoneNumber))
+                            .description(LocaleController.formatString("HidePhoneNumber_Desc", R.string.HidePhoneNumber_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideOtherPhoneNumber)
-                            .title("Hide other people's phone number")
-                            .description("Hide other people's phone number from their profile")
+                            .title(LocaleController.formatString("HideOtherPhoneNumber", R.string.HideOtherPhoneNumber))
+                            .description(LocaleController.formatString("HideOtherPhoneNumber_Desc", R.string.HideOtherPhoneNumber_Desc))
                             .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showFakePhoneNumber)
-                            .title("Show fake phone number")
-                            .description("Show a fake phone number in your profile. " +
-                                    "This fake phone number is only showed to yourself! If you disable phone privacy, people will see your real phone number.")
+                            .title(LocaleController.formatString("ShowFakePhoneNumber", R.string.ShowFakePhoneNumber))
+                            .description(LocaleController.formatString("ShowFakePhoneNumber_Desc", R.string.ShowFakePhoneNumber_Desc))
                             .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.promptBeforeCalling)
-                            .title("Prompt before calling")
-                            .description("Show a prompt to avoid accidental calls")
+                            .title(LocaleController.formatString("PromptBeforeCalling", R.string.PromptBeforeCalling))
+                            .description(LocaleController.formatString("PromptBeforeCalling_Desc", R.string.PromptBeforeCalling_Desc))
                             .build());
                 })
-                .category("Datacenter and User ID", category -> {
+                .category(LocaleController.formatString("DcIdHeader", R.string.DcIdHeader), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
                                     new Pair<>(0, "OctoGram"),
                                     new Pair<>(1, "Telegram"),
-                                    new Pair<>(2, "None")
+                                    new Pair<>(2, LocaleController.formatString("Nothing", R.string.Nothing))
                             ))
-                            .title("Style")
+                            .title(LocaleController.formatString("Style", R.string.Style))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
-                            .title("Show registration date")
-                            .description("Show user's registration date in profiles. This is achieved thru guessing, so it may show inaccurate results")
+                            .title(LocaleController.formatString("ShowRegistrationDate", R.string.ShowRegistrationDate))
+                            .description(LocaleController.formatString("ShowRegistrationDate_Desc", R.string.ShowRegistrationDate_Desc))
                             .build());
                 })
-                .category("Chat", category -> {
+                .category(LocaleController.formatString("Chats", R.string.Chats), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.jumpToNextChannel)
-                            .title("Jump to next channel")
-                            .description("Allows to swipe up from a channel to jump to next one")
+                            .title(LocaleController.formatString("JumpToNextChannel", R.string.JumpToNextChannel))
+                            .description(LocaleController.formatString("JumpToNextChannel_Desc", R.string.JumpToNextChannel_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showGreetingSticker)
                             .showIf(OctoConfig.INSTANCE.jumpToNextChannel)
-                            .title("Hide greeting sticker")
-                            .description("Hides the greeting sticker when messaging a new contact")
+                            .title(LocaleController.formatString("HideGreetingSticker", R.string.HideGreetingSticker))
+                            .description(LocaleController.formatString("HideGreetingSticker_Desc", R.string.HideGreetingSticker_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.playGifAsVideo)
-                            .title("Play GIFs as Video")
-                            .description("Allows to play gifs as video files")
+                            .title(LocaleController.formatString("PlayGifsAsVideo", R.string.PlayGifsAsVideo))
+                            .description(LocaleController.formatString("PlayGifsAsVideo_Desc", R.string.PlayGifsAsVideo_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideKeyboardOnScroll)
-                            .title("Hide keyboard on chat scroll")
-                            .description("Hides the keyboard when scrolling in the chat")
+                            .title(LocaleController.formatString("HideKeyboardOnScroll", R.string.HideKeyboardOnScroll))
+                            .description(LocaleController.formatString("HideKeyboardOnScroll_Desc", R.string.HideKeyboardOnScroll_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideSendAsChannel)
-                            .title(LocaleController.getString(R.string.HideSendAsChannel))
-                            .description("Hides the send as channel action near the keyboard")
+                            .title(LocaleController.formatString("HideSendAsChannel", R.string.HideSendAsChannel))
+                            .description(LocaleController.formatString("HideSendAsChannel_Desc", R.string.HideSendAsChannel_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showOnlineStatus)
-                            .title("Show online status")
-                            .description("Shows the online status of other people next to their profile picture in groups")
+                            .title(LocaleController.formatString("ShowOnlineStatus", R.string.ShowOnlineStatus))
+                            .description(LocaleController.formatString("ShowOnlineStatus_Desc", R.string.ShowOnlineStatus_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideCustomEmojis)
-                            .title("Hide custom emojis")
-                            .description("Hides all custom emojis in the keyboard or as a reaction.")
+                            .title(LocaleController.formatString("HideCustomEmojis", R.string.HideCustomEmojis))
+                            .description(LocaleController.formatString("HideCustomEmojis_Desc", R.string.HideCustomEmojis_Desc))
                             .build());
                 })
-                .category("Media", category -> {
+                .category(LocaleController.formatString("MediaTab", R.string.MediaTab), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.activeNoiseSuppression)
-                            .title("Noise suppression in calls")
-                            .description("Enables noise suppression and voice normalization while in a call")
+                            .title(LocaleController.formatString("VoiceImprovements", R.string.VoiceImprovements))
+                            .description(LocaleController.formatString("VoiceImprovements_Desc", R.string.VoiceImprovements_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.unmuteVideosWithVolumeDown)
-                            .title("Unmute videos with volume down")
-                            .description("Unmute a video by pressing the volume down button")
+                            .title(LocaleController.formatString("UnmuteWithVolumeDown", R.string.UnmuteWithVolumeDown))
+                            .description(LocaleController.formatString("UnmuteWithVolumeDown_Desc", R.string.UnmuteWithVolumeDown_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.disableProximityEvents)
-                            .title("Disable proximity events")
+                            .title(LocaleController.formatString("DisableProximitySensor", R.string.DisableProximitySensor))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.startWithRearCamera)
-                            .title("Start with rear camera")
-                            .description("Record video messages with the rear camera instead of the front camera")
+                            .title(LocaleController.formatString("StartWithRearCamera", R.string.StartWithRearCamera))
+                            .description(LocaleController.formatString("StartWithRearCamera_Desc", R.string.StartWithRearCamera_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.disableCameraPreview)
-                            .title("Disable camera preview")
-                            .description("Disables camera preview in the attachments menu")
+                            .title(LocaleController.formatString("DisableCameraPreview", R.string.DisableCameraPreview))
+                            .description(LocaleController.formatString("DisableCameraPreview_Desc", R.string.DisableCameraPreview_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideSentTimeOnStickers)
-                            .title("Hide sent time on stickers")
+                            .title(LocaleController.formatString("RemoveTimeOnStickers", R.string.RemoveTimeOnStickers))
                             .build());
                 })
-                .category("Chat folders", category -> {
+                .category(LocaleController.formatString("FilterAvailableTitle", R.string.FilterAvailableTitle), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideChatFolders)
-                            .title("Hide all chats folders")
+                            .title(LocaleController.formatString("HideAllChatFolders", R.string.HideAllChatFolders))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideFoldersWhenForwarding)
-                            .title("Hide folders when forwarding")
+                            .title(LocaleController.formatString("HideChatFoldersWhenForwarding", R.string.HideChatFoldersWhenForwarding))
                             .build());
                 })
-                .category("Notifications", category -> category.row(new SwitchRow.SwitchRowBuilder()
+                .category(LocaleController.formatString("Notifications", R.string.Notifications), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
-                        .title("Accent color as notification color")
+                        .title(LocaleController.formatString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))
                         .build()))
                 .build();
     }

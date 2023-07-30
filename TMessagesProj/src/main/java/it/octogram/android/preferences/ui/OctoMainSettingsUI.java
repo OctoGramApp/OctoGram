@@ -34,7 +34,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
         String footer = AndroidUtilities.replaceTags(LocaleController.formatString("OctoMainSettingsFooter", R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING)).toString();
         String comingSoon = AndroidUtilities.replaceTags(LocaleController.formatString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable)).toString();
         return OctoPreferences.builder("OctoGram Settings")
-                .sticker(context, R.raw.utyan_robot, true, "Welcome to the OctoGram Settings! Here you can customize your experience with the app.")
+                .sticker(context, R.raw.utyan_robot, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoGeneralSettingsUI())))

@@ -9,12 +9,15 @@
   -->
 
 <resources>
-    <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
+    <string name="Style">Style</string>
+    <string name="Nothing">None</string>
     <string name="Translator">Translator</string>
     <string name="Updates">Updates</string>
     <string name="Experiments">Experiments</string>
-    <string name="FeatureCurrentlyUnavailable">This feature is currently unavailable. :(</string>
+    <string name="FeatureCurrentlyUnavailable">This feature is currently unavailable :(</string>
 
+    <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
+    <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
     <string name="OctoMainSettingsInfoCategory">Info</string>
     <string name="OfficialChannel">Official Channel</string>
     <string name="OfficialChannel_Desc">Stay informed about new updates</string>
@@ -22,10 +25,62 @@
     <string name="ContributeOcto_Desc">Help us creating a better app if you are a developer</string>
     <string name="TranslateOcto">Translate OctoGram</string>
     <string name="TranslateOcto_Desc">Help us translating OctoGram in your language</string>
+    <string name="SourceCode">View Source Code</string>
+
+    <string name="OctoGeneralSettings">General Settings</string>
+    <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app, as well as privacy</string>
+    <string name="PrivacyHeader">Privacy</string>
+    <string name="HidePhoneNumber">Hide phone number</string>
+    <string name="HidePhoneNumber_Desc">Hide your phone number from other users</string>
+    <string name="HideOtherPhoneNumber">Hide other people\'s phone number</string>
+    <string name="HideOtherPhoneNumber_Desc">Hide other people\'s phone number from their profile</string>
+    <string name="ShowFakePhoneNumber">Show fake phone number</string>
+    <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile. This fake phone number is only showed to yourself! If you disable phone privacy, people will see your real phone number</string>
+    <string name="PromptBeforeCalling">Prompt before calling</string>
+    <string name="PromptBeforeCalling_Desc">Show a prompt to avoid accidental calls</string>
+    <string name="DcIdHeader">Datacenter and User ID</string>
+    <string name="ShowRegistrationDate">Show registration date</string>
+    <string name="ShowRegistrationDate_Desc">Show user\'s registration date in profiles. Note that this is achieved through guessing, so it may show inaccurate results</string>
+    <string name="JumpToNextChannel">Jump to next channel</string>
+    <string name="JumpToNextChannel_Desc">Allows to swipe up from a channel to jump to next one</string>
+    <string name="HideGreetingSticker">Hide greeting sticker</string>
+    <string name="HideGreetingSticker_Desc">Hides the greeting sticker when messaging a new contact</string>
+    <string name="PlayGifsAsVideo">Play GIFs as Videos</string>
+    <string name="PlayGifsAsVideo_Desc">Allows to play gifs as video files</string>
+    <string name="HideKeyboardOnScroll">Hide keyboard on chat scroll</string>
+    <string name="HideKeyboardOnScroll_Desc">Hides the keyboard when scrolling in the chat</string>
+    <string name="HideSendAsChannel">Hide send as channel</string>
+    <string name="HideSendAsChannel_Desc">Hides the send as channel action near the keyboard</string>
+    <string name="ShowOnlineStatus">Show online status</string>
+    <string name="ShowOnlineStatus_Desc">Shows the online status of other people next to their profile picture in groups</string>
+    <string name="HideCustomEmojis">Hide custom emojis</string>
+    <string name="HideCustomEmojis_Desc">Hides all custom emojis in the keyboard or as a reaction</string>
+    <string name="VoiceImprovements">Noise suppression in calls</string>
+    <string name="VoiceImprovements_Desc">Enables noise suppression and voice normalization while in a call</string>
+    <string name="UnmuteWithVolumeDown">Unmute videos with volume down</string>
+    <string name="UnmuteWithVolumeDown_Desc">Unmute a video by pressing the volume down button</string>
+    <string name="DisableProximitySensor">Disable proximity sensor</string>
+    <string name="StartWithRearCamera">Start with rear camera</string>
+    <string name="StartWithRearCamera_Desc">Start recording video messages with the rear camera instead of the front camera</string>
+    <string name="DisableCameraPreview">Disable camera preview</string>
+    <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
+    <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
+    <string name="HideAllChatFolders">Hide all chat folders</string>
+    <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
+    <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
+
+    <string name="OctoCameraSettings">OctoCameraSettings</string>
+    <string name="OctoCameraSettingsHeader">Here you can customize your camera experience with the app</string>
+    <string name="UseCameraX">Use CameraX</string>
+    <string name="UseCameraX_Desc">Use CameraX instead of the legacy API</string>
+    <string name="ZeroShutter">Zero shutter lag (experimental)</string>
+    <string name="ZeroShutter_Desc">Enable zero shutter lag for CameraX</string>
+    <string name="PerformanceMode">Performance mode</string>
+    <string name="PerformanceMode_Desc">Enable performance mode for CameraX. This will reduce the quality of the photos taken</string>
+    <string name="CurrentCameraXResolution">Current CameraX resolution</string>
 
     <!-- OLD STRINGS -->
-
-    <string name="TestBackendNumber">Test Number</string>
+    <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
     <string name="TestBackendOn">This account will connect to the test backend.</string>
     <string name="TestBackendOff">This account will connect to the production backend.</string>
@@ -85,7 +140,7 @@
     <string name="AppIconMonoBlack" comment="AppIconMonoBlack">Mono Black</string>
     <string name="AppIconDeveloper" comment="AppIconDeveloper">Developer</string>
     <string name="AppIconArctic" comment="AppIconArctic">Arctic</string>
-    <!--<string name="AppIconFoxgram" comment="AppIconFoxgram">Shy Fox</string>-->
+    &lt;!&ndash;<string name="AppIconFoxgram" comment="AppIconFoxgram">Shy Fox</string>&ndash;&gt;
     <string name="UnlockedHiddenFoxIcon">Oh… Congratulations! You unlocked the little shy fox icon.</string>
     <string name="AppIconRainbow" comment="AppIconRainbow">Rainbow</string>
     <string name="AppIconChupa" comment="AppIconChupa">Chupa</string>
@@ -121,7 +176,7 @@
     <string name="ConfirmCallsDesc">Show confirmation dialog each time you call anyone</string>
     <string name="StickersSize">Stickers Size</string>
     <string name="ResetStickersSize">Reset Stickers Size</string>
-    <!-- HARRY POTTER QUOTE B.1 C.4 -->
+    &lt;!&ndash; HARRY POTTER QUOTE B.1 C.4 &ndash;&gt;
     <string name="StickerSizeDialogMessage">What else is missing?</string>
     <string name="StickerSizeDialogMessage2">Gallopin\' Gorgons, that reminds me.</string>
     <string name="FlipMediaByTapping">Flip Media by Tapping on Edges</string>
@@ -364,5 +419,5 @@
     <string name="UseCameraPreview">Enable Camera preview</string>
     <string name="JumpToNextChannelDesc">Allows to swipe up from a channel to jump to next one</string>
     <string name="HideGreetingStickerDesc">Hides the greeting sticker when messaging a new contact</string>
-    <string name="HideGreetingSticker">Hide greeting sticker</string>
+    <string name="HideGreetingSticker">Hide greeting sticker</string>-->
 </resources>
