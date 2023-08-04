@@ -62,6 +62,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
+import it.octogram.android.OctoConfig;
+
 public class VoIPHelper {
 
 	public static long lastCallTime = 0;
@@ -69,6 +71,10 @@ public class VoIPHelper {
 	private static final int VOIP_SUPPORT_ID = 4244000;
 
 	public static void startCall(TLRPC.User user, boolean videoCall, boolean canVideoCall, final Activity activity, TLRPC.UserFull userFull, AccountInstance accountInstance) {
+		startCall(user, videoCall, canVideoCall, activity, userFull, accountInstance, false);
+	}
+
+	public static void startCall(TLRPC.User user, boolean videoCall, boolean canVideoCall, final Activity activity, TLRPC.UserFull userFull, AccountInstance accountInstance, boolean callConfirmed) {
 		if (userFull != null && userFull.phone_calls_private) {
 			new AlertDialog.Builder(activity)
 					.setTitle(LocaleController.getString("VoipFailed", R.string.VoipFailed))
@@ -94,6 +100,14 @@ public class VoIPHelper {
 				bldr.show();
 			} catch (Exception e) {
 				FileLog.e(e);
+			}
+			return;
+		}
+
+		if (OctoConfig.INSTANCE.promptBeforeCalling.getValue() && !callConfirmed && activity instanceof LaunchActivity) {
+			BaseFragment lastFragment = ((LaunchActivity) activity).getActionBarLayout().getLastFragment();
+			if (lastFragment != null) {
+				AlertsCreator.createCallDialogAlert(lastFragment, lastFragment.getMessagesController().getUser(user.id), videoCall);
 			}
 			return;
 		}
