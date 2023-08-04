@@ -76,6 +76,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import it.octogram.android.OctoConfig;
+
 public class ReactionsContainerLayout extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     public final static Property<ReactionsContainerLayout, Float> TRANSITION_PROGRESS_VALUE = new Property<ReactionsContainerLayout, Float>(Float.class, "transitionProgress") {
@@ -1019,7 +1021,7 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
             if (reactionsChat.available_reactions instanceof TLRPC.TL_chatReactionsAll) {
                 TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(reactionsChat.id);
                 if (chat != null && !ChatObject.isChannelAndNotMegaGroup(chat)) {
-                    allReactionsAvailable = true;
+                    allReactionsAvailable = !OctoConfig.INSTANCE.hideCustomEmojis.getValue();
                 } else {
                     allReactionsAvailable = false;
                 }
