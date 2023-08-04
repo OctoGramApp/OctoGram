@@ -64,13 +64,15 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> cameraXPerfOverQuality = new ConfigProperty<>("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = new ConfigProperty<>("cameraXZeroShutter", false);
     public final ConfigProperty<Integer> cameraXResolution = new ConfigProperty<>("cameraXResolution", -1);
+    public final ConfigProperty<Boolean> showNameInActionBar = new ConfigProperty<>("showNameInActionBar", false);
 
     private final List<ConfigProperty<?>> properties = List.of(
             hidePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, registrationDateInProfiles, jumpToNextChannel,
             showGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus, hideCustomEmojis,
             activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera, disableCameraPreview,
             hideSentTimeOnStickers, hideChatFolders, hideFoldersWhenForwarding, accentColorAsNotificationColor, showFakePhoneNumber,
-            voiceAgc, openArchiveOnPull, cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution
+            voiceAgc, openArchiveOnPull, cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution,
+            showNameInActionBar
     );
 
 

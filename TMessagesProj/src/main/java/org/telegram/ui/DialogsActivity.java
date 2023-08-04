@@ -3101,10 +3101,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             } else {
                 statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(null, AndroidUtilities.dp(26));
                 statusDrawable.center = true;
-                if (BuildVars.DEBUG_VERSION) {
-                    actionBar.setTitle(LocaleController.getString("AppNameBeta", R.string.AppNameBeta), statusDrawable);
+                if (OctoConfig.INSTANCE.showNameInActionBar.getValue()) {
+                    TLRPC.User selfUser = UserConfig.getInstance(currentAccount).getCurrentUser();
+                    actionBar.setTitle((selfUser.first_name + " " + (selfUser.last_name != null ? selfUser.last_name : "")), statusDrawable);
                 } else {
-                    actionBar.setTitle(LocaleController.getString("AppName", R.string.AppName), statusDrawable);
+                    actionBar.setTitle(LocaleController.getString("BuildAppName", R.string.BuildAppName), statusDrawable);
                 }
                 updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
             }
