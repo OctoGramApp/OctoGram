@@ -18,6 +18,8 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.FooterRow;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 
 public class OctoAppearanceUI implements PreferencesEntry {
@@ -32,11 +34,22 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title(LocaleController.getString("ShowNameActionBar", R.string.ShowNameActionBar))
                             .description(LocaleController.getString("ShowNameActionBar_Desc", R.string.ShowNameActionBar_Desc))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.forceChatBlurEffect)
+                            .title(LocaleController.getString("ForceChatBlurEffect", R.string.ForceChatBlurEffect))
+                            .build());
+                    category.row(new HeaderRow(LocaleController.getString("ForceChatBlurEffectName", R.string.ForceChatBlurEffectName), OctoConfig.INSTANCE.forceChatBlurEffect));
+                    category.row(new SliderRow.SliderRowBuilder()
+                            .min(0)
+                            .max(255)
+                            .preferenceValue(OctoConfig.INSTANCE.blurEffectStrength)
+                            .showIf(OctoConfig.INSTANCE.forceChatBlurEffect)
+                            .build());
                     category.row(new FooterRow.FooterRowBuilder()
                             .title("More coming soon...")
                             .build());
                 })
                 .build();
     }
-    
+
 }

@@ -18,7 +18,6 @@ import java.util.List;
 /*
  * Super big TODO list:
  *
- * - Adjust chat blur effect
  * - Option to delete account
  * - Option to delete all personal messages in a chat
  * - two-way translation. And automatically turn over the text sent by the user
@@ -59,6 +58,8 @@ public class OctoConfig {
 
     /*Appearance*/
     public final ConfigProperty<Boolean> showNameInActionBar = new ConfigProperty<>("showNameInActionBar", false);
+    public final ConfigProperty<Boolean> forceChatBlurEffect = new ConfigProperty<>("forceChatBlurEffect", false);
+    public final ConfigProperty<Integer> blurEffectStrength = new ConfigProperty<>("blurEffectStrength", 155);
 
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXEnabled = new ConfigProperty<>("cameraXEnabled", true);
@@ -72,7 +73,8 @@ public class OctoConfig {
             jumpToNextChannel, showGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus,
             hideCustomEmojis, activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera,
             disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideFoldersWhenForwarding, accentColorAsNotificationColor,
-            openArchiveOnPull, showNameInActionBar, cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution
+            openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, cameraXEnabled,
+            cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution
     );
 
 

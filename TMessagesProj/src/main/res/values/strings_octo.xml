@@ -72,6 +72,8 @@
 
     <string name="ShowNameActionBar">Show name on action bar</string>
     <string name="ShowNameActionBar_Desc">You will see your name on the action bar instead of "OctoGram"</string>
+    <string name="ForceChatBlurEffect">Force chat blur effect</string>
+    <string name="ForceChatBlurEffectName">Alpha</string>
 
     <string name="RestrictionReason">Restriction Reason</string>
     <string name="RegistrationDate">Registration Date</string>

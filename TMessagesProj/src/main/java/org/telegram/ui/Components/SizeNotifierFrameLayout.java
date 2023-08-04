@@ -43,6 +43,8 @@ import org.telegram.ui.ChatBackgroundDrawable;
 
 import java.util.ArrayList;
 
+import it.octogram.android.OctoConfig;
+
 public class SizeNotifierFrameLayout extends FrameLayout {
 
     private Rect rect = new Rect();
@@ -555,6 +557,9 @@ public class SizeNotifierFrameLayout extends FrameLayout {
         }
 
         int blurAlpha = Color.alpha(Theme.getColor(Theme.key_chat_BlurAlpha));
+        if (OctoConfig.INSTANCE.forceChatBlurEffect.getValue()) {
+            blurAlpha = OctoConfig.INSTANCE.blurEffectStrength.getValue();
+        }
         if (blurAlpha == 255) {
             return;
         }
@@ -817,6 +822,9 @@ public class SizeNotifierFrameLayout extends FrameLayout {
 
     public void drawBlurRect(Canvas canvas, float y, Rect rectTmp, Paint blurScrimPaint, boolean top) {
         int blurAlpha = Color.alpha(Theme.getColor(Theme.key_chat_BlurAlpha));
+        if (OctoConfig.INSTANCE.forceChatBlurEffect.getValue()) {
+            blurAlpha = OctoConfig.INSTANCE.blurEffectStrength.getValue();
+        }
         if (currentBitmap == null || !SharedConfig.chatBlurEnabled()) {
             canvas.drawRect(rectTmp, blurScrimPaint);
             return;
