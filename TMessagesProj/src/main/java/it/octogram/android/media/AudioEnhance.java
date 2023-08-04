@@ -20,7 +20,7 @@ public class AudioEnhance {
     private static AcousticEchoCanceler acousticEchoCanceler = null;
 
     public static void initVoiceEnhancements(AudioRecord audioRecord) {
-        if (!OctoConfig.INSTANCE.voiceAgc.getValue()) return;
+        if (!OctoConfig.INSTANCE.activeNoiseSuppression.getValue()) return;
         if (AutomaticGainControl.isAvailable()) {
             automaticGainControl = AutomaticGainControl.create(audioRecord.getAudioSessionId());
             automaticGainControl.setEnabled(true);

@@ -47,7 +47,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("Translator", R.string.Translator))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
                             .title(LocaleController.formatString("Appearance", R.string.Appearance))
                             .build());

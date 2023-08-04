@@ -68,11 +68,15 @@
     <string name="HideAllChatFolders">Hide all chat folders</string>
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
+    <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
+
+    <string name="ShowNameActionBar">Show name on action bar</string>
+    <string name="ShowNameActionBar_Desc">You will see your name on the action bar instead of "OctoGram"</string>
 
     <string name="RestrictionReason">Restriction Reason</string>
     <string name="RegistrationDate">Registration Date</string>
     <string name="OctoGramVersion">OctoGram %1$s\nBased on Telegram %2$s</string>
-    <string name="OctoCameraSettings">OctoCamera Settings</string>
+    <string name="OctoCameraSettings">Camera Settings</string>
     <string name="OctoCameraSettingsHeader">Here you can customize your camera experience with the app</string>
     <string name="UseCameraX">Use CameraX</string>
     <string name="UseCameraX_Desc">Use CameraX instead of the legacy API</string>

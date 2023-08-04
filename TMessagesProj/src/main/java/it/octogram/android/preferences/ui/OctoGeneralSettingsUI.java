@@ -106,6 +106,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("HideCustomEmojis", R.string.HideCustomEmojis))
                             .description(LocaleController.formatString("HideCustomEmojis_Desc", R.string.HideCustomEmojis_Desc))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.openArchiveOnPull)
+                            .title(LocaleController.formatString("OpenArchiveOnPull", R.string.OpenArchiveOnPull))
+                            .build());
                 })
                 .category(LocaleController.formatString("MediaTab", R.string.MediaTab), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
