@@ -54,7 +54,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideSentTimeOnStickers = new ConfigProperty<>("hideSentTimeOnStickers", false);
     /*TODO*/ public final ConfigProperty<Boolean> hideChatFolders = new ConfigProperty<>("hideChatFolders", false);
     /*TODO*/ public final ConfigProperty<Boolean> hideFoldersWhenForwarding = new ConfigProperty<>("showFoldersWhenForwarding", false);
-    /*TODO*/ public final ConfigProperty<Boolean> accentColorAsNotificationColor = new ConfigProperty<>("accentColorAsNotificationColor", false);
+    public final ConfigProperty<Boolean> accentColorAsNotificationColor = new ConfigProperty<>("accentColorAsNotificationColor", false);
     public final ConfigProperty<Boolean> openArchiveOnPull = new ConfigProperty<>("openArchiveOnPull", false);
 
     /*Appearance*/
