@@ -11,8 +11,8 @@ public class SliderRow extends BaseRow {
     private final int max;
     private final ConfigProperty<Integer> preferenceValue;
 
-    protected SliderRow(int min, int max, ConfigProperty<Integer> preferenceValue) {
-        super(PreferenceType.SLIDER);
+    protected SliderRow(int min, int max, ConfigProperty<Integer> preferenceValue, ConfigProperty<Boolean> showIf) {
+        super(null, null, false, showIf, PreferenceType.SLIDER);
         this.min = min;
         this.max = max;
         this.preferenceValue = preferenceValue;
@@ -45,7 +45,7 @@ public class SliderRow extends BaseRow {
         }
 
         public SliderRow build() {
-            return new SliderRow(min, max, preferenceValue);
+            return new SliderRow(min, max, preferenceValue, showIf);
         }
     }
 }
