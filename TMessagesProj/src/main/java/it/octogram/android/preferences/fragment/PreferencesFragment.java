@@ -143,11 +143,12 @@ public class PreferencesFragment extends BaseFragment {
         listView.setOnItemClickListener((view, position, x, y) -> {
             BaseRow row = positions.get(position);
             if (row instanceof Clickable) {
-                ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
-            }
-
-            if (row.doesRequireRestart()) {
-                BulletinFactory.of(this).createErrorBulletin("Restart to apply changes", getResourceProvider()).show();
+                boolean success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
+                if (success) {
+                    if (row.doesRequireRestart()) {
+                        BulletinFactory.of(this).createErrorBulletin("Restart to apply changes", getResourceProvider()).show();
+                    }
+                }
             }
 
             for (BaseRow category : preferences.getPreferences()) {

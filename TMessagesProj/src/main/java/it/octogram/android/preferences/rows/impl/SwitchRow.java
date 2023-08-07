@@ -34,6 +34,7 @@ public class SwitchRow extends BaseRow implements Clickable {
 
         TextCheckCell cell = (TextCheckCell) view;
         cell.setChecked(preferenceValue.getValue());
+        return true;
     }
 
     public static class SwitchRowBuilder extends ToggleableBaseRowBuilder<SwitchRow, Boolean> {

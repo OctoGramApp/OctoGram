@@ -42,7 +42,7 @@ public class ListRow extends BaseRow implements Clickable {
     }
 
     @Override
-    public void onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
+    public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
         int selected = 0;
         List<String> titleArray = new ArrayList<>();
         List<Integer> idArray = new ArrayList<>();
@@ -86,6 +86,7 @@ public class ListRow extends BaseRow implements Clickable {
         fragment.setVisibleDialog(dialog);
 
         dialog.show();
+        return true;
     }
 
     public ConfigProperty<String> getCurrentValue() {

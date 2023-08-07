@@ -40,9 +40,10 @@ public class TextIconRow extends BaseRow implements Clickable {
     }
 
     @Override
-    public void onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
+    public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
         if (onClick != null)
             onClick.run();
+        return true;
     }
 
     public static class TextIconRowBuilder extends BaseRowBuilder<TextIconRow> {
