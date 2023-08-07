@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.ui.Components.AnimatedPhoneNumberEditText;
 
 import java.util.List;
 
@@ -28,10 +27,7 @@ import java.util.List;
  */
 public class OctoConfig {
 
-    public static final int TELEGRAM_CAMERA = 0;
-    public static final int CAMERA_X = 1;
-    public static final int SYSTEM_CAMERA = 2;
-    public static OctoConfig INSTANCE = new OctoConfig();
+    public static final OctoConfig INSTANCE = new OctoConfig();
 
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
 
@@ -75,7 +71,6 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> cameraXPerfOverQuality = new ConfigProperty<>("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = new ConfigProperty<>("cameraXZeroShutter", false);
     public final ConfigProperty<Integer> cameraXResolution = new ConfigProperty<>("cameraXResolution", -1);
-    public final ConfigProperty<Integer> getCameraType = new ConfigProperty<>("getCameraType", 0);
 
 
     private final List<ConfigProperty<?>> properties = List.of(
