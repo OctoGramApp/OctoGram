@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.ui.Components.AnimatedPhoneNumberEditText;
 
 import java.util.List;
 
@@ -27,6 +28,9 @@ import java.util.List;
  */
 public class OctoConfig {
 
+    public static final int TELEGRAM_CAMERA = 0;
+    public static final int CAMERA_X = 1;
+    public static final int SYSTEM_CAMERA = 2;
     public static OctoConfig INSTANCE = new OctoConfig();
 
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
@@ -61,11 +65,17 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> forceChatBlurEffect = new ConfigProperty<>("forceChatBlurEffect", false);
     public final ConfigProperty<Integer> blurEffectStrength = new ConfigProperty<>("blurEffectStrength", 155);
 
+    /*Unlock Secret Icons*/
+    /*TODO*/ public final ConfigProperty<Boolean> unlockedYuki = new ConfigProperty<>("unlockedYuki", false);
+    /*TODO*/ public final ConfigProperty<Boolean> unlockedChupa = new ConfigProperty<>("unlockedChupa", false);
+
+
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXEnabled = new ConfigProperty<>("cameraXEnabled", true);
     public final ConfigProperty<Boolean> cameraXPerfOverQuality = new ConfigProperty<>("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = new ConfigProperty<>("cameraXZeroShutter", false);
     public final ConfigProperty<Integer> cameraXResolution = new ConfigProperty<>("cameraXResolution", -1);
+    public final ConfigProperty<Integer> getCameraType = new ConfigProperty<>("getCameraType", 0);
 
 
     private final List<ConfigProperty<?>> properties = List.of(
@@ -74,7 +84,7 @@ public class OctoConfig {
             hideCustomEmojis, activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera,
             disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideFoldersWhenForwarding, accentColorAsNotificationColor,
             openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, cameraXEnabled,
-            cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution
+            cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa
     );
 
 
@@ -109,6 +119,12 @@ public class OctoConfig {
 
         SharedPreferences.Editor editor = PREFS.edit();
         editor.putBoolean(property.getKey(), property.getValue());
+        editor.apply();
+    }
+
+    public void unlockIcon(ConfigProperty<Boolean> property, boolean value) {
+        SharedPreferences.Editor editor = PREFS.edit();
+        editor.putBoolean(property.getKey(), value);
         editor.apply();
     }
 

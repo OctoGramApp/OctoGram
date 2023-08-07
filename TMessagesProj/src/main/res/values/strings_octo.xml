@@ -87,6 +87,11 @@
     <string name="PerformanceMode">Performance mode</string>
     <string name="PerformanceMode_Desc">Enable performance mode for CameraX. This will reduce the quality of the photos taken</string>
     <string name="CurrentCameraXResolution">Current CameraX resolution</string>
+    <string name="MonetIcon">Force Monet Icon</string>
+    <string name="AppIconChupa">Chupa Icon</string>
+    <string name="AppIconYuki">Yuki Icon</string>
+    <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
+    <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

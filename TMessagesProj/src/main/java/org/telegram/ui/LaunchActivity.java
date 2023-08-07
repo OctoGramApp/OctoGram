@@ -57,6 +57,7 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -2528,6 +2529,26 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             open_settings = 9;
                                         } else {
                                             open_settings = 1;
+                                        }
+                                    } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
+                                        if (!OctoConfig.INSTANCE.unlockedChupa.getValue()) {
+                                            BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
+                                            AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.CHUPA, null);
+                                            layout.textView.setText(LocaleController.getString("UnlockedHiddenChupaIcon", R.string.UnlockedHiddenChupaIcon));
+                                            fireworksOverlay.start();
+                                            layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                            Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
+                                            OctoConfig.INSTANCE.unlockIcon(OctoConfig.INSTANCE.unlockedChupa, true);
+                                        }
+                                    } else if (url.startsWith("tg:yukigram") || url.startsWith("tg://yukigram")) {
+                                        if (!OctoConfig.INSTANCE.unlockedYuki.getValue()) {
+                                            BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
+                                            AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.YUKI, null);
+                                            layout.textView.setText(LocaleController.getString("UnlockedHiddenYukiIcon", R.string.UnlockedHiddenYukiIcon));
+                                            fireworksOverlay.start();
+                                            layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                            Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
+                                            OctoConfig.INSTANCE.unlockIcon(OctoConfig.INSTANCE.unlockedYuki, true);
                                         }
                                     } else if ((url.startsWith("tg:search") || url.startsWith("tg://search"))) {
                                         url = url.replace("tg:search", "tg://telegram.org").replace("tg://search", "tg://telegram.org");

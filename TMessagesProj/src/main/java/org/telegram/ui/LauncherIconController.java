@@ -36,16 +36,20 @@ public class LauncherIconController {
     public enum LauncherIcon {
         DEFAULT("DefaultIcon", R.drawable.icon_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconDefault),
         VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.mipmap.icon_6_foreground_sa, R.string.AppIconVintage),
+        MONET("MonetIcon", -1, -1, R.string.MonetIcon, false, true),
         AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconAqua),
+        CHUPA("ChupaIcon", -1, R.mipmap.icon_9_launcher, R.string.AppIconChupa, false, true),
         PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground_sa, R.string.AppIconPremium, true),
         TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.mipmap.icon_5_foreground_sa, R.string.AppIconTurbo, true),
-        NOX("NoxIcon", R.drawable.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox, true);
+        NOX("NoxIcon", R.drawable.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox, true),
+        YUKI("YukiIcon", -1, -1, R.string.AppIconYuki, false, true);
 
         public final String key;
         public final int background;
         public final int foreground;
         public final int title;
         public final boolean premium;
+        public final boolean hidden;
 
         private ComponentName componentName;
 
@@ -61,11 +65,16 @@ public class LauncherIconController {
         }
 
         LauncherIcon(String key, int background, int foreground, int title, boolean premium) {
+            this(key, background, foreground, title, premium, false);
+        }
+
+        LauncherIcon(String key, int background, int foreground, int title, boolean premium, boolean hidden) {
             this.key = key;
             this.background = background;
             this.foreground = foreground;
             this.title = title;
             this.premium = premium;
+            this.hidden = hidden;
         }
     }
 }
