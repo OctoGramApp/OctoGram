@@ -13,28 +13,26 @@ import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
 public class SliderChooseRow extends BaseRow {
 
     private final List<Pair<Integer, String>> options;
-    private final ConfigProperty<Integer> preferenceValue;
-    private final ConfigProperty<String> currentValue;
+    private final ConfigProperty<String> preferenceValue;
 
-    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<String> currentValue, ConfigProperty<Integer> preferenceValue) {
-        super(PreferenceType.SLIDER_CHOOSE);
+    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<String> currentValue, ConfigProperty<Boolean> showIf) {
+        super(null, null, false, showIf, PreferenceType.SLIDER_CHOOSE);
         this.options = options;
-        this.preferenceValue = preferenceValue;
-        this.currentValue = currentValue;
+        this.preferenceValue = currentValue;
     }
 
     public List<Pair<Integer, String>> getOptions() {
         return options;
     }
 
-    public ConfigProperty<String> getCurrentValue() {
-        return currentValue;
+    public ConfigProperty<String> getPreferenceValue() {
+        return preferenceValue;
     }
 
     public int getIntValue() {
         for (int index = 0; index < options.size(); index++) {
             Pair<Integer, String> pair = options.get(index);
-            if (currentValue.getValue().equals(pair.second)) {
+            if (preferenceValue.getValue().equals(pair.second)) {
                 return index;
             }
         }
@@ -43,42 +41,26 @@ public class SliderChooseRow extends BaseRow {
 
     public String[] getValues() {
         List<String> titleArray = new ArrayList<>();
-        for (int index = 0; index < options.size(); index++) {
-            Pair<Integer, String> pair = options.get(index);
-            titleArray.add(pair.second);
-        }
+        options.forEach(pair -> titleArray.add(pair.second));
         return titleArray.toArray(new String[0]);
     }
 
     public ArrayList<Integer> getIds() {
         ArrayList<Integer> idArray = new ArrayList<>();
-        for (int index = 0; index < options.size(); index++) {
-            Pair<Integer, String> pair = options.get(index);
-            idArray.add(pair.first);
-        }
+        options.forEach(pair -> idArray.add(pair.first));
         return idArray;
     }
 
-    public ConfigProperty<Integer> getPreferenceValue() {
-        return preferenceValue;
-    }
-
-    public static class SliderChooseRowBuilder extends ToggleableBaseRowBuilder<SliderChooseRow, Integer> {
+    public static class SliderChooseRowBuilder extends ToggleableBaseRowBuilder<SliderChooseRow, String> {
         private final List<Pair<Integer, String>> options = new ArrayList<>();
-        private ConfigProperty<String> currentValue;
 
         public SliderChooseRowBuilder options(List<Pair<Integer, String>> options) {
             this.options.addAll(options);
             return this;
         }
 
-        public SliderChooseRowBuilder currentValue(ConfigProperty<String> currentValue) {
-            this.currentValue = currentValue;
-            return this;
-        }
-
         public SliderChooseRow build() {
-            return new SliderChooseRow(options, currentValue, preferenceValue);
+            return new SliderChooseRow(options, preferenceValue, showIf);
         }
     }
 }

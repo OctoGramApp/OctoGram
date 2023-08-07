@@ -31,10 +31,8 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.EmptyCell;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
-import org.telegram.ui.Cells.StickerCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
@@ -303,7 +301,7 @@ public class PreferencesFragment extends BaseFragment {
                     SliderChooseRow sliderRow = (SliderChooseRow) positions.get(position);
                     slideChooseView.setCallback(index -> {
                         int id = sliderRow.getIds().get(index);
-                        OctoConfig.INSTANCE.updateStringSetting(sliderRow.getCurrentValue(), sliderRow.getOptions().get(id).second);
+                        OctoConfig.INSTANCE.updateStringSetting(sliderRow.getPreferenceValue(), sliderRow.getOptions().get(id).second);
                     });
                     slideChooseView.setOptions(sliderRow.getIntValue(), sliderRow.getValues());
                     break;
