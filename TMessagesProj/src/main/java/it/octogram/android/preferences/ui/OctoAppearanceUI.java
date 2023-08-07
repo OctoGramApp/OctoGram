@@ -78,8 +78,8 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
-                            .title("Use system font")
                             .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
+                            .requiresRestart(true)
                             .build());
                 })
                 .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> {
