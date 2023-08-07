@@ -80,6 +80,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 
+import it.octogram.android.utils.MessageResourceHelper;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -12468,7 +12469,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else {
             signString = null;
         }
-        String timeString;
+        CharSequence timeString;
         TLRPC.User author = null;
         if (currentMessageObject.isFromUser()) {
             author = MessagesController.getInstance(currentAccount).getUser(fromId);
@@ -12500,7 +12501,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE) {
             timeString = "";
         } else if (edited) {
-            timeString = LocaleController.getString("EditedMessage", R.string.EditedMessage) + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            // timeString = LocaleController.getString("EditedMessage", R.string.EditedMessage) + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            timeString = MessageResourceHelper.createEditedString(messageObject);
         } else {
             timeString = LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
         }
@@ -12514,6 +12516,11 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             currentTimeString = timeString;
         }
         timeTextWidth = timeWidth = (int) Math.ceil(Theme.chat_timePaint.measureText(currentTimeString, 0, currentTimeString == null ? 0 : currentTimeString.length()));
+        if (timeString instanceof SpannableStringBuilder) {
+            if (edited && OctoConfig.INSTANCE.pencilIconForEditedMessages.getValue()) {
+                timeTextWidth = timeWidth += MessageResourceHelper.editedDrawable.getIntrinsicWidth();
+            }
+        }
         if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE) {
             timeWidth -= AndroidUtilities.dp(8);
         }

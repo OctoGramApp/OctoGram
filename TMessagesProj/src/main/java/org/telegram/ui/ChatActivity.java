@@ -3152,6 +3152,18 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         avatarContainer = new ChatAvatarContainer(context, this, currentEncryptedChat != null, themeDelegate);
         avatarContainer.allowShorterStatus = true;
         avatarContainer.premiumIconHiddable = true;
+        avatarContainer.setOnLongClickListener(v -> {
+            if (inPreviewMode
+                    || threadMessageId != 0
+                    || UserObject.isReplyUser(currentUser)
+                    || currentUser != null && currentUser.self
+                    || OctoConfig.INSTANCE.searchIconInHeader.getValue()
+                    || chatMode == MODE_PINNED) {
+                return false;
+            }
+            openSearchWithText(null);
+            return true;
+        });
         AndroidUtilities.updateViewVisibilityAnimated(avatarContainer, true, 1f, false);
         updateTopicTitleIcon();
         if (inPreviewMode || inBubbleMode) {
@@ -13379,6 +13391,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else {
                     showSearchAsIcon = false;
                 }
+                showSearchAsIcon |= OctoConfig.INSTANCE.searchIconInHeader.getValue() && !inPreviewMode
+                        && !isComments && !isThreadChat() && !UserObject.isReplyUser(currentUser);
                 if (showSearchAsIcon || showAudioCallAsIcon) {
                     if (avatarContainer != null && avatarContainer.getLayoutParams() != null) {
                         ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = AndroidUtilities.dp(96);
@@ -13408,7 +13422,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
                 if (headerItem != null) {
                     TLRPC.UserFull userInfo = getCurrentUserInfo();
-                    if (showAudioCallAsIcon) {
+                    if (showAudioCallAsIcon && !OctoConfig.INSTANCE.searchIconInHeader.getValue()) {
                         headerItem.hideSubItem(call);
                     } else if (userInfo != null && userInfo.phone_calls_available) {
                         headerItem.showSubItem(call, true);
@@ -14571,18 +14585,18 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         } else if (chatMode == MODE_PINNED) {
             avatarContainer.setTitle(LocaleController.formatPluralString("PinnedMessagesCount", getPinnedMessagesCount()));
         } else if (currentChat != null) {
-            avatarContainer.setTitle(currentChat.title, currentChat.scam, currentChat.fake, currentChat.verified, false, null, animated);
+            avatarContainer.setTitle(currentChat.title, currentChat.scam, currentChat.fake, currentChat.verified, false, null, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
         } else if (currentUser != null) {
             if (currentUser.self) {
                 avatarContainer.setTitle(LocaleController.getString("SavedMessages", R.string.SavedMessages));
             } else if (!MessagesController.isSupportUser(currentUser) && getContactsController().contactsDict.get(currentUser.id) == null && (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                 if (!TextUtils.isEmpty(currentUser.phone)) {
-                    avatarContainer.setTitle(PhoneFormat.getInstance().format("+" + currentUser.phone), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
+                    avatarContainer.setTitle(PhoneFormat.getInstance().format("+" + currentUser.phone), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
                 } else {
-                    avatarContainer.setTitle(UserObject.getUserName(currentUser), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
+                    avatarContainer.setTitle(UserObject.getUserName(currentUser), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
                 }
             } else {
-                avatarContainer.setTitle(UserObject.getUserName(currentUser), currentUser.scam, currentUser.fake, currentUser.verified,  getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
+                avatarContainer.setTitle(UserObject.getUserName(currentUser), currentUser.scam, currentUser.fake, currentUser.verified,  getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
             }
         }
         setParentActivityTitle(avatarContainer.getTitleTextView().getText());

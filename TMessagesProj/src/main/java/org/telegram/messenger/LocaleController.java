@@ -22,6 +22,7 @@ import android.util.Xml;
 
 import androidx.annotation.StringRes;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.time.FastDateFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -33,6 +34,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -57,6 +59,7 @@ public class LocaleController {
     public static int nameDisplayOrder = 1;
     public static boolean is24HourFormat = false;
     public FastDateFormat formatterDay;
+    public FastDateFormat formatterDayWithSeconds;
     public FastDateFormat formatterWeek;
     public FastDateFormat formatterWeekLong;
     public FastDateFormat formatterDayMonth;
@@ -1919,6 +1922,8 @@ public class LocaleController {
         formatterScheduleDay = createFormatter(locale, getStringInternal("formatDateSchedule", R.string.formatDateSchedule), "MMM d");
         formatterScheduleYear = createFormatter(locale, getStringInternal("formatDateScheduleYear", R.string.formatDateScheduleYear), "MMM d yyyy");
         formatterDay = createFormatter(lang.toLowerCase().equals("ar") || lang.toLowerCase().equals("ko") ? locale : Locale.US, is24HourFormat ? getStringInternal("formatterDay24H", R.string.formatterDay24H) : getStringInternal("formatterDay12H", R.string.formatterDay12H), is24HourFormat ? "HH:mm" : "h:mm a");
+        formatterDayWithSeconds = createFormatter(lang.toLowerCase().equals("ar") || lang.toLowerCase().equals("ko") ? locale : Locale.US, is24HourFormat ? getStringInternal("FormatterDay24HSec", R.string.FormatterDay24HSec) : getStringInternal("FormatterDay12HSec", R.string.FormatterDay12HSec), is24HourFormat ? "HH:mm:ss" : "h:mm:ss a");
+        if (OctoConfig.INSTANCE.formatTimeWithSeconds.getValue()) formatterDay = formatterDayWithSeconds;
         formatterStats = createFormatter(locale, is24HourFormat ? getStringInternal("formatterStats24H", R.string.formatterStats24H) : getStringInternal("formatterStats12H", R.string.formatterStats12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
         formatterBannedUntil = createFormatter(locale, is24HourFormat ? getStringInternal("formatterBannedUntil24H", R.string.formatterBannedUntil24H) : getStringInternal("formatterBannedUntil12H", R.string.formatterBannedUntil12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
         formatterBannedUntilThisYear = createFormatter(locale, is24HourFormat ? getStringInternal("formatterBannedUntilThisYear24H", R.string.formatterBannedUntilThisYear24H) : getStringInternal("formatterBannedUntilThisYear12H", R.string.formatterBannedUntilThisYear12H), is24HourFormat ? "MMM dd, HH:mm" : "MMM dd, h:mm a");
@@ -2064,6 +2069,14 @@ public class LocaleController {
     }
 
     public static String formatShortNumber(int number, int[] rounded) {
+        if (!OctoConfig.INSTANCE.numberRounding.getValue()) {
+            if (rounded != null) {
+                rounded[0] = number;
+            }
+            DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.US);
+            formatter.applyPattern("#,###");
+            return formatter.format(number);
+        }
         StringBuilder K = new StringBuilder();
         int lastDec = 0;
         int KCount = 0;

@@ -2474,7 +2474,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     }
                 };
                 setDialogsListFrozen(true);
-                if (Utilities.random.nextInt(1000) == 1) {
+                if (Utilities.random.nextInt(1000) == 1 || OctoConfig.INSTANCE.forcePacmanAnimation.getValue()) {
                     if (pacmanAnimation == null) {
                         pacmanAnimation = new PacmanAnimation(parentPage.listView);
                     }

@@ -60,6 +60,13 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> showNameInActionBar = new ConfigProperty<>("showNameInActionBar", false);
     public final ConfigProperty<Boolean> forceChatBlurEffect = new ConfigProperty<>("forceChatBlurEffect", false);
     public final ConfigProperty<Integer> blurEffectStrength = new ConfigProperty<>("blurEffectStrength", 155);
+    public final ConfigProperty<Boolean> forcePacmanAnimation = new ConfigProperty<>("forcePacmanAnimation", false);
+    public final ConfigProperty<Boolean> formatTimeWithSeconds = new ConfigProperty<>("formatTimeWithSeconds", false);
+    public final ConfigProperty<Boolean> numberRounding = new ConfigProperty<>("numberRounding", false);
+    public final ConfigProperty<Boolean> pencilIconForEditedMessages = new ConfigProperty<>("pencilIconForEditedMessages", false);
+    public final ConfigProperty<Boolean> searchIconInHeader = new ConfigProperty<>("searchIconInHeader", false);
+    public final ConfigProperty<Boolean> slidingTitle = new ConfigProperty<>("slidingTitle", false);
+    public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
 
     /*Unlock Secret Icons*/
     /*TODO*/ public final ConfigProperty<Boolean> unlockedYuki = new ConfigProperty<>("unlockedYuki", false);
@@ -78,8 +85,9 @@ public class OctoConfig {
             jumpToNextChannel, showGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus,
             hideCustomEmojis, activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera,
             disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideFoldersWhenForwarding, accentColorAsNotificationColor,
-            openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, cameraXEnabled,
-            cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa
+            openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, forcePacmanAnimation, formatTimeWithSeconds,
+            numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, useSystemFont,
+            cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa
     );
 
 

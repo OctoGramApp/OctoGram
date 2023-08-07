@@ -569,14 +569,19 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
     }
 
     public void setTitle(CharSequence value) {
-        setTitle(value, false, false, false, false, null, false);
+        setTitle(value, false, false, false, false, null, false, false);
     }
 
     public void setTitle(CharSequence value, boolean scam, boolean fake, boolean verified, boolean premium, TLRPC.EmojiStatus emojiStatus, boolean animated) {
+        setTitle(value, scam, fake, verified, premium, emojiStatus, animated, false);
+    }
+
+    public void setTitle(CharSequence value, boolean scam, boolean fake, boolean verified, boolean premium, TLRPC.EmojiStatus emojiStatus, boolean animated, boolean scrollable) {
         if (value != null) {
             value = Emoji.replaceEmoji(value, titleTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(24), false);
         }
         titleTextView.setText(value);
+        titleTextView.setScrollNonFitText(scrollable);
         if (scam || fake) {
             if (!(titleTextView.getRightDrawable() instanceof ScamDrawable)) {
                 ScamDrawable drawable = new ScamDrawable(11, scam ? 0 : 1);

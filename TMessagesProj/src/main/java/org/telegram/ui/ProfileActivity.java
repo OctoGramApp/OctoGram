@@ -6857,7 +6857,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     animatingItem.setAlpha(1.0f);
                     animators.add(ObjectAnimator.ofFloat(animatingItem, View.ALPHA, 0.0f));
                 }
-                if (callItemVisible && chatId != 0) {
+                if (callItemVisible && (chatId != 0 || OctoConfig.INSTANCE.searchIconInHeader.getValue())) {
                     callItem.setAlpha(0.0f);
                     animators.add(ObjectAnimator.ofFloat(callItem, View.ALPHA, 1.0f));
                 }
@@ -6920,7 +6920,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     animatingItem.setAlpha(0.0f);
                     animators.add(ObjectAnimator.ofFloat(animatingItem, View.ALPHA, 1.0f));
                 }
-                if (callItemVisible && chatId != 0) {
+                if (callItemVisible && (chatId != 0 || OctoConfig.INSTANCE.searchIconInHeader.getValue())) {
                     callItem.setAlpha(1.0f);
                     animators.add(ObjectAnimator.ofFloat(callItem, View.ALPHA, 0.0f));
                 }

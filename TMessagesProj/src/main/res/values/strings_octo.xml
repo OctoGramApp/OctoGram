@@ -15,6 +15,8 @@
     <string name="Updates">Updates</string>
     <string name="Experiments">Experiments</string>
     <string name="FeatureCurrentlyUnavailable">This feature is currently unavailable :(</string>
+    <string name="FormatterDay24HSec">HH:mm:ss</string>
+    <string name="FormatterDay12HSec">h:mm:ss a</string>
 
     <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
     <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
@@ -70,6 +72,7 @@
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
 
+    <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
     <string name="ShowNameActionBar">Show name on action bar</string>
     <string name="ShowNameActionBar_Desc">You will see your name on the action bar instead of "OctoGram"</string>
     <string name="ForceChatBlurEffect">Force chat blur effect</string>

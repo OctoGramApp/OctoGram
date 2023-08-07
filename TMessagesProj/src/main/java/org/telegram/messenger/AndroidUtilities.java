@@ -126,6 +126,7 @@ import com.google.android.gms.auth.api.phone.SmsRetriever;
 import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.utils.CustomHtml;
@@ -1844,20 +1845,45 @@ public class AndroidUtilities {
         synchronized (typefaceCache) {
             if (!typefaceCache.containsKey(assetPath)) {
                 try {
-                    Typeface t;
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        Typeface.Builder builder = new Typeface.Builder(ApplicationLoader.applicationContext.getAssets(), assetPath);
-                        if (assetPath.contains("medium")) {
-                            builder.setWeight(700);
+                    if (OctoConfig.INSTANCE.useSystemFont.getValue()) {
+                        Typeface t = null;
+                        switch (assetPath) {
+                            case "fonts/rmedium.ttf":
+                                t = Typeface.create("sans-serif-medium", Typeface.NORMAL);
+                                break;
+                            case "fonts/ritalic.ttf":
+                                t = Typeface.create("sans-serif", Typeface.ITALIC);
+                                break;
+                            case "fonts/rmediumitalic.ttf":
+                                t = Typeface.create("sans-serif-medium", Typeface.ITALIC);
+                                break;
+                            case "fonts/rmono.ttf":
+                                t = Typeface.MONOSPACE;
+                                break;
+                            case "fonts/mw_bold.ttf":
+                                t = Typeface.create("serif", Typeface.BOLD);
+                                break;
+                            case "fonts/rcondensedbold.ttf":
+                                t = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+                                break;
                         }
-                        if (assetPath.contains("italic")) {
-                            builder.setItalic(true);
-                        }
-                        t = builder.build();
+                        typefaceCache.put(assetPath, t);
                     } else {
-                        t = Typeface.createFromAsset(ApplicationLoader.applicationContext.getAssets(), assetPath);
+                        Typeface t;
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            Typeface.Builder builder = new Typeface.Builder(ApplicationLoader.applicationContext.getAssets(), assetPath);
+                            if (assetPath.contains("medium")) {
+                                builder.setWeight(700);
+                            }
+                            if (assetPath.contains("italic")) {
+                                builder.setItalic(true);
+                            }
+                            t = builder.build();
+                        } else {
+                            t = Typeface.createFromAsset(ApplicationLoader.applicationContext.getAssets(), assetPath);
+                        }
+                        typefaceCache.put(assetPath, t);
                     }
-                    typefaceCache.put(assetPath, t);
                 } catch (Exception e) {
                     if (BuildVars.LOGS_ENABLED) {
                         FileLog.e("Could not get typeface '" + assetPath + "' because " + e.getMessage());
