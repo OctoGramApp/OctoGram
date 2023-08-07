@@ -14,7 +14,7 @@ OctoGram is an open-source messaging platform that serves as an alternative to T
 To reproduce the build of OctoGram is only needed ccache (**already installed in "Tools" folder**), on macOs
 will be used from Homebrew if installed, otherwise it will be used the one in the "Tools" folder.
 
-1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application and put it [**here**](https://github.com/OctoGramApp/OctoGram/blob/main/TMessagesProj/src/main/java/it/octogram/Extra.java.example) (remember to **rename** Extra.java.example to Extra.java).
+1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application and put it [**here**](https://github.com/OctoGramApp/OctoGram/blob/main/TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java).
 2. Please **do not** use the name Telegram for your app — or make sure your users understand that it is unofficial.
 3. Kindly **do not** use our standard logo (white paper plane in a blue circle) as your app's logo.
 4. Please study our [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of your users' data and privacy.
@@ -34,6 +34,5 @@ keyPassword=<your-keystore-password>
 
 ## Thanks to the following projects:
 - [Telegram](https://github.com/DrKLO/Telegram)
-- [Catogram X](https://github.com/CatogramX/CatogramX)
-- [Nekogram](https://gitlab.com/Nekogram/Nekogram)
-- [OwlGram](https://github.com/OwlGramDev/OwlGram)
+- [Catogram X](https://github.com/CatogramX/CatogramX) for the UI toolkit (which OctoGram's one is heavily inspired by)
+- [OwlGram](https://github.com/OwlGramDev/OwlGram) for the CameraX implementation
