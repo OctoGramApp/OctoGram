@@ -38,7 +38,7 @@ public class LauncherIconController {
         VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.mipmap.icon_6_foreground_sa, R.string.AppIconVintage),
         MONET("MonetIcon", -1, -1, R.string.MonetIcon, false, true),
         AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconAqua),
-        CHUPA("ChupaIcon", -1, R.mipmap.icon_9_launcher, R.string.AppIconChupa, false, true),
+        CHUPA("ChupaIcon", R.drawable.icon_9_background_sa, R.mipmap.icon_9_launcher, R.string.AppIconChupa, false, true),
         PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground_sa, R.string.AppIconPremium, true),
         TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.mipmap.icon_5_foreground_sa, R.string.AppIconTurbo, true),
         NOX("NoxIcon", R.drawable.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox, true),
