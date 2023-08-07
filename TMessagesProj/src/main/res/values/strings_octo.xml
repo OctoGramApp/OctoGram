@@ -113,6 +113,18 @@
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
     <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
 
+    <string name="OctoExperimentsSettingsHeader">Try out new and shiny features</string>
+    <string name="OctoExperimentsDialogTitle">Experiments - Warning</string>
+    <string name="OctoExperimentsDialogMessage">These features are experimental and may not work as expected. You may experience crashes and other issues. Please report any issues you encounter to the developers. If you wish to continue, click "OK"</string>
+    <string name="ExperimentalSettings">Experimental Settings</string>
+    <string name="AlternativeNavigation">Alternative navigation</string>
+    <string name="AlternativeNavigation_Desc">Use a different navigation style when navigating through the app</string>
+    <string name="UploadBoost">Upload boost</string>
+    <string name="DownloadBoost">Download boost</string>
+    <string name="DownloadBoostType">Download Boost type</string>
+    <string name="Fast">Fast</string>
+    <string name="Extreme">Extreme</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>

@@ -72,12 +72,18 @@ public class OctoConfig {
     /*TODO*/ public final ConfigProperty<Boolean> unlockedYuki = new ConfigProperty<>("unlockedYuki", false);
     /*TODO*/ public final ConfigProperty<Boolean> unlockedChupa = new ConfigProperty<>("unlockedChupa", false);
 
-
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXEnabled = new ConfigProperty<>("cameraXEnabled", true);
     public final ConfigProperty<Boolean> cameraXPerfOverQuality = new ConfigProperty<>("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = new ConfigProperty<>("cameraXZeroShutter", false);
     public final ConfigProperty<Integer> cameraXResolution = new ConfigProperty<>("cameraXResolution", -1);
+
+    /*Experiments*/
+    public final ConfigProperty<Boolean> experimentsEnabled = new ConfigProperty<>("experimentsEnabled", false);
+    public final ConfigProperty<Boolean> alternativeNavigation = new ConfigProperty<>("alternativeNavigation", false);
+    public final ConfigProperty<Boolean> uploadBoost = new ConfigProperty<>("uploadBoost", false);
+    public final ConfigProperty<Boolean> downloadBoost = new ConfigProperty<>("downloadBoost", false);
+    public final ConfigProperty<String> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", "Default");
 
 
     private final List<ConfigProperty<?>> properties = List.of(
@@ -87,7 +93,8 @@ public class OctoConfig {
             disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideFoldersWhenForwarding, accentColorAsNotificationColor,
             openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, forcePacmanAnimation, formatTimeWithSeconds,
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, useSystemFont,
-            cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa
+            cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
+            experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue
     );
 
 

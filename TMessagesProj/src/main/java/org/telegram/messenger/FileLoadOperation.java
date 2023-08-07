@@ -12,6 +12,7 @@ import android.os.Build;
 
 import com.google.android.exoplayer2.util.Log;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.utils.ImmutableByteArrayOutputStream;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
@@ -263,14 +264,20 @@ public class FileLoadOperation {
     }
 
     private void updateParams() {
-        if ((preloadPrefixSize > 0 || MessagesController.getInstance(currentAccount).getfileExperimentalParams) && !forceSmallChunk) {
-            downloadChunkSizeBig = 1024 * 512;
-            maxDownloadRequests = 8;
-            maxDownloadRequestsBig = 8;
-        } else {
+        String downloadBoostValue = OctoConfig.INSTANCE.downloadBoostValue.getValue();
+        if (!OctoConfig.INSTANCE.downloadBoost.getValue() || downloadBoostValue.equals("Default")) {
             downloadChunkSizeBig = 1024 * 128;
             maxDownloadRequests = 4;
             maxDownloadRequestsBig = 4;
+        }
+        if (downloadBoostValue.equals("Fast") || MessagesController.getInstance(currentAccount).getfileExperimentalParams && !forceSmallChunk) {
+            downloadChunkSizeBig = 1024 * 512;
+            maxDownloadRequests = 8;
+            maxDownloadRequestsBig = 8;
+        } else if (downloadBoostValue.equals("Extreme")) {
+            downloadChunkSizeBig = 1024 * 1024;
+            maxDownloadRequests = 12;
+            maxDownloadRequestsBig = 12;
         }
         maxCdnParts = (int) (FileLoader.DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
     }
