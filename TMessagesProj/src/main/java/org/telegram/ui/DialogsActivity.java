@@ -84,6 +84,8 @@ import androidx.recyclerview.widget.LinearSmoothScrollerCustom;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
+import it.octogram.android.Crashlytics;
+import it.octogram.android.CrashlyticsBottomSheet;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -5047,6 +5049,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             FilesMigrationService.checkBottomSheet(this);
+        }
+        boolean foundCrashReport = Crashlytics.isCrashed();
+        if (foundCrashReport) {
+            CrashlyticsBottomSheet.checkBottomSheet(this);
         }
         updateMenuButton(false);
         actionBar.setDrawBlurBackground(contentView);

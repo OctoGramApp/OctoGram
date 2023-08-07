@@ -89,6 +89,7 @@ import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
 
+import it.octogram.android.Crashlytics;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -5736,6 +5737,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     protected void onResume() {
         super.onResume();
+        if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof Crashlytics)) {
+            Thread.setDefaultUncaughtExceptionHandler(new Crashlytics());
+        }
         isResumed = true;
         if (onResumeStaticCallback != null) {
             onResumeStaticCallback.run();
