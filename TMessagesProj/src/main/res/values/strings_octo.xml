@@ -73,10 +73,27 @@
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
 
     <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
-    <string name="ShowNameActionBar">Show name on action bar</string>
-    <string name="ShowNameActionBar_Desc">You will see your name on the action bar instead of "OctoGram"</string>
+    <string name="BlurHeader">Blur</string>
     <string name="ForceChatBlurEffect">Force chat blur effect</string>
     <string name="ForceChatBlurEffectName">Alpha</string>
+    <string name="FormattingHeader">Formatting</string>
+    <string name="FormatTimeWithSeconds">Format time with seconds</string>
+    <string name="NumberRounding">Number rounding</string>
+    <string name="PencilIconForEdited">Pencil icon for edited messages</string>
+    <string name="PencilIconForEdited_Desc">This will replace the text "Edited" with a pencil icon</string>
+    <string name="HeaderHeader">Header</string>
+    <string name="ShowNameActionBar">Show name on action bar</string>
+    <string name="ShowNameActionBar_Desc">You will see your name on the action bar instead of "OctoGram"</string>
+    <string name="SearchIconInHeader">Search icon in header bar</string>
+    <string name="SlidingTitle">Sliding title</string>
+    <string name="SlidingTitle_Desc">The title will slide on screen when it\'s too long</string>
+    <string name="FontEmojisHeader">Font &amp; Emojis</string>
+    <string name="EmojiSets">Emoji sets</string>
+    <string name="EmojiSets_Desc">Customize your emoji sets</string>
+    <string name="UseSystemFont">Use system font</string>
+    <string name="ArchiveHeader">Archive</string>
+    <string name="ForcePacmanAnimation">Force pacman animation</string>
+    <string name="ForcePacmanAnimation_Desc">Force pacman animation when archiving a chat</string>
 
     <string name="RestrictionReason">Restriction Reason</string>
     <string name="RegistrationDate">Registration Date</string>

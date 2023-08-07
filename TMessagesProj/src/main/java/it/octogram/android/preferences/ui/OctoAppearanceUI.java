@@ -25,7 +25,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
     public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("Appearance", R.string.Appearance))
                 .sticker(context, R.raw.utyan_appearance, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
-                .category("Blur", category -> {
+                .category(LocaleController.formatString("BlurHeader", R.string.BlurHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forceChatBlurEffect)
                             .title(LocaleController.getString("ForceChatBlurEffect", R.string.ForceChatBlurEffect))
@@ -38,23 +38,23 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .showIf(OctoConfig.INSTANCE.forceChatBlurEffect)
                             .build());
                 })
-                .category("Formatting", category -> {
+                .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.formatTimeWithSeconds)
-                            .title("Format time with seconds")
+                            .title(LocaleController.formatString("FormatTimeWithSeconds", R.string.FormatTimeWithSeconds))
                             .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.numberRounding)
-                            .title("Number rounding")
+                            .title(LocaleController.formatString("NumberRounding", R.string.NumberRounding))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.pencilIconForEditedMessages)
-                            .title("Pencil icon for edited messages")
-                            .description("This will replace the text \"Edited\" with a pencil icon")
+                            .title(LocaleController.formatString("PencilIconForEdited", R.string.PencilIconForEdited))
+                            .description(LocaleController.formatString("PencilIconForEdited_Desc", R.string.PencilIconForEdited_Desc))
                             .build());
                 })
-                .category("Header", category -> {
+                .category(LocaleController.getString("HeaderHeader", R.string.HeaderHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showNameInActionBar)
                             .title(LocaleController.getString("ShowNameActionBar", R.string.ShowNameActionBar))
@@ -62,30 +62,31 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.searchIconInHeader)
-                            .title("Search icon in header")
+                            .title(LocaleController.getString("SearchIconInHeader", R.string.SearchIconInHeader))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.slidingTitle)
-                            .title("Sliding title")
-                            .description("The title will slide on screen when it's too long")
+                            .title(LocaleController.getString("SlidingTitle", R.string.SlidingTitle))
+                            .description(LocaleController.getString("SlidingTitle_Desc", R.string.SlidingTitle_Desc))
                             .build());
                 })
-                .category("Fonts & Emojis", category -> {
+                .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .icon(R.drawable.msg_emoji_cat)
-                            .title("Emoji sets")
-                            .description("Feature coming soon")
+                            .title(LocaleController.getString("EmojiSets", R.string.EmojiSets))
+                            .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
                             .title("Use system font")
+                            .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
                             .build());
                 })
-                .category("Archive", category -> {
+                .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)
-                            .title("Force pacman animation")
-                            .description("Force pacman animation when archiving a chat")
+                            .title(LocaleController.getString("ForcePacmanAnimation", R.string.ForcePacmanAnimation))
+                            .description(LocaleController.getString("ForcePacmanAnimation_Desc", R.string.ForcePacmanAnimation_Desc))
                             .build());
                 })
                 .build();
