@@ -165,6 +165,12 @@ android {
             buildConfigField "String", "BUILD_VERSION_STRING", "\"${getVersionPBetaName()}\""
         }
 
+        beta {
+            resValue "string", "BuildAppName", "@string/AppName"
+            buildConfigField "boolean", "DEBUG_VERSION", "true"
+            buildConfigField "String", "BUILD_VERSION_STRING", "\"${getVersionPBetaName()}\""
+        }
+
         release {
             resValue "string", "BuildAppName", "@string/AppName"
         }

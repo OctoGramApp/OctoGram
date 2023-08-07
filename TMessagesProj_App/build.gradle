@@ -57,6 +57,17 @@ android {
             ndk.debugSymbolLevel 'FULL'
         }
 
+        beta {
+            minifyEnabled true
+            shrinkResources true
+            if (signingProperties.size() > 0) {
+                signingConfig signingConfigs.sign
+            }
+            jniDebuggable true
+            proguardFiles '../TMessagesProj/proguard-rules.pro'
+            ndk.debugSymbolLevel 'FULL'
+        }
+
         release {
             minifyEnabled true
             shrinkResources true
