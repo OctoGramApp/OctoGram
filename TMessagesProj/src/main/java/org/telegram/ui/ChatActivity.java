@@ -25037,7 +25037,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         contentView.addView(emptyViewContainer, 1, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
 
         int distance = getArguments().getInt("nearby_distance", -1);
-        if (OctoConfig.INSTANCE.showGreetingSticker.getValue() && (distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked) {
+        if (!OctoConfig.INSTANCE.hideGreetingSticker.getValue() && (distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked) {
             greetingsViewContainer = new ChatGreetingsView(getContext(), currentUser, distance, currentAccount, preloadedGreetingsSticker, themeDelegate);
             greetingsViewContainer.setListener((sticker) -> {
                 animatingDocuments.put(sticker, 0);
@@ -25056,7 +25056,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     bigEmptyView.setStatusText(AndroidUtilities.replaceTags(LocaleController.getString("GroupEmptyTitle1", R.string.GroupEmptyTitle1)));
                 }
             } else {
-                String emptyMessage = null;
+                String emptyMessage = LocaleController.getString("NoMessages", R.string.NoMessages);
                 if (isThreadChat()) {
                     if (isComments) {
                         emptyMessage = LocaleController.getString("NoComments", R.string.NoComments);
@@ -25070,7 +25070,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else if (currentUser == null || currentUser.self || currentUser.deleted || userBlocked) {
                     emptyMessage = LocaleController.getString("NoMessages", R.string.NoMessages);
                 }
-                if (emptyMessage == null) {
+                if (emptyMessage == null && !OctoConfig.INSTANCE.hideGreetingSticker.getValue()) {
                     greetingsViewContainer = new ChatGreetingsView(getContext(), currentUser, distance, currentAccount, preloadedGreetingsSticker, themeDelegate);
                     greetingsViewContainer.setListener((sticker) -> {
                         animatingDocuments.put(sticker, 0);
