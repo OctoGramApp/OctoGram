@@ -10,18 +10,16 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 import android.util.Pair;
-
-import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.BaseFragment;
-
-import java.util.List;
-
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.BaseFragment;
+
+import java.util.List;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
 
@@ -145,10 +143,12 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideChatFolders)
                             .title(LocaleController.formatString("HideAllChatFolders", R.string.HideAllChatFolders))
+                            .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideFoldersWhenForwarding)
                             .title(LocaleController.formatString("HideChatFoldersWhenForwarding", R.string.HideChatFoldersWhenForwarding))
+                            .requiresRestart(true)
                             .build());
                 })
                 .category(LocaleController.formatString("Notifications", R.string.Notifications), category -> category.row(new SwitchRow.SwitchRowBuilder()
