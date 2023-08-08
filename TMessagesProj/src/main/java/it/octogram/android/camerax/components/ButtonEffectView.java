@@ -83,8 +83,6 @@ public class ButtonEffectView extends RelativeLayout {
     }
 
     private int getIconRes(int icon) {
-        //TODO PLACEHOLDER
-        return R.drawable.instant_camera;
         switch (icon) {
             case CameraXController.CAMERA_HDR:
                 return R.drawable.round_hdr_on_black;
