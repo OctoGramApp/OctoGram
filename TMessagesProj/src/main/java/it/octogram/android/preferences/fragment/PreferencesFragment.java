@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.preferences.rows.impl.*;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -52,13 +53,6 @@ import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
 import it.octogram.android.preferences.rows.cells.SliderCell;
-import it.octogram.android.preferences.rows.impl.ListRow;
-import it.octogram.android.preferences.rows.impl.SliderChooseRow;
-import it.octogram.android.preferences.rows.impl.SliderRow;
-import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
-import it.octogram.android.preferences.rows.impl.SwitchRow;
-import it.octogram.android.preferences.rows.impl.TextDetailRow;
-import it.octogram.android.preferences.rows.impl.TextIconRow;
 
 /*
  * This library is *heavily* inspired by CatoGramX's preferences library.
@@ -197,6 +191,10 @@ public class PreferencesFragment extends BaseFragment {
             }
 
             switch (type) {
+                case CUSTOM:
+                    view = new FrameLayout(context);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
                 case SHADOW:
                     view = new ShadowSectionCell(context);
                     break;
@@ -261,6 +259,14 @@ public class PreferencesFragment extends BaseFragment {
             }
 
             switch (type) {
+                case CUSTOM:
+                    // remove the current view if it exists
+                    if (((FrameLayout) holder.itemView).getChildCount() > 0) {
+                        ((FrameLayout) holder.itemView).removeAllViews();
+                    }
+                    // add custom view
+                    ((FrameLayout) holder.itemView).addView(((CustomCellRow)positions.get(position)).getLayout());
+                    break;
                 case SHADOW:
                     holder.itemView.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                     break;

@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 public enum PreferenceType {
 
+    CUSTOM(-1, true),
     SHADOW(0, false),
     EMPTY_CELL(2, false),
     HEADER(2, false),
