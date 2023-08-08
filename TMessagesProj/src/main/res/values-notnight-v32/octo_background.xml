@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="octo_foreground">@android:color/system_neutral1_700</color>
+</resources>
