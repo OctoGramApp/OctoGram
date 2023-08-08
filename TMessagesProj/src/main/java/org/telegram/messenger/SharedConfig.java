@@ -27,6 +27,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.pm.ShortcutManagerCompat;
 
+import it.octogram.android.OctoConfig;
 import org.json.JSONObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
@@ -1546,7 +1547,7 @@ public class SharedConfig {
     }
 
     public static boolean canBlurChat() {
-        return getDevicePerformanceClass() == PERFORMANCE_CLASS_HIGH;
+        return getDevicePerformanceClass() == PERFORMANCE_CLASS_HIGH || OctoConfig.INSTANCE.forceChatBlurEffect.getValue();
     }
 
     public static boolean chatBlurEnabled() {
