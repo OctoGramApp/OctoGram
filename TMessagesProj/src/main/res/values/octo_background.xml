@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="splash_background">#1c273b</color>
+    <color name="splash_navigation_bar">#000</color>
+    <color name="splash_fm_background">#1c273b</color>
+    <color name="splash_fm_navigation_bar">#000</color>
+    <color name="octo_background">#4285F4</color>
+    <color name="octo_foreground">#FFF</color>
+    <color name="octo_fm_background">#4285F4</color>
+    <color name="octo_fm_foreground">#FFF</color>
+</resources>
