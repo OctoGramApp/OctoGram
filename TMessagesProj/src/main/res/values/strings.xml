@@ -7005,4 +7005,5 @@
     <string name="UnarchiveStories">Unhide Stories</string>
     <string name="GroupTooLarge">Group Too Large</string>
     <string name="GroupTooLargeMessage">You can select groups that are up to 200 members.</string>
+    <string name="CreateMention">Create Mention</string>
 </resources>

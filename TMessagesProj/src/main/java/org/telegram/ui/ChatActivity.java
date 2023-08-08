@@ -20599,6 +20599,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             menu.add(R.id.menu_groupbolditalic, R.id.menu_underline, order++, stringBuilder);
         }
         menu.add(R.id.menu_groupbolditalic, R.id.menu_link, order++, LocaleController.getString("CreateLink", R.string.CreateLink));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_mention, order++, LocaleController.getString("CreateMention", R.string.CreateMention));
         menu.add(R.id.menu_groupbolditalic, R.id.menu_regular, order++, LocaleController.getString("Regular", R.string.Regular));
     }
 
