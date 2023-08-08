@@ -85,7 +85,7 @@ public class ButtonEffectView extends RelativeLayout {
     private int getIconRes(int icon) {
         //TODO PLACEHOLDER
         return R.drawable.instant_camera;
-        /*switch (icon) {
+        switch (icon) {
             case CameraXController.CAMERA_HDR:
                 return R.drawable.round_hdr_on_black;
             case CameraXController.CAMERA_NIGHT:
@@ -97,7 +97,7 @@ public class ButtonEffectView extends RelativeLayout {
             case CameraXController.CAMERA_NONE:
             default:
                 return R.drawable.round_photo_camera_black;
-        }*/
+        }
     }
 
     public void toggleButton(boolean enabled, boolean animated) {
