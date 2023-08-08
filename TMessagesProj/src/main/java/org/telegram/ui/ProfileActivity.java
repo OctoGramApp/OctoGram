@@ -9114,8 +9114,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             abi = "direct ";
                         } else if (StoreUtils.isFromHuaweiStore()) {
                             abi = "huawei ";
-                        } else if (BuildVars.DEBUG_VERSION) {
-                            abi = "beta ";
                         }
                         switch (pInfo.versionCode % 10) {
                             case 1:
