@@ -75,7 +75,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideGreetingSticker)
-                            .showIf(OctoConfig.INSTANCE.jumpToNextChannel)
                             .title(LocaleController.formatString("HideGreetingSticker", R.string.HideGreetingSticker))
                             .description(LocaleController.formatString("HideGreetingSticker_Desc", R.string.HideGreetingSticker_Desc))
                             .build());
