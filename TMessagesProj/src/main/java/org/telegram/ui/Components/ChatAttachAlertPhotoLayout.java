@@ -2186,14 +2186,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             deviceHasGoodCamera = false;
         } else {
             if (Build.VERSION.SDK_INT >= 23) {
-                if (noCameraPermissions == (fragment.getParentActivity().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+                if (noCameraPermissions = (fragment.getParentActivity().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
                     if (request) {
                         try {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO}, 17);
-                            } else {
-                                parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 17);
-                            }
+                            parentAlert.baseFragment.getParentActivity().requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE}, 17);
                         } catch (Exception ignore) {
 
                         }
@@ -3185,10 +3181,8 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     public void checkStorage() {
-        requestingPermissions = true;
         if (noGalleryPermissions && Build.VERSION.SDK_INT >= 23) {
-            android.util.Log.e("GALLERY_PERMISSION", "requesting" + " " + "status" + PermissionsUtils.isImagesAndVideoPermissionGranted());
-            noGalleryPermissions = PermissionsUtils.isImagesAndVideoPermissionGranted(); // Testing
+            noGalleryPermissions = !PermissionsUtils.isImagesAndVideoPermissionGranted();
             if (!noGalleryPermissions) {
                 loadGalleryPhotos();
             }
@@ -3548,8 +3542,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
         }
         if (Build.VERSION.SDK_INT >= 23) {
-            // Photo & Video List
-            noGalleryPermissions = !PermissionsUtils.isImagesAndVideoPermissionGranted();;
+            noGalleryPermissions = !PermissionsUtils.isImagesAndVideoPermissionGranted();
         }
         if (galleryAlbumEntry != null) {
             for (int a = 0; a < Math.min(100, galleryAlbumEntry.photos.size()); a++) {

@@ -62,11 +62,6 @@ public class PermissionsUtils {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public static void requestCameraPermission(Activity activity) {
-        requestImagesPermission(activity, BasePermissionsActivity.REQUEST_CODE_OPEN_CAMERA);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public static void requestAudioPermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(activity, BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE, Manifest.permission.READ_MEDIA_AUDIO);
