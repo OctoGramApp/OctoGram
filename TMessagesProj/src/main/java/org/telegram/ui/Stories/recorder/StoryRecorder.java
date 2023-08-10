@@ -145,6 +145,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import it.octogram.android.utils.PermissionsUtils;
+
 public class StoryRecorder implements NotificationCenter.NotificationCenterDelegate {
 
     private final Theme.ResourcesProvider resourcesProvider = new DarkThemeResourceProvider();
@@ -2292,8 +2294,10 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
 
         @Override
         public void onGalleryClick() {
-            if (currentPage == PAGE_CAMERA && requestGalleryPermission()) {
+            if (currentPage == PAGE_CAMERA && PermissionsUtils.isImagesAndVideoPermissionGranted()) {
                 animateGalleryListView(true);
+            } else {
+                requestGalleryPermission();
             }
         }
 
@@ -3945,26 +3949,24 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
 
     private boolean requestGalleryPermission() {
         if (activity != null) {
-            boolean noGalleryPermission = false;
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                noGalleryPermission = (
-//                    activity.checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ||
-//                    activity.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED
-//                );
-//                if (noGalleryPermission) {
-//                    activity.requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO}, 114);
-//                }
-//            } else
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                noGalleryPermission = activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
-                if (noGalleryPermission) {
+            boolean hasGalleryPermission = true;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (!PermissionsUtils.isImagesAndVideoPermissionGranted()) {
+                    PermissionsUtils.requestImagesAndVideoPermission(activity);
+                    hasGalleryPermission = false;
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 114);
+                    hasGalleryPermission = false;
                 }
             }
-            return !noGalleryPermission;
+            return hasGalleryPermission;
         }
         return true;
     }
+
 
     private boolean requestAudioPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity != null) {
