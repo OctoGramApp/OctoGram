@@ -64,6 +64,16 @@ def getCCacheExecutable = {
         }
         pathName = "macOs"
     } else {
+        if (new ProcessBuilder("which", "ccache").start().waitFor() == 0) {
+            def stdout = new ByteArrayOutputStream()
+            exec {
+                commandLine 'which', 'ccache'
+                standardOutput = stdout
+            }
+            pathName = stdout.toString().trim()
+            // Get the path to the ccache executable
+            return Paths.get(pathName).toFile()
+        }
         pathName = "linux"
     }
     def executableFile = "ccache"
