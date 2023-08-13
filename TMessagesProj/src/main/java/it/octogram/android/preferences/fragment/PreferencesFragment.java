@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -42,6 +43,7 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.Components.UndoView;
+import org.telegram.ui.Components.*;
 
 import java.util.List;
 
@@ -334,6 +336,10 @@ public class PreferencesFragment extends BaseFragment {
                     LinearLayout linearLayout = (LinearLayout) holder.itemView;
 
                     linearLayout.removeAllViews();
+                    if (((View) pref.getStickerView()).getParent() != null) {
+                        ((ViewGroup) ((View) pref.getStickerView()).getParent()).removeView((View) pref.getStickerView());
+                    }
+
                     linearLayout.addView((View) pref.getStickerView(), LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 20, 0, 0));
 
                     if (pref.getSummary() != null) {
