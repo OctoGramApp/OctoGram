@@ -15,9 +15,11 @@ public abstract class BaseRow {
     private final ConfigProperty<Boolean> showIfPreferenceValue;
     private boolean divider;
     private final PreferenceType type;
+    private final int[] postNotificationName;
 
     private boolean currentlyHidden;
     private int row;
+
 
     public BaseRow(PreferenceType type) {
         this(null, null, false, null, true, type);
@@ -36,12 +38,17 @@ public abstract class BaseRow {
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type) {
+        this(title, summary, requiresRestart, showIf, divider, type, (int[]) null);
+    }
+
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type, @Nullable int... postNotificationName) {
         this.title = title;
         this.summary = summary;
         this.requiresRestart = requiresRestart;
         this.showIfPreferenceValue = showIf;
         this.divider = divider;
         this.type = type;
+        this.postNotificationName = postNotificationName;
 
         this.currentlyHidden = showIfPreferenceValue != null && !showIfPreferenceValue.getValue();
     }
@@ -70,6 +77,10 @@ public abstract class BaseRow {
 
     public PreferenceType getType() {
         return type;
+    }
+
+    public int[] getPostNotificationName() {
+        return postNotificationName;
     }
 
     public void setDivider(boolean divider) {

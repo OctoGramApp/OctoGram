@@ -22,8 +22,8 @@ public class SwitchRow extends BaseRow implements Clickable {
     private final ConfigProperty<Boolean> preferenceValue;
     private final Supplier<Boolean> supplierClickable;
 
-    private SwitchRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable) {
-        super(title, summary, requiresRestart, showIf, divider, PreferenceType.SWITCH);
+    private SwitchRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, int... posts) {
+        super(title, summary, requiresRestart, showIf, divider, PreferenceType.SWITCH, posts);
         this.preferenceValue = preferenceValue;
         this.supplierClickable = supplierClickable;
     }
@@ -53,7 +53,7 @@ public class SwitchRow extends BaseRow implements Clickable {
         }
 
         public SwitchRow build() {
-            return new SwitchRow(title, description, requiresRestart, showIf, divider, preferenceValue, supplierClickable);
+            return new SwitchRow(title, description, requiresRestart, showIf, divider, preferenceValue, supplierClickable, postNotificationName);
         }
     }
 

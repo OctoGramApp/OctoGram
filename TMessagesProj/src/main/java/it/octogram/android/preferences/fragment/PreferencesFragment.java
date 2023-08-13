@@ -149,6 +149,12 @@ public class PreferencesFragment extends BaseFragment {
                         frameLayout.addView(restartTooltip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT, 8, 0, 8, 8));
                         restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
                     }
+
+                    if (row.getPostNotificationName() != null) {
+                        for (int notif : row.getPostNotificationName()) {
+                            NotificationCenter.getGlobalInstance().postNotificationName(notif);
+                        }
+                    }
                 }
             }
 

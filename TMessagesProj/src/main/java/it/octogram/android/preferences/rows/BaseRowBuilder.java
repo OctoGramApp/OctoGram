@@ -17,6 +17,7 @@ public abstract class BaseRowBuilder<T> {
     protected boolean requiresRestart = false;
     protected ConfigProperty<Boolean> showIf;
     protected boolean divider = true;
+    protected int[] postNotificationName;
 
     public BaseRowBuilder<T> title(String val) {
         title = val;
@@ -40,6 +41,11 @@ public abstract class BaseRowBuilder<T> {
 
     public BaseRowBuilder<T> divider(boolean val) {
         divider = val;
+        return this;
+    }
+
+    public BaseRowBuilder<T> postNotificationName(int... val) {
+        postNotificationName = val;
         return this;
     }
 
