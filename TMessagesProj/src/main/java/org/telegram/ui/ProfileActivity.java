@@ -9299,7 +9299,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), isTopic);
                     } else if (position == registrationDataRow) {
                         if (!isChat() && userId != 0) {
-                            detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId), LocaleController.getString(R.string.RegistrationDate), true);
+                            detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId), LocaleController.getString(R.string.RegistrationDate), false);
                             break;
                         }
                     } else if (position == restrictionReasonRow) {
