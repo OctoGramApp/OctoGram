@@ -12,6 +12,7 @@ import android.content.Context;
 
 import it.octogram.android.preferences.rows.impl.*;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 
@@ -46,7 +47,6 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             })
                             .preferenceValue(OctoConfig.INSTANCE.formatTimeWithSeconds)
                             .title(LocaleController.formatString("FormatTimeWithSeconds", R.string.FormatTimeWithSeconds))
-                            .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.numberRounding)
@@ -76,6 +76,11 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.slidingTitle)
                             .title(LocaleController.getString("SlidingTitle", R.string.SlidingTitle))
                             .description(LocaleController.getString("SlidingTitle_Desc", R.string.SlidingTitle_Desc))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.hideStories)
+                            .postNotificationName(NotificationCenter.storiesUpdated, NotificationCenter.storiesEnabledUpdate, NotificationCenter.reloadInterface, NotificationCenter.updateInterfaces)
+                            .title("Hide stories")
                             .build());
                 })
                 .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
