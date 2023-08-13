@@ -165,6 +165,9 @@ public class UndoView extends FrameLayout {
     public final static int ACTION_LINK_COPIED = 59;
     public final static int ACTION_PHONE_COPIED = 60;
     public final static int ACTION_SHARE_BACKGROUND = 61;
+    public final static int ACTION_CALLBACK_COPIED = 201;
+    public final static int ACTION_ID_COPIED = 202;
+    public final static int ACTION_QUERY_COPIED = 203;
 
     public final static int ACTION_AUTO_DELETE_ON = 70;
     public final static int ACTION_AUTO_DELETE_OFF = 71;
@@ -451,7 +454,7 @@ public class UndoView extends FrameLayout {
     }
 
     public void showWithAction(ArrayList<Long> dialogIds, int action, Object infoObject, Object infoObject2, Runnable actionRunnable, Runnable cancelRunnable) {
-        if (!AndroidUtilities.shouldShowClipboardToast() && (currentAction == ACTION_MESSAGE_COPIED || currentAction == ACTION_USERNAME_COPIED || currentAction == ACTION_HASHTAG_COPIED || currentAction == ACTION_TEXT_COPIED || currentAction == ACTION_LINK_COPIED || currentAction == ACTION_PHONE_COPIED || currentAction == ACTION_EMAIL_COPIED || currentAction == ACTION_VOIP_LINK_COPIED)) {
+        if (!AndroidUtilities.shouldShowClipboardToast() && (currentAction == ACTION_MESSAGE_COPIED || currentAction == ACTION_USERNAME_COPIED || currentAction == ACTION_HASHTAG_COPIED || currentAction == ACTION_TEXT_COPIED || currentAction == ACTION_LINK_COPIED || currentAction == ACTION_PHONE_COPIED || currentAction == ACTION_EMAIL_COPIED || currentAction == ACTION_VOIP_LINK_COPIED || currentAction == ACTION_CALLBACK_COPIED || currentAction == ACTION_ID_COPIED || currentAction == ACTION_QUERY_COPIED)) {
             return;
         }
         if (currentActionRunnable != null) {
@@ -467,7 +470,7 @@ public class UndoView extends FrameLayout {
         currentInfoObject = infoObject;
         currentInfoObject2 = infoObject2;
         lastUpdateTime = SystemClock.elapsedRealtime();
-        undoTextView.setText(LocaleController.getString("Undo", R.string.Undo));
+        undoTextView.setText(LocaleController.getString("Undo", R.string.Undo).toUpperCase());
         undoImageView.setVisibility(VISIBLE);
         leftImageView.setPadding(0, 0, 0, 0);
         leftImageView.setScaleX(1);
@@ -1017,6 +1020,12 @@ public class UndoView extends FrameLayout {
                 } else if (currentAction == ACTION_LINK_COPIED) {
                     iconRawId = R.raw.voip_invite;
                     infoTextView.setText(LocaleController.getString("LinkCopied", R.string.LinkCopied));
+                } else if (currentAction == ACTION_CALLBACK_COPIED) {
+                    infoTextView.setText(LocaleController.getString("CallbackCopiedHint", R.string.CallbackCopiedHint));
+                } else if (currentAction == ACTION_ID_COPIED) {
+                    infoTextView.setText(LocaleController.getString("IDCopied", R.string.IDCopied));
+                } else if (currentAction == ACTION_QUERY_COPIED) {
+                    infoTextView.setText(LocaleController.getString("InlineQueryCopied", R.string.InlineQueryCopied));
                 } else {
                     infoTextView.setText(LocaleController.getString("TextCopied", R.string.TextCopied));
                 }

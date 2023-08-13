@@ -29441,6 +29441,56 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     cell.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
                 } catch (Exception ignore) {}
             }
+            BottomSheet.Builder builder = new BottomSheet.Builder(getParentActivity(), false, themeDelegate);
+            String link = button.url != null ? button.url:button.text;
+            link = button.data != null ? new String(button.data):link;
+            builder.setTitle(link);
+            builder.setItems(new CharSequence[]{
+                    LocaleController.getString("CopyTitle", R.string.CopyTitle),
+                    button.data != null ? LocaleController.getString("CopyCallback", R.string.CopyCallback) : null,
+                    button.url != null ? LocaleController.getString("CopyLink", R.string.CopyLink) : null,
+                    button.query != null && button.same_peer ? LocaleController.getString("CopyInlineQuery", R.string.CopyInlineQuery) : null,
+                    button.user_id != 0 ? LocaleController.getString("CopyID", R.string.CopyID) : null}, (dialog, which) -> {
+                if (which == 0) {
+                    AndroidUtilities.addToClipboard(button.text);
+                } else if (which == 1) {
+                    AndroidUtilities.addToClipboard(new String(button.data));
+                } else if (which == 2) {
+                    AndroidUtilities.addToClipboard(button.url);
+                } else if (which == 3) {
+                    MessageObject messageObject = cell.getMessageObject();
+                    long uid = messageObject.messageOwner.from_id.user_id;
+                    if (messageObject.messageOwner.via_bot_id != 0) {
+                        uid = messageObject.messageOwner.via_bot_id;
+                    }
+                    TLRPC.User user = getAccountInstance().getMessagesController().getUser(uid);
+                    if (user == null) {
+                        return;
+                    }
+                    AndroidUtilities.addToClipboard("@" + user.username + " " + button.query);
+                } else if (which == 4) {
+                    AndroidUtilities.addToClipboard(String.valueOf(button.user_id));
+                }
+                createUndoView();
+                if (undoView != null) {
+                    switch (which) {
+                        case 1:
+                        case 3:
+                            undoView.showWithAction(0, UndoView.ACTION_CALLBACK_COPIED, null);
+                            break;
+                        case 2:
+                            undoView.showWithAction(0, UndoView.ACTION_LINK_COPIED, null);
+                            break;
+                        case 4:
+                            undoView.showWithAction(0, UndoView.ACTION_ID_COPIED, null);
+                            break;
+                        default:
+                            undoView.showWithAction(0, UndoView.ACTION_TEXT_COPIED, null);
+                            break;
+                    }
+                }
+            });
+            showDialog(builder.create());
         }
 
         @Override
