@@ -150,6 +150,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .requiresRestart(true)
                             .build());
                 })
+                .category("Tablet Mode", category -> category.row(new SwitchRow.SwitchRowBuilder()
+                        .preferenceValue(OctoConfig.INSTANCE.tabletMode)
+                        .title(LocaleController.formatString("EnableTabletMode", R.string.ForceTableMode))
+                        .build()))
                 .category(LocaleController.formatString("Notifications", R.string.Notifications), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
                         .title(LocaleController.formatString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))

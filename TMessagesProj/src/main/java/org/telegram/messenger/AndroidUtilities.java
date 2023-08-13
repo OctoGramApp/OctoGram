@@ -2379,6 +2379,9 @@ public class AndroidUtilities {
     }
 
     public static boolean isTabletInternal() {
+        if (OctoConfig.INSTANCE.tabletMode.getValue()) {
+            return true;
+        }
         if (isTablet == null) {
             isTablet = isTabletForce();
         }

@@ -87,6 +87,7 @@ public class OctoConfig {
     public final ConfigProperty<String> photoResolution = new ConfigProperty<>("photoResolution", "Default");
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
 
+    public final ConfigProperty<Boolean> tabletMode = new ConfigProperty<>("tabletMode", false);
 
     private final List<ConfigProperty<?>> properties = List.of(
             hidePhoneNumber, showFakePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, registrationDateInProfiles,
@@ -97,6 +98,7 @@ public class OctoConfig {
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, useSystemFont,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
             experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution,lastSelectedCompression,
+            tabletMode
     );
 
 
