@@ -3432,13 +3432,15 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                         FileLog.e(e);
                     }
                     String name = messageObject.getFileName();
-                    if (!TextUtils.isEmpty(name) && messageObject.getDuration() >= 10 * 60) {
+                    if (!TextUtils.isEmpty(name)) {
                         SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("media_saved_pos", Activity.MODE_PRIVATE);
                         float pos = preferences.getFloat(name, -1);
-                        if (pos > 0 && pos < 0.999f) {
+                        if (pos > 0 && pos < 0.999f && messageObject.getDuration() >= 10 * 60) {
                             messageObject.audioProgress = seekToProgressPending = pos;
                         }
-                        shouldSavePositionForCurrentAudio = name;
+                        if (messageObject.getDuration() >= 10 * 60) {
+                            shouldSavePositionForCurrentAudio = name;
+                        }
                         if (Math.abs(currentMusicPlaybackSpeed - 1.0f) > 0.001f) {
                             audioPlayer.setPlaybackSpeed(Math.round(currentMusicPlaybackSpeed * 10f) / 10f);
                         }
@@ -5333,7 +5335,15 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         float compressFactor;
         float minCompressFactor;
         int maxBitrate;
-        if (Math.min(height, width) >= 1080) {
+        if (Math.min(height, width) >= 2160) {
+            maxBitrate = 12000_000;
+            compressFactor = 1f;
+            minCompressFactor = 1f;
+        } else if (Math.min(height, width) >= 1440) {
+            maxBitrate = 8000_000;
+            compressFactor = 1f;
+            minCompressFactor = 1f;
+        } else if (Math.min(height, width) >= 1080) {
             maxBitrate = 6800_000;
             compressFactor = 1f;
             minCompressFactor = 1f;

@@ -26,7 +26,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import it.octogram.android.preferences.rows.impl.*;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -39,20 +38,28 @@ import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
-import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
+import org.telegram.ui.Components.UndoView;
 
 import java.util.List;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferenceType;
+import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
 import it.octogram.android.preferences.rows.cells.SliderCell;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.SliderChooseRow;
+import it.octogram.android.preferences.rows.impl.SliderRow;
+import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.rows.impl.TextDetailRow;
+import it.octogram.android.preferences.rows.impl.TextIconRow;
 
 /*
  * This library is *heavily* inspired by CatoGramX's preferences library.
@@ -138,7 +145,9 @@ public class PreferencesFragment extends BaseFragment {
                 boolean success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
                 if (success) {
                     if (row.doesRequireRestart()) {
-                        BulletinFactory.of(this).createErrorBulletin("Restart to apply changes", getResourceProvider()).show();
+                        UndoView restartTooltip = new UndoView(context);
+                        frameLayout.addView(restartTooltip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT, 8, 0, 8, 8));
+                        restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
                     }
                 }
             }

@@ -266,6 +266,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.VideoUtils;
 
 @SuppressLint("WrongConstant")
 @SuppressWarnings("unchecked")
@@ -5669,6 +5670,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         containerView.addView(qualityPicker, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.LEFT));
         qualityPicker.cancelButton.setOnClickListener(view -> {
             selectedCompression = previousCompression;
+            OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.lastSelectedCompression, selectedCompression);
             didChangedCompressionLevel(false);
             showQualityView(false);
             requestVideoPreview(2);
@@ -5678,6 +5680,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             if (object instanceof MediaController.MediaEditState) {
                 ((MediaController.MediaEditState) object).editedInfo = getCurrentVideoEditedInfo();
             }
+            OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.lastSelectedCompression, selectedCompression);
             showQualityView(false);
             requestVideoPreview(2);
         });
@@ -6357,9 +6360,13 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             compressItem.setImageResource(R.drawable.video_quality1);
         } else if (selectedCompression == 2) {
             compressItem.setImageResource(R.drawable.video_quality2);
+        } else if (selectedCompression == 3) {
+            compressItem.setImageResource(R.drawable.video_quality3);
+        } else if (selectedCompression == 4) {
+            compressItem.setImageResource(R.drawable.video_quality4);
         } else {
             selectedCompression = compressionsCount - 1;
-            compressItem.setImageResource(R.drawable.video_quality3);
+            compressItem.setImageResource(R.drawable.video_quality5);
         }
         compressItem.setContentDescription(LocaleController.getString("AccDescrVideoQuality", R.string.AccDescrVideoQuality));
         itemsLayout.addView(compressItem, LayoutHelper.createLinear(48, 48));
@@ -17528,6 +17535,10 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             compressItem.setImageResource(R.drawable.video_quality2);
         } else if (selectedCompression == 3) {
             compressItem.setImageResource(R.drawable.video_quality3);
+        } else if (selectedCompression == 4) {
+            compressItem.setImageResource(R.drawable.video_quality4);
+        } else if (selectedCompression == 5) {
+            compressItem.setImageResource(R.drawable.video_quality5);
         }
         itemsLayout.requestLayout();
 
@@ -17655,9 +17666,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         if (compressionsCount == 1) {
             return new Size(originalWidth, originalHeight);
         }
-        float maxSize;
         int resultWidth;
         int resultHeight;
+        /*float maxSize;
         switch (selectedCompression) {
             case 0:
                 maxSize = 480.0f;
@@ -17672,7 +17683,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             default:
                 maxSize = 1920.0f;
                 break;
-        }
+        }*/
+        float maxSize = VideoUtils.getMaxSize(originalWidth, originalHeight, selectedCompression);
         float scale = originalWidth > originalHeight ? maxSize / originalWidth : maxSize / originalHeight;
         if (selectedCompression == compressionsCount - 1 && scale >= 1f) {
             resultWidth = originalWidth;
@@ -17702,6 +17714,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         }
         if (selectedCompression >= compressionsCount) {
             selectedCompression = compressionsCount - 1;
+        } else if (selectedCompression < 0) {
+            selectedCompression = 0;
         }
 
         if (sendPhotoType == SELECT_TYPE_AVATAR) {
@@ -17910,6 +17924,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private int selectCompression() {
+        // FORCE TO HIGHEST QUALITY
+        return Math.min(OctoConfig.INSTANCE.lastSelectedCompression.getValue(), compressionsCount - 1);
+        /*
         //1GB
         if (originalSize > 1024L * 1024L * 1000L) {
             return compressionsCount - 1;
@@ -17924,11 +17941,12 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             compressionsCount++;
         }
-        return Math.min(maxCompression, Math.round(DownloadController.getInstance(currentAccount).getMaxVideoBitrate() / (100f / compressionsCount)) - 1);
+        return Math.min(maxCompression, Math.round(DownloadController.getInstance(currentAccount).getMaxVideoBitrate() / (100f / compressionsCount)) - 1);*/
     }
 
     private void updateCompressionsCount(int h, int w) {
-        int maxSize = Math.max(h, w);
+        compressionsCount = VideoUtils.getCompressionsCount(w, h);
+        /*int maxSize = Math.max(h, w);
         if (maxSize > 1280) {
             compressionsCount = 4;
         } else if (maxSize > 854) {
@@ -17937,7 +17955,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             compressionsCount = 2;
         } else {
             compressionsCount = 1;
-        }
+        }*/
     }
 
     private void setCompressItemEnabled(boolean enabled, boolean animated) {

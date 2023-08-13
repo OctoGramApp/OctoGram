@@ -10,18 +10,20 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 import android.util.Pair;
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.OctoPreferences;
-import it.octogram.android.preferences.PreferencesEntry;
-import it.octogram.android.preferences.rows.impl.HeaderRow;
-import it.octogram.android.preferences.rows.impl.SliderChooseRow;
-import it.octogram.android.preferences.rows.impl.SwitchRow;
+
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.util.ArrayList;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.OctoPreferences;
+import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.SliderChooseRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
 
 public class OctoExperimentsUI implements PreferencesEntry {
 
@@ -63,6 +65,16 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             }})
                             .preferenceValue(OctoConfig.INSTANCE.downloadBoostValue)
                             .showIf(OctoConfig.INSTANCE.downloadBoost)
+                            .build());
+                    category.row(new SliderChooseRow.SliderChooseRowBuilder()
+                            .options(new ArrayList<>() {{
+                                add(new Pair<>(0, LocaleController.getString(R.string.ResolutionLow)));
+                                add(new Pair<>(1, LocaleController.getString(R.string.ResolutionMedium)));
+                                add(new Pair<>(2, LocaleController.getString(R.string.ResolutionHigh)));
+                                add(new Pair<>(3, LocaleController.getString(R.string.ResolutionVeryHigh)));
+                                add(new Pair<>(4, LocaleController.getString(R.string.ResolutionUltraHigh)));
+                            }})
+                            .preferenceValue(OctoConfig.INSTANCE.photoResolution)
                             .build());
                 })
                 .build();

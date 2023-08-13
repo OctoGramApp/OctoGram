@@ -69,8 +69,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
 
     /*Unlock Secret Icons*/
-    /*TODO*/ public final ConfigProperty<Boolean> unlockedYuki = new ConfigProperty<>("unlockedYuki", false);
-    /*TODO*/ public final ConfigProperty<Boolean> unlockedChupa = new ConfigProperty<>("unlockedChupa", false);
+    public final ConfigProperty<Boolean> unlockedYuki = new ConfigProperty<>("unlockedYuki", false);
+    public final ConfigProperty<Boolean> unlockedChupa = new ConfigProperty<>("unlockedChupa", false);
 
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXEnabled = new ConfigProperty<>("cameraXEnabled", true);
@@ -84,6 +84,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> uploadBoost = new ConfigProperty<>("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = new ConfigProperty<>("downloadBoost", false);
     public final ConfigProperty<String> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", "Default");
+    public final ConfigProperty<String> photoResolution = new ConfigProperty<>("photoResolution", "Default");
+    public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
 
 
     private final List<ConfigProperty<?>> properties = List.of(
@@ -94,7 +96,7 @@ public class OctoConfig {
             openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, forcePacmanAnimation, formatTimeWithSeconds,
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, useSystemFont,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
-            experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue
+            experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution,lastSelectedCompression,
     );
 
 

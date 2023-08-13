@@ -124,6 +124,20 @@
     <string name="DownloadBoostType">Download Boost type</string>
     <string name="Fast">Fast</string>
     <string name="Extreme">Extreme</string>
+    <string name="RestartAppToApplyChanges">Restart app to apply changes.</string>
+    <!-- RESOLUTION STRING SECTION -->
+
+    <string name="SendHQPhotos">Send HQ photos</string>
+    <string name="ResolutionLow">Low</string>
+    <string name="ResolutionMedium">Default</string>
+    <string name="ResolutionHigh">High</string>
+    <string name="ResolutionVeryHigh">Extreme</string>
+    <string name="ResolutionUltraHigh">UHD</string>
+    <string name="ForceTableMode">Force Tablet Mode</string>
+
+    <!--<string name="ResolutionLow">Low (800px)</string>
+    <string name="ResolutionMedium">Medium (1280px)</string>
+    <string name="ResolutionHigh">High (2560px)</string>-->
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
