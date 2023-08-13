@@ -40,6 +40,10 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 })
                 .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> {
+                                LocaleController.getInstance().recreateFormatters();
+                                return true;
+                            })
                             .preferenceValue(OctoConfig.INSTANCE.formatTimeWithSeconds)
                             .title(LocaleController.formatString("FormatTimeWithSeconds", R.string.FormatTimeWithSeconds))
                             .requiresRestart(true)
@@ -49,6 +53,10 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title(LocaleController.formatString("NumberRounding", R.string.NumberRounding))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> {
+                                fragment.getParentLayout().rebuildAllFragmentViews(false, false);
+                                return true;
+                            })
                             .preferenceValue(OctoConfig.INSTANCE.pencilIconForEditedMessages)
                             .title(LocaleController.formatString("PencilIconForEdited", R.string.PencilIconForEdited))
                             .description(LocaleController.formatString("PencilIconForEdited_Desc", R.string.PencilIconForEdited_Desc))
