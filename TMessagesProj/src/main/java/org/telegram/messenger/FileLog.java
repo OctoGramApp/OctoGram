@@ -434,6 +434,31 @@ public class FileLog {
         }
     }
 
+    public static String getLogDirSize() {
+        File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
+        if (sdCard == null) {
+            return "N/A";
+        }
+        File dir = new File (sdCard.getAbsolutePath() + "/logs");
+        File[] files = dir.listFiles();
+        long size = 0;
+        if (files != null) {
+            for (File file : files) {
+                if (getInstance().currentFile != null && file.getAbsolutePath().equals(getInstance().currentFile.getAbsolutePath())) {
+                    continue;
+                }
+                if (getInstance().networkFile != null && file.getAbsolutePath().equals(getInstance().networkFile.getAbsolutePath())) {
+                    continue;
+                }
+                if (getInstance().tonlibFile != null && file.getAbsolutePath().equals(getInstance().tonlibFile.getAbsolutePath())) {
+                    continue;
+                }
+                size += file.length();
+            }
+        }
+        return AndroidUtilities.formatFileSize(size);
+    }
+
     public static void cleanupLogs() {
         ensureInitied();
         File dir = AndroidUtilities.getLogsDir();

@@ -336,6 +336,11 @@ public class TextCell extends FrameLayout {
         setTextAndValue(text, value, false, divider);
     }
 
+    public void setValue(String value, boolean animated) {
+        valueTextView.setText(value, animated);
+        valueTextView.setVisibility(VISIBLE);
+    }
+
     public void setTextAndValue(String text, String value, boolean animated, boolean divider) {
         imageLeft = 21;
         offsetFromImage = getOffsetFromImage(false);
