@@ -1072,7 +1072,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
 
             @Override
             public boolean shutterLongPressed() {
-                if (CameraXUtils.isCameraXSupported() /* && OctoConfig.cameraType == 1*/) {
+                if (CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraXEnabled.getValue()) {
                     if (((CameraXView)cameraView).getCameraEffect() != CameraXController.CAMERA_NONE) {
                         return false;
                     }
