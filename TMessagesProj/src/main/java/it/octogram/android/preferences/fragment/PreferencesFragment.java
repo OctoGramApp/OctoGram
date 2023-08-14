@@ -172,7 +172,7 @@ public class PreferencesFragment extends BaseFragment {
         if (show) {
             updateRows();
         }
-        int row = rows.get(0).getRow();
+        int row = rows.get(0).getRow() -1;
         int size = rows.size();
         if (show) {
             listAdapter.notifyItemRangeInserted(row, size);
