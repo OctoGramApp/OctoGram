@@ -8,8 +8,6 @@
 
 package it.octogram.android.preferences.fragment;
 
-import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.SparseArray;
@@ -20,33 +18,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.ActionBar;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.HeaderCell;
-import org.telegram.ui.Cells.ShadowSectionCell;
-import org.telegram.ui.Cells.TextCell;
-import org.telegram.ui.Cells.TextCheckCell;
-import org.telegram.ui.Cells.TextDetailSettingsCell;
-import org.telegram.ui.Cells.TextInfoPrivacyCell;
-import org.telegram.ui.Cells.TextSettingsCell;
-import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.Components.SlideChooseView;
-import org.telegram.ui.Components.UndoView;
-import org.telegram.ui.Components.*;
-
-import java.util.List;
-
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferenceType;
@@ -54,19 +29,30 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
 import it.octogram.android.preferences.rows.cells.SliderCell;
-import it.octogram.android.preferences.rows.impl.CustomCellRow;
-import it.octogram.android.preferences.rows.impl.ListRow;
-import it.octogram.android.preferences.rows.impl.SliderChooseRow;
-import it.octogram.android.preferences.rows.impl.SliderRow;
-import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
-import it.octogram.android.preferences.rows.impl.SwitchRow;
-import it.octogram.android.preferences.rows.impl.TextDetailRow;
-import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.preferences.rows.impl.*;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.*;
+import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.SlideChooseView;
+import org.telegram.ui.Components.UndoView;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 /*
  * This library is *heavily* inspired by CatoGramX's preferences library.
  */
 public class PreferencesFragment extends BaseFragment {
+
+    private final Object PARTIAL = new Object();
 
     private final OctoPreferences preferences;
     private final SparseArray<BaseRow> positions = new SparseArray<>();
@@ -160,24 +146,43 @@ public class PreferencesFragment extends BaseFragment {
                 }
             }
 
-            for (BaseRow category : preferences.getPreferences()) {
-                if (category.getShowIfPreferenceValue() == null) continue;
+            List<BaseRow> toShow = preferences.getPreferences().stream()
+                    .filter(fi -> fi.getShowIfPreferenceValue() != null)
+                    .filter(BaseRow::isCurrentlyHidden)
+                    .filter(fi -> fi.getShowIfPreferenceValue().getValue())
+                    .collect(Collectors.toList());
+            if (!toShow.isEmpty()) {
+                updateUI(toShow, true);
+            }
 
-                if (category.isCurrentlyHidden() && category.getShowIfPreferenceValue().getValue()) {
-                    category.setCurrentlyHidden(false);
-                    updateRows();
-                    listAdapter.notifyItemInserted(category.getRow());
-                    listAdapter.notifyDataSetChanged();
-                }
-                if (!category.isCurrentlyHidden() && !category.getShowIfPreferenceValue().getValue()) {
-                    category.setCurrentlyHidden(true);
-                    listAdapter.notifyItemRemoved(category.getRow());
-                    listAdapter.notifyDataSetChanged();
-                    updateRows();
-                }
+            List<BaseRow> toHide = preferences.getPreferences().stream()
+                    .filter(fi -> fi.getShowIfPreferenceValue() != null)
+                    .filter(fi -> !fi.isCurrentlyHidden())
+                    .filter(fi -> !fi.getShowIfPreferenceValue().getValue())
+                    .collect(Collectors.toList());
+            if (!toHide.isEmpty()) {
+                updateUI(toHide, false);
             }
         });
         return fragmentView;
+    }
+
+    private void updateUI(List<BaseRow> rows, boolean show) {
+        rows.forEach(row -> row.setCurrentlyHidden(!show));
+        if (show) {
+            updateRows();
+        }
+        int row = rows.get(0).getRow();
+        int size = rows.size();
+        if (show) {
+            listAdapter.notifyItemRangeInserted(row, size);
+        } else {
+            listAdapter.notifyItemRangeRemoved(row, size);
+        }
+        listAdapter.notifyItemRangeChanged(row, size, PARTIAL);
+        if (!show) {
+            updateRows();
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
