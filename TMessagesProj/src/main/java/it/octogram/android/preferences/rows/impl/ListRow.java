@@ -2,6 +2,7 @@ package it.octogram.android.preferences.rows.impl;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.print.PageRange;
 import android.util.Pair;
 import android.view.View;
 
@@ -13,6 +14,7 @@ import org.telegram.ui.Components.AlertsCreator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ConfigProperty;
@@ -28,21 +30,28 @@ public class ListRow extends BaseRow implements Clickable {
     private final List<Triple<Integer, String, Integer>> optionsIcons;
     private final ConfigProperty<String> currentValue;
 
+    private final Supplier<Boolean> supplierClickable;
+
     public ListRow(@Nullable String title,
                    boolean divider,
                    boolean requiresRestart,
                    ConfigProperty<Boolean> showIf,
                    List<Pair<Integer, String>> options,
                    @Nullable List<Triple<Integer, String, Integer>> optionsIcons,
-                   ConfigProperty<String> currentValue) {
+                   ConfigProperty<String> currentValue,
+                   Supplier<Boolean> supplierClickable) {
         super(title, null, requiresRestart, showIf, divider, PreferenceType.LIST);
         this.options = options;
         this.optionsIcons = optionsIcons;
         this.currentValue = currentValue;
+        this.supplierClickable = supplierClickable;
     }
 
     @Override
     public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
+        if (supplierClickable != null && !supplierClickable.get()) {
+            return false;
+        }
         int selected = 0;
         List<String> titleArray = new ArrayList<>();
         List<Integer> idArray = new ArrayList<>();
@@ -97,6 +106,7 @@ public class ListRow extends BaseRow implements Clickable {
 
         private final List<Pair<Integer, String>> options = new ArrayList<>();
         private final List<Triple<Integer, String, Integer>> optionsIcons = new ArrayList<>();
+        private Supplier<Boolean> supplierClickable;
         private ConfigProperty<String> currentValue;
 
         public ListRowBuilder options(List<Pair<Integer, String>> opt) {
@@ -114,9 +124,14 @@ public class ListRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public ListRowBuilder onClick(Supplier<Boolean> supplierClickable) {
+            this.supplierClickable = supplierClickable;
+            return this;
+        }
+
         @Override
         public ListRow build() {
-            return new ListRow(title, divider, requiresRestart, showIf, options, optionsIcons, currentValue);
+            return new ListRow(title, divider, requiresRestart, showIf, options, optionsIcons, currentValue, supplierClickable);
         }
     }
 }
