@@ -11,6 +11,7 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
+import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -33,7 +34,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
         if (OctoConfig.INSTANCE.experimentsEnabled.getValue()) {
             if (!OctoConfig.INSTANCE.alternativeNavigation.getValue() &&
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
-                    !OctoConfig.INSTANCE.downloadBoost.getValue()) {
+                    !OctoConfig.INSTANCE.downloadBoost.getValue() &&
+                    !OctoConfig.INSTANCE.photoResolution.getValue().equals("Default")) {
                 OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
             }
         }
@@ -67,7 +69,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.downloadBoostValue)
                             .showIf(OctoConfig.INSTANCE.downloadBoost)
                             .build());
-                    category.row(new SliderChooseRow.SliderChooseRowBuilder()
+                    category.row(new ListRow.ListRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(fragment, context))
                             .options(new ArrayList<>() {{
                                 add(new Pair<>(0, LocaleController.getString(R.string.ResolutionLow)));
                                 add(new Pair<>(1, LocaleController.getString(R.string.ResolutionMedium)));
@@ -75,7 +78,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                 add(new Pair<>(3, LocaleController.getString(R.string.ResolutionVeryHigh)));
                                 add(new Pair<>(4, LocaleController.getString(R.string.ResolutionUltraHigh)));
                             }})
-                            .preferenceValue(OctoConfig.INSTANCE.photoResolution)
+                            .currentValue(OctoConfig.INSTANCE.photoResolution)
+                            .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))
                             .build());
                 })
                 .build();

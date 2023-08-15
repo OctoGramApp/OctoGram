@@ -128,12 +128,12 @@
     <string name="RestartAppToApplyChanges">Restart app to apply changes.</string>
     <!-- RESOLUTION STRING SECTION -->
 
-    <string name="SendHQPhotos">Send HQ photos</string>
-    <string name="ResolutionLow">Low</string>
-    <string name="ResolutionMedium">Default</string>
-    <string name="ResolutionHigh">High</string>
-    <string name="ResolutionVeryHigh">Extreme</string>
-    <string name="ResolutionUltraHigh">UHD</string>
+    <string name="PhotoResolution">Photo Resolution</string>
+    <string name="ResolutionLow">Low (800x)</string>
+    <string name="ResolutionMedium">Default (1280x)</string>
+    <string name="ResolutionHigh">High (2560x)</string>
+    <string name="ResolutionVeryHigh">Extreme (3840x)</string>
+    <string name="ResolutionUltraHigh">UHD (4096x)</string>
     <string name="ForceTableMode">Force Tablet Mode</string>
 
     <!--<string name="ResolutionLow">Low (800px)</string>
