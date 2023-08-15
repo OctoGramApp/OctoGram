@@ -3067,7 +3067,7 @@ public class Theme {
     public static boolean dialogs_archiveAvatarDrawableRecolored;
     private static int dialogs_holidayDrawableOffsetX;
     private static int dialogs_holidayDrawableOffsetY;
-    private static long lastHolidayCheckTime;
+    public static long lastHolidayCheckTime;
     private static boolean canStartHolidayAnimation;
 
     public static RLottieDrawable dialogs_swipeMuteDrawable;

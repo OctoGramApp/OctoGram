@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
@@ -253,6 +254,9 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             return;
         }
         int eventType = Theme.getEventType();
+        if (OctoConfig.INSTANCE.eventType.getValue() > 0) {
+            eventType = OctoConfig.INSTANCE.eventType.getValue() - 1;
+        }
         int newGroupIcon;
         int newSecretIcon;
         int newChannelIcon;

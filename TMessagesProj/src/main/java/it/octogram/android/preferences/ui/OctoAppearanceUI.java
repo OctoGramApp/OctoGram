@@ -9,16 +9,16 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.OctoPreferences;
+import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.*;
+import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
-
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.OctoPreferences;
-import it.octogram.android.preferences.PreferencesEntry;
+import org.telegram.ui.ActionBar.Theme;
 
 public class OctoAppearanceUI implements PreferencesEntry {
 
@@ -43,6 +43,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> {
                                 LocaleController.getInstance().recreateFormatters();
+                                fragment.getParentLayout().rebuildAllFragmentViews(false, false);
                                 return true;
                             })
                             .preferenceValue(OctoConfig.INSTANCE.formatTimeWithSeconds)
@@ -81,6 +82,26 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.hideStories)
                             .postNotificationName(NotificationCenter.storiesUpdated, NotificationCenter.storiesEnabledUpdate, NotificationCenter.reloadInterface, NotificationCenter.updateInterfaces)
                             .title("Hide stories")
+                            .build());
+                })
+                .category("Icon sets", category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
+                                @Override
+                                protected void onSelectedEvent(int eventSelected) {
+                                    super.onSelectedEvent(eventSelected);
+                                    OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.eventType, eventSelected);
+
+                                    Theme.lastHolidayCheckTime = 0;
+                                    Theme.dialogs_holidayDrawable = null;
+
+                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.mainUserInfoChanged);
+                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
+                                }
+                            })
+                            .build());
+                    category.row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                            .title("You can force telegram to change the emoji event type")
                             .build());
                 })
                 .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
