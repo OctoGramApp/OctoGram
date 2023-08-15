@@ -14,7 +14,7 @@ public enum PreferenceType {
     SLIDER(6, true),
     LIST(7, true),
     SLIDER_CHOOSE(8, true),
-    FOOTER(14, true),
+    FOOTER(14, false),
     STICKER_HEADER(15, false),
 
     ;
