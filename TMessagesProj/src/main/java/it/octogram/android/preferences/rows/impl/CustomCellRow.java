@@ -31,7 +31,8 @@ public class CustomCellRow extends BaseRow implements Clickable {
 
     @Override
     public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
-        onClick.run();
+        if (onClick != null)
+            onClick.run();
         return true;
     }
 
