@@ -105,7 +105,7 @@ public class VoIPHelper {
 		}
 
 		if (OctoConfig.INSTANCE.promptBeforeCalling.getValue() && !callConfirmed && activity instanceof LaunchActivity) {
-			BaseFragment lastFragment = ((LaunchActivity) activity).getActionBarLayout().getLastFragment();
+			final BaseFragment lastFragment = ((LaunchActivity) activity).getActionBarLayout().getLastFragment();
 			if (lastFragment != null) {
 				AlertsCreator.createCallDialogAlert(lastFragment, lastFragment.getMessagesController().getUser(user.id), videoCall);
 			}
@@ -120,6 +120,9 @@ public class VoIPHelper {
 			}
 			if (videoCall && activity.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 				permissions.add(Manifest.permission.CAMERA);
+			}
+			if (Build.VERSION.SDK_INT >= 31 && activity.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+				permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
 			}
 			if (permissions.isEmpty()) {
 				initiateCall(user, null, null, videoCall, canVideoCall, false, null, activity, null, accountInstance);
@@ -164,6 +167,9 @@ public class VoIPHelper {
 			ChatObject.Call call = accountInstance.getMessagesController().getGroupCall(chat.id, false);
 			if (activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && !(call != null && call.call.rtmp_stream)) {
 				permissions.add(Manifest.permission.RECORD_AUDIO);
+			}
+			if (Build.VERSION.SDK_INT >= 31 && activity.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+				permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
 			}
 			if (permissions.isEmpty()) {
 				initiateCall(null, chat, hash, false, false, createCall, checkJoiner, activity, fragment, accountInstance);

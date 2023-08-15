@@ -745,7 +745,7 @@ public class AndroidUtilities {
         return capitalizeString;
     }
 
-    public static int getTransparentColor(int color, float opacity){
+    public static int getTransparentColor(int color, float opacity) {
         int alpha = Color.alpha(color);
         int red = Color.red(color);
         int green = Color.green(color);
@@ -753,6 +753,8 @@ public class AndroidUtilities {
         // Set alpha based on your logic, here I'm making it 25% of it's initial value.
         alpha *= opacity;
         return Color.argb(alpha, red, green, blue);
+    }
+
     public static float[] getCoordinateInParent(ViewGroup parentView, View view) {
         float x = 0, y = 0;
         View child = view;
