@@ -16,6 +16,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -752,7 +753,15 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     }
                     return;
                 } else if (noGalleryPermissions) {
-                    PermissionsUtils.requestImagesAndVideoPermission(parentAlert.baseFragment.getParentActivity());
+                    if (Build.VERSION.SDK_INT >= 33) {
+                        try {
+                            fragment.getParentActivity().requestPermissions(new String[]{Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_IMAGES}, BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE);
+                        } catch (Exception ignore) {}
+                    } else {
+                        try {
+                            fragment.getParentActivity().requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE);
+                        } catch (Exception ignore) {}
+                    }
                     return;
                 }
             }
@@ -3180,9 +3189,26 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
     }
 
+    private boolean isNoGalleryPermissions() {
+        Activity activity = AndroidUtilities.findActivity(getContext());
+        if (activity == null) {
+            activity = parentAlert.baseFragment.getParentActivity();
+        }
+        return Build.VERSION.SDK_INT >= 23 && (
+            activity == null ||
+            Build.VERSION.SDK_INT >= 33 && (
+                    activity.checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ||
+                            activity.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED
+            ) ||
+            Build.VERSION.SDK_INT < 33 && activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        );
+    }
+
     public void checkStorage() {
         if (noGalleryPermissions && Build.VERSION.SDK_INT >= 23) {
-            noGalleryPermissions = !PermissionsUtils.isImagesAndVideoPermissionGranted();
+            final Activity activity = parentAlert.baseFragment.getParentActivity();
+
+            noGalleryPermissions = isNoGalleryPermissions();
             if (!noGalleryPermissions) {
                 loadGalleryPhotos();
             }
@@ -3542,7 +3568,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
         }
         if (Build.VERSION.SDK_INT >= 23) {
-            noGalleryPermissions = !PermissionsUtils.isImagesAndVideoPermissionGranted();
+            noGalleryPermissions = isNoGalleryPermissions();
         }
         if (galleryAlbumEntry != null) {
             for (int a = 0; a < Math.min(100, galleryAlbumEntry.photos.size()); a++) {
@@ -4363,7 +4389,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 return 1;
             }
             int count = 0;
-            if (needCamera && selectedAlbumEntry != null && galleryAlbumEntry != null && selectedAlbumEntry.bucketId == galleryAlbumEntry.bucketId) {
+            if (needCamera && selectedAlbumEntry == galleryAlbumEntry) {
                 count++;
             }
             if (showAvatarConstructor) {
