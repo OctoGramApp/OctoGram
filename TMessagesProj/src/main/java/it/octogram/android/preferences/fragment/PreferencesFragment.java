@@ -258,6 +258,10 @@ public class PreferencesFragment extends BaseFragment {
                     view = cell;
                     view.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
                     break;
+                case FOOTER_INFORMATIVE:
+                    view = new TextInfoPrivacyCell(context);
+                    view.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
+                    break;
                 case STICKER_HEADER:
                     LinearLayout layout = new LinearLayout(context);
                     layout.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -333,6 +337,7 @@ public class PreferencesFragment extends BaseFragment {
                     });
                     slideChooseView.setOptions(sliderRow.getIntValue(), sliderRow.getValues());
                     break;
+                case FOOTER_INFORMATIVE:
                 case FOOTER:
                     ((TextInfoPrivacyCell) holder.itemView).setText(positions.get(position).getTitle());
                     break;
