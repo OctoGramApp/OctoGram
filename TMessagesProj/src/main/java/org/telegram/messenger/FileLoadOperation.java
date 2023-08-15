@@ -264,17 +264,17 @@ public class FileLoadOperation {
     }
 
     private void updateParams() {
-        String downloadBoostValue = OctoConfig.INSTANCE.downloadBoostValue.getValue();
-        if (!OctoConfig.INSTANCE.downloadBoost.getValue() || downloadBoostValue.equals("Default")) {
+        int downloadBoostValue = OctoConfig.INSTANCE.downloadBoostValue.getValue();
+        if (!OctoConfig.INSTANCE.downloadBoost.getValue() || downloadBoostValue == 0) {
             downloadChunkSizeBig = 1024 * 128;
             maxDownloadRequests = 4;
             maxDownloadRequestsBig = 4;
         }
-        if (downloadBoostValue.equals("Fast") || MessagesController.getInstance(currentAccount).getfileExperimentalParams && !forceSmallChunk) {
+        if (downloadBoostValue == 1 || MessagesController.getInstance(currentAccount).getfileExperimentalParams && !forceSmallChunk) {
             downloadChunkSizeBig = 1024 * 512;
             maxDownloadRequests = 8;
             maxDownloadRequestsBig = 8;
-        } else if (downloadBoostValue.equals("Extreme")) {
+        } else if (downloadBoostValue == 2) {
             downloadChunkSizeBig = 1024 * 1024;
             maxDownloadRequests = 12;
             maxDownloadRequestsBig = 12;

@@ -28,7 +28,7 @@ public class ListRow extends BaseRow implements Clickable {
 
     private final List<Pair<Integer, String>> options;
     private final List<Triple<Integer, String, Integer>> optionsIcons;
-    private final ConfigProperty<String> currentValue;
+    private final ConfigProperty<Integer> currentValue;
 
     private final Supplier<Boolean> supplierClickable;
 
@@ -38,7 +38,7 @@ public class ListRow extends BaseRow implements Clickable {
                    ConfigProperty<Boolean> showIf,
                    List<Pair<Integer, String>> options,
                    @Nullable List<Triple<Integer, String, Integer>> optionsIcons,
-                   ConfigProperty<String> currentValue,
+                   ConfigProperty<Integer> currentValue,
                    Supplier<Boolean> supplierClickable) {
         super(title, null, requiresRestart, showIf, divider, PreferenceType.LIST);
         this.options = options;
@@ -62,7 +62,7 @@ public class ListRow extends BaseRow implements Clickable {
                 titleArray.add(triple.component2());
                 idArray.add(triple.component1());
 
-                if (currentValue.getValue().equals(triple.component2())) {
+                if (currentValue.getValue().equals(triple.component1())) {
                     selected = index;
                 }
             }
@@ -72,7 +72,7 @@ public class ListRow extends BaseRow implements Clickable {
                 titleArray.add(pair.second);
                 idArray.add(pair.first);
 
-                if (currentValue.getValue().equals(pair.second)) {
+                if (currentValue.getValue().equals(pair.first)) {
                     selected = index;
                 }
             }
@@ -85,9 +85,9 @@ public class ListRow extends BaseRow implements Clickable {
                 selected,
                 (dialogInterface, sel) -> {
                     int id = idArray.get(sel);
-                    OctoConfig.INSTANCE.updateStringSetting(currentValue, options.get(id).second);
+                    OctoConfig.INSTANCE.updateIntegerSetting(currentValue, options.get(id).first);
                     if (view instanceof TextSettingsCell) {
-                        ((TextSettingsCell) view).setTextAndValue(getTitle(), currentValue.getValue(), hasDivider());
+                        ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), hasDivider());
                     }
                 }
         );
@@ -98,7 +98,18 @@ public class ListRow extends BaseRow implements Clickable {
         return true;
     }
 
-    public ConfigProperty<String> getCurrentValue() {
+    public String getTextFromInteger(int integer) {
+        List<String> titleArray = new ArrayList<>();
+        options.forEach(pair -> titleArray.add(pair.second));
+        for (int index = 0; index < titleArray.size(); index++) {
+            if (options.get(index).first.equals(integer)) {
+                return titleArray.get(index);
+            }
+        }
+        return "";
+    }
+
+    public ConfigProperty<Integer> getCurrentValue() {
         return currentValue;
     }
 
@@ -107,7 +118,7 @@ public class ListRow extends BaseRow implements Clickable {
         private final List<Pair<Integer, String>> options = new ArrayList<>();
         private final List<Triple<Integer, String, Integer>> optionsIcons = new ArrayList<>();
         private Supplier<Boolean> supplierClickable;
-        private ConfigProperty<String> currentValue;
+        private ConfigProperty<Integer> currentValue;
 
         public ListRowBuilder options(List<Pair<Integer, String>> opt) {
             options.addAll(opt);
@@ -119,7 +130,7 @@ public class ListRow extends BaseRow implements Clickable {
             return this;
         }
 
-        public ListRowBuilder currentValue(ConfigProperty<String> currentValue) {
+        public ListRowBuilder currentValue(ConfigProperty<Integer> currentValue) {
             this.currentValue = currentValue;
             return this;
         }

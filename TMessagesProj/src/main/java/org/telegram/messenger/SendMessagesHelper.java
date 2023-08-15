@@ -6370,15 +6370,15 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         return generatePhotoSizes(null, path, imageUri);
     }
 
-    private static int getPhotoResolution(String photoResolution) {
+    private static int getPhotoResolution(int photoResolution) {
         switch (photoResolution) {
-            case "Low":
+            case 0:
                 return 800;
-            case "High":
+            case 2:
                 return 2560;
-            case "Extreme":
+            case 3:
                 return 3840;
-            case "UHD":
+            case 4:
                 return 4096;
             default:
                 return 1280;

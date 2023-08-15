@@ -35,7 +35,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
             if (!OctoConfig.INSTANCE.alternativeNavigation.getValue() &&
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
-                    !OctoConfig.INSTANCE.photoResolution.getValue().equals("Default")) {
+                    OctoConfig.INSTANCE.photoResolution.getValue() != 1) {
                 OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
             }
         }

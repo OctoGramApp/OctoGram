@@ -13,9 +13,9 @@ import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
 public class SliderChooseRow extends BaseRow {
 
     private final List<Pair<Integer, String>> options;
-    private final ConfigProperty<String> preferenceValue;
+    private final ConfigProperty<Integer> preferenceValue;
 
-    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<String> currentValue, ConfigProperty<Boolean> showIf) {
+    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<Integer> currentValue, ConfigProperty<Boolean> showIf) {
         super(null, null, false, showIf, PreferenceType.SLIDER_CHOOSE);
         this.options = options;
         this.preferenceValue = currentValue;
@@ -25,14 +25,14 @@ public class SliderChooseRow extends BaseRow {
         return options;
     }
 
-    public ConfigProperty<String> getPreferenceValue() {
+    public ConfigProperty<Integer> getPreferenceValue() {
         return preferenceValue;
     }
 
     public int getIntValue() {
         for (int index = 0; index < options.size(); index++) {
             Pair<Integer, String> pair = options.get(index);
-            if (preferenceValue.getValue().equals(pair.second)) {
+            if (preferenceValue.getValue().equals(pair.first)) {
                 return index;
             }
         }
@@ -51,7 +51,7 @@ public class SliderChooseRow extends BaseRow {
         return idArray;
     }
 
-    public static class SliderChooseRowBuilder extends ToggleableBaseRowBuilder<SliderChooseRow, String> {
+    public static class SliderChooseRowBuilder extends ToggleableBaseRowBuilder<SliderChooseRow, Integer> {
         private final List<Pair<Integer, String>> options = new ArrayList<>();
 
         public SliderChooseRowBuilder options(List<Pair<Integer, String>> options) {

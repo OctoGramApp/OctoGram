@@ -326,14 +326,14 @@ public class PreferencesFragment extends BaseFragment {
                 case LIST:
                     TextSettingsCell listCell = (TextSettingsCell) holder.itemView;
                     ListRow listRow = (ListRow) positions.get(position);
-                    listCell.setTextAndValue(listRow.getTitle(), listRow.getCurrentValue().getValue(), true, listRow.hasDivider());
+                    listCell.setTextAndValue(listRow.getTitle(), listRow.getTextFromInteger(listRow.getCurrentValue().getValue()), true, listRow.hasDivider());
                     break;
                 case SLIDER_CHOOSE:
                     SlideChooseView slideChooseView = (SlideChooseView) holder.itemView;
                     SliderChooseRow sliderRow = (SliderChooseRow) positions.get(position);
                     slideChooseView.setCallback(index -> {
                         int id = sliderRow.getIds().get(index);
-                        OctoConfig.INSTANCE.updateStringSetting(sliderRow.getPreferenceValue(), sliderRow.getOptions().get(id).second);
+                        OctoConfig.INSTANCE.updateIntegerSetting(sliderRow.getPreferenceValue(), sliderRow.getOptions().get(id).first);
                     });
                     slideChooseView.setOptions(sliderRow.getIntValue(), sliderRow.getValues());
                     break;

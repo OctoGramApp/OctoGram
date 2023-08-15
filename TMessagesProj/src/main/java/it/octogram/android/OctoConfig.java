@@ -36,7 +36,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> showFakePhoneNumber = new ConfigProperty<>("showFakePhoneNumber", false);
     public final ConfigProperty<Boolean> hideOtherPhoneNumber = new ConfigProperty<>("hideOtherPhoneNumber", true);
     public final ConfigProperty<Boolean> promptBeforeCalling = new ConfigProperty<>("promptBeforeCalling", true);
-    /*TODO*/ public final ConfigProperty<String> dcIdStyle = new ConfigProperty<>("dcIdStyle", "OctoGram");
+    /*TODO*/ public final ConfigProperty<Integer> dcIdStyle = new ConfigProperty<>("dcIdStyle", 0);
     public final ConfigProperty<Boolean> registrationDateInProfiles = new ConfigProperty<>("registrationDateInProfiles", false);
     public final ConfigProperty<Boolean> jumpToNextChannel = new ConfigProperty<>("jumpToNextChannel", true);
     public final ConfigProperty<Boolean> hideGreetingSticker = new ConfigProperty<>("hideGreetingSticker", false);
@@ -86,8 +86,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> alternativeNavigation = new ConfigProperty<>("alternativeNavigation", false);
     public final ConfigProperty<Boolean> uploadBoost = new ConfigProperty<>("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = new ConfigProperty<>("downloadBoost", false);
-    public final ConfigProperty<String> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", "Default");
-    public final ConfigProperty<String> photoResolution = new ConfigProperty<>("photoResolution", "Default");
+    public final ConfigProperty<Integer> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", 0);
+    public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", 1);
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
 
     public final ConfigProperty<Boolean> tabletMode = new ConfigProperty<>("tabletMode", false);
