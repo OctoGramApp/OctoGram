@@ -11,6 +11,7 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
+import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -85,7 +86,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
             return true;
 
         // create OK/Cancel dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        /*AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(LocaleController.getString("OctoExperimentsDialogTitle", R.string.OctoExperimentsDialogTitle));
         builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog, which) -> {
             OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
@@ -95,6 +96,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
         });
         builder.setMessage(LocaleController.getString("OctoExperimentsDialogMessage", R.string.OctoExperimentsDialogMessage));
         fragment.showDialog(builder.create());
+        */
+        new AllowExperimentalBottomSheet(context).show();
 
         return OctoConfig.INSTANCE.experimentsEnabled.getValue();
     }
