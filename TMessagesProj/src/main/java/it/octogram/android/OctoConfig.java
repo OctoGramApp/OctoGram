@@ -57,6 +57,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideFoldersWhenForwarding = new ConfigProperty<>("showFoldersWhenForwarding", false);
     public final ConfigProperty<Boolean> accentColorAsNotificationColor = new ConfigProperty<>("accentColorAsNotificationColor", false);
     public final ConfigProperty<Boolean> openArchiveOnPull = new ConfigProperty<>("openArchiveOnPull", false);
+    public final ConfigProperty<Boolean> tabletMode = new ConfigProperty<>("tabletMode", false);
+
 
     /*Appearance*/
     public final ConfigProperty<Boolean> showNameInActionBar = new ConfigProperty<>("showNameInActionBar", false);
@@ -69,6 +71,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> searchIconInHeader = new ConfigProperty<>("searchIconInHeader", false);
     public final ConfigProperty<Boolean> slidingTitle = new ConfigProperty<>("slidingTitle", false);
     public final ConfigProperty<Integer> eventType = new ConfigProperty<>("eventType", 0);
+    public final ConfigProperty<Integer> maxStickerSize = new ConfigProperty<>("maxStickerSize", 30);
     public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
 
     /*Unlock Secret Icons*/
@@ -90,8 +93,6 @@ public class OctoConfig {
     public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", 1);
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
 
-    public final ConfigProperty<Boolean> tabletMode = new ConfigProperty<>("tabletMode", false);
-
     private final List<ConfigProperty<?>> properties = List.of(
             hidePhoneNumber, showFakePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, registrationDateInProfiles,
             jumpToNextChannel, hideGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus,
@@ -101,7 +102,7 @@ public class OctoConfig {
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
             experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution,lastSelectedCompression,
-            tabletMode
+            tabletMode, maxStickerSize
     );
 
 

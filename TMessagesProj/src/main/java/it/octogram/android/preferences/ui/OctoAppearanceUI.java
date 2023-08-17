@@ -19,6 +19,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.ActionBar.INavigationLayout;
 
 public class OctoAppearanceUI implements PreferencesEntry {
 
@@ -26,6 +27,21 @@ public class OctoAppearanceUI implements PreferencesEntry {
     public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("Appearance", R.string.Appearance))
                 .sticker(context, R.raw.utyan_appearance, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
+                .category("Sticker Size", category -> {
+                    category.row(
+                            new SliderRow.SliderRowBuilder()
+                                    .min(2)
+                                    .max(20)
+                                    .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
+                                    .title("asd")
+                                    .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.updateInterfaces)
+                                    .build()
+                    );
+                    /*category.row(
+                            new CustomCellRow.CustomCellRowBuilder().layout(new StickerSizePreviewMessages(context, INavigationLayout.newLayout(context))).build()
+                    );*/
+
+                })
                 .category(LocaleController.formatString("BlurHeader", R.string.BlurHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forceChatBlurEffect)
