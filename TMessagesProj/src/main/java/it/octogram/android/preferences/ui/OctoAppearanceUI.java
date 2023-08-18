@@ -33,8 +33,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                                     .min(2)
                                     .max(20)
                                     .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
-                                    .title("asd")
-                                    .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.updateInterfaces)
+                                    //.postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.updateInterfaces)
                                     .build()
                     );
                     /*category.row(

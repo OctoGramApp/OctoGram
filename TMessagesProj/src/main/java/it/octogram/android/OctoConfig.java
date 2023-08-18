@@ -71,7 +71,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> searchIconInHeader = new ConfigProperty<>("searchIconInHeader", false);
     public final ConfigProperty<Boolean> slidingTitle = new ConfigProperty<>("slidingTitle", false);
     public final ConfigProperty<Integer> eventType = new ConfigProperty<>("eventType", 0);
-    public final ConfigProperty<Integer> maxStickerSize = new ConfigProperty<>("maxStickerSize", 30);
+    public final ConfigProperty<Integer> maxStickerSize = new ConfigProperty<>("maxStickerSize", 14);
     public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
 
     /*Unlock Secret Icons*/
