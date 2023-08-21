@@ -15,7 +15,6 @@ import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.util.ArrayList;
@@ -72,11 +71,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(fragment, context))
                             .options(new ArrayList<>() {{
-                                add(new Pair<>(0, LocaleController.getString(R.string.ResolutionLow)));
-                                add(new Pair<>(1, LocaleController.getString(R.string.ResolutionMedium)));
-                                add(new Pair<>(2, LocaleController.getString(R.string.ResolutionHigh)));
-                                add(new Pair<>(3, LocaleController.getString(R.string.ResolutionVeryHigh)));
-                                add(new Pair<>(4, LocaleController.getString(R.string.ResolutionUltraHigh)));
+                                add(new Pair<>(OctoConfig.PhotoResolution.LOW, LocaleController.getString(R.string.ResolutionLow)));
+                                add(new Pair<>(OctoConfig.PhotoResolution.DEFAULT, LocaleController.getString(R.string.ResolutionMedium)));
+                                add(new Pair<>(OctoConfig.PhotoResolution.HIGH, LocaleController.getString(R.string.ResolutionHigh)));
+                                add(new Pair<>(OctoConfig.PhotoResolution.EXTREME, LocaleController.getString(R.string.ResolutionVeryHigh)));
+                                add(new Pair<>(OctoConfig.PhotoResolution.UHD, LocaleController.getString(R.string.ResolutionUltraHigh)));
                             }})
                             .currentValue(OctoConfig.INSTANCE.photoResolution)
                             .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))

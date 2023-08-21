@@ -6372,18 +6372,19 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
 
     private static int getPhotoResolution(int photoResolution) {
         switch (photoResolution) {
-            case 0:
+            case OctoConfig.PhotoResolution.LOW:
                 return 800;
-            case 2:
+            case OctoConfig.PhotoResolution.HIGH:
                 return 2560;
-            case 3:
+            case OctoConfig.PhotoResolution.EXTREME:
                 return 3840;
-            case 4:
+            case OctoConfig.PhotoResolution.UHD:
                 return 4096;
             default:
                 return 1280;
         }
     }
+
     public TLRPC.TL_photo generatePhotoSizes(TLRPC.TL_photo photo, String path, Uri imageUri) {
         int maxSize = getPhotoResolution(OctoConfig.INSTANCE.photoResolution.getValue());
         Bitmap bitmap = ImageLoader.loadBitmap(path, imageUri, maxSize, maxSize, true);

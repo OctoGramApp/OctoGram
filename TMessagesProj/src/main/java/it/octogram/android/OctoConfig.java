@@ -36,7 +36,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> showFakePhoneNumber = new ConfigProperty<>("showFakePhoneNumber", false);
     public final ConfigProperty<Boolean> hideOtherPhoneNumber = new ConfigProperty<>("hideOtherPhoneNumber", true);
     public final ConfigProperty<Boolean> promptBeforeCalling = new ConfigProperty<>("promptBeforeCalling", true);
-    /*TODO*/ public final ConfigProperty<Integer> dcIdStyle = new ConfigProperty<>("dcIdStyle", 0);
+    /*TODO*/ public final ConfigProperty<Integer> dcIdStyle = new ConfigProperty<>("dcIdStyle", DcIdStyle.MINIMAL);
     public final ConfigProperty<Boolean> registrationDateInProfiles = new ConfigProperty<>("registrationDateInProfiles", false);
     public final ConfigProperty<Boolean> jumpToNextChannel = new ConfigProperty<>("jumpToNextChannel", true);
     public final ConfigProperty<Boolean> hideGreetingSticker = new ConfigProperty<>("hideGreetingSticker", false);
@@ -70,7 +70,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> pencilIconForEditedMessages = new ConfigProperty<>("pencilIconForEditedMessages", false);
     public final ConfigProperty<Boolean> searchIconInHeader = new ConfigProperty<>("searchIconInHeader", false);
     public final ConfigProperty<Boolean> slidingTitle = new ConfigProperty<>("slidingTitle", false);
-    public final ConfigProperty<Integer> eventType = new ConfigProperty<>("eventType", 0);
+    public final ConfigProperty<Integer> eventType = new ConfigProperty<>("eventType", EventType.NONE);
     public final ConfigProperty<Integer> maxStickerSize = new ConfigProperty<>("maxStickerSize", 14);
     public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
 
@@ -90,7 +90,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> uploadBoost = new ConfigProperty<>("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = new ConfigProperty<>("downloadBoost", false);
     public final ConfigProperty<Integer> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", 0);
-    public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", 1);
+    public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", PhotoResolution.DEFAULT);
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
 
     private final List<ConfigProperty<?>> properties = List.of(
@@ -160,6 +160,29 @@ public class OctoConfig {
         SharedPreferences.Editor editor = PREFS.edit();
         editor.putInt(property.getKey(), property.getValue());
         editor.apply();
+    }
+
+    public static class DcIdStyle {
+        public static final int NONE = 0;
+        public static final int MINIMAL = 1;
+        public static final int OWLGRAM = 2;
+        public static final int TELEGRAM = 3;
+    }
+
+    public static class EventType {
+        public static final int NONE = 5;
+        public static final int DEFAULT = 0;
+        public static final int HOLIDAY = 1;
+        public static final int VALENTINE = 2;
+        public static final int HALLOWEEN = 3;
+    }
+
+    public static class PhotoResolution {
+        public static final int LOW = 0;
+        public static final int DEFAULT = 1;
+        public static final int HIGH = 2;
+        public static final int EXTREME = 3;
+        public static final int UHD = 4;
     }
 
 }

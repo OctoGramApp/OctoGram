@@ -55,9 +55,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
-                                    new Pair<>(0, "OctoGram"),
-                                    new Pair<>(1, "Telegram"),
-                                    new Pair<>(2, LocaleController.formatString("Nothing", R.string.Nothing))
+                                    new Pair<>(OctoConfig.DcIdStyle.MINIMAL, "Minimal"),
+                                    new Pair<>(OctoConfig.DcIdStyle.OWLGRAM, "OwlGram"),
+                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram"),
+                                    new Pair<>(OctoConfig.DcIdStyle.NONE, LocaleController.formatString("Nothing", R.string.Nothing))
                             ))
                             .title(LocaleController.formatString("Style", R.string.Style))
                             .build());
