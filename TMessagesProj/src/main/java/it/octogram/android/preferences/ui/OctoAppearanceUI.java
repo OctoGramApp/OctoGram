@@ -13,13 +13,14 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.*;
+import it.octogram.android.preferences.ui.custom.StickerSize;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.INavigationLayout;
+import org.telegram.ui.ActionBar.Theme;
 
 public class OctoAppearanceUI implements PreferencesEntry {
 
@@ -27,31 +28,37 @@ public class OctoAppearanceUI implements PreferencesEntry {
     public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("Appearance", R.string.Appearance))
                 .sticker(context, R.raw.utyan_appearance, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
-                .category("Sticker Size", category -> {
-                    category.row(
-                            new SliderRow.SliderRowBuilder()
-                                    .min(2)
-                                    .max(20)
-                                    .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
-                                    //.postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.updateInterfaces)
-                                    .build()
+                .category(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(new StickerSize(context, INavigationLayout.newLayout(context)))
+                            .build()
                     );
-                    /*category.row(
-                            new CustomCellRow.CustomCellRowBuilder().layout(new StickerSizePreviewMessages(context, INavigationLayout.newLayout(context))).build()
-                    );*/
-
                 })
-                .category(LocaleController.formatString("BlurHeader", R.string.BlurHeader), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.forceChatBlurEffect)
-                            .title(LocaleController.getString("ForceChatBlurEffect", R.string.ForceChatBlurEffect))
+                .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
+                                @Override
+                                protected void onSelectedEvent(int eventSelected) {
+                                    super.onSelectedEvent(eventSelected);
+                                    OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.eventType, eventSelected);
+
+                                    Theme.lastHolidayCheckTime = 0;
+                                    Theme.dialogs_holidayDrawable = null;
+
+                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.mainUserInfoChanged);
+                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
+                                }
+                            })
                             .build());
-                    category.row(new HeaderRow(LocaleController.getString("ForceChatBlurEffectName", R.string.ForceChatBlurEffectName), OctoConfig.INSTANCE.forceChatBlurEffect));
-                    category.row(new SliderRow.SliderRowBuilder()
-                            .min(0)
-                            .max(255)
-                            .preferenceValue(OctoConfig.INSTANCE.blurEffectStrength)
-                            .showIf(OctoConfig.INSTANCE.forceChatBlurEffect)
+                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                            .icon(R.drawable.msg_emoji_cat)
+                            .title(LocaleController.getString("EmojiSets", R.string.EmojiSets))
+                            .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
+                            .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
+                            .requiresRestart(true)
                             .build());
                 })
                 .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {
@@ -95,40 +102,21 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideStories)
-                            .postNotificationName(NotificationCenter.storiesUpdated, NotificationCenter.storiesEnabledUpdate, NotificationCenter.reloadInterface, NotificationCenter.updateInterfaces)
+                            .postNotificationName(NotificationCenter.updateInterfaces, NotificationCenter.reloadInterface)
                             .title("Hide stories")
                             .build());
                 })
-                .category("Icon sets", category -> {
-                    category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
-                                @Override
-                                protected void onSelectedEvent(int eventSelected) {
-                                    super.onSelectedEvent(eventSelected);
-                                    OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.eventType, eventSelected);
-
-                                    Theme.lastHolidayCheckTime = 0;
-                                    Theme.dialogs_holidayDrawable = null;
-
-                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.mainUserInfoChanged);
-                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
-                                }
-                            })
-                            .build());
-                    category.row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                            .title("You can force telegram to change the emoji event type")
-                            .build());
-                })
-                .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .icon(R.drawable.msg_emoji_cat)
-                            .title(LocaleController.getString("EmojiSets", R.string.EmojiSets))
-                            .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
-                            .build());
+                .category(LocaleController.formatString("BlurHeader", R.string.BlurHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
-                            .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
-                            .requiresRestart(true)
+                            .preferenceValue(OctoConfig.INSTANCE.forceChatBlurEffect)
+                            .title(LocaleController.getString("ForceChatBlurEffect", R.string.ForceChatBlurEffect))
+                            .build());
+                    category.row(new HeaderRow(LocaleController.getString("ForceChatBlurEffectName", R.string.ForceChatBlurEffectName), OctoConfig.INSTANCE.forceChatBlurEffect));
+                    category.row(new SliderRow.SliderRowBuilder()
+                            .min(0)
+                            .max(255)
+                            .preferenceValue(OctoConfig.INSTANCE.blurEffectStrength)
+                            .showIf(OctoConfig.INSTANCE.forceChatBlurEffect)
                             .build());
                 })
                 .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> {
