@@ -137,7 +137,7 @@ public class ThemeSelectorCell extends FrameLayout {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ThemeDrawer drawerCell2 = (ThemeDrawer) holder.itemView;
-            boolean animated = drawerCell2.canBeAnimate() && oldSelectedItem != -1;
+            boolean animated = oldSelectedItem != -1;
             if (position == noTheme) {
                 drawerCell2.setEvent(
                         5,
