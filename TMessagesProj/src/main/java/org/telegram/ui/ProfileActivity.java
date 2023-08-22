@@ -9385,7 +9385,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             dcInfo = DCUtils.getDcInfo(chat);
                         }
                         boolean isSelfSettings = userId == UserConfig.getInstance(currentAccount).getClientUserId();
-                        detailCell.setTextAndValue(dcInfo.userId + "", "DC" + dcInfo.dcId + " (" + dcInfo.dcNameType + ")", isSelfSettings);
+                        if (dcInfo == null) {
+                            detailCell.setTextAndValue(LocaleController.getString(R.string.NumberUnknown), LocaleController.getString(R.string.NumberUnknown), isSelfSettings);
+                        } else {
+                            detailCell.setTextAndValue(dcInfo.userId + "", "DC" + dcInfo.dcId + " (" + dcInfo.dcNameType + ")", isSelfSettings);
+                        }
                     } else if (position == registrationDataRow) {
                         if (!isChat() && userId != 0) {
                             boolean isSelfSettings = userId == UserConfig.getInstance(currentAccount).getClientUserId();
