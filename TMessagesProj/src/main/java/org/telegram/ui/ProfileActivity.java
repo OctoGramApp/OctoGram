@@ -95,6 +95,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import it.octogram.android.preferences.ui.custom.DatacenterCell;
+import it.octogram.android.utils.DCUtils;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -453,6 +455,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int qr_button = 37;
     private final static int gift_premium = 38;
 
+    private final static int copy_id = 100;
+
     private Rect rect = new Rect();
 
     private TextCell setAvatarCell;
@@ -503,6 +507,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int userInfoRow;
     private int channelInfoRow;
     private int usernameRow;
+    private int dcIdRow;
     private int restrictionReasonRow;
     private int registrationDataRow;
     private int notificationsDividerRow;
@@ -2034,6 +2039,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         return true;
                     });
                     presentFragment(fragment);
+                } else if (id == copy_id) {
+                    if (userId != 0) {
+                        TLRPC.User user = getMessagesController().getUser(userId);
+                        if (user == null) {
+                            return;
+                        }
+                        AndroidUtilities.addToClipboard("" + user.id);
+                    } else if (chatId != 0) {
+                        TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                        if (chat == null) {
+                            return;
+                        }
+                        AndroidUtilities.addToClipboard("" + chat.id);
+                    }
+                    BulletinFactory.of(ProfileActivity.this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
                 } else if (id == share) {
                     try {
                         String text = null;
@@ -5187,6 +5207,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             popupWindow.showAtLocation(getFragmentView(), 0, (int) px, (int) py);
             popupWindow.dimBehind();
             return true;
+        } else if (position == dcIdRow) {
+            if (userId != 0) {
+                TLRPC.User user = getMessagesController().getUser(userId);
+                if (user == null) {
+                    return false;
+                }
+                AndroidUtilities.addToClipboard("" + user.id);
+            } else if (chatId != 0) {
+                TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                if (chat == null) {
+                    return false;
+                }
+                AndroidUtilities.addToClipboard("" + chat.id);
+            }
+            BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
         } else if (position == registrationDataRow && (userId != 0)) {
             try {
                 String date = RegistrationDateController.getRegistrationDate(userId);
@@ -7139,6 +7174,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         numberSectionRow = -1;
         numberRow = -1;
         setUsernameRow = -1;
+        dcIdRow = -1;
         bioRow = -1;
         phoneSuggestionSectionRow = -1;
         phoneSuggestionRow = -1;
@@ -7241,11 +7277,15 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     setAvatarSectionRow = rowCount++;
                 }
                 numberSectionRow = rowCount++;
+
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM)
+                    dcIdRow = rowCount++;
+
                 numberRow = rowCount++;
                 setUsernameRow = rowCount++;
 
                 if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM)
-                    telegramDcIdRow = rowCount++;
+                    dcIdRow = rowCount++;
 
                 if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat())
                     registrationDataRow = rowCount++;
@@ -7311,6 +7351,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 boolean hasPhone = user != null && (!TextUtils.isEmpty(user.phone) || !TextUtils.isEmpty(vcardPhone));
 
                 infoHeaderRow = rowCount++;
+
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM) {
+                    dcIdRow = rowCount++;
+                };
+
                 if (!isBot && (hasPhone || !hasInfo)) {
                     phoneRow = rowCount++;
                 }
@@ -7321,8 +7366,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     usernameRow = rowCount++;
                 }
 
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM) {
+                    dcIdRow = rowCount++;
+                }
                 if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat()){
-                    // General User Info
                     registrationDataRow = rowCount++;
                 }
 
@@ -7330,7 +7377,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     restrictionReasonRow = rowCount++;
                 }
 
-                if (phoneRow != -1 || userInfoRow != -1 || usernameRow != -1 || registrationDataRow != -1 || restrictionReasonRow != -1) {
+                if (phoneRow != -1 || userInfoRow != -1 || usernameRow != -1 || restrictionReasonRow != -1 || dcIdRow != -1 || registrationDataRow != -1) {
                     notificationsDividerRow = rowCount++;
                 }
                 if (userId != getUserConfig().getClientUserId()) {
@@ -7386,11 +7433,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 sharedMediaRow = rowCount++;
             }
         } else if (chatId != 0) {
+            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM) {
+                infoHeaderRow = rowCount++;
+                // todo current user current chat
+                dcIdRow = rowCount++;
+            }
             if (chatInfo != null && (!TextUtils.isEmpty(chatInfo.about) || chatInfo.location instanceof TLRPC.TL_channelLocation) || ChatObject.isPublic(currentChat)) {
                 if (LocaleController.isRTL && ChatObject.isChannel(currentChat) && chatInfo != null && !currentChat.megagroup && chatInfo.linked_chat_id != 0) {
                     emptyRow = rowCount++;
                 }
-                infoHeaderRow = rowCount++;
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() != OctoConfig.DcIdStyle.OWLGRAM) {
+                    infoHeaderRow = rowCount++;
+                }
                 if (chatInfo != null) {
                     if (!TextUtils.isEmpty(chatInfo.about)) {
                         channelInfoRow = rowCount++;
@@ -7408,6 +7462,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             if (infoHeaderRow != -1) {
                 notificationsDividerRow = rowCount++;
+            }
+            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM) {
+                dcIdRow = rowCount++;
             }
             notificationsRow = rowCount++;
             infoSectionRow = rowCount++;
@@ -8110,6 +8167,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (user == null) {
                 return;
             }
+            otherItem.addSubItem(copy_id, R.drawable.msg_copy, "Copy ID");
             if (UserObject.isUserSelf(user)) {
                 otherItem.addSubItem(edit_name, R.drawable.msg_edit, LocaleController.getString("EditName", R.string.EditName));
                 selfUser = true;
@@ -8989,7 +9047,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 VIEW_TYPE_ADDTOGROUP_INFO = 17,
                 VIEW_TYPE_PREMIUM_TEXT_CELL = 18,
                 VIEW_TYPE_TEXT_DETAIL_MULTILINE = 19,
-                VIEW_TYPE_NOTIFICATIONS_CHECK_SIMPLE = 20;
+                VIEW_TYPE_NOTIFICATIONS_CHECK_SIMPLE = 20,
+                VIEW_TYPE_DATACENTER_INFO = 100;
 
         private Context mContext;
 
@@ -9191,6 +9250,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 case VIEW_TYPE_PREMIUM_TEXT_CELL:
                     view = new ProfilePremiumCell(mContext, resourcesProvider);
                     break;
+                case VIEW_TYPE_DATACENTER_INFO: {
+                    view = new DatacenterCell(mContext, resourcesProvider);
+                    break;
+                }
             }
             if (viewType != VIEW_TYPE_SHARED_MEDIA) {
                 view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
@@ -9312,6 +9375,17 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             usernames = new ArrayList<>();
                         }
                         detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), isTopic);
+                    } else if (position == dcIdRow) {
+                        DCUtils.DCInfo dcInfo = null;
+                        if (userId != 0) {
+                            TLRPC.User user = getMessagesController().getUser(userId);
+                            dcInfo = DCUtils.getDcInfo(user);
+                        } else if (chatId != 0) {
+                            TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                            dcInfo = DCUtils.getDcInfo(chat);
+                        }
+                        boolean isSelfSettings = userId == UserConfig.getInstance(currentAccount).getClientUserId();
+                        detailCell.setTextAndValue(dcInfo.userId + "", "DC" + dcInfo.dcId + " (" + dcInfo.dcNameType + ")", isSelfSettings);
                     } else if (position == registrationDataRow) {
                         if (!isChat() && userId != 0) {
                             boolean isSelfSettings = userId == UserConfig.getInstance(currentAccount).getClientUserId();
@@ -9695,6 +9769,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     textCheckCell.setTextAndCheck(LocaleController.getString("Notifications", R.string.Notifications), !getMessagesController().isDialogMuted(getDialogId(), topicId), false);
                     break;
+                case VIEW_TYPE_DATACENTER_INFO:
+                    DatacenterCell dc = (DatacenterCell) holder.itemView;
+                    TLRPC.User currentUser = getMessagesController().getUser(userId);
+                    DCUtils.DCInfo info = currentChat != null ? DCUtils.getDcInfo(currentChat) : DCUtils.getDcInfo(currentUser);
+                    boolean withDivider = (chatInfo != null && !TextUtils.isEmpty(chatInfo.about)) || (currentChat != null && !TextUtils.isEmpty(currentChat.username)) || currentUser != null && (UserObject.isUserSelf(currentUser) || !TextUtils.isEmpty(currentUser.username));
+                    dc.setIdAndDC(info, withDivider);
+                    break;
             }
         }
 
@@ -9762,7 +9843,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (notificationRow != -1) {
                 int position = holder.getAdapterPosition();
                 return position == notificationRow || position == numberRow || position == privacyRow ||
-                        position == languageRow || position == setUsernameRow || position == bioRow ||
+                        position == languageRow || position == setUsernameRow || position == dcIdRow || position == bioRow ||
                         position == versionRow || position == dataRow || position == chatRow ||
                         position == questionRow || position == devicesRow || position == filtersRow || position == stickersRow ||
                         position == faqRow || position == policyRow || position == sendLogsRow || position == sendLastLogsRow ||
@@ -9796,7 +9877,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (position == infoHeaderRow || position == membersHeaderRow || position == settingsSectionRow2 ||
                     position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == octoGramSettingsRow) {
                 return VIEW_TYPE_HEADER;
-            } else if (position == phoneRow || position == locationRow || position == numberRow || position == restrictionReasonRow || position == registrationDataRow) {
+            } else if (position == phoneRow || position == locationRow || position == numberRow || position == restrictionReasonRow || position == registrationDataRow
+                    || (position == dcIdRow && OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM)) {
                 return VIEW_TYPE_TEXT_DETAIL;
             } else if (position == usernameRow || position == setUsernameRow) {
                 return VIEW_TYPE_TEXT_DETAIL_MULTILINE;
@@ -9839,6 +9921,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 return VIEW_TYPE_ADDTOGROUP_INFO;
             } else if (position == premiumRow) {
                 return VIEW_TYPE_PREMIUM_TEXT_CELL;
+            } else if (position == dcIdRow && OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM) {
+                return VIEW_TYPE_DATACENTER_INFO;
             }
             return 0;
         }
@@ -10981,6 +11065,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             put(++pointer, numberSectionRow, sparseIntArray);
             put(++pointer, numberRow, sparseIntArray);
             put(++pointer, setUsernameRow, sparseIntArray);
+            put(++pointer, dcIdRow, sparseIntArray);
             put(++pointer, bioRow, sparseIntArray);
             put(++pointer, phoneSuggestionRow, sparseIntArray);
             put(++pointer, phoneSuggestionSectionRow, sparseIntArray);
