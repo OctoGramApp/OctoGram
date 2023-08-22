@@ -6376,10 +6376,6 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 return 800;
             case OctoConfig.PhotoResolution.HIGH:
                 return 2560;
-            case OctoConfig.PhotoResolution.EXTREME:
-                return 3840;
-            case OctoConfig.PhotoResolution.UHD:
-                return 4096;
             default:
                 return 1280;
         }

@@ -34,7 +34,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
             if (!OctoConfig.INSTANCE.alternativeNavigation.getValue() &&
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
-                    OctoConfig.INSTANCE.photoResolution.getValue() != 1) {
+                    OctoConfig.INSTANCE.photoResolution.getValue() == OctoConfig.PhotoResolution.DEFAULT) {
                 OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
             }
         }
@@ -74,8 +74,6 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                 add(new Pair<>(OctoConfig.PhotoResolution.LOW, LocaleController.getString(R.string.ResolutionLow)));
                                 add(new Pair<>(OctoConfig.PhotoResolution.DEFAULT, LocaleController.getString(R.string.ResolutionMedium)));
                                 add(new Pair<>(OctoConfig.PhotoResolution.HIGH, LocaleController.getString(R.string.ResolutionHigh)));
-                                add(new Pair<>(OctoConfig.PhotoResolution.EXTREME, LocaleController.getString(R.string.ResolutionVeryHigh)));
-                                add(new Pair<>(OctoConfig.PhotoResolution.UHD, LocaleController.getString(R.string.ResolutionUltraHigh)));
                             }})
                             .currentValue(OctoConfig.INSTANCE.photoResolution)
                             .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))

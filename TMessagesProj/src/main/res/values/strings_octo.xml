@@ -138,13 +138,8 @@
     <string name="ResolutionLow">Low (800x)</string>
     <string name="ResolutionMedium">Default (1280x)</string>
     <string name="ResolutionHigh">High (2560x)</string>
-    <string name="ResolutionVeryHigh">Extreme (3840x)</string>
-    <string name="ResolutionUltraHigh">UHD (4096x)</string>
     <string name="ForceTableMode">Force Tablet Mode</string>
 
-    <!--<string name="ResolutionLow">Low (800px)</string>
-    <string name="ResolutionMedium">Medium (1280px)</string>
-    <string name="ResolutionHigh">High (2560px)</string>-->
     <string name="CopyTitle">Copy Title</string>
     <string name="CopyCallback">Copy Callback</string>
     <string name="CopyID">Copy ID</string>
