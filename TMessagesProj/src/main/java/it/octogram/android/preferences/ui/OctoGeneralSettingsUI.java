@@ -16,6 +16,7 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 
@@ -55,10 +56,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
+                                    new Pair<>(OctoConfig.DcIdStyle.NONE, LocaleController.formatString("Nothing", R.string.Nothing)),
                                     new Pair<>(OctoConfig.DcIdStyle.MINIMAL, "Minimal"),
                                     new Pair<>(OctoConfig.DcIdStyle.OWLGRAM, "OwlGram"),
-                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram"),
-                                    new Pair<>(OctoConfig.DcIdStyle.NONE, LocaleController.formatString("Nothing", R.string.Nothing))
+                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram")
                             ))
                             .title(LocaleController.formatString("Style", R.string.Style))
                             .build());
@@ -66,6 +67,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
                             .title(LocaleController.formatString("ShowRegistrationDate", R.string.ShowRegistrationDate))
                             .description(LocaleController.formatString("ShowRegistrationDate_Desc", R.string.ShowRegistrationDate_Desc))
+                            .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
                             .build());
                 })
                 .category(LocaleController.formatString("Chats", R.string.Chats), category -> {
