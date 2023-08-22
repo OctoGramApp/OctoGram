@@ -7243,12 +7243,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 numberSectionRow = rowCount++;
                 numberRow = rowCount++;
                 setUsernameRow = rowCount++;
-                bioRow = rowCount++;
 
-                if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat()){
-                    // Profile Settings
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM)
+                    telegramDcIdRow = rowCount++;
+
+                if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat())
                     registrationDataRow = rowCount++;
-                }
+
+                bioRow = rowCount++;
 
                 octoGramShadowRow = rowCount++;
                 octoGramSettingsRow = rowCount++;
@@ -9312,8 +9314,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), isTopic);
                     } else if (position == registrationDataRow) {
                         if (!isChat() && userId != 0) {
-                            detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId), LocaleController.getString(R.string.RegistrationDate), false);
-                            break;
+                            boolean isSelfSettings = userId == UserConfig.getInstance(currentAccount).getClientUserId();
+                            detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId), LocaleController.getString(R.string.RegistrationDate), isSelfSettings);
                         }
                     } else if (position == restrictionReasonRow) {
                         ArrayList<TLRPC.TL_restrictionReason> reasons = new ArrayList<>();
