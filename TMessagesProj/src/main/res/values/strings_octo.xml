@@ -10,6 +10,7 @@
 
 <resources>
     <string name="Style">Style</string>
+    <string name="Type">Type</string>
     <string name="Nothing">None</string>
     <string name="Translator">Translator</string>
     <string name="Updates">Updates</string>
@@ -37,10 +38,11 @@
     <string name="HideOtherPhoneNumber">Hide other people\'s phone number</string>
     <string name="HideOtherPhoneNumber_Desc">Hide other people\'s phone number from their profile</string>
     <string name="ShowFakePhoneNumber">Show fake phone number</string>
-    <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile. This fake phone number is only showed to yourself! If you disable phone privacy, people will see your real phone number</string>
+    <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile. This fake phone number is only shown to yourself! If you disable phone privacy, people will see your real phone number</string>
     <string name="PromptBeforeCalling">Prompt before calling</string>
     <string name="PromptBeforeCalling_Desc">Show a prompt to avoid accidental calls</string>
     <string name="DcIdHeader">Datacenter and User ID</string>
+    <string name="DcIdTypeDescription">Telegram\'s API displays IDs as they are, while the Bot API introduces a "-" sign for groups and prepends "-100" for supergroups, broadcast groups, and channels.</string>
     <string name="ShowRegistrationDate">Show registration date</string>
     <string name="ShowRegistrationDate_Desc">Show user\'s registration date in profiles. Note that this is achieved through guessing, so it may show inaccurate results</string>
     <string name="JumpToNextChannel">Jump to next channel</string>
