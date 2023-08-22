@@ -9,16 +9,17 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-
+import android.util.Pair;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.OctoPreferences;
+import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.OctoPreferences;
-import it.octogram.android.preferences.PreferencesEntry;
-import it.octogram.android.preferences.rows.impl.FooterRow;
-import it.octogram.android.preferences.rows.impl.SwitchRow;
+import java.util.ArrayList;
 
 public class OctoCameraSettingsUI implements PreferencesEntry {
 
@@ -44,9 +45,15 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                             .description(LocaleController.getString("PerformanceMode_Desc", R.string.PerformanceMode_Desc))
                             .showIf(OctoConfig.INSTANCE.cameraXEnabled)
                             .build());
-                    category.row(new FooterRow.FooterRowBuilder()
-                            .title(LocaleController.getString("CurrentCameraXResolution", R.string.CurrentCameraXResolution) + ": " + OctoConfig.INSTANCE.cameraXResolution.getValue() + "p")
-                            .showIf(OctoConfig.INSTANCE.cameraXEnabled)
+                    category.row(new ListRow.ListRowBuilder()
+                            .options(new ArrayList<>() {{
+                                add(new Pair<>(OctoConfig.CameraXResolution.SD, "480p"));
+                                add(new Pair<>(OctoConfig.CameraXResolution.HD, "720p"));
+                                add(new Pair<>(OctoConfig.CameraXResolution.FHD, "1080p"));
+                                add(new Pair<>(OctoConfig.CameraXResolution.UHD, "2160p"));
+                            }})
+                            .currentValue(OctoConfig.INSTANCE.cameraXResolution)
+                            .title(LocaleController.getString("CurrentCameraXResolution", R.string.CurrentCameraXResolution))
                             .build());
                 })
                 .build();

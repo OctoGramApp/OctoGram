@@ -137,11 +137,42 @@ public class CameraXUtils {
                 .findFirst()
                 .ifPresent(height -> {
                     cameraResolution = height;
-                    int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
+                    int current = getResolutionFromConfig();
                     if (current == -1 || current > max || current < min) {
-                        OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.cameraXResolution, height);
+                        OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.cameraXResolution, getConfigFromResolution(height));
                     }
                 });
+    }
+
+    private static int getResolutionFromConfig() {
+        int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
+        switch (current) {
+            case OctoConfig.CameraXResolution.SD:
+                return 480;
+            case OctoConfig.CameraXResolution.HD:
+                return 720;
+            case OctoConfig.CameraXResolution.FHD:
+                return 1080;
+            case OctoConfig.CameraXResolution.UHD:
+                return 2160;
+        }
+        return -1;
+    }
+
+    private static int getConfigFromResolution(int resolution) {
+        switch (resolution) {
+            case 480:
+                return OctoConfig.CameraXResolution.SD;
+            case 720:
+                return OctoConfig.CameraXResolution.HD;
+            case 1080:
+                return OctoConfig.CameraXResolution.FHD;
+            case 2160:
+                return OctoConfig.CameraXResolution.UHD;
+            default:
+                loadSuggestedResolution();
+        }
+        return -1;
     }
 
     public static int getCameraResolution() {
@@ -151,14 +182,14 @@ public class CameraXUtils {
     public static Size getPreviewBestSize() {
         int suggestedRes = getSuggestedResolution(true);
         return getAvailableVideoSizes().values().stream()
-                .filter(size -> size.getHeight() <= OctoConfig.INSTANCE.cameraXResolution.getValue() && size.getHeight() <= suggestedRes)
+                .filter(size -> size.getHeight() <= getResolutionFromConfig() && size.getHeight() <= suggestedRes)
                 .max(Comparator.comparingInt(Size::getHeight))
                 .orElse(new Size(0, 0));
     }
 
     public static Quality getVideoQuality() {
         return getAvailableVideoSizes().entrySet().stream()
-                .filter(entry -> entry.getValue().getHeight() == OctoConfig.INSTANCE.cameraXResolution.getValue())
+                .filter(entry -> entry.getValue().getHeight() == getResolutionFromConfig())
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .orElse(Quality.HIGHEST);

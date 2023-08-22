@@ -183,12 +183,17 @@ public class OctoConfig {
         public static final int HALLOWEEN = 3;
     }
 
+    public static class CameraXResolution {
+        public static final int SD = 0;
+        public static final int HD = 1;
+        public static final int FHD = 2;
+        public static final int UHD = 3;
+    }
+
     public static class PhotoResolution {
         public static final int LOW = 0;
         public static final int DEFAULT = 1;
         public static final int HIGH = 2;
-        public static final int EXTREME = 3;
-        public static final int UHD = 4;
     }
 
 }
