@@ -5213,13 +5213,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (user == null) {
                     return false;
                 }
-                AndroidUtilities.addToClipboard("" + user.id);
+                AndroidUtilities.addToClipboard("" + DCUtils.getNiceId(user.id));
             } else if (chatId != 0) {
                 TLRPC.Chat chat = getMessagesController().getChat(chatId);
                 if (chat == null) {
                     return false;
                 }
-                AndroidUtilities.addToClipboard("" + chat.id);
+                AndroidUtilities.addToClipboard("" + DCUtils.getNiceId(chat, chat.id));
             }
             BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
         } else if (position == registrationDataRow && (userId != 0)) {

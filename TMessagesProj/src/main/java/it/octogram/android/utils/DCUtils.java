@@ -47,19 +47,26 @@ public class DCUtils {
             id = user.id;
         } else if (chat != null) {
             dc = chat.photo != null ? chat.photo.dc_id : -1;
-            if (OctoConfig.INSTANCE.dcIdType.getValue() == OctoConfig.DcIdType.BOT_API) {
-                if (ChatObject.isChannel(chat)) {
-                    id = -1000000000000L - chat.id;
-                } else {
-                    id = -chat.id;
-                }
-            } else {
-                id = chat.id;
-            }
+            id = getNiceId(chat, chat.id);
         }
         dc = dc != 0 ? dc : -1;
         String dcName = dcNames.getOrDefault(dc, LocaleController.getString("NumberUnknown", R.string.NumberUnknown));
         return new DCInfo(dc, id, dcName);
+    }
+
+    public static long getNiceId(long id) {
+        return getNiceId(null, id);
+    }
+
+    public static long getNiceId(TLRPC.Chat chat, long id) {
+        if (OctoConfig.INSTANCE.dcIdType.getValue() == OctoConfig.DcIdType.BOT_API) {
+            if (ChatObject.isChannel(chat)) {
+                id = -1000000000000L - id;
+            } else {
+                id = -id;
+            }
+        }
+        return id;
     }
 
 
