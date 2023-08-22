@@ -43,8 +43,8 @@ public class AllowExperimentalBottomSheet extends BottomSheet {
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         textView = new TextView(context);
-        textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
-        textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MONO));
+        textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
+        //textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MONO));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setText(LocaleController.getString("OctoExperimentsDialogMessage", R.string.OctoExperimentsDialogMessage));
