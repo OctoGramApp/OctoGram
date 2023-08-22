@@ -36,7 +36,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> showFakePhoneNumber = new ConfigProperty<>("showFakePhoneNumber", false);
     public final ConfigProperty<Boolean> hideOtherPhoneNumber = new ConfigProperty<>("hideOtherPhoneNumber", true);
     public final ConfigProperty<Boolean> promptBeforeCalling = new ConfigProperty<>("promptBeforeCalling", true);
-    /*TODO*/ public final ConfigProperty<Integer> dcIdStyle = new ConfigProperty<>("dcIdStyle", DcIdStyle.MINIMAL);
+    public final ConfigProperty<Integer> dcIdStyle = new ConfigProperty<>("dcIdStyle", DcIdStyle.MINIMAL);
+    public final ConfigProperty<Integer> dcIdType = new ConfigProperty<>("dcIdType", DcIdType.BOT_API);
     public final ConfigProperty<Boolean> registrationDateInProfiles = new ConfigProperty<>("registrationDateInProfiles", false);
     public final ConfigProperty<Boolean> jumpToNextChannel = new ConfigProperty<>("jumpToNextChannel", true);
     public final ConfigProperty<Boolean> hideGreetingSticker = new ConfigProperty<>("hideGreetingSticker", false);
@@ -94,7 +95,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
 
     private final List<ConfigProperty<?>> properties = List.of(
-            hidePhoneNumber, showFakePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, registrationDateInProfiles,
+            hidePhoneNumber, showFakePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, dcIdType, registrationDateInProfiles,
             jumpToNextChannel, hideGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus,
             hideCustomEmojis, activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera,
             disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideStories, hideFoldersWhenForwarding, accentColorAsNotificationColor,
@@ -167,6 +168,11 @@ public class OctoConfig {
         public static final int MINIMAL = 1;
         public static final int OWLGRAM = 2;
         public static final int TELEGRAM = 3;
+    }
+
+    public static class DcIdType {
+        public static final int BOT_API = 0;
+        public static final int TELEGRAM = 1;
     }
 
     public static class EventType {

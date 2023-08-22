@@ -13,6 +13,7 @@ import android.util.Pair;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import org.telegram.messenger.LocaleController;
@@ -62,6 +63,17 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                     new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram")
                             ))
                             .title(LocaleController.formatString("Style", R.string.Style))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.dcIdType)
+                            .options(List.of(
+                                    new Pair<>(OctoConfig.DcIdType.BOT_API, "Bot API"),
+                                    new Pair<>(OctoConfig.DcIdType.TELEGRAM, "Telegram")
+                            ))
+                            .title(LocaleController.formatString("Type", R.string.Type))
+                            .build());
+                    category.row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                            .title(LocaleController.formatString("DcIdTypeDescription", R.string.DcIdTypeDescription))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
