@@ -97,6 +97,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import it.octogram.android.preferences.ui.custom.DatacenterCell;
 import it.octogram.android.utils.DCUtils;
+import org.telegram.PhoneFormat.CallingCodeInfo;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -9319,9 +9320,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             phoneNumber = null;
                         }
                         if (OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()) {
-                            if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue()) {
-                                String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
-                                text = String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry));
+                            if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue() && phoneNumber != null) {
+                                CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber);
+                                if (info == null) {
+                                    text = LocaleController.getString("MobileHidden", R.string.MobileHidden);
+                                } else {
+                                    String phoneCountry = info.callingCode;
+                                    text = String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry));
+                                }
                             } else {
                                 text = LocaleController.getString("MobileHidden", R.string.MobileHidden);
                             }
@@ -9427,10 +9433,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         String value;
                         if (user != null && user.phone != null && user.phone.length() != 0) {
                             if (OctoConfig.INSTANCE.hidePhoneNumber.getValue()) {
-                                if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue()) {
-                                    String phoneNumber = user.phone;
-                                    String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
-                                    value = String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry));
+                                if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue() && user.phone != null) {
+                                    CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(user.phone);
+                                    if (info == null) {
+                                        value = LocaleController.getString("MobileHidden", R.string.MobileHidden);
+                                    } else {
+                                        String phoneCountry = info.callingCode;
+                                        value = String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(user.phone, phoneCountry));
+                                    }
                                 } else {
                                     value = LocaleController.getString("MobileHidden", R.string.MobileHidden);
                                 }
