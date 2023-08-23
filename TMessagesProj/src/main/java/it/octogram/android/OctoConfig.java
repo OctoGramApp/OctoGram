@@ -9,6 +9,7 @@ package it.octogram.android;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.media.AudioFormat;
 
 import org.telegram.messenger.ApplicationLoader;
 
@@ -93,6 +94,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", 0);
     public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", PhotoResolution.DEFAULT);
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
+    public final ConfigProperty<Integer> gcOutputType = new ConfigProperty<>("gcOutputType", AudioFormat.CHANNEL_OUT_MONO);
     public final ConfigProperty<Boolean> mediaInGroupCall = new ConfigProperty<>("mediaInGroupCall", false);
 
     private final List<ConfigProperty<?>> properties = List.of(
@@ -104,7 +106,7 @@ public class OctoConfig {
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
             experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution,lastSelectedCompression,
-            tabletMode, maxStickerSize, mediaInGroupCall
+            tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall
     );
 
 

@@ -9,6 +9,7 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
+import android.media.AudioFormat;
 import android.util.Pair;
 
 import it.octogram.android.preferences.rows.impl.ListRow;
@@ -35,6 +36,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
                     !OctoConfig.INSTANCE.mediaInGroupCall.getValue() &&
+                    OctoConfig.INSTANCE.gcOutputType.getValue() == AudioFormat.CHANNEL_OUT_MONO &&
                     OctoConfig.INSTANCE.photoResolution.getValue() == OctoConfig.PhotoResolution.DEFAULT) {
                 OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
             }
@@ -53,6 +55,15 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .onClick(() -> checkExperimentsEnabled(fragment, context))
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
                             .title(LocaleController.getString(R.string.MediaStream))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .options(new ArrayList<>() {{
+                                add(new Pair<>(AudioFormat.CHANNEL_OUT_STEREO, LocaleController.getString(R.string.AudioTypeStereo)));
+                                add(new Pair<>(AudioFormat.CHANNEL_OUT_MONO, LocaleController.getString(R.string.AudioTypeMono)));
+                            }})
+                            .currentValue(OctoConfig.INSTANCE.gcOutputType)
+                            .title(LocaleController.getString(R.string.AudioStereo))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(fragment, context))

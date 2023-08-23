@@ -3533,7 +3533,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				int outFramesPerBuffer = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
 				Instance.setBufferSize(outFramesPerBuffer);
 			} else {
-				Instance.setBufferSize(AudioTrack.getMinBufferSize(48000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT) / 2);
+				Instance.setBufferSize(AudioTrack.getMinBufferSize(48000, OctoConfig.INSTANCE.gcOutputType.getValue(), AudioFormat.ENCODING_PCM_16BIT) / 2);
 			}
 
 			cpuWakelock = ((PowerManager) getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "telegram-voip");
