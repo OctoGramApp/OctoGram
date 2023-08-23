@@ -101,6 +101,11 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);
     public final ConfigProperty<Boolean> unlockedChupa = newConfigProperty("unlockedChupa", false);
 
+    /* Translator */
+    public final ConfigProperty<Boolean> showTranslateButton = newConfigProperty("translatorEnabled", false);
+    public final ConfigProperty<Boolean> translateEntireChat = newConfigProperty("translatorLanguage", false);
+    public final ConfigProperty<Boolean> keepMarkdown = newConfigProperty("translatorShowOriginal", false);
+
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXEnabled = newConfigProperty("cameraXEnabled", true);
     public final ConfigProperty<Boolean> cameraXPerfOverQuality = newConfigProperty("cameraXPerformanceMode", false);
