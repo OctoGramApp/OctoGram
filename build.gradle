@@ -2,11 +2,11 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'https://developer.huawei.com/repo/' }
+        //maven { url 'https://developer.huawei.com/repo/' }
     }
-    dependencies {
+    /*dependencies {
         classpath group: 'com.huawei.agconnect', name: 'agcp', version: '1.6.0.300'
-    }
+    }*/
 }
 
 plugins {
