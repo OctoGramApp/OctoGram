@@ -34,6 +34,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
             if (!OctoConfig.INSTANCE.alternativeNavigation.getValue() &&
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
+                    !OctoConfig.INSTANCE.mediaInGroupCall.getValue() &&
                     OctoConfig.INSTANCE.photoResolution.getValue() == OctoConfig.PhotoResolution.DEFAULT) {
                 OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
             }
@@ -47,6 +48,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .title(LocaleController.getString("AlternativeNavigation", R.string.AlternativeNavigation))
                             .description(LocaleController.getString("AlternativeNavigation_Desc", R.string.AlternativeNavigation_Desc))
                             .requiresRestart(true)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
+                            .title(LocaleController.getString(R.string.MediaStream))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(fragment, context))

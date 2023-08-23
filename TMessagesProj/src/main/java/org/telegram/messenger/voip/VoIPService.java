@@ -3630,12 +3630,22 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 	}
 
+	private int currentStreamType;
 	private void loadResources() {
-		if (Build.VERSION.SDK_INT >= 21) {
-			WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+		if (chat != null && OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
+			currentStreamType = AudioManager.STREAM_MUSIC;
+			if (Build.VERSION.SDK_INT >= 21) {
+				WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_MEDIA);
+			}
+		} else {
+			currentStreamType = AudioManager.STREAM_VOICE_CALL;
+			if (Build.VERSION.SDK_INT >= 21) {
+				WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+			}
 		}
+		WebRtcAudioTrack.setAudioStreamType(currentStreamType);
 		Utilities.globalQueue.postRunnable(() -> {
-			soundPool = new SoundPool(1, AudioManager.STREAM_VOICE_CALL, 0);
+			soundPool = new SoundPool(1, currentStreamType, 0);
 			spConnectingId = soundPool.load(this, R.raw.voip_connecting, 1);
 			spRingbackID = soundPool.load(this, R.raw.voip_ringback, 1);
 			spFailedID = soundPool.load(this, R.raw.voip_failed, 1);
@@ -3693,8 +3703,8 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 
 		if (Build.VERSION.SDK_INT >= 21) {
-			WebRtcAudioTrack.setAudioTrackUsageAttribute(hasRtmpStream() ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_VOICE_COMMUNICATION);
-			WebRtcAudioTrack.setAudioStreamType(hasRtmpStream() ? AudioManager.USE_DEFAULT_STREAM_TYPE : AudioManager.STREAM_VOICE_CALL);
+			WebRtcAudioTrack.setAudioTrackUsageAttribute(hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue() ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_VOICE_COMMUNICATION);
+			WebRtcAudioTrack.setAudioStreamType(hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue() ? AudioManager.USE_DEFAULT_STREAM_TYPE : AudioManager.STREAM_VOICE_CALL);
 		}
 
 		needPlayEndSound = true;
@@ -3702,7 +3712,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		if (!USE_CONNECTION_SERVICE) {
 			Utilities.globalQueue.postRunnable(() -> {
 				try {
-					if (hasRtmpStream()) {
+					if (hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
 						am.setMode(AudioManager.MODE_NORMAL);
 						am.setBluetoothScoOn(false);
 						AndroidUtilities.runOnUIThread(() -> {
@@ -3775,6 +3785,9 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void fetchBluetoothDeviceName() {
+		if (Build.VERSION.SDK_INT >= 31 && ApplicationLoader.applicationContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+			return;
+		}
 		if (fetchingBluetoothDeviceName) {
 			return;
 		}
@@ -4423,7 +4436,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	public void updateOutputGainControlState() {
-		if (hasRtmpStream()) {
+		if (hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
 			return;
 		}
 		if (tgVoip[CAPTURE_DEVICE_CAMERA] != null) {

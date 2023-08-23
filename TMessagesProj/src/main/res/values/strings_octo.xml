@@ -147,6 +147,7 @@
     <string name="CallbackCopiedHint">Callback copied to clipboard.</string>
     <string name="IDCopied">ID copied to clipboard.</string>
     <string name="InlineQueryCopied">Inline Query copied to clipboard.</string>
+    <string name="MediaStream">Use Media Stream in GroupCall</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
