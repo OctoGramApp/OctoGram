@@ -721,6 +721,8 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 String phoneNumber = user.phone;
                 String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
                 phoneTextView.setText(String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry)));
+            } else if (OctoConfig.INSTANCE.showUsernameAsPhoneNumber.getValue() && user.username != null && !user.username.isEmpty()) {
+                phoneTextView.setText(String.format("@%s", user.username));
             } else {
                 phoneTextView.setText(LocaleController.getString("MobileHidden", R.string.MobileHidden));
             }

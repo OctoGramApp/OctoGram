@@ -39,6 +39,8 @@
     <string name="HideOtherPhoneNumber_Desc">Hide other people\'s phone number from their profile</string>
     <string name="ShowFakePhoneNumber">Show fake phone number</string>
     <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile. This fake phone number is only shown to yourself! If you disable phone privacy, people will see your real phone number</string>
+    <string name="ShowUsernameAsPhoneNumber">Show username as phone number</string>
+    <string name="ShowUsernameAsPhoneNumber_Desc">Show your username as your phone number in your profile. This will only be shown to yourself!</string>
     <string name="PromptBeforeCalling">Prompt before calling</string>
     <string name="PromptBeforeCalling_Desc">Show a prompt to avoid accidental calls</string>
     <string name="DcIdHeader">Datacenter and User ID</string>

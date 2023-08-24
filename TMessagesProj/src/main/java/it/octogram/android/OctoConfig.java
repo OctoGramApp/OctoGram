@@ -35,6 +35,7 @@ public class OctoConfig {
     /*General*/
     public final ConfigProperty<Boolean> hidePhoneNumber = new ConfigProperty<>("hidePhoneNumber", true);
     public final ConfigProperty<Boolean> showFakePhoneNumber = new ConfigProperty<>("showFakePhoneNumber", false);
+    public final ConfigProperty<Boolean> showUsernameAsPhoneNumber = new ConfigProperty<>("showUsernameAsPhoneNumber", false);
     public final ConfigProperty<Boolean> hideOtherPhoneNumber = new ConfigProperty<>("hideOtherPhoneNumber", true);
     public final ConfigProperty<Boolean> promptBeforeCalling = new ConfigProperty<>("promptBeforeCalling", true);
     public final ConfigProperty<Integer> dcIdStyle = new ConfigProperty<>("dcIdStyle", DcIdStyle.MINIMAL);
@@ -45,7 +46,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> playGifAsVideo = new ConfigProperty<>("playGifAsVideo", false);
     public final ConfigProperty<Boolean> hideKeyboardOnScroll = new ConfigProperty<>("hideKeyboardOnScroll", false);
     public final ConfigProperty<Boolean> hideSendAsChannel = new ConfigProperty<>("hideSendAsChannel", false);
-    public final ConfigProperty<Boolean> showOnlineStatus = new ConfigProperty<>("showOnlineStatus", true);
+    public final ConfigProperty<Boolean> showOnlineStatus = new ConfigProperty<>("showOnlineStatus", false);
     public final ConfigProperty<Boolean> hideCustomEmojis = new ConfigProperty<>("hideCustomEmojis", false);
     public final ConfigProperty<Boolean> activeNoiseSuppression = new ConfigProperty<>("activeNoiseSuppression", false);
     public final ConfigProperty<Boolean> unmuteVideosWithVolumeDown = new ConfigProperty<>("unmuteVideosWithVolumeDown", true);
