@@ -1443,6 +1443,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         float height = bitmapToEdit.getHeight();
 
         int maxSide;
+        // Photo Editor Preview
         switch (SharedConfig.getDevicePerformanceClass()) {
             case SharedConfig.PERFORMANCE_CLASS_LOW:
                 maxSide = 1280;
