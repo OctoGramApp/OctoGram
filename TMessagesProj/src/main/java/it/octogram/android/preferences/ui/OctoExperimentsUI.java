@@ -12,8 +12,6 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.util.Pair;
 
-import it.octogram.android.preferences.rows.impl.ListRow;
-import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -24,8 +22,10 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 
 public class OctoExperimentsUI implements PreferencesEntry {
 
@@ -37,6 +37,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
                     !OctoConfig.INSTANCE.mediaInGroupCall.getValue() &&
                     OctoConfig.INSTANCE.gcOutputType.getValue() == AudioFormat.CHANNEL_OUT_MONO &&
+                    OctoConfig.INSTANCE.maxRecentStickers.getValue() == 20 &&
                     OctoConfig.INSTANCE.photoResolution.getValue() == OctoConfig.PhotoResolution.DEFAULT) {
                 OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
             }
@@ -65,6 +66,34 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .currentValue(OctoConfig.INSTANCE.gcOutputType)
                             .title(LocaleController.getString(R.string.AudioStereo))
                             .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .options(new ArrayList<>() {{
+                                add(new Pair<>(OctoConfig.PhotoResolution.LOW, LocaleController.getString(R.string.ResolutionLow)));
+                                add(new Pair<>(OctoConfig.PhotoResolution.DEFAULT, LocaleController.getString(R.string.ResolutionMedium)));
+                                add(new Pair<>(OctoConfig.PhotoResolution.HIGH, LocaleController.getString(R.string.ResolutionHigh)));
+                            }})
+                            .currentValue(OctoConfig.INSTANCE.photoResolution)
+                            .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.maxRecentStickers)
+                            .options(new ArrayList<>() {{
+                                add(new Pair<>(0, LocaleController.getString("MaxStickerSizeDefault", R.string.MaxStickerSizeDefault)));
+                                add(new Pair<>(1, "30"));
+                                add(new Pair<>(2, "40"));
+                                add(new Pair<>(3, "50"));
+                                add(new Pair<>(4, "80"));
+                                add(new Pair<>(5, "100"));
+                                add(new Pair<>(6, "120"));
+                                add(new Pair<>(7, "150"));
+                                add(new Pair<>(8, "180"));
+                                add(new Pair<>(9, "200"));
+                            }})
+                            .title(LocaleController.getString("MaxRecentStickers", R.string.MaxRecentStickers))
+                            .build());
+                })
+                .category("Upload & Download Boost", category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(fragment, context))
                             .preferenceValue(OctoConfig.INSTANCE.uploadBoost)
@@ -84,16 +113,6 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             }})
                             .preferenceValue(OctoConfig.INSTANCE.downloadBoostValue)
                             .showIf(OctoConfig.INSTANCE.downloadBoost)
-                            .build());
-                    category.row(new ListRow.ListRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
-                            .options(new ArrayList<>() {{
-                                add(new Pair<>(OctoConfig.PhotoResolution.LOW, LocaleController.getString(R.string.ResolutionLow)));
-                                add(new Pair<>(OctoConfig.PhotoResolution.DEFAULT, LocaleController.getString(R.string.ResolutionMedium)));
-                                add(new Pair<>(OctoConfig.PhotoResolution.HIGH, LocaleController.getString(R.string.ResolutionHigh)));
-                            }})
-                            .currentValue(OctoConfig.INSTANCE.photoResolution)
-                            .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))
                             .build());
                 })
                 .build();

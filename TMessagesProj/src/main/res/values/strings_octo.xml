@@ -151,7 +151,8 @@
     <string name="AudioStereo">Use Audio Stereo in GroupCall</string>
     <string name="AudioTypeStereo">Audio Stereo</string>
     <string name="AudioTypeMono">Audio Mono (Default)</string>
-
+    <string name="MaxRecentStickers">Max Recent Stickers</string>
+    <string name="MaxStickerSizeDefault">20 (Default)</string>
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>

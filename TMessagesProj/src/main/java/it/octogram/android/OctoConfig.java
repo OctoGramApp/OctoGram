@@ -96,6 +96,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
     public final ConfigProperty<Integer> gcOutputType = new ConfigProperty<>("gcOutputType", 0);
     public final ConfigProperty<Boolean> mediaInGroupCall = new ConfigProperty<>("mediaInGroupCall", false);
+    public final ConfigProperty<Integer> maxRecentStickers = new ConfigProperty<>("maxRecentStickers", 0);
 
     private final List<ConfigProperty<?>> properties = List.of(
             hidePhoneNumber, showFakePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, dcIdType, registrationDateInProfiles,
@@ -106,7 +107,7 @@ public class OctoConfig {
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
             experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution,lastSelectedCompression,
-            tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall
+            tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall, maxRecentStickers
     );
 
 
@@ -121,6 +122,13 @@ public class OctoConfig {
         return AudioFormat.CHANNEL_OUT_MONO;
     }
 
+    public static int getMaxRecentSticker(int size) {
+        int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200};
+        if (size >= 0 && size < sizes.length) {
+            return sizes[size];
+        }
+        return 20;
+    }
     /*
      * It is safe to suppress this warning because the method loadConfig() is only called once in the static block above.
      * Also the semantics of the data structure is pretty solid, so there is no need to worry about it.
