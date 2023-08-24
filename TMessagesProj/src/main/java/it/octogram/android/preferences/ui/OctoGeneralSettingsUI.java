@@ -50,6 +50,11 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.showUsernameAsPhoneNumber)
+                            .title(LocaleController.formatString(R.string.ShowUsernameAsPhoneNumber))
+                            .description(LocaleController.formatString("ShowUsernameAsPhoneNumber_Desc", R.string.ShowUsernameAsPhoneNumber_Desc))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.promptBeforeCalling)
                             .title(LocaleController.formatString("PromptBeforeCalling", R.string.PromptBeforeCalling))
                             .description(LocaleController.formatString("PromptBeforeCalling_Desc", R.string.PromptBeforeCalling_Desc))
