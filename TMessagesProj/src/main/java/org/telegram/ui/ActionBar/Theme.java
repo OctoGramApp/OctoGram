@@ -1068,7 +1068,7 @@ public class Theme {
                 for (int a = 0, N = accents.size(); a < N; a++) {
                     ThemeAccent accent = accents.get(a);
                     File wallpaper = accent.getPathToWallpaper();
-                    if (wallpaper != null && wallpaper.length() > 0) {
+                    if (wallpaper != null && wallpaper.exists()) {
                         accents.remove(a);
                         a--;
                         N--;
