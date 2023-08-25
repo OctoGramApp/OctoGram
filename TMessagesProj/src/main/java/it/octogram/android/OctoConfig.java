@@ -82,6 +82,10 @@ public class OctoConfig {
     public final ConfigProperty<String> selectedEmojiPack = new ConfigProperty<>("selectedEmojiPack", "default");
     public final ConfigProperty<Boolean> showSnowflakes = new ConfigProperty<>("showSnowflakes", false);
     public final ConfigProperty<Boolean> disableDividers = new ConfigProperty<>("disableDividers", false);
+
+    /*Folders*/
+    public final ConfigProperty<Integer> tabMode = new ConfigProperty<>("tabMode", TabMode.MIXED);
+
     /*Drawer elements*/
     public final ConfigProperty<Boolean> changeStatus = new ConfigProperty<>("drawer_changeStatus", true);
     public final ConfigProperty<Boolean> myStories = new ConfigProperty<>("drawer_myStories", true);
@@ -130,7 +134,7 @@ public class OctoConfig {
             octogramSettings, datacenterInfo, inviteFriends, telegramFeatures,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
             experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution, lastSelectedCompression,
-            tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall, maxRecentStickers
+            tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall, maxRecentStickers, tabMode
     );
 
 
@@ -260,4 +264,10 @@ public class OctoConfig {
         public static final int HIGH = 2;
     }
 
+    public static class TabMode {
+        public static final int TEXT = 0;
+        public static final int MIXED = 1;
+        public static final int ICON = 2;
+
+    }
 }
