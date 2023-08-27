@@ -275,6 +275,14 @@ public class PreferencesFragment extends BaseFragment {
                     view = layout;
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
+                case CHECKBOX:
+                    CheckBoxCell checkBoxCell = new CheckBoxCell(context, 4, 21, getResourceProvider());
+                    checkBoxCell.getCheckBoxRound().setDrawBackgroundAsArc(14);
+                    checkBoxCell.getCheckBoxRound().setColor(Theme.key_switch2TrackChecked, Theme.key_radioBackground, Theme.key_checkboxCheck);
+                    checkBoxCell.setEnabled(true);
+                    view = checkBoxCell;
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
                 default:
                     throw new RuntimeException("No view found for " + type);
             }
@@ -371,6 +379,11 @@ public class PreferencesFragment extends BaseFragment {
                         textView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
                         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 36, 26, 36, 0));
                     }
+                    break;
+                case CHECKBOX:
+                    CheckBoxCell checkboxCell = (CheckBoxCell) holder.itemView;
+                    CheckboxRow checkboxRow = (CheckboxRow) positions.get(position);
+                    checkboxCell.setText(checkboxRow.getTitle(), checkboxRow.getSummary(), checkboxRow.getPreferenceValue(), !OctoConfig.INSTANCE.disableDividers.getValue(), true);
                     break;
                 default:
                     throw new RuntimeException("No view found for " + type);
