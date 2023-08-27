@@ -10,8 +10,10 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 import android.media.AudioFormat;
+import android.util.Log;
 import android.util.Pair;
 
+import it.octogram.android.preferences.rows.impl.*;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -21,10 +23,6 @@ import java.util.ArrayList;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
-import it.octogram.android.preferences.rows.impl.HeaderRow;
-import it.octogram.android.preferences.rows.impl.ListRow;
-import it.octogram.android.preferences.rows.impl.SliderChooseRow;
-import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 
 public class OctoExperimentsUI implements PreferencesEntry {
@@ -36,10 +34,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
                     !OctoConfig.INSTANCE.mediaInGroupCall.getValue() &&
-                    OctoConfig.INSTANCE.gcOutputType.getValue() == AudioFormat.CHANNEL_OUT_MONO &&
-                    OctoConfig.INSTANCE.maxRecentStickers.getValue() == 20 &&
+                    OctoConfig.INSTANCE.gcOutputType.getValue() == OctoConfig.AudioType.MONO &&
+                    OctoConfig.INSTANCE.maxRecentStickers.getValue() == 0 &&
                     OctoConfig.INSTANCE.photoResolution.getValue() == OctoConfig.PhotoResolution.DEFAULT) {
-                OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
+                Log.d("OctoExperiments", "Experiments disabled");
+                OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled, false);
             }
         }
         return OctoPreferences.builder(LocaleController.getString("Experiments", R.string.Experiments))
@@ -60,8 +59,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(fragment, context))
                             .options(new ArrayList<>() {{
-                                add(new Pair<>(AudioFormat.CHANNEL_OUT_MONO, LocaleController.getString(R.string.AudioTypeMono)));
-                                add(new Pair<>(AudioFormat.CHANNEL_OUT_STEREO, LocaleController.getString(R.string.AudioTypeStereo)));
+                                add(new Pair<>(OctoConfig.AudioType.MONO, LocaleController.getString(R.string.AudioTypeMono)));
+                                add(new Pair<>(OctoConfig.AudioType.STEREO, LocaleController.getString(R.string.AudioTypeStereo)));
                             }})
                             .currentValue(OctoConfig.INSTANCE.gcOutputType)
                             .title(LocaleController.getString(R.string.AudioTypeInCall))

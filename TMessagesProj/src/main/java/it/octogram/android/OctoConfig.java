@@ -98,7 +98,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", 0);
     public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", PhotoResolution.DEFAULT);
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
-    public final ConfigProperty<Integer> gcOutputType = new ConfigProperty<>("gcOutputType", AudioFormat.CHANNEL_OUT_MONO);
+    public final ConfigProperty<Integer> gcOutputType = new ConfigProperty<>("gcOutputType", AudioType.MONO);
     public final ConfigProperty<Boolean> mediaInGroupCall = new ConfigProperty<>("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = new ConfigProperty<>("maxRecentStickers", 0);
 
@@ -119,13 +119,23 @@ public class OctoConfig {
         loadConfig();
     }
 
-    public static int getMaxRecentSticker(int size) {
+    public static int getMaxRecentSticker() {
         int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200};
-        if (size >= 0 && size < sizes.length) {
-            return sizes[size];
+        Integer value = OctoConfig.INSTANCE.maxRecentStickers.getValue();
+        if (value >= 0 && value < sizes.length) {
+            return sizes[value];
         }
         return 20;
     }
+
+    public static int getAudioType() {
+        if (OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO) {
+            return AudioFormat.CHANNEL_OUT_MONO;
+        } else {
+            return AudioFormat.CHANNEL_OUT_STEREO;
+        }
+    }
+
     /*
      * It is safe to suppress this warning because the method loadConfig() is only called once in the static block above.
      * Also the semantics of the data structure is pretty solid, so there is no need to worry about it.
@@ -149,7 +159,11 @@ public class OctoConfig {
     }
 
     public void toggleBooleanSetting(ConfigProperty<Boolean> property) {
-        property.setValue(!property.getValue());
+        updateBooleanSetting(property, !property.getValue());
+    }
+
+    public void updateBooleanSetting(ConfigProperty<Boolean> property, boolean value) {
+        property.setValue(value);
 
         SharedPreferences.Editor editor = PREFS.edit();
         editor.putBoolean(property.getKey(), property.getValue());
@@ -206,6 +220,11 @@ public class OctoConfig {
         public static final int HOLIDAY = 1;
         public static final int VALENTINE = 2;
         public static final int HALLOWEEN = 3;
+    }
+
+    public static class AudioType {
+        public static final int MONO = 0;
+        public static final int STEREO = 1;
     }
 
     public static class CameraXResolution {

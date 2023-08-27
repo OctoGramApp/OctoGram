@@ -17,6 +17,7 @@ public enum PreferenceType {
     FOOTER_INFORMATIVE(13, false),
     FOOTER(14, false),
     STICKER_HEADER(15, false),
+    CHECKBOX(16, true),
 
     ;
 

@@ -2540,7 +2540,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             fireworksOverlay.start();
                                             layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
-                                            OctoConfig.INSTANCE.unlockIcon(OctoConfig.INSTANCE.unlockedChupa, true);
+                                            OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.unlockedChupa, true);
                                         }
                                     } else if (url.startsWith("tg:yukigram") || url.startsWith("tg://yukigram")) {
                                         if (!OctoConfig.INSTANCE.unlockedYuki.getValue()) {
@@ -2550,7 +2550,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             fireworksOverlay.start();
                                             layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
-                                            OctoConfig.INSTANCE.unlockIcon(OctoConfig.INSTANCE.unlockedYuki, true);
+                                            OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.unlockedYuki, true);
                                         }
                                     } else if ((url.startsWith("tg:search") || url.startsWith("tg://search"))) {
                                         url = url.replace("tg:search", "tg://telegram.org").replace("tg://search", "tg://telegram.org");
