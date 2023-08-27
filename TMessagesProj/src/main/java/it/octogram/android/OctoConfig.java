@@ -119,13 +119,6 @@ public class OctoConfig {
         loadConfig();
     }
 
-    public static int getOutputType(int output) {
-        if (output == 1) {
-            return AudioFormat.CHANNEL_OUT_STEREO;
-        }
-        return AudioFormat.CHANNEL_OUT_MONO;
-    }
-
     public static int getMaxRecentSticker(int size) {
         int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200};
         if (size >= 0 && size < sizes.length) {
