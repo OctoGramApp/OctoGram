@@ -316,6 +316,7 @@ public class CameraXView extends BaseCameraView {
     }
 
     private ValueAnimator textureViewAnimator;
+
     @Override
     public void showTexture(boolean show, boolean animated) {
         if (previewView == null) {
@@ -343,6 +344,7 @@ public class CameraXView extends BaseCameraView {
 
     private boolean textureInited = false;
     private final boolean frontface;
+
     @Override
     public void initTexture() {
         if (textureInited) {

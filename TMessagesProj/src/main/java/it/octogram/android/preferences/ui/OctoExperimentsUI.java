@@ -9,11 +9,9 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.media.AudioFormat;
 import android.util.Log;
 import android.util.Pair;
 
-import it.octogram.android.preferences.rows.impl.*;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -23,6 +21,10 @@ import java.util.ArrayList;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.SliderChooseRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 
 public class OctoExperimentsUI implements PreferencesEntry {

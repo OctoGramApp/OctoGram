@@ -6,11 +6,12 @@ import android.graphics.Canvas;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
-import it.octogram.android.OctoConfig;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
@@ -20,6 +21,8 @@ import org.telegram.ui.Components.RecyclerListView;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+
+import it.octogram.android.OctoConfig;
 
 @SuppressLint("ViewConstructor")
 public class ThemeSelectorCell extends FrameLayout {

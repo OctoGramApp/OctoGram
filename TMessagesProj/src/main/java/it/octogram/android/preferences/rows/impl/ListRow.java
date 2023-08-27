@@ -2,13 +2,11 @@ package it.octogram.android.preferences.rows.impl;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.print.PageRange;
 import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import it.octogram.android.utils.PopupChoiceDialogUtils;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AlertsCreator;
@@ -17,12 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import it.octogram.android.OctoConfig;
 import it.octogram.android.ConfigProperty;
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
 import it.octogram.android.preferences.rows.Clickable;
+import it.octogram.android.utils.PopupChoiceDialogUtils;
 import kotlin.Triple;
 
 public class ListRow extends BaseRow implements Clickable {

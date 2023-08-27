@@ -37,7 +37,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                 .sticker(context, R.raw.utyan_robot, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new PreferencesFragment( new OctoGeneralSettingsUI())))
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());

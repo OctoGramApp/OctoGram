@@ -8,6 +8,8 @@
 
 package it.octogram.android.preferences.fragment;
 
+import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.SparseArray;
@@ -18,25 +20,26 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.OctoPreferences;
-import it.octogram.android.preferences.PreferenceType;
-import it.octogram.android.preferences.PreferencesEntry;
-import it.octogram.android.preferences.rows.BaseRow;
-import it.octogram.android.preferences.rows.Clickable;
-import it.octogram.android.preferences.rows.cells.SliderCell;
-import it.octogram.android.preferences.rows.impl.*;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.*;
+import org.telegram.ui.Cells.CheckBoxCell;
+import org.telegram.ui.Cells.HeaderCell;
+import org.telegram.ui.Cells.ShadowSectionCell;
+import org.telegram.ui.Cells.TextCell;
+import org.telegram.ui.Cells.TextCheckCell;
+import org.telegram.ui.Cells.TextDetailSettingsCell;
+import org.telegram.ui.Cells.TextInfoPrivacyCell;
+import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
@@ -46,7 +49,22 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.OctoPreferences;
+import it.octogram.android.preferences.PreferenceType;
+import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.rows.BaseRow;
+import it.octogram.android.preferences.rows.Clickable;
+import it.octogram.android.preferences.rows.cells.SliderCell;
+import it.octogram.android.preferences.rows.impl.CheckboxRow;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.SliderChooseRow;
+import it.octogram.android.preferences.rows.impl.SliderRow;
+import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.rows.impl.TextDetailRow;
+import it.octogram.android.preferences.rows.impl.TextIconRow;
 
 /*
  * This library is *heavily* inspired by CatoGramX's preferences library.
@@ -178,7 +196,7 @@ public class PreferencesFragment extends BaseFragment {
         if (show) {
             updateRows();
         }
-        int row = rows.get(0).getRow() -1;
+        int row = rows.get(0).getRow() - 1;
         int size = rows.size();
         if (show) {
             listAdapter.notifyItemRangeInserted(row, size);
@@ -306,7 +324,7 @@ public class PreferencesFragment extends BaseFragment {
                         frameLayout.removeAllViews();
                     }
                     // add custom view
-                    View view = ((CustomCellRow)positions.get(position)).getLayout();
+                    View view = ((CustomCellRow) positions.get(position)).getLayout();
                     frameLayout.addView(view);
                     break;
                 case SHADOW:

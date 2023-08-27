@@ -2,7 +2,11 @@ package it.octogram.android.preferences.ui.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.TypedValue;
@@ -10,16 +14,19 @@ import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
-import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.UserAccountInfoController;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.Locale;
 import java.util.Objects;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.UserAccountInfoController;
 
 @SuppressLint("ViewConstructor")
 public class DatacenterCell extends LinearLayout {

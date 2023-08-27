@@ -126,7 +126,7 @@ public class OctoConfig {
             disableDividers, changeStatus, myStories, newGroup, newChannel, contacts, calls, peopleNearby, savedMessages, settings,
             octogramSettings, datacenterInfo, inviteFriends, telegramFeatures,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
-            experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution,lastSelectedCompression,
+            experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution, lastSelectedCompression,
             tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall, maxRecentStickers
     );
 

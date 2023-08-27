@@ -1,11 +1,6 @@
 package it.octogram.android.preferences.rows.impl;
 
-import android.content.Context;
-
 import androidx.annotation.Nullable;
-
-import org.telegram.messenger.UserConfig;
-import org.telegram.ui.Components.StickerImageView;
 
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;

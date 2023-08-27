@@ -1,10 +1,26 @@
 package it.octogram.android;
 
 import android.os.Build;
-import androidx.annotation.NonNull;
-import org.telegram.messenger.*;
 
-import java.io.*;
+import androidx.annotation.NonNull;
+
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.SharedConfig;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 
 public class Crashlytics implements Thread.UncaughtExceptionHandler {
     private final Thread.UncaughtExceptionHandler defaultUEH;

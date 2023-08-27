@@ -11,9 +11,9 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
-import it.octogram.android.preferences.rows.impl.*;
-import kotlin.Triple;
-import org.telegram.messenger.*;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.util.List;
@@ -21,6 +21,11 @@ import java.util.List;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.rows.impl.TextDetailRow;
+import kotlin.Triple;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
 

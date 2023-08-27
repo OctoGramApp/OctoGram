@@ -9,16 +9,23 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.OctoPreferences;
-import it.octogram.android.preferences.PreferencesEntry;
-import it.octogram.android.preferences.rows.impl.*;
-import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
+
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.OctoPreferences;
+import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.rows.impl.CheckboxRow;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.SliderRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.rows.impl.TextDetailRow;
+import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 
 public class OctoAppearanceUI implements PreferencesEntry {
 

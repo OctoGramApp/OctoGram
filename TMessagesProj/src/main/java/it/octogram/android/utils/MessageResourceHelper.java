@@ -10,8 +10,9 @@ package it.octogram.android.utils;
 
 import android.graphics.drawable.Drawable;
 import android.text.SpannableStringBuilder;
+
 import androidx.core.content.ContextCompat;
-import it.octogram.android.OctoConfig;
+
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
@@ -19,6 +20,8 @@ import org.telegram.messenger.R;
 import org.telegram.ui.Components.ColoredImageSpan;
 
 import java.util.Objects;
+
+import it.octogram.android.OctoConfig;
 
 public class MessageResourceHelper {
 

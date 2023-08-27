@@ -2,18 +2,20 @@ package it.octogram.android.preferences.rows.impl;
 
 import android.app.Activity;
 import android.view.View;
+
 import androidx.annotation.Nullable;
+
+import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.Cells.CheckBoxCell;
+
+import java.util.function.Supplier;
+
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
 import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.Cells.CheckBoxCell;
-import org.telegram.ui.Cells.TextCheckCell;
-
-import java.util.function.Supplier;
 
 public class CheckboxRow extends BaseRow implements Clickable {
 

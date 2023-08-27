@@ -11,8 +11,8 @@ import org.telegram.ui.Cells.TextDetailSettingsCell;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
-import it.octogram.android.preferences.rows.Clickable;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
+import it.octogram.android.preferences.rows.Clickable;
 
 public class TextDetailRow extends BaseRow implements Clickable {
 

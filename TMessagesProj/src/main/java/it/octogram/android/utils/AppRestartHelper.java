@@ -25,7 +25,8 @@ public final class AppRestartHelper extends Activity {
         context.startActivity(intent);
     }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Process.killProcess(getIntent().getIntExtra(KEY_MAIN_PROCESS_PID, -1));
         ArrayList<Intent> intents = getIntent().getParcelableArrayListExtra(KEY_RESTART_INTENTS);

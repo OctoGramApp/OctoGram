@@ -75,9 +75,9 @@ public class OctoPreferences {
         public OctoPreferencesBuilder sticker(Context context, int packName, boolean autoRepeat, String description) {
             RLottieImageView rLottieImageView = createRLottieImageView(context, packName, autoRepeat);
             preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
-                            .stickerView(rLottieImageView)
-                            .description(description)
-                            .build());
+                    .stickerView(rLottieImageView)
+                    .description(description)
+                    .build());
             preferences.add(new EmptyCellRow());
             preferences.add(new ShadowRow());
             return this;
@@ -86,7 +86,7 @@ public class OctoPreferences {
         private RLottieImageView createRLottieImageView(Context context, int packName, boolean autoRepeat) {
             RLottieImageView rlottieImageView = new RLottieImageView(context);
             rlottieImageView.setAutoRepeat(autoRepeat);
-            rlottieImageView.setAnimation(packName, AndroidUtilities.dp(130),AndroidUtilities.dp(130));
+            rlottieImageView.setAnimation(packName, AndroidUtilities.dp(130), AndroidUtilities.dp(130));
             rlottieImageView.playAnimation();
             return rlottieImageView;
         }

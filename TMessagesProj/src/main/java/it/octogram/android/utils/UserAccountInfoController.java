@@ -8,9 +8,15 @@
 
 package it.octogram.android.utils;
 
-import it.octogram.android.OctoConfig;
-import org.telegram.messenger.*;
+import org.telegram.messenger.AccountInstance;
+import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
+
+import it.octogram.android.OctoConfig;
 
 public class UserAccountInfoController {
 

@@ -10,12 +10,15 @@ package it.octogram.android.preferences.rows.impl;
 
 import android.app.Activity;
 import android.view.View;
+
 import androidx.annotation.Nullable;
+
+import org.telegram.ui.ActionBar.BaseFragment;
+
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
 import it.octogram.android.preferences.rows.Clickable;
-import org.telegram.ui.ActionBar.BaseFragment;
 
 public class FooterInformativeRow extends BaseRow implements Clickable {
 

@@ -13,8 +13,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.util.Consumer;
-
 import org.telegram.ui.ActionBar.BaseFragment;
 
 import it.octogram.android.preferences.PreferenceType;
