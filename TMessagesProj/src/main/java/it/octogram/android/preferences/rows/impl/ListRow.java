@@ -8,6 +8,7 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import it.octogram.android.utils.PopupChoiceDialogUtils;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AlertsCreator;
@@ -55,17 +56,34 @@ public class ListRow extends BaseRow implements Clickable {
         int selected = 0;
         List<String> titleArray = new ArrayList<>();
         List<Integer> idArray = new ArrayList<>();
+        Dialog dialog;
 
         if (!optionsIcons.isEmpty()) {
+            List<Integer> icons = new ArrayList<>();
             for (int index = 0; index < optionsIcons.size(); index++) {
                 Triple<Integer, String, Integer> triple = optionsIcons.get(index);
                 titleArray.add(triple.component2());
                 idArray.add(triple.component1());
+                icons.add(triple.component3());
 
                 if (currentValue.getValue().equals(triple.component1())) {
                     selected = index;
                 }
             }
+            dialog = PopupChoiceDialogUtils.createSingleChoiceIconsDialog(
+                    activity,
+                    titleArray.toArray(new String[0]),
+                    icons.stream().mapToInt(i -> i).toArray(),
+                    getTitle(),
+                    selected,
+                    (dialogInterface, sel) -> {
+                        int id = idArray.get(sel);
+                        OctoConfig.INSTANCE.updateIntegerSetting(currentValue, optionsIcons.get(id).component1());
+                        if (view instanceof TextSettingsCell) {
+                            ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), true, hasDivider());
+                        }
+                    }
+            );
         } else {
             for (int index = 0; index < options.size(); index++) {
                 Pair<Integer, String> pair = options.get(index);
@@ -76,34 +94,40 @@ public class ListRow extends BaseRow implements Clickable {
                     selected = index;
                 }
             }
-        }
-
-        Dialog dialog = AlertsCreator.createSingleChoiceDialog(
-                activity,
-                titleArray.toArray(new String[0]),
-                getTitle(),
-                selected,
-                (dialogInterface, sel) -> {
-                    int id = idArray.get(sel);
-                    OctoConfig.INSTANCE.updateIntegerSetting(currentValue, options.get(id).first);
-                    if (view instanceof TextSettingsCell) {
-                        ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), hasDivider());
+            dialog = AlertsCreator.createSingleChoiceDialog(
+                    activity,
+                    titleArray.toArray(new String[0]),
+                    getTitle(),
+                    selected,
+                    (dialogInterface, sel) -> {
+                        int id = idArray.get(sel);
+                        OctoConfig.INSTANCE.updateIntegerSetting(currentValue, options.get(id).first);
+                        if (view instanceof TextSettingsCell) {
+                            ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), true, hasDivider());
+                        }
                     }
-                }
-        );
-
+            );
+        }
         fragment.setVisibleDialog(dialog);
-
         dialog.show();
         return true;
     }
 
     public String getTextFromInteger(int integer) {
         List<String> titleArray = new ArrayList<>();
-        options.forEach(pair -> titleArray.add(pair.second));
-        for (int index = 0; index < titleArray.size(); index++) {
-            if (options.get(index).first.equals(integer)) {
-                return titleArray.get(index);
+        if (!options.isEmpty()) {
+            options.forEach(pair -> titleArray.add(pair.second));
+            for (int index = 0; index < titleArray.size(); index++) {
+                if (options.get(index).first.equals(integer)) {
+                    return titleArray.get(index);
+                }
+            }
+        } else {
+            optionsIcons.forEach(triple -> titleArray.add(triple.component2()));
+            for (int index = 0; index < titleArray.size(); index++) {
+                if (optionsIcons.get(index).component1().equals(integer)) {
+                    return titleArray.get(index);
+                }
             }
         }
         return "";
