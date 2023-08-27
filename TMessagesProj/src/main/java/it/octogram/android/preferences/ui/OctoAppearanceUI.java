@@ -84,6 +84,11 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title(LocaleController.formatString("PencilIconForEdited", R.string.PencilIconForEdited))
                             .description(LocaleController.formatString("PencilIconForEdited_Desc", R.string.PencilIconForEdited_Desc))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.showSnowflakes)
+                            .title(LocaleController.getString("ShowSnowflakes", R.string.ShowSnowflakes))
+                            .requiresRestart(true)
+                            .build());
                 })
                 .category(LocaleController.getString("HeaderHeader", R.string.HeaderHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()

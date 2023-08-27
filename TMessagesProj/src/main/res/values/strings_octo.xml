@@ -99,6 +99,7 @@
     <string name="EmojiSets">Emoji sets</string>
     <string name="EmojiSets_Desc">Customize your emoji sets</string>
     <string name="UseSystemFont">Use system font</string>
+    <string name="ShowSnowflakes">Show snowflakes</string>
     <string name="ArchiveHeader">Archive</string>
     <string name="ForcePacmanAnimation">Force pacman animation</string>
     <string name="ForcePacmanAnimation_Desc">Force pacman animation when archiving a chat</string>
