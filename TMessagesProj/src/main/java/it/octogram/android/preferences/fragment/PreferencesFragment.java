@@ -54,16 +54,20 @@ public class PreferencesFragment extends BaseFragment {
 
     private final Object PARTIAL = new Object();
 
-    private final OctoPreferences preferences;
+    private OctoPreferences preferences;
     private final SparseArray<BaseRow> positions = new SparseArray<>();
+    private final PreferencesEntry entry;
 
     private ListAdapter listAdapter;
     private RecyclerListView listView;
     private int rowCount;
+    private Context context;
 
-    public PreferencesFragment(Context context, PreferencesEntry entry) {
-        super();
+    public PreferencesFragment(PreferencesEntry entry) {
+        this.entry = entry;
+    }
 
+    private void updatePreferences() {
         OctoPreferences preferences = entry.getPreferences(this, context);
         List<BaseRow> preferenceList = preferences.getPreferences();
 
@@ -75,7 +79,7 @@ public class PreferencesFragment extends BaseFragment {
             }
         }
 
-        this.preferences =  preferences;
+        this.preferences = preferences;
     }
 
     public void updateRows() {
@@ -95,12 +99,15 @@ public class PreferencesFragment extends BaseFragment {
     @Override
     public boolean onFragmentCreate() {
         super.onFragmentCreate();
-        updateRows();
         return true;
     }
 
     @Override
     public View createView(Context context) {
+        this.context = context;
+        updatePreferences();
+        updateRows();
+
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setTitle(preferences.getTitle());
         if (AndroidUtilities.isTablet()) {
@@ -286,12 +293,14 @@ public class PreferencesFragment extends BaseFragment {
 
             switch (type) {
                 case CUSTOM:
+                    FrameLayout frameLayout = ((FrameLayout) holder.itemView);
                     // remove the current view if it exists
-                    if (((FrameLayout) holder.itemView).getChildCount() > 0) {
-                        ((FrameLayout) holder.itemView).removeAllViews();
+                    if (frameLayout.getChildCount() > 0) {
+                        frameLayout.removeAllViews();
                     }
                     // add custom view
-                    ((FrameLayout) holder.itemView).addView(((CustomCellRow)positions.get(position)).getLayout());
+                    View view = ((CustomCellRow)positions.get(position)).getLayout();
+                    frameLayout.addView(view);
                     break;
                 case SHADOW:
                     holder.itemView.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));

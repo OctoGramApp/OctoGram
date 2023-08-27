@@ -37,7 +37,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                 .sticker(context, R.raw.utyan_robot, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoGeneralSettingsUI())))
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment( new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());
@@ -47,17 +47,17 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("Translator", R.string.Translator))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoAppearanceUI())))
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
                             .title(LocaleController.formatString("Appearance", R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoCameraSettingsUI())))
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoCameraSettingsUI())))
                             .icon(R.drawable.msg_camera)
                             .title(LocaleController.formatString("ChatCamera", R.string.ChatCamera))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(context, new OctoExperimentsUI())))
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI())))
                             .icon(R.drawable.outline_science_white)
                             .title(LocaleController.formatString("Experiments", R.string.Experiments))
                             .build());
