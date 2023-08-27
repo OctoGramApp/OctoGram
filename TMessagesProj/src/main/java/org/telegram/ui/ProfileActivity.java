@@ -96,7 +96,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import it.octogram.android.preferences.ui.custom.DatacenterCell;
-import it.octogram.android.utils.DCUtils;
+import it.octogram.android.utils.UserAccountInfoController;
 import org.telegram.PhoneFormat.CallingCodeInfo;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -3355,7 +3355,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == notificationRow) {
                 presentFragment(new NotificationsSettingsActivity());
             } else if (position == octoGramMainSettingsRow) {
-                presentFragment(new PreferencesFragment(getContext(), new OctoMainSettingsUI()));
+                presentFragment(new PreferencesFragment(new OctoMainSettingsUI()));
             }else if (position == privacyRow) {
                 presentFragment(new PrivacySettingsActivity().setCurrentPassword(currentPassword));
             } else if (position == dataRow) {
@@ -5214,13 +5214,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (user == null) {
                     return false;
                 }
-                AndroidUtilities.addToClipboard("" + DCUtils.getNiceId(user.id));
+                AndroidUtilities.addToClipboard("" + UserAccountInfoController.getNiceId(user.id));
             } else if (chatId != 0) {
                 TLRPC.Chat chat = getMessagesController().getChat(chatId);
                 if (chat == null) {
                     return false;
                 }
-                AndroidUtilities.addToClipboard("" + DCUtils.getNiceId(chat, chat.id));
+                AndroidUtilities.addToClipboard("" + UserAccountInfoController.getNiceId(chat, chat.id));
             }
             BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
         } else if (position == registrationDataRow && (userId != 0)) {
@@ -9387,19 +9387,19 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                         detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), isTopic);
                     } else if (position == dcIdRow) {
-                        DCUtils.DCInfo dcInfo = null;
+                        UserAccountInfoController.UserAccountInfo userAccountInfo = null;
                         if (userId != 0) {
                             TLRPC.User user = getMessagesController().getUser(userId);
-                            dcInfo = DCUtils.getDcInfo(user);
+                            userAccountInfo = UserAccountInfoController.getDcInfo(user);
                         } else if (chatId != 0) {
                             TLRPC.Chat chat = getMessagesController().getChat(chatId);
-                            dcInfo = DCUtils.getDcInfo(chat);
+                            userAccountInfo = UserAccountInfoController.getDcInfo(chat);
                         }
                         boolean isSelfSettings = userId == UserConfig.getInstance(currentAccount).getClientUserId();
-                        if (dcInfo == null) {
+                        if (userAccountInfo == null) {
                             detailCell.setTextAndValue(LocaleController.getString(R.string.NumberUnknown), LocaleController.getString(R.string.NumberUnknown), isSelfSettings);
                         } else {
-                            detailCell.setTextAndValue(dcInfo.userId + "", "DC" + dcInfo.dcId + " (" + dcInfo.dcNameType + ")", isSelfSettings);
+                            detailCell.setTextAndValue(userAccountInfo.userId + "", "DC" + userAccountInfo.dcInfo.dcId + " (" + userAccountInfo.dcInfo.dcName + ")", isSelfSettings);
                         }
                     } else if (position == registrationDataRow) {
                         if (!isChat() && userId != 0) {
@@ -9791,7 +9791,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 case VIEW_TYPE_DATACENTER_INFO:
                     DatacenterCell dc = (DatacenterCell) holder.itemView;
                     TLRPC.User currentUser = getMessagesController().getUser(userId);
-                    DCUtils.DCInfo info = currentChat != null ? DCUtils.getDcInfo(currentChat) : DCUtils.getDcInfo(currentUser);
+                    UserAccountInfoController.UserAccountInfo info = currentChat != null ? UserAccountInfoController.getDcInfo(currentChat) : UserAccountInfoController.getDcInfo(currentUser);
                     boolean withDivider = (chatInfo != null && !TextUtils.isEmpty(chatInfo.about)) || (currentChat != null && !TextUtils.isEmpty(currentChat.username)) || currentUser != null && (UserObject.isUserSelf(currentUser) || !TextUtils.isEmpty(currentUser.username));
                     dc.setIdAndDC(info, withDivider);
                     break;

@@ -10,14 +10,11 @@ import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-
 import androidx.core.graphics.ColorUtils;
-import it.octogram.android.utils.DCUtils;
+import it.octogram.android.utils.UserAccountInfoController;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.Locale;
@@ -109,12 +106,11 @@ public class DatacenterCell extends LinearLayout {
         mainCardView.setCardBackgroundColor(Color.TRANSPARENT);
     }
 
-    public void setIdAndDC(DCUtils.DCInfo tInfo, boolean divider) {
-        dcNameView.setText(String.format(Locale.ENGLISH, "%s (DC%d)", tInfo.dcNameType, tInfo.dcId));
+    public void setIdAndDC(UserAccountInfoController.UserAccountInfo tInfo, boolean divider) {
+        dcNameView.setText(String.format(Locale.ENGLISH, "%s (DC%d)", tInfo.dcInfo.dcName, tInfo.dcInfo.dcId));
         idView.setText(String.valueOf(tInfo.userId));
 
-        // todo actual drawable
-        Drawable d = ContextCompat.getDrawable(getContext(), R.drawable.msg_edit);
+        Drawable d = ContextCompat.getDrawable(getContext(), tInfo.dcInfo.icon);
         ColorFilter filter = new PorterDuffColorFilter(Theme.getColor(Theme.key_switch2TrackChecked, resourcesProvider), PorterDuff.Mode.SRC_ATOP);
         Objects.requireNonNull(d).setColorFilter(filter);
         dcIconView.setBackground(d);
