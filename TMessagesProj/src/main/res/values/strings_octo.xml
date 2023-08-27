@@ -154,9 +154,9 @@
     <string name="IDCopied">ID copied to clipboard.</string>
     <string name="InlineQueryCopied">Inline Query copied to clipboard.</string>
     <string name="MediaStream">Use Media Stream in GroupCall</string>
-    <string name="AudioStereo">Use Audio Stereo in GroupCall</string>
-    <string name="AudioTypeStereo">Audio Stereo</string>
-    <string name="AudioTypeMono">Audio Mono (Default)</string>
+    <string name="AudioTypeInCall">Use Type in GroupCall</string>
+    <string name="AudioTypeStereo">Stereo</string>
+    <string name="AudioTypeMono">Mono (Default)</string>
     <string name="MaxRecentStickers">Max Recent Stickers</string>
     <string name="MaxStickerSizeDefault">20 (Default)</string>
     <!-- OLD STRINGS -->

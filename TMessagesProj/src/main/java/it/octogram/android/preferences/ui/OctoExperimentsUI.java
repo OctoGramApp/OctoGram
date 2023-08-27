@@ -64,7 +64,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                 add(new Pair<>(AudioFormat.CHANNEL_OUT_STEREO, LocaleController.getString(R.string.AudioTypeStereo)));
                             }})
                             .currentValue(OctoConfig.INSTANCE.gcOutputType)
-                            .title(LocaleController.getString(R.string.AudioStereo))
+                            .title(LocaleController.getString(R.string.AudioTypeInCall))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(fragment, context))
