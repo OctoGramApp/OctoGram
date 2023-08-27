@@ -13,13 +13,11 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.*;
-import it.octogram.android.preferences.ui.custom.StickerSize;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 
 public class OctoAppearanceUI implements PreferencesEntry {
@@ -105,8 +103,8 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideStories)
-                            .postNotificationName(NotificationCenter.updateInterfaces, NotificationCenter.reloadInterface)
-                            .title("Hide stories")
+                            .requiresRestart(true)
+                            .title(LocaleController.getString("HideStories", R.string.HideStories))
                             .build());
                 })
                 .category(LocaleController.formatString("BlurHeader", R.string.BlurHeader), category -> {
