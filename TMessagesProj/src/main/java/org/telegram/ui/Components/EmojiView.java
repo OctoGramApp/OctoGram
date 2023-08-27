@@ -3865,7 +3865,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         private Paint dividerPaint;
         @Override
         protected void onDraw(Canvas canvas) {
-            if (divider) {
+            if (divider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 if (dividerPaint == null) {
                     dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                     dividerPaint.setStrokeWidth(1);

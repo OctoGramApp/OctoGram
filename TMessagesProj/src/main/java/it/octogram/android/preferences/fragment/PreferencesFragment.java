@@ -71,11 +71,9 @@ public class PreferencesFragment extends BaseFragment {
         OctoPreferences preferences = entry.getPreferences(this, context);
         List<BaseRow> preferenceList = preferences.getPreferences();
 
-        for (BaseRow baseRow : preferenceList) {
-            int lastIndex = preferenceList.size() - 1;
-            for (int index = 0; index < preferenceList.size(); index++) {
-                boolean isNotLast = index != lastIndex;
-                baseRow.setDivider(isNotLast);
+        if (OctoConfig.INSTANCE.disableDividers.getValue()) {
+            for (BaseRow baseRow : preferenceList) {
+                baseRow.setDivider(false);
             }
         }
 

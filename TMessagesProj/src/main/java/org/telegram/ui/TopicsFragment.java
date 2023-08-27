@@ -54,6 +54,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.exoplayer2.util.Log;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -471,7 +472,8 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                     actionBarPaint.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
                     actionBarPaint.setAlpha((int) (255 * searchAnimationProgress));
                     canvas.drawRect(0, 0, getWidth(), AndroidUtilities.statusBarHeight, actionBarPaint);
-                    canvas.drawLine(0, 0, 0, getHeight(), Theme.dividerPaint);
+                    if (!OctoConfig.INSTANCE.disableDividers.getValue())
+                        canvas.drawLine(0, 0, 0, getHeight(), Theme.dividerPaint);
                 }
             }
 
@@ -2863,7 +2865,7 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
             canvas.restore();
             canvas.save();
             canvas.translate(super.translationX, 0);
-            if (drawDivider) {
+            if (drawDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 int left = fullSeparator ? 0 : AndroidUtilities.dp(messagePaddingStart);
                 if (LocaleController.isRTL) {
                     canvas.drawLine(0 - super.translationX, getMeasuredHeight() - 1, getMeasuredWidth() - left, getMeasuredHeight() - 1, Theme.dividerPaint);

@@ -1987,6 +1987,8 @@ public class AndroidUtilities {
     }
 
     public static int getShadowHeight() {
+        if (!OctoConfig.INSTANCE.disableDividers.getValue())
+            return 0;
         if (density >= 4.0f) {
             return 3;
         } else if (density >= 2.0f) {

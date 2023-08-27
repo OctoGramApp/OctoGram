@@ -66,6 +66,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.zxing.common.detector.MathUtils;
 
+import it.octogram.android.OctoConfig;
 import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
@@ -2817,7 +2818,7 @@ public class StoryPrivacyBottomSheet extends BottomSheet implements Notification
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 dividerPaint.setColor(Theme.getColor(Theme.key_divider, resourcesProvider));
                 if (LocaleController.isRTL) {
                     canvas.drawRect(0, getHeight() - 1, getWidth() - AndroidUtilities.dp(105), getHeight(), dividerPaint);

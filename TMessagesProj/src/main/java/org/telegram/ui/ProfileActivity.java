@@ -7413,7 +7413,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     reportReactionRow = rowCount++;
                     divider = true;
                 }
-                if (divider) {
+                if (divider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                     reportDividerRow = rowCount++;
                 }
 

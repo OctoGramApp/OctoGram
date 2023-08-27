@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
@@ -1598,7 +1599,7 @@ public class FilterCreateActivity extends BaseFragment {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            if (divider) {
+            if (divider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawRect(textView.getLeft(), getMeasuredHeight() - 1, textView.getRight(), getMeasuredHeight(), Theme.dividerPaint);
             }
         }
@@ -1659,7 +1660,7 @@ public class FilterCreateActivity extends BaseFragment {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawRect(textView.getLeft(), getMeasuredHeight() - 1, textView.getRight(), getMeasuredHeight(), Theme.dividerPaint);
             }
         }
@@ -1753,7 +1754,7 @@ public class FilterCreateActivity extends BaseFragment {
                 revokedLinkIcon.draw(canvas);
             }
 
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawRect(LocaleController.isRTL ? 0 : dp(64), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? dp(64) : 0), getMeasuredHeight(), Theme.dividerPaint);
             }
         }

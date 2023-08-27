@@ -85,6 +85,7 @@
     <string name="NumberRounding">Number rounding</string>
     <string name="PencilIconForEdited">Pencil icon for edited messages</string>
     <string name="PencilIconForEdited_Desc">This will replace the text "Edited" with a pencil icon</string>
+    <string name="HideDividers">Hide dividers</string>
     <string name="HeaderHeader">Header</string>
     <string name="ShowNameActionBar">Show name on action bar</string>
     <string name="ShowNameActionBar_Desc">You will see your name on the action bar instead of "OctoGram"</string>

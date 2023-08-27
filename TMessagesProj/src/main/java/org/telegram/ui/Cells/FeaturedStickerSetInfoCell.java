@@ -26,6 +26,7 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.LocaleController;
@@ -323,7 +324,7 @@ public class FeaturedStickerSetInfoCell extends FrameLayout {
             paint.setColor(getThemedColor(Theme.key_featuredStickers_unread));
             canvas.drawCircle(nameTextView.getRight() + AndroidUtilities.dp(12), AndroidUtilities.dp(20), AndroidUtilities.dp(4) * unreadProgress, paint);
         }
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             canvas.drawLine(0, 0, getWidth(), 0, Theme.getThemePaint(Theme.key_paint_divider, resourcesProvider));
         }
     }

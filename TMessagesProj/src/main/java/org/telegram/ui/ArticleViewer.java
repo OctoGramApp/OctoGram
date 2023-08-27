@@ -105,6 +105,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 
+import it.octogram.android.OctoConfig;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -9568,7 +9569,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textLayout2.draw(canvas, this);
             }
             canvas.restore();
-            if (divider) {
+            if (divider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawLine(parentAdapter.isRtl ? 0 : AndroidUtilities.dp(17), getMeasuredHeight() - 1, getMeasuredWidth() - (parentAdapter.isRtl ? AndroidUtilities.dp(17) : 0), getMeasuredHeight() - 1, dividerPaint);
             }
         }

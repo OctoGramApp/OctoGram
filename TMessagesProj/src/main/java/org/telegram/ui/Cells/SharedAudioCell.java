@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DownloadController;
 import org.telegram.messenger.Emoji;
@@ -706,7 +707,7 @@ public class SharedAudioCell extends FrameLayout implements DownloadController.F
         radialProgress.setOverlayImageAlpha(showNameProgress);
         radialProgress.draw(canvas);
 
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             if (LocaleController.isRTL) {
                 canvas.drawLine(0, getHeight() - 1, getWidth() - AndroidUtilities.dp(72) - getPaddingRight(), getHeight() - 1, Theme.getThemePaint(Theme.key_paint_divider, resourcesProvider));
             } else {

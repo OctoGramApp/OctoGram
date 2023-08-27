@@ -11,6 +11,7 @@ package org.telegram.ui.Components;
 import android.graphics.*;
 import android.view.View;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
@@ -49,7 +50,8 @@ public class GroupCreateDividerItemDecoration extends RecyclerView.ItemDecoratio
                 continue;
             }
             top = child.getBottom();
-            canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(72), top, width - (LocaleController.isRTL ? AndroidUtilities.dp(72) : 0), top, Theme.dividerPaint);
+            if (!OctoConfig.INSTANCE.disableDividers.getValue())
+                canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(72), top, width - (LocaleController.isRTL ? AndroidUtilities.dp(72) : 0), top, Theme.dividerPaint);
         }
     }
 

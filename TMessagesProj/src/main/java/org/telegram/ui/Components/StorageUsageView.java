@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.core.graphics.ColorUtils;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -213,7 +214,7 @@ public class StorageUsageView extends FrameLayout {
             }
             calculatingTextView.setVisibility(View.GONE);
             if (totalSize > 0) {
-                divider.setVisibility(VISIBLE);
+                divider.setVisibility(OctoConfig.INSTANCE.disableDividers.getValue() ? GONE : VISIBLE);
                 textSettingsCell.setVisibility(VISIBLE);
                 telegramCacheTextView.setVisibility(View.VISIBLE);
                 telegramDatabaseTextView.setVisibility(GONE);

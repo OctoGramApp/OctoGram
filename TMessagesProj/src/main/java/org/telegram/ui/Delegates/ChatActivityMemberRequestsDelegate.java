@@ -3,6 +3,7 @@ package org.telegram.ui.Delegates;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.os.Build;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -60,7 +62,14 @@ public class ChatActivityMemberRequestsDelegate {
 
     public View getView() {
         if (root == null) {
-            root = new FrameLayout(fragment.getParentActivity());
+            root = new FrameLayout(fragment.getParentActivity()) {
+                @Override
+                protected void onDraw(Canvas canvas) {
+                    super.onDraw(canvas);
+                    if (!OctoConfig.INSTANCE.disableDividers.getValue())
+                        canvas.drawLine(0, getMeasuredHeight() - AndroidUtilities.dp(2), getMeasuredWidth(), getMeasuredHeight() - AndroidUtilities.dp(2), Theme.dividerPaint);
+                }
+            };
             root.setBackgroundResource(R.drawable.blockpanel);
             root.getBackground().mutate().setColorFilter(new PorterDuffColorFilter(fragment.getThemedColor(Theme.key_chat_topPanelBackground), PorterDuff.Mode.MULTIPLY));
             root.setVisibility(View.GONE);
