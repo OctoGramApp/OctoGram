@@ -11,9 +11,9 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
-import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import it.octogram.android.preferences.rows.impl.*;
+import kotlin.Triple;
+import org.telegram.messenger.*;
 import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.util.List;
@@ -21,9 +21,6 @@ import java.util.List;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
-import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
-import it.octogram.android.preferences.rows.impl.ListRow;
-import it.octogram.android.preferences.rows.impl.SwitchRow;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
 
@@ -172,6 +169,25 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.hideFoldersWhenForwarding)
                             .title(LocaleController.formatString("HideChatFoldersWhenForwarding", R.string.HideChatFoldersWhenForwarding))
                             .requiresRestart(true)
+                            .build());
+                })
+                .category("Double tap actions", category -> {
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.doubleTapAction)
+                            .optionsIcons(List.of(
+                                    new Triple<>(OctoConfig.DoubleTapAction.DISABLED, "Disabled", R.drawable.msg_block),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REACTION, "Reaction", R.drawable.msg_emoji_cat),
+                                    new Triple<>(OctoConfig.DoubleTapAction.COPY, "Copy", R.drawable.msg_copy),
+                                    new Triple<>(OctoConfig.DoubleTapAction.FORWARD, "Forward", R.drawable.msg_forward),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REPLY, "Reply", R.drawable.msg_reply),
+                                    new Triple<>(OctoConfig.DoubleTapAction.DELETE, "Delete", R.drawable.msg_delete),
+                                    new Triple<>(OctoConfig.DoubleTapAction.SAVE, "Save", R.drawable.msg_saved)
+                            ))
+                            .title("Preferred action")
+                            .build());
+                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                            .title("Double tap emoji")
+                            .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
                             .build());
                 })
                 .category("Tablet Mode", category -> category.row(new SwitchRow.SwitchRowBuilder()

@@ -56,6 +56,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideSentTimeOnStickers = new ConfigProperty<>("hideSentTimeOnStickers", false);
     public final ConfigProperty<Boolean> hideChatFolders = new ConfigProperty<>("hideChatFolders", false);
     public final ConfigProperty<Boolean> hideStories = new ConfigProperty<>("hideStories", false);
+    public final ConfigProperty<Integer> doubleTapAction = new ConfigProperty<>("doubleTapAction", DoubleTapAction.REACTION);
 
     public final ConfigProperty<Boolean> hideFoldersWhenForwarding = new ConfigProperty<>("showFoldersWhenForwarding", false);
     public final ConfigProperty<Boolean> accentColorAsNotificationColor = new ConfigProperty<>("accentColorAsNotificationColor", false);
@@ -97,7 +98,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", 0);
     public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", PhotoResolution.DEFAULT);
     public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
-    public final ConfigProperty<Integer> gcOutputType = new ConfigProperty<>("gcOutputType", 0);
+    public final ConfigProperty<Integer> gcOutputType = new ConfigProperty<>("gcOutputType", AudioFormat.CHANNEL_OUT_MONO);
     public final ConfigProperty<Boolean> mediaInGroupCall = new ConfigProperty<>("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = new ConfigProperty<>("maxRecentStickers", 0);
 
@@ -105,7 +106,7 @@ public class OctoConfig {
             hidePhoneNumber, showFakePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, dcIdType, registrationDateInProfiles,
             jumpToNextChannel, hideGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus,
             hideCustomEmojis, activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera,
-            disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideStories, hideFoldersWhenForwarding, accentColorAsNotificationColor,
+            disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideStories, doubleTapAction, hideFoldersWhenForwarding, accentColorAsNotificationColor,
             openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, forcePacmanAnimation, formatTimeWithSeconds,
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont, showSnowflakes,
             disableDividers, cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
@@ -194,6 +195,16 @@ public class OctoConfig {
     public static class DcIdType {
         public static final int BOT_API = 0;
         public static final int TELEGRAM = 1;
+    }
+
+    public static class DoubleTapAction {
+        public static final int DISABLED = 0;
+        public static final int REACTION = 1;
+        public static final int COPY = 2;
+        public static final int FORWARD = 3;
+        public static final int REPLY = 4;
+        public static final int DELETE = 5;
+        public static final int SAVE = 6;
     }
 
     public static class EventType {

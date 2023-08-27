@@ -1505,56 +1505,111 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public boolean hasDoubleTap(View view, int position) {
-            String reactionStringSetting = getMediaDataController().getDoubleTapReaction();
-            TLRPC.TL_availableReaction reaction = getMediaDataController().getReactionsMap().get(reactionStringSetting);
-            if (reaction == null && (reactionStringSetting == null || !reactionStringSetting.startsWith("animated_"))) {
+            if (!(view instanceof ChatMessageCell)) {
                 return false;
             }
-            boolean available = dialog_id >= 0;
-            if (!available && chatInfo != null) {
-                available = ChatObject.reactionIsAvailable(chatInfo, reaction == null ? reactionStringSetting : reaction.reaction);
-            }
-            if (!available || !(view instanceof ChatMessageCell)) {
-                return false;
-            }
+
             ChatMessageCell cell = (ChatMessageCell) view;
-            return !cell.getMessageObject().isSending() && !cell.getMessageObject().isEditing() && cell.getMessageObject().type != MessageObject.TYPE_PHONE_CALL && !actionBar.isActionModeShowed() && !isSecretChat() && !isInScheduleMode() && !cell.getMessageObject().isSponsored();
+            MessageObject message = cell.getMessageObject();
+
+            switch (OctoConfig.INSTANCE.doubleTapAction.getValue()) {
+                case OctoConfig.DoubleTapAction.REACTION:
+                    String reactionStringSetting = getMediaDataController().getDoubleTapReaction();
+                    TLRPC.TL_availableReaction reaction = getMediaDataController().getReactionsMap().get(reactionStringSetting);
+                    if (reaction == null && (reactionStringSetting == null || !reactionStringSetting.startsWith("animated_"))) {
+                        return false;
+                    }
+                    boolean available = dialog_id >= 0;
+                    if (!available && chatInfo != null) {
+                        available = ChatObject.reactionIsAvailable(chatInfo, reaction == null ? reactionStringSetting : reaction.reaction);
+                    }
+                    if (!available) {
+                        return false;
+                    }
+                    return !cell.getMessageObject().isSending() && !cell.getMessageObject().isEditing() && cell.getMessageObject().type != MessageObject.TYPE_PHONE_CALL && !actionBar.isActionModeShowed() && !isSecretChat() && !isInScheduleMode() && !cell.getMessageObject().isSponsored();
+                case OctoConfig.DoubleTapAction.COPY:
+                    return message.type == MessageObject.TYPE_TEXT;
+                case OctoConfig.DoubleTapAction.REPLY:
+                    boolean allowChatActions = chatMode != MODE_SCHEDULED && (threadMessageObjects == null || !threadMessageObjects.contains(message)) &&
+                            !message.isSponsored() && (getMessageType(message) != 1 || message.getDialogId() != mergeDialogId) &&
+                            !(message.messageOwner.action instanceof TLRPC.TL_messageActionSecureValuesSent) &&
+                            (currentEncryptedChat != null || message.getId() >= 0) &&
+                            (bottomOverlayChat == null || bottomOverlayChat.getVisibility() != View.VISIBLE || bottomOverlayChatWaitsReply && selectedObject != null && (MessageObject.getTopicId(selectedObject.messageOwner, ChatObject.isForum(currentChat)) != 0 || selectedObject.wasJustSent)) &&
+                            (currentChat == null || ((!ChatObject.isNotInChat(currentChat) || isThreadChat()) && (!ChatObject.isChannel(currentChat) || ChatObject.canPost(currentChat) || currentChat.megagroup) && ChatObject.canSendMessages(currentChat)));
+                    return message.getId() > 0 && allowChatActions;
+                case OctoConfig.DoubleTapAction.DELETE:
+                    return message.canDeleteMessage(chatMode == MODE_SCHEDULED, currentChat) && (threadMessageObjects == null || !threadMessageObjects.contains(message)) && !(message.messageOwner != null && message.messageOwner.action instanceof TLRPC.TL_messageActionTopicCreate);
+               case OctoConfig.DoubleTapAction.FORWARD:
+               case OctoConfig.DoubleTapAction.SAVE:
+                   boolean noForwards = getMessagesController().isChatNoForwards(currentChat) || message.messageOwner.noforwards;
+                   boolean allowForward = !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() || message.hasExtendedMediaPreview()) &&
+                            !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL && !noForwards &&
+                            message.type != MessageObject.TYPE_GIFT_PREMIUM && message.type != MessageObject.TYPE_SUGGEST_PHOTO;
+                   boolean allowSave = allowForward && !UserObject.isUserSelf(currentUser);
+                   if (OctoConfig.INSTANCE.doubleTapAction.getValue() == OctoConfig.DoubleTapAction.FORWARD)
+                       return allowForward;
+                   else if (OctoConfig.INSTANCE.doubleTapAction.getValue() == OctoConfig.DoubleTapAction.SAVE)
+                       return allowSave;
+                case OctoConfig.DoubleTapAction.DISABLED:
+                default:
+                    return false;
+            }
         }
 
         @Override
         public void onDoubleTap(View view, int position, float x, float y) {
+            System.out.println(OctoConfig.INSTANCE.doubleTapAction.getValue());
             if (!(view instanceof ChatMessageCell) || getParentActivity() == null || isSecretChat() || isInScheduleMode() || isInPreviewMode()) {
                 return;
             }
             ChatMessageCell cell = (ChatMessageCell) view;
-            MessageObject primaryMessage = cell.getPrimaryMessageObject();
-            if (primaryMessage.isSecretMedia() || primaryMessage.isExpiredStory()) {
-                return;
-            }
-            ReactionsEffectOverlay.removeCurrent(false);
-            String reactionString = getMediaDataController().getDoubleTapReaction();
-            if (reactionString.startsWith("animated_")) {
-                boolean available = dialog_id >= 0;
-                if (!available && chatInfo != null) {
-                    available = ChatObject.reactionIsAvailable(chatInfo, reactionString);
-                }
-                if (!available) {
-                    return;
-                }
-                selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reactionString), true, false, false);
-            } else {
-                TLRPC.TL_availableReaction reaction = getMediaDataController().getReactionsMap().get(reactionString);
-                if (reaction == null || cell.getMessageObject().isSponsored()) {
-                    return;
-                }
-                boolean available = dialog_id >= 0;
-                if (!available && chatInfo != null) {
-                    available = ChatObject.reactionIsAvailable(chatInfo, reaction.reaction);
-                }
-                if (!available) {
-                    return;
-                }
-                selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reaction), true, false, false);
+            switch (OctoConfig.INSTANCE.doubleTapAction.getValue()) {
+                case OctoConfig.DoubleTapAction.REACTION:
+                    MessageObject primaryMessage = cell.getPrimaryMessageObject();
+                    if (primaryMessage.isSecretMedia() || primaryMessage.isExpiredStory()) {
+                        return;
+                    }
+                    ReactionsEffectOverlay.removeCurrent(false);
+                    String reactionString = getMediaDataController().getDoubleTapReaction();
+                    if (reactionString.startsWith("animated_")) {
+                        boolean available = dialog_id >= 0;
+                        if (!available && chatInfo != null) {
+                            available = ChatObject.reactionIsAvailable(chatInfo, reactionString);
+                        }
+                        if (!available) {
+                            return;
+                        }
+                        selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reactionString), true, false, false);
+                    } else {
+                        TLRPC.TL_availableReaction reaction = getMediaDataController().getReactionsMap().get(reactionString);
+                        if (reaction == null || cell.getMessageObject().isSponsored()) {
+                            return;
+                        }
+                        boolean available = dialog_id >= 0;
+                        if (!available && chatInfo != null) {
+                            available = ChatObject.reactionIsAvailable(chatInfo, reaction.reaction);
+                        }
+                        if (!available) {
+                            return;
+                        }
+                        selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reaction), true, false, false);
+                    }
+                    break;
+                case OctoConfig.DoubleTapAction.COPY:
+                    processSelectedOption(OPTION_COPY);
+                    break;
+                case OctoConfig.DoubleTapAction.REPLY:
+                    processSelectedOption(OPTION_REPLY);
+                    break;
+                case OctoConfig.DoubleTapAction.DELETE:
+                    processSelectedOption(OPTION_DELETE);
+                    break;
+                case OctoConfig.DoubleTapAction.FORWARD:
+                    processSelectedOption(OPTION_FORWARD);
+                    break;
+                case OctoConfig.DoubleTapAction.SAVE:
+                    processSelectedOption(OPTION_SAVE_TO_GALLERY);
+                    break;
             }
         }
     };
