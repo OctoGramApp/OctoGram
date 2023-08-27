@@ -11,6 +11,7 @@
 <resources>
     <string name="Style">Style</string>
     <string name="Type">Type</string>
+    <string name="Reaction">Reaction</string>
     <string name="Nothing">None</string>
     <string name="Translator">Translator</string>
     <string name="Updates">Updates</string>
@@ -75,6 +76,9 @@
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
+    <string name="DoubleTapActionsHeader">Double tap actions</string>
+    <string name="PreferredAction">Preferred action</string>
+    <string name="CustomEmojiReaction">Custom emoji reaction</string>
 
     <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
     <string name="BlurHeader">Blur</string>

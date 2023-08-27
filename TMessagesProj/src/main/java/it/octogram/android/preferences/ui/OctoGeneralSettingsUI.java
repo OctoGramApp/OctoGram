@@ -171,22 +171,22 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .requiresRestart(true)
                             .build());
                 })
-                .category("Double tap actions", category -> {
+                .category(LocaleController.getString(R.string.DoubleTapActionsHeader), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapAction)
                             .optionsIcons(List.of(
-                                    new Triple<>(OctoConfig.DoubleTapAction.DISABLED, "Disabled", R.drawable.msg_block),
-                                    new Triple<>(OctoConfig.DoubleTapAction.REACTION, "Reaction", R.drawable.msg_emoji_cat),
-                                    new Triple<>(OctoConfig.DoubleTapAction.COPY, "Copy", R.drawable.msg_copy),
-                                    new Triple<>(OctoConfig.DoubleTapAction.FORWARD, "Forward", R.drawable.msg_forward),
-                                    new Triple<>(OctoConfig.DoubleTapAction.REPLY, "Reply", R.drawable.msg_reply),
-                                    new Triple<>(OctoConfig.DoubleTapAction.DELETE, "Delete", R.drawable.msg_delete),
-                                    new Triple<>(OctoConfig.DoubleTapAction.SAVE, "Save", R.drawable.msg_saved)
+                                    new Triple<>(OctoConfig.DoubleTapAction.DISABLED, LocaleController.getString(R.string.Disable), R.drawable.msg_block),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REACTION, LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
+                                    new Triple<>(OctoConfig.DoubleTapAction.COPY, LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
+                                    new Triple<>(OctoConfig.DoubleTapAction.FORWARD, LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REPLY, LocaleController.getString(R.string.Reply), R.drawable.msg_reply),
+                                    new Triple<>(OctoConfig.DoubleTapAction.DELETE, LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
+                                    new Triple<>(OctoConfig.DoubleTapAction.SAVE, LocaleController.getString(R.string.Save), R.drawable.msg_saved)
                             ))
-                            .title("Preferred action")
+                            .title(LocaleController.getString(R.string.PreferredAction))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .title("Double tap emoji")
+                            .title(LocaleController.getString(R.string.CustomEmojiReaction))
                             .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
                             .build());
                 })
