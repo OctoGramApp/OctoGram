@@ -1471,7 +1471,7 @@ public class FilterCreateActivity extends BaseFragment {
                     createLinkCell.setDivider(divider);
                     break;
                 }
-                case 2: {
+                case VIEW_TYPE_EDIT: {
                     PollEditTextCell cell = (PollEditTextCell) holder.itemView;
                     cell.setIcon(FolderIconController.getTabIcon(newFilterEmoticon));
                     break;
