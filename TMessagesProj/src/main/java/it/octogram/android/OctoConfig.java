@@ -79,6 +79,20 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
     public final ConfigProperty<Boolean> showSnowflakes = new ConfigProperty<>("showSnowflakes", false);
     public final ConfigProperty<Boolean> disableDividers = new ConfigProperty<>("disableDividers", false);
+    /*Drawer elements*/
+    public final ConfigProperty<Boolean> changeStatus = new ConfigProperty<>("drawer_changeStatus", true);
+    public final ConfigProperty<Boolean> myStories = new ConfigProperty<>("drawer_myStories", true);
+    public final ConfigProperty<Boolean> newGroup = new ConfigProperty<>("drawer_newGroup", true);
+    public final ConfigProperty<Boolean> newChannel = new ConfigProperty<>("drawer_newChannel", false);
+    public final ConfigProperty<Boolean> contacts = new ConfigProperty<>("drawer_contacts", true);
+    public final ConfigProperty<Boolean> calls = new ConfigProperty<>("drawer_calls", true);
+    public final ConfigProperty<Boolean> peopleNearby = new ConfigProperty<>("drawer_peopleNearby", true);
+    public final ConfigProperty<Boolean> savedMessages = new ConfigProperty<>("drawer_savedMessages", true);
+    public final ConfigProperty<Boolean> settings = new ConfigProperty<>("drawer_settings", true);
+    public final ConfigProperty<Boolean> octogramSettings = new ConfigProperty<>("drawer_octogramSettings", true);
+    public final ConfigProperty<Boolean> datacenterInfo = new ConfigProperty<>("drawer_datacenterInfo", true);
+    public final ConfigProperty<Boolean> inviteFriends = new ConfigProperty<>("drawer_inviteFriends", true);
+    public final ConfigProperty<Boolean> telegramFeatures = new ConfigProperty<>("drawer_telegramFeatures", true);
 
     /*Unlock Secret Icons*/
     public final ConfigProperty<Boolean> unlockedYuki = new ConfigProperty<>("unlockedYuki", false);
@@ -109,7 +123,9 @@ public class OctoConfig {
             disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideStories, doubleTapAction, hideFoldersWhenForwarding, accentColorAsNotificationColor,
             openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, forcePacmanAnimation, formatTimeWithSeconds,
             numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont, showSnowflakes,
-            disableDividers, cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
+            disableDividers, changeStatus, myStories, newGroup, newChannel, contacts, calls, peopleNearby, savedMessages, settings,
+            octogramSettings, datacenterInfo, inviteFriends, telegramFeatures,
+            cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
             experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution,lastSelectedCompression,
             tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall, maxRecentStickers
     );

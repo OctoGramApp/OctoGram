@@ -91,6 +91,8 @@ import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
 
 import it.octogram.android.Crashlytics;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -620,6 +622,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     args.putInt("type", MediaActivity.TYPE_STORIES);
                     drawerLayoutContainer.closeDrawer(true);
                     presentFragment(new MediaActivity(args, null));
+                } else if (id == 100) {
+                    presentFragment(new PreferencesFragment(new OctoMainSettingsUI()));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 101) {
+                    // todo add dc stuff
                 }
             }
         });

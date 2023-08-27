@@ -92,6 +92,15 @@ public class UserAccountInfoController {
             }
             return UNKNOWN;
         }
+
+        public static int getDcIcon(int dcId) {
+            for (DcInfo dcInfo : values()) {
+                if (dcInfo.dcId == dcId) {
+                    return dcInfo.icon;
+                }
+            }
+            return UNKNOWN.icon;
+        }
     }
 
 }

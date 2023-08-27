@@ -135,6 +135,73 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .description(LocaleController.getString("ForcePacmanAnimation_Desc", R.string.ForcePacmanAnimation_Desc))
                             .build());
                 })
+                .category(LocaleController.getString("DrawerElementsHeader", R.string.DrawerElementsHeader), category -> {
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.changeStatus)
+                            .title(LocaleController.getString(R.string.SetEmojiStatus))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.myStories)
+                            .title(LocaleController.getString(R.string.ProfileMyStories))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.newGroup)
+                            .title(LocaleController.getString(R.string.NewGroup))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.newChannel)
+                            .title(LocaleController.getString(R.string.NewChannel))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.contacts)
+                            .title(LocaleController.getString(R.string.Contacts))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.calls)
+                            .title(LocaleController.getString(R.string.Calls))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.peopleNearby)
+                            .title(LocaleController.getString(R.string.PeopleNearby))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.savedMessages)
+                            .title(LocaleController.getString(R.string.SavedMessages))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.settings)
+                            .title(LocaleController.getString(R.string.Settings))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.octogramSettings)
+                            .title("OctoGram Settings")
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.datacenterInfo)
+                            .title(LocaleController.getString(R.string.DatacenterStatus))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.inviteFriends)
+                            .title(LocaleController.getString(R.string.InviteFriends))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.telegramFeatures)
+                            .title(LocaleController.getString(R.string.TelegramFeatures))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
+                })
                 .build();
     }
 

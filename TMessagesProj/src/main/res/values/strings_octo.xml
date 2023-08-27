@@ -19,6 +19,7 @@
     <string name="FeatureCurrentlyUnavailable">This feature is currently unavailable :(</string>
     <string name="FormatterDay24HSec">HH:mm:ss</string>
     <string name="FormatterDay12HSec">h:mm:ss a</string>
+    <string name="DatacenterStatus">Datacenter Status</string>
 
     <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
     <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
@@ -110,6 +111,7 @@
     <string name="ArchiveHeader">Archive</string>
     <string name="ForcePacmanAnimation">Force pacman animation</string>
     <string name="ForcePacmanAnimation_Desc">Force pacman animation when archiving a chat</string>
+    <string name="DrawerElementsHeader">Drawer Elements</string>
 
     <string name="RestrictionReason">Restriction Reason</string>
     <string name="RegistrationDate">Registration Date</string>
