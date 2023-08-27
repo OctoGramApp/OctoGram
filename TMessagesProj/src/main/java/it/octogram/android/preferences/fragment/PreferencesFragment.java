@@ -42,6 +42,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.Components.UndoView;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,21 +133,21 @@ public class PreferencesFragment extends BaseFragment {
         listView.setLayoutManager(new LinearLayoutManager(context, VERTICAL, false));
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT));
         listView.setAdapter(listAdapter);
+
+        UndoView restartTooltip = new UndoView(context);
+        frameLayout.addView(restartTooltip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT, 8, 0, 8, 8));
+
         listView.setOnItemClickListener((view, position, x, y) -> {
             BaseRow row = positions.get(position);
             if (row instanceof Clickable) {
                 boolean success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
                 if (success) {
                     if (row.doesRequireRestart()) {
-                        UndoView restartTooltip = new UndoView(context);
-                        frameLayout.addView(restartTooltip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT, 8, 0, 8, 8));
                         restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
                     }
 
                     if (row.getPostNotificationName() != null) {
-                        for (int notif : row.getPostNotificationName()) {
-                            NotificationCenter.getGlobalInstance().postNotificationName(notif);
-                        }
+                        Arrays.stream(row.getPostNotificationName()).forEach(NotificationCenter.getGlobalInstance()::postNotificationName);
                     }
                 }
             }
