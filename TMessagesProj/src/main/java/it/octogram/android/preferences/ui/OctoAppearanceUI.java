@@ -112,6 +112,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.hideStories)
                             .requiresRestart(true)
                             .title(LocaleController.getString("HideStories", R.string.HideStories))
+                            .description(LocaleController.getString("HideStories_Desc", R.string.HideStories_Desc))
                             .build());
                 })
                 .category(LocaleController.formatString("BlurHeader", R.string.BlurHeader), category -> {
