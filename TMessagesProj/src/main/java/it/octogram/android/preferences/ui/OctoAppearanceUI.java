@@ -28,12 +28,6 @@ public class OctoAppearanceUI implements PreferencesEntry {
     public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("Appearance", R.string.Appearance))
                 .sticker(context, R.raw.utyan_appearance, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
-                .category(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader), category -> {
-                    category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(new StickerSize(context, INavigationLayout.newLayout(context)))
-                            .build()
-                    );
-                })
                 .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
@@ -59,6 +53,10 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
                             .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
                             .requiresRestart(true)
+                            .build());
+                    category.row(new HeaderRow(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader)));
+                    category.row(new SliderRow.SliderRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
                             .build());
                 })
                 .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {

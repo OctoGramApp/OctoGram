@@ -93,8 +93,9 @@
     <string name="SlidingTitle_Desc">The title will slide on screen when it\'s too long</string>
     <string name="StickersSizeHeader">Sticker Size</string>
     <string name="StickerSizePreviewMessage1">New octo update just dropped!</string>
+    <!--<string name="StickerSizePreviewMessage1">New octo update just dropped!</string>
     <string name="StickerSizePreviewMessage2">Neat!</string>
-    <string name="StickerSizePreviewMessage2ReplyName">Firo</string>
+    <string name="StickerSizePreviewMessage2ReplyName">Firo</string>-->
     <string name="FontEmojisHeader">Font &amp; Emojis</string>
     <string name="EmojiSets">Emoji sets</string>
     <string name="EmojiSets_Desc">Customize your emoji sets</string>
