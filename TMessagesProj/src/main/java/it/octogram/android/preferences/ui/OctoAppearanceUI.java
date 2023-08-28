@@ -66,7 +66,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .build());
                     category.row(new HeaderRow(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader)));
                     category.row(new SliderRow.SliderRowBuilder()
-                            .min(0)
+                            .min(2)
                             .max(20)
                             .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
                             .build());
