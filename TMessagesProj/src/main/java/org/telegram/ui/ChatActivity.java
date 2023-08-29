@@ -1511,6 +1511,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
             ChatMessageCell cell = (ChatMessageCell) view;
             MessageObject message = cell.getMessageObject();
+            MessageObject.GroupedMessages messageGroup = getValidGroupedMessage(message);
 
             switch (OctoConfig.INSTANCE.doubleTapAction.getValue()) {
                 case OctoConfig.DoubleTapAction.REACTION:
@@ -1527,8 +1528,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         return false;
                     }
                     return !cell.getMessageObject().isSending() && !cell.getMessageObject().isEditing() && cell.getMessageObject().type != MessageObject.TYPE_PHONE_CALL && !actionBar.isActionModeShowed() && !isSecretChat() && !isInScheduleMode() && !cell.getMessageObject().isSponsored();
-                case OctoConfig.DoubleTapAction.COPY:
-                    return message.type == MessageObject.TYPE_TEXT;
                 case OctoConfig.DoubleTapAction.REPLY:
                     boolean allowChatActions = chatMode != MODE_SCHEDULED && (threadMessageObjects == null || !threadMessageObjects.contains(message)) &&
                             !message.isSponsored() && (getMessageType(message) != 1 || message.getDialogId() != mergeDialogId) &&
@@ -1540,14 +1539,18 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 case OctoConfig.DoubleTapAction.DELETE:
                     return message.canDeleteMessage(chatMode == MODE_SCHEDULED, currentChat) && (threadMessageObjects == null || !threadMessageObjects.contains(message)) && !(message.messageOwner != null && message.messageOwner.action instanceof TLRPC.TL_messageActionTopicCreate);
                case OctoConfig.DoubleTapAction.FORWARD:
+               case OctoConfig.DoubleTapAction.COPY:
                case OctoConfig.DoubleTapAction.SAVE:
                    boolean noForwards = getMessagesController().isChatNoForwards(currentChat) || message.messageOwner.noforwards;
                    boolean allowForward = !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() || message.hasExtendedMediaPreview()) &&
                             !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL && !noForwards &&
                             message.type != MessageObject.TYPE_GIFT_PREMIUM && message.type != MessageObject.TYPE_SUGGEST_PHOTO;
                    boolean allowSave = allowForward && !UserObject.isUserSelf(currentUser);
+                   boolean allowCopy = (message.type == MessageObject.TYPE_TEXT || message.isAnimatedEmoji() || message.isAnimatedEmojiStickers() || getMessageCaption(message, messageGroup) != null) && !noForwards;
                    if (OctoConfig.INSTANCE.doubleTapAction.getValue() == OctoConfig.DoubleTapAction.FORWARD)
                        return allowForward;
+                   else if (OctoConfig.INSTANCE.doubleTapAction.getValue() == OctoConfig.DoubleTapAction.COPY)
+                       return allowCopy;
                    else if (OctoConfig.INSTANCE.doubleTapAction.getValue() == OctoConfig.DoubleTapAction.SAVE)
                        return allowSave;
                 case OctoConfig.DoubleTapAction.DISABLED:
