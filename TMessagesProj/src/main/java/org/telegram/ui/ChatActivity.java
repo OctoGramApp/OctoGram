@@ -988,6 +988,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int OPTION_SPEED_PROMO = 103;
     private final static int OPTION_OPEN_PROFILE = 104;
 
+    private final static int OPTION_SAVE_TO_SAVED_MESSAGES = 200;
+
     private final static int[] allowedNotificationsDuringChatListAnimations = new int[]{
             NotificationCenter.messagesRead,
             NotificationCenter.threadMessagesRead,
@@ -1611,7 +1613,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     processSelectedOption(OPTION_FORWARD);
                     break;
                 case OctoConfig.DoubleTapAction.SAVE:
-                    processSelectedOption(OPTION_SAVE_TO_GALLERY);
+                    processSelectedOption(OPTION_SAVE_TO_SAVED_MESSAGES);
                     break;
             }
         }
@@ -26199,6 +26201,26 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             case OPTION_OPEN_PROFILE: {
                 TLRPC.Peer from = selectedObject.messageOwner.from_id;
                 openUserProfile(from.user_id != 0 ? from.user_id : from.channel_id != 0 ? from.channel_id : from.chat_id);
+                break;
+            }
+            case OPTION_SAVE_TO_SAVED_MESSAGES: {
+                ArrayList<MessageObject> messages = new ArrayList<>(selectedObjectGroup != null ? selectedObjectGroup.messages : Collections.singletonList(selectedObject));
+
+                if (messages.isEmpty()) {
+                    // There is no message to be saved, we can return
+                    return;
+                }
+
+                int result = getSendMessagesHelper().sendMessage(messages, getUserConfig().getClientUserId(), false, false, false, 0);
+                AlertsCreator.showSendMediaAlert(result, this, themeDelegate);
+                if (result != 0) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        waitingForSendingMessageLoad = false;
+                        hideFieldPanel(true);
+                    });
+                }
+                createUndoView();
+                undoView.showWithAction(getUserConfig().getClientUserId(), UndoView.ACTION_FWD_MESSAGES, messages.size());
                 break;
             }
         }
