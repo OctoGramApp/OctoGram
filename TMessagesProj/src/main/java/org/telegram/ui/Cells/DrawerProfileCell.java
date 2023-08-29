@@ -717,19 +717,17 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         animatedStatus.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         status.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         if (OctoConfig.INSTANCE.hidePhoneNumber.getValue()) {
-            if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue()) {
+            if (OctoConfig.INSTANCE.showUsernameAsPhoneNumber.getValue() && user.username != null && !user.username.isEmpty()) {
+                phoneTextView.setText(String.format("@%s", user.username));
+            } else if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue()) {
                 String phoneNumber = user.phone;
                 String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
                 phoneTextView.setText(String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry)));
-            } else if (OctoConfig.INSTANCE.showUsernameAsPhoneNumber.getValue() && user.username != null && !user.username.isEmpty()) {
-                phoneTextView.setText(String.format("@%s", user.username));
             } else {
                 phoneTextView.setText(LocaleController.getString("MobileHidden", R.string.MobileHidden));
             }
         } else {
-            String phoneNumber = user.phone;
-            String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
-            phoneTextView.setText(String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry)));
+            phoneTextView.setText(PhoneFormat.getInstance().format("+" + user.phone));
         }
         AvatarDrawable avatarDrawable = new AvatarDrawable(user);
         avatarDrawable.setColor(Theme.getColor(Theme.key_avatar_backgroundInProfileBlue));

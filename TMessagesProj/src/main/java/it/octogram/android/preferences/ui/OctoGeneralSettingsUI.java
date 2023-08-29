@@ -38,23 +38,28 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.hidePhoneNumber)
                             .title(LocaleController.formatString("HidePhoneNumber", R.string.HidePhoneNumber))
                             .description(LocaleController.formatString("HidePhoneNumber_Desc", R.string.HidePhoneNumber_Desc))
+                            .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideOtherPhoneNumber)
                             .title(LocaleController.formatString("HideOtherPhoneNumber", R.string.HideOtherPhoneNumber))
                             .description(LocaleController.formatString("HideOtherPhoneNumber_Desc", R.string.HideOtherPhoneNumber_Desc))
                             .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
+                            .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showFakePhoneNumber)
                             .title(LocaleController.formatString("ShowFakePhoneNumber", R.string.ShowFakePhoneNumber))
                             .description(LocaleController.formatString("ShowFakePhoneNumber_Desc", R.string.ShowFakePhoneNumber_Desc))
                             .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
+                            .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showUsernameAsPhoneNumber)
                             .title(LocaleController.formatString(R.string.ShowUsernameAsPhoneNumber))
                             .description(LocaleController.formatString("ShowUsernameAsPhoneNumber_Desc", R.string.ShowUsernameAsPhoneNumber_Desc))
+                            .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
+                            .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.promptBeforeCalling)
