@@ -68,6 +68,12 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.formatString("DcIdHeader", R.string.DcIdHeader), category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
+                            .title(LocaleController.formatString("ShowRegistrationDate", R.string.ShowRegistrationDate))
+                            .description(LocaleController.formatString("ShowRegistrationDate_Desc", R.string.ShowRegistrationDate_Desc))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
@@ -90,12 +96,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new FooterInformativeRow.FooterInformativeRowBuilder()
                             .title(LocaleController.formatString("DcIdTypeDescription", R.string.DcIdTypeDescription))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
-                            .title(LocaleController.formatString("ShowRegistrationDate", R.string.ShowRegistrationDate))
-                            .description(LocaleController.formatString("ShowRegistrationDate_Desc", R.string.ShowRegistrationDate_Desc))
-                            .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                 })
                 .category(LocaleController.formatString("Chats", R.string.Chats), category -> {
