@@ -21,6 +21,13 @@
     <string name="FormatterDay12HSec">h:mm:ss a</string>
     <string name="DatacenterStatus">Datacenter Status</string>
 
+    <!--Crashlytics-->
+    <string name="OctoCrashedTitle">OctoGram has stopped working!</string>
+    <string name="OctoCrashedSubTitle">OctoGram has crashed, and we\'re sorry for the trouble. Please send us the crash log to help us fix the issue.</string>
+    <string name="SendLogsButton">Send logs</string>
+    <string name="CancelArchiveButton">Cancel &amp; Archive logs</string>
+    <string name="ErrorSendingCrashContent">There was an error while sending crash logs</string>
+
     <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
     <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
     <string name="OctoMainSettingsInfoCategory">Info</string>
