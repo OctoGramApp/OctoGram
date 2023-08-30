@@ -45,7 +45,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Property;
 import android.util.StateSet;
@@ -84,8 +83,8 @@ import androidx.recyclerview.widget.LinearSmoothScrollerCustom;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
-import it.octogram.android.Crashlytics;
-import it.octogram.android.CrashlyticsBottomSheet;
+import it.octogram.android.crashlytics.Crashlytics;
+import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -210,7 +209,6 @@ import org.telegram.ui.Components.ViewPagerFixed;
 import org.telegram.ui.Stories.DialogStoriesCell;
 import org.telegram.ui.Stories.StoriesController;
 import org.telegram.ui.Stories.StoriesListPlaceProvider;
-import org.telegram.ui.Stories.StoriesUtilities;
 import org.telegram.ui.Stories.UserListPoller;
 import org.telegram.ui.Stories.recorder.HintView2;
 import org.telegram.ui.Stories.recorder.StoryRecorder;
@@ -5042,9 +5040,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             FilesMigrationService.checkBottomSheet(this);
         }
-        boolean foundCrashReport = Crashlytics.isCrashed();
-        if (foundCrashReport) {
-            CrashlyticsBottomSheet.checkBottomSheet(this);
+        if (Crashlytics.getLatestCrashFile().exists()) {
+            CrashlyticsBottomSheet.showCrash(this);
         }
         updateMenuButton(false);
         actionBar.setDrawBlurBackground(contentView);
