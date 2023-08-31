@@ -105,7 +105,6 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         listView.setOnItemClickListener(this::onItemClick);
         listView.setOnItemLongClickListener((view, position) -> {
             if (position >= customEmojiStartRow && position < customEmojiEndRow) {
-                System.out.println("[aaaa] long clicking");
                 listAdapter.toggleSelected(position);
                 return true;
             }
