@@ -30,13 +30,13 @@
     <string name="CustomEmojiSet">Custom Emoji Set</string>
     <string name="CustomEmojiSetHint">Import and choose emoji sets from your internal storage.</string>
     <string name="AddEmojiSet">Add Emoji Set</string>
-    <string name="ErrorEmojiFontInvalidFormat">File must be an emoji font file.</string>
     <string name="EmojiSetRemoved">Emoji set removed</string>
     <string name="EmojiSetRemovedInfo">%1$s is no longer in your emoji sets.</string>
     <string name="DeleteEmojiSets">%1$s emoji sets</string>
     <string name="DeleteEmojiSetsMessage">Are you sure you want to delete the selected emoji sets?</string>
     <string name="ApplyEmojiSet">Apply emoji set</string>
     <string name="InvalidCustomEmojiSet">Invalid font file.</string>
+    <string name="ErrorEmojiFontInvalidFormat">File must be an emoji font file.</string>
     <string name="EmojiSetApplied">Emoji set applied</string>
     <string name="EmojiSetAppliedInfo">%1$s is now your emoji set.</string>
     <string name="EmojiSetAlreadyApplied">Emoji set already applied.</string>

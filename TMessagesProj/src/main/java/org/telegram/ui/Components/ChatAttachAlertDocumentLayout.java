@@ -871,7 +871,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
 
     public boolean isEmojiFont(File file) {
         boolean isValidEmojiFont = CustomEmojiController.isValidEmojiPack(file);
-        if (!isValidEmojiFont) BulletinFactory.of(parentAlert.getContainer(), null).createErrorBulletinSubtitle("invalid format", "invalid format", null).show();
+        if (!isValidEmojiFont) BulletinFactory.of(parentAlert.getContainer(), null).createErrorBulletinSubtitle(LocaleController.formatString("InvalidCustomEmojiSet", R.string.InvalidCustomEmojiSet), LocaleController.formatString("ErrorEmojiFontInvalidFormat", R.string.ErrorEmojiFontInvalidFormat), null).show();
         return isValidEmojiFont;
     }
 
