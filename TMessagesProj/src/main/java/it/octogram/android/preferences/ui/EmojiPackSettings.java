@@ -389,6 +389,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                         emojiPackInfo = customEmojiPacks.get(position - customEmojiStartRow);
                     }
                     emojiPackSetCell.setSelected(selectedItems.get(position, false), partial);
+                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
                     if (emojiPackInfo != null) {
                         emojiPackSetCell.setChecked(!hasSelected() && emojiPackInfo.getPackId().equals(CustomEmojiController.getSelectedEmojiPackId()) && getCurrentDownloading() == null && getCurrentUnzipping() == null && !OctoConfig.INSTANCE.useSystemEmoji.getValue(), partial);
                         emojiPackSetCell.setData(
