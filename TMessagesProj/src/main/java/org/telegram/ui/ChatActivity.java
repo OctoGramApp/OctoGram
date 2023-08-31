@@ -115,6 +115,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.zxing.common.detector.MathUtils;
 
+import it.octogram.android.ConfigProperty;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -1512,8 +1513,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
 
             ChatMessageCell cell = (ChatMessageCell) view;
+            boolean isOutOwner = ((ChatMessageCell) view).getMessageObject().isOutOwner();
 
-            if (OctoConfig.INSTANCE.doubleTapAction.getValue() == OctoConfig.DoubleTapAction.REACTION) {
+            int doubleTapAction = !isOutOwner ? OctoConfig.INSTANCE.doubleTapAction.getValue() :
+                    OctoConfig.INSTANCE.doubleTapActionOut.getValue();
+
+            if (doubleTapAction == OctoConfig.DoubleTapAction.REACTION) {
                 String reactionStringSetting = getMediaDataController().getDoubleTapReaction();
                 TLRPC.TL_availableReaction reaction = getMediaDataController().getReactionsMap().get(reactionStringSetting);
                 if (reaction == null && (reactionStringSetting == null || !reactionStringSetting.startsWith("animated_"))) {
@@ -1545,7 +1550,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 boolean allowCopy = (message.type == MessageObject.TYPE_TEXT || message.isAnimatedEmoji() || message.isAnimatedEmojiStickers() || getMessageCaption(message, messageGroup) != null) && !noForwards;
                 boolean allowDelete = message.canDeleteMessage(chatMode == MODE_SCHEDULED, currentChat) && (threadMessageObjects == null || !threadMessageObjects.contains(message)) && !(message.messageOwner != null && message.messageOwner.action instanceof TLRPC.TL_messageActionTopicCreate);
 
-                switch (OctoConfig.INSTANCE.doubleTapAction.getValue()) {
+                switch (doubleTapAction) {
                     case OctoConfig.DoubleTapAction.REPLY:
                         return message.getId() > 0 && allowChatActions;
                     case OctoConfig.DoubleTapAction.DELETE:
@@ -1569,8 +1574,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 return;
             }
             ChatMessageCell cell = (ChatMessageCell) view;
+            boolean isOutOwner = ((ChatMessageCell) view).getMessageObject().isOutOwner();
 
-            if (OctoConfig.INSTANCE.doubleTapAction.getValue() == OctoConfig.DoubleTapAction.REACTION) {
+            int doubleTapAction = !isOutOwner ? OctoConfig.INSTANCE.doubleTapAction.getValue() :
+                    OctoConfig.INSTANCE.doubleTapActionOut.getValue();
+
+            if (doubleTapAction == OctoConfig.DoubleTapAction.REACTION) {
                 MessageObject primaryMessage = cell.getPrimaryMessageObject();
                 if (primaryMessage.isSecretMedia() || primaryMessage.isExpiredStory()) {
                     return;
@@ -1605,7 +1614,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 selectedObject = message;
                 selectedObjectGroup = getValidGroupedMessage(message);
 
-                switch (OctoConfig.INSTANCE.doubleTapAction.getValue()) {
+                switch (doubleTapAction) {
                     case OctoConfig.DoubleTapAction.COPY: {
                         processSelectedOption(OPTION_COPY);
                         break;

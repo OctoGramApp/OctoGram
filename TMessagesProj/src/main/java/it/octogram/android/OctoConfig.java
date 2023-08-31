@@ -57,6 +57,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideChatFolders = new ConfigProperty<>("hideChatFolders", false);
     public final ConfigProperty<Boolean> hideStories = new ConfigProperty<>("hideStories", false);
     public final ConfigProperty<Integer> doubleTapAction = new ConfigProperty<>("doubleTapAction", DoubleTapAction.REACTION);
+    public final ConfigProperty<Integer> doubleTapActionOut = new ConfigProperty<>("doubleTapAction", DoubleTapAction.REACTION);
 
     public final ConfigProperty<Boolean> hideFoldersWhenForwarding = new ConfigProperty<>("showFoldersWhenForwarding", false);
     public final ConfigProperty<Boolean> accentColorAsNotificationColor = new ConfigProperty<>("accentColorAsNotificationColor", false);

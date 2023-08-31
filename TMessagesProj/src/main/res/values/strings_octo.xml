@@ -85,7 +85,8 @@
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
     <string name="DoubleTapActionsHeader">Double tap actions</string>
-    <string name="PreferredAction">Preferred action</string>
+    <string name="PreferredActionIncoming">Incoming messages</string>
+    <string name="PreferredActionOutgoing">Outgoing messages</string>
     <string name="CustomEmojiReaction">Custom emoji reaction</string>
 
     <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
