@@ -1547,7 +1547,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL && !noForwards &&
                         message.type != MessageObject.TYPE_GIFT_PREMIUM && message.type != MessageObject.TYPE_SUGGEST_PHOTO;
                 boolean allowSave = allowForward && !UserObject.isUserSelf(currentUser);
-                boolean allowCopy = (message.type == MessageObject.TYPE_TEXT || message.isAnimatedEmoji() || message.isAnimatedEmojiStickers() || getMessageCaption(message, messageGroup) != null) && !noForwards;
+                boolean allowCopy = (message.type == MessageObject.TYPE_TEXT || message.isAnimatedEmoji() || message.isAnimatedEmojiStickers() || getMessageCaption(message, groupedMessages) != null) && !noForwards;
                 boolean allowDelete = message.canDeleteMessage(chatMode == MODE_SCHEDULED, currentChat) && (threadMessageObjects == null || !threadMessageObjects.contains(message)) && !(message.messageOwner != null && message.messageOwner.action instanceof TLRPC.TL_messageActionTopicCreate);
                 boolean allowEdit = message.canEditMessage(currentChat) && !chatActivityEnterView.hasAudioToSend() && message.getDialogId() != mergeDialogId && message.type != MessageObject.TYPE_STORY;
                 if (allowEdit && groupedMessages != null) {
