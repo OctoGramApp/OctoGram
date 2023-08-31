@@ -14189,6 +14189,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                         return 5;
                                     } else if (!messageObject.isNewGif() && mime.endsWith("/mp4") || mime.endsWith("/png") || mime.endsWith("/jpg") || mime.endsWith("/jpeg")) {
                                         return 6;
+                                    } else if (mime.startsWith("font/")) {
+                                        return 208;
                                     }
                                 }
                             }
@@ -23794,6 +23796,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 options.add(OPTION_SHARE);
                                 icons.add(R.drawable.msg_shareout);
                             }
+                        } else if (type == 208) {
+                            items.add(LocaleController.getString("ApplyEmojiSet", R.string.ApplyEmojiSet));
+                            options.add(OPTION_APPLY_LOCALIZATION_OR_THEME);
+                            icons.add(R.drawable.msg_emoji_smiles);
                         } else if (type == 6 && !noforwards && !selectedObject.hasRevealedExtendedMedia()) {
                             items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
                             options.add(OPTION_SAVE_TO_GALLERY2);
@@ -25743,12 +25749,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     progressDialog.dismiss();
                                     if (finalSuccess && finalEmojiPackBase != null) {
                                         if (finalEmojiPackBase.getPackId().equals(OctoConfig.INSTANCE.selectedEmojiPack.getValue())) {
-                                            BulletinFactory.of(ChatActivity.this).createErrorBulletin("already applied", themeDelegate).show();
+                                            BulletinFactory.of(ChatActivity.this).createErrorBulletin(LocaleController.getString("EmojiSetAlreadyApplied", R.string.EmojiSetAlreadyApplied), themeDelegate).show();
                                         } else {
                                             EmojiSetBulletinLayout bulletinLayout = new EmojiSetBulletinLayout(
                                                     getParentActivity(),
-                                                    "applied!",
-                                                    finalEmojiPackBase.getPackName(),
+                                                    LocaleController.getString("EmojiSetApplied", R.string.EmojiSetApplied),
+                                                    LocaleController.formatString("EmojiSetAppliedInfo", R.string.EmojiSetAppliedInfo, finalEmojiPackBase.getPackName()),
                                                     finalEmojiPackBase,
                                                     themeDelegate
                                             );
@@ -25759,7 +25765,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                             NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
                                         }
                                     } else {
-                                        BulletinFactory.of(ChatActivity.this).createErrorBulletin("invalid set", themeDelegate).show();
+                                        BulletinFactory.of(ChatActivity.this).createErrorBulletin(LocaleController.getString("InvalidCustomEmojiSet", R.string.InvalidCustomEmojiSet), themeDelegate).show();
                                     }
                                 });
                             }
