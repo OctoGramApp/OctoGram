@@ -21,14 +21,25 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Emoji;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.AnimatedTextView;
+import org.telegram.ui.Components.BackupImageView;
+import org.telegram.ui.Components.CheckBox2;
+import org.telegram.ui.Components.CubicBezierInterpolator;
+import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.RadialProgressView;
+
+import java.util.Objects;
+
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.http.FileDownloader;
 import it.octogram.android.utils.FileUnzip;
-import org.telegram.messenger.*;
-import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.*;
-
-import java.util.Objects;
 
 public class EmojiSet extends FrameLayout {
     private final TextView textView;
@@ -152,9 +163,9 @@ public class EmojiSet extends FrameLayout {
             }).alpha(checked ? 1 : 0).scaleX(checked ? 1 : 0.1f).scaleY(checked ? 1 : 0.1f).setDuration(150).start();
         } else {
             optionsButton.setVisibility(checked ? VISIBLE : INVISIBLE);
-            optionsButton.setScaleX(checked ? 1f:0.1f);
-            optionsButton.setScaleY(checked ? 1f:0.1f);
-            optionsButton.setAlpha(checked ? 1f:0f);
+            optionsButton.setScaleX(checked ? 1f : 0.1f);
+            optionsButton.setScaleY(checked ? 1f : 0.1f);
+            optionsButton.setAlpha(checked ? 1f : 0f);
         }
     }
 

@@ -12,27 +12,41 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import it.octogram.android.fonts.FontFileReader;
-import it.octogram.android.http.FileDownloader;
-import it.octogram.android.http.StandardHTTPRequest;
-import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
-import it.octogram.android.utils.FileUnzip;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.telegram.messenger.*;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.Emoji;
+import org.telegram.messenger.FileLog;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Bulletin;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,6 +54,12 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import it.octogram.android.fonts.FontFileReader;
+import it.octogram.android.http.FileDownloader;
+import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
+import it.octogram.android.utils.FileUnzip;
 
 public class CustomEmojiController {
     private static Typeface systemEmojiTypeface;
@@ -421,7 +441,7 @@ public class CustomEmojiController {
 
     public static void deleteOldVersions(String emojiID, String versionWithMd5) {
         for (File oldVersion : getAllVersions(emojiID, versionWithMd5)) {
-           FileUnzip.deleteFolder(oldVersion);
+            FileUnzip.deleteFolder(oldVersion);
         }
     }
 
@@ -571,7 +591,8 @@ public class CustomEmojiController {
             if (tmpFontName != null) {
                 fontName = tmpFontName;
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         File emojiDir = new File(EMOJI_PACKS_FILE_DIR + fontName + "_v" + sb);
         boolean isAlreadyInstalled = getAllEmojis().stream()
                 .filter(CustomEmojiController::isValidCustomPack)
@@ -628,7 +649,7 @@ public class CustomEmojiController {
     }
 
     public static void drawEmojiFont(Canvas canvas, int x, int y, Typeface typeface, String emoji, int emojiSize) {
-        int fontSize = (int)(emojiSize * 0.85f);
+        int fontSize = (int) (emojiSize * 0.85f);
         Rect areaRect = new Rect(0, 0, emojiSize, emojiSize);
         TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTypeface(Typeface.create(typeface, Typeface.NORMAL));
@@ -636,7 +657,7 @@ public class CustomEmojiController {
         textPaint.setTextAlign(Paint.Align.CENTER);
         Rect textRect = new Rect();
         textPaint.getTextBounds(emoji, 0, emoji.length(), textRect);
-        canvas.drawText(emoji, areaRect.centerX() + x,-textRect.top + y, textPaint);
+        canvas.drawText(emoji, areaRect.centerX() + x, -textRect.top + y, textPaint);
     }
 
     private static ArrayList<EmojiPackBase> loadCustomEmojiPacks() {
@@ -661,7 +682,7 @@ public class CustomEmojiController {
         if (emojiPackBulletin != null && pendingDeleteEmojiPackId != null) {
             AlertDialog progressDialog = new AlertDialog(fragment.getParentActivity(), 3);
             emojiPackBulletin.hide(false, 0);
-            new Thread(){
+            new Thread() {
                 @Override
                 public void run() {
                     do {
@@ -689,7 +710,7 @@ public class CustomEmojiController {
                 LocaleController.formatString("EmojiSetRemovedInfo", R.string.EmojiSetRemovedInfo, emojiPackBase.getPackName()),
                 emojiPackBase,
                 null
-                );
+        );
         Bulletin.UndoButton undoButton = new Bulletin.UndoButton(fragment.getParentActivity(), false).setUndoAction(() -> {
             if (wasSelected) {
                 OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, pendingDeleteEmojiPackId);
@@ -788,6 +809,7 @@ public class CustomEmojiController {
 
     public interface OnBulletinAction {
         void onPreStart();
+
         void onUndo();
     }
 }

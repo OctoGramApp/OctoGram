@@ -10,10 +10,13 @@ package it.octogram.android.preferences.ui.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+
 import androidx.annotation.NonNull;
-import it.octogram.android.CustomEmojiController;
+
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.Bulletin;
+
+import it.octogram.android.CustomEmojiController;
 
 @SuppressLint("ViewConstructor")
 public class EmojiSetBulletinLayout extends Bulletin.TwoLineLayout {

@@ -26,27 +26,54 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import it.octogram.android.OctoConfig;
-import it.octogram.android.CustomEmojiController;
-import it.octogram.android.preferences.ui.custom.EmojiSet;
-import it.octogram.android.http.FileDownloader;
-import it.octogram.android.utils.FileUnzip;
+
 import org.jetbrains.annotations.NotNull;
-import org.telegram.messenger.*;
-import org.telegram.ui.ActionBar.*;
-import org.telegram.ui.Cells.*;
-import org.telegram.ui.Components.*;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.Emoji;
+import org.telegram.messenger.FileLog;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
+import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.BackDrawable;
+import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.CreationTextCell;
+import org.telegram.ui.Cells.HeaderCell;
+import org.telegram.ui.Cells.ShadowSectionCell;
+import org.telegram.ui.Cells.TextCheckCell;
+import org.telegram.ui.Cells.TextInfoPrivacyCell;
+import org.telegram.ui.Components.BulletinFactory;
+import org.telegram.ui.Components.ChatAttachAlert;
+import org.telegram.ui.Components.ChatAttachAlertDocumentLayout;
+import org.telegram.ui.Components.CombinedDrawable;
+import org.telegram.ui.Components.CubicBezierInterpolator;
+import org.telegram.ui.Components.FlickerLoadingView;
+import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.NumberTextView;
+import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import it.octogram.android.CustomEmojiController;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.http.FileDownloader;
+import it.octogram.android.preferences.ui.custom.EmojiSet;
+import it.octogram.android.utils.FileUnzip;
 
 public class EmojiPackSettings extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
 
@@ -249,7 +276,8 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                     } else {
                         CustomEmojiController.emojiTmp(cell.packId).delete();
                         listAdapter.notifyEmojiSetsChanged();
-                        if (isFailed) BulletinFactory.of(EmojiPackSettings.this).createErrorBulletin(LocaleController.getString("EmojiSetErrorDownloading", R.string.EmojiSetErrorDownloading)).show();
+                        if (isFailed)
+                            BulletinFactory.of(EmojiPackSettings.this).createErrorBulletin(LocaleController.getString("EmojiSetErrorDownloading", R.string.EmojiSetErrorDownloading)).show();
                     }
                 }
                 cell.checkDownloaded(true);
@@ -300,7 +328,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         customEmojiEndRow = -1;
         placeHolderRow = -1;
 
-        generalHeaderRow =  rowCount++;
+        generalHeaderRow = rowCount++;
         useSystemEmojiRow = rowCount++;
         emojiDividerRow = rowCount++;
         useCustomEmojiHeaderRow = rowCount++;
@@ -413,8 +441,10 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 case SWITCH:
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     if (position == useSystemEmojiRow) {
-                        if (!partial) textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseSystemEmojis", R.string.UseSystemEmojis), LocaleController.getString("UseSystemEmojisDesc", R.string.UseSystemEmojisDesc), OctoConfig.INSTANCE.useSystemEmoji.getValue(), true, false);
-                        if (partial) textCheckCell.setChecked(OctoConfig.INSTANCE.useSystemEmoji.getValue());
+                        if (!partial)
+                            textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseSystemEmojis", R.string.UseSystemEmojis), LocaleController.getString("UseSystemEmojisDesc", R.string.UseSystemEmojisDesc), OctoConfig.INSTANCE.useSystemEmoji.getValue(), true, false);
+                        if (partial)
+                            textCheckCell.setChecked(OctoConfig.INSTANCE.useSystemEmoji.getValue());
                     }
                     break;
                 case CREATION_TEXT_CELL:

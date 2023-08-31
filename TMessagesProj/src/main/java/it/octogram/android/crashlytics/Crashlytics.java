@@ -9,13 +9,28 @@
 package it.octogram.android.crashlytics;
 
 import android.os.Build;
+
 import androidx.annotation.NonNull;
+
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.SharedConfig;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Field;
+
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
-import org.telegram.messenger.*;
-
-import java.io.*;
-import java.lang.reflect.Field;
 
 public class Crashlytics implements Thread.UncaughtExceptionHandler {
 
@@ -48,17 +63,16 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
     }
 
     private String getSystemInfo() throws IllegalAccessException {
-        StringBuilder builder = new StringBuilder();
-        builder.append(LocaleController.getInstance().formatterStats.format(System.currentTimeMillis())).append("\n\n");
-        builder.append("App Version: ").append(BuildVars.BUILD_VERSION_STRING).append(" (").append(BuildVars.BUILD_VERSION).append(")\n");
-        builder.append("Base Version: ").append(BuildVars.TELEGRAM_VERSION_STRING).append(" (").append(BuildVars.TELEGRAM_BUILD_VERSION).append(")\n");
-        builder.append("Device: ").append(Build.MANUFACTURER).append(" ").append(Build.MODEL).append("\n");
-        builder.append("OS Version: ").append(Build.VERSION.RELEASE).append("\n");
-        builder.append("Google Play Services: ").append(ApplicationLoader.hasPlayServices).append("\n");
-        builder.append("Performance Class: ").append(getPerformanceClassString()).append("\n");
-        builder.append("Locale: ").append(LocaleController.getSystemLocaleStringIso639()).append("\n");
-        builder.append("Octogram Configuration: ").append(getOctoConfiguration()).append("\n");
-        return builder.toString();
+        String builder = LocaleController.getInstance().formatterStats.format(System.currentTimeMillis()) + "\n\n" +
+                "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildVars.BUILD_VERSION + ")\n" +
+                "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
+                "Device: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
+                "OS Version: " + Build.VERSION.RELEASE + "\n" +
+                "Google Play Services: " + ApplicationLoader.hasPlayServices + "\n" +
+                "Performance Class: " + getPerformanceClassString() + "\n" +
+                "Locale: " + LocaleController.getSystemLocaleStringIso639() + "\n" +
+                "Octogram Configuration: " + getOctoConfiguration() + "\n";
+        return builder;
     }
 
     // I don't even know why I did this

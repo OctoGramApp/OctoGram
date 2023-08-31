@@ -3,10 +3,15 @@ package it.octogram.android.http;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.PowerManager;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.NotificationCenter;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
