@@ -115,7 +115,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.zxing.common.detector.MathUtils;
 
-import it.octogram.android.ConfigProperty;
+import it.octogram.android.CustomEmojiController;
+import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -326,7 +327,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.PermissionsUtils;
 
 @SuppressWarnings("unchecked")
 public class ChatActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, LocationActivity.LocationActivityDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate, ChatActivityInterface, FloatingDebugProvider, InstantCameraView.Delegate {
@@ -25723,7 +25723,51 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             builder.setOnPreDismissListener(di -> dimBehindView(false));
                             showDialog(builder.create());
                         }
-                    } else {
+                    } else if (getMessageType(selectedObject) == 208) {
+                        AlertDialog progressDialog = new AlertDialog(getParentActivity(), 3);
+                        File finalLocFile = locFile;
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                boolean success = true;
+                                CustomEmojiController.EmojiPackBase emojiPackBase = null;
+                                try {
+                                    emojiPackBase = CustomEmojiController.installEmoji(finalLocFile, false);
+                                } catch (Exception e) {
+                                    FileLog.e("Emoji Font install failed", e);
+                                    success = false;
+                                }
+                                boolean finalSuccess = success;
+                                CustomEmojiController.EmojiPackBase finalEmojiPackBase = emojiPackBase;
+                                AndroidUtilities.runOnUIThread(() -> {
+                                    progressDialog.dismiss();
+                                    if (finalSuccess && finalEmojiPackBase != null) {
+                                        if (finalEmojiPackBase.getPackId().equals(OctoConfig.INSTANCE.selectedEmojiPack.getValue())) {
+                                            BulletinFactory.of(ChatActivity.this).createErrorBulletin("already applied", themeDelegate).show();
+                                        } else {
+                                            EmojiSetBulletinLayout bulletinLayout = new EmojiSetBulletinLayout(
+                                                    getParentActivity(),
+                                                    "applied!",
+                                                    finalEmojiPackBase.getPackName(),
+                                                    finalEmojiPackBase,
+                                                    themeDelegate
+                                            );
+                                            Bulletin.make(ChatActivity.this, bulletinLayout, Bulletin.DURATION_LONG).show();
+                                            OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, finalEmojiPackBase.getPackId());
+                                            if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.useSystemEmoji);
+                                            Emoji.reloadEmoji();
+                                            NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
+                                        }
+                                    } else {
+                                        BulletinFactory.of(ChatActivity.this).createErrorBulletin("invalid set", themeDelegate).show();
+                                    }
+                                });
+                            }
+                        }.start();
+                        progressDialog.setCanCancel(false);
+                        progressDialog.showDelayed(300);
+
+                    } else  {
                         if (LocaleController.getInstance().applyLanguageFile(locFile, currentAccount)) {
                             presentFragment(new LanguageSelectActivity());
                         } else {

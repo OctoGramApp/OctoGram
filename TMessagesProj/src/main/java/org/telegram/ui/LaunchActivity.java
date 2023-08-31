@@ -90,6 +90,7 @@ import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
 
 import it.octogram.android.crashlytics.Crashlytics;
+import it.octogram.android.CustomEmojiController;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import org.telegram.PhoneFormat.PhoneFormat;
@@ -926,6 +927,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         }
                     });
         }
+        CustomEmojiController.checkEmojiPacks();
         BackupAgent.requestBackup(this);
 
         RestrictedLanguagesSelectActivity.checkRestrictedLanguages(false);
