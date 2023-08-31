@@ -29,16 +29,6 @@ import kotlin.Triple;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
 
-    private final List<Triple<Integer, String, Integer>> actions = List.of(
-            new Triple<>(OctoConfig.DoubleTapAction.DISABLED, LocaleController.getString(R.string.Disable), R.drawable.msg_block),
-            new Triple<>(OctoConfig.DoubleTapAction.REACTION, LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
-            new Triple<>(OctoConfig.DoubleTapAction.COPY, LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
-            new Triple<>(OctoConfig.DoubleTapAction.FORWARD, LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
-            new Triple<>(OctoConfig.DoubleTapAction.REPLY, LocaleController.getString(R.string.Reply), R.drawable.msg_reply),
-            new Triple<>(OctoConfig.DoubleTapAction.DELETE, LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
-            new Triple<>(OctoConfig.DoubleTapAction.SAVE, LocaleController.getString(R.string.Save), R.drawable.msg_saved)
-    );
-
     @Override
     public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("OctoGeneralSettings", R.string.OctoGeneralSettings))
@@ -194,12 +184,29 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .category(LocaleController.getString(R.string.DoubleTapActionsHeader), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapAction)
-                            .optionsIcons(actions)
+                            .optionsIcons(List.of(
+                                    new Triple<>(OctoConfig.DoubleTapAction.DISABLED, LocaleController.getString(R.string.Disable), R.drawable.msg_block),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REACTION, LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
+                                    new Triple<>(OctoConfig.DoubleTapAction.COPY, LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
+                                    new Triple<>(OctoConfig.DoubleTapAction.FORWARD, LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REPLY, LocaleController.getString(R.string.Reply), R.drawable.msg_reply),
+                                    new Triple<>(OctoConfig.DoubleTapAction.DELETE, LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
+                                    new Triple<>(OctoConfig.DoubleTapAction.SAVE, LocaleController.getString(R.string.Save), R.drawable.msg_saved)
+                            ))
                             .title(LocaleController.getString(R.string.PreferredActionIncoming))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapActionOut)
-                            .optionsIcons(actions)
+                            .optionsIcons(List.of(
+                                    new Triple<>(OctoConfig.DoubleTapAction.DISABLED, LocaleController.getString(R.string.Disable), R.drawable.msg_block),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REACTION, LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
+                                    new Triple<>(OctoConfig.DoubleTapAction.COPY, LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
+                                    new Triple<>(OctoConfig.DoubleTapAction.FORWARD, LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
+                                    new Triple<>(OctoConfig.DoubleTapAction.REPLY, LocaleController.getString(R.string.Reply), R.drawable.msg_reply),
+                                    new Triple<>(OctoConfig.DoubleTapAction.DELETE, LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
+                                    new Triple<>(OctoConfig.DoubleTapAction.SAVE, LocaleController.getString(R.string.Save), R.drawable.msg_saved),
+                                    new Triple<>(OctoConfig.DoubleTapAction.EDIT, LocaleController.getString(R.string.Edit), R.drawable.msg_edit)
+                            ))
                             .title(LocaleController.getString(R.string.PreferredActionOutgoing))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()

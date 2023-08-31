@@ -229,6 +229,7 @@ public class OctoConfig {
         public static final int REPLY = 4;
         public static final int DELETE = 5;
         public static final int SAVE = 6;
+        public static final int EDIT = 7;
     }
 
     public static class EventType {

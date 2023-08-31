@@ -1534,7 +1534,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 return !cell.getMessageObject().isSending() && !cell.getMessageObject().isEditing() && cell.getMessageObject().type != MessageObject.TYPE_PHONE_CALL && !actionBar.isActionModeShowed() && !isSecretChat() && !isInScheduleMode() && !cell.getMessageObject().isSponsored();
             } else {
                 MessageObject message = cell.getMessageObject();
-                MessageObject.GroupedMessages messageGroup = getValidGroupedMessage(message);
+                MessageObject.GroupedMessages groupedMessages = getValidGroupedMessage(message);
 
                 boolean noForwards = getMessagesController().isChatNoForwards(currentChat) || hasSelectedNoforwardsMessage();
                 boolean allowChatActions = !message.isExpiredStory() || chatMode != MODE_SCHEDULED && (threadMessageObjects == null || !threadMessageObjects.contains(message)) &&
@@ -1549,7 +1549,20 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 boolean allowSave = allowForward && !UserObject.isUserSelf(currentUser);
                 boolean allowCopy = (message.type == MessageObject.TYPE_TEXT || message.isAnimatedEmoji() || message.isAnimatedEmojiStickers() || getMessageCaption(message, messageGroup) != null) && !noForwards;
                 boolean allowDelete = message.canDeleteMessage(chatMode == MODE_SCHEDULED, currentChat) && (threadMessageObjects == null || !threadMessageObjects.contains(message)) && !(message.messageOwner != null && message.messageOwner.action instanceof TLRPC.TL_messageActionTopicCreate);
-
+                boolean allowEdit = message.canEditMessage(currentChat) && !chatActivityEnterView.hasAudioToSend() && message.getDialogId() != mergeDialogId && message.type != MessageObject.TYPE_STORY;
+                if (allowEdit && groupedMessages != null) {
+                    int captionsCount = 0;
+                    for (int a = 0, N = groupedMessages.messages.size(); a < N; a++) {
+                        MessageObject messageObject = groupedMessages.messages.get(a);
+                        if (a == 0 || !TextUtils.isEmpty(messageObject.caption)) {
+                            selectedObjectToEditCaption = messageObject;
+                            if (!TextUtils.isEmpty(messageObject.caption)) {
+                                captionsCount++;
+                            }
+                        }
+                    }
+                    allowEdit = captionsCount < 2;
+                }
                 switch (doubleTapAction) {
                     case OctoConfig.DoubleTapAction.REPLY:
                         return message.getId() > 0 && allowChatActions;
@@ -1561,6 +1574,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         return allowCopy;
                     case OctoConfig.DoubleTapAction.SAVE:
                         return allowSave;
+                    case OctoConfig.DoubleTapAction.EDIT:
+                        return allowEdit;
                     case OctoConfig.DoubleTapAction.DISABLED:
                     default:
                         return false;
@@ -1633,6 +1648,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                     case OctoConfig.DoubleTapAction.SAVE: {
                         processSelectedOption(OPTION_SAVE_TO_SAVED_MESSAGES);
+                        break;
+                    }
+                    case OctoConfig.DoubleTapAction.EDIT: {
+                        processSelectedOption(OPTION_EDIT);
                         break;
                     }
                 }
