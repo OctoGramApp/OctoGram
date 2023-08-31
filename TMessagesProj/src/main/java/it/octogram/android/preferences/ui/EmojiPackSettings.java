@@ -450,8 +450,8 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 case CREATION_TEXT_CELL:
                     CreationTextCell creationTextCell = (CreationTextCell) holder.itemView;
                     if (position == customEmojiAddRow) {
-                        Drawable drawable1 = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_circle);
-                        Drawable drawable2 = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_plus);
+                        Drawable drawable1 = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_circle, context.getTheme());
+                        Drawable drawable2 = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_plus, context.getTheme());
                         drawable1.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked), PorterDuff.Mode.MULTIPLY));
                         drawable2.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_checkboxCheck), PorterDuff.Mode.MULTIPLY));
                         CombinedDrawable combinedDrawable = new CombinedDrawable(drawable1, drawable2);
@@ -625,7 +625,6 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         @NonNull
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view;
-            boolean canSetBackground = true;
             switch (viewType) {
                 case SHADOW:
                     view = new ShadowSectionCell(context);
