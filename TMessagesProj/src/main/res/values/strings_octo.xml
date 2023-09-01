@@ -207,6 +207,10 @@
     <string name="MaxRecentStickers">Max Recent Stickers</string>
     <string name="MaxStickerSizeDefault">20 (Default)</string>
 
+    <!-- Privacy Policy -->
+    <string name="PrivacyPolicyLogin">By continuing,\nyou agree to the *Privacy Policy*.</string>
+    <string name="OctoPrivacyPolicy">OctoGram Privacy Policy</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
@@ -503,8 +507,6 @@
     <string name="ThemeMonetLight">Monet Light</string>
     <string name="ThemeMonetDark">Monet Dark</string>
     <string name="Patpat">Patpat</string>
-    <string name="PrivacyPolicyLogin">By continuing,\nyou agree to the *Privacy Policy*.</string>
-    <string name="OctoPrivacyPolicy">OctoGram Privacy Policy</string>
     <string name="HideSendAsChannel">Hide "Send as Channel"</string>
     <string name="EmojiSets">Emoji Sets</string>
     <string name="MyEmojiSets">My Emoji Sets</string>

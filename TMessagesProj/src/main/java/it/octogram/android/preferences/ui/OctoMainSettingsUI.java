@@ -71,6 +71,14 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .description(LocaleController.formatString("DatacenterStatus_Desc", R.string.DatacenterStatus_Desc))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
+                            .onClick(() -> {
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://octogram.site/privacy"));
+                                fragment.getParentActivity().startActivity(browserIntent);
+                            })
+                            .icon(R.drawable.msg2_policy)
+                            .title(LocaleController.formatString("OctoPrivacyPolicy", R.string.OctoPrivacyPolicy))
+                            .build());
+                    category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
                             .icon(R.drawable.msg_channel)
                             .title(LocaleController.formatString("OfficialChannel", R.string.OfficialChannel))

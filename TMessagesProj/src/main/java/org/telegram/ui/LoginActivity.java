@@ -2311,6 +2311,29 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 addView(bottomSpacer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
             }
 
+            if (UserConfig.getActivatedAccountsCount() == 0) {
+                FrameLayout privacyLayout = new FrameLayout(context);
+                addView(privacyLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.BOTTOM));
+                TextView privacyView = new TextView(context);
+                privacyView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
+                privacyView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, AndroidUtilities.isSmallScreen() ? 13 : 14);
+                privacyView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
+                privacyView.setGravity(Gravity.CENTER_VERTICAL);
+                privacyView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText6));
+                privacyView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
+                String str = LocaleController.getString("PrivacyPolicyLogin", R.string.PrivacyPolicyLogin);
+                SpannableStringBuilder text = new SpannableStringBuilder(str);
+                int index1 = str.indexOf('*');
+                int index2 = str.lastIndexOf('*');
+                if (index1 != -1 && index2 != -1 && index1 != index2) {
+                    text.replace(index2, index2 + 1, "");
+                    text.replace(index1, index1 + 1, "");
+                    text.setSpan(new URLSpanNoUnderline("https://octogram.site/privacy"), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                privacyView.setText(text);
+                privacyLayout.addView(privacyView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 56, Gravity.LEFT | Gravity.BOTTOM, 14, 0, 70, 32));
+            }
+
             HashMap<String, String> languageMap = new HashMap<>();
 
             try {
