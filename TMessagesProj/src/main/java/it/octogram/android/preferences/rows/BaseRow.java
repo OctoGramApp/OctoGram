@@ -3,6 +3,7 @@ package it.octogram.android.preferences.rows;
 import androidx.annotation.Nullable;
 
 import it.octogram.android.ConfigProperty;
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 
 public abstract class BaseRow {
@@ -22,19 +23,19 @@ public abstract class BaseRow {
 
 
     public BaseRow(PreferenceType type) {
-        this(null, null, false, null, true, type);
+        this(null, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
     }
 
     public BaseRow(@Nullable String title, PreferenceType type) {
-        this(title, null, false, null, true, type);
+        this(title, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, PreferenceType type) {
-        this(title, summary, false, null, true, type);
+        this(title, summary, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, PreferenceType type) {
-        this(title, summary, requiresRestart, showIf, true, type);
+        this(title, summary, requiresRestart, showIf, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type) {
