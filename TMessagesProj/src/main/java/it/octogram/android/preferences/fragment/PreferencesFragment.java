@@ -12,6 +12,7 @@ import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -238,6 +239,7 @@ public class PreferencesFragment extends BaseFragment {
 
             switch (type) {
                 case CUSTOM:
+                case TEXT_ICON:
                     view = new FrameLayout(context);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
@@ -255,10 +257,6 @@ public class PreferencesFragment extends BaseFragment {
                     break;
                 case TEXT_DETAIL:
                     view = new TextDetailSettingsCell(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case TEXT_ICON:
-                    view = new TextCell(context);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case SLIDER:
@@ -351,8 +349,17 @@ public class PreferencesFragment extends BaseFragment {
                     textDetailRow.bindCell(settingsCell);
                     break;
                 case TEXT_ICON:
-                    TextCell textCell = (TextCell) holder.itemView;
-                    ((TextIconRow) positions.get(position)).bindCell(textCell);
+                    FrameLayout l = ((FrameLayout) holder.itemView);
+                    // remove the current view if it exists
+                    if (l.getChildCount() > 0) {
+                        l.removeAllViews();
+                    }
+                    // add custom view
+                    TextIconRow textIconRow = (TextIconRow) positions.get(position);
+                    TextCell v = new TextCell(context, 23, false, textIconRow.getPreference() != null, getResourceProvider());
+                    l.addView(v);
+
+                    textIconRow.bindCell(v);
                     break;
                 case SLIDER:
                     ((SliderCell) holder.itemView).setSliderRow((SliderRow) positions.get(position));
