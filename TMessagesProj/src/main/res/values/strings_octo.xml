@@ -164,7 +164,6 @@
     <string name="AppIconYuki">Yuki Icon</string>
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
     <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
-
     <string name="OctoExperimentsSettingsHeader">Try out new and shiny features</string>
     <string name="OctoExperimentsDialogMessage">These features are experimental and may not work as expected. You may experience crashes and other issues. Please report any issues you encounter to the developers</string>
     <string name="OctoExperimentsDialogButton">Enable experimental settings</string>
@@ -178,13 +177,21 @@
     <string name="Extreme">Extreme</string>
     <string name="TabletMode">Force Tablet Mode</string>
     <string name="RestartAppToApplyChanges">Restart app to apply changes.</string>
+    <string name="FoldersType">Folders Type</string>
+    <string name="FoldersTypeTitles">Titles</string>
+    <string name="FoldersTypeIcons">Icons</string>
+    <string name="FoldersTypeIconsTitles">Icons with Titles</string>
+    <string name="ChooseFolderIcon">Choose an Icon</string>
+    <string name="ForceTableMode">Force Tablet Mode</string>
+
     <!-- RESOLUTION STRING SECTION -->
 
     <string name="PhotoResolution">Photo Resolution</string>
     <string name="ResolutionLow">Low (800x)</string>
     <string name="ResolutionMedium">Default (1280x)</string>
     <string name="ResolutionHigh">High (2560x)</string>
-    <string name="ForceTableMode">Force Tablet Mode</string>
+
+    <!-- -->
 
     <string name="CopyTitle">Copy Title</string>
     <string name="CopyCallback">Copy Callback</string>
@@ -199,6 +206,7 @@
     <string name="AudioTypeMono">Mono (Default)</string>
     <string name="MaxRecentStickers">Max Recent Stickers</string>
     <string name="MaxStickerSizeDefault">20 (Default)</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
@@ -446,10 +454,6 @@
     <string name="AutoLockInstant">Instant</string>
     <string name="MKVAsVideo">Show MKV as Video</string>
     <string name="StreamAllVideos">Stream All Videos</string>
-    <string name="FoldersType">Folders Type</string>
-    <string name="FoldersTypeTitles">Titles</string>
-    <string name="FoldersTypeIcons">Icons</string>
-    <string name="FoldersTypeIconsTitles">Icons with Titles</string>
     <string name="ChooseFolderIcon">Choose an Icon</string>
     <string name="MutualContact">Mutual Contact</string>
     <string name="MutualContactDesc">**%s** and you have added each other in the contacts list.</string>

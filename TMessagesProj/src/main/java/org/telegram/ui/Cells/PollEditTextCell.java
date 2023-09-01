@@ -53,10 +53,14 @@ public class PollEditTextCell extends FrameLayout {
     private boolean alwaysShowText2;
 
     public PollEditTextCell(Context context, OnClickListener onDelete) {
-        this(context, false, onDelete);
+        this(context, false, onDelete, null);
     }
 
     public PollEditTextCell(Context context, boolean caption, OnClickListener onDelete) {
+        this(context, caption, onDelete, null);
+    }
+
+    public PollEditTextCell(Context context, boolean caption, OnClickListener onDelete, OnClickListener onChangeIcon) {
         super(context);
 
         if (caption) {
@@ -134,7 +138,7 @@ public class PollEditTextCell extends FrameLayout {
         textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         textView.setHintTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteHintText));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-//        textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
+        textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
         textView.setBackgroundDrawable(null);
         textView.setImeOptions(textView.getImeOptions() | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
         textView.setInputType(textView.getInputType() | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES);
@@ -179,9 +183,23 @@ public class PollEditTextCell extends FrameLayout {
                 }
                 onCheckBoxClick(PollEditTextCell.this, !checkBox.isChecked());
             });
+        } else if (onChangeIcon != null) {
+            addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 19 : 66, 0, !LocaleController.isRTL ? 19 : 66, 0));
+            moveImageView = new ImageView(context);
+            moveImageView.setFocusable(true);
+            moveImageView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_stickers_menuSelector)));
+            moveImageView.setScaleType(ImageView.ScaleType.CENTER);
+            moveImageView.setOnClickListener(onChangeIcon);
+            moveImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
+            moveImageView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            addView(moveImageView, LayoutHelper.createFrame(48, 48, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 8, 2, 8, 0));
         } else {
             addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, 19, 0, 19, 0));
         }
+    }
+
+    public void setIcon(int icon) {
+        moveImageView.setImageResource(icon);
     }
 
     public void createErrorTextView() {

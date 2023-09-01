@@ -997,6 +997,8 @@ public class MessagesController extends BaseController implements NotificationCe
 
         public ArrayList<TLRPC.TL_exportedChatlistInvite> invites = null;
 
+        public String emoticon;
+
         private static int dialogFilterPointer = 10;
         public int localId = dialogFilterPointer++;
         public boolean locked;

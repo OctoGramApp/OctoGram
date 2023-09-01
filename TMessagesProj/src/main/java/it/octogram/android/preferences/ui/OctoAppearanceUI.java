@@ -9,12 +9,15 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
+import android.util.Pair;
 
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+
+import java.util.ArrayList;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
@@ -23,6 +26,7 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.CheckboxRow;
 import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
@@ -144,6 +148,20 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .description(LocaleController.getString("ForcePacmanAnimation_Desc", R.string.ForcePacmanAnimation_Desc))
                             .build());
                 })
+                .category(LocaleController.getString(R.string.FoldersType), category -> category.row(new ListRow.ListRowBuilder()
+                        .options(new ArrayList<>() {{
+                            add(new Pair<>(0, LocaleController.getString(R.string.FoldersTypeIcons)));
+                            add(new Pair<>(1, LocaleController.getString(R.string.FoldersTypeIconsTitles)));
+                            add(new Pair<>(2, LocaleController.getString(R.string.FoldersTypeTitles)));
+                        }})
+                        .currentValue(OctoConfig.INSTANCE.tabMode)
+                        .title(LocaleController.getString(R.string.FoldersType)
+                        .build()))
+                .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> category.row(new SwitchRow.SwitchRowBuilder()
+                        .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)
+                        .title(LocaleController.getString("ForcePacmanAnimation", R.string.ForcePacmanAnimation))
+                        .description(LocaleController.getString("ForcePacmanAnimation_Desc", R.string.ForcePacmanAnimation_Desc))
+                        .build()))
                 .category(LocaleController.getString("DrawerElementsHeader", R.string.DrawerElementsHeader), category -> {
                     category.row(new CheckboxRow.CheckboxRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.changeStatus)
