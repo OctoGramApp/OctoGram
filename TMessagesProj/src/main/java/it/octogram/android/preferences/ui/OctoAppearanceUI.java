@@ -155,7 +155,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             add(new Pair<>(2, LocaleController.getString(R.string.FoldersTypeTitles)));
                         }})
                         .currentValue(OctoConfig.INSTANCE.tabMode)
-                        .title(LocaleController.getString(R.string.FoldersType)
+                        .title(LocaleController.getString(R.string.FoldersType))
                         .build()))
                 .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)
