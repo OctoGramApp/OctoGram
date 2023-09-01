@@ -70,7 +70,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("DatacenterStatus", R.string.DatacenterStatus))
                             .description(LocaleController.formatString("DatacenterStatus_Desc", R.string.DatacenterStatus_Desc))
                             .build());
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                    category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://octogram.site/privacy"));
                                 fragment.getParentActivity().startActivity(browserIntent);
