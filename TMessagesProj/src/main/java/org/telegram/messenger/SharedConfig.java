@@ -1582,11 +1582,11 @@ public class SharedConfig {
     }
 
     public static boolean canBlurChat() {
-        return getDevicePerformanceClass() == PERFORMANCE_CLASS_HIGH || OctoConfig.INSTANCE.forceChatBlurEffect.getValue();
+        return getDevicePerformanceClass() == PERFORMANCE_CLASS_HIGH;
     }
 
     public static boolean chatBlurEnabled() {
-        return canBlurChat() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BLUR);
+        return (canBlurChat() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BLUR)) || OctoConfig.INSTANCE.forceChatBlurEffect.getValue();
     }
 
     public static class BackgroundActivityPrefs {
