@@ -180,7 +180,7 @@
     <string name="FoldersType">Folders Type</string>
     <string name="FoldersTypeTitles">Titles</string>
     <string name="FoldersTypeIcons">Icons</string>
-    <string name="FoldersTypeIconsTitles">Mixed</string>
+    <string name="FoldersTypeIconsTitles">Icons with Titles</string>
     <string name="ChooseFolderIcon">Choose an Icon</string>
     <string name="ForceTableMode">Force Tablet Mode</string>
 
@@ -454,10 +454,6 @@
     <string name="AutoLockInstant">Instant</string>
     <string name="MKVAsVideo">Show MKV as Video</string>
     <string name="StreamAllVideos">Stream All Videos</string>
-    <string name="FoldersType">Folders Type</string>
-    <string name="FoldersTypeTitles">Titles</string>
-    <string name="FoldersTypeIcons">Icons</string>
-    <string name="FoldersTypeIconsTitles">Icons with Titles</string>
     <string name="ChooseFolderIcon">Choose an Icon</string>
     <string name="MutualContact">Mutual Contact</string>
     <string name="MutualContactDesc">**%s** and you have added each other in the contacts list.</string>
