@@ -84,19 +84,19 @@ public class OctoConfig {
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED);
     /*Drawer elements*/
-    public final ConfigProperty<Boolean> changeStatus = newConfigProperty("drawer_changeStatus", true);
-    public final ConfigProperty<Boolean> myStories = newConfigProperty("drawer_myStories", true);
-    public final ConfigProperty<Boolean> newGroup = newConfigProperty("drawer_newGroup", true);
-    public final ConfigProperty<Boolean> newChannel = newConfigProperty("drawer_newChannel", false);
-    public final ConfigProperty<Boolean> contacts = newConfigProperty("drawer_contacts", true);
-    public final ConfigProperty<Boolean> calls = newConfigProperty("drawer_calls", true);
-    public final ConfigProperty<Boolean> peopleNearby = newConfigProperty("drawer_peopleNearby", true);
-    public final ConfigProperty<Boolean> savedMessages = newConfigProperty("drawer_savedMessages", true);
-    public final ConfigProperty<Boolean> settings = newConfigProperty("drawer_settings", true);
-    public final ConfigProperty<Boolean> octogramSettings = newConfigProperty("drawer_octogramSettings", false);
-    public final ConfigProperty<Boolean> datacenterInfo = newConfigProperty("drawer_datacenterInfo", true);
-    public final ConfigProperty<Boolean> inviteFriends = newConfigProperty("drawer_inviteFriends", true);
-    public final ConfigProperty<Boolean> telegramFeatures = newConfigProperty("drawer_telegramFeatures", true);
+    public final ConfigProperty<Boolean> drawerChangeStatus = newConfigProperty("drawer_changeStatus", true);
+    public final ConfigProperty<Boolean> drawerMyStories = newConfigProperty("drawer_myStories", true);
+    public final ConfigProperty<Boolean> drawerNewGroup = newConfigProperty("drawer_newGroup", true);
+    public final ConfigProperty<Boolean> drawerNewChannel = newConfigProperty("drawer_newChannel", false);
+    public final ConfigProperty<Boolean> drawerContacts = newConfigProperty("drawer_contacts", true);
+    public final ConfigProperty<Boolean> drawerCalls = newConfigProperty("drawer_calls", true);
+    public final ConfigProperty<Boolean> drawerPeopleNearby = newConfigProperty("drawer_peopleNearby", true);
+    public final ConfigProperty<Boolean> drawerSavedMessages = newConfigProperty("drawer_savedMessages", true);
+    public final ConfigProperty<Boolean> drawerSettings = newConfigProperty("drawer_settings", true);
+    public final ConfigProperty<Boolean> drawerOctogramSettings = newConfigProperty("drawer_octogramSettings", false);
+    public final ConfigProperty<Boolean> drawerDatacenterInfo = newConfigProperty("drawer_datacenterInfo", true);
+    public final ConfigProperty<Boolean> drawerInviteFriends = newConfigProperty("drawer_inviteFriends", true);
+    public final ConfigProperty<Boolean> drawerTelegramFeatures = newConfigProperty("drawer_telegramFeatures", true);
     /*Unlock Secret Icons*/
     public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);
     public final ConfigProperty<Boolean> unlockedChupa = newConfigProperty("unlockedChupa", false);

@@ -9,15 +9,12 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.util.Pair;
 
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
-
-import java.util.ArrayList;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
@@ -26,7 +23,6 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.impl.CheckboxRow;
 import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
-import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
@@ -155,67 +151,67 @@ public class OctoAppearanceUI implements PreferencesEntry {
                         .build()))
                 .category(LocaleController.getString("DrawerElementsHeader", R.string.DrawerElementsHeader), category -> {
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.changeStatus)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerChangeStatus)
                             .title(LocaleController.getString(R.string.SetEmojiStatus))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.myStories)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerMyStories)
                             .title(LocaleController.getString(R.string.ProfileMyStories))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.newGroup)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerNewGroup)
                             .title(LocaleController.getString(R.string.NewGroup))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.newChannel)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerNewChannel)
                             .title(LocaleController.getString(R.string.NewChannel))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.contacts)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerContacts)
                             .title(LocaleController.getString(R.string.Contacts))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.calls)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerCalls)
                             .title(LocaleController.getString(R.string.Calls))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.peopleNearby)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerPeopleNearby)
                             .title(LocaleController.getString(R.string.PeopleNearby))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.savedMessages)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerSavedMessages)
                             .title(LocaleController.getString(R.string.SavedMessages))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.settings)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerSettings)
                             .title(LocaleController.getString(R.string.Settings))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.octogramSettings)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerOctogramSettings)
                             .title("OctoGram Settings")
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.datacenterInfo)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerDatacenterInfo)
                             .title(LocaleController.getString(R.string.DatacenterStatus))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.inviteFriends)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerInviteFriends)
                             .title(LocaleController.getString(R.string.InviteFriends))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.telegramFeatures)
+                            .preferenceValue(OctoConfig.INSTANCE.drawerTelegramFeatures)
                             .title(LocaleController.getString(R.string.TelegramFeatures))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());

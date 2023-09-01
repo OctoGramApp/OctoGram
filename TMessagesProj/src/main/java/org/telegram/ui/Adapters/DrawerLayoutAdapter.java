@@ -8,7 +8,6 @@
 
 package org.telegram.ui.Adapters;
 
-import android.accounts.Account;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.view.View;
@@ -18,9 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import it.octogram.android.Datacenter;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.UserAccountInfoController;
 import org.telegram.messenger.*;
-import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.DividerCell;
@@ -315,15 +312,15 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
         if (me != null && me.isPremium()) {
             if (me.getEmojiStatus() != null) {
-                if (OctoConfig.INSTANCE.changeStatus.getValue())
+                if (OctoConfig.INSTANCE.drawerChangeStatus.getValue())
                     items.add(new Item(15, LocaleController.getString("ChangeEmojiStatus", R.string.ChangeEmojiStatus), R.drawable.msg_status_edit));
             } else {
-                if (OctoConfig.INSTANCE.changeStatus.getValue())
+                if (OctoConfig.INSTANCE.drawerChangeStatus.getValue())
                     items.add(new Item(15, LocaleController.getString("SetEmojiStatus", R.string.SetEmojiStatus), R.drawable.msg_status_set));
             }
         }
         if (MessagesController.getInstance(UserConfig.selectedAccount).storiesEnabled()) {
-            if (OctoConfig.INSTANCE.myStories.getValue()) {
+            if (OctoConfig.INSTANCE.drawerMyStories.getValue()) {
                 items.add(new Item(16, LocaleController.getString("ProfileMyStories", R.string.ProfileMyStories), R.drawable.msg_menu_stories));
                 items.add(null); // divider
             }
@@ -333,41 +330,41 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
 
         //items.add(new Item(3, LocaleController.getString("NewSecretChat", R.string.NewSecretChat), newSecretIcon));
 
-        if (OctoConfig.INSTANCE.newGroup.getValue()) {
+        if (OctoConfig.INSTANCE.drawerNewGroup.getValue()) {
             items.add(new Item(2, LocaleController.getString("NewGroup", R.string.NewGroup), newGroupIcon));
         }
-        if (OctoConfig.INSTANCE.newChannel.getValue()) {
+        if (OctoConfig.INSTANCE.drawerNewChannel.getValue()) {
             items.add(new Item(4, LocaleController.getString("NewChannel", R.string.NewChannel), newChannelIcon));
         }
-        if (OctoConfig.INSTANCE.contacts.getValue()) {
+        if (OctoConfig.INSTANCE.drawerContacts.getValue()) {
             items.add(new Item(6, LocaleController.getString("Contacts", R.string.Contacts), contactsIcon));
         }
-        if (OctoConfig.INSTANCE.calls.getValue()) {
+        if (OctoConfig.INSTANCE.drawerCalls.getValue()) {
             items.add(new Item(10, LocaleController.getString("Calls", R.string.Calls), callsIcon));
         }
-        if (OctoConfig.INSTANCE.peopleNearby.getValue()) {
+        if (OctoConfig.INSTANCE.drawerPeopleNearby.getValue()) {
             if (hasGps) {
                 items.add(new Item(12, LocaleController.getString("PeopleNearby", R.string.PeopleNearby), peopleNearbyIcon));
             }
         }
-        if (OctoConfig.INSTANCE.savedMessages.getValue()) {
+        if (OctoConfig.INSTANCE.drawerSavedMessages.getValue()) {
             items.add(new Item(11, LocaleController.getString("SavedMessages", R.string.SavedMessages), savedIcon));
         }
-        if (OctoConfig.INSTANCE.settings.getValue()) {
+        if (OctoConfig.INSTANCE.drawerSettings.getValue()) {
             items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon));
         }
-        if (OctoConfig.INSTANCE.octogramSettings.getValue()) {
+        if (OctoConfig.INSTANCE.drawerOctogramSettings.getValue()) {
             items.add(new Item(100, "Octogram Settings", octogramIcon));
         }
-        if (OctoConfig.INSTANCE.datacenterInfo.getValue()) {
+        if (OctoConfig.INSTANCE.drawerDatacenterInfo.getValue()) {
             items.add(new Item(101, LocaleController.getString("DatacenterStatus", R.string.DatacenterStatus), datacenterIcon));
         }
         items.add(null); // divider
 
-        if (OctoConfig.INSTANCE.inviteFriends.getValue()) {
+        if (OctoConfig.INSTANCE.drawerInviteFriends.getValue()) {
             items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));
         }
-        if (OctoConfig.INSTANCE.telegramFeatures.getValue()) {
+        if (OctoConfig.INSTANCE.drawerTelegramFeatures.getValue()) {
             items.add(new Item(13, LocaleController.getString("TelegramFeatures", R.string.TelegramFeatures), helpIcon));
         }
     }
