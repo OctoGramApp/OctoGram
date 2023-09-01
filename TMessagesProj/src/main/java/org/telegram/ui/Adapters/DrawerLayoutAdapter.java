@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.Datacenter;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.UserAccountInfoController;
 import org.telegram.messenger.*;
@@ -265,7 +266,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         int helpIcon;
         int peopleNearbyIcon;
         int octogramIcon = R.drawable.intro_octo;
-        int datacenterIcon = UserAccountInfoController.DcInfo.getDcIcon(AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId());
+        int datacenterIcon = Datacenter.getDcIcon(AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId());
         if (eventType == 0) {
             newGroupIcon = R.drawable.msg_groups_ny;
             //newSecretIcon = R.drawable.msg_secret_ny;

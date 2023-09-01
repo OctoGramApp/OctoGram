@@ -91,7 +91,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> savedMessages = new ConfigProperty<>("drawer_savedMessages", true);
     public final ConfigProperty<Boolean> settings = new ConfigProperty<>("drawer_settings", true);
     public final ConfigProperty<Boolean> octogramSettings = new ConfigProperty<>("drawer_octogramSettings", false);
-    public final ConfigProperty<Boolean> datacenterInfo = new ConfigProperty<>("drawer_datacenterInfo", false);
+    public final ConfigProperty<Boolean> datacenterInfo = new ConfigProperty<>("drawer_datacenterInfo", true);
     public final ConfigProperty<Boolean> inviteFriends = new ConfigProperty<>("drawer_inviteFriends", true);
     public final ConfigProperty<Boolean> telegramFeatures = new ConfigProperty<>("drawer_telegramFeatures", true);
 

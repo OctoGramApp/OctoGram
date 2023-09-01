@@ -8,10 +8,9 @@
 
 package it.octogram.android.utils;
 
+import it.octogram.android.Datacenter;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.ChatObject;
-import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
@@ -43,7 +42,7 @@ public class UserAccountInfoController {
             id = getNiceId(chat, chat.id);
         }
         dc = dc != 0 ? dc : -1;
-        DcInfo dcInfo = DcInfo.getDcInfo(dc);
+        Datacenter dcInfo = Datacenter.getDcInfo(dc);
         return new UserAccountInfo(id, dcInfo);
     }
 
@@ -64,48 +63,11 @@ public class UserAccountInfoController {
 
     public static class UserAccountInfo {
         public final long userId;
-        public final DcInfo dcInfo;
+        public final Datacenter dcInfo;
 
-        UserAccountInfo(long userId, DcInfo dcInfo) {
+        UserAccountInfo(long userId, Datacenter dcInfo) {
             this.userId = userId;
             this.dcInfo = dcInfo;
-        }
-    }
-
-    public enum DcInfo {
-        USA_1(1, "MIA, Miami FL, USA", R.drawable.ic_pluto_datacenter),
-        USA_2(3, "MIA, Miami FL, USA", R.drawable.ic_aurora_datacenter),
-        AMSTERDAM_1(2, "AMS, Amsterdam, NL", R.drawable.ic_venus_datacenter),
-        AMSTERDAM_2(4, "AMS, Amsterdam, NL", R.drawable.ic_vesta_datacenter),
-        SINGAPORE(5, "SIN, Singapore, SG", R.drawable.ic_flora_datacenter),
-        UNKNOWN(-1, LocaleController.getString("NumberUnknown", R.string.NumberUnknown), R.drawable.msg_secret_hw);
-
-        public final int dcId;
-        public final String dcName;
-        public final int icon;
-
-        DcInfo(int dcId, String dcName, int icon) {
-            this.dcId = dcId;
-            this.dcName = dcName;
-            this.icon = icon;
-        }
-
-        public static DcInfo getDcInfo(int dcId) {
-            for (DcInfo dcInfo : values()) {
-                if (dcInfo.dcId == dcId) {
-                    return dcInfo;
-                }
-            }
-            return UNKNOWN;
-        }
-
-        public static int getDcIcon(int dcId) {
-            for (DcInfo dcInfo : values()) {
-                if (dcInfo.dcId == dcId) {
-                    return dcInfo.icon;
-                }
-            }
-            return UNKNOWN.icon;
         }
     }
 

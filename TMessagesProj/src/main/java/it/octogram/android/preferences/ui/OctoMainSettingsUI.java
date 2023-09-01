@@ -69,6 +69,12 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                 })
                 .category(LocaleController.formatString("OctoMainSettingsInfoCategory", R.string.OctoMainSettingsInfoCategory), category -> {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
+                            .icon(R.drawable.msg2_data)
+                            .title(LocaleController.formatString("DatacenterStatus", R.string.DatacenterStatus))
+                            .description(LocaleController.formatString("DatacenterStatus_Desc", R.string.DatacenterStatus_Desc))
+                            .build());
+                    category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
                             .icon(R.drawable.msg_channel)
                             .title(LocaleController.formatString("OfficialChannel", R.string.OfficialChannel))

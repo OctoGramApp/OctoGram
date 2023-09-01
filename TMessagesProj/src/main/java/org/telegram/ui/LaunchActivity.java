@@ -91,6 +91,7 @@ import com.google.firebase.appindexing.builders.AssistActionBuilder;
 
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.DatacenterActivity;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -625,7 +626,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     presentFragment(new PreferencesFragment(new OctoMainSettingsUI()));
                     drawerLayoutContainer.closeDrawer(false);
                 } else if (id == 101) {
-                    // todo add dc stuff
+                    presentFragment(new DatacenterActivity());
+                    drawerLayoutContainer.closeDrawer(false);
                 }
             }
         });

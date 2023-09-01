@@ -38,6 +38,7 @@
     <string name="TranslateOcto">Translate OctoGram</string>
     <string name="TranslateOcto_Desc">Help us translating OctoGram in your language</string>
     <string name="SourceCode">View Source Code</string>
+    <string name="DatacenterStatus_Desc">View datacenter info</string>
 
     <string name="OctoGeneralSettings">General Settings</string>
     <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app, as well as privacy</string>
