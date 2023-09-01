@@ -153,7 +153,9 @@ public class DatacenterStatus extends LinearLayout {
                 statusText = LocaleController.getString("SpeedSlow", R.string.SpeedSlow);
                 colorKey = Theme.key_statisticChartLine_orange;
             }
-            statusText += ", " + LocaleController.formatString("Ping", R.string.Ping, ping);
+            if (status != 0) {
+                statusText += ", " + LocaleController.formatString("Ping", R.string.Ping, ping);
+            }
             statusTextView.setText(statusText);
             statusTextView.setTextColor(Theme.getColor(colorKey));
         }
