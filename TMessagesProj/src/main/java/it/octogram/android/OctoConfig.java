@@ -78,6 +78,8 @@ public class OctoConfig {
     public final ConfigProperty<Integer> eventType = new ConfigProperty<>("eventType", EventType.NONE);
     public final ConfigProperty<Integer> maxStickerSize = new ConfigProperty<>("maxStickerSize", 14);
     public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
+    public final ConfigProperty<Boolean> useSystemEmoji = new ConfigProperty<>("useSystemEmoji", false);
+    public final ConfigProperty<String> selectedEmojiPack = new ConfigProperty<>("selectedEmojiPack", "default");
     public final ConfigProperty<Boolean> showSnowflakes = new ConfigProperty<>("showSnowflakes", false);
     public final ConfigProperty<Boolean> disableDividers = new ConfigProperty<>("disableDividers", false);
     /*Drawer elements*/
@@ -123,7 +125,7 @@ public class OctoConfig {
             hideCustomEmojis, activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera,
             disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideStories, doubleTapAction, hideFoldersWhenForwarding, accentColorAsNotificationColor,
             openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, forcePacmanAnimation, formatTimeWithSeconds,
-            numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont, showSnowflakes,
+            numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont, useSystemEmoji, selectedEmojiPack, showSnowflakes,
             disableDividers, changeStatus, myStories, newGroup, newChannel, contacts, calls, peopleNearby, savedMessages, settings,
             octogramSettings, datacenterInfo, inviteFriends, telegramFeatures,
             cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,

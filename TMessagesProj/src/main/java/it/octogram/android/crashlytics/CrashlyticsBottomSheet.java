@@ -17,9 +17,10 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
-import it.octogram.android.OctoConfig;
+
 import org.telegram.messenger.*;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;

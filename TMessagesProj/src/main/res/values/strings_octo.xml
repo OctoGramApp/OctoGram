@@ -21,6 +21,31 @@
     <string name="FormatterDay12HSec">h:mm:ss a</string>
     <string name="DatacenterStatus">Datacenter Status</string>
 
+    <!--Emoji Sets-->
+    <string name="MyEmojiSets">My Emoji Sets</string>
+    <string name="InstalledEmojiSet">Installed</string>
+    <string name="InstallingEmojiSet">Installing…</string>
+    <string name="UpdateEmojiSet">Update</string>
+    <string name="EmojiSetHint">This affects emoji appearance only for you. Others see them based on their preferences.</string>
+    <string name="CustomEmojiSet">Custom Emoji Set</string>
+    <string name="CustomEmojiSetHint">Import and choose emoji sets from your internal storage.</string>
+    <string name="AddEmojiSet">Add Emoji Set</string>
+    <string name="EmojiSetRemoved">Emoji set removed</string>
+    <string name="EmojiSetRemovedInfo">%1$s is no longer in your emoji sets.</string>
+    <string name="DeleteEmojiSets">%1$s emoji sets</string>
+    <string name="DeleteEmojiSetsMessage">Are you sure you want to delete the selected emoji sets?</string>
+    <string name="ApplyEmojiSet">Apply emoji set</string>
+    <string name="InvalidCustomEmojiSet">Invalid font file.</string>
+    <string name="ErrorEmojiFontInvalidFormat">File must be an emoji font file.</string>
+    <string name="EmojiSetApplied">Emoji set applied</string>
+    <string name="EmojiSetAppliedInfo">%1$s is now your emoji set.</string>
+    <string name="EmojiSetAlreadyApplied">Emoji set already applied.</string>
+    <string name="EmojiSetErrorDownloading">Error downloading emoji set.</string>
+    <string name="UseSystemEmojis">Use System Emoji</string>
+    <string name="UseSystemEmojisDesc">Use system\'s emoji instead of the chosen ones</string>
+    <string name="DownloadUpdate">Download</string>
+    <string name="DownloadingUpdate">Downloading…</string>
+
     <!--Crashlytics-->
     <string name="OctoCrashedTitle">OctoGram has stopped working!</string>
     <string name="OctoCrashedSubTitle">OctoGram has crashed, and we\'re sorry for the trouble. Please send us the crash log to help us fix the issue.</string>
