@@ -10,22 +10,19 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.rows.impl.*;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
-import it.octogram.android.preferences.rows.impl.CheckboxRow;
-import it.octogram.android.preferences.rows.impl.CustomCellRow;
-import it.octogram.android.preferences.rows.impl.HeaderRow;
-import it.octogram.android.preferences.rows.impl.SliderRow;
-import it.octogram.android.preferences.rows.impl.SwitchRow;
-import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 
 public class OctoAppearanceUI implements PreferencesEntry {
@@ -56,23 +53,26 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .icon(R.drawable.msg_emoji_cat)
                             .title(LocaleController.getString("EmojiSets", R.string.EmojiSets))
                             .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .icon(R.drawable.msg_text_outlined)
                             .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
                             .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
                             .requiresRestart(true)
                             .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.showSnowflakes)
-                            .title(LocaleController.getString("ShowSnowflakes", R.string.ShowSnowflakes))
-                            .requiresRestart(true)
-                            .build());
-                    category.row(new HeaderRow(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader)));
-                    category.row(new SliderRow.SliderRowBuilder()
-                            .min(2)
-                            .max(20)
-                            .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
-                            .build());
                 })
+                .row(new TextDetailRow.TextDetailRowBuilder()
+                        .onClick(() -> fragment.presentFragment(new PreferencesFragment(new DrawerElementsSettingsUI())))
+                        .icon(R.drawable.msg_voice_headphones)
+                        .title(LocaleController.getString("DrawerElements", R.string.DrawerElements))
+                        .description(LocaleController.getString("DrawerElements_Desc", R.string.DrawerElements_Desc))
+                        .build())
+                .row(new TextDetailRow.TextDetailRowBuilder()
+                        .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
+                        .icon(R.drawable.msg_menu_stories)
+                        .title(LocaleController.getString("ContextElements", R.string.ContextElements))
+                        .description(LocaleController.getString("ContextElements_Desc", R.string.ContextElements_Desc))
+                        .build())
+                .row(new ShadowRow())
                 .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> {
@@ -82,10 +82,12 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             })
                             .preferenceValue(OctoConfig.INSTANCE.formatTimeWithSeconds)
                             .title(LocaleController.formatString("FormatTimeWithSeconds", R.string.FormatTimeWithSeconds))
+                            .description(LocaleController.formatString("FormatTimeWithSeconds_Desc", R.string.FormatTimeWithSeconds_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.numberRounding)
                             .title(LocaleController.formatString("NumberRounding", R.string.NumberRounding))
+                            .description(LocaleController.formatString("NumberRounding_Desc", R.string.NumberRounding_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> {
@@ -97,6 +99,10 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .description(LocaleController.formatString("PencilIconForEdited_Desc", R.string.PencilIconForEdited_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> {
+                                fragment.getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+                                return true;
+                            })
                             .preferenceValue(OctoConfig.INSTANCE.disableDividers)
                             .title(LocaleController.formatString("HideDividers", R.string.HideDividers))
                             .postNotificationName(NotificationCenter.reloadInterface)
@@ -137,6 +143,13 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .showIf(OctoConfig.INSTANCE.forceChatBlurEffect)
                             .build());
                 })
+                .row(new HeaderRow(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader)))
+                .row(new SliderRow.SliderRowBuilder()
+                        .min(2)
+                        .max(20)
+                        .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
+                        .build())
+                .row(new ShadowRow())
                 .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)
@@ -144,76 +157,11 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .description(LocaleController.getString("ForcePacmanAnimation_Desc", R.string.ForcePacmanAnimation_Desc))
                             .build());
                 })
-                .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> category.row(new SwitchRow.SwitchRowBuilder()
-                        .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)
-                        .title(LocaleController.getString("ForcePacmanAnimation", R.string.ForcePacmanAnimation))
-                        .description(LocaleController.getString("ForcePacmanAnimation_Desc", R.string.ForcePacmanAnimation_Desc))
-                        .build()))
-                .category(LocaleController.getString("DrawerElementsHeader", R.string.DrawerElementsHeader), category -> {
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerChangeStatus)
-                            .title(LocaleController.getString(R.string.SetEmojiStatus))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerMyStories)
-                            .title(LocaleController.getString(R.string.ProfileMyStories))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerNewGroup)
-                            .title(LocaleController.getString(R.string.NewGroup))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerNewChannel)
-                            .title(LocaleController.getString(R.string.NewChannel))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerContacts)
-                            .title(LocaleController.getString(R.string.Contacts))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerCalls)
-                            .title(LocaleController.getString(R.string.Calls))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerPeopleNearby)
-                            .title(LocaleController.getString(R.string.PeopleNearby))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerSavedMessages)
-                            .title(LocaleController.getString(R.string.SavedMessages))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerSettings)
-                            .title(LocaleController.getString(R.string.Settings))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerOctogramSettings)
-                            .title("OctoGram Settings")
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerDatacenterInfo)
-                            .title(LocaleController.getString(R.string.DatacenterStatus))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerInviteFriends)
-                            .title(LocaleController.getString(R.string.InviteFriends))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerTelegramFeatures)
-                            .title(LocaleController.getString(R.string.TelegramFeatures))
-                            .postNotificationName(NotificationCenter.reloadInterface)
+                .category(LocaleController.getString("LocalOther", R.string.LocalOther), category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.showSnowflakes)
+                            .title(LocaleController.getString("ShowSnowflakes", R.string.ShowSnowflakes))
+                            .requiresRestart(true)
                             .build());
                 })
                 .build();
