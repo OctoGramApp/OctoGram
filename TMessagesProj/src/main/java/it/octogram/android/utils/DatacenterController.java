@@ -21,14 +21,15 @@ import java.util.List;
 
 public class DatacenterController {
 
-    private static final String url = "https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json";
+    private static int token = 0;
+    private static final String assetsUrl = "https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json?token=%s";
     private static final Gson GSON = new Gson();
     private static final Object lock = new Object();
 
     private static DCInfo fetchDCStatus() {
         synchronized (lock) {
             try {
-                URL url = new URL(DatacenterController.url);
+                URL url = new URL(String.format(assetsUrl, ++token));
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
 
@@ -79,6 +80,7 @@ public class DatacenterController {
                                 }
                                 SystemClock.sleep(1000L * currentDCStatus.refresh_in_time);
                             }
+                            SystemClock.sleep(1000L);
                         } catch (Exception ignored) {
                             SystemClock.sleep(1000L);
                         }
