@@ -41,11 +41,11 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .icon(R.drawable.msg_media)
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
-                            .icon(R.drawable.msg_translate)
-                            .title(LocaleController.formatString("Translator", R.string.Translator))
-                            .build());
+//                    category.row(new TextIconRow.TextIconRowBuilder()
+//                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+//                            .icon(R.drawable.msg_translate)
+//                            .title(LocaleController.formatString("Translator", R.string.Translator))
+//                            .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
@@ -85,7 +85,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://crowdin.com/project/octogram"));
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://octogram.crowdin.com/octogram"));
                                 fragment.getParentActivity().startActivity(browserIntent);
                             })
                             .icon(R.drawable.msg_translate)

@@ -193,11 +193,11 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title("OctoGram Settings")
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.datacenterInfo)
-                            .title(LocaleController.getString(R.string.DatacenterStatus))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
+//                    category.row(new CheckboxRow.CheckboxRowBuilder()
+//                            .preferenceValue(OctoConfig.INSTANCE.datacenterInfo)
+//                            .title(LocaleController.getString(R.string.DatacenterStatus))
+//                            .postNotificationName(NotificationCenter.reloadInterface)
+//                            .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.inviteFriends)
                             .title(LocaleController.getString(R.string.InviteFriends))
