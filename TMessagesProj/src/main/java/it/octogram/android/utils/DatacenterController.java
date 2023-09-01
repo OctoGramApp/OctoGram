@@ -10,6 +10,7 @@ package it.octogram.android.utils;
 
 import android.os.SystemClock;
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import org.telegram.messenger.AndroidUtilities;
 
 import java.io.BufferedReader;
@@ -109,9 +110,16 @@ public class DatacenterController {
     }
 
     public static class DCInfo {
+        @SerializedName("status")
         public List<DCStatus> status;
+
+        @SerializedName("last_refresh")
         public int last_refresh;
+
+        @SerializedName("refresh_in_time")
         public int refresh_in_time;
+
+        @SerializedName("is_refreshing")
         public boolean is_refreshing;
 
         public DCInfo(List<DCStatus> dc_status, int last_refresh, int refresh_in_time, boolean is_refreshing) {
@@ -130,10 +138,19 @@ public class DatacenterController {
     }
 
     public static class DCStatus {
+        @SerializedName("dc_id")
         public int dc_id;
+
+        @SerializedName("ping")
         public int ping;
+
+        @SerializedName("dc_status")
         public int dc_status;
+
+        @SerializedName("last_down")
         public int last_down;
+
+        @SerializedName("last_lag")
         public int last_lag;
 
         public DCStatus(int dc_id, int ping, int dc_status, int last_down, int last_lag) {
