@@ -30,7 +30,7 @@ import java.util.List;
 public class OctoConfig {
 
     public static final OctoConfig INSTANCE = new OctoConfig();
-    private static final List<ConfigProperty<?>> properties = new ArrayList<>();
+    private final List<ConfigProperty<?>> properties = new ArrayList<>();
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
 
     /*General*/
