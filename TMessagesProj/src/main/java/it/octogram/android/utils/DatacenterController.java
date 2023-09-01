@@ -21,15 +21,15 @@ import java.util.List;
 
 public class DatacenterController {
 
-    private static int token = 0;
-    private static final String assetsUrl = "https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json?token=%s";
+    private static int token = 1;
     private static final Gson GSON = new Gson();
     private static final Object lock = new Object();
 
     private static DCInfo fetchDCStatus() {
         synchronized (lock) {
             try {
-                URL url = new URL(String.format(assetsUrl, ++token));
+                String assetsUrl = "https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json?token=" + ++token;
+                URL url = new URL(assetsUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
 
