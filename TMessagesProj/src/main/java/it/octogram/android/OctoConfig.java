@@ -13,6 +13,7 @@ import android.media.AudioFormat;
 
 import org.telegram.messenger.ApplicationLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -29,114 +30,107 @@ import java.util.List;
 public class OctoConfig {
 
     public static final OctoConfig INSTANCE = new OctoConfig();
-
+    private static final List<ConfigProperty<?>> properties = new ArrayList<>();
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
 
     /*General*/
-    public final ConfigProperty<Boolean> hidePhoneNumber = new ConfigProperty<>("hidePhoneNumber", true);
-    public final ConfigProperty<Boolean> showFakePhoneNumber = new ConfigProperty<>("showFakePhoneNumber", false);
-    public final ConfigProperty<Boolean> showUsernameAsPhoneNumber = new ConfigProperty<>("showUsernameAsPhoneNumber", false);
-    public final ConfigProperty<Boolean> hideOtherPhoneNumber = new ConfigProperty<>("hideOtherPhoneNumber", true);
-    public final ConfigProperty<Boolean> promptBeforeCalling = new ConfigProperty<>("promptBeforeCalling", true);
-    public final ConfigProperty<Integer> dcIdStyle = new ConfigProperty<>("dcIdStyle", DcIdStyle.MINIMAL);
-    public final ConfigProperty<Integer> dcIdType = new ConfigProperty<>("dcIdType", DcIdType.BOT_API);
-    public final ConfigProperty<Boolean> registrationDateInProfiles = new ConfigProperty<>("registrationDateInProfiles", false);
-    public final ConfigProperty<Boolean> jumpToNextChannel = new ConfigProperty<>("jumpToNextChannel", true);
-    public final ConfigProperty<Boolean> hideGreetingSticker = new ConfigProperty<>("hideGreetingSticker", false);
-    public final ConfigProperty<Boolean> playGifAsVideo = new ConfigProperty<>("playGifAsVideo", false);
-    public final ConfigProperty<Boolean> hideKeyboardOnScroll = new ConfigProperty<>("hideKeyboardOnScroll", false);
-    public final ConfigProperty<Boolean> hideSendAsChannel = new ConfigProperty<>("hideSendAsChannel", false);
-    public final ConfigProperty<Boolean> showOnlineStatus = new ConfigProperty<>("showOnlineStatus", false);
-    public final ConfigProperty<Boolean> hideCustomEmojis = new ConfigProperty<>("hideCustomEmojis", false);
-    public final ConfigProperty<Boolean> activeNoiseSuppression = new ConfigProperty<>("activeNoiseSuppression", false);
-    public final ConfigProperty<Boolean> unmuteVideosWithVolumeDown = new ConfigProperty<>("unmuteVideosWithVolumeDown", true);
-    public final ConfigProperty<Boolean> disableProximityEvents = new ConfigProperty<>("disableProximityEvents", false);
-    public final ConfigProperty<Boolean> startWithRearCamera = new ConfigProperty<>("startWithRearCamera", false);
-    public final ConfigProperty<Boolean> disableCameraPreview = new ConfigProperty<>("disableCameraPreview", false);
-    public final ConfigProperty<Boolean> hideSentTimeOnStickers = new ConfigProperty<>("hideSentTimeOnStickers", false);
-    public final ConfigProperty<Boolean> hideChatFolders = new ConfigProperty<>("hideChatFolders", false);
-    public final ConfigProperty<Boolean> hideStories = new ConfigProperty<>("hideStories", false);
-    public final ConfigProperty<Integer> doubleTapAction = new ConfigProperty<>("doubleTapAction", DoubleTapAction.REACTION);
-    public final ConfigProperty<Integer> doubleTapActionOut = new ConfigProperty<>("doubleTapActionOut", DoubleTapAction.REACTION);
-
-    public final ConfigProperty<Boolean> hideFoldersWhenForwarding = new ConfigProperty<>("showFoldersWhenForwarding", false);
-    public final ConfigProperty<Boolean> accentColorAsNotificationColor = new ConfigProperty<>("accentColorAsNotificationColor", false);
-    public final ConfigProperty<Boolean> openArchiveOnPull = new ConfigProperty<>("openArchiveOnPull", false);
-    public final ConfigProperty<Boolean> tabletMode = new ConfigProperty<>("tabletMode", false);
-
+    public final ConfigProperty<Boolean> hidePhoneNumber = newConfigProperty("hidePhoneNumber", true);
+    public final ConfigProperty<Boolean> showFakePhoneNumber = newConfigProperty("showFakePhoneNumber", false);
+    public final ConfigProperty<Boolean> showUsernameAsPhoneNumber = newConfigProperty("showUsernameAsPhoneNumber", false);
+    public final ConfigProperty<Boolean> hideOtherPhoneNumber = newConfigProperty("hideOtherPhoneNumber", true);
+    public final ConfigProperty<Boolean> promptBeforeCalling = newConfigProperty("promptBeforeCalling", true);
+    public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.MINIMAL);
+    public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API);
+    public final ConfigProperty<Boolean> registrationDateInProfiles = newConfigProperty("registrationDateInProfiles", false);
+    public final ConfigProperty<Boolean> jumpToNextChannel = newConfigProperty("jumpToNextChannel", true);
+    public final ConfigProperty<Boolean> hideGreetingSticker = newConfigProperty("hideGreetingSticker", false);
+    public final ConfigProperty<Boolean> playGifAsVideo = newConfigProperty("playGifAsVideo", false);
+    public final ConfigProperty<Boolean> hideKeyboardOnScroll = newConfigProperty("hideKeyboardOnScroll", false);
+    public final ConfigProperty<Boolean> hideSendAsChannel = newConfigProperty("hideSendAsChannel", false);
+    public final ConfigProperty<Boolean> showOnlineStatus = newConfigProperty("showOnlineStatus", false);
+    public final ConfigProperty<Boolean> hideCustomEmojis = newConfigProperty("hideCustomEmojis", false);
+    public final ConfigProperty<Boolean> activeNoiseSuppression = newConfigProperty("activeNoiseSuppression", false);
+    public final ConfigProperty<Boolean> unmuteVideosWithVolumeDown = newConfigProperty("unmuteVideosWithVolumeDown", true);
+    public final ConfigProperty<Boolean> disableProximityEvents = newConfigProperty("disableProximityEvents", false);
+    public final ConfigProperty<Boolean> startWithRearCamera = newConfigProperty("startWithRearCamera", false);
+    public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
+    public final ConfigProperty<Boolean> hideSentTimeOnStickers = newConfigProperty("hideSentTimeOnStickers", false);
+    public final ConfigProperty<Boolean> hideChatFolders = newConfigProperty("hideChatFolders", false);
+    public final ConfigProperty<Boolean> hideStories = newConfigProperty("hideStories", false);
+    public final ConfigProperty<Integer> doubleTapAction = newConfigProperty("doubleTapAction", DoubleTapAction.REACTION);
+    public final ConfigProperty<Integer> doubleTapActionOut = newConfigProperty("doubleTapActionOut", DoubleTapAction.REACTION);
+    public final ConfigProperty<Boolean> hideFoldersWhenForwarding = newConfigProperty("showFoldersWhenForwarding", false);
+    public final ConfigProperty<Boolean> accentColorAsNotificationColor = newConfigProperty("accentColorAsNotificationColor", false);
+    public final ConfigProperty<Boolean> openArchiveOnPull = newConfigProperty("openArchiveOnPull", false);
+    public final ConfigProperty<Boolean> tabletMode = newConfigProperty("tabletMode", false);
 
     /*Appearance*/
-    public final ConfigProperty<Boolean> showNameInActionBar = new ConfigProperty<>("showNameInActionBar", false);
-    public final ConfigProperty<Boolean> forceChatBlurEffect = new ConfigProperty<>("forceChatBlurEffect", false);
-    public final ConfigProperty<Integer> blurEffectStrength = new ConfigProperty<>("blurEffectStrength", 155);
-    public final ConfigProperty<Boolean> forcePacmanAnimation = new ConfigProperty<>("forcePacmanAnimation", false);
-    public final ConfigProperty<Boolean> formatTimeWithSeconds = new ConfigProperty<>("formatTimeWithSeconds", false);
-    public final ConfigProperty<Boolean> numberRounding = new ConfigProperty<>("numberRounding", false);
-    public final ConfigProperty<Boolean> pencilIconForEditedMessages = new ConfigProperty<>("pencilIconForEditedMessages", false);
-    public final ConfigProperty<Boolean> searchIconInHeader = new ConfigProperty<>("searchIconInHeader", false);
-    public final ConfigProperty<Boolean> slidingTitle = new ConfigProperty<>("slidingTitle", false);
-    public final ConfigProperty<Integer> eventType = new ConfigProperty<>("eventType", EventType.NONE);
-    public final ConfigProperty<Integer> maxStickerSize = new ConfigProperty<>("maxStickerSize", 14);
-    public final ConfigProperty<Boolean> useSystemFont = new ConfigProperty<>("useSystemFont", false);
-    public final ConfigProperty<Boolean> useSystemEmoji = new ConfigProperty<>("useSystemEmoji", false);
-    public final ConfigProperty<String> selectedEmojiPack = new ConfigProperty<>("selectedEmojiPack", "default");
-    public final ConfigProperty<Boolean> showSnowflakes = new ConfigProperty<>("showSnowflakes", false);
-    public final ConfigProperty<Boolean> disableDividers = new ConfigProperty<>("disableDividers", false);
-
+    public final ConfigProperty<Boolean> showNameInActionBar = newConfigProperty("showNameInActionBar", false);
+    public final ConfigProperty<Boolean> forceChatBlurEffect = newConfigProperty("forceChatBlurEffect", false);
+    public final ConfigProperty<Integer> blurEffectStrength = newConfigProperty("blurEffectStrength", 155);
+    public final ConfigProperty<Boolean> forcePacmanAnimation = newConfigProperty("forcePacmanAnimation", false);
+    public final ConfigProperty<Boolean> formatTimeWithSeconds = newConfigProperty("formatTimeWithSeconds", false);
+    public final ConfigProperty<Boolean> numberRounding = newConfigProperty("numberRounding", false);
+    public final ConfigProperty<Boolean> pencilIconForEditedMessages = newConfigProperty("pencilIconForEditedMessages", false);
+    public final ConfigProperty<Boolean> searchIconInHeader = newConfigProperty("searchIconInHeader", false);
+    public final ConfigProperty<Boolean> slidingTitle = newConfigProperty("slidingTitle", false);
+    public final ConfigProperty<Integer> eventType = newConfigProperty("eventType", EventType.NONE);
+    public final ConfigProperty<Integer> maxStickerSize = newConfigProperty("maxStickerSize", 14);
+    public final ConfigProperty<Boolean> useSystemFont = newConfigProperty("useSystemFont", false);
+    public final ConfigProperty<Boolean> useSystemEmoji = newConfigProperty("useSystemEmoji", false);
+    public final ConfigProperty<String> selectedEmojiPack = newConfigProperty("selectedEmojiPack", "default");
+    public final ConfigProperty<Boolean> showSnowflakes = newConfigProperty("showSnowflakes", false);
+    public final ConfigProperty<Boolean> disableDividers = newConfigProperty("disableDividers", false);
     /*Folders*/
-    public final ConfigProperty<Integer> tabMode = new ConfigProperty<>("tabMode", TabMode.MIXED);
-
+    public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED);
     /*Drawer elements*/
-    public final ConfigProperty<Boolean> changeStatus = new ConfigProperty<>("drawer_changeStatus", true);
-    public final ConfigProperty<Boolean> myStories = new ConfigProperty<>("drawer_myStories", true);
-    public final ConfigProperty<Boolean> newGroup = new ConfigProperty<>("drawer_newGroup", true);
-    public final ConfigProperty<Boolean> newChannel = new ConfigProperty<>("drawer_newChannel", false);
-    public final ConfigProperty<Boolean> contacts = new ConfigProperty<>("drawer_contacts", true);
-    public final ConfigProperty<Boolean> calls = new ConfigProperty<>("drawer_calls", true);
-    public final ConfigProperty<Boolean> peopleNearby = new ConfigProperty<>("drawer_peopleNearby", true);
-    public final ConfigProperty<Boolean> savedMessages = new ConfigProperty<>("drawer_savedMessages", true);
-    public final ConfigProperty<Boolean> settings = new ConfigProperty<>("drawer_settings", true);
-    public final ConfigProperty<Boolean> octogramSettings = new ConfigProperty<>("drawer_octogramSettings", false);
-    public final ConfigProperty<Boolean> datacenterInfo = new ConfigProperty<>("drawer_datacenterInfo", true);
-    public final ConfigProperty<Boolean> inviteFriends = new ConfigProperty<>("drawer_inviteFriends", true);
-    public final ConfigProperty<Boolean> telegramFeatures = new ConfigProperty<>("drawer_telegramFeatures", true);
-
+    public final ConfigProperty<Boolean> changeStatus = newConfigProperty("drawer_changeStatus", true);
+    public final ConfigProperty<Boolean> myStories = newConfigProperty("drawer_myStories", true);
+    public final ConfigProperty<Boolean> newGroup = newConfigProperty("drawer_newGroup", true);
+    public final ConfigProperty<Boolean> newChannel = newConfigProperty("drawer_newChannel", false);
+    public final ConfigProperty<Boolean> contacts = newConfigProperty("drawer_contacts", true);
+    public final ConfigProperty<Boolean> calls = newConfigProperty("drawer_calls", true);
+    public final ConfigProperty<Boolean> peopleNearby = newConfigProperty("drawer_peopleNearby", true);
+    public final ConfigProperty<Boolean> savedMessages = newConfigProperty("drawer_savedMessages", true);
+    public final ConfigProperty<Boolean> settings = newConfigProperty("drawer_settings", true);
+    public final ConfigProperty<Boolean> octogramSettings = newConfigProperty("drawer_octogramSettings", false);
+    public final ConfigProperty<Boolean> datacenterInfo = newConfigProperty("drawer_datacenterInfo", true);
+    public final ConfigProperty<Boolean> inviteFriends = newConfigProperty("drawer_inviteFriends", true);
+    public final ConfigProperty<Boolean> telegramFeatures = newConfigProperty("drawer_telegramFeatures", true);
     /*Unlock Secret Icons*/
-    public final ConfigProperty<Boolean> unlockedYuki = new ConfigProperty<>("unlockedYuki", false);
-    public final ConfigProperty<Boolean> unlockedChupa = new ConfigProperty<>("unlockedChupa", false);
+    public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);
+    public final ConfigProperty<Boolean> unlockedChupa = newConfigProperty("unlockedChupa", false);
 
     /*CameraX*/
-    public final ConfigProperty<Boolean> cameraXEnabled = new ConfigProperty<>("cameraXEnabled", true);
-    public final ConfigProperty<Boolean> cameraXPerfOverQuality = new ConfigProperty<>("cameraXPerformanceMode", false);
-    public final ConfigProperty<Boolean> cameraXZeroShutter = new ConfigProperty<>("cameraXZeroShutter", false);
-    public final ConfigProperty<Integer> cameraXResolution = new ConfigProperty<>("cameraXResolution", -1);
+    public final ConfigProperty<Boolean> cameraXEnabled = newConfigProperty("cameraXEnabled", true);
+    public final ConfigProperty<Boolean> cameraXPerfOverQuality = newConfigProperty("cameraXPerformanceMode", false);
+    public final ConfigProperty<Boolean> cameraXZeroShutter = newConfigProperty("cameraXZeroShutter", false);
+    public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", -1);
 
     /*Experiments*/
-    public final ConfigProperty<Boolean> experimentsEnabled = new ConfigProperty<>("experimentsEnabled", false);
-    public final ConfigProperty<Boolean> alternativeNavigation = new ConfigProperty<>("alternativeNavigation", false);
-    public final ConfigProperty<Boolean> uploadBoost = new ConfigProperty<>("uploadBoost", false);
-    public final ConfigProperty<Boolean> downloadBoost = new ConfigProperty<>("downloadBoost", false);
-    public final ConfigProperty<Integer> downloadBoostValue = new ConfigProperty<>("downloadBoostValue", 0);
-    public final ConfigProperty<Integer> photoResolution = new ConfigProperty<>("photoResolution", PhotoResolution.DEFAULT);
-    public final ConfigProperty<Integer> lastSelectedCompression = new ConfigProperty<>("lastSelectedCompression", 3);
-    public final ConfigProperty<Integer> gcOutputType = new ConfigProperty<>("gcOutputType", AudioType.MONO);
-    public final ConfigProperty<Boolean> mediaInGroupCall = new ConfigProperty<>("mediaInGroupCall", false);
-    public final ConfigProperty<Integer> maxRecentStickers = new ConfigProperty<>("maxRecentStickers", 0);
+    public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
+    public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
+    public final ConfigProperty<Boolean> uploadBoost = newConfigProperty("uploadBoost", false);
+    public final ConfigProperty<Boolean> downloadBoost = newConfigProperty("downloadBoost", false);
+    public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", 0);
+    public final ConfigProperty<Integer> photoResolution = newConfigProperty("photoResolution", PhotoResolution.DEFAULT);
+    public final ConfigProperty<Integer> lastSelectedCompression = newConfigProperty("lastSelectedCompression", 3);
+    public final ConfigProperty<Integer> gcOutputType = newConfigProperty("gcOutputType", AudioType.MONO);
+    public final ConfigProperty<Boolean> mediaInGroupCall = newConfigProperty("mediaInGroupCall", false);
+    public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
 
-    private final List<ConfigProperty<?>> properties = List.of(
-            hidePhoneNumber, showFakePhoneNumber, hideOtherPhoneNumber, promptBeforeCalling, dcIdStyle, dcIdType, registrationDateInProfiles,
-            jumpToNextChannel, hideGreetingSticker, playGifAsVideo, hideKeyboardOnScroll, hideSendAsChannel, showOnlineStatus,
-            hideCustomEmojis, activeNoiseSuppression, unmuteVideosWithVolumeDown, disableProximityEvents, startWithRearCamera,
-            disableCameraPreview, hideSentTimeOnStickers, hideChatFolders, hideStories, doubleTapAction, hideFoldersWhenForwarding, accentColorAsNotificationColor,
-            openArchiveOnPull, showNameInActionBar, forceChatBlurEffect, blurEffectStrength, forcePacmanAnimation, formatTimeWithSeconds,
-            numberRounding, pencilIconForEditedMessages, searchIconInHeader, slidingTitle, eventType, useSystemFont, useSystemEmoji, selectedEmojiPack, showSnowflakes,
-            disableDividers, changeStatus, myStories, newGroup, newChannel, contacts, calls, peopleNearby, savedMessages, settings,
-            octogramSettings, datacenterInfo, inviteFriends, telegramFeatures,
-            cameraXEnabled, cameraXPerfOverQuality, cameraXZeroShutter, cameraXResolution, unlockedYuki, unlockedChupa,
-            experimentsEnabled, alternativeNavigation, uploadBoost, downloadBoost, downloadBoostValue, photoResolution, lastSelectedCompression,
-            tabletMode, maxStickerSize, gcOutputType, mediaInGroupCall, maxRecentStickers, tabMode
-    );
-
+    /**
+     * Creates a new config property and adds it to the list of properties.
+     * @param key The key of the property.
+     * @param defaultValue The default value of the property.
+     * @return The newly created property.
+     * @param <T> The type of the property.
+     */
+    private <T> ConfigProperty<T> newConfigProperty(String key, T defaultValue) {
+        ConfigProperty<T> property = new ConfigProperty<>(key, defaultValue);
+        properties.add(property);
+        return property;
+    }
 
     private OctoConfig() {
         loadConfig();
