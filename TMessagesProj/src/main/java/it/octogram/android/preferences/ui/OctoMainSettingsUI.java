@@ -66,7 +66,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                 .category(LocaleController.formatString("OctoMainSettingsInfoCategory", R.string.OctoMainSettingsInfoCategory), category -> {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
-                            .icon(R.drawable.msg2_data)
+                            .icon(R.drawable.datacenter_status)
                             .title(LocaleController.formatString("DatacenterStatus", R.string.DatacenterStatus))
                             .description(LocaleController.formatString("DatacenterStatus_Desc", R.string.DatacenterStatus_Desc))
                             .build());
