@@ -62,7 +62,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 })
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new DrawerElementsSettingsUI())))
-                        .icon(R.drawable.msg_voice_headphones)
+                        .icon(R.drawable.msg_message)
                         .title(LocaleController.getString("DrawerElements", R.string.DrawerElements))
                         .description(LocaleController.getString("DrawerElements_Desc", R.string.DrawerElements_Desc))
                         .build())
