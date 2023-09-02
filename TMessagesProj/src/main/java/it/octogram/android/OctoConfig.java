@@ -39,7 +39,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> showUsernameAsPhoneNumber = newConfigProperty("showUsernameAsPhoneNumber", false);
     public final ConfigProperty<Boolean> hideOtherPhoneNumber = newConfigProperty("hideOtherPhoneNumber", true);
     public final ConfigProperty<Boolean> promptBeforeCalling = newConfigProperty("promptBeforeCalling", true);
-    public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.MINIMAL);
+    public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM);
     public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API);
     public final ConfigProperty<Boolean> registrationDateInProfiles = newConfigProperty("registrationDateInProfiles", false);
     public final ConfigProperty<Boolean> jumpToNextChannel = newConfigProperty("jumpToNextChannel", true);
@@ -211,9 +211,9 @@ public class OctoConfig {
 
     public static class DcIdStyle {
         public static final int NONE = 0;
-        public static final int MINIMAL = 1;
-        public static final int OWLGRAM = 2;
-        public static final int TELEGRAM = 3;
+        public static final int OWLGRAM = 1;
+        public static final int TELEGRAM = 2;
+        public static final int MINIMAL = 3;
     }
 
     public static class DcIdType {
