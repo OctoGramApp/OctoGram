@@ -76,6 +76,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new ListRow.ListRowBuilder()
+                            .onClick(() -> {
+                                fragment.getParentLayout().rebuildAllFragmentViews(false, false);
+                                return true;
+                            })
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
                                     new Pair<>(OctoConfig.DcIdStyle.NONE, LocaleController.formatString("Nothing", R.string.Nothing)),
