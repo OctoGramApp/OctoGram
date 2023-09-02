@@ -10,13 +10,13 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 
+import android.os.Parcelable;
+import androidx.recyclerview.widget.RecyclerView;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.*;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 
 import it.octogram.android.CustomEmojiController;
@@ -28,7 +28,7 @@ import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 public class OctoAppearanceUI implements PreferencesEntry {
 
     @Override
-    public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
+    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("Appearance", R.string.Appearance))
                 .sticker(context, R.raw.utyan_appearance, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
                 .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
@@ -100,12 +100,17 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> {
-                                fragment.getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+                                Parcelable recyclerViewState = null;
+                                RecyclerView.LayoutManager layoutManager = fragment.getListView().getLayoutManager();
+                                if (layoutManager != null)
+                                    recyclerViewState = layoutManager.onSaveInstanceState();
+                                fragment.getParentLayout().rebuildAllFragmentViews(false, false);
+                                if (layoutManager != null && recyclerViewState != null)
+                                    layoutManager.onRestoreInstanceState(recyclerViewState);
                                 return true;
                             })
                             .preferenceValue(OctoConfig.INSTANCE.disableDividers)
                             .title(LocaleController.formatString("HideDividers", R.string.HideDividers))
-                            .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                 })
                 .category(LocaleController.getString("HeaderHeader", R.string.HeaderHeader), category -> {

@@ -220,6 +220,10 @@ public class PreferencesFragment extends BaseFragment {
         }
     }
 
+    public RecyclerListView getListView() {
+        return listView;
+    }
+
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
 
         private final Context context;
