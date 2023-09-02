@@ -12,6 +12,7 @@ import android.content.Context;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.CheckboxRow;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
@@ -20,7 +21,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 
 public class DrawerElementsSettingsUI implements PreferencesEntry {
     @Override
-    public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
+    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.getString("DrawerElements", R.string.DrawerElements))
                 .category(LocaleController.getString("DrawerElements", R.string.DrawerElements), category -> {
                     category.row(new CheckboxRow.CheckboxRowBuilder()

@@ -26,7 +26,7 @@ import it.octogram.android.preferences.rows.impl.TextIconRow;
 public class OctoMainSettingsUI implements PreferencesEntry {
 
     @Override
-    public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
+    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         String footer = AndroidUtilities.replaceTags(LocaleController.formatString("OctoMainSettingsFooter", R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING)).toString();
         String comingSoon = AndroidUtilities.replaceTags(LocaleController.formatString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable)).toString();
         return OctoPreferences.builder("OctoGram Settings")

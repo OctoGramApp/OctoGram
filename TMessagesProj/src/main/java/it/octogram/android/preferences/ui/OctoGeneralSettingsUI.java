@@ -11,6 +11,7 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
+import it.octogram.android.preferences.fragment.PreferencesFragment;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -30,7 +31,7 @@ import kotlin.Triple;
 public class OctoGeneralSettingsUI implements PreferencesEntry {
 
     @Override
-    public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
+    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("OctoGeneralSettings", R.string.OctoGeneralSettings))
                 .sticker(context, R.raw.utyan_umbrella, true, LocaleController.formatString("OctoGeneralSettingsHeader", R.string.OctoGeneralSettingsHeader))
                 .category(LocaleController.formatString("PrivacyHeader", R.string.PrivacyHeader), category -> {

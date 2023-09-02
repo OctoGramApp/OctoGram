@@ -11,6 +11,7 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
+import it.octogram.android.preferences.fragment.PreferencesFragment;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -26,7 +27,7 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 public class OctoCameraSettingsUI implements PreferencesEntry {
 
     @Override
-    public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
+    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.formatString("OctoCameraSettings", R.string.OctoCameraSettings))
                 .sticker(context, R.raw.utyan_camera, true, LocaleController.formatString("OctoCameraSettingsHeader", R.string.OctoCameraSettingsHeader))
                 .category("CameraX", category -> {

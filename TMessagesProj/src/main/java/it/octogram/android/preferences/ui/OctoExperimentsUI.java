@@ -12,6 +12,7 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
+import it.octogram.android.preferences.fragment.PreferencesFragment;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -30,7 +31,7 @@ import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 public class OctoExperimentsUI implements PreferencesEntry {
 
     @Override
-    public OctoPreferences getPreferences(BaseFragment fragment, Context context) {
+    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         if (OctoConfig.INSTANCE.experimentsEnabled.getValue()) {
             if (!OctoConfig.INSTANCE.alternativeNavigation.getValue() &&
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
