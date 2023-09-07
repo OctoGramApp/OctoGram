@@ -644,7 +644,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             invalidate();
         }
 
-        if (snowflakesEffect != null && OctoConfig.INSTANCE.showSnowflakes.getValue()) {
+        if (snowflakesEffect != null) {
             snowflakesEffect.onDraw(this, canvas);
         }
     }

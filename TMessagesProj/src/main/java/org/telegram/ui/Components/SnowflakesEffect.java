@@ -170,7 +170,7 @@ public class SnowflakesEffect {
     }
 
     public void onDraw(View parent, Canvas canvas) {
-        if (parent == null || canvas == null || (!LiteMode.isEnabled(LiteMode.FLAG_CHAT_BACKGROUND) || OctoConfig.INSTANCE.showSnowflakes.getValue())) {
+        if (parent == null || canvas == null || (!LiteMode.isEnabled(LiteMode.FLAG_CHAT_BACKGROUND) || !OctoConfig.INSTANCE.showSnowflakes.getValue())) {
             return;
         }
 
