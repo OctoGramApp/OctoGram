@@ -216,6 +216,9 @@
     <string name="PrivacyPolicyLogin">By continuing,\nyou agree to the *Privacy Policy*.</string>
     <string name="OctoPrivacyPolicy">OctoGram Privacy Policy</string>
 
+    <string name="MKVAsVideo">Show MKV as Video</string>
+    <string name="StreamAllVideos">Stream All Videos</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
