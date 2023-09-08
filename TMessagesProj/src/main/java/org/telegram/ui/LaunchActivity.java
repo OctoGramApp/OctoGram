@@ -89,10 +89,15 @@ import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
 
+import it.octogram.android.MonetThemeController;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.DatacenterActivity;
+import it.octogram.android.preferences.ui.OctoAppearanceUI;
+import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
+import it.octogram.android.preferences.ui.OctoExperimentsUI;
+import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -629,6 +634,43 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 } else if (id == 101) {
                     presentFragment(new DatacenterActivity());
                     drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 204) {
+                    ActionIntroActivity fragment = new ActionIntroActivity(ActionIntroActivity.ACTION_TYPE_QR_LOGIN);
+                    fragment.setQrLoginDelegate(code -> {
+                        AlertDialog progressDialog = new AlertDialog(LaunchActivity.this, 3);
+                        progressDialog.setCanCancel(false);
+                        progressDialog.show();
+                        byte[] token = Base64.decode(code.substring("tg://login?token=".length()), Base64.URL_SAFE);
+                        TLRPC.TL_auth_acceptLoginToken req = new TLRPC.TL_auth_acceptLoginToken();
+                        req.token = token;
+                        ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+                            try {
+                                progressDialog.dismiss();
+                            } catch (Exception ignore) {
+                            }
+                            if (!(response instanceof TLRPC.TL_authorization)) {
+                                AndroidUtilities.runOnUIThread(() -> AlertsCreator.showSimpleAlert(fragment, LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient), LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + error.text));
+                            }
+                        }));
+                    });
+                    actionBarLayout.presentFragment(fragment, false, true, true, false);
+                    if (AndroidUtilities.isTablet()) {
+                        actionBarLayout.showLastFragment();
+                        rightActionBarLayout.showLastFragment();
+                        drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                    } else {
+                        drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                    }
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 205) {
+                    presentFragment(new SessionsActivity(0));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 206) {
+                    presentFragment(new LiteModeSettingsActivity());
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 207) {
+                    presentFragment(new ProxyListActivity());
+                    drawerLayoutContainer.closeDrawer(false);
                 }
             }
         });
@@ -928,6 +970,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             getWindowManager().removeCrossWindowBlurEnabledListener(blurListener);
                         }
                     });
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            MonetThemeController.registerReceiver(this);
         }
         CustomEmojiController.checkEmojiPacks();
         BackupAgent.requestBackup(this);
@@ -1660,6 +1705,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         long push_chat_id = 0;
         long[] push_story_dids = null;
         int push_story_id = 0;
+        long profile_user_id = 0;
         int push_topic_id = 0;
         int push_enc_id = 0;
         int push_msg_id = 0;
@@ -2478,6 +2524,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         if (intCode != 0) {
                                             code = "" + intCode;
                                         }
+                                    } else if (url.startsWith("tg:user") || url.startsWith("tg://user")) {
+                                        url = url.replace("tg:user", "tg://telegram.org").replace("tg://user", "tg://telegram.org");
+                                        data = Uri.parse(url);
+                                        String userID = data.getQueryParameter("id");
+                                        if (userID != null) {
+                                            try {
+                                                profile_user_id = Long.parseLong(userID);
+                                            } catch (NumberFormatException ignore) {
+                                            }
+                                        }
                                     } else if (url.startsWith("tg:openmessage") || url.startsWith("tg://openmessage")) {
                                         url = url.replace("tg:openmessage", "tg://telegram.org").replace("tg://openmessage", "tg://telegram.org");
                                         data = Uri.parse(url);
@@ -2539,6 +2595,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             open_settings = 8;
                                         } else if (url.contains("?disablelogs")) {
                                             open_settings = 9;
+                                        } else if (url.contains("privacy")) {
+                                            open_settings = 201;
+                                        } else if (url.contains("language")) {
+                                            open_settings = 202;
                                         } else {
                                             open_settings = 1;
                                         }
@@ -2561,6 +2621,51 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
                                             OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.unlockedYuki, true);
+                                        }
+                                    } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoExperimentsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:camera") || url.startsWith("tg://camera")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoCameraSettingsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:general") || url.startsWith("tg://general")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:octosettings") || url.startsWith("tg://octosettings")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoMainSettingsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:appearance") || url.startsWith("tg://appearance")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoAppearanceUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
                                         }
                                     } else if ((url.startsWith("tg:search") || url.startsWith("tg://search"))) {
                                         url = url.replace("tg:search", "tg://telegram.org").replace("tg://search", "tg://telegram.org");
@@ -2838,6 +2943,18 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     pushOpened = true;
                     drawerLayoutContainer.closeDrawer();
                 }
+            } else if (profile_user_id != 0) {
+                Bundle args = new Bundle();
+                args.putLong("user_id", profile_user_id);
+                ProfileActivity fragment = new ProfileActivity(args);
+                AndroidUtilities.runOnUIThread(() -> presentFragment(fragment, false, false));
+                if (AndroidUtilities.isTablet()) {
+                    actionBarLayout.showLastFragment();
+                    rightActionBarLayout.showLastFragment();
+                    drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                } else {
+                    drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                }
             } else if (showDialogsList) {
                 if (!AndroidUtilities.isTablet()) {
                     actionBarLayout.removeAllFragments();
@@ -2934,6 +3051,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     closePrevious = true;
                 } else if (open_settings == 6) {
                     fragment = new EditWidgetActivity(open_widget_edit_type, open_widget_edit);
+                } else if (open_settings == 201) {
+                    fragment = new PrivacySettingsActivity();
+                } else if (open_settings == 202) {
+                    fragment = new LanguageSelectActivity();
                 } else {
                     fragment = null;
                 }
@@ -5680,6 +5801,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     @Override
     protected void onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            MonetThemeController.unregisterReceiver(this);
+        }
         if (PhotoViewer.getPipInstance() != null) {
             PhotoViewer.getPipInstance().destroyPhotoViewer();
         }
