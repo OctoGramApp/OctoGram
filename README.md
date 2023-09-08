@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/OctoGramApp/website/main/assets/icons/applogo.png" width="150" align="left"/>
+<img src="https://raw.githubusercontent.com/OctoGramApp/website/main/assets/images/applogo.preview.jpg" width="150" align="left"/>
 
 # 🐙 OctoGram
 *[Licensed under the GNU General Public License v2.0](https://github.com/OctoGramApp/OctoGram/blob/main/LICENSE)*
@@ -11,8 +11,7 @@
 OctoGram is an open-source messaging platform that serves as an alternative to Telegram.<br></br>
 
 ## Compilation guide
-To reproduce the build of OctoGram is only needed ccache (**already installed in "Tools" folder**), on macOs
-will be used from Homebrew if installed, otherwise it will be used the one in the "Tools" folder.
+To reproduce the build of OctoGram, you only require the presence of ccache, which is located in the "Tools" folder. On macOs, if you have Homebrew installed, it will automatically utilize the Homebrew-installed ccache; otherwise, it will use the one located in the "Tools" folder.
 
 1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application and put it [**here**](https://github.com/OctoGramApp/OctoGram/blob/main/TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java).
 2. Please **do not** use the name Telegram for your app — or make sure your users understand that it is unofficial.
