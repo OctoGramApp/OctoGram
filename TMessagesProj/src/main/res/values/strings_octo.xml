@@ -206,7 +206,7 @@
     <string name="IDCopied">ID copied to clipboard.</string>
     <string name="InlineQueryCopied">Inline Query copied to clipboard.</string>
     <string name="MediaStream">Use Media Stream in GroupCall</string>
-    <string name="AudioTypeInCall">Use Type in GroupCall</string>
+    <string name="AudioTypeInCall">Output Type in GroupCall</string>
     <string name="AudioTypeStereo">Stereo</string>
     <string name="AudioTypeMono">Mono (Default)</string>
     <string name="MaxRecentStickers">Max Recent Stickers</string>
