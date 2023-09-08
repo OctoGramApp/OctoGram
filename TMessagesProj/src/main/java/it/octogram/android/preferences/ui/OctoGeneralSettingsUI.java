@@ -11,21 +11,19 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
-import it.octogram.android.preferences.fragment.PreferencesFragment;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.util.List;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
-import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import kotlin.Triple;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
@@ -222,6 +220,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .category("Tablet Mode", category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.tabletMode)
                         .title(LocaleController.formatString("EnableTabletMode", R.string.ForceTableMode))
+                        .requiresRestart(true)
                         .build()))
                 .category(LocaleController.formatString("Notifications", R.string.Notifications), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
