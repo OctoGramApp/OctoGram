@@ -22,8 +22,8 @@ public class CheckboxRow extends BaseRow implements Clickable {
     private final ConfigProperty<Boolean> preferenceValue;
     private final Supplier<Boolean> supplierClickable;
 
-    private CheckboxRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, int... posts) {
-        super(title, summary, requiresRestart, showIf, divider, PreferenceType.CHECKBOX, posts);
+    private CheckboxRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, boolean premium, int... posts) {
+        super(title, summary, requiresRestart, showIf, divider, PreferenceType.CHECKBOX, premium, posts);
         this.preferenceValue = preferenceValue;
         this.supplierClickable = supplierClickable;
     }
@@ -53,7 +53,7 @@ public class CheckboxRow extends BaseRow implements Clickable {
         }
 
         public CheckboxRow build() {
-            return new CheckboxRow(title, description, requiresRestart, showIf, divider, preferenceValue, supplierClickable, postNotificationName);
+            return new CheckboxRow(title, description, requiresRestart, showIf, divider, preferenceValue, supplierClickable, premium, postNotificationName);
         }
     }
 

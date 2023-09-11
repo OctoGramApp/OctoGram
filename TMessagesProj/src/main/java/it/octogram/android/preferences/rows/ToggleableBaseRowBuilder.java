@@ -13,9 +13,15 @@ import it.octogram.android.ConfigProperty;
 public abstract class ToggleableBaseRowBuilder<T, G> extends BaseRowBuilder<T> {
 
     protected ConfigProperty<G> preferenceValue;
+    protected boolean premium;
 
     public ToggleableBaseRowBuilder<T, G> preferenceValue(ConfigProperty<G> val) {
         preferenceValue = val;
+        return this;
+    }
+
+    public ToggleableBaseRowBuilder<T, G> premium(boolean val) {
+        premium = val;
         return this;
     }
 }

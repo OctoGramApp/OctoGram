@@ -17,32 +17,36 @@ public abstract class BaseRow {
     private boolean divider;
     private final PreferenceType type;
     private final int[] postNotificationName;
+    private final boolean premium;
 
     private boolean currentlyHidden;
     private int row;
 
 
     public BaseRow(PreferenceType type) {
-        this(null, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
+        this(null, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
     public BaseRow(@Nullable String title, PreferenceType type) {
-        this(title, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
+        this(title, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, PreferenceType type) {
-        this(title, summary, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
+        this(title, summary, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, PreferenceType type) {
-        this(title, summary, requiresRestart, showIf, !OctoConfig.INSTANCE.disableDividers.getValue(), type);
+        this(title, summary, requiresRestart, showIf, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type) {
-        this(title, summary, requiresRestart, showIf, divider, type, (int[]) null);
+        this(title, summary, requiresRestart, showIf, divider, type, false, (int[]) null);
+    }
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type, boolean premium) {
+        this(title, summary, requiresRestart, showIf, divider, type, premium, (int[]) null);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type, @Nullable int... postNotificationName) {
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type, boolean premium, @Nullable int... postNotificationName) {
         this.title = title;
         this.summary = summary;
         this.requiresRestart = requiresRestart;
@@ -50,6 +54,7 @@ public abstract class BaseRow {
         this.divider = divider;
         this.type = type;
         this.postNotificationName = postNotificationName;
+        this.premium = premium;
 
         this.currentlyHidden = showIfPreferenceValue != null && !showIfPreferenceValue.getValue();
     }
@@ -102,5 +107,9 @@ public abstract class BaseRow {
 
     public void setRow(int row) {
         this.row = row;
+    }
+
+    public boolean isPremium() {
+        return premium;
     }
 }

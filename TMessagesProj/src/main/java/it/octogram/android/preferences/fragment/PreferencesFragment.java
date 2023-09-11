@@ -27,9 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
+import org.telegram.messenger.*;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -42,6 +40,7 @@ import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.Components.UndoView;
@@ -66,6 +65,7 @@ import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import org.telegram.ui.PremiumPreviewFragment;
 
 /*
  * This library is *heavily* inspired by CatoGramX's preferences library.
@@ -159,6 +159,11 @@ public class PreferencesFragment extends BaseFragment {
         listView.setOnItemClickListener((view, position, x, y) -> {
             BaseRow row = positions.get(position);
             if (row instanceof Clickable) {
+                if (row.isPremium() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+                    showDialog(new PremiumFeatureBottomSheet(this, PremiumPreviewFragment.PREMIUM_FEATURE_ADVANCED_CHAT_MANAGEMENT, false));
+                    return;
+                }
+
                 boolean success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
                 if (success) {
                     if (row.doesRequireRestart()) {
@@ -344,6 +349,7 @@ public class PreferencesFragment extends BaseFragment {
                     } else {
                         checkCell.setTextAndCheck(switchRow.getTitle(), switchRow.getPreferenceValue(), switchRow.hasDivider());
                     }
+                    checkCell.setCheckBoxIcon(switchRow.isPremium() ? R.drawable.permission_locked : 0);
                     break;
                 case TEXT_DETAIL:
                     TextDetailRow textDetailRow = (TextDetailRow) positions.get(position);
@@ -413,6 +419,7 @@ public class PreferencesFragment extends BaseFragment {
                     CheckBoxCell checkboxCell = (CheckBoxCell) holder.itemView;
                     CheckboxRow checkboxRow = (CheckboxRow) positions.get(position);
                     checkboxCell.setText(checkboxRow.getTitle(), checkboxRow.getSummary(), checkboxRow.getPreferenceValue(), !OctoConfig.INSTANCE.disableDividers.getValue(), true);
+                    checkboxCell.setIcon(checkboxRow.isPremium() ? R.drawable.permission_locked : 0);
                     break;
                 default:
                     throw new RuntimeException("No view found for " + type);
