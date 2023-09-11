@@ -118,6 +118,7 @@ import com.google.zxing.common.detector.MathUtils;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.preferences.ui.DetailsActivity;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
+import it.octogram.android.utils.MessageHelper;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -992,6 +993,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     private final static int OPTION_SAVE_TO_SAVED_MESSAGES = 200;
     private final static int OPTION_MESSAGE_DETAILS = 201;
+    private final static int OPTION_COPY_PHOTO = 202;
+    private final static int OPTION_CLEAR_FROM_CACHE = 203;
 
     private final static int[] allowedNotificationsDuringChatListAnimations = new int[]{
             NotificationCenter.messagesRead,
@@ -23743,6 +23746,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                         items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
                                         options.add(OPTION_SAVE_TO_GALLERY);
                                         icons.add(R.drawable.msg_gallery);
+                                        if (OctoConfig.INSTANCE.contextClearFromCache.getValue()) {
+                                            items.add(LocaleController.getString("ClearFromCache", R.string.ClearFromCache));
+                                            options.add(OPTION_CLEAR_FROM_CACHE);
+                                            icons.add(R.drawable.msg_clear);
+                                        }
                                         items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                         options.add(OPTION_SHARE);
                                         icons.add(R.drawable.msg_shareout);
@@ -23751,6 +23759,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     items.add(LocaleController.getString("SaveToMusic", R.string.SaveToMusic));
                                     options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
                                     icons.add(R.drawable.msg_download);
+                                    if (OctoConfig.INSTANCE.contextClearFromCache.getValue()) {
+                                        items.add(LocaleController.getString("ClearFromCache", R.string.ClearFromCache));
+                                        options.add(OPTION_CLEAR_FROM_CACHE);
+                                        icons.add(R.drawable.msg_clear);
+                                    }
                                     items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                     options.add(OPTION_SHARE);
                                     icons.add(R.drawable.msg_shareout);
@@ -23763,6 +23776,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
                                     options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
                                     icons.add(R.drawable.msg_download);
+                                    if (OctoConfig.INSTANCE.contextClearFromCache.getValue()) {
+                                        items.add(LocaleController.getString("ClearFromCache", R.string.ClearFromCache));
+                                        options.add(OPTION_CLEAR_FROM_CACHE);
+                                        icons.add(R.drawable.msg_clear);
+                                    }
                                     items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                     options.add(OPTION_SHARE);
                                     icons.add(R.drawable.msg_shareout);
@@ -23771,6 +23789,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                         items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
                                         options.add(OPTION_SAVE_TO_GALLERY);
                                         icons.add(R.drawable.msg_gallery);
+
+                                        if (OctoConfig.INSTANCE.contextCopyPhoto.getValue()) {
+                                            items.add(LocaleController.getString("CopyPhoto", R.string.CopyPhoto));
+                                            options.add(OPTION_COPY_PHONE_NUMBER);
+                                            icons.add(R.drawable.msg_copy);
+                                        }
                                     }
                                 }
                             }
@@ -23782,6 +23806,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
                                 options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
                                 icons.add(R.drawable.msg_download);
+                                if (OctoConfig.INSTANCE.contextClearFromCache.getValue()) {
+                                    items.add(LocaleController.getString("ClearFromCache", R.string.ClearFromCache));
+                                    options.add(OPTION_CLEAR_FROM_CACHE);
+                                    icons.add(R.drawable.msg_clear);
+                                }
                                 items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                 options.add(OPTION_SHARE);
                                 icons.add(R.drawable.msg_shareout);
@@ -23809,6 +23838,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
                             options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
                             icons.add(R.drawable.msg_download);
+                            if (OctoConfig.INSTANCE.contextClearFromCache.getValue()) {
+                                items.add(LocaleController.getString("ClearFromCache", R.string.ClearFromCache));
+                                options.add(OPTION_CLEAR_FROM_CACHE);
+                                icons.add(R.drawable.msg_clear);
+                            }
                             items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                             options.add(OPTION_SHARE);
                             icons.add(R.drawable.msg_shareout);
@@ -23877,6 +23911,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             options.add(OPTION_FORWARD);
                             icons.add(R.drawable.msg_forward);
                         }
+                        if (chatMode != MODE_SCHEDULED && !getMessagesController().isChatNoForwards(currentChat)) {
+                            long my_user_id = UserConfig.getInstance(currentAccount).getClientUserId();
+                            long user_id = selectedObject.messageOwner.from_id.user_id;
+                            long chat_id = selectedObject.getChatId();
+                            if (!(chat_id == 0 && user_id == my_user_id) && OctoConfig.INSTANCE.contextSaveMessage.getValue()) {
+                                items.add(LocaleController.getString("AddToSavedMessages", R.string.AddToSavedMessages));
+                                options.add(OPTION_SAVE_TO_SAVED_MESSAGES);
+                                icons.add(R.drawable.msg_saved);
+                            }
+                        }
                         if (allowUnpin) {
                             items.add(LocaleController.getString("UnpinMessage", R.string.UnpinMessage));
                             options.add(OPTION_UNPIN);
@@ -23906,7 +23950,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("BlockContact", R.string.BlockContact));
                                 options.add(OPTION_REPORT_CHAT);
                                 icons.add(R.drawable.msg_block2);
-                            } else {
+                            } else if (OctoConfig.INSTANCE.contextReportMessage.getValue()){
                                 items.add(LocaleController.getString("ReportChat", R.string.ReportChat));
                                 options.add(OPTION_REPORT_CHAT);
                                 icons.add(R.drawable.msg_report);
@@ -23961,6 +24005,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
                                 options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
                                 icons.add(R.drawable.msg_download);
+                                if (OctoConfig.INSTANCE.contextClearFromCache.getValue()) {
+                                    items.add(LocaleController.getString("ClearFromCache", R.string.ClearFromCache));
+                                    options.add(OPTION_CLEAR_FROM_CACHE);
+                                    icons.add(R.drawable.msg_clear);
+                                }
                                 items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                 options.add(OPTION_SHARE);
                                 icons.add(R.drawable.msg_shareout);
@@ -24007,6 +24056,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         options.add(OPTION_DELETE);
                         icons.add(selectedObject.messageOwner.ttl_period != 0 ? R.drawable.msg_delete_auto : R.drawable.msg_delete);
                     }
+                }
+                if (OctoConfig.INSTANCE.contextMessageDetails.getValue()) {
+                    items.add(LocaleController.getString("MessageDetails", R.string.MessageDetails));
+                    options.add(OPTION_MESSAGE_DETAILS);
+                    icons.add(R.drawable.msg_info);
                 }
             }
 
@@ -26317,6 +26371,57 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             case OPTION_MESSAGE_DETAILS: {
                 presentFragment(new DetailsActivity(selectedObject));
+                break;
+            }
+            case OPTION_COPY_PHOTO: {
+                MessageHelper.addMessageToClipboard(selectedObject, () -> {
+                    if (BulletinFactory.canShowBulletin(ChatActivity.this)) {
+                        AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("PhotoCopied", R.string.PhotoCopied)).show());
+                    }
+                });
+                break;
+            }
+            case OPTION_CLEAR_FROM_CACHE: {
+                if (Build.VERSION.SDK_INT >= 23 && (Build.VERSION.SDK_INT <= 28 || BuildVars.NO_SCOPED_STORAGE) && getParentActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    getParentActivity().requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 4);
+                    selectedObject = null;
+                    selectedObjectGroup = null;
+                    selectedObjectToEditCaption = null;
+                    return;
+                }
+                ChatMessageCell messageCell = null;
+                int count = chatListView.getChildCount();
+                for (int a = 0; a < count; a++) {
+                    View child = chatListView.getChildAt(a);
+                    if (child instanceof ChatMessageCell) {
+                        ChatMessageCell cell = (ChatMessageCell) child;
+                        if (cell.getMessageObject() == selectedObject) {
+                            messageCell = cell;
+                            break;
+                        }
+                    }
+                }
+                String path = selectedObject.messageOwner.attachPath;
+                if (path != null && path.length() > 0) {
+                    File temp = new File(path);
+                    if (!temp.exists()) {
+                        path = null;
+                    }
+                }
+                if (path == null || path.length() == 0) {
+                    path = FileLoader.getInstance(currentAccount).getPathToMessage(selectedObject.messageOwner).toString();
+                }
+                File temp = new File(path);
+                try {
+                    //noinspection ResultOfMethodCallIgnored
+                    temp.delete();
+                    selectedObject.mediaExists = false;
+                } catch (Exception ignore) {
+                    temp.deleteOnExit();
+                }
+                if (messageCell != null) {
+                    messageCell.updateButtonState(false, true, false);
+                }
                 break;
             }
         }

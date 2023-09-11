@@ -20,6 +20,7 @@
     <string name="FormatterDay24HSec">HH:mm:ss</string>
     <string name="FormatterDay12HSec">h:mm:ss a</string>
     <string name="DatacenterStatus">Datacenter Status</string>
+    <string name="PhotoCopied">Photo copied to clipboard.</string>
 
     <!--Emoji Sets-->
     <string name="MyEmojiSets">My Emoji Sets</string>
@@ -198,8 +199,6 @@
     <string name="ResolutionMedium">Default (1280x)</string>
     <string name="ResolutionHigh">High (2560x)</string>
 
-    <!-- -->
-
     <string name="CopyTitle">Copy Title</string>
     <string name="CopyCallback">Copy Callback</string>
     <string name="CopyID">Copy ID</string>
@@ -242,6 +241,11 @@
     <string name="FileDC">Datacenter</string>
     <string name="FilePath">Path</string>
     <string name="FileSize">Size</string>
+
+    <!-- Context menu -->
+    <string name="CopyPhoto">Copy photo</string>
+    <string name="ClearFromCache">Clear from cache</string>
+    <string name="AddToSavedMessages">Save message</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

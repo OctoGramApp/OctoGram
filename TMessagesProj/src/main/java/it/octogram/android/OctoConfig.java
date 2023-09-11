@@ -98,6 +98,13 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> drawerDatacenterInfo = newConfigProperty("drawer_datacenterInfo", true);
     public final ConfigProperty<Boolean> drawerInviteFriends = newConfigProperty("drawer_inviteFriends", true);
     public final ConfigProperty<Boolean> drawerTelegramFeatures = newConfigProperty("drawer_telegramFeatures", true);
+    /*Context menu elements*/
+    public final ConfigProperty<Boolean> contextClearFromCache = newConfigProperty("context_clearFromCache", false);
+    public final ConfigProperty<Boolean> contextCopyPhoto = newConfigProperty("context_copyPhoto", true);
+    public final ConfigProperty<Boolean> contextSaveMessage = newConfigProperty("context_saveMessage", false);
+    public final ConfigProperty<Boolean> contextReportMessage = newConfigProperty("context_reportMessage", true);
+    public final ConfigProperty<Boolean> contextMessageDetails = newConfigProperty("context_messageDetails", true);
+
     /*Unlock Secret Icons*/
     public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);
     public final ConfigProperty<Boolean> unlockedChupa = newConfigProperty("unlockedChupa", false);
