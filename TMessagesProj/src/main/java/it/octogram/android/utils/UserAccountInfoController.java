@@ -54,8 +54,6 @@ public class UserAccountInfoController {
         if (OctoConfig.INSTANCE.dcIdType.getValue() == OctoConfig.DcIdType.BOT_API) {
             if (ChatObject.isChannel(chat)) {
                 id = -1000000000000L - id;
-            } else {
-                id = -id;
             }
         }
         return id;
