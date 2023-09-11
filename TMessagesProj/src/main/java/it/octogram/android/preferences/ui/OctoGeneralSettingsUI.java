@@ -140,6 +140,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.openArchiveOnPull)
                             .title(LocaleController.formatString("OpenArchiveOnPull", R.string.OpenArchiveOnPull))
+                            .description(LocaleController.formatString("OpenArchiveOnPull_Desc", R.string.OpenArchiveOnPull_Desc))
                             .build());
                 })
                 .category(LocaleController.formatString("MediaTab", R.string.MediaTab), category -> {
