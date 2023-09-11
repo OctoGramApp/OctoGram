@@ -116,6 +116,7 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.zxing.common.detector.MathUtils;
 
 import it.octogram.android.CustomEmojiController;
+import it.octogram.android.preferences.ui.DetailsActivity;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -990,6 +991,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int OPTION_OPEN_PROFILE = 104;
 
     private final static int OPTION_SAVE_TO_SAVED_MESSAGES = 200;
+    private final static int OPTION_MESSAGE_DETAILS = 201;
 
     private final static int[] allowedNotificationsDuringChatListAnimations = new int[]{
             NotificationCenter.messagesRead,
@@ -26311,6 +26313,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
                 createUndoView();
                 undoView.showWithAction(getUserConfig().getClientUserId(), UndoView.ACTION_FWD_MESSAGES, messages.size());
+                break;
+            }
+            case OPTION_MESSAGE_DETAILS: {
+                presentFragment(new DetailsActivity(selectedObject));
                 break;
             }
         }

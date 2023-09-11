@@ -221,6 +221,28 @@
     <string name="MKVAsVideo">Show MKV as Video</string>
     <string name="StreamAllVideos">Stream All Videos</string>
 
+    <!-- Message Details -->
+    <string name="MessageDetails">Details</string>
+    <string name="UserInfo">User</string>
+    <string name="BotInfo">Bot</string>
+    <string name="FullName">Full Name</string>
+    <string name="MessageText">Text</string>
+    <string name="MessageTextLength">Text Length</string>
+    <string name="EditedDate">Edited Date</string>
+    <string name="MessageDate">Date</string>
+    <string name="ForwardsNumber">Forwards</string>
+    <string name="ForwardedFrom">Forwarded from</string>
+    <string name="MessageScheduledDate">Scheduled date</string>
+    <string name="MessageScheduledWhenOnline">When online</string>
+    <string name="MessageInReply">Message in reply</string>
+    <string name="InReplyTo">In reply to</string>
+    <string name="FileName">Name</string>
+    <string name="MimeType">Mime Type</string>
+    <string name="AssociatedEmoji">Associated Emoji</string>
+    <string name="FileDC">Datacenter</string>
+    <string name="FilePath">Path</string>
+    <string name="FileSize">Size</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
