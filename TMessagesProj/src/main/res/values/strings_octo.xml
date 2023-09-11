@@ -107,7 +107,7 @@
     <string name="DisableCameraPreview">Disable camera preview</string>
     <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
     <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
-    <string name="HideAllChatFolder">Hide "All Chats" folder</string>
+    <string name="HideAllChatFolder">Hide \"All Chats\" folder</string>
     <string name="HideAllChatFolders">Remove all folders</string>
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
