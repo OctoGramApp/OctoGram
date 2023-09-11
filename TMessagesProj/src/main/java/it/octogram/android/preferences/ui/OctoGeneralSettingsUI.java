@@ -82,8 +82,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .options(List.of(
                                     new Pair<>(OctoConfig.DcIdStyle.NONE, LocaleController.formatString("Nothing", R.string.Nothing)),
                                     new Pair<>(OctoConfig.DcIdStyle.OWLGRAM, "OwlGram"),
-                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram")//,
-                                    //new Pair<>(OctoConfig.DcIdStyle.MINIMAL, "Minimal")
+                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram"),
+                                    new Pair<>(OctoConfig.DcIdStyle.MINIMAL, "Minimal")
                             ))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .title(LocaleController.formatString("Style", R.string.Style))
