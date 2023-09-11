@@ -424,7 +424,7 @@ public class DatabaseMigrationHelper {
             version = 64;
         }
         if (version == 64) {
-            database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter(id INTEGER PRIMARY KEY, ord INTEGER, unread_count INTEGER, flags INTEGER, title TEXT)").stepThis().dispose();
+            database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter_octo(id INTEGER PRIMARY KEY, ord INTEGER, unread_count INTEGER, flags INTEGER, title TEXT, emoticon TEXT)").stepThis().dispose();
             database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter_ep(id INTEGER, peer INTEGER, PRIMARY KEY (id, peer))").stepThis().dispose();
             database.executeFast("PRAGMA user_version = 65").stepThis().dispose();
             version = 65;
@@ -1397,7 +1397,7 @@ public class DatabaseMigrationHelper {
             excludeTables.add("media_counts_v2");
             excludeTables.add("media_counts_topics");
             excludeTables.add("dialogs");
-            excludeTables.add("dialog_filter");
+            excludeTables.add("dialog_filter_octo");
             excludeTables.add("dialog_filter_ep");
             excludeTables.add("dialog_filter_pin_v2");
 
