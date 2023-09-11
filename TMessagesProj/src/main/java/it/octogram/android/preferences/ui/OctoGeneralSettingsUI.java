@@ -174,6 +174,11 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 })
                 .category(LocaleController.formatString("FilterAvailableTitle", R.string.FilterAvailableTitle), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.hideOnlyAllChatsFolder)
+                            .title(LocaleController.formatString("HideAllChatFolder", R.string.HideAllChatFolder))
+                            .requiresRestart(true)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideChatFolders)
                             .title(LocaleController.formatString("HideAllChatFolders", R.string.HideAllChatFolders))
                             .requiresRestart(true)

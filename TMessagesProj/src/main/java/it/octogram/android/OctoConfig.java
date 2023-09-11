@@ -55,6 +55,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> startWithRearCamera = newConfigProperty("startWithRearCamera", false);
     public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
     public final ConfigProperty<Boolean> hideSentTimeOnStickers = newConfigProperty("hideSentTimeOnStickers", false);
+    public final ConfigProperty<Boolean> hideOnlyAllChatsFolder = newConfigProperty("hideOnlyAllChatsFolder", false);
     public final ConfigProperty<Boolean> hideChatFolders = newConfigProperty("hideChatFolders", false);
     public final ConfigProperty<Boolean> hideStories = newConfigProperty("hideStories", false);
     public final ConfigProperty<Integer> doubleTapAction = newConfigProperty("doubleTapAction", DoubleTapAction.REACTION);
