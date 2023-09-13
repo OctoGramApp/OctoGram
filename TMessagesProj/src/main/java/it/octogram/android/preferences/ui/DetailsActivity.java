@@ -6,16 +6,20 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import it.octogram.android.Datacenter;
-import it.octogram.android.preferences.ui.custom.DetailsPreviewMessages;
-import it.octogram.android.preferences.ui.custom.TextDetailCellMultiline;
-import it.octogram.android.utils.MessageStringHelper;
-import it.octogram.android.utils.UserAccountInfoController;
-import org.telegram.messenger.*;
+
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Emoji;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -29,6 +33,12 @@ import org.telegram.ui.Components.RecyclerListView;
 
 import java.io.File;
 import java.util.Date;
+
+import it.octogram.android.Datacenter;
+import it.octogram.android.preferences.ui.custom.DetailsPreviewMessages;
+import it.octogram.android.preferences.ui.custom.TextDetailCellMultiline;
+import it.octogram.android.utils.MessageStringHelper;
+import it.octogram.android.utils.UserAccountInfoController;
 
 public class DetailsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
     private int rowCount;

@@ -6,10 +6,16 @@ package it.octogram.android.preferences.ui.components;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RadialGradient;
+import android.graphics.Shader;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
+
 import androidx.core.graphics.ColorUtils;
+
 import org.telegram.ui.Components.BlobDrawable;
 import org.telegram.ui.Components.WaveDrawable;
 

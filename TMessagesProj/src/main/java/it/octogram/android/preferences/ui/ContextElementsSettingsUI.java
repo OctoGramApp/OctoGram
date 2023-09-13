@@ -9,14 +9,16 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
+
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.CheckboxRow;
-import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 
 public class ContextElementsSettingsUI implements PreferencesEntry {
     @Override

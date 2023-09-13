@@ -9,11 +9,10 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-
 import android.os.Parcelable;
+
 import androidx.recyclerview.widget.RecyclerView;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.rows.impl.*;
+
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -23,6 +22,14 @@ import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.ShadowRow;
+import it.octogram.android.preferences.rows.impl.SliderRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.rows.impl.TextDetailRow;
+import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 
 public class OctoAppearanceUI implements PreferencesEntry {

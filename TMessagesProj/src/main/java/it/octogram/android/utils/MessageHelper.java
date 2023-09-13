@@ -5,8 +5,14 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+
 import androidx.core.content.FileProvider;
-import org.telegram.messenger.*;
+
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.FileLog;
+import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.UserConfig;
 
 import java.io.File;
 

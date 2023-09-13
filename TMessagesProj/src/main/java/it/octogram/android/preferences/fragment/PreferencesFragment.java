@@ -12,7 +12,6 @@ import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -27,7 +26,10 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.telegram.messenger.*;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -44,6 +46,7 @@ import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.Components.UndoView;
+import org.telegram.ui.PremiumPreviewFragment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +68,6 @@ import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
-import org.telegram.ui.PremiumPreviewFragment;
 
 /*
  * This library is *heavily* inspired by CatoGramX's preferences library.

@@ -12,7 +12,6 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
-import it.octogram.android.preferences.fragment.PreferencesFragment;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -22,6 +21,7 @@ import java.util.ArrayList;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;

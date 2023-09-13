@@ -5,9 +5,20 @@
 package it.octogram.android.preferences.ui.components;
 
 import android.animation.ValueAnimator;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.RadialGradient;
+import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.view.animation.LinearInterpolator;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 

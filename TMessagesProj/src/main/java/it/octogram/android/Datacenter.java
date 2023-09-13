@@ -9,6 +9,7 @@
 package it.octogram.android;
 
 import android.graphics.Color;
+
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 

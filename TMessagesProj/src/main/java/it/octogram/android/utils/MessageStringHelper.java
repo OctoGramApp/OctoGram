@@ -9,14 +9,30 @@
 package it.octogram.android.utils;
 
 import android.graphics.Typeface;
-import android.text.*;
+import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.LocaleSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
 import android.text.style.TypefaceSpan;
-import android.text.style.*;
+import android.text.style.URLSpan;
+import android.text.style.UnderlineSpan;
 import android.view.View;
+
 import org.telegram.messenger.MediaDataController;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.*;
+import org.telegram.ui.Components.TextStyleSpan;
+import org.telegram.ui.Components.URLSpanMono;
+import org.telegram.ui.Components.URLSpanNoUnderline;
+import org.telegram.ui.Components.URLSpanReplacement;
+import org.telegram.ui.Components.URLSpanUserMention;
 
 import java.util.ArrayList;
 import java.util.Locale;
