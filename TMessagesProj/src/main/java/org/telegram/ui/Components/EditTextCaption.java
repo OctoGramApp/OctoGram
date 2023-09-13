@@ -49,6 +49,7 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.utils.CopyUtilities;
 import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.AlertDialogDecor;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.List;
@@ -73,6 +74,8 @@ public class EditTextCaption extends EditTextBoldCursor {
     private int lineCount;
     private boolean isInitLineCount;
     private final Theme.ResourcesProvider resourcesProvider;
+    private AlertDialog creationLinkDialog;
+    public boolean adaptiveCreateLinkDialog;
 
     public interface EditTextCaptionDelegate {
         void onSpansChanged();
@@ -166,7 +169,12 @@ public class EditTextCaption extends EditTextBoldCursor {
     }
 
     public void makeSelectedUrl() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), resourcesProvider);
+        AlertDialog.Builder builder;
+        if (adaptiveCreateLinkDialog) {
+            builder = new AlertDialogDecor.Builder(getContext(), resourcesProvider);
+        } else {
+            builder = new AlertDialog.Builder(getContext(), resourcesProvider);
+        }
         builder.setTitle(LocaleController.getString("CreateLink", R.string.CreateLink));
 
         final EditTextBoldCursor editText = new EditTextBoldCursor(getContext()) {
@@ -230,21 +238,46 @@ public class EditTextCaption extends EditTextBoldCursor {
             }
         });
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
-        builder.show().setOnShowListener(dialog -> {
-            editText.requestFocus();
-            AndroidUtilities.showKeyboard(editText);
-        });
-        if (editText != null) {
-            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) editText.getLayoutParams();
-            if (layoutParams != null) {
-                if (layoutParams instanceof FrameLayout.LayoutParams) {
-                    ((FrameLayout.LayoutParams) layoutParams).gravity = Gravity.CENTER_HORIZONTAL;
+        if (adaptiveCreateLinkDialog) {
+            creationLinkDialog = builder.create();
+            creationLinkDialog.setOnDismissListener(dialog -> {
+                creationLinkDialog = null;
+                requestFocus();
+            });
+            creationLinkDialog.setOnShowListener(dialog -> {
+                editText.requestFocus();
+                AndroidUtilities.showKeyboard(editText);
+            });
+            creationLinkDialog.showDelayed(250);
+            if (editText != null) {
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) editText.getLayoutParams();
+                if (layoutParams != null) {
+                    if (layoutParams instanceof FrameLayout.LayoutParams) {
+                        ((FrameLayout.LayoutParams) layoutParams).gravity = Gravity.CENTER_HORIZONTAL;
+                    }
+                    layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(24);
+                    layoutParams.height = AndroidUtilities.dp(36);
+                    editText.setLayoutParams(layoutParams);
                 }
-                layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(24);
-                layoutParams.height = AndroidUtilities.dp(36);
-                editText.setLayoutParams(layoutParams);
+                editText.setSelection(0, editText.getText().length());
             }
-            editText.setSelection(0, editText.getText().length());
+        } else {
+            builder.show().setOnShowListener(dialog -> {
+                editText.requestFocus();
+                AndroidUtilities.showKeyboard(editText);
+            });
+            if (editText != null) {
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) editText.getLayoutParams();
+                if (layoutParams != null) {
+                    if (layoutParams instanceof FrameLayout.LayoutParams) {
+                        ((FrameLayout.LayoutParams) layoutParams).gravity = Gravity.CENTER_HORIZONTAL;
+                    }
+                    layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(24);
+                    layoutParams.height = AndroidUtilities.dp(36);
+                    editText.setLayoutParams(layoutParams);
+                }
+                editText.setSelection(0, editText.getText().length());
+            }
         }
     }
 
@@ -329,6 +362,14 @@ public class EditTextCaption extends EditTextBoldCursor {
         }
     }
 
+
+    public boolean closeCreationLinkDialog() {
+        if (creationLinkDialog != null && creationLinkDialog.isShowing()) {
+            creationLinkDialog.dismiss();
+            return true;
+        }
+        return false;
+    }
 
     public void makeSelectedRegular() {
         applyTextStyleToSelection(null);
@@ -628,7 +669,7 @@ public class EditTextCaption extends EditTextBoldCursor {
                         }
                     }
                     int start = Math.max(0, getSelectionStart());
-                    int end   = Math.min(getText().length(), getSelectionEnd());
+                    int end = Math.min(getText().length(), getSelectionEnd());
                     setText(getText().replace(start, end, pasted));
                     setSelection(start + pasted.length(), start + pasted.length());
                     return true;
