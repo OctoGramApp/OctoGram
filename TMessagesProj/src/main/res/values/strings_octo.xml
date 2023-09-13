@@ -9,7 +9,6 @@
   -->
 
 <resources>
-    <string name="Style">Style</string>
     <string name="Type">Type</string>
     <string name="Reaction">Reaction</string>
     <string name="Nothing">None</string>
