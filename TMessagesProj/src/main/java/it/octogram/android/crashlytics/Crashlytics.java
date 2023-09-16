@@ -12,11 +12,7 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 
-import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildVars;
-import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -62,7 +58,7 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
         writer.close();
     }
 
-    private String getSystemInfo() throws IllegalAccessException {
+    public static String getSystemInfo() throws IllegalAccessException {
         String builder = LocaleController.getInstance().formatterStats.format(System.currentTimeMillis()) + "\n\n" +
                 "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildVars.BUILD_VERSION + ")\n" +
                 "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
@@ -76,7 +72,7 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
     }
 
     // I don't even know why I did this
-    private String getOctoConfiguration() throws IllegalAccessException {
+    private static String getOctoConfiguration() throws IllegalAccessException {
         StringBuilder builder = new StringBuilder();
         builder.append("{").append("\n");
 
@@ -99,7 +95,7 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
         return builder.toString();
     }
 
-    private String getPerformanceClassString() {
+    private static String getPerformanceClassString() {
         switch (SharedConfig.getDevicePerformanceClass()) {
             case SharedConfig.PERFORMANCE_CLASS_LOW:
                 return "LOW";
@@ -112,6 +108,22 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
         }
     }
 
+    public static void deleteCrashLogs() {
+        File[] files = getArchivedCrashFiles();
+        for (File file : files) {
+            file.delete();
+        }
+    }
+
+    public static File getLatestArchivedCrashFile() {
+        File[] files = getArchivedCrashFiles();
+        if (files.length > 0) {
+            return files[files.length - 1];
+        } else {
+            return null;
+        }
+    }
+
     public static String getLatestCrashDate() {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(getLatestCrashFile()));
@@ -120,9 +132,14 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
 
             return line.replace(" ", "_").replace(",", "").replace(":", "_");
         } catch (IOException e) {
-            e.printStackTrace();
+            FileLog.e(e);
             return "null";
         }
+    }
+
+    public static File[] getArchivedCrashFiles() {
+        File dir = ApplicationLoader.getFilesDirFixed();
+        return dir.listFiles((dir1, name) -> name.endsWith(".log"));
     }
 
     public static File getLatestCrashFile() {

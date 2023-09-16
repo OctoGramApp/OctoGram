@@ -246,6 +246,20 @@
     <string name="ClearFromCache">Clear from cache</string>
     <string name="AddToSavedMessages">Save message</string>
 
+    <!-- Crash history -->
+    <string name="CrashHistory">Crash History</string>
+    <string name="CrashHistory_Desc">View crash logs and configuration</string>
+    <string name="NoCrashLogFound">No crash log found</string>
+    <string name="CouldNotCopyFile">Could not copy file</string>
+    <string name="CopyOctogramConfiguration">Copy Octogram Configuration</string>
+    <string name="CopyLatestCrashLog">Copy Latest Crash Log</string>
+    <string name="CrashLogInfo">Crash logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
+    <string name="CrashesDeleteConfirmation">Do you want to delete %s crash logs? This action is irreversible</string>
+    <string name="CrashDeleteConfirmation">Do you want to delete one crash log? This action is irreversible</string>
+    <string name="CrashesDeleted">%s crash logs have been cleared</string>
+    <string name="CrashDeleted">One crash log has been cleared</string>
+    <string name="CrashedOnDate">Crashed on: %s</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
