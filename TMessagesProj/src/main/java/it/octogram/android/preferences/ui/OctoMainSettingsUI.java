@@ -67,6 +67,14 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.formatString("OctoMainSettingsInfoCategory", R.string.OctoMainSettingsInfoCategory), category -> {
+//                    category.row(new TextDetailRow.TextDetailRowBuilder()
+//                            .onClick(() -> {
+//                                throw new RuntimeException("Test crash");
+//                            })
+//                            .icon(R.drawable.list_warning_sign)
+//                            .title("crash")
+//                            .description("crash")
+//                            .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
                             .icon(R.drawable.datacenter_status)

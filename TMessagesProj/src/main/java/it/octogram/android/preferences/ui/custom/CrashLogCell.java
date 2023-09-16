@@ -23,6 +23,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.LayoutHelper;
 
 import java.io.File;
@@ -34,6 +35,7 @@ public class CrashLogCell extends LinearLayout {
     private final LinearLayout linearLayout;
     private final TextView textView;
     private final TextView crashDateTextView;
+    private final CheckBox2 checkBox;
 
     private boolean needDivider = false;
     private File crashLog;
@@ -47,6 +49,12 @@ public class CrashLogCell extends LinearLayout {
 
         ImageView imageView = new ImageView(context);
         imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.bot_file));
+
+        checkBox = new CheckBox2(context, 21);
+        checkBox.setColor(-1, Theme.key_windowBackgroundWhite, Theme.key_checkboxCheck);
+        checkBox.setDrawUnchecked(false);
+        checkBox.setDrawBackgroundAsArc(3);
+        relativeLayout.addView(checkBox, LayoutHelper.createFrame(24, 24, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, LocaleController.isRTL ? 0 : 40, 40, LocaleController.isRTL ? 39 : 0, 0));
 
         relativeLayout.addView(imageView, LayoutHelper.createRelative(25, 25, RelativeLayout.CENTER_IN_PARENT));
         addView(relativeLayout, LayoutHelper.createLinear(65, 65));
@@ -68,6 +76,7 @@ public class CrashLogCell extends LinearLayout {
         crashDateTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         crashDateTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         linearLayout.addView(crashDateTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 10, 0, 0, 0));
+
     }
 
     public void setData(File crashLog, boolean divider) {
@@ -84,6 +93,9 @@ public class CrashLogCell extends LinearLayout {
         setWillNotDraw(!needDivider);
     }
 
+    public void setSelected(boolean selected, boolean animated) {
+        checkBox.setChecked(selected, animated);
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {

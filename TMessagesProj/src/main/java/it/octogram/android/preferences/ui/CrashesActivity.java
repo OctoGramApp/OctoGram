@@ -256,7 +256,10 @@ public class CrashesActivity extends BaseFragment {
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, @NonNull List payloads) {
+            Object payload = payloads.isEmpty() ? null : payloads.get(0);
+            boolean partial = PARTIAL.equals(payload);
+
             switch (holder.getItemViewType()) {
                 case TYPE_SETTINGS_HEADER:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
@@ -285,9 +288,15 @@ public class CrashesActivity extends BaseFragment {
                         CrashLogCell crashLogCell = (CrashLogCell) holder.itemView;
                         File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
                         crashLogCell.setData(file, true);
+                        crashLogCell.setSelected(selectedItems.get(position, false), partial);
                     }
                     break;
             }
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull @NotNull RecyclerView.ViewHolder holder, int position) {
+
         }
 
         @Override
