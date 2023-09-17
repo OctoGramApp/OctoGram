@@ -1959,6 +1959,12 @@ public class AndroidUtilities {
         }
     }
 
+    public static void clearTypefaceCache() {
+        synchronized (typefaceCache) {
+            typefaceCache.clear();
+        }
+    }
+
     public static boolean isWaitingForSms() {
         boolean value;
         synchronized (smsLock) {

@@ -12,6 +12,7 @@ import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Parcelable;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -32,6 +33,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
 import org.telegram.ui.Cells.HeaderCell;
@@ -533,6 +535,15 @@ public class PreferencesFragment extends BaseFragment {
             }
             super.notifyItemRemoved(position);
         }
+    }
+
+    public void rebuildAllFragmentsWithLast() {
+        Parcelable recyclerViewState = null;
+        if (listView.getLayoutManager() != null) {
+            recyclerViewState = listView.getLayoutManager().onSaveInstanceState();
+        }
+        parentLayout.rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+        listView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
     }
 
 

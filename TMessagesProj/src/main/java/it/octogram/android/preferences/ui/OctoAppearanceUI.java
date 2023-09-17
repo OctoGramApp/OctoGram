@@ -13,9 +13,11 @@ import android.os.Parcelable;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 
 import it.octogram.android.CustomEmojiController;
@@ -61,6 +63,10 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title(LocaleController.getString("EmojiSets", R.string.EmojiSets))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> {
+                                AndroidUtilities.clearTypefaceCache();
+                                fragment.rebuildAllFragmentsWithLast();
+                            })
                             .icon(R.drawable.msg_text_outlined)
                             .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
                             .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
