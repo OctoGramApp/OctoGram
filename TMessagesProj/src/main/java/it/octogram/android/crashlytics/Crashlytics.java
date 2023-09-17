@@ -12,7 +12,12 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 
-import org.telegram.messenger.*;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.FileLog;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.SharedConfig;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
