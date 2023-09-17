@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/OctoGramApp/website/main/assets/images/applogo.preview.jpg" width="150" align="left"/>
+<img src="https://raw.githubusercontent.com/OctoGramApp/website/main/assets/readme.images/applogo.png" width="150" align="left"/>
 
 # 🐙 OctoGram
 *[Licensed under the GNU General Public License v2.0](https://github.com/OctoGramApp/OctoGram/blob/main/LICENSE)*
