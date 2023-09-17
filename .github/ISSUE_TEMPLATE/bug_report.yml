@@ -1,0 +1,65 @@
+name: Bug Report
+description: Something is wrong with the app
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Octogram Bug Report
+        Thank you for helping us improve Octogram! Please follow these guidelines when reporting a bug:
+
+        - **Check for Duplicates:** Ensure you have checked existing issues to avoid duplication. Duplicate issues will be closed.
+        - **Verify Default Client:** Make sure this issue doesn't occur in the latest default Telegram client.
+        - **English Only:** Please use English when submitting your request. Issues in other languages will be closed.
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe what you expected to happen when using Octogram.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current Behavior
+      description: Describe what is currently happening, including any unexpected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: how-to-reproduce
+    attributes:
+      label: Steps to Reproduce (if applicable)
+      description: Provide a clear step-by-step guide on how to reproduce the bug.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional Information
+      description: Include any context or observations that could help us understand and resolve the bug.
+      placeholder: Add any relevant details here.
+    validations:
+      required: false
+
+  - type: textarea
+    id: crash-logs
+    attributes:
+      label: Octogram Crash Log
+      description: Paste the Octogram crash log here. Find it at OctoGram Settings > Crash History > Copy Latest Crash Log.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to the following
+      options:
+        - label: Checked for similar issues and confirmed this is unique
+          required: true
+        - label: This issue does not occur in the latest default Telegram client
+          required: true
