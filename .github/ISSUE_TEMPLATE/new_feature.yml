@@ -1,6 +1,7 @@
 name: Feature Request
 description: Request a new feature for Octogram
 labels: ["feature"]
+title: "[Feature]: <title-here>"
 body:
   - type: markdown
     attributes:
@@ -13,20 +14,25 @@ body:
         - **Do not ask to explicitly take unique features from other clients:** Please do not ask.
         - **English Only:** Please use English when submitting your request. Requests in other languages will be closed.
 
-  - type: textarea
-    id: feature-description
-    attributes:
-      label: Feature Description
-      description: Describe the feature you would like to see added to Octogram. Please be as detailed as possible.
-      placeholder: Add a description of the feature here.
-    validations:
-      required: true
+        ---
 
   - type: checkboxes
-    id: terms
     attributes:
       label: Code of Conduct
       description: By submitting this request, you agree to the following
       options:
         - label: Checked for similar requests and confirmed this is unique
           required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+  - type: textarea
+    attributes:
+      label: Feature Description
+      description: Describe the feature you would like to see added to Octogram. Please be as detailed as possible.
+      placeholder: Add a description of the feature here.
+    validations:
+      required: true
