@@ -387,6 +387,7 @@ public class CrashesActivity extends BaseFragment {
                                 unableToDeleteCount++;
                             }
                         }
+                        selectedItems.clear();
                         updateRowsId();
                         notifyDataSetChanged();
                         actionBar.hideActionMode();
