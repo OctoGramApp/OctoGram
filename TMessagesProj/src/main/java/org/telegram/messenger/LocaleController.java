@@ -66,6 +66,7 @@ public class LocaleController {
     public FastDateFormat formatterYear;
     public FastDateFormat formatterYearMax;
     public FastDateFormat formatterStats;
+    public FastDateFormat formatterFull;
     public FastDateFormat formatterBannedUntil;
     public FastDateFormat formatterBannedUntilThisYear;
     public FastDateFormat chatDate;
@@ -1925,6 +1926,7 @@ public class LocaleController {
         formatterDayWithSeconds = createFormatter(lang.toLowerCase().equals("ar") || lang.toLowerCase().equals("ko") ? locale : Locale.US, is24HourFormat ? getStringInternal("FormatterDay24HSec", R.string.FormatterDay24HSec) : getStringInternal("FormatterDay12HSec", R.string.FormatterDay12HSec), is24HourFormat ? "HH:mm:ss" : "h:mm:ss a");
         if (OctoConfig.INSTANCE.formatTimeWithSeconds.getValue()) formatterDay = formatterDayWithSeconds;
         formatterStats = createFormatter(locale, is24HourFormat ? getStringInternal("formatterStats24H", R.string.formatterStats24H) : getStringInternal("formatterStats12H", R.string.formatterStats12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
+        formatterFull = createFormatter(locale, "MMM dd yyyy, HH:mm:ss", "MMM dd yyyy, HH:mm:ss");
         formatterBannedUntil = createFormatter(locale, is24HourFormat ? getStringInternal("formatterBannedUntil24H", R.string.formatterBannedUntil24H) : getStringInternal("formatterBannedUntil12H", R.string.formatterBannedUntil12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
         formatterBannedUntilThisYear = createFormatter(locale, is24HourFormat ? getStringInternal("formatterBannedUntilThisYear24H", R.string.formatterBannedUntilThisYear24H) : getStringInternal("formatterBannedUntilThisYear12H", R.string.formatterBannedUntilThisYear12H), is24HourFormat ? "MMM dd, HH:mm" : "MMM dd, h:mm a");
         formatterScheduleSend[0] = createFormatter(locale, getStringInternal("SendTodayAt", R.string.SendTodayAt), "'Send today at' HH:mm");

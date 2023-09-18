@@ -64,7 +64,7 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
     }
 
     public static String getSystemInfo() throws IllegalAccessException {
-        String builder = LocaleController.getInstance().formatterStats.format(System.currentTimeMillis()) + "\n\n" +
+        return LocaleController.getInstance().formatterFull.format(System.currentTimeMillis()) + "\n\n" +
                 "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildVars.BUILD_VERSION + ")\n" +
                 "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
                 "Device: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
@@ -73,7 +73,6 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
                 "Performance Class: " + getPerformanceClassString() + "\n" +
                 "Locale: " + LocaleController.getSystemLocaleStringIso639() + "\n" +
                 "Octogram Configuration: " + getOctoConfiguration() + "\n";
-        return builder;
     }
 
     // I don't even know why I did this
