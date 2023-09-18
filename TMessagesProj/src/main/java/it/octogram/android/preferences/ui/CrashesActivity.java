@@ -45,7 +45,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
@@ -301,9 +304,19 @@ public class CrashesActivity extends BaseFragment {
                 case TYPE_CRASH_FILE:
                     if (position >= crashesStartRow && position < crashesEndRow) {
                         CrashLogCell crashLogCell = (CrashLogCell) holder.itemView;
-                        File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
-                        crashLogCell.setData(file, true);
-                        crashLogCell.setSelected(selectedItems.get(position, false), partial);
+
+                        List<File> sorted = Arrays.stream(Crashlytics.getArchivedCrashFiles())
+                                .sorted(Comparator.comparingLong(File::lastModified))
+                                .collect(Collectors.toList());
+                        for (int i = 0; i < sorted.size(); i++) {
+                            File file = sorted.get(i);
+                            if (crashesEndRow - position - 1 == i) {
+                                crashLogCell.setData(file, true);
+                                crashLogCell.setSelected(selectedItems.get(position, false), partial);
+                                break;
+                            }
+                        }
+
                     }
                     break;
             }
