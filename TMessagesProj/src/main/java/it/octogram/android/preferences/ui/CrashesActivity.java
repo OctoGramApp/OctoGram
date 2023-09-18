@@ -378,10 +378,14 @@ public class CrashesActivity extends BaseFragment {
                         }
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("OctoGram");
+                    builder.setTitle(LocaleController.getString(R.string.BuildAppName));
                     builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog, which) -> {
+                        int unableToDeleteCount = 0;
                         for (File file : toDelete) {
-                            file.delete();
+                            if (!file.delete()) {
+                                FileLog.e("Could not delete file " + file);
+                                unableToDeleteCount++;
+                            }
                         }
                         updateRowsId();
                         notifyDataSetChanged();
@@ -392,6 +396,15 @@ public class CrashesActivity extends BaseFragment {
                             message = LocaleController.formatString("CrashesDeleted", R.string.CrashesDeleted, toDelete.size());
                         } else {
                             message = LocaleController.formatString("CrashDeleted", R.string.CrashDeleted);
+                        }
+                        if (unableToDeleteCount > 0) {
+                            message = LocaleController.formatString("CrashesUnableToDelete", R.string.CrashesUnableToDelete, unableToDeleteCount);
+                            AlertDialog.Builder unableToDeleteBuilder = new AlertDialog.Builder(context);
+                            unableToDeleteBuilder.setTitle(LocaleController.getString(R.string.BuildAppName));
+                            unableToDeleteBuilder.setMessage(message);
+                            unableToDeleteBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> {
+                                dialog1.dismiss();
+                            });
                         }
                         BulletinFactory.of(CrashesActivity.this).createErrorBulletin(message).show();
                     });

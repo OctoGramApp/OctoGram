@@ -257,6 +257,7 @@
     <string name="CrashesDeleteConfirmation">Do you want to delete %s crash logs? This action is irreversible</string>
     <string name="CrashDeleteConfirmation">Do you want to delete one crash log? This action is irreversible</string>
     <string name="CrashesDeleted">%s crash logs have been cleared</string>
+    <string name="CrashesUnableToDelete">Could not delete %s crash logs!</string>
     <string name="CrashDeleted">One crash log has been cleared</string>
     <string name="CrashedOnDate">Crashed on: %s</string>
 
