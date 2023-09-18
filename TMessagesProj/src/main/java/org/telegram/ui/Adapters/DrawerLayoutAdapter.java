@@ -261,6 +261,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (OctoConfig.INSTANCE.eventType.getValue() > 0) {
             eventType = OctoConfig.INSTANCE.eventType.getValue() - 1;
         }
+        int datacenterId = AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId();
+
         int newGroupIcon;
         int newSecretIcon;
         int newChannelIcon = R.drawable.msg_channel;
@@ -272,7 +274,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         int helpIcon;
         int peopleNearbyIcon;
         int octogramIcon = R.drawable.intro_octo;
-        int datacenterIcon = Datacenter.getDcIcon(AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId());
+        int datacenterIcon = Datacenter.getDcInfo(datacenterId).icon;
         if (eventType == 0) {
             newGroupIcon = R.drawable.msg_groups_ny;
             //newSecretIcon = R.drawable.msg_secret_ny;
