@@ -43,7 +43,7 @@ public class TextCheckCell2 extends FrameLayout {
     private LinearLayout collapseViewContainer;
     private AnimatedTextView animatedTextView;
     private View collapsedArrow;
-    private View checkBoxClickArea;
+    public View checkBoxClickArea;
 
     public void setCollapseArrow(String text, boolean collapsed, Runnable onCheckClick) {
         if (collapseViewContainer == null) {

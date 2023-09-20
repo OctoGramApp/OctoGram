@@ -52,6 +52,7 @@ public class SlideChooseView extends View {
     private final Theme.ResourcesProvider resourcesProvider;
 
     private boolean touchWasClose = false;
+    private boolean slidable = true;
 
     public SlideChooseView(Context context) {
         this(context, null);
@@ -113,6 +114,9 @@ public class SlideChooseView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
+        if(!isSlidable()){
+            return true;
+        }
         float indexTouch = MathUtils.clamp((x - sideSide + circleSize / 2f) / (lineSize + gapSize * 2 + circleSize), 0, optionsStr.length - 1);
         boolean isClose = Math.abs(indexTouch - Math.round(indexTouch)) < .35f;
         if (isClose) {
@@ -262,6 +266,13 @@ public class SlideChooseView extends View {
         return Theme.getColor(key, resourcesProvider);
     }
 
+    public void setSlidable(boolean slidable) {
+        this.slidable = slidable;
+    }
+
+    public boolean isSlidable() {
+        return slidable;
+    }
 
     public interface Callback {
         void onOptionSelected(int index);

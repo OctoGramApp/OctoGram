@@ -261,6 +261,15 @@
     <string name="CrashDeleted">One crash log has been cleared</string>
     <string name="CrashedOnDate">Crashed on: %s</string>
 
+    <!-- Permissions -->
+    <string name="SendMediaPermissionStickers">Stickers</string>
+    <string name="SendMediaPermissionGifs">GIFs</string>
+    <string name="SendMediaPermissionGames">Animated Games</string>
+    <string name="SendMediaPermissionInline">Inline Bots</string>
+    <string name="UserRestrictionsNoSendGifs">no GIFs</string>
+    <string name="UserRestrictionsNoSendGames">no games</string>
+    <string name="UserRestrictionsNoSendInlineBots">no inline bots</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
