@@ -23,6 +23,8 @@ import android.util.Xml;
 import androidx.annotation.StringRes;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
+
 import org.telegram.messenger.time.FastDateFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -1061,6 +1063,9 @@ public class LocaleController {
     }
 
     private String getStringInternal(String key, int res) {
+        if (OctoUtils.isTelegramString(key, res)) {
+            return OctoUtils.getCorrectAppName();
+        }
         return getStringInternal(key, null, res);
     }
 
@@ -1085,6 +1090,9 @@ public class LocaleController {
     }
 
     public static String getServerString(String key) {
+        if (OctoUtils.isTelegramString(key)) {
+            return OctoUtils.getCorrectAppName();
+        }
         String value = getInstance().localeValues.get(key);
         if (value == null) {
             int resourceId = ApplicationLoader.applicationContext.getResources().getIdentifier(key, "string", ApplicationLoader.applicationContext.getPackageName());
