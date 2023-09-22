@@ -289,6 +289,7 @@ public class LNavigation extends FrameLayout implements INavigationLayout, Float
     private String titleOverlayTitle;
     private int titleOverlayTitleId;
     private Runnable titleOverlayAction;
+    private boolean isSheet;
 
     public LNavigation(@NonNull Context context) {
         this(context, null);
@@ -1154,6 +1155,17 @@ public class LNavigation extends FrameLayout implements INavigationLayout, Float
     public void setFragmentStack(List<BaseFragment> fragmentStack) {
         this.fragmentStack = fragmentStack;
         unmodifiableFragmentStack = Collections.unmodifiableList(fragmentStack);
+    }
+
+
+    @Override
+    public void setIsSheet(boolean isSheet) {
+        this.isSheet = isSheet;
+    }
+
+    @Override
+    public boolean isSheet() {
+        return isSheet;
     }
 
     @Override

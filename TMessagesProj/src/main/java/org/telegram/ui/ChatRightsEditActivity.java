@@ -2176,11 +2176,9 @@ public class ChatRightsEditActivity extends BaseFragment {
         if (position == sendStickersRow || position == embedLinksRow || position == sendPollsRow ||
                 position == sendPhotosRow || position == sendVideosRow || position == sendFilesRow ||
                 position == sendMusicRow || position == sendRoundRow || position == sendVoiceRow ||
-                position == sendGifsRow || position == sendGamesRow || position == useInlineBotRow) {
-            position == sendPhotosRow || position == sendVideosRow || position == sendFilesRow ||
-            position == sendMusicRow || position == sendRoundRow || position == sendVoiceRow ||
-            position == channelPostMessagesRow || position == channelEditMessagesRow || position == channelDeleteMessagesRow ||
-            position == channelPostStoriesRow || position == channelEditStoriesRow || position == channelDeleteStoriesRow) {
+                position == sendGifsRow || position == sendGamesRow || position == useInlineBotRow ||
+                position == channelPostMessagesRow || position == channelEditMessagesRow || position == channelDeleteMessagesRow ||
+                position == channelPostStoriesRow || position == channelEditStoriesRow || position == channelDeleteStoriesRow) {
             return true;
         }
         return false;
