@@ -16,9 +16,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import it.octogram.android.OctoConfig;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -29,6 +30,8 @@ import org.telegram.ui.Components.LayoutHelper;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+
+import it.octogram.android.OctoConfig;
 
 public class CrashLogCell extends LinearLayout {
 

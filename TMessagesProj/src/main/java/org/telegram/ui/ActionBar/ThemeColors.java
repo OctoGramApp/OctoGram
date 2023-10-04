@@ -766,6 +766,39 @@ public class ThemeColors {
         defaultColors[key_stories_circle_closeFriends1] = 0xFFC9EB38;
         defaultColors[key_stories_circle_closeFriends2] = 0xFF09C167;
 
+        // CUSTOM HIGHLIGHTS BASED ON PRISM4
+        defaultColors[key_code_high_light_annotation] = 0x00000000;
+        defaultColors[key_code_high_light_atrule] = 0xFF0077AA;
+        defaultColors[key_code_high_light_attr_name] = 0xFF669900;
+        defaultColors[key_code_high_light_attr_value] = 0xFF0077AA;
+        defaultColors[key_code_high_light_boolean] = 0xFF990055;
+        defaultColors[key_code_high_light_builtin] = 0xFF669900;
+        defaultColors[key_code_high_light_cdata] = 0xFF708090;
+        defaultColors[key_code_high_light_char] = 0xFF669900;
+        defaultColors[key_code_high_light_class_name] = 0xFFDD4A68;
+        defaultColors[key_code_high_light_comment] = 0xFF708090;
+        defaultColors[key_code_high_light_constant] = 0xFF990055;
+        defaultColors[key_code_high_light_deleted] = 0xFF990055;
+        defaultColors[key_code_high_light_delimiter] = 0x00000000;
+        defaultColors[key_code_high_light_doctype] = 0xFF708090;
+        defaultColors[key_code_high_light_entity] = 0xFF9A6E3A;
+        defaultColors[key_code_high_light_function] = 0xFFDD4A68;
+        defaultColors[key_code_high_light_important] = 0xFFEE9900;
+        defaultColors[key_code_high_light_inserted] = 0xFF669900;
+        defaultColors[key_code_high_light_keyword] = 0xFF0077AA;
+        defaultColors[key_code_high_light_number] = 0xFF990055;
+        defaultColors[key_code_high_light_operator] = 0xFF9A6E3A;
+        defaultColors[key_code_high_light_prolog] = 0xFF708090;
+        defaultColors[key_code_high_light_property] = 0xFF990055;
+        defaultColors[key_code_high_light_punctuation] = 0xFF999999;
+        defaultColors[key_code_high_light_regex] = 0xFFEE9900;
+        defaultColors[key_code_high_light_selector] = 0xFF669900;
+        defaultColors[key_code_high_light_string] = 0xFF669900;
+        defaultColors[key_code_high_light_symbol] = 0xFF990055;
+        defaultColors[key_code_high_light_tag] = 0xFF990055;
+        defaultColors[key_code_high_light_url] = 0xFF9A6E3A;
+        defaultColors[key_code_high_light_variable] = 0xFFEE9900;
+
         return defaultColors;
     }
 
@@ -1493,6 +1526,39 @@ public class ThemeColors {
         colorKeysMap.put(key_stories_circle_dialog2, "stories_circle_dialog2");
         colorKeysMap.put(key_stories_circle_closeFriends1, "stories_circle_closeFriends1");
         colorKeysMap.put(key_stories_circle_closeFriends2, "stories_circle_closeFriends2");
+
+        // CUSTOM HIGHLIGHTS BASED ON PRISM4
+        colorKeysMap.put(key_code_high_light_annotation, "code_high_light_annotation");
+        colorKeysMap.put(key_code_high_light_atrule, "code_high_light_atrule");
+        colorKeysMap.put(key_code_high_light_attr_name, "code_high_light_attr_name");
+        colorKeysMap.put(key_code_high_light_attr_value, "code_high_light_attr_value");
+        colorKeysMap.put(key_code_high_light_boolean, "code_high_light_boolean");
+        colorKeysMap.put(key_code_high_light_builtin, "code_high_light_builtin");
+        colorKeysMap.put(key_code_high_light_cdata, "code_high_light_cdata");
+        colorKeysMap.put(key_code_high_light_char, "code_high_light_char");
+        colorKeysMap.put(key_code_high_light_class_name, "code_high_light_class_name");
+        colorKeysMap.put(key_code_high_light_comment, "code_high_light_comment");
+        colorKeysMap.put(key_code_high_light_constant, "code_high_light_constant");
+        colorKeysMap.put(key_code_high_light_deleted, "code_high_light_deleted");
+        colorKeysMap.put(key_code_high_light_delimiter, "code_high_light_delimiter");
+        colorKeysMap.put(key_code_high_light_doctype, "code_high_light_doctype");
+        colorKeysMap.put(key_code_high_light_entity, "code_high_light_entity");
+        colorKeysMap.put(key_code_high_light_function, "code_high_light_function");
+        colorKeysMap.put(key_code_high_light_important, "code_high_light_important");
+        colorKeysMap.put(key_code_high_light_inserted, "code_high_light_inserted");
+        colorKeysMap.put(key_code_high_light_keyword, "code_high_light_keyword");
+        colorKeysMap.put(key_code_high_light_number, "code_high_light_number");
+        colorKeysMap.put(key_code_high_light_operator, "code_high_light_operator");
+        colorKeysMap.put(key_code_high_light_prolog, "code_high_light_prolog");
+        colorKeysMap.put(key_code_high_light_property, "code_high_light_property");
+        colorKeysMap.put(key_code_high_light_punctuation, "code_high_light_punctuation");
+        colorKeysMap.put(key_code_high_light_regex, "code_high_light_regex");
+        colorKeysMap.put(key_code_high_light_selector, "code_high_light_selector");
+        colorKeysMap.put(key_code_high_light_string, "code_high_light_string");
+        colorKeysMap.put(key_code_high_light_symbol, "code_high_light_symbol");
+        colorKeysMap.put(key_code_high_light_tag, "code_high_light_tag");
+        colorKeysMap.put(key_code_high_light_url, "code_high_light_url");
+        colorKeysMap.put(key_code_high_light_variable, "code_high_light_variable");
         return colorKeysMap;
     }
 
