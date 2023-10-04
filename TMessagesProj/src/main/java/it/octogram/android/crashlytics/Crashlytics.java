@@ -36,6 +36,7 @@ import it.octogram.android.OctoConfig;
 public class Crashlytics implements Thread.UncaughtExceptionHandler {
 
     private final Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+    private final static File filesDir = ApplicationLoader.applicationContext.getFilesDir();
 
     @Override
     public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
@@ -72,7 +73,7 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
                 "Google Play Services: " + ApplicationLoader.hasPlayServices + "\n" +
                 "Performance Class: " + getPerformanceClassString() + "\n" +
                 "Locale: " + LocaleController.getSystemLocaleStringIso639() + "\n" +
-                "Octogram Configuration: " + getOctoConfiguration() + "\n";
+                "Configuration: " + getOctoConfiguration() + "\n";
     }
 
     // I don't even know why I did this
@@ -142,42 +143,35 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
     }
 
     public static File[] getArchivedCrashFiles() {
-        File dir = ApplicationLoader.getFilesDirFixed();
-        return dir.listFiles((dir1, name) -> name.endsWith(".log"));
+        return filesDir.listFiles((dir1, name) -> name.endsWith(".log"));
     }
 
     public static File getLatestCrashFile() {
-        return new File(ApplicationLoader.getFilesDirFixed(), "latest_crash.log");
+        return new File(filesDir, "latest_crash.log");
     }
 
     public static void archiveLatestCrash() {
         File file = getLatestCrashFile();
         if (file.exists()) {
-            File archived = new File(ApplicationLoader.getFilesDirFixed(), getLatestCrashDate() + ".log");
+            File archived = new File(filesDir, getLatestCrashDate() + ".log");
             file.renameTo(archived);
         }
     }
 
-    private static File getShareLogFile() {
-        return new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), "crash_" + getLatestCrashDate() + ".log");
-    }
-
-    public static File shareLogs() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(getLatestCrashFile()));
+    public static File shareLog(File file) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder builder = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
             builder.append(line).append("\n");
         }
         reader.close();
-        File file = getShareLogFile();
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        File shareLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), file.getName());
+        BufferedWriter writer = new BufferedWriter(new FileWriter(shareLogFile));
         writer.write(builder.toString());
         writer.flush();
         writer.close();
-
-        archiveLatestCrash();
-        return file;
+        return shareLogFile;
     }
 
 }

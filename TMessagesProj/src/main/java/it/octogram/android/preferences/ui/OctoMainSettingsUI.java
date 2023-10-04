@@ -35,11 +35,24 @@ public class OctoMainSettingsUI implements PreferencesEntry {
         return OctoPreferences.builder("OctoGram Settings")
                 .sticker(context, R.raw.utyan_robot, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
+
+//                    if (BuildConfig.DEBUG_PRIVATE_VERSION) {
+//                        category.row(new TextDetailRow.TextDetailRowBuilder()
+//                                .onClick(() -> {
+//                                    throw new RuntimeException("Test crash");
+//                                })
+//                                .icon(R.drawable.msg_cancel)
+//                                .title("Crash the app")
+//                                .description("Yup, this is literally a crash button")
+//                                .build());
+//                    }
+
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());
+
 //                    category.row(new TextIconRow.TextIconRowBuilder()
 //                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
 //                            .icon(R.drawable.msg_translate)
@@ -67,14 +80,6 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.formatString("OctoMainSettingsInfoCategory", R.string.OctoMainSettingsInfoCategory), category -> {
-//                    category.row(new TextDetailRow.TextDetailRowBuilder()
-//                            .onClick(() -> {
-//                                throw new RuntimeException("Test crash");
-//                            })
-//                            .icon(R.drawable.list_warning_sign)
-//                            .title("crash")
-//                            .description("crash")
-//                            .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
                             .icon(R.drawable.datacenter_status)

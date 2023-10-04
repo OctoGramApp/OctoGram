@@ -8,19 +8,28 @@
 
 package it.octogram.android.preferences.ui;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -53,10 +62,13 @@ import java.util.stream.Collectors;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.preferences.ui.custom.CrashLogCell;
+import org.telegram.ui.LaunchActivity;
 
 public class CrashesActivity extends BaseFragment {
 
     private final Object PARTIAL = new Object();
+
+    private final String REPORT_URL = "https://github.com/OctoGramApp/OctoGram/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+%3Ctitle-here%3E";
 
     private int settingsHeaderRow;
     private int copyInfoRow;
@@ -163,9 +175,55 @@ public class CrashesActivity extends BaseFragment {
             if (listAdapter.hasSelected()) {
                 listAdapter.toggleSelected(position);
             } else {
-                copyCrashLine(position);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), getResourceProvider());
+                builder.setTitle("Crash settings");
+                CharSequence[] items = new CharSequence[]{
+                        "Open crash log",
+                        "Send crash log",
+                        "Copy crash log",
+                        "Report crash",
+                };
+                int[] icons = new int[]{
+                        R.drawable.msg_openin,
+                        R.drawable.msg_send,
+                        R.drawable.msg_copy,
+                        R.drawable.msg_report,
+                };
+                builder.setItems(items, icons, (dialog, which) -> {
+                    if (which == 0) {
+                        File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
+                        if (!openLog(file)) {
+                            // Show popup error
+                            AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
+                            warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
+                            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> {
+                                dialog1.dismiss();
+                            });
+                            warningBuilder.setMessage(LocaleController.getString(R.string.ErrorSendingCrashContent));
+                            showDialog(warningBuilder.create());
+                        }
+                    } else if (which == 1) {
+                        File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
+                        if (!sendLog(file)) {
+                            // Show popup error
+                            AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
+                            warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
+                            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> {
+                                dialog1.dismiss();
+                            });
+                            warningBuilder.setMessage(LocaleController.getString(R.string.ErrorSendingCrashContent));
+                            showDialog(warningBuilder.create());
+                        }
+                    } else if (which == 2) {
+                        copyCrashLine(position);
+                    } else if (which == 3) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(REPORT_URL));
+                        context.startActivity(browserIntent);
+                    }
+                });
+                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                showDialog(builder.create());
             }
-
         }
     }
 
@@ -222,6 +280,41 @@ public class CrashesActivity extends BaseFragment {
             return false;
         }
         return super.onBackPressed();
+    }
+
+    private boolean openLog(File file) {
+        try {
+            File cacheFile = Crashlytics.shareLog(file);
+            AndroidUtilities.openForView(cacheFile, cacheFile.getName(), "text/plain", getParentActivity(), getResourceProvider());
+            return true;
+        } catch (IOException e) {
+            Log.e(getClass().getName(), "Error opening crash content", e);
+            return false;
+        }
+    }
+
+    private boolean sendLog(File file) {
+        try {
+            File cacheFile = Crashlytics.shareLog(file);
+            Uri uri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                uri = FileProvider.getUriForFile(getParentActivity(), ApplicationLoader.getApplicationId() + ".provider", cacheFile);
+            } else {
+                uri = Uri.fromFile(cacheFile);
+            }
+            Intent i = new Intent(Intent.ACTION_SEND);
+            if (Build.VERSION.SDK_INT >= 24) {
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            i.setType("message/rfc822");
+            i.putExtra(Intent.EXTRA_STREAM, uri);
+            i.setClass(getParentActivity(), LaunchActivity.class);
+            getParentActivity().startActivity(i);
+            return true;
+        } catch (IOException e) {
+            Log.e(getClass().getName(), "Error sending crash content", e);
+            return false;
+        }
     }
 
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
