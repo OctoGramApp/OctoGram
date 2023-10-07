@@ -8,15 +8,25 @@
 
 package it.octogram.android.crashlytics;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import it.octogram.android.utils.NotificationColorize;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationsController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 
 import java.io.BufferedReader;
@@ -32,31 +42,59 @@ import java.lang.reflect.Field;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import org.telegram.ui.LaunchActivity;
 
-public class Crashlytics implements Thread.UncaughtExceptionHandler {
+public class Crashlytics {
 
     private final Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
     private final static File filesDir = ApplicationLoader.applicationContext.getFilesDir();
 
-    @Override
-    public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
+    public static void init() {
+        Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((thread, th) -> uncaughtException(exceptionHandler, thread, th));
+    }
+
+    private static void uncaughtException(@NonNull Thread.UncaughtExceptionHandler exceptionHandler,
+                                          @NonNull Thread t,
+                                          @NonNull Throwable e) {
         Writer result = new StringWriter();
         PrintWriter printWriter = new PrintWriter(result);
         e.printStackTrace(printWriter);
         String stacktrace = result.toString();
         try {
             saveCrashLogs(stacktrace);
-        } catch (IOException | IllegalAccessException ex) {
-            ex.printStackTrace();
+        } catch (IOException | IllegalAccessException ignored) {
         }
         printWriter.close();
 
-        if (exceptionHandler != null) {
-            exceptionHandler.uncaughtException(t, e);
+
+        Intent intent = new Intent(ApplicationLoader.applicationContext, LaunchActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.applicationContext)
+                .setSmallIcon(R.drawable.notification)
+                .setContentTitle("OctoGram just crashed!")
+                .setContentText("Sorry about that!")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(stacktrace))
+                .setAutoCancel(true)
+                .setColor(NotificationColorize.parseNotificationColor())
+                .setContentIntent(pendingIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setPriority(NotificationManager.IMPORTANCE_HIGH);
+        } else {
+            builder.setPriority(Notification.PRIORITY_HIGH);
         }
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationsController.checkOtherNotificationsChannel();
+            builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
+        }
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(ApplicationLoader.applicationContext);
+        notificationManager.notify(1278927891, builder.build());
+
+        exceptionHandler.uncaughtException(t, e);
     }
 
-    private void saveCrashLogs(String stacktrace) throws IOException, IllegalAccessException {
+    private static void saveCrashLogs(String stacktrace) throws IOException, IllegalAccessException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(getLatestCrashFile()));
         writer.write(getSystemInfo());
         writer.write(stacktrace);
