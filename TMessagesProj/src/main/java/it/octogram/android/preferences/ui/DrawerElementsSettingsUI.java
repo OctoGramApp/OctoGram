@@ -66,11 +66,6 @@ public class DrawerElementsSettingsUI implements PreferencesEntry {
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerSettings)
-                            .title(LocaleController.getString(R.string.Settings))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.drawerOctogramSettings)
                             .title("OctoGram Settings")
                             .postNotificationName(NotificationCenter.reloadInterface)

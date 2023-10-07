@@ -93,7 +93,6 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> drawerCalls = newConfigProperty("drawer_calls", true);
     public final ConfigProperty<Boolean> drawerPeopleNearby = newConfigProperty("drawer_peopleNearby", true);
     public final ConfigProperty<Boolean> drawerSavedMessages = newConfigProperty("drawer_savedMessages", true);
-    public final ConfigProperty<Boolean> drawerSettings = newConfigProperty("drawer_settings", true);
     public final ConfigProperty<Boolean> drawerOctogramSettings = newConfigProperty("drawer_octogramSettings", false);
     public final ConfigProperty<Boolean> drawerDatacenterInfo = newConfigProperty("drawer_datacenterInfo", true);
     public final ConfigProperty<Boolean> drawerInviteFriends = newConfigProperty("drawer_inviteFriends", true);

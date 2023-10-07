@@ -374,9 +374,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (OctoConfig.INSTANCE.drawerSavedMessages.getValue()) {
             items.add(new Item(11, LocaleController.getString("SavedMessages", R.string.SavedMessages), savedIcon));
         }
-        if (OctoConfig.INSTANCE.drawerSettings.getValue()) {
-            items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon));
-        }
+        items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon));
         if (OctoConfig.INSTANCE.drawerOctogramSettings.getValue()) {
             items.add(new Item(100, "Octogram Settings", octogramIcon));
         }
