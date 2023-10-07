@@ -146,6 +146,8 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 import it.octogram.android.MonetThemeController;
+import it.octogram.android.entities.syntax_highlight.SyntaxHighlight;
+
 public class Theme {
 
     public static final String DEFAULT_BACKGROUND_SLUG = "d";
@@ -6513,6 +6515,7 @@ public class Theme {
         applyDialogsTheme();
         applyProfileTheme();
         applyChatTheme(false, bg);
+        SyntaxHighlight.updateColors();
         boolean checkNavigationBarColor = !hasPreviousTheme;
         AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.didSetNewTheme, false, checkNavigationBarColor));
     }

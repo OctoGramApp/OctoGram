@@ -93,6 +93,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.entities.EntitiesHelper;
 import it.octogram.android.utils.VideoUtils;
 
 public class SendMessagesHelper extends BaseController implements NotificationCenter.NotificationCenterDelegate {
@@ -3355,6 +3356,9 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         }
         if (message == null && caption == null) {
             caption = "";
+        }
+        if (caption != null && entities != null) {
+            caption = EntitiesHelper.applySyntaxHighlight(caption, entities).toString();
         }
 
         String originalPath = null;

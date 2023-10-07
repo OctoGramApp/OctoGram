@@ -6253,6 +6253,14 @@ public class MediaDataController extends BaseController {
     }
 
     public ArrayList<TLRPC.MessageEntity> getEntities(CharSequence[] message, boolean allowStrike) {
+        return getEntities(message, allowStrike, true);
+    }
+
+    public ArrayList<TLRPC.MessageEntity> getEntities(CharSequence[] message, boolean allowStrike, boolean allowSpannable) {
+        return getEntities(message, allowStrike, allowSpannable, true);
+    }
+
+    public ArrayList<TLRPC.MessageEntity> getEntities(CharSequence[] message, boolean allowStrike, boolean allowSpannable, boolean allowParsePatterns) {
         if (message == null || message[0] == null) {
             return null;
         }
@@ -6263,70 +6271,72 @@ public class MediaDataController extends BaseController {
         boolean isPre = false;
         final String mono = "`";
         final String pre = "```";
-        while ((index = TextUtils.indexOf(message[0], !isPre ? mono : pre, lastIndex)) != -1) {
-            if (start == -1) {
-                isPre = message[0].length() - index > 2 && message[0].charAt(index + 1) == '`' && message[0].charAt(index + 2) == '`';
-                start = index;
-                lastIndex = index + (isPre ? 3 : 1);
-            } else {
+        if (allowParsePatterns) {
+            while ((index = TextUtils.indexOf(message[0], !isPre ? mono : pre, lastIndex)) != -1) {
+                if (start == -1) {
+                    isPre = message[0].length() - index > 2 && message[0].charAt(index + 1) == '`' && message[0].charAt(index + 2) == '`';
+                    start = index;
+                    lastIndex = index + (isPre ? 3 : 1);
+                } else {
+                    if (entities == null) {
+                        entities = new ArrayList<>();
+                    }
+                    for (int a = index + (isPre ? 3 : 1); a < message[0].length(); a++) {
+                        if (message[0].charAt(a) == '`') {
+                            index++;
+                        } else {
+                            break;
+                        }
+                    }
+                    lastIndex = index + (isPre ? 3 : 1);
+                    if (isPre) {
+                        int firstChar = start > 0 ? message[0].charAt(start - 1) : 0;
+                        boolean replacedFirst = firstChar == ' ' || firstChar == '\n';
+                        CharSequence startMessage = substring(message[0], 0, start - (replacedFirst ? 1 : 0));
+                        CharSequence content = substring(message[0], start + 3, index);
+                        firstChar = index + 3 < message[0].length() ? message[0].charAt(index + 3) : 0;
+                        CharSequence endMessage = substring(message[0], index + 3 + (firstChar == ' ' || firstChar == '\n' ? 1 : 0), message[0].length());
+                        if (startMessage.length() != 0) {
+                            startMessage = AndroidUtilities.concat(startMessage, "\n");
+                        } else {
+                            replacedFirst = true;
+                        }
+                        if (endMessage.length() != 0) {
+                            endMessage = AndroidUtilities.concat("\n", endMessage);
+                        }
+                        if (!TextUtils.isEmpty(content)) {
+                            message[0] = AndroidUtilities.concat(startMessage, content, endMessage);
+                            TLRPC.TL_messageEntityPre entity = new TLRPC.TL_messageEntityPre();
+                            entity.offset = start + (replacedFirst ? 0 : 1);
+                            entity.length = index - start - 3 + (replacedFirst ? 0 : 1);
+                            entity.language = "";
+                            entities.add(entity);
+                            lastIndex -= 6;
+                        }
+                    } else {
+                        if (start + 1 != index) {
+                            message[0] = AndroidUtilities.concat(substring(message[0], 0, start), substring(message[0], start + 1, index), substring(message[0], index + 1, message[0].length()));
+                            TLRPC.TL_messageEntityCode entity = new TLRPC.TL_messageEntityCode();
+                            entity.offset = start;
+                            entity.length = index - start - 1;
+                            entities.add(entity);
+                            lastIndex -= 2;
+                        }
+                    }
+                    start = -1;
+                    isPre = false;
+                }
+            }
+            if (start != -1 && isPre) {
+                message[0] = AndroidUtilities.concat(substring(message[0], 0, start), substring(message[0], start + 2, message[0].length()));
                 if (entities == null) {
                     entities = new ArrayList<>();
                 }
-                for (int a = index + (isPre ? 3 : 1); a < message[0].length(); a++) {
-                    if (message[0].charAt(a) == '`') {
-                        index++;
-                    } else {
-                        break;
-                    }
-                }
-                lastIndex = index + (isPre ? 3 : 1);
-                if (isPre) {
-                    int firstChar = start > 0 ? message[0].charAt(start - 1) : 0;
-                    boolean replacedFirst = firstChar == ' ' || firstChar == '\n';
-                    CharSequence startMessage = substring(message[0], 0, start - (replacedFirst ? 1 : 0));
-                    CharSequence content = substring(message[0], start + 3, index);
-                    firstChar = index + 3 < message[0].length() ? message[0].charAt(index + 3) : 0;
-                    CharSequence endMessage = substring(message[0], index + 3 + (firstChar == ' ' || firstChar == '\n' ? 1 : 0), message[0].length());
-                    if (startMessage.length() != 0) {
-                        startMessage = AndroidUtilities.concat(startMessage, "\n");
-                    } else {
-                        replacedFirst = true;
-                    }
-                    if (endMessage.length() != 0) {
-                        endMessage = AndroidUtilities.concat("\n", endMessage);
-                    }
-                    if (!TextUtils.isEmpty(content)) {
-                        message[0] = AndroidUtilities.concat(startMessage, content, endMessage);
-                        TLRPC.TL_messageEntityPre entity = new TLRPC.TL_messageEntityPre();
-                        entity.offset = start + (replacedFirst ? 0 : 1);
-                        entity.length = index - start - 3 + (replacedFirst ? 0 : 1);
-                        entity.language = "";
-                        entities.add(entity);
-                        lastIndex -= 6;
-                    }
-                } else {
-                    if (start + 1 != index) {
-                        message[0] = AndroidUtilities.concat(substring(message[0], 0, start), substring(message[0], start + 1, index), substring(message[0], index + 1, message[0].length()));
-                        TLRPC.TL_messageEntityCode entity = new TLRPC.TL_messageEntityCode();
-                        entity.offset = start;
-                        entity.length = index - start - 1;
-                        entities.add(entity);
-                        lastIndex -= 2;
-                    }
-                }
-                start = -1;
-                isPre = false;
+                TLRPC.TL_messageEntityCode entity = new TLRPC.TL_messageEntityCode();
+                entity.offset = start;
+                entity.length = 1;
+                entities.add(entity);
             }
-        }
-        if (start != -1 && isPre) {
-            message[0] = AndroidUtilities.concat(substring(message[0], 0, start), substring(message[0], start + 2, message[0].length()));
-            if (entities == null) {
-                entities = new ArrayList<>();
-            }
-            TLRPC.TL_messageEntityCode entity = new TLRPC.TL_messageEntityCode();
-            entity.offset = start;
-            entity.length = 1;
-            entities.add(entity);
         }
 
         if (message[0] instanceof Spanned) {

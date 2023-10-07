@@ -165,6 +165,7 @@ import java.util.List;
 import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.entities.EntitiesHelper;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate {
 
@@ -5766,6 +5767,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
         CharSequence[] message = new CharSequence[]{text};
         ArrayList<TLRPC.MessageEntity> entities = MediaDataController.getInstance(currentAccount).getEntities(message, supportsSendingNewEntities());
+        message[0] = EntitiesHelper.applySyntaxHighlight(message[0], entities);
         if (!TextUtils.equals(message[0], editingMessageObject.messageText) || entities != null && !entities.isEmpty() || !editingMessageObject.messageOwner.entities.isEmpty() || editingMessageObject.messageOwner.media instanceof TLRPC.TL_messageMediaWebPage) {
             editingMessageObject.editingMessage = message[0];
             editingMessageObject.editingMessageEntities = entities;
@@ -5846,7 +5848,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                         sendAnimationData.y = AndroidUtilities.displaySize.y - AndroidUtilities.dp(8 + 11);
                     }
                 }
-
+                message[0] = EntitiesHelper.applySyntaxHighlight(message[0], entities);
                 boolean updateStickersOrder = false;
                 updateStickersOrder = SendMessagesHelper.checkUpdateStickersOrder(text);
 
