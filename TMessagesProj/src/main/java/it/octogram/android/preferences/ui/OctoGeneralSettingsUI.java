@@ -14,6 +14,7 @@ import android.util.Pair;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 
 import java.util.List;
 
@@ -176,7 +177,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .category(LocaleController.formatString("FilterAvailableTitle", R.string.FilterAvailableTitle), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideOnlyAllChatsFolder)
-                            .premium(true)
+                            .premium(!UserConfig.getInstance(UserConfig.selectedAccount).isPremium())
                             .title(LocaleController.formatString("HideAllChatFolder", R.string.HideAllChatFolder))
                             .requiresRestart(true)
                             .build());
