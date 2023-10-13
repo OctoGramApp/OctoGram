@@ -2,7 +2,11 @@ package it.octogram.android.preferences.ui.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -12,13 +16,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import it.octogram.android.Datacenter;
-import it.octogram.android.preferences.ui.components.RadialProgressView;
-import it.octogram.android.preferences.ui.components.Shimmer;
-import it.octogram.android.preferences.ui.components.ShimmerFrameLayout;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -27,6 +29,11 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.TextStyleSpan;
 
 import java.util.Locale;
+
+import it.octogram.android.Datacenter;
+import it.octogram.android.preferences.ui.components.RadialProgressView;
+import it.octogram.android.preferences.ui.components.Shimmer;
+import it.octogram.android.preferences.ui.components.ShimmerFrameLayout;
 
 public class DatacenterStatus extends LinearLayout {
 

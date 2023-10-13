@@ -150,6 +150,9 @@ public class CameraXView extends BaseCameraView {
 
     @Override
     public boolean isFrontface() {
+        if (controller == null) {
+            return frontface;
+        }
         return controller.isFrontface();
     }
 

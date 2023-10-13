@@ -12,8 +12,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import org.telegram.messenger.*;
-import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.R;
 import org.telegram.ui.Components.BulletinFactory;
 
 import it.octogram.android.preferences.OctoPreferences;
@@ -32,11 +35,24 @@ public class OctoMainSettingsUI implements PreferencesEntry {
         return OctoPreferences.builder("OctoGram Settings")
                 .sticker(context, R.raw.utyan_robot, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
+
+//                    if (BuildConfig.DEBUG_PRIVATE_VERSION) {
+//                        category.row(new TextDetailRow.TextDetailRowBuilder()
+//                                .onClick(() -> {
+//                                    throw new RuntimeException("Test crash");
+//                                })
+//                                .icon(R.drawable.msg_cancel)
+//                                .title("Crash the app")
+//                                .description("Yup, this is literally a crash button")
+//                                .build());
+//                    }
+
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());
+
 //                    category.row(new TextIconRow.TextIconRowBuilder()
 //                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
 //                            .icon(R.drawable.msg_translate)
@@ -74,6 +90,12 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .icon(R.drawable.datacenter_status)
                             .title(LocaleController.formatString("DatacenterStatus", R.string.DatacenterStatus))
                             .description(LocaleController.formatString("DatacenterStatus_Desc", R.string.DatacenterStatus_Desc))
+                            .build());
+                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new CrashesActivity()))
+                            .icon(R.drawable.msg_secret_hw)
+                            .title(LocaleController.getString("CrashHistory", R.string.CrashHistory))
+                            .description(LocaleController.getString("CrashHistory_Desc", R.string.CrashHistory_Desc))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {

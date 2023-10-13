@@ -8,14 +8,25 @@
 
 package it.octogram.android.crashlytics;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import it.octogram.android.utils.NotificationColorize;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationsController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 
 import java.io.BufferedReader;
@@ -31,30 +42,59 @@ import java.lang.reflect.Field;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import org.telegram.ui.LaunchActivity;
 
-public class Crashlytics implements Thread.UncaughtExceptionHandler {
+public class Crashlytics {
 
     private final Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+    private final static File filesDir = ApplicationLoader.applicationContext.getFilesDir();
 
-    @Override
-    public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
+    public static void init() {
+        Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((thread, th) -> uncaughtException(exceptionHandler, thread, th));
+    }
+
+    private static void uncaughtException(@NonNull Thread.UncaughtExceptionHandler exceptionHandler,
+                                          @NonNull Thread t,
+                                          @NonNull Throwable e) {
         Writer result = new StringWriter();
         PrintWriter printWriter = new PrintWriter(result);
         e.printStackTrace(printWriter);
         String stacktrace = result.toString();
         try {
             saveCrashLogs(stacktrace);
-        } catch (IOException | IllegalAccessException ex) {
-            ex.printStackTrace();
+        } catch (IOException | IllegalAccessException ignored) {
         }
         printWriter.close();
 
-        if (exceptionHandler != null) {
-            exceptionHandler.uncaughtException(t, e);
+
+        Intent intent = new Intent(ApplicationLoader.applicationContext, LaunchActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.applicationContext)
+                .setSmallIcon(R.drawable.notification)
+                .setContentTitle("OctoGram just crashed!")
+                .setContentText("Sorry about that!")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(stacktrace))
+                .setAutoCancel(true)
+                .setColor(NotificationColorize.parseNotificationColor())
+                .setContentIntent(pendingIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setPriority(NotificationManager.IMPORTANCE_HIGH);
+        } else {
+            builder.setPriority(Notification.PRIORITY_HIGH);
         }
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationsController.checkOtherNotificationsChannel();
+            builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
+        }
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(ApplicationLoader.applicationContext);
+        notificationManager.notify(1278927891, builder.build());
+
+        exceptionHandler.uncaughtException(t, e);
     }
 
-    private void saveCrashLogs(String stacktrace) throws IOException, IllegalAccessException {
+    private static void saveCrashLogs(String stacktrace) throws IOException, IllegalAccessException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(getLatestCrashFile()));
         writer.write(getSystemInfo());
         writer.write(stacktrace);
@@ -62,8 +102,8 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
         writer.close();
     }
 
-    private String getSystemInfo() throws IllegalAccessException {
-        String builder = LocaleController.getInstance().formatterStats.format(System.currentTimeMillis()) + "\n\n" +
+    public static String getSystemInfo() throws IllegalAccessException {
+        return LocaleController.getInstance().formatterFull.format(System.currentTimeMillis()) + "\n\n" +
                 "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildVars.BUILD_VERSION + ")\n" +
                 "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
                 "Device: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
@@ -71,12 +111,11 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
                 "Google Play Services: " + ApplicationLoader.hasPlayServices + "\n" +
                 "Performance Class: " + getPerformanceClassString() + "\n" +
                 "Locale: " + LocaleController.getSystemLocaleStringIso639() + "\n" +
-                "Octogram Configuration: " + getOctoConfiguration() + "\n";
-        return builder;
+                "Configuration: " + getOctoConfiguration() + "\n";
     }
 
     // I don't even know why I did this
-    private String getOctoConfiguration() throws IllegalAccessException {
+    private static String getOctoConfiguration() throws IllegalAccessException {
         StringBuilder builder = new StringBuilder();
         builder.append("{").append("\n");
 
@@ -99,7 +138,7 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
         return builder.toString();
     }
 
-    private String getPerformanceClassString() {
+    private static String getPerformanceClassString() {
         switch (SharedConfig.getDevicePerformanceClass()) {
             case SharedConfig.PERFORMANCE_CLASS_LOW:
                 return "LOW";
@@ -112,6 +151,22 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
         }
     }
 
+    public static void deleteCrashLogs() {
+        File[] files = getArchivedCrashFiles();
+        for (File file : files) {
+            file.delete();
+        }
+    }
+
+    public static File getLatestArchivedCrashFile() {
+        File[] files = getArchivedCrashFiles();
+        if (files.length > 0) {
+            return files[files.length - 1];
+        } else {
+            return null;
+        }
+    }
+
     public static String getLatestCrashDate() {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(getLatestCrashFile()));
@@ -120,43 +175,41 @@ public class Crashlytics implements Thread.UncaughtExceptionHandler {
 
             return line.replace(" ", "_").replace(",", "").replace(":", "_");
         } catch (IOException e) {
-            e.printStackTrace();
+            FileLog.e(e);
             return "null";
         }
     }
 
+    public static File[] getArchivedCrashFiles() {
+        return filesDir.listFiles((dir1, name) -> name.endsWith(".log"));
+    }
+
     public static File getLatestCrashFile() {
-        return new File(ApplicationLoader.getFilesDirFixed(), "latest_crash.log");
+        return new File(filesDir, "latest_crash.log");
     }
 
     public static void archiveLatestCrash() {
         File file = getLatestCrashFile();
         if (file.exists()) {
-            File archived = new File(ApplicationLoader.getFilesDirFixed(), getLatestCrashDate() + ".log");
+            File archived = new File(filesDir, getLatestCrashDate() + ".log");
             file.renameTo(archived);
         }
     }
 
-    private static File getShareLogFile() {
-        return new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), "crash_" + getLatestCrashDate() + ".log");
-    }
-
-    public static File shareLogs() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(getLatestCrashFile()));
+    public static File shareLog(File file) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder builder = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
             builder.append(line).append("\n");
         }
         reader.close();
-        File file = getShareLogFile();
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        File shareLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), file.getName());
+        BufferedWriter writer = new BufferedWriter(new FileWriter(shareLogFile));
         writer.write(builder.toString());
         writer.flush();
         writer.close();
-
-        archiveLatestCrash();
-        return file;
+        return shareLogFile;
     }
 
 }

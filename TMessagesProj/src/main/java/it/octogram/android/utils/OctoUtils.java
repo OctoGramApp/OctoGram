@@ -1,6 +1,8 @@
 package it.octogram.android.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.R;
 
 public class OctoUtils {
     public static String phoneNumberReplacer(String input, String phoneCountry) {
@@ -35,6 +37,23 @@ public class OctoUtils {
         formattedNumber = "(" + areaCode + ") " + middleDigits + "-" + lastDigits;
 
         return formattedNumber;
+    }
+
+    public static String getCorrectAppName() {
+        if (BuildConfig.BUILD_TYPE.equals("debug") || BuildConfig.BUILD_TYPE.equals("pbeta")) {
+            return "OctoGram Beta";
+        } else {
+            return "OctoGram";
+        }
+    }
+
+
+    public static boolean isTelegramString(String string, int resId) {
+        return "Telegram".equals(string) || ("Telegram Beta".equals(string) || resId == R.string.AppNameBeta) || resId == R.string.AppName;
+    }
+
+    public static boolean isTelegramString(String string) {
+        return "Telegram".equals(string) || ("Telegram Beta".equals(string));
     }
 }
 

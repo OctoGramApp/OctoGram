@@ -9,7 +9,6 @@
   -->
 
 <resources>
-    <string name="Style">Style</string>
     <string name="Type">Type</string>
     <string name="Reaction">Reaction</string>
     <string name="Nothing">None</string>
@@ -20,6 +19,8 @@
     <string name="FormatterDay24HSec">HH:mm:ss</string>
     <string name="FormatterDay12HSec">h:mm:ss a</string>
     <string name="DatacenterStatus">Datacenter Status</string>
+    <string name="PhotoCopied">Photo copied to clipboard.</string>
+    <string name="Acknowledge">Acknowledge</string>
 
     <!--Emoji Sets-->
     <string name="MyEmojiSets">My Emoji Sets</string>
@@ -48,7 +49,7 @@
 
     <!--Crashlytics-->
     <string name="OctoCrashedTitle">OctoGram has stopped working!</string>
-    <string name="OctoCrashedSubTitle">OctoGram has crashed, and we\'re sorry for the trouble. Please send us the crash log to help us fix the issue.</string>
+    <string name="OctoCrashedSubTitle">OctoGram has crashed, and we\'re sorry for the trouble. Please report this crash by going to the "Crash History" tab in the Octogram settings page</string>
     <string name="SendLogsButton">Send logs</string>
     <string name="CancelArchiveButton">Cancel &amp; Archive logs</string>
     <string name="ErrorSendingCrashContent">There was an error while sending crash logs</string>
@@ -106,10 +107,12 @@
     <string name="DisableCameraPreview">Disable camera preview</string>
     <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
     <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
-    <string name="HideAllChatFolders">Hide all chat folders</string>
+    <string name="HideAllChatFolder">Hide \"All Chats\" folder</string>
+    <string name="HideAllChatFolders">Remove all folders</string>
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
+    <string name="OpenArchiveOnPull_Desc">Automatically opens the archive when pulling down</string>
     <string name="DoubleTapActionsHeader">Double tap actions</string>
     <string name="PreferredActionIncoming">Incoming messages</string>
     <string name="PreferredActionOutgoing">Outgoing messages</string>
@@ -196,8 +199,6 @@
     <string name="ResolutionMedium">Default (1280x)</string>
     <string name="ResolutionHigh">High (2560x)</string>
 
-    <!-- -->
-
     <string name="CopyTitle">Copy Title</string>
     <string name="CopyCallback">Copy Callback</string>
     <string name="CopyID">Copy ID</string>
@@ -218,6 +219,57 @@
 
     <string name="MKVAsVideo">Show MKV as Video</string>
     <string name="StreamAllVideos">Stream All Videos</string>
+
+    <!-- Message Details -->
+    <string name="MessageDetails">Details</string>
+    <string name="UserInfo">User</string>
+    <string name="BotInfo">Bot</string>
+    <string name="FullName">Full Name</string>
+    <string name="MessageText">Text</string>
+    <string name="MessageTextLength">Text Length</string>
+    <string name="EditedDate">Edited Date</string>
+    <string name="MessageDate">Date</string>
+    <string name="ForwardsNumber">Forwards</string>
+    <string name="ForwardedFrom">Forwarded from</string>
+    <string name="MessageScheduledDate">Scheduled date</string>
+    <string name="MessageScheduledWhenOnline">When online</string>
+    <string name="MessageInReply">Message in reply</string>
+    <string name="InReplyTo">In reply to</string>
+    <string name="FileName">Name</string>
+    <string name="MimeType">Mime Type</string>
+    <string name="AssociatedEmoji">Associated Emoji</string>
+    <string name="FileDC">Datacenter</string>
+    <string name="FilePath">Path</string>
+    <string name="FileSize">Size</string>
+
+    <!-- Context menu -->
+    <string name="CopyPhoto">Copy photo</string>
+    <string name="ClearFromCache">Clear from cache</string>
+    <string name="AddToSavedMessages">Save message</string>
+
+    <!-- Crash history -->
+    <string name="CrashHistory">Crash History</string>
+    <string name="CrashHistory_Desc">View crash logs and configuration</string>
+    <string name="NoCrashLogFound">No crash log found</string>
+    <string name="CouldNotCopyFile">Could not copy file</string>
+    <string name="CopyOctogramConfiguration">Copy Octogram Configuration</string>
+    <string name="CopyLatestCrashLog">Copy Latest Crash Log</string>
+    <string name="CrashLogInfo">Crash logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
+    <string name="CrashesDeleteConfirmation">Do you want to delete %s crash logs? This action is irreversible</string>
+    <string name="CrashDeleteConfirmation">Do you want to delete one crash log? This action is irreversible</string>
+    <string name="CrashesDeleted">%s crash logs have been cleared</string>
+    <string name="CrashesUnableToDelete">Could not delete %s crash logs!</string>
+    <string name="CrashDeleted">One crash log has been cleared</string>
+    <string name="CrashedOnDate">Crashed on: %s</string>
+
+    <!-- Permissions -->
+    <string name="SendMediaPermissionStickers">Stickers</string>
+    <string name="SendMediaPermissionGifs">GIFs</string>
+    <string name="SendMediaPermissionGames">Animated Games</string>
+    <string name="SendMediaPermissionInline">Inline Bots</string>
+    <string name="UserRestrictionsNoSendGifs">no GIFs</string>
+    <string name="UserRestrictionsNoSendGames">no games</string>
+    <string name="UserRestrictionsNoSendInlineBots">no inline bots</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

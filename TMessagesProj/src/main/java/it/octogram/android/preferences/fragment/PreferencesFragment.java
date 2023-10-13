@@ -12,7 +12,7 @@ import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
+import android.os.Parcelable;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -30,8 +30,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
 import org.telegram.ui.Cells.HeaderCell;
@@ -42,9 +44,11 @@ import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.Components.UndoView;
+import org.telegram.ui.PremiumPreviewFragment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -159,6 +163,11 @@ public class PreferencesFragment extends BaseFragment {
         listView.setOnItemClickListener((view, position, x, y) -> {
             BaseRow row = positions.get(position);
             if (row instanceof Clickable) {
+                if (row.isPremium() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+                    showDialog(new PremiumFeatureBottomSheet(this, PremiumPreviewFragment.PREMIUM_FEATURE_ADVANCED_CHAT_MANAGEMENT, false));
+                    return;
+                }
+
                 boolean success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
                 if (success) {
                     if (row.doesRequireRestart()) {
@@ -344,6 +353,7 @@ public class PreferencesFragment extends BaseFragment {
                     } else {
                         checkCell.setTextAndCheck(switchRow.getTitle(), switchRow.getPreferenceValue(), switchRow.hasDivider());
                     }
+                    checkCell.setCheckBoxIcon(switchRow.isPremium() ? R.drawable.permission_locked : 0);
                     break;
                 case TEXT_DETAIL:
                     TextDetailRow textDetailRow = (TextDetailRow) positions.get(position);
@@ -413,6 +423,7 @@ public class PreferencesFragment extends BaseFragment {
                     CheckBoxCell checkboxCell = (CheckBoxCell) holder.itemView;
                     CheckboxRow checkboxRow = (CheckboxRow) positions.get(position);
                     checkboxCell.setText(checkboxRow.getTitle(), checkboxRow.getSummary(), checkboxRow.getPreferenceValue(), !OctoConfig.INSTANCE.disableDividers.getValue(), true);
+                    checkboxCell.setIcon(checkboxRow.isPremium() ? R.drawable.permission_locked : 0);
                     break;
                 default:
                     throw new RuntimeException("No view found for " + type);
@@ -524,6 +535,15 @@ public class PreferencesFragment extends BaseFragment {
             }
             super.notifyItemRemoved(position);
         }
+    }
+
+    public void rebuildAllFragmentsWithLast() {
+        Parcelable recyclerViewState = null;
+        if (listView.getLayoutManager() != null) {
+            recyclerViewState = listView.getLayoutManager().onSaveInstanceState();
+        }
+        parentLayout.rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+        listView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
     }
 
 

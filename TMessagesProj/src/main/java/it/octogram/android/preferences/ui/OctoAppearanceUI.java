@@ -9,20 +9,29 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-
 import android.os.Parcelable;
+
 import androidx.recyclerview.widget.RecyclerView;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.rows.impl.*;
+
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.ShadowRow;
+import it.octogram.android.preferences.rows.impl.SliderRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.rows.impl.TextDetailRow;
+import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 
 public class OctoAppearanceUI implements PreferencesEntry {
@@ -54,6 +63,10 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title(LocaleController.getString("EmojiSets", R.string.EmojiSets))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> {
+                                AndroidUtilities.clearTypefaceCache();
+                                fragment.rebuildAllFragmentsWithLast();
+                            })
                             .icon(R.drawable.msg_text_outlined)
                             .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
                             .title(LocaleController.getString("UseSystemFont", R.string.UseSystemFont))
@@ -66,12 +79,12 @@ public class OctoAppearanceUI implements PreferencesEntry {
                         .title(LocaleController.getString("DrawerElements", R.string.DrawerElements))
                         .description(LocaleController.getString("DrawerElements_Desc", R.string.DrawerElements_Desc))
                         .build())
-//                .row(new TextDetailRow.TextDetailRowBuilder()
-//                        .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
-//                        .icon(R.drawable.msg_menu_stories)
-//                        .title(LocaleController.getString("ContextElements", R.string.ContextElements))
-//                        .description(LocaleController.getString("ContextElements_Desc", R.string.ContextElements_Desc))
-//                        .build())
+                .row(new TextDetailRow.TextDetailRowBuilder()
+                        .onClick(() -> fragment.presentFragment(new PreferencesFragment(new ContextElementsSettingsUI())))
+                        .icon(R.drawable.msg_list)
+                        .title(LocaleController.getString("ContextElements", R.string.ContextElements))
+                        .description(LocaleController.getString("ContextElements_Desc", R.string.ContextElements_Desc))
+                        .build())
                 .row(new ShadowRow())
                 .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()

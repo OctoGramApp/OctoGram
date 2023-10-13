@@ -27,8 +27,8 @@ public class BuildVars {
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
     public static int BUILD_VERSION = BuildConfig.BUILD_VERSION;
     public static String BUILD_VERSION_STRING = BuildConfig.BUILD_VERSION_STRING;
-    public static int TELEGRAM_BUILD_VERSION = 3804;
-    public static String TELEGRAM_VERSION_STRING = "10.0.5";
+    public static int TELEGRAM_BUILD_VERSION = 3926;
+    public static String TELEGRAM_VERSION_STRING = "10.1.1";
     public static int APP_ID = 14565251;
     public static String APP_HASH = "9952ccf3124c8fa7835d9b8e091dfb4a";
 
@@ -36,6 +36,7 @@ public class BuildVars {
     public static String SAFETYNET_KEY = "";
     public static String SMS_HASH = isStandaloneApp() ? "w0lkcmTZkKh" : (DEBUG_VERSION ? "O2P2z+/jBpJ" : "oLeq9AcOZkT");
     public static String PLAYSTORE_APP_URL = "https://play.google.com/store/apps/details?id=it.octogram.android";
+    public static String HUAWEI_STORE_URL = "https://appgallery.huawei.com/app/C101184875";
     public static String GOOGLE_AUTH_CLIENT_ID = "760348033671-81kmi3pi84p11ub8hp9a1funsv0rn2p9.apps.googleusercontent.com";
 
     public static String HUAWEI_APP_ID = "101184875";

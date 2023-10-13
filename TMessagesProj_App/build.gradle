@@ -22,7 +22,7 @@ android {
     }
 
     Properties signingProperties = new Properties()
-    if (project.rootProject.file('signing.properties').exists()) {
+    if (project.rootProject.file('signing.properties').size() > 0) {
         signingProperties.load(project.rootProject.file('signing.properties').newDataInputStream())
     }
 
@@ -55,7 +55,6 @@ android {
             jniDebuggable true
             proguardFiles '../TMessagesProj/proguard-rules.pro'
             ndk.debugSymbolLevel 'FULL'
-            applicationIdSuffix ".beta"
         }
 
         release {

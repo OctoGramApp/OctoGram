@@ -424,7 +424,7 @@ public class DatabaseMigrationHelper {
             version = 64;
         }
         if (version == 64) {
-            database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter(id INTEGER PRIMARY KEY, ord INTEGER, unread_count INTEGER, flags INTEGER, title TEXT)").stepThis().dispose();
+            database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter_octo(id INTEGER PRIMARY KEY, ord INTEGER, unread_count INTEGER, flags INTEGER, title TEXT, emoticon TEXT)").stepThis().dispose();
             database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter_ep(id INTEGER, peer INTEGER, PRIMARY KEY (id, peer))").stepThis().dispose();
             database.executeFast("PRAGMA user_version = 65").stepThis().dispose();
             version = 65;
@@ -1340,6 +1340,42 @@ public class DatabaseMigrationHelper {
             version = 129;
         }
 
+        if (version == 129) {
+            database.executeFast("CREATE INDEX IF NOT EXISTS stickers_featured_emoji_index ON stickers_featured(emoji);").stepThis().dispose();
+
+            database.executeFast("PRAGMA user_version = 130").stepThis().dispose();
+            version = 130;
+        }
+
+        if (version == 130) {
+            database.executeFast("DROP TABLE archived_stories").stepThis().dispose();
+            database.executeFast("ALTER TABLE profile_stories ADD COLUMN type INTEGER default 0").stepThis().dispose();
+
+            database.executeFast("PRAGMA user_version = 131").stepThis().dispose();
+            version = 131;
+        }
+
+        if (version == 131) {
+            database.executeFast("ALTER TABLE stories DROP COLUMN local_path").stepThis().dispose();
+            database.executeFast("ALTER TABLE stories DROP COLUMN local_thumb_path").stepThis().dispose();
+
+            database.executeFast("PRAGMA user_version = 132").stepThis().dispose();
+            version = 132;
+        }
+
+        if (version == 132) {
+            database.executeFast("CREATE TABLE unconfirmed_auth (data BLOB);").stepThis().dispose();
+
+            database.executeFast("PRAGMA user_version = 133").stepThis().dispose();
+            version = 133;
+        }
+
+        if (version == 133) {
+            database.executeFast("ALTER TABLE unread_push_messages ADD COLUMN topicId INTEGER default 0").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 134").stepThis().dispose();
+            version = 134;
+        }
+
         return version;
     }
 
@@ -1397,7 +1433,7 @@ public class DatabaseMigrationHelper {
             excludeTables.add("media_counts_v2");
             excludeTables.add("media_counts_topics");
             excludeTables.add("dialogs");
-            excludeTables.add("dialog_filter");
+            excludeTables.add("dialog_filter_octo");
             excludeTables.add("dialog_filter_ep");
             excludeTables.add("dialog_filter_pin_v2");
 

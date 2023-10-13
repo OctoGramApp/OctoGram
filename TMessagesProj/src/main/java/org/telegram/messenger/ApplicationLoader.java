@@ -45,7 +45,7 @@ import it.octogram.android.camerax.CameraXUtils;
 
 public class ApplicationLoader extends Application {
 
-    private static ApplicationLoader applicationLoaderInstance;
+    public static ApplicationLoader applicationLoaderInstance;
 
     @SuppressLint("StaticFieldLeak")
     public static volatile Context applicationContext;
@@ -151,6 +151,7 @@ public class ApplicationLoader extends Application {
             return;
         }
         applicationInited = true;
+        NativeLoader.initNativeLibs(ApplicationLoader.applicationContext);
 
         try {
             LocaleController.getInstance(); //TODO improve
@@ -230,7 +231,6 @@ public class ApplicationLoader extends Application {
             ContactsController.getInstance(a).checkAppAccount();
             DownloadController.getInstance(a);
         }
-        ChatThemeController.init();
         BillingController.getInstance().startConnection();
     }
 
@@ -553,4 +553,11 @@ public class ApplicationLoader extends Application {
 
     }
 
+    public boolean checkApkInstallPermissions(final Context context) {
+        return false;
+    }
+
+    public boolean openApkInstall(Activity activity, TLRPC.Document document) {
+        return false;
+    }
 }

@@ -214,6 +214,8 @@ public class NotificationCenter {
     public static final int storiesEnabledUpdate = totalEvents++;
     public static final int storiesBlocklistUpdate = totalEvents++;
     public static final int storiesLimitUpdate = totalEvents++;
+    public static final int storiesSendAsUpdate = totalEvents++;
+    public static final int unconfirmedAuthUpdate = totalEvents++;
 
     //global
     public static final int pushMessagesUpdated = totalEvents++;
@@ -292,7 +294,7 @@ public class NotificationCenter {
     public static final int uploadStoryEnd = totalEvents++;
     public static final int customTypefacesLoaded = totalEvents++;
     public static final int stealthModeChanged = totalEvents++;
-    public static final int onReceivedChannelDifference = totalEvents++;
+    public static final int onReceivedChannelDifference = totalEvents++;;
 
     public static boolean alreadyLogged;
 

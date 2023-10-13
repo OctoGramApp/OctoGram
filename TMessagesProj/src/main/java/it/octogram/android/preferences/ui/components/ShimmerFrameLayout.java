@@ -12,8 +12,10 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import org.telegram.messenger.R;
 
 public class ShimmerFrameLayout extends FrameLayout {

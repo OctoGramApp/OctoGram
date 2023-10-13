@@ -9,6 +9,7 @@
 package it.octogram.android;
 
 import android.graphics.Color;
+
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
@@ -41,15 +42,6 @@ public enum Datacenter {
             }
         }
         return UNKNOWN;
-    }
-
-    public static int getDcIcon(int dcId) {
-        for (Datacenter dcInfo : values()) {
-            if (dcInfo.dcId == dcId) {
-                return dcInfo.icon;
-            }
-        }
-        return UNKNOWN.icon;
     }
 
 }

@@ -55,6 +55,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> startWithRearCamera = newConfigProperty("startWithRearCamera", false);
     public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
     public final ConfigProperty<Boolean> hideSentTimeOnStickers = newConfigProperty("hideSentTimeOnStickers", false);
+    public final ConfigProperty<Boolean> hideOnlyAllChatsFolder = newConfigProperty("hideOnlyAllChatsFolder", false);
     public final ConfigProperty<Boolean> hideChatFolders = newConfigProperty("hideChatFolders", false);
     public final ConfigProperty<Boolean> hideStories = newConfigProperty("hideStories", false);
     public final ConfigProperty<Integer> doubleTapAction = newConfigProperty("doubleTapAction", DoubleTapAction.REACTION);
@@ -92,11 +93,17 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> drawerCalls = newConfigProperty("drawer_calls", true);
     public final ConfigProperty<Boolean> drawerPeopleNearby = newConfigProperty("drawer_peopleNearby", true);
     public final ConfigProperty<Boolean> drawerSavedMessages = newConfigProperty("drawer_savedMessages", true);
-    public final ConfigProperty<Boolean> drawerSettings = newConfigProperty("drawer_settings", true);
     public final ConfigProperty<Boolean> drawerOctogramSettings = newConfigProperty("drawer_octogramSettings", false);
     public final ConfigProperty<Boolean> drawerDatacenterInfo = newConfigProperty("drawer_datacenterInfo", true);
     public final ConfigProperty<Boolean> drawerInviteFriends = newConfigProperty("drawer_inviteFriends", true);
     public final ConfigProperty<Boolean> drawerTelegramFeatures = newConfigProperty("drawer_telegramFeatures", true);
+    /*Context menu elements*/
+    public final ConfigProperty<Boolean> contextClearFromCache = newConfigProperty("context_clearFromCache", false);
+    public final ConfigProperty<Boolean> contextCopyPhoto = newConfigProperty("context_copyPhoto", true);
+    public final ConfigProperty<Boolean> contextSaveMessage = newConfigProperty("context_saveMessage", false);
+    public final ConfigProperty<Boolean> contextReportMessage = newConfigProperty("context_reportMessage", true);
+    public final ConfigProperty<Boolean> contextMessageDetails = newConfigProperty("context_messageDetails", true);
+
     /*Unlock Secret Icons*/
     public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);
     public final ConfigProperty<Boolean> unlockedChupa = newConfigProperty("unlockedChupa", false);

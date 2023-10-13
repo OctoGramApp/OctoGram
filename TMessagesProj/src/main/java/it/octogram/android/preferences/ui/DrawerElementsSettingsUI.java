@@ -9,15 +9,16 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
+
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.CheckboxRow;
-import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.BaseFragment;
 
 public class DrawerElementsSettingsUI implements PreferencesEntry {
     @Override
@@ -62,11 +63,6 @@ public class DrawerElementsSettingsUI implements PreferencesEntry {
                     category.row(new CheckboxRow.CheckboxRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.drawerSavedMessages)
                             .title(LocaleController.getString(R.string.SavedMessages))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerSettings)
-                            .title(LocaleController.getString(R.string.Settings))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()

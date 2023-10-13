@@ -3,15 +3,18 @@ package it.octogram.android.preferences.rows.impl;
 import android.app.Activity;
 import android.view.View;
 import android.widget.FrameLayout;
+
 import androidx.annotation.Nullable;
+
+import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.Cells.TextCell;
+
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
 import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.Cells.TextCell;
 
 public class TextIconRow extends BaseRow implements Clickable {
 

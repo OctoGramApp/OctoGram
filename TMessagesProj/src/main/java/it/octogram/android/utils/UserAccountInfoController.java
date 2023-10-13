@@ -8,13 +8,13 @@
 
 package it.octogram.android.utils;
 
-import it.octogram.android.Datacenter;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 
+import it.octogram.android.Datacenter;
 import it.octogram.android.OctoConfig;
 
 public class UserAccountInfoController {
@@ -54,8 +54,6 @@ public class UserAccountInfoController {
         if (OctoConfig.INSTANCE.dcIdType.getValue() == OctoConfig.DcIdType.BOT_API) {
             if (ChatObject.isChannel(chat)) {
                 id = -1000000000000L - id;
-            } else {
-                id = -id;
             }
         }
         return id;

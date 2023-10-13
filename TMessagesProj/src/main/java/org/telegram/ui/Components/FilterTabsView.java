@@ -1131,7 +1131,7 @@ public class FilterTabsView extends FrameLayout {
             }
             TabView tabView = (TabView) view;
             if (isEditing) {
-                if (position != 0 || OctoConfig.INSTANCE.hideChatFolders.getValue()) {
+                if (position != 0 || OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
                     int side = AndroidUtilities.dp(6);
                     if (tabView.rect.left - side < x && tabView.rect.right + side > x) {
                         delegate.onDeletePressed(tabView.currentTab.id);
@@ -1464,7 +1464,7 @@ public class FilterTabsView extends FrameLayout {
         if (!tabs.isEmpty()) {
             int width = MeasureSpec.getSize(widthMeasureSpec) - AndroidUtilities.dp(7) - AndroidUtilities.dp(7);
             int trueTabsWidth;
-            if (!OctoConfig.INSTANCE.hideChatFolders.getValue())  {
+            if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue())  {
                 Tab firstTab = findDefaultTab();
                 firstTab.setTitle(LocaleController.getString("FilterAllChats", R.string.FilterAllChats));
                 int tabWith = firstTab.getWidth(false);
@@ -1642,7 +1642,8 @@ public class FilterTabsView extends FrameLayout {
                 invalidated = true;
                 requestLayout();
                 allTabsWidth = 0;
-                if (!OctoConfig.INSTANCE.hideChatFolders.getValue()) findDefaultTab().setTitle(LocaleController.getString("FilterAllChats", R.string.FilterAllChats));
+                if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue())
+                    findDefaultTab().setTitle(LocaleController.getString("FilterAllChats", R.string.FilterAllChats));
                 for (int b = 0; b < N; b++) {
                     allTabsWidth += tabs.get(b).getWidth(true) + FolderIconController.getPaddingTab();
                 }
@@ -1673,7 +1674,8 @@ public class FilterTabsView extends FrameLayout {
             listView.setItemAnimator(itemAnimator);
             adapter.notifyDataSetChanged();
             allTabsWidth = 0;
-            if (!OctoConfig.INSTANCE.hideChatFolders.getValue()) findDefaultTab().setTitle(LocaleController.getString("FilterAllChats", R.string.FilterAllChats));
+            if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue())
+                findDefaultTab().setTitle(LocaleController.getString("FilterAllChats", R.string.FilterAllChats));
             for (int b = 0, N = tabs.size(); b < N; b++) {
                 allTabsWidth += tabs.get(b).getWidth(true) + FolderIconController.getPaddingTab();
             }
@@ -1731,21 +1733,21 @@ public class FilterTabsView extends FrameLayout {
                 return;
             }
             ArrayList<MessagesController.DialogFilter> filters = MessagesController.getInstance(UserConfig.selectedAccount).getDialogFilters();
-//            if (OctoConfig.INSTANCE.hideChatFolders.getValue()) {
-//                int defaultPosition = 0;
-//                for (int i = 0; i < filters.size(); i++) {
-//                    if (filters.get(i).isDefault()) {
-//                        defaultPosition = i;
-//                        break;
-//                    }
-//                }
-//                if (idx1 >= defaultPosition) {
-//                    idx1++;
-//                }
-//                if (idx2 >= defaultPosition) {
-//                    idx2++;
-//                }
-//            }
+            if (OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
+                int defaultPosition = 0;
+                for (int i = 0; i < filters.size(); i++) {
+                    if (filters.get(i).isDefault()) {
+                        defaultPosition = i;
+                        break;
+                    }
+                }
+                if (idx1 >= defaultPosition) {
+                    idx1++;
+                }
+                if (idx2 >= defaultPosition) {
+                    idx2++;
+                }
+            }
             MessagesController.DialogFilter filter1 = filters.get(idx1);
             MessagesController.DialogFilter filter2 = filters.get(idx2);
             int temp = filter1.order;
@@ -1844,7 +1846,7 @@ public class FilterTabsView extends FrameLayout {
 
         @Override
         public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-            if (!OctoConfig.INSTANCE.hideChatFolders.getValue() && MessagesController.getInstance(UserConfig.selectedAccount).premiumLocked && (!isEditing || (viewHolder.getAdapterPosition() == 0 && tabs.get(0).isDefault && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()))) {
+            if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue() && MessagesController.getInstance(UserConfig.selectedAccount).premiumLocked && (!isEditing || (viewHolder.getAdapterPosition() == 0 && tabs.get(0).isDefault && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()))) {
                 return makeMovementFlags(0, 0);
             }
             return makeMovementFlags(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0);
@@ -1852,7 +1854,7 @@ public class FilterTabsView extends FrameLayout {
 
         @Override
         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target) {
-            if (!OctoConfig.INSTANCE.hideChatFolders.getValue() && MessagesController.getInstance(UserConfig.selectedAccount).premiumLocked && ((source.getAdapterPosition() == 0 || target.getAdapterPosition() == 0) && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium())) {
+            if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue() && MessagesController.getInstance(UserConfig.selectedAccount).premiumLocked && ((source.getAdapterPosition() == 0 || target.getAdapterPosition() == 0) && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium())) {
                 return false;
             }
             adapter.swapElements(source.getAdapterPosition(), target.getAdapterPosition());

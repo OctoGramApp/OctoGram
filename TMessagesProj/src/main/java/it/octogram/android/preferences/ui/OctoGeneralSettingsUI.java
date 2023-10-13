@@ -82,8 +82,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .options(List.of(
                                     new Pair<>(OctoConfig.DcIdStyle.NONE, LocaleController.formatString("Nothing", R.string.Nothing)),
                                     new Pair<>(OctoConfig.DcIdStyle.OWLGRAM, "OwlGram"),
-                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram")//,
-                                    //new Pair<>(OctoConfig.DcIdStyle.MINIMAL, "Minimal")
+                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram"),
+                                    new Pair<>(OctoConfig.DcIdStyle.MINIMAL, "Minimal")
                             ))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .title(LocaleController.formatString("Style", R.string.Style))
@@ -140,6 +140,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.openArchiveOnPull)
                             .title(LocaleController.formatString("OpenArchiveOnPull", R.string.OpenArchiveOnPull))
+                            .description(LocaleController.formatString("OpenArchiveOnPull_Desc", R.string.OpenArchiveOnPull_Desc))
                             .build());
                 })
                 .category(LocaleController.formatString("MediaTab", R.string.MediaTab), category -> {
@@ -173,6 +174,12 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.formatString("FilterAvailableTitle", R.string.FilterAvailableTitle), category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.hideOnlyAllChatsFolder)
+                            .premium(true)
+                            .title(LocaleController.formatString("HideAllChatFolder", R.string.HideAllChatFolder))
+                            .requiresRestart(true)
+                            .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideChatFolders)
                             .title(LocaleController.formatString("HideAllChatFolders", R.string.HideAllChatFolders))

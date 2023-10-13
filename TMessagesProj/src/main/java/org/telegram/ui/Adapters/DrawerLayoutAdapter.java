@@ -15,9 +15,15 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import it.octogram.android.Datacenter;
-import it.octogram.android.OctoConfig;
-import org.telegram.messenger.*;
+import org.telegram.messenger.AccountInstance;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MediaDataController;
+import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.DividerCell;
@@ -31,6 +37,9 @@ import org.telegram.ui.Components.SideMenultItemAnimator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+import it.octogram.android.Datacenter;
+import it.octogram.android.OctoConfig;
 
 public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
 
@@ -252,6 +261,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (OctoConfig.INSTANCE.eventType.getValue() > 0) {
             eventType = OctoConfig.INSTANCE.eventType.getValue() - 1;
         }
+        int datacenterId = AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId();
+
         int newGroupIcon;
         int newSecretIcon;
         int newChannelIcon = R.drawable.msg_channel;
@@ -263,7 +274,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         int helpIcon;
         int peopleNearbyIcon;
         int octogramIcon = R.drawable.intro_octo;
-        int datacenterIcon = Datacenter.getDcIcon(AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId());
+        int datacenterIcon = Datacenter.getDcInfo(datacenterId).icon;
         if (eventType == 0) {
             newGroupIcon = R.drawable.msg_groups_ny;
             //newSecretIcon = R.drawable.msg_secret_ny;
@@ -310,6 +321,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             peopleNearbyIcon = R.drawable.msg_nearby;
         }
         UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
+        boolean showDivider = false;
         if (me != null && me.isPremium()) {
             if (me.getEmojiStatus() != null) {
                 if (OctoConfig.INSTANCE.drawerChangeStatus.getValue())
@@ -318,13 +330,25 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                 if (OctoConfig.INSTANCE.drawerChangeStatus.getValue())
                     items.add(new Item(15, LocaleController.getString("SetEmojiStatus", R.string.SetEmojiStatus), R.drawable.msg_status_set));
             }
+            showDivider = true;
         }
         if (MessagesController.getInstance(UserConfig.selectedAccount).storiesEnabled()) {
             if (OctoConfig.INSTANCE.drawerMyStories.getValue()) {
                 items.add(new Item(16, LocaleController.getString("ProfileMyStories", R.string.ProfileMyStories), R.drawable.msg_menu_stories));
-                items.add(null); // divider
+                showDivider = true;
             }
-        } else if (me != null && me.isPremium()) {
+        }
+        TLRPC.TL_attachMenuBots menuBots = MediaDataController.getInstance(UserConfig.selectedAccount).getAttachMenuBots();
+        if (menuBots != null && menuBots.bots != null) {
+            for (int i = 0; i < menuBots.bots.size(); i++) {
+                TLRPC.TL_attachMenuBot bot = menuBots.bots.get(i);
+                if (bot.show_in_side_menu) {
+                    items.add(new Item(bot));
+                    showDivider = true;
+                }
+            }
+        }
+        if (showDivider) {
             items.add(null); // divider
         }
 
@@ -350,9 +374,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (OctoConfig.INSTANCE.drawerSavedMessages.getValue()) {
             items.add(new Item(11, LocaleController.getString("SavedMessages", R.string.SavedMessages), savedIcon));
         }
-        if (OctoConfig.INSTANCE.drawerSettings.getValue()) {
-            items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon));
-        }
+        items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon));
         if (OctoConfig.INSTANCE.drawerOctogramSettings.getValue()) {
             items.add(new Item(100, "Octogram Settings", octogramIcon));
         }
@@ -395,10 +417,23 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         return 1 + accountNumbers.size();
     }
 
+    public TLRPC.TL_attachMenuBot getAttachMenuBot(int position) {
+        position -= 2;
+        if (accountsShown) {
+            position -= getAccountRowsCount();
+        }
+        if (position < 0 || position >= items.size()) {
+            return null;
+        }
+        Item item = items.get(position);
+        return item != null ? item.bot : null;
+    }
+
     private static class Item {
         public int icon;
         public String text;
         public int id;
+        TLRPC.TL_attachMenuBot bot;
 
         public Item(int id, String text, int icon) {
             this.icon = icon;
@@ -406,8 +441,17 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             this.text = text;
         }
 
+        public Item(TLRPC.TL_attachMenuBot bot) {
+            this.bot = bot;
+            this.id = (int) (100 + (bot.bot_id >> 16));
+        }
+
         public void bind(DrawerActionCell actionCell) {
-            actionCell.setTextAndIcon(id, text, icon);
+            if (this.bot != null) {
+                actionCell.setBot(bot);
+            } else {
+                actionCell.setTextAndIcon(id, text, icon);
+            }
         }
     }
 }

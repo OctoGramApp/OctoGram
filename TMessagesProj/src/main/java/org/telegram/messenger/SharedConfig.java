@@ -145,6 +145,14 @@ public class SharedConfig {
                 .apply();
     }
 
+    public static void togglePhotoViewerBlur() {
+        photoViewerBlur = !photoViewerBlur;
+        ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE)
+                .edit()
+                .putBoolean("photoViewerBlur", photoViewerBlur)
+                .apply();
+    }
+
     private static String goodHevcEncoder;
     private static HashSet<String> hevcEncoderWhitelist = new HashSet<>();
     static {
@@ -227,6 +235,9 @@ public class SharedConfig {
     public static int searchMessagesAsListHintShows;
     public static int textSelectionHintShows;
     public static int scheduledOrNoSoundHintShows;
+    public static long scheduledOrNoSoundHintSeenAt;
+    public static int scheduledHintShows;
+    public static long scheduledHintSeenAt;
     public static int lockRecordAudioVideoHint;
     public static boolean forwardingOptionsHintShown;
     public static boolean searchMessagesAsListUsed;
@@ -238,6 +249,7 @@ public class SharedConfig {
     public static boolean updateStickersOrderOnSend = true;
     public static boolean bigCameraForRound;
     public static boolean useSurfaceInStories;
+    public static boolean photoViewerBlur = true;
     public static int stealthModeSendMessageConfirm = 2;
     private static int lastLocalId = -210000;
 
@@ -422,6 +434,9 @@ public class SharedConfig {
                 editor.putBoolean("sortFilesByName", sortFilesByName);
                 editor.putInt("textSelectionHintShows", textSelectionHintShows);
                 editor.putInt("scheduledOrNoSoundHintShows", scheduledOrNoSoundHintShows);
+                editor.putLong("scheduledOrNoSoundHintSeenAt", scheduledOrNoSoundHintSeenAt);
+                editor.putInt("scheduledHintShows", scheduledHintShows);
+                editor.putLong("scheduledHintSeenAt", scheduledHintSeenAt);
                 editor.putBoolean("forwardingOptionsHintShown", forwardingOptionsHintShown);
                 editor.putInt("lockRecordAudioVideoHint", lockRecordAudioVideoHint);
                 editor.putString("storageCacheDir", !TextUtils.isEmpty(storageCacheDir) ? storageCacheDir : "");
@@ -597,6 +612,9 @@ public class SharedConfig {
             storyReactionsLongPressHint = preferences.getBoolean("storyReactionsLongPressHint", false);
             textSelectionHintShows = preferences.getInt("textSelectionHintShows", 0);
             scheduledOrNoSoundHintShows = preferences.getInt("scheduledOrNoSoundHintShows", 0);
+            scheduledOrNoSoundHintSeenAt = preferences.getLong("scheduledOrNoSoundHintSeenAt", 0);
+            scheduledHintShows = preferences.getInt("scheduledHintShows", 0);
+            scheduledHintSeenAt = preferences.getLong("scheduledHintSeenAt", 0);
             forwardingOptionsHintShown = preferences.getBoolean("forwardingOptionsHintShown", false);
             lockRecordAudioVideoHint = preferences.getInt("lockRecordAudioVideoHint", 0);
             disableVoiceAudioEffects = preferences.getBoolean("disableVoiceAudioEffects", false);
@@ -616,6 +634,9 @@ public class SharedConfig {
             dayNightWallpaperSwitchHint = preferences.getInt("dayNightWallpaperSwitchHint", 0);
             bigCameraForRound = preferences.getBoolean("bigCameraForRound", false);
             useSurfaceInStories = preferences.getBoolean("useSurfaceInStories", Build.VERSION.SDK_INT >= 30);
+            photoViewerBlur = preferences.getBoolean("photoViewerBlur", true);
+
+            loadDebugConfig(preferences);
 
             preferences = ApplicationLoader.applicationContext.getSharedPreferences("Notifications", Activity.MODE_PRIVATE);
             showNotificationsForAllAccounts = preferences.getBoolean("AllAccounts", true);
@@ -813,6 +834,9 @@ public class SharedConfig {
         lastUpdateVersion = BuildVars.BUILD_VERSION_STRING;
         textSelectionHintShows = 0;
         scheduledOrNoSoundHintShows = 0;
+        scheduledOrNoSoundHintSeenAt = 0;
+        scheduledHintShows = 0;
+        scheduledHintSeenAt = 0;
         lockRecordAudioVideoHint = 0;
         forwardingOptionsHintShown = false;
         messageSeenHintCount = 3;
@@ -876,10 +900,21 @@ public class SharedConfig {
         editor.apply();
     }
 
-    public static void increaseScheduledOrNoSuoundHintShowed() {
+    public static void increaseScheduledOrNoSoundHintShowed() {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
         SharedPreferences.Editor editor = preferences.edit();
+        scheduledOrNoSoundHintSeenAt = System.currentTimeMillis();
         editor.putInt("scheduledOrNoSoundHintShows", ++scheduledOrNoSoundHintShows);
+        editor.putLong("scheduledOrNoSoundHintSeenAt", scheduledOrNoSoundHintSeenAt);
+        editor.apply();
+    }
+
+    public static void increaseScheduledHintShowed() {
+        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
+        SharedPreferences.Editor editor = preferences.edit();
+        scheduledHintSeenAt = System.currentTimeMillis();
+        editor.putInt("scheduledHintShows", ++scheduledHintShows);
+        editor.putLong("scheduledHintSeenAt", scheduledHintSeenAt);
         editor.apply();
     }
 
@@ -895,6 +930,13 @@ public class SharedConfig {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("scheduledOrNoSoundHintShows", 3);
+        editor.apply();
+    }
+
+    public static void removeScheduledHint() {
+        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("scheduledHintShows", 3);
         editor.apply();
     }
 
@@ -1682,4 +1724,20 @@ public class SharedConfig {
         }
         return legacyDevicePerformanceClass;
     }
+
+
+    //DEBUG
+    public static boolean drawActionBarShadow = true;
+
+    private static void loadDebugConfig(SharedPreferences preferences) {
+        drawActionBarShadow = preferences.getBoolean("drawActionBarShadow", true);
+    }
+
+    public static void saveDebugConfig() {
+        SharedPreferences pref = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE);
+        pref.edit().putBoolean("drawActionBarShadow", drawActionBarShadow);
+    }
+
+
+
 }

@@ -3496,7 +3496,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             addButtonView.addView(addButtonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
             addView(addButtonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
-            premiumButtonView = new PremiumButtonView(getContext(), false);
+            premiumButtonView = new PremiumButtonView(getContext(), false, resourcesProvider);
             premiumButtonView.setIcon(R.raw.unlock_icon);
             addView(premiumButtonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         }
@@ -3739,7 +3739,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             });
             buttonsView.addView(removeButtonView, LayoutHelper.createFrameRelatively(LayoutHelper.WRAP_CONTENT, 26, Gravity.END | Gravity.TOP));
 
-            premiumButtonView = new PremiumButtonView(context, AndroidUtilities.dp(16), false);
+            premiumButtonView = new PremiumButtonView(context, AndroidUtilities.dp(16), false, resourcesProvider);
             premiumButtonView.setIcon(R.raw.unlock_icon);
             premiumButtonView.setButton(LocaleController.getString("Unlock", R.string.Unlock), e -> openPremiumAnimatedEmojiFeature());
 
@@ -3853,7 +3853,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     installedEmojiSets.add(set.set.id);
                 }
                 updateState(true);
-            });
+            }, false);
         }
 
         @Override
@@ -5966,7 +5966,12 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     checkPanels();
                 }
             } else if ((Integer) args[0] == MediaDataController.TYPE_EMOJIPACKS) {
-                emojiAdapter.notifyDataSetChanged((Boolean) args[1]);
+                if ((Boolean) args[1]) {
+                    AndroidUtilities.cancelRunOnUIThread(updateStickersLoadedDelayed);
+                    AndroidUtilities.runOnUIThread(updateStickersLoadedDelayed, 100);
+                } else {
+                    emojiAdapter.notifyDataSetChanged(false);
+                }
             }
         } else if (id == NotificationCenter.recentDocumentsDidLoad) {
             boolean isGif = (Boolean) args[0];
@@ -7067,6 +7072,9 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                 } else {
                     pack.documents = set.covers;
                 }
+                if (pack.documents == null || pack.documents.isEmpty()) {
+                    continue;
+                }
                 pack.index = index++;
                 boolean premium = false;
                 for (int j = 0; j < pack.documents.size(); ++j) {
@@ -7160,6 +7168,9 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                 trendingHeaderRow = itemCount++;
                 trendingRow = itemCount++;
                 recentlyUsedHeaderRow = itemCount++;
+                rowHashCodes.add(324953);
+                rowHashCodes.add(123342);
+                rowHashCodes.add(929132);
             } else {
                 trendingHeaderRow = -1;
                 trendingRow = -1;
@@ -7202,14 +7213,14 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     if (!pack.expanded && pack.documents.size() > maxlen) {
                         count--;
                     }
-                    rowHashCodes.add(Objects.hash(pack.featured ? 56345 : -645231, (pack.set == null ? b : pack.set.id)));
+                    rowHashCodes.add(Objects.hash(pack.featured ? 56345 : -495231, (pack.set == null ? b : pack.set.id)));
                     for (int i = 1; i < count; ++i) {
-                        rowHashCodes.add(Objects.hash(pack.featured ? 3442 : 3213, pack.documents.get(i - 1).id));
+                        rowHashCodes.add(Objects.hash(pack.featured ? 3442 : -9964, pack.documents.get(i - 1).id));
                     }
                     itemCount += count;
                     if (!pack.expanded && pack.documents.size() > maxlen) {
                         positionToExpand.put(itemCount, b);
-                        rowHashCodes.add(Objects.hash(-65174, pack.set.id));
+                        rowHashCodes.add(Objects.hash(pack.featured ? -65174 : 92242, pack.set.id));
                         itemCount++;
                     }
 //                    if (!pack.installed) {
