@@ -52,19 +52,13 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .icon(R.drawable.msg_media)
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());
-
-//                    category.row(new TextIconRow.TextIconRowBuilder()
-//                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
-//                            .icon(R.drawable.msg_translate)
-//                            .title(LocaleController.formatString("Translator", R.string.Translator))
-//                            .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
                             .title(LocaleController.formatString("Appearance", R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoTranslationUI())))
                             .icon(R.drawable.msg_translate)
                             .title(LocaleController.formatString("Translator", R.string.Translator))
                             .build());
