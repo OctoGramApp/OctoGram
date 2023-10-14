@@ -112,6 +112,11 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> showTranslateButton = newConfigProperty("translatorEnabled", false);
     public final ConfigProperty<Boolean> translateEntireChat = newConfigProperty("translatorLanguage", false);
     public final ConfigProperty<Boolean> keepMarkdown = newConfigProperty("translatorShowOriginal", false);
+    public final ConfigProperty<Integer> translatorType = newConfigProperty("translatorType", TranslatorType.TELEGRAM);
+    public final ConfigProperty<Integer> translateLanguage = newConfigProperty("translateLanguage", 0);
+    public final ConfigProperty<Integer> doNotTranslate = newConfigProperty("doNotTranslate", 0);
+    public final ConfigProperty<Integer> autoTranslate = newConfigProperty("autoTranslate", 0);
+    public final ConfigProperty<Integer> translateMode = newConfigProperty("translateMode", 0);
 
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXEnabled = newConfigProperty("cameraXEnabled", true);
@@ -130,6 +135,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> gcOutputType = newConfigProperty("gcOutputType", AudioType.MONO);
     public final ConfigProperty<Boolean> mediaInGroupCall = newConfigProperty("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
+    public final ConfigProperty<Boolean> featureNotAvailable = newConfigProperty("featureNotAvailable", true);
 
     /**
      * Creates a new config property and adds it to the list of properties.
@@ -275,5 +281,14 @@ public class OctoConfig {
         public static final int MIXED = 1;
         public static final int ICON = 2;
 
+    }
+
+    public static class TranslatorType {
+        public static final int TELEGRAM = 0;
+        public static final int GOOGLE = 1;
+        public static final int DEEPL = 2;
+        public static final int NIU = 3;
+        public static final int YANDEX = 4;
+        public static final int DUCKDUCKGO = 5;
     }
 }
