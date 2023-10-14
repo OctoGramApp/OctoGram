@@ -271,6 +271,42 @@
     <string name="UserRestrictionsNoSendGames">no games</string>
     <string name="UserRestrictionsNoSendInlineBots">no inline bots</string>
 
+    <!-- Translator -->
+    <string name="TranslateInfo">Manage your translation and auto-translation preferences in OctoGram settings.</string>
+    <string name="TranslatorType">Translator Type</string>
+    <string name="TranslatorTypeOcto">In-Message</string>
+    <string name="TranslatorTypeTG">Dialog Popup</string>
+    <string name="TranslatorLanguageCode">Translation (%s)</string>
+    <string name="MessageTranslateProgress">translating</string>
+    <string name="MessageTranslated">translated</string>
+    <string name="UndoTranslate">Undo Translate</string>
+    <string name="TranslationProvider">Translation Provider</string>
+    <string name="TranslationProviderShort">Provider</string>
+    <string name="ProviderGoogleTranslate">Google Translate</string>
+    <string name="ProviderYandex">Yandex Translate</string>
+    <string name="ProviderDeepLTranslate">DeepL Translate</string>
+    <string name="ProviderNiuTrans">Niu Trans</string>
+    <string name="ProviderDuckDuckGo">DuckDuckGo Translate</string>
+    <string name="ProviderTelegram">Telegram Translate</string>
+    <string name="TranslationProviderInfo">%s may have access to the messages you translate.</string>
+    <string name="TranslationLanguage">Translation Language</string>
+    <string name="UseGoogleTranslate">Use Google</string>
+    <string name="ResetLanguage">Reset Language</string>
+    <string name="DeepLFormality">Formality</string>
+    <string name="DeepLFormalityDefault">Default</string>
+    <string name="DeepLFormalityMore">More</string>
+    <string name="DeepLFormalityLess">Less</string>
+    <string name="AutoTranslate">Auto-Translate</string>
+    <string name="AutoTranslateDesc">Automatically translate messages that are in another language.</string>
+    <string name="AutoTranslateTitle">Do you want auto-translation of messages?</string>
+    <string name="AutoTranslateDesc2">These chats will or will not be translated regardless of the settings above.</string>
+    <string name="AlwaysTranslate">Always translate</string>
+    <string name="NeverTranslate">Never translate</string>
+    <string name="ShowTranslateChatButtonDesc">Show the translation bar below the chat title</string>
+    <string name="KeepMarkdown" comment="KeepMarkdown">Keep Markdown</string>
+    <string name="KeepMarkdownDesc" comment="KeepMarkdownDesc">When translating a message, keep the markdown formatting.</string>
+
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
@@ -562,8 +598,6 @@
     <string name="DisableAccountProtectionAlert">Are you sure you want to disable the account protection feature?</string>
     <string name="AppCrashed">Something went wrong</string>
     <string name="AppCrashedDesc">OctoGram has stopped working. Please, send logs to the developers so that they can fix this bug as soon as possible.</string>
-    <string name="KeepMarkdown" comment="KeepMarkdown">Keep Markdown</string>
-    <string name="KeepMarkdownDesc" comment="KeepMarkdownDesc">When translating a message, keep the markdown formatting.</string>
     <string name="ThemeMonetLight">Monet Light</string>
     <string name="ThemeMonetDark">Monet Dark</string>
     <string name="Patpat">Patpat</string>
@@ -589,7 +623,6 @@
     <string name="EmojiSetAlreadyApplied">Emoji set already applied.</string>
     <string name="EmojiSetErrorDownloading">Error downloading emoji set.</string>
     <string name="ChatHeader">Chat Header</string>
-    <string name="ShowTranslateChatButtonDesc">Show the translation bar below the chat title</string>
     <string name="HRPhotos">High-res Photos</string>
     <string name="HRPhotosDesc">Increase the side limit on compressed photos from 1280px to 2560px</string>
     <string name="ZeroShutterLag">Zero-Shutter Lag</string>
