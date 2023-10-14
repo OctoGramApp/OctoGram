@@ -11671,16 +11671,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void updateMinimalDcId(boolean animated) {
-        String layout = "id: %s (dc%s)";
         if (userId != 0) {
             TLRPC.User user = getMessagesController().getUser(userId);
             UserAccountInfoController.UserAccountInfo info = UserAccountInfoController.getDcInfo(user);
-            dcIdTextView.setText(String.format(layout, info.userId, info.dcInfo.dcId), animated);
+            dcIdTextView.setText(formatMinimalDcId(info), animated);
         } else if (chatId != 0) {
             TLRPC.Chat chat = getMessagesController().getChat(chatId);
             UserAccountInfoController.UserAccountInfo info = UserAccountInfoController.getDcInfo(chat);
-            dcIdTextView.setText(String.format(layout, info.userId, info.dcInfo.dcId), animated);
+            dcIdTextView.setText(formatMinimalDcId(info), animated);
         }
+    }
+
+    private String formatMinimalDcId(UserAccountInfoController.UserAccountInfo tInfo) {
+        return tInfo.dcInfo.dcId != -1 ?
+                String.format(Locale.ENGLISH, "id: %s (dc%s)", tInfo.dcInfo.dcName, tInfo.dcInfo.dcId) :
+                String.format(Locale.ENGLISH, "id: %s", tInfo.dcInfo.dcName);
     }
 
     private void updateStoriesViewBounds(boolean animated) {

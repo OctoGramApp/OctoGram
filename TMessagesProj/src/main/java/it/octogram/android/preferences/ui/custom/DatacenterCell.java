@@ -115,7 +115,10 @@ public class DatacenterCell extends LinearLayout {
     }
 
     public void setIdAndDC(UserAccountInfoController.UserAccountInfo tInfo, boolean divider) {
-        dcNameView.setText(String.format(Locale.ENGLISH, "%s (DC%d)", tInfo.dcInfo.dcName, tInfo.dcInfo.dcId));
+        String formatted = tInfo.dcInfo.dcId != -1 ?
+                String.format(Locale.ENGLISH, "%s (DC%d)", tInfo.dcInfo.dcName, tInfo.dcInfo.dcId) :
+                tInfo.dcInfo.dcName;
+        dcNameView.setText(formatted);
         idView.setText(String.valueOf(tInfo.userId));
 
         Drawable d = ContextCompat.getDrawable(getContext(), tInfo.dcInfo.icon);
