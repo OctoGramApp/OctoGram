@@ -25,10 +25,10 @@ public class RegistrationDateController {
 
     private static final String[] IDS;
     private static final String FILE_NAME = "registration_id.json";
-    private static final int[] AGES;
+    private static final Long[] AGES;
 
-    private static final int MIN_ID;
-    private static final int MAX_ID;
+    private static final long MIN_ID;
+    private static final long MAX_ID;
 
     static {
         try {
@@ -41,9 +41,9 @@ public class RegistrationDateController {
             }
             IDS = idList.toArray(new String[0]);
 
-            AGES = new int[IDS.length];
+            AGES = new Long[IDS.length];
             for (int i = 0; i < IDS.length; i++) {
-                AGES[i] = Integer.parseInt(IDS[i]);
+                AGES[i] = Long.parseLong(IDS[i]);
             }
 
             MIN_ID = AGES[0];
@@ -79,7 +79,7 @@ public class RegistrationDateController {
             } else if (id > MAX_ID) {
                 return new Date((Long) REGISTRATION_JSON.get(IDS[IDS.length - 1]));
             } else {
-                int index = Arrays.binarySearch(AGES, (int) id);
+                int index = Arrays.binarySearch(AGES, id);
                 if (index >= 0) {
                     long dateInMillis = (Long) REGISTRATION_JSON.get(IDS[index]);
                     String formattedDate = DATE_FORMAT.format(new Date(dateInMillis));
