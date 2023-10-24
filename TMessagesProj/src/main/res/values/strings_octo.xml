@@ -305,6 +305,12 @@
     <string name="ShowTranslateChatButtonDesc">Show the translation bar below the chat title</string>
     <string name="KeepMarkdown" comment="KeepMarkdown">Keep Markdown</string>
     <string name="KeepMarkdownDesc" comment="KeepMarkdownDesc">When translating a message, keep the markdown formatting.</string>
+    <string name="MessageAlreadyInX">You cannot translate 1 message since it is already in %1$s.</string>
+    <string name="MessagesAlreadyInX">You cannot translate %1$d messages since they are already in %2$s.</string>
+    <string name="TranslationFailed">Translate Server Error</string>
+    <string name="TranslateApiUnsupported">The translation provider you selected don\'t support your language.</string>
+    <string name="BrokenMLKit">Unavailable Option</string>
+    <string name="BrokenMLKitDetail">Google MLKit language identifier is somehow broken on this device.</string>
 
 
     <!-- OLD STRINGS -->

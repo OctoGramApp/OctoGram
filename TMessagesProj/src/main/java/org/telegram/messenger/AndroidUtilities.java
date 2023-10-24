@@ -57,6 +57,7 @@ import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
@@ -113,6 +114,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
+import androidx.core.text.HtmlCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -129,6 +131,7 @@ import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
 import it.octogram.android.OctoConfig;
+
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.utils.CustomHtml;
@@ -178,6 +181,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -204,6 +208,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 public class AndroidUtilities {
     public final static int LIGHT_STATUS_BAR_OVERLAY = 0x0f000000, DARK_STATUS_BAR_OVERLAY = 0x33000000;
@@ -812,6 +817,41 @@ public class AndroidUtilities {
                 runnable.run();
             }
         });
+    }
+
+    public static InputStream decompressStream(InputStream input) throws IOException {
+        PushbackInputStream pb = new PushbackInputStream(input, 2);
+        byte[] signature = new byte[2];
+        int len = pb.read(signature);
+        pb.unread(signature, 0, len);
+        if (signature[0] == (byte) 0x1f && signature[1] == (byte) 0x8b) {
+            return new GZIPInputStream(pb);
+        } else {
+            return pb;
+        }
+    }
+
+    public static void selectionSort(ArrayList<CharSequence> x, ArrayList<String> y) {
+        for (int i = 0; i < x.size() - 1; i++) {
+            for (int j = i + 1; j < x.size(); j++) {
+                if (x.get(i).toString().compareTo(x.get(j).toString()) > 0) {
+                    CharSequence temp = x.get(i);
+                    x.set(i, x.get(j));
+                    x.set(j, temp);
+
+                    String tempStr = y.get(i);
+                    y.set(i, y.get(j));
+                    y.set(j, tempStr);
+                }
+            }
+        }
+    }
+
+    public static Spanned fromHtml(@NonNull String source) {
+        return fromHtml(source, null);
+    }
+    public static Spanned fromHtml(@NonNull String source, Html.TagHandler tagHandler) {
+        return HtmlCompat.fromHtml(source, HtmlCompat.FROM_HTML_MODE_LEGACY,null, tagHandler);
     }
 
     private static class LinkSpec {

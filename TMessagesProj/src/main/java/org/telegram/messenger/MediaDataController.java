@@ -6253,6 +6253,14 @@ public class MediaDataController extends BaseController {
     }
 
     public ArrayList<TLRPC.MessageEntity> getEntities(CharSequence[] message, boolean allowStrike) {
+        return getEntities(message, allowStrike, true);
+    }
+
+    public ArrayList<TLRPC.MessageEntity> getEntities(CharSequence[] message, boolean allowStrike, boolean allowSpannable) {
+        return getEntities(message, allowStrike, allowSpannable, true);
+    }
+
+    public ArrayList<TLRPC.MessageEntity> getEntities(CharSequence[] message, boolean allowStrike, boolean allowSpannable, boolean allowParsePatterns) {
         if (message == null || message[0] == null) {
             return null;
         }
