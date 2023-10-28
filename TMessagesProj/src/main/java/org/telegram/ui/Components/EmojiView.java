@@ -1455,12 +1455,16 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         }
     }
 
-    public EmojiView(BaseFragment fragment, boolean needAnimatedEmoji, boolean needStickers, boolean needGif, final Context context, boolean needSearch, final TLRPC.ChatFull chatFull, ViewGroup parentView, boolean shouldDrawBackground, Theme.ResourcesProvider resourcesProvider) {
+    public EmojiView(BaseFragment fragment, boolean needAnimatedEmoji, boolean needStickers, boolean needGif, final Context context, boolean needSearch, final TLRPC.ChatFull chatFull, ViewGroup parentView, boolean shouldDrawBackground, Theme.ResourcesProvider resourcesProvider, boolean frozenAtStart) {
         super(context);
         this.shouldDrawBackground = shouldDrawBackground;
         this.fragment = fragment;
         this.allowAnimatedEmoji = needAnimatedEmoji;
         this.resourcesProvider = resourcesProvider;
+
+        if (frozenAtStart) {
+            freeze(true);
+        }
 
         int color = getThemedColor(Theme.key_chat_emojiBottomPanelIcon);
         color = Color.argb(30, Color.red(color), Color.green(color), Color.blue(color));
@@ -6507,6 +6511,10 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         }
 
         private void updateItems() {
+            if (frozen) {
+                return;
+            }
+
             int width = getMeasuredWidth();
             if (width == 0) {
                 width = AndroidUtilities.displaySize.x;
@@ -7238,6 +7246,9 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         }
 
         public void notifyDataSetChanged(boolean updateEmojipack) {
+            if (frozen) {
+                return;
+            }
             ArrayList<Integer> prevRowHashCodes = new ArrayList<>(rowHashCodes);
 
             final MediaDataController mediaDataController = MediaDataController.getInstance(currentAccount);
@@ -7555,7 +7566,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                                     notifyDataSetChanged();
                                 }
                             }
-                        }, null, true, false, true, 25);
+                        }, null, SharedConfig.suggestAnimatedEmoji, false, true, 25);
                     };
                     if (Emoji.fullyConsistsOfEmojis(query)) {
                         StickerCategoriesListView.search.fetch(UserConfig.selectedAccount, query, list -> {
@@ -8966,5 +8977,26 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
     private class Tab {
         int type;
         View view;
+    }
+
+    private boolean frozen;
+    public void freeze(boolean freeze) {
+        final boolean wasFrozen = frozen;
+        this.frozen = freeze;
+        if (wasFrozen && !freeze) {
+            if (currentPage == 0) {
+                if (emojiAdapter != null) {
+                    emojiAdapter.notifyDataSetChanged();
+                }
+            } else if (currentPage == 1) {
+                if (gifAdapter != null) {
+                    gifAdapter.notifyDataSetChanged();
+                }
+            } else if (currentPage == 2) {
+                if (stickersGridAdapter != null) {
+                    stickersGridAdapter.notifyDataSetChanged();
+                }
+            }
+        }
     }
 }

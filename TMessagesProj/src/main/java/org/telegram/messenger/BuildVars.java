@@ -27,8 +27,8 @@ public class BuildVars {
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
     public static int BUILD_VERSION = BuildConfig.BUILD_VERSION;
     public static String BUILD_VERSION_STRING = BuildConfig.BUILD_VERSION_STRING;
-    public static int TELEGRAM_BUILD_VERSION = 3926;
-    public static String TELEGRAM_VERSION_STRING = "10.1.1";
+    public static int TELEGRAM_BUILD_VERSION = 4056;
+    public static String TELEGRAM_VERSION_STRING = "10.2.0";
     public static int APP_ID = 14565251;
     public static String APP_HASH = "9952ccf3124c8fa7835d9b8e091dfb4a";
 
@@ -52,7 +52,7 @@ public class BuildVars {
     }
 
     public static boolean useInvoiceBilling() {
-        return BillingController.billingClientEmpty || DEBUG_VERSION || isStandaloneApp() || isBetaApp() || isHuaweiStoreApp() || hasDirectCurrency();
+        return BillingController.billingClientEmpty || DEBUG_VERSION || ApplicationLoader.isStandaloneBuild() || isBetaApp() || isHuaweiStoreApp() || hasDirectCurrency();
     }
 
     private static boolean hasDirectCurrency() {
@@ -71,13 +71,13 @@ public class BuildVars {
         return false;
     }
 
-    private static Boolean standaloneApp;
+    /* TODO: Check private static Boolean standaloneApp;
     public static boolean isStandaloneApp() {
         if (standaloneApp == null) {
             standaloneApp = ApplicationLoader.applicationContext != null && "it.octogram.android".equals(ApplicationLoader.applicationContext.getPackageName());
         }
         return standaloneApp;
-    }
+    }*/
 
     private static Boolean betaApp;
     public static boolean isBetaApp() {
@@ -90,5 +90,9 @@ public class BuildVars {
 
     public static boolean isHuaweiStoreApp() {
         return ApplicationLoader.isHuaweiStoreBuild();
+    }
+
+    public static String getSmsHash() {
+        return ApplicationLoader.isStandaloneBuild() ? "w0lkcmTZkKh" : (DEBUG_VERSION ? "O2P2z+/jBpJ" : "oLeq9AcOZkT");
     }
 }

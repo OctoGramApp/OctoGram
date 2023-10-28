@@ -101,7 +101,7 @@ import it.octogram.android.BaseCameraView;
 @SuppressLint("NewApi")
 public class CameraView extends BaseCameraView implements TextureView.SurfaceTextureListener, CameraController.ICameraView {
 
-    public boolean WRITE_TO_FILE_IN_BACKGROUND = true;
+    public boolean WRITE_TO_FILE_IN_BACKGROUND = false;
 
     public boolean isStory;
     private Size[] previewSize = new Size[2];
@@ -991,20 +991,19 @@ public class CameraView extends BaseCameraView implements TextureView.SurfaceTex
 
     private float takePictureProgress = 1f;
 
-    public void startTakePictureAnimation() {
+    public void startTakePictureAnimation(boolean haptic) {
         takePictureProgress = 0;
         invalidate();
-        runHaptic();
+        if (haptic) {
+            runHaptic();
+        }
     }
 
     public void runHaptic() {
         long[] vibrationWaveFormDurationPattern = {0, 1};
-
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-
             final Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
             VibrationEffect vibrationEffect = VibrationEffect.createWaveform(vibrationWaveFormDurationPattern, -1);
-
             vibrator.cancel();
             vibrator.vibrate(vibrationEffect);
         } else {
@@ -2651,6 +2650,7 @@ public class CameraView extends BaseCameraView implements TextureView.SurfaceTex
                 movie.setRotation(0);
                 movie.setSize(videoWidth, videoHeight);
                 mediaMuxer = new MP4Builder().createMovie(movie, false, false);
+                mediaMuxer.setAllowSyncFiles(false);
 
             } catch (Exception ioe) {
                 throw new RuntimeException(ioe);
