@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -1166,6 +1167,14 @@ public class LNavigation extends FrameLayout implements INavigationLayout, Float
     @Override
     public boolean isSheet() {
         return isSheet;
+    }
+
+    @Override
+    public void updateTitleOverlay() {
+    }
+
+    @Override
+    public void setWindow(Window window) {
     }
 
     @Override

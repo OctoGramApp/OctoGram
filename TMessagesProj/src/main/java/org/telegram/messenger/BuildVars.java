@@ -34,7 +34,6 @@ public class BuildVars {
 
     // SafetyNet key for Google Identity SDK, set it to empty to disable
     public static String SAFETYNET_KEY = "";
-    public static String SMS_HASH = isStandaloneApp() ? "w0lkcmTZkKh" : (DEBUG_VERSION ? "O2P2z+/jBpJ" : "oLeq9AcOZkT");
     public static String PLAYSTORE_APP_URL = "https://play.google.com/store/apps/details?id=it.octogram.android";
     public static String HUAWEI_STORE_URL = "https://appgallery.huawei.com/app/C101184875";
     public static String GOOGLE_AUTH_CLIENT_ID = "760348033671-81kmi3pi84p11ub8hp9a1funsv0rn2p9.apps.googleusercontent.com";
@@ -71,13 +70,6 @@ public class BuildVars {
         return false;
     }
 
-    /* TODO: Check private static Boolean standaloneApp;
-    public static boolean isStandaloneApp() {
-        if (standaloneApp == null) {
-            standaloneApp = ApplicationLoader.applicationContext != null && "it.octogram.android".equals(ApplicationLoader.applicationContext.getPackageName());
-        }
-        return standaloneApp;
-    }*/
 
     private static Boolean betaApp;
     public static boolean isBetaApp() {
