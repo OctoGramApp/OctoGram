@@ -1280,7 +1280,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                         photoEntry.canDeleteAfter = true;
                         openPhotoViewer(photoEntry, sameTakePictureOrientation, false);
                     });
-                    ((CameraView)cameraView).startTakePictureAnimation(false);
+                    ((CameraView)cameraView).startTakePictureAnimation(true);
                 } else {
                     final boolean sameTakePictureOrientation = ((CameraXView) cameraView).isSameTakePictureOrientation();
                     takingPhoto = true;
