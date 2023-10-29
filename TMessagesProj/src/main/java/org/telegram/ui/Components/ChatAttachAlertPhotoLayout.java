@@ -1321,7 +1321,6 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                         openPhotoViewer(photoEntry, sameTakePictureOrientation, false);
                         effectSelector.setEnabledButtons(true);
                     });
-                    ((CameraView)cameraView).startTakePictureAnimation(true);
                 }
             }
 
