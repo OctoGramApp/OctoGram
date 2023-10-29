@@ -117,7 +117,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://octogram.crowdin.com/octogram"));
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://translations.octogram.site"));
                                 fragment.getParentActivity().startActivity(browserIntent);
                             })
                             .icon(R.drawable.msg_translate)
