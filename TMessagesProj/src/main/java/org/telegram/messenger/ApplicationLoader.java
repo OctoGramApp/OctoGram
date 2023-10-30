@@ -128,15 +128,11 @@ public class ApplicationLoader extends Application {
     }
 
     public static boolean isStandaloneBuild() {
-        return applicationLoaderInstance.isStandalone();
+        return BuildVars.isStandaloneApp();
     }
 
     protected boolean isHuaweiBuild() {
         return false;
-    }
-
-    protected boolean isStandalone() {
-        return BuildVars.isStandaloneApp();
     }
 
     public static File getFilesDirFixed() {
