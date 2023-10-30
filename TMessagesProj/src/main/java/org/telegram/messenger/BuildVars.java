@@ -70,6 +70,14 @@ public class BuildVars {
         return false;
     }
 
+    private static Boolean standaloneApp;
+
+    public static boolean isStandaloneApp() {
+        if (standaloneApp == null) {
+            standaloneApp = ApplicationLoader.applicationContext != null && "it.octogram.android".equals(ApplicationLoader.applicationContext.getPackageName());
+        }
+        return standaloneApp;
+    }
 
     private static Boolean betaApp;
     public static boolean isBetaApp() {

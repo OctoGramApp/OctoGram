@@ -136,7 +136,7 @@ public class ApplicationLoader extends Application {
     }
 
     protected boolean isStandalone() {
-        return false;
+        return BuildVars.isStandaloneApp();
     }
 
     public static File getFilesDirFixed() {
