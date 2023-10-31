@@ -135,6 +135,10 @@ public class ApplicationLoader extends Application {
         return false;
     }
 
+    protected boolean isStandalone() {
+        return isStandaloneBuild();
+    }
+
     public static File getFilesDirFixed() {
         for (int a = 0; a < 10; a++) {
             File path = ApplicationLoader.applicationContext.getFilesDir();
