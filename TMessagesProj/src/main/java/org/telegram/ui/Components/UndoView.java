@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import it.octogram.android.utils.AppRestartHelper;
 
 @SuppressWarnings("FieldCanBeLocal")
+@Deprecated // use Bulletin instead
 public class UndoView extends FrameLayout {
 
     private TextView infoTextView;
