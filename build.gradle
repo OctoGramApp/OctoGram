@@ -37,7 +37,7 @@ subprojects {
                 }
 
                 defaultConfig {
-                    minSdkVersion 21
+                    minSdkVersion 23
                     //noinspection OldTargetApi
                     targetSdkVersion 33
                 }
