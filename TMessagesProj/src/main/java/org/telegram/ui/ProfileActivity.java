@@ -11773,8 +11773,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
     private String formatMinimalDcId(UserAccountInfoController.UserAccountInfo tInfo) {
         return tInfo.dcInfo.dcId != -1 ?
-                String.format(Locale.ENGLISH, "id: %s (dc%s)", tInfo.dcInfo.dcName, tInfo.dcInfo.dcId) :
-                String.format(Locale.ENGLISH, "id: %s", tInfo.dcInfo.dcName);
+                String.format(Locale.ENGLISH, "id: %s (dc%s)", tInfo.userId, tInfo.dcInfo.dcId) :
+                String.format(Locale.ENGLISH, "id: %s", tInfo.userId);
     }
 
     private void updateStoriesViewBounds(boolean animated) {
