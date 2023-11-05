@@ -241,7 +241,12 @@ public class CameraXController {
 
     public boolean isAvailableHdrMode() {
         if (extensionsManager != null) {
-            return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.HDR);
+            try {
+                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.HDR);
+            } catch (Exception e) {
+                FileLog.e(e);
+                return false;
+            }
         } else {
             return false;
         }
@@ -249,7 +254,12 @@ public class CameraXController {
 
     public boolean isAvailableNightMode() {
         if (extensionsManager != null) {
-            return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.NIGHT);
+            try {
+                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.NIGHT);
+            } catch (Exception e) {
+                FileLog.e(e);
+                return false;
+            }
         } else {
             return false;
         }
@@ -265,7 +275,12 @@ public class CameraXController {
 
     public boolean isAvailableAutoMode() {
         if (extensionsManager != null) {
-            return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.AUTO);
+            try {
+                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.AUTO);
+            } catch (Exception e) {
+                FileLog.e(e);
+                return false;
+            }
         } else {
             return false;
         }
