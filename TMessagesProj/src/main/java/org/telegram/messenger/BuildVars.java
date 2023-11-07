@@ -27,8 +27,8 @@ public class BuildVars {
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
     public static int BUILD_VERSION = BuildConfig.BUILD_VERSION;
     public static String BUILD_VERSION_STRING = BuildConfig.BUILD_VERSION_STRING;
-    public static int TELEGRAM_BUILD_VERSION = 4075;
-    public static String TELEGRAM_VERSION_STRING = "10.2.3";
+    public static int TELEGRAM_BUILD_VERSION = 4082;
+    public static String TELEGRAM_VERSION_STRING = "10.2.6";
     public static int APP_ID = 14565251;
     public static String APP_HASH = "9952ccf3124c8fa7835d9b8e091dfb4a";
 
