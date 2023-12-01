@@ -10125,7 +10125,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == notificationRow) {
                         textCell.setTextAndIcon(LocaleController.getString("NotificationsAndSounds", R.string.NotificationsAndSounds), R.drawable.msg2_notifications, true);
                     } else if (position == octoGramMainSettingsRow) {
-                        textCell.setTextAndIcon("OctoGram Settings", R.drawable.msg_settings, true);
+                        textCell.setTextAndIcon(String.format("%s Settings", LocaleController.getString(R.string.AppName)), R.drawable.msg_settings, true);
                     }else if (position == privacyRow) {
                         textCell.setTextAndIcon(LocaleController.getString("PrivacySettings", R.string.PrivacySettings), R.drawable.msg2_secret, true);
                     } else if (position == dataRow) {
