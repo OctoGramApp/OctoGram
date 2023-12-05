@@ -143,7 +143,7 @@
             android:name="org.telegram.messenger.ChupaIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
             android:icon="@mipmap/icon_9_launcher"
-            android:roundIcon="@mipmap/icon_9_launcher"
+            android:roundIcon="@mipmap/icon_9_launcher_round"
             android:exported="true">
 
             <intent-filter>
