@@ -24,7 +24,7 @@
 }
 
 # Some members of this class are being accessed from native methods. Keep them unobfuscated.
--keep class com.google.android.exoplayer2.video.VideoDecoderOutputBufferRenderer {
+-keep class com.google.android.exoplayer2.decoder.VideoDecoderOutputBuffer {
   *;
 }
 
@@ -54,7 +54,7 @@
 }
 -dontnote com.google.android.exoplayer2.source.hls.offline.HlsDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.hls.offline.HlsDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DefaultDownloaderFactory);
+  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.video.VideoDecoderOutputBufferRenderer);
 }
 -dontnote com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader {
@@ -80,10 +80,12 @@
 -keep class org.telegram.SQLite.SQLiteException { <methods>; }
 -keep class org.telegram.tgnet.ConnectionsManager { <methods>; }
 -keep class org.telegram.tgnet.NativeByteBuffer { <methods>; }
+# -keep class org.telegram.tgnet.TLRPC* { *; }
 -keepnames class org.telegram.tgnet.TLRPC$TL_* {}
--keepclassmembernames class org.telegram.ui.* { <fields>; }
--keepclassmembernames class org.telegram.ui.Cells.* { <fields>; }
--keepclassmembernames class org.telegram.ui.Components.* { <fields>; }
+-keepclassmembernames,allowshrinking,allowoptimization class org.telegram.ui.* { <fields>; }
+-keepclassmembernames,allowshrinking,allowoptimization class org.telegram.ui.Cells.* { <fields>; }
+-keepclassmembernames,allowshrinking,allowoptimization class org.telegram.ui.Components.* { <fields>; }
+-keep class org.telegram.ui.Components.RLottieDrawable$LottieMetadata { <fields>; }
 -keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.GroupCreateSpan {
     public void updateColors();
  }
@@ -175,7 +177,3 @@
 -overloadaggressively
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
-
-# Use -keep to explicitly keep any other classes shrinking would remove
--dontoptimize
--dontobfuscate
