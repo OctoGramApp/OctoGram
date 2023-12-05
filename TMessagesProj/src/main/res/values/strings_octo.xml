@@ -270,6 +270,7 @@
     <string name="UserRestrictionsNoSendGifs">no GIFs</string>
     <string name="UserRestrictionsNoSendGames">no games</string>
     <string name="UserRestrictionsNoSendInlineBots">no inline bots</string>
+    <string name="OctoGramSettings">OctoGram Settings</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
