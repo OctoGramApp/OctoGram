@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import it.octogram.android.utils.NotificationColorize;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
@@ -104,7 +105,7 @@ public class Crashlytics {
 
     public static String getSystemInfo() throws IllegalAccessException {
         return LocaleController.getInstance().formatterFull.format(System.currentTimeMillis()) + "\n\n" +
-                "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildVars.BUILD_VERSION + ")\n" +
+                "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildConfig.BUILD_VERSION + ")\n" +
                 "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
                 "Device: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
                 "OS Version: " + Build.VERSION.RELEASE + "\n" +
