@@ -1070,10 +1070,10 @@ public class LocaleController {
         if (OctoUtils.isTelegramString(key, res)) {
             return OctoUtils.getCorrectAppName();
         }
-        return getStringInternal(key, null, res);
+        return getStringInternal(key, null, 0, res);
     }
 
-    private String getStringInternal(String key, String fallback, int res) {
+    private String getStringInternal(String key, String fallback, int fallbackRes, int res) {
         String value = BuildVars.USE_CLOUD_STRINGS ? localeValues.get(key) : null;
         if (value == null) {
             if (BuildVars.USE_CLOUD_STRINGS && fallback != null) {
@@ -1083,6 +1083,11 @@ public class LocaleController {
                 try {
                     value = ApplicationLoader.applicationContext.getString(res);
                 } catch (Exception e) {
+                    if (fallbackRes != 0) {
+                        try {
+                            value = ApplicationLoader.applicationContext.getString(fallbackRes);
+                        } catch (Exception ignored) {}
+                    }
                     FileLog.e(e);
                 }
             }
@@ -1119,8 +1124,12 @@ public class LocaleController {
         return getInstance().getStringInternal(key, res);
     }
 
+    public static String getString(String key, String fallback, int fallbackRes, int res) {
+        return getInstance().getStringInternal(key, fallback, fallbackRes, res);
+    }
+
     public static String getString(String key, String fallback, int res) {
-        return getInstance().getStringInternal(key, fallback, res);
+        return getInstance().getStringInternal(key, fallback, 0, res);
     }
 
     public static String getString(String key) {
@@ -1141,7 +1150,8 @@ public class LocaleController {
         String param = getInstance().stringForQuantity(getInstance().currentPluralRules.quantityForNumber(plural));
         param = key + "_" + param;
         int resourceId = ApplicationLoader.applicationContext.getResources().getIdentifier(param, "string", ApplicationLoader.applicationContext.getPackageName());
-        return getString(param, key + "_other", resourceId);
+        int fallbackResourceId = ApplicationLoader.applicationContext.getResources().getIdentifier(key + "_other", "string", ApplicationLoader.applicationContext.getPackageName());
+        return getString(param, key + "_other", resourceId, fallbackResourceId);
     }
 
     public static String formatPluralString(String key, int plural, Object... args) {
@@ -1156,6 +1166,10 @@ public class LocaleController {
         argsWithPlural[0] = plural;
         System.arraycopy(args, 0, argsWithPlural, 1, args.length);
         return formatString(param, key + "_other", resourceId, fallbackResourceId, argsWithPlural);
+    }
+
+    public static String getStringParamForNumber(int number) {
+        return getInstance().stringForQuantity(getInstance().currentPluralRules.quantityForNumber(number));
     }
 
     public static String formatPluralStringComma(String key, int plural) {
@@ -1617,6 +1631,24 @@ public class LocaleController {
                 return getInstance().chatDate.format(date);
             }
             return getInstance().chatFullDate.format(date);
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+        return "LOC_ERR: formatDateChat";
+    }
+
+    public static String formatSmallDateChat(long date) {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            int currentYear = calendar.get(Calendar.YEAR);
+            date *= 1000;
+
+            calendar.setTimeInMillis(date);
+            if (currentYear == calendar.get(Calendar.YEAR)) {
+                return getInstance().formatterDayMonth.format(date);
+            }
+            return getInstance().formatterDayMonth.format(date) + ", " + calendar.get(Calendar.YEAR);
         } catch (Exception e) {
             FileLog.e(e);
         }

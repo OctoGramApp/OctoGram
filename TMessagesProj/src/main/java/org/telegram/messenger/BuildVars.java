@@ -25,10 +25,9 @@ public class BuildVars {
     public static boolean USE_CLOUD_STRINGS = true;
     public static boolean CHECK_UPDATES = false;
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
-    public static int BUILD_VERSION = BuildConfig.BUILD_VERSION;
     public static String BUILD_VERSION_STRING = BuildConfig.BUILD_VERSION_STRING;
-    public static int TELEGRAM_BUILD_VERSION = 4139;
-    public static String TELEGRAM_VERSION_STRING = "10.3.2";
+    public static int TELEGRAM_BUILD_VERSION = 4228;
+    public static String TELEGRAM_VERSION_STRING = "10.5.0";
     public static int APP_ID = 14565251;
     public static String APP_HASH = "9952ccf3124c8fa7835d9b8e091dfb4a";
 
