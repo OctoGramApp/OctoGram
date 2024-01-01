@@ -25,7 +25,7 @@ public class MessageHelper {
         }
     }
 
-    private static void addFileToClipboard(File file, Runnable callback) {
+    public static void addFileToClipboard(File file, Runnable callback) {
         try {
             Context context = ApplicationLoader.applicationContext;
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
