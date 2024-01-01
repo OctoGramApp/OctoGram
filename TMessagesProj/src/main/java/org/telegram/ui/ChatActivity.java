@@ -24977,7 +24977,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
                                         if (OctoConfig.INSTANCE.contextCopyPhoto.getValue()) {
                                             items.add(LocaleController.getString("CopyPhoto", R.string.CopyPhoto));
-                                            options.add(OPTION_COPY_PHONE_NUMBER);
+                                            options.add(OPTION_COPY_PHOTO);
                                             icons.add(R.drawable.msg_copy);
                                         }
                                     }
