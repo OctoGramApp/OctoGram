@@ -126,6 +126,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> mediaInGroupCall = newConfigProperty("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
 
+    public final ConfigProperty<Boolean> showRPCErrors = newConfigProperty("showRPCErrors", false);
+
     /**
      * Creates a new config property and adds it to the list of properties.
      * @param key The key of the property.

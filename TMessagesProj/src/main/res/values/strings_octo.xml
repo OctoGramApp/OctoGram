@@ -272,6 +272,7 @@
     <string name="UserRestrictionsNoSendInlineBots">no inline bots</string>
     <string name="OctoGramSettings">OctoGram Settings</string>
 
+    <string name="ShowRPCErrors">Show RPC Errors</string>
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>

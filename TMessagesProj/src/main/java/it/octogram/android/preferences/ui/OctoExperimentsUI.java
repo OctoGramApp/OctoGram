@@ -14,7 +14,6 @@ import android.util.Pair;
 
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
-import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.util.ArrayList;
 
@@ -37,6 +36,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     !OctoConfig.INSTANCE.uploadBoost.getValue() &&
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
                     !OctoConfig.INSTANCE.mediaInGroupCall.getValue() &&
+                    !OctoConfig.INSTANCE.showRPCErrors.getValue() &&
                     OctoConfig.INSTANCE.gcOutputType.getValue() == OctoConfig.AudioType.MONO &&
                     OctoConfig.INSTANCE.maxRecentStickers.getValue() == 0 &&
                     OctoConfig.INSTANCE.photoResolution.getValue() == OctoConfig.PhotoResolution.DEFAULT) {
@@ -48,19 +48,24 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 .sticker(context, R.raw.utyan_experiments, true, LocaleController.formatString("OctoExperimentsSettingsHeader", R.string.OctoExperimentsSettingsHeader))
                 .category(LocaleController.getString("ExperimentalSettings", R.string.ExperimentalSettings), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.alternativeNavigation)
                             .title(LocaleController.getString("AlternativeNavigation", R.string.AlternativeNavigation))
                             .description(LocaleController.getString("AlternativeNavigation_Desc", R.string.AlternativeNavigation_Desc))
                             .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
                             .title(LocaleController.getString(R.string.MediaStream))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.showRPCErrors)
+                            .title(LocaleController.getString(R.string.ShowRPCErrors))
+                            .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .options(new ArrayList<>() {{
                                 add(new Pair<>(OctoConfig.AudioType.MONO, LocaleController.getString(R.string.AudioTypeMono)));
                                 add(new Pair<>(OctoConfig.AudioType.STEREO, LocaleController.getString(R.string.AudioTypeStereo)));
@@ -69,7 +74,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.AudioTypeInCall))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .options(new ArrayList<>() {{
                                 add(new Pair<>(OctoConfig.PhotoResolution.LOW, LocaleController.getString(R.string.ResolutionLow)));
                                 add(new Pair<>(OctoConfig.PhotoResolution.DEFAULT, LocaleController.getString(R.string.ResolutionMedium)));
@@ -79,7 +84,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .currentValue(OctoConfig.INSTANCE.maxRecentStickers)
                             .options(new ArrayList<>() {{
                                 add(new Pair<>(0, LocaleController.getString("MaxStickerSizeDefault", R.string.MaxStickerSizeDefault)));
@@ -98,12 +103,12 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 })
                 .category("Upload & Download Boost", category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.uploadBoost)
                             .title(LocaleController.getString("UploadBoost", R.string.UploadBoost))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(fragment, context))
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.downloadBoost)
                             .title(LocaleController.getString("DownloadBoost", R.string.DownloadBoost))
                             .build());
@@ -121,25 +126,10 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 .build();
     }
 
-    private boolean checkExperimentsEnabled(BaseFragment fragment, Context context) {
-        if (OctoConfig.INSTANCE.experimentsEnabled.getValue())
-            return true;
-
-        // create OK/Cancel dialog
-        /*AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(LocaleController.getString("OctoExperimentsDialogTitle", R.string.OctoExperimentsDialogTitle));
-        builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog, which) -> {
-            OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
-        });
-        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> {
-            dialog.dismiss();
-        });
-        builder.setMessage(LocaleController.getString("OctoExperimentsDialogMessage", R.string.OctoExperimentsDialogMessage));
-        fragment.showDialog(builder.create());
-        */
-        new AllowExperimentalBottomSheet(context).show();
-
+    private boolean checkExperimentsEnabled(Context context) {
+        if (OctoConfig.INSTANCE.experimentsEnabled.getValue()) return true;
+        var bottomSheet = new AllowExperimentalBottomSheet(context);
+        bottomSheet.show();
         return OctoConfig.INSTANCE.experimentsEnabled.getValue();
     }
-
 }
