@@ -275,20 +275,18 @@ public class FileLoadOperation {
     }
 
     private void updateParams() {
-        int downloadBoostValue = OctoConfig.INSTANCE.downloadBoostValue.getValue();
-        if (!OctoConfig.INSTANCE.downloadBoost.getValue() || downloadBoostValue == 0) {
-            downloadChunkSizeBig = 1024 * 128;
-            maxDownloadRequests = 4;
-            maxDownloadRequestsBig = 4;
-        }
-        if (downloadBoostValue == 1 || MessagesController.getInstance(currentAccount).getfileExperimentalParams && !forceSmallChunk) {
+        if (OctoConfig.INSTANCE.downloadBoostValue.getValue() == OctoConfig.DownloadBoost.FAST || MessagesController.getInstance(currentAccount).getfileExperimentalParams) {
             downloadChunkSizeBig = 1024 * 512;
             maxDownloadRequests = 8;
             maxDownloadRequestsBig = 8;
-        } else if (downloadBoostValue == 2) {
+        } else if (OctoConfig.INSTANCE.downloadBoostValue.getValue() == OctoConfig.DownloadBoost.EXTREME) {
             downloadChunkSizeBig = 1024 * 1024;
             maxDownloadRequests = 12;
             maxDownloadRequestsBig = 12;
+        } else {
+            downloadChunkSizeBig = 1024 * 128;
+            maxDownloadRequests = 4;
+            maxDownloadRequestsBig = 4;
         }
         maxCdnParts = (int) (FileLoader.DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
     }

@@ -119,7 +119,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
     public final ConfigProperty<Boolean> uploadBoost = newConfigProperty("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = newConfigProperty("downloadBoost", false);
-    public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", 0);
+    public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", DownloadBoost.NORMAL);
     public final ConfigProperty<Integer> photoResolution = newConfigProperty("photoResolution", PhotoResolution.DEFAULT);
     public final ConfigProperty<Integer> lastSelectedCompression = newConfigProperty("lastSelectedCompression", 3);
     public final ConfigProperty<Integer> gcOutputType = newConfigProperty("gcOutputType", AudioType.MONO);
@@ -272,5 +272,11 @@ public class OctoConfig {
         public static final int MIXED = 1;
         public static final int ICON = 2;
 
+    }
+
+    public static class DownloadBoost {
+        public static final int NORMAL = 0;
+        public static final int FAST = 1;
+        public static final int EXTREME = 2;
     }
 }
