@@ -1286,7 +1286,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int text_underline = 56;
     private final static int text_spoiler = 57;
     private final static int text_quote = 58;
-    private final static int text_mention = 59;
+    private final static int text_mention = 590;
+    private final static int text_format_code = 591;
 
     private final static int view_as_topics = 59;
 
@@ -3292,6 +3293,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (chatActivityEnterView != null && chatActivityEnterView.getEditField() != null) {
                         chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
                         chatActivityEnterView.getEditField().makeSelectedMention();
+                    }
+                } else if (id == text_format_code) {
+                    if (chatActivityEnterView != null && chatActivityEnterView.getEditField() != null) {
+                        chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
+                        chatActivityEnterView.getEditField().makeSelectedCode();
                     }
                 } else if (id == text_regular) {
                     if (chatActivityEnterView != null && chatActivityEnterView.getEditField() != null) {
@@ -8166,6 +8172,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
         item.addSubItem(text_link, LocaleController.getString("CreateLink", R.string.CreateLink));
         item.addSubItem(text_mention, LocaleController.getString("Mention", R.string.Mention));
+        item.addSubItem(text_format_code, LocaleController.getString("CodeFormat", R.string.CodeFormat));
         item.addSubItem(text_regular, LocaleController.getString("Regular", R.string.Regular));
 
         filledEditTextItemMenu = true;

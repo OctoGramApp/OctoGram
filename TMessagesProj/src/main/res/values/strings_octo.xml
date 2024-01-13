@@ -276,6 +276,7 @@
     <string name="OctoGramSettings">OctoGram Settings</string>
 
     <string name="ShowRPCErrors">Show RPC Errors</string>
+    <string name="CodeFormat">Code Format</string>
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
