@@ -117,6 +117,7 @@
     <string name="PreferredActionIncoming">Incoming messages</string>
     <string name="PreferredActionOutgoing">Outgoing messages</string>
     <string name="CustomEmojiReaction">Custom emoji reaction</string>
+    <string name="TabletModeSection">Tablet Mode</string>
     <string name="ConnectionSection">Connection</string>
     <string name="TryConnectWithIPV6">Try connecting through IPv6</string>
 

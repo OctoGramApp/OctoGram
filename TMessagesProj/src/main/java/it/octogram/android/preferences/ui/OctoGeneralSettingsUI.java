@@ -225,18 +225,18 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
 //                            .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
 //                            .build());
                 })
-                .category("Tablet Mode", category -> category.row(new SwitchRow.SwitchRowBuilder()
+                .category(LocaleController.getString("TabletModeSection", R.string.TabletModeSection), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.tabletMode)
-                        .title(LocaleController.formatString("EnableTabletMode", R.string.ForceTableMode))
+                        .title(LocaleController.getString("EnableTabletMode", R.string.ForceTableMode))
                         .requiresRestart(true)
                         .build()))
                 .category(LocaleController.getString(R.string.ConnectionSection), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.forceUseIpV6)
                         .title(LocaleController.getString(R.string.TryConnectWithIPV6))
                         .build()))
-                .category(LocaleController.formatString("Notifications", R.string.Notifications), category -> category.row(new SwitchRow.SwitchRowBuilder()
+                .category(LocaleController.getString("Notifications", R.string.Notifications), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
-                        .title(LocaleController.formatString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))
+                        .title(LocaleController.getString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))
                         .build()))
                 .build();
     }
