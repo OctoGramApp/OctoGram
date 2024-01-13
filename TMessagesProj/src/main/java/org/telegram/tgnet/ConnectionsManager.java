@@ -908,7 +908,7 @@ public class ConnectionsManager extends BaseController {
                     }
                 }
             }
-            if (hasIpv6) {
+            if (OctoConfig.INSTANCE.forceUseIpV6.getValue() && hasIpv6) {
                 if (forceTryIpV6) {
                     return USE_IPV6_ONLY;
                 }

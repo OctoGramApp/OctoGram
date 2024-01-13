@@ -64,6 +64,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> accentColorAsNotificationColor = newConfigProperty("accentColorAsNotificationColor", false);
     public final ConfigProperty<Boolean> openArchiveOnPull = newConfigProperty("openArchiveOnPull", false);
     public final ConfigProperty<Boolean> tabletMode = newConfigProperty("tabletMode", false);
+    public final ConfigProperty<Boolean> forceUseIpV6 = newConfigProperty("forceUseIpV6", false);
 
     /*Appearance*/
     public final ConfigProperty<Boolean> showNameInActionBar = newConfigProperty("showNameInActionBar", false);
