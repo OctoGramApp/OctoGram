@@ -42,6 +42,7 @@ public abstract class BaseRow {
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type) {
         this(title, summary, requiresRestart, showIf, divider, type, false, (int[]) null);
     }
+
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type, boolean premium) {
         this(title, summary, requiresRestart, showIf, divider, type, premium, (int[]) null);
     }

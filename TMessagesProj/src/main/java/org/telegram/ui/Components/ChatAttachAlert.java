@@ -3329,8 +3329,8 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             documentLayout.setMaxSelectedFiles(currentChat != null && !ChatObject.hasAdminRights(currentChat) && currentChat.slowmode_enabled || editingMessageObject != null ? 1 : -1);
         } else {
             documentLayout.setMaxSelectedFiles(maxSelectedPhotos);
-//            documentLayout.setCanSelectOnlyImageFiles(!isSoundPicker && !allowEnterCaption);
             documentLayout.setCanSelectOnlyImageFiles(!isSoundPicker && !isEmojiPicker);
+            // documentLayout.setCanSelectOnlyImageFiles(!isSoundPicker && !allowEnterCaption);
         }
         documentLayout.isSoundPicker = isSoundPicker;
         documentLayout.isEmojiPicker = isEmojiPicker;

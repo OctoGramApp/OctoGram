@@ -337,10 +337,10 @@ if (${ANDROID_ABI} STREQUAL "armeabi-v7a")
     target_compile_definitions(${NATIVE_LIB} PUBLIC
             ANDROID_ARM_NEON=false)
     target_sources(${NATIVE_LIB} PRIVATE
-            third_party/libyuv/source/compare_neon.cc
-            third_party/libyuv/source/rotate_neon.cc
-            third_party/libyuv/source/row_neon.cc
-            third_party/libyuv/source/scale_neon.cc)
+        third_party/libyuv/source/compare_neon.cc
+        third_party/libyuv/source/rotate_neon.cc
+        third_party/libyuv/source/row_neon.cc
+        third_party/libyuv/source/scale_neon.cc)
 else()
     set_target_properties(${NATIVE_LIB} PROPERTIES
             ANDROID_ARM_NEON FALSE

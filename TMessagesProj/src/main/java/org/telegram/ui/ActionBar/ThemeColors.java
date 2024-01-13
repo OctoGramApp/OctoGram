@@ -3,6 +3,7 @@ package org.telegram.ui.ActionBar;
 import static org.telegram.ui.ActionBar.Theme.*;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.util.SparseArray;
 
 import androidx.core.graphics.ColorUtils;

@@ -93,8 +93,6 @@ import org.telegram.ui.Components.URLSpanNoUnderline;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-import it.octogram.android.utils.PermissionsUtils;
-
 @TargetApi(18)
 public class CameraScanActivity extends BaseFragment {
 

@@ -130,10 +130,11 @@ public class OctoConfig {
 
     /**
      * Creates a new config property and adds it to the list of properties.
-     * @param key The key of the property.
+     *
+     * @param key          The key of the property.
      * @param defaultValue The default value of the property.
+     * @param <T>          The type of the property.
      * @return The newly created property.
-     * @param <T> The type of the property.
      */
     private <T> ConfigProperty<T> newConfigProperty(String key, T defaultValue) {
         ConfigProperty<T> property = new ConfigProperty<>(key, defaultValue);

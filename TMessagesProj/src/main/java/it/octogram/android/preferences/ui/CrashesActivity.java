@@ -8,7 +8,6 @@
 
 package it.octogram.android.preferences.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -28,8 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -48,6 +45,7 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.NumberTextView;
 import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.LaunchActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -62,7 +60,6 @@ import java.util.stream.Collectors;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.preferences.ui.custom.CrashLogCell;
-import org.telegram.ui.LaunchActivity;
 
 public class CrashesActivity extends BaseFragment {
 
@@ -147,7 +144,7 @@ public class CrashesActivity extends BaseFragment {
                         finishFragment();
                     }
                 } else {
-                    if (id == MENU_DELETE ||  id == MENU_DELETE_ALL) {
+                    if (id == MENU_DELETE || id == MENU_DELETE_ALL) {
                         listAdapter.processSelectionMenu(id);
                     }
                 }

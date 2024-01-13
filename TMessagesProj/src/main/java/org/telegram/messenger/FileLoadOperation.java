@@ -8,10 +8,6 @@
 
 package org.telegram.messenger;
 
-import android.os.Build;
-
-import com.google.android.exoplayer2.util.Log;
-
 import it.octogram.android.OctoConfig;
 import org.telegram.messenger.utils.ImmutableByteArrayOutputStream;
 import org.telegram.tgnet.ConnectionsManager;

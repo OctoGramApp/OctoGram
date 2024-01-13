@@ -38,8 +38,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
-import it.octogram.android.utils.PermissionsUtils;
-
 public class WallpaperUpdater {
 
     private String currentPicturePath;
