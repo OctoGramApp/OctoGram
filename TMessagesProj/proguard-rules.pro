@@ -7,10 +7,9 @@
 -keep class org.telegram.tgnet.QuickAckDelegate { *; }
 -keep class org.telegram.tgnet.WriteToSocketDelegate { *; }
 -keep class com.google.android.exoplayer2.ext.** { *; }
--keep class com.google.android.exoplayer2.extractor.FlacStreamMetadata { *; }
+-keep class com.google.android.exoplayer2.util.FlacStreamMetadata { *; }
 -keep class com.google.android.exoplayer2.metadata.flac.PictureFrame { *; }
--keep class com.google.android.exoplayer2.decoder.SimpleDecoderOutputBuffer { *; }
--keep class org.telegram.ui.Stories.recorder.FfmpegAudioWaveformLoader { *; }
+-keep class com.google.android.exoplayer2.decoder.SimpleOutputBuffer { *; }
 
 # Constant folding for resource integers may mean that a resource passed to this method appears to be unused. Keep the method to prevent this from happening.
 -keep class com.google.android.exoplayer2.upstream.RawResourceDataSource {
@@ -24,7 +23,7 @@
 }
 
 # Some members of this class are being accessed from native methods. Keep them unobfuscated.
--keep class com.google.android.exoplayer2.video.VideoDecoderOutputBufferRenderer {
+-keep class com.google.android.exoplayer2.video.VideoDecoderOutputBuffer {
   *;
 }
 
@@ -50,15 +49,15 @@
 # Constructors accessed via reflection in DefaultDownloaderFactory
 -dontnote com.google.android.exoplayer2.source.dash.offline.DashDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.dash.offline.DashDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DefaultDownloaderFactory);
+  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
 }
 -dontnote com.google.android.exoplayer2.source.hls.offline.HlsDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.hls.offline.HlsDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DefaultDownloaderFactory);
+  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
 }
 -dontnote com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DefaultDownloaderFactory);
+  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
 }
 
 # Constructors accessed via reflection in DownloadHelper
@@ -167,15 +166,9 @@
 -dontwarn org.jetbrains.annotations.Nullable
 -dontwarn androidx.camera.extensions.**
 -dontwarn javax.script.**
--dontwarn com.google.j2objc.annotations.RetainedWith
--dontwarn com.google.j2objc.annotations.Weak
 
 -repackageclasses
 -allowaccessmodification
 -overloadaggressively
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
-
-# Use -keep to explicitly keep any other classes shrinking would remove
--dontoptimize
--dontobfuscate
