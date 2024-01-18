@@ -625,10 +625,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             textureOverlayView.setImageResource(R.drawable.icplaceholder);
         }
         cameraReady = false;
-        isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
         selectedCamera = null;
         if (!fromPaused) {
-            isFrontface = true; // TODO: Check 
+            isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
             recordedTime = 0;
             progress = 0;
         }
