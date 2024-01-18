@@ -1539,7 +1539,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         !message.isSponsored() && (getMessageType(message) != 1 || message.getDialogId() != mergeDialogId) &&
                         !(message.messageOwner.action instanceof TLRPC.TL_messageActionSecureValuesSent) &&
                         (currentEncryptedChat != null || message.getId() >= 0) &&
-                        (bottomOverlayChat == null || bottomOverlayChat.getVisibility() != View.VISIBLE || bottomOverlayChatWaitsReply && selectedObject != null && (MessageObject.getTopicId(selectedObject.messageOwner, ChatObject.isForum(currentChat)) != 0 || selectedObject.wasJustSent)) &&
+                        (bottomOverlayChat == null || bottomOverlayChat.getVisibility() != View.VISIBLE || bottomOverlayChatWaitsReply && selectedObject != null && (MessageObject.getTopicId(selectedObject.currentAccount, selectedObject.messageOwner, ChatObject.isForum(currentChat)) != 0 || selectedObject.wasJustSent)) &&
                         (currentChat == null || ((!ChatObject.isNotInChat(currentChat) || isThreadChat()) && (!ChatObject.isChannel(currentChat) || ChatObject.canPost(currentChat) || currentChat.megagroup) && ChatObject.canSendMessages(currentChat)));
                 boolean allowForward = !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() || message.hasExtendedMediaPreview()) &&
                         !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL && !noForwards &&
