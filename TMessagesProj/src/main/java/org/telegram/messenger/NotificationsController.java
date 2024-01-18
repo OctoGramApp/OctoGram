@@ -43,7 +43,6 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -117,7 +116,7 @@ public class NotificationsController extends BaseController {
     private final ArrayList<StoryNotification> storyPushMessages = new ArrayList<>();
     private final LongSparseArray<StoryNotification> storyPushMessagesDict = new LongSparseArray<>();
     private long openedDialogId = 0;
-    private int openedTopicId = 0;
+    private long openedTopicId = 0;
     private int lastButtonId = 5000;
     private int total_unread_count = 0;
     private int personalCount = 0;
@@ -282,15 +281,15 @@ public class NotificationsController extends BaseController {
 
     private static final LongSparseArray<String> sharedPrefCachedKeys = new LongSparseArray<>();
 
-    public static String getSharedPrefKey(long dialog_id, int topicId) {
+    public static String getSharedPrefKey(long dialog_id, long topicId) {
         return getSharedPrefKey(dialog_id, topicId, false);
     }
 
-    public static String getSharedPrefKey(long dialog_id, int topicId, boolean backgroundThread) {
+    public static String getSharedPrefKey(long dialog_id, long topicId, boolean backgroundThread) {
         if (backgroundThread) {
             String key;
             if (topicId != 0) {
-                key = String.format(Locale.US, "%d_%d",dialog_id, topicId);
+                key = String.format(Locale.US, "%d_%d", dialog_id, topicId);
             } else {
                 key = String.valueOf(dialog_id);
             }
@@ -308,7 +307,7 @@ public class NotificationsController extends BaseController {
         }
         String key;
         if (topicId != 0) {
-            key = String.format(Locale.US, "%d_%d",dialog_id, topicId);
+            key = String.format(Locale.US, "%d_%d", dialog_id, topicId);
         } else {
             key = String.valueOf(dialog_id);
         }
@@ -316,7 +315,7 @@ public class NotificationsController extends BaseController {
         return key;
     }
 
-    public void muteUntil(long did, int topicId, int selectedTimeInSeconds) {
+    public void muteUntil(long did, long topicId, int selectedTimeInSeconds) {
         if (did != 0) {
             SharedPreferences preferences = MessagesController.getNotificationsSettings(currentAccount);
             SharedPreferences.Editor editor = preferences.edit();
@@ -423,7 +422,7 @@ public class NotificationsController extends BaseController {
         inChatSoundEnabled = value;
     }
 
-    public void setOpenedDialogId(long dialog_id, int topicId) {
+    public void setOpenedDialogId(long dialog_id, long topicId) {
         notificationsQueue.postRunnable(() -> {
             openedDialogId = dialog_id;
             openedTopicId = topicId;
@@ -460,8 +459,10 @@ public class NotificationsController extends BaseController {
         for (int a = 0; a < pushMessages.size(); a++) {
             MessageObject messageObject = pushMessages.get(a);
             long dialog_id = messageObject.getDialogId();
-            if (messageObject.messageOwner.mentioned && messageObject.messageOwner.action instanceof TLRPC.TL_messageActionPinMessage ||
-                    DialogObject.isEncryptedDialog(dialog_id) || messageObject.messageOwner.peer_id.channel_id != 0 && !messageObject.isSupergroup()) {
+            if (messageObject.isReactionPush ||
+                messageObject.messageOwner.mentioned && messageObject.messageOwner.action instanceof TLRPC.TL_messageActionPinMessage ||
+                DialogObject.isEncryptedDialog(dialog_id) ||
+                messageObject.messageOwner.peer_id.channel_id != 0 && !messageObject.isSupergroup()) {
                 continue;
             }
             return true;
@@ -1007,7 +1008,7 @@ public class NotificationsController extends BaseController {
                 }
 
                 long originalDialogId = dialogId;
-                int topicId = MessageObject.getTopicId(messageObject.messageOwner, getMessagesController().isForum(messageObject));
+                long topicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(messageObject));
                 if (dialogId == openedDialogId && ApplicationLoader.isScreenOn) {
                     if (!isFcm) {
                         playInChatSound();
@@ -1102,7 +1103,7 @@ public class NotificationsController extends BaseController {
                 } else if (added) {
                     MessageObject messageObject = messageObjects.get(0);
                     long dialog_id = messageObject.getDialogId();
-                    int topicId = MessageObject.getTopicId(messageObject.messageOwner, getMessagesController().isForum(dialog_id));
+                    long topicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(dialog_id));
                     Boolean isChannel;
                     if (messageObject.isFcmMessage()) {
                         isChannel = messageObject.localChannel;
@@ -1352,7 +1353,7 @@ public class NotificationsController extends BaseController {
                     }
                     long dialog_id = messageObject.getDialogId();
                     long original_dialog_id = dialog_id;
-                    int topicId = MessageObject.getTopicId(messageObject.messageOwner, getMessagesController().isForum(messageObject));
+                    long topicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(messageObject));
                     if (messageObject.messageOwner.mentioned) {
                         dialog_id = messageObject.getFromChatId();
                     }
@@ -1424,7 +1425,7 @@ public class NotificationsController extends BaseController {
                     }
                     long dialogId = messageObject.getDialogId();
                     long originalDialogId = dialogId;
-                    int topicId = MessageObject.getTopicId(messageObject.messageOwner, getMessagesController().isForum(messageObject));
+                    long topicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(messageObject));
                     long randomId = messageObject.messageOwner.random_id;
                     if (messageObject.messageOwner.mentioned) {
                         dialogId = messageObject.getFromChatId();
@@ -2084,6 +2085,10 @@ public class NotificationsController extends BaseController {
                         } else {
                             return LocaleController.getString("Message", R.string.Message);
                         }
+                    } else if (messageObject.isVoiceOnce()) {
+                        return LocaleController.getString(R.string.AttachOnceAudio);
+                    } else if (messageObject.isRoundOnce()) {
+                        return LocaleController.getString(R.string.AttachOnceRound);
                     } else if (messageObject.messageOwner.media instanceof TLRPC.TL_messageMediaPhoto) {
                         if (Build.VERSION.SDK_INT >= 19 && !TextUtils.isEmpty(messageObject.messageOwner.message)) {
                             return "\uD83D\uDDBC " + replaceSpoilers(messageObject);
@@ -2897,7 +2902,7 @@ public class NotificationsController extends BaseController {
                 && (messageObject.messageOwner.action == null || messageObject.messageOwner.action instanceof TLRPC.TL_messageActionEmpty);
     }
 
-    private int getNotifyOverride(SharedPreferences preferences, long dialog_id, int topicId) {
+    private int getNotifyOverride(SharedPreferences preferences, long dialog_id, long topicId) {
         int notifyOverride = dialogsNotificationsFacade.getProperty(NotificationsSettingsFacade.PROPERTY_NOTIFY, dialog_id, topicId, -1);
         if (notifyOverride == 3) {
             int muteUntil = dialogsNotificationsFacade.getProperty(NotificationsSettingsFacade.PROPERTY_NOTIFY_UNTIL, dialog_id, topicId, 0);
@@ -3039,11 +3044,11 @@ public class NotificationsController extends BaseController {
         return true;
     }
 
-    public void deleteNotificationChannel(long dialogId, int topicId) {
+    public void deleteNotificationChannel(long dialogId, long topicId) {
         deleteNotificationChannel(dialogId, topicId, -1);
     }
 
-    private void deleteNotificationChannelInternal(long dialogId, int topicId, int what) {
+    private void deleteNotificationChannelInternal(long dialogId, long topicId, int what) {
         if (Build.VERSION.SDK_INT < 26) {
             return;
         }
@@ -3089,7 +3094,7 @@ public class NotificationsController extends BaseController {
         }
     }
 
-    public void deleteNotificationChannel(long dialogId, int topicId, int what) {
+    public void deleteNotificationChannel(long dialogId, long topicId, int what) {
         if (Build.VERSION.SDK_INT < 26) {
             return;
         }
@@ -3404,7 +3409,7 @@ public class NotificationsController extends BaseController {
     }
 
     @TargetApi(26)
-    private String validateChannelId(long dialogId, int topicId, String name, long[] vibrationPattern, int ledColor, Uri sound, int importance, boolean isDefault, boolean isInApp, boolean isSilent, int type) {
+    private String validateChannelId(long dialogId, long topicId, String name, long[] vibrationPattern, int ledColor, Uri sound, int importance, boolean isDefault, boolean isInApp, boolean isSilent, int type) {
         ensureGroupsCreated();
 
         SharedPreferences preferences = getAccountInstance().getNotificationsSettings();
@@ -3776,7 +3781,7 @@ public class NotificationsController extends BaseController {
             }
 
             long dialog_id = lastMessageObject.getDialogId();
-            int topicId = MessageObject.getTopicId(lastMessageObject.messageOwner, getMessagesController().isForum(lastMessageObject));
+            long topicId = MessageObject.getTopicId(currentAccount, lastMessageObject.messageOwner, getMessagesController().isForum(lastMessageObject));
             boolean story = lastMessageObject.isStoryPush;
 
             boolean isChannel = false;
@@ -4322,7 +4327,7 @@ public class NotificationsController extends BaseController {
         }
     }
 
-    private void resetNotificationSound(NotificationCompat.Builder notificationBuilder, long dialogId, int topicId, String chatName, long[] vibrationPattern, int ledColor, Uri sound, int importance, boolean isDefault, boolean isInApp, boolean isSilent, int chatType) {
+    private void resetNotificationSound(NotificationCompat.Builder notificationBuilder, long dialogId, long topicId, String chatName, long[] vibrationPattern, int ledColor, Uri sound, int importance, boolean isDefault, boolean isInApp, boolean isSilent, int chatType) {
         Uri defaultSound = Settings.System.DEFAULT_RINGTONE_URI;
         if (defaultSound != null && sound != null && !TextUtils.equals(defaultSound.toString(), sound.toString())) {
             SharedPreferences preferences = getAccountInstance().getNotificationsSettings();
@@ -4363,7 +4368,7 @@ public class NotificationsController extends BaseController {
     }
 
     @SuppressLint("InlinedApi")
-    private void showExtraNotifications(NotificationCompat.Builder notificationBuilder, String summary, long lastDialogId, int lastTopicId, String chatName, long[] vibrationPattern, int ledColor, Uri sound, int importance, boolean isDefault, boolean isInApp, boolean isSilent, int chatType) {
+    private void showExtraNotifications(NotificationCompat.Builder notificationBuilder, String summary, long lastDialogId, long lastTopicId, String chatName, long[] vibrationPattern, int ledColor, Uri sound, int importance, boolean isDefault, boolean isInApp, boolean isSilent, int chatType) {
         if (Build.VERSION.SDK_INT >= 26) {
             notificationBuilder.setChannelId(validateChannelId(lastDialogId, lastTopicId, chatName, vibrationPattern, ledColor, sound, importance, isDefault, isInApp, isSilent, chatType));
         }
@@ -4386,7 +4391,7 @@ public class NotificationsController extends BaseController {
         for (int a = 0; a < pushMessages.size(); a++) {
             MessageObject messageObject = pushMessages.get(a);
             long dialog_id = messageObject.getDialogId();
-            int topicId = MessageObject.getTopicId(messageObject.messageOwner, getMessagesController().isForum(messageObject));
+            long topicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(messageObject));
             int dismissDate = preferences.getInt("dismissDate" + dialog_id, 0);
             if (!messageObject.isStoryPush && messageObject.messageOwner.date <= dismissDate) {
                 continue;
@@ -4410,14 +4415,14 @@ public class NotificationsController extends BaseController {
         class NotificationHolder {
             int id;
             long dialogId;
-            int topicId;
+            long topicId;
             boolean story;
             String name;
             TLRPC.User user;
             TLRPC.Chat chat;
             NotificationCompat.Builder notification;
 
-            NotificationHolder(int i, long li, boolean story, int topicId, String n, TLRPC.User u, TLRPC.Chat c, NotificationCompat.Builder builder) {
+            NotificationHolder(int i, long li, boolean story, long topicId, String n, TLRPC.User u, TLRPC.Chat c, NotificationCompat.Builder builder) {
                 id = i;
                 name = n;
                 user = u;
@@ -4460,7 +4465,8 @@ public class NotificationsController extends BaseController {
             }
             DialogKey dialogKey = sortedDialogs.get(b);
             long dialogId;
-            int topicId, maxId;
+            long topicId;
+            int maxId;
             MessageObject lastMessageObject = null;
             ArrayList<MessageObject> messageObjects;
             if (dialogKey.story) {
@@ -4523,7 +4529,7 @@ public class NotificationsController extends BaseController {
                     photoPath = user.photo.photo_small;
                 }
             } else if (!DialogObject.isEncryptedDialog(dialogId)) {
-                canReply = dialogId != 777000;
+                canReply = (lastMessageObject != null && !lastMessageObject.isReactionPush) && dialogId != 777000;
                 if (DialogObject.isUserDialog(dialogId)) {
                     user = getMessagesController().getUser(dialogId);
                     if (user == null) {
@@ -4756,7 +4762,7 @@ public class NotificationsController extends BaseController {
             } else {
                 for (int a = messageObjects.size() - 1; a >= 0; a--) {
                     MessageObject messageObject = messageObjects.get(a);
-                    int messageTopicId = MessageObject.getTopicId(messageObject.messageOwner, getMessagesController().isForum(messageObject));
+                    long messageTopicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(messageObject));
                     if (topicId != messageTopicId) {
                         continue;
                     }
@@ -5372,7 +5378,7 @@ public class NotificationsController extends BaseController {
     public static final int SETTING_MUTE_UNMUTE = 4;
     public static final int SETTING_MUTE_CUSTOM = 5;
 
-    public void clearDialogNotificationsSettings(long did, int topicId) {
+    public void clearDialogNotificationsSettings(long did, long topicId) {
         SharedPreferences preferences = getAccountInstance().getNotificationsSettings();
         SharedPreferences.Editor editor = preferences.edit();
         String prefKey =  NotificationsController.getSharedPrefKey(did, topicId);
@@ -5386,7 +5392,7 @@ public class NotificationsController extends BaseController {
         getNotificationsController().updateServerNotificationsSettings(did, topicId,true);
     }
 
-    public void setDialogNotificationsSettings(long dialog_id, int topicId, int setting) {
+    public void setDialogNotificationsSettings(long dialog_id, long topicId, int setting) {
         SharedPreferences preferences = getAccountInstance().getNotificationsSettings();
         SharedPreferences.Editor editor = preferences.edit();
         TLRPC.Dialog dialog = MessagesController.getInstance(UserConfig.selectedAccount).dialogs_dict.get(dialog_id);
@@ -5433,11 +5439,11 @@ public class NotificationsController extends BaseController {
         updateServerNotificationsSettings(dialog_id, topicId);
     }
 
-    public void updateServerNotificationsSettings(long dialog_id, int topicId) {
+    public void updateServerNotificationsSettings(long dialog_id, long topicId) {
         updateServerNotificationsSettings(dialog_id, topicId, true);
     }
 
-    public void updateServerNotificationsSettings(long dialogId, int topicId, boolean post) {
+    public void updateServerNotificationsSettings(long dialogId, long topicId, boolean post) {
         if (post) {
             getNotificationCenter().postNotificationName(NotificationCenter.notificationsSettingsUpdated);
         }
@@ -5490,10 +5496,10 @@ public class NotificationsController extends BaseController {
         } else {
             req.settings.sound = new TLRPC.TL_notificationSoundDefault();
         }
-        if (topicId != 0) {
+        if (topicId != 0 && dialogId != getUserConfig().getClientUserId()) {
             TLRPC.TL_inputNotifyForumTopic topicPeer = new TLRPC.TL_inputNotifyForumTopic();
             topicPeer.peer = getMessagesController().getInputPeer(dialogId);
-            topicPeer.top_msg_id = topicId;
+            topicPeer.top_msg_id = (int) topicId;
             req.peer = topicPeer;
         } else {
             req.peer = new TLRPC.TL_inputNotifyPeer();
@@ -5623,7 +5629,7 @@ public class NotificationsController extends BaseController {
         }
     }
 
-    public void muteDialog(long dialog_id, int topicId, boolean mute) {
+    public void muteDialog(long dialog_id, long topicId, boolean mute) {
         if (mute) {
             NotificationsController.getInstance(currentAccount).muteUntil(dialog_id, topicId, Integer.MAX_VALUE);
         } else {
@@ -5681,10 +5687,10 @@ public class NotificationsController extends BaseController {
 
     private static class DialogKey {
         final long dialogId;
-        final int topicId;
+        final long topicId;
         final boolean story;
 
-        private DialogKey(long dialogId, int topicId, boolean story) {
+        private DialogKey(long dialogId, long topicId, boolean story) {
             this.dialogId = dialogId;
             this.topicId = topicId;
             this.story = story;
