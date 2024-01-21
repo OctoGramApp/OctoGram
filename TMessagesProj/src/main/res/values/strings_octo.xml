@@ -282,6 +282,8 @@
 
     <string name="ShowRPCErrors">Show RPC Errors</string>
     <string name="CodeFormat">Code Format</string>
+    <string name="TestBackendNumber">Test Number</string>
+
     <string name="StickerSavedHint">Sticker saved to gallery.</string>
     <string name="NoQuoteForward">NoQuote Forward</string>
 

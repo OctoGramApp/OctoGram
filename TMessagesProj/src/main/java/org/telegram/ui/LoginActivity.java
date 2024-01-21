@@ -2297,12 +2297,27 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     CheckBoxCell cell = (CheckBoxCell) v;
                     testBackend = !testBackend;
                     cell.setChecked(testBackend, true);
-
-                    boolean testBackend = BuildVars.DEBUG_VERSION && getConnectionsManager().isTestBackend();
-                    if (testBackend != LoginActivity.this.testBackend) {
-                        getConnectionsManager().switchBackend(false);
+                    CountrySelectActivity.Country countryWithCode = new CountrySelectActivity.Country();
+                    String test_code = "999";
+                    countryWithCode.name = LocaleController.getString("TestBackendNumber", R.string.TestBackendNumber);
+                    countryWithCode.code = test_code;
+                    countryWithCode.shortname = "";
+                    if (LoginActivity.this.testBackend) {
+                        countriesArray.add(countryWithCode);
+                        List<CountrySelectActivity.Country> countryList = codesMap.get(test_code);
+                        if (countryList == null) {
+                            codesMap.put(test_code, countryList = new ArrayList<>());
+                        }
+                        countryList.add(countryWithCode);
+                        List<String> phoneFormats = new ArrayList<>();
+                        phoneFormats.add("XX X XXXX");
+                        phoneFormatMap.put(test_code, phoneFormats);
+                    } else {
+                        countriesArray.remove(countryWithCode);
+                        codesMap.remove(test_code);
+                        phoneFormatMap.remove(test_code);
                     }
-                    loadCountries();
+                    codeField.setText(codeField.getText());
                 });
             }
             if (bottomMargin > 0 && !AndroidUtilities.isSmallScreen()) {
@@ -2871,7 +2886,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 return;
             }
             String phone = PhoneFormat.stripExceptNumbers("" + codeField.getText() + phoneField.getText());
-            if (activityMode == MODE_LOGIN) {
+            /*if (activityMode == MODE_LOGIN) {*/
+                boolean testBackend = getConnectionsManager().isTestBackend();
+                if (testBackend != LoginActivity.this.testBackend) {
+                    getConnectionsManager().switchBackend(false);
+                    testBackend = LoginActivity.this.testBackend;
+                }
+
                 if (getParentActivity() instanceof LaunchActivity) {
                     for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
                         UserConfig userConfig = UserConfig.getInstance(a);
@@ -2897,7 +2918,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         }
                     }
                 }
-            }
+            //}
 
             TLRPC.TL_codeSettings settings = new TLRPC.TL_codeSettings();
             settings.allow_flashcall = simcardAvailable && allowCall && allowCancelCall && allowReadCallLog;
