@@ -217,6 +217,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.ForwardContext;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
     public final static String EXTRA_FORCE_NOT_INTERNAL_APPS = "force_not_internal_apps";
@@ -3385,6 +3386,17 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 return false;
             }
         };
+        fragment.forwardContext = new ForwardContext() {
+            @Override
+            public ArrayList<MessageObject> getForwardingMessages() {
+                return null;
+            }
+
+            @Override
+            public boolean forceShowScheduleAndSound() {
+                return true;
+            }
+        };
         fragment.setDelegate(this);
         boolean removeLast;
         if (AndroidUtilities.isTablet()) {
@@ -5541,7 +5553,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
             }
         } else {
-            boolean notify = dialogsFragment == null || dialogsFragment.notify;
+            boolean notify = dialogsFragment == null || dialogsFragment.forwardContext == null || dialogsFragment.forwardContext.getForwardParams().notify;
+            int scheduleDate = dialogsFragment == null || dialogsFragment.forwardContext == null ? 0 : dialogsFragment.forwardContext.getForwardParams().scheduleDate;
             final ChatActivity fragment;
             if (dids.size() <= 1) {
                 final long did = dids.get(0).dialogId;
@@ -5557,6 +5570,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     args.putLong("user_id", did);
                 } else {
                     args.putLong("chat_id", -did);
+                }
+                if (scheduleDate != 0) {
+                    args.putInt("chatMode", ChatActivity.MODE_SCHEDULED);
                 }
                 if (!MessagesController.getInstance(account).checkCanOpenChat(args, dialogsFragment)) {
                     return false;
@@ -5604,7 +5620,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             if (contactsToSend != null && contactsToSend.size() == 1 && !mainFragmentsStack.isEmpty()) {
                 presentedFragmentWithRemoveLast = true;
                 PhonebookShareAlert alert = new PhonebookShareAlert(mainFragmentsStack.get(mainFragmentsStack.size() - 1), null, null, contactsToSendUri, null, null, null);
-                alert.setDelegate((user, notify2, scheduleDate) -> {
+                alert.setDelegate((user, notify2, scheduleDate2) -> {
                     if (fragment != null) {
                         getActionBarLayout().presentFragment(fragment, true, false, true, false);
                     }
@@ -5666,7 +5682,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             }
                             ArrayList<String> arrayList = new ArrayList<>();
                             arrayList.add(videoPath);
-                            SendMessagesHelper.prepareSendingDocuments(accountInstance, arrayList, arrayList, null, captionToSend, null, did, replyToMsg, replyToMsg, null, null, null, notify, 0, null);
+                            SendMessagesHelper.prepareSendingDocuments(accountInstance, arrayList, arrayList, null, captionToSend, null, did, replyToMsg, replyToMsg, null, null, null, notify, scheduleDate, null);
                         }
                     }
                     if (photoPathsArray != null && !photosEditorOpened) {
@@ -5674,14 +5690,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             photoPathsArray.get(0).caption = sendingText;
                             sendingText = null;
                         }
-                        SendMessagesHelper.prepareSendingMedia(accountInstance, photoPathsArray, did, replyToMsg, replyToMsg, null, null, false, false, null, notify, 0, false, null);
+                        SendMessagesHelper.prepareSendingMedia(accountInstance, photoPathsArray, did, replyToMsg, replyToMsg, null, null, false, false, null, notify, scheduleDate, false, null);
                     }
                     if (documentsPathsArray != null || documentsUrisArray != null) {
                         if (sendingText != null && sendingText.length() <= 1024 && ((documentsPathsArray != null ? documentsPathsArray.size() : 0) + (documentsUrisArray != null ? documentsUrisArray.size() : 0)) == 1) {
                             captionToSend = sendingText;
                             sendingText = null;
                         }
-                        SendMessagesHelper.prepareSendingDocuments(accountInstance, documentsPathsArray, documentsOriginalPathsArray, documentsUrisArray, captionToSend, documentsMimeType, did, replyToMsg, replyToMsg, null, null, null, notify, 0, null);
+                        SendMessagesHelper.prepareSendingDocuments(accountInstance, documentsPathsArray, documentsOriginalPathsArray, documentsUrisArray, captionToSend, documentsMimeType, did, replyToMsg, replyToMsg, null, null, null, notify, scheduleDate, null);
                     }
                     if (voicePath != null) {
                         File file = new File(voicePath);
@@ -5715,11 +5731,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     if (contactsToSend != null && !contactsToSend.isEmpty()) {
                         for (int a = 0; a < contactsToSend.size(); a++) {
                             TLRPC.User user = contactsToSend.get(a);
-                            SendMessagesHelper.getInstance(account).sendMessage(SendMessagesHelper.SendMessageParams.of(user, did, replyToMsg, replyToMsg, null, null, notify, 0));
+                            SendMessagesHelper.getInstance(account).sendMessage(SendMessagesHelper.SendMessageParams.of(user, did, replyToMsg, replyToMsg, null, null, notify, scheduleDate));
                         }
                     }
                     if (!TextUtils.isEmpty(message) && !videoEditorOpened && !photosEditorOpened) {
-                        SendMessagesHelper.prepareSendingText(accountInstance, message.toString(), did, topicId, notify, 0);
+                        SendMessagesHelper.prepareSendingText(accountInstance, message.toString(), did, topicId, notify, scheduleDate);
                     }
                 }
             }

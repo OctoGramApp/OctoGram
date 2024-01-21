@@ -50,6 +50,11 @@ public class ContextElementsSettingsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.MessageDetails))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
+                    category.row(new CheckboxRow.CheckboxRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.contextNoQuoteForward)
+                            .title(LocaleController.getString(R.string.NoQuoteForward))
+                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .build());
                 }).build();
     }
 }

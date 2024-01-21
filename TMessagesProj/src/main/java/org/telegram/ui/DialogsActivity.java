@@ -229,6 +229,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.ForwardContext;
+import it.octogram.android.utils.SendMessageOptions;
 
 public class DialogsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, FloatingDebugProvider {
 
@@ -548,6 +550,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private TextView updateTextView;
 
     private DialogsActivityDelegate delegate;
+    public ForwardContext forwardContext;
 
     private ArrayList<Long> selectedDialogs = new ArrayList<>();
     public boolean notify = true;
@@ -11364,44 +11367,18 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (parentActivity == null) {
             return false;
         }
-        LinearLayout layout = new LinearLayout(parentActivity);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        ActionBarPopupWindow.ActionBarPopupWindowLayout sendPopupLayout2 = new ActionBarPopupWindow.ActionBarPopupWindowLayout(parentActivity, resourcesProvider);
-        sendPopupLayout2.setAnimationEnabled(false);
-        sendPopupLayout2.setOnTouchListener(new View.OnTouchListener() {
-            private android.graphics.Rect popupRect = new android.graphics.Rect();
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                        v.getHitRect(popupRect);
-                        if (!popupRect.contains((int) event.getX(), (int) event.getY())) {
-                            sendPopupWindow.dismiss();
-                        }
-                    }
-                }
-                return false;
+        ForwardContext forwardContext = delegate instanceof ForwardContext ? (ForwardContext) delegate : this.forwardContext;
+        if (forwardContext == null) {
+            return false;
+        }
+        boolean hasEncrypted = false;
+        for (Long did : selectedDialogs) {
+            if (DialogObject.isEncryptedDialog(did)) {
+                hasEncrypted = true;
+                break;
             }
-        });
-        sendPopupLayout2.setDispatchKeyEventListener(keyEvent -> {
-            if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getRepeatCount() == 0 && sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                sendPopupWindow.dismiss();
-            }
-        });
-        sendPopupLayout2.setShownFromBottom(false);
-        sendPopupLayout2.setupRadialSelectors(getThemedColor(Theme.key_dialogButtonSelector));
-
-        ActionBarMenuSubItem sendWithoutSound = new ActionBarMenuSubItem(parentActivity, true, true, resourcesProvider);
-        sendWithoutSound.setTextAndIcon(LocaleController.getString("SendWithoutSound", R.string.SendWithoutSound), R.drawable.input_notify_off);
-        sendWithoutSound.setMinimumWidth(AndroidUtilities.dp(196));
-        sendPopupLayout2.addView(sendWithoutSound, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-        sendWithoutSound.setOnClickListener(v -> {
-            if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                sendPopupWindow.dismiss();
-            }
-            this.notify = false;
+        }
+        SendMessageOptions layout = new SendMessageOptions(parentActivity, forwardContext, selectedDialogs.size() > 1 && !hasEncrypted, selectedDialogs.size() > 1, () -> {
             if (delegate == null || selectedDialogs.isEmpty()) {
                 return;
             }
@@ -11410,9 +11387,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 topicKeys.add(MessagesStorage.TopicKey.of(selectedDialogs.get(i), 0));
             }
             delegate.didSelectDialogs(DialogsActivity.this, topicKeys, commentView.getFieldText(), false, null);
-        });
-
-        layout.addView(sendPopupLayout2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        }, resourcesProvider);
 
         sendPopupWindow = new ActionBarPopupWindow(layout, LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT);
         sendPopupWindow.setAnimationEnabled(false);
@@ -11424,6 +11399,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         sendPopupWindow.getContentView().setFocusableInTouchMode(true);
         SharedConfig.removeScheduledOrNoSoundHint();
 
+        layout.setSendPopupWindow(sendPopupWindow);
         layout.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST));
         sendPopupWindow.setFocusable(true);
         int[] location = new int[2];

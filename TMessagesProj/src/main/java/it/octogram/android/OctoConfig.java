@@ -104,6 +104,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> contextSaveMessage = newConfigProperty("context_saveMessage", false);
     public final ConfigProperty<Boolean> contextReportMessage = newConfigProperty("context_reportMessage", true);
     public final ConfigProperty<Boolean> contextMessageDetails = newConfigProperty("context_messageDetails", true);
+    public final ConfigProperty<Boolean> contextNoQuoteForward = newConfigProperty("context_noQuoteForward", false);
 
     /*Unlock Secret Icons*/
     public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);

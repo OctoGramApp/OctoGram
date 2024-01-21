@@ -277,6 +277,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import it.octogram.android.utils.VideoUtils;
 
@@ -1943,6 +1944,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private final static int gallery_menu_showall = 2;
     private final static int gallery_menu_send = 3;
     private final static int gallery_menu_showinchat = 4;
+    private final static int gallery_menu_send_noquote = 93;
     private final static int gallery_menu_pip = 5;
     private final static int gallery_menu_delete = 6;
     private final static int gallery_menu_cancel_loading = 7;
@@ -4889,14 +4891,17 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         final ArrayList<MessageObject> fmessages = new ArrayList<>();
                         fmessages.add(currentMessageObject);
                         final ChatActivity parentChatActivityFinal = parentChatActivity;
+                        fragment.forwardContext = () -> fmessages;
+                        ForwardContext.ForwardParams forwardParams = fragment.forwardContext.getForwardParams();
+                        forwardParams.noQuote = id == gallery_menu_send_noquote;
                         fragment.setDelegate((fragment1, dids, message, param, topicsFragment) -> {
                             if (dids.size() > 1 || dids.get(0).dialogId == UserConfig.getInstance(currentAccount).getClientUserId() || message != null) {
                                 for (int a = 0; a < dids.size(); a++) {
                                     long did = dids.get(a).dialogId;
                                     if (message != null) {
-                                        SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, true, 0, null, false));
+                                        SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, forwardParams.notify, forwardParams.scheduleDate, null, false));
                                     }
-                                    SendMessagesHelper.getInstance(currentAccount).sendMessage(fmessages, did, false, false, true, 0);
+                                    SendMessagesHelper.getInstance(currentAccount).sendMessage(fmessages, did, forwardParams.noQuote, forwardParams.noCaption, forwardParams.notify, forwardParams.scheduleDate);
                                 }
                                 fragment1.finishFragment();
                                 if (parentChatActivityFinal != null) {
@@ -4913,6 +4918,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                                 MessagesStorage.TopicKey topicKey = dids.get(0);
                                 long did = topicKey.dialogId;
                                 Bundle args1 = new Bundle();
+                                args1.putBoolean("forward_noQuote", forwardParams.noQuote);
+                                args1.putBoolean("forward_noCaption", forwardParams.noCaption);
                                 args1.putBoolean("scrollToTopOnResume", true);
                                 if (DialogObject.isEncryptedDialog(did)) {
                                     args1.putInt("enc_id", DialogObject.getEncryptedChatId(did));

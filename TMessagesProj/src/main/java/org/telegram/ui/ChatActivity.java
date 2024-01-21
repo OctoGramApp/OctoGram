@@ -124,6 +124,7 @@ import com.google.zxing.common.detector.MathUtils;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.preferences.ui.DetailsActivity;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
+import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
@@ -258,7 +259,7 @@ import java.util.regex.Pattern;
 import it.octogram.android.OctoConfig;
 
 @SuppressWarnings("unchecked")
-public class ChatActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, LocationActivity.LocationActivityDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate, ChatActivityInterface, FloatingDebugProvider, InstantCameraView.Delegate {
+public class ChatActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, LocationActivity.LocationActivityDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate, ChatActivityInterface, FloatingDebugProvider, InstantCameraView.Delegate, ForwardContext {
     private final static boolean PULL_DOWN_BACK_FRAGMENT = false;
     private final static boolean DISABLE_PROGRESS_VIEW = true;
     private final static int SKELETON_DISAPPEAR_MS = 200;
@@ -579,6 +580,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private MessageObject.GroupedMessages selectedObjectGroup;
     private boolean forbidForwardingWithDismiss;
     public MessagePreviewParams messagePreviewParams;
+    public ForwardContext.ForwardParams forwardingMessages;
     private CharSequence formwardingNameText;
     private MessageObject forwardingMessage;
     private MessageObject.GroupedMessages forwardingMessageGroup;
@@ -909,6 +911,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int OPTION_RETRY = 0;
     private final static int OPTION_DELETE = 1;
     private final static int OPTION_FORWARD = 2;
+    private final static int OPTION_FORWARD_NO_QUOTE = 204;
     private final static int OPTION_COPY = 3;
     private final static int OPTION_SAVE_TO_GALLERY = 4;
     private final static int OPTION_APPLY_LOCALIZATION_OR_THEME = 5;
@@ -1263,6 +1266,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     private final static int copy = 10;
     private final static int forward = 11;
+    private final static int forward_noQuote = OPTION_FORWARD_NO_QUOTE;
     private final static int delete = 12;
     private final static int chat_enc_timer = 13;
     private final static int chat_menu_attach = 14;
@@ -2279,6 +2283,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         needRemovePreviousSameChatActivity = arguments.getBoolean("need_remove_previous_same_chat_activity", true);
         justCreatedChat = arguments.getBoolean("just_created_chat", false);
 
+        ForwardContext.setForwardParams(
+                arguments.getBoolean("forward_noQuote", false),
+                arguments.getBoolean("forward_noCaption", false)
+        );
         if (chatId != 0) {
             currentChat = getMessagesController().getChat(chatId);
             if (currentChat == null) {
@@ -3148,7 +3156,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         return;
                     }
                     createDeleteMessagesAlert(null, null);
-                } else if (id == forward) {
+                } else if (id == forward || id == forward_noQuote) {
+                    setForwardParams(id == forward_noQuote);
                     openForward(true);
                 } else if (id == save_to) {
                     ArrayList<MessageObject> messageObjects = new ArrayList<>();
@@ -7682,7 +7691,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         Drawable image = getContext().getResources().getDrawable(R.drawable.input_forward).mutate();
         image.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarActionModeDefaultIcon), PorterDuff.Mode.MULTIPLY));
         forwardButton.setCompoundDrawablesWithIntrinsicBounds(image, null, null, null);
-        forwardButton.setOnClickListener(v -> openForward(false));
+        forwardButton.setOnClickListener(v -> {
+            setForwardParams(false);
+            openForward(false);
+        });
         bottomMessagesActionContainer.addView(forwardButton, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.RIGHT | Gravity.TOP));
     }
 
@@ -8009,7 +8021,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             actionModeViews.add(actionMode.addItemWithWidth(edit, R.drawable.msg_edit, AndroidUtilities.dp(54), LocaleController.getString("Edit", R.string.Edit)));
             actionModeViews.add(actionMode.addItemWithWidth(star, R.drawable.msg_fave, AndroidUtilities.dp(54), LocaleController.getString("AddToFavorites", R.string.AddToFavorites)));
             actionModeViews.add(actionMode.addItemWithWidth(copy, R.drawable.msg_copy, AndroidUtilities.dp(54), LocaleController.getString("Copy", R.string.Copy)));
-            actionModeViews.add(actionMode.addItemWithWidth(forward, R.drawable.msg_forward, AndroidUtilities.dp(54), LocaleController.getString("Forward", R.string.Forward)));
+            actionModeViews.add(actionMode.addItemWithWidth(forward_noQuote, R.drawable.msg_forward, AndroidUtilities.dp(54), 2 + LocaleController.getString("NoQuoteForward", R.string.NoQuoteForward)));
+            actionModeViews.add(actionMode.addItemWithWidth(forward, OctoConfig.INSTANCE.contextNoQuoteForward.getValue() ? R.drawable.msg_forward_quote:R.drawable.msg_forward, AndroidUtilities.dp(54), LocaleController.getString("Forward", R.string.Forward)));
             actionModeViews.add(actionMode.addItemWithWidth(delete, R.drawable.msg_delete, AndroidUtilities.dp(54), LocaleController.getString("Delete", R.string.Delete)));
         } else {
             actionModeViews.add(actionMode.addItemWithWidth(edit, R.drawable.msg_edit, AndroidUtilities.dp(54), LocaleController.getString("Edit", R.string.Edit)));
@@ -8608,6 +8621,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (!forward) {
                         ignoreDraft = true;
                     }
+                    ForwardContext.setForwardParams(
+                            messagePreviewParams.hideForwardSendersName,
+                            messagePreviewParams.hideCaption
+                    );
                     int hasPoll = 0;
                     boolean hasInvoice = false;
                     if (messagePreviewParams.forwardMessages != null) {
@@ -12187,6 +12204,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 editingMessageObject = null;
                 chatActivityEnterView.setEditingMessageObject(null, false);
                 forbidForwardingWithDismiss = false;
+                if (forwardParams.noQuote || forwardParams.noCaption) {
+                    messagePreviewParams.hideForwardSendersName = forwardParams.noQuote;
+                    messagePreviewParams.hideCaption = forwardParams.noCaption;
+                    setForwardParams(false);
+                }
                 chatActivityEnterView.setForceShowSendButton(true, false);
                 ArrayList<Long> uids = new ArrayList<>();
                 replyIconImageView.setImageResource(R.drawable.filled_forward);
@@ -15579,6 +15601,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 ActionBarMenuItem starItem = actionBar.createActionMode().getItem(star);
                 ActionBarMenuItem editItem = actionBar.createActionMode().getItem(edit);
                 ActionBarMenuItem forwardItem = actionBar.createActionMode().getItem(forward);
+                ActionBarMenuItem forwardNoQuoteItem = actionBar.createActionMode().getItem(forward_noQuote);
                 ActionBarMenuItem deleteItem = actionBar.createActionMode().getItem(delete);
 
                 createBottomMessagesActionButtons();
@@ -15594,6 +15617,15 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             forwardItem.setBackground(null);
                         } else if (forwardItem.getBackground() == null) {
                             forwardItem.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 5));
+                        }
+                    }
+                    if (forwardNoQuoteItem != null) {
+                        forwardNoQuoteItem.setEnabled(cantForwardMessagesCount == 0 || noforwards);
+                        animators.add(ObjectAnimator.ofFloat(forwardNoQuoteItem, View.ALPHA, cantForwardMessagesCount == 0 ? 1.0f : 0.5f));
+                        if (noforwards) {
+                            if (forwardNoQuoteItem.getBackground() != null) forwardNoQuoteItem.setBackground(null);
+                        } else if (forwardNoQuoteItem.getBackground() == null) {
+                            forwardNoQuoteItem.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 5));
                         }
                     }
                     if (forwardButton != null) {
@@ -15626,6 +15658,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             forwardItem.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 3));
                         }
                     }
+                    if (forwardNoQuoteItem != null) {
+                        forwardNoQuoteItem.setEnabled(cantForwardMessagesCount == 0);
+                        forwardNoQuoteItem.setAlpha(cantForwardMessagesCount == 0 ? 1.0f : 0.5f);
+                    }
                     if (forwardButton != null) {
                         forwardButton.setEnabled(cantForwardMessagesCount == 0 || noforwards);
                         if (noforwards) {
@@ -15634,6 +15670,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             forwardButton.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 3));
                         }
                         forwardButton.setAlpha(cantForwardMessagesCount == 0 ? 1.0f : 0.5f);
+                    }
+                }
+                if (forwardNoQuoteItem != null) {
+                    if ((((canSaveMusicCount > 0 && canSaveDocumentsCount == 0) || (canSaveMusicCount == 0 && canSaveDocumentsCount > 0)) && cantSaveMessagesCount == 0) && canEditMessagesCount > 0 && canForwardMessagesCount > 0 && OctoConfig.INSTANCE.contextNoQuoteForward.getValue()) {
+                        forwardNoQuoteItem.setVisibility(View.GONE);
+                    } else {
+                        forwardNoQuoteItem.setVisibility(OctoConfig.INSTANCE.contextNoQuoteForward.getValue() ? View.VISIBLE:View.GONE);
                     }
                 }
                 if (saveItem != null) {
@@ -25539,6 +25582,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 && !message.isExpiredStory() && message.type != MessageObject.TYPE_STORY_MENTION) {
                             items.add(LocaleController.getString("Forward", R.string.Forward));
                             options.add(OPTION_FORWARD);
+                            icons.add(OctoConfig.INSTANCE.contextNoQuoteForward.getValue() ? R.drawable.msg_forward_quote:R.drawable.msg_forward);
+                        }
+                        if (OctoConfig.INSTANCE.contextNoQuoteForward.getValue() && !selectedObject.isSponsored() && chatMode != MODE_SCHEDULED && !selectedObject.needDrawBluredPreview() && !selectedObject.isLiveLocation() && selectedObject.type != 16 && !noforwards) {
+                            items.add(LocaleController.getString("NoQuoteForward", R.string.NoQuoteForward));
+                            options.add(OPTION_FORWARD_NO_QUOTE);
                             icons.add(R.drawable.msg_forward);
                         }
                         if (chatMode != MODE_SCHEDULED && !getMessagesController().isChatNoForwards(currentChat)) {
@@ -25549,6 +25597,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("AddToSavedMessages", R.string.AddToSavedMessages));
                                 options.add(OPTION_SAVE_TO_SAVED_MESSAGES);
                                 icons.add(R.drawable.msg_saved);
+                            }
+                            if (message.messageOwner.forwards > 0 && ChatObject.hasAdminRights(getCurrentChat()) && ChatObject.isChannel(currentChat) && !currentChat.megagroup) {
+                                items.add(LocaleController.getString("ViewStats", R.string.ViewStats));
+                                options.add(OPTION_STATISTICS);
+                                icons.add(R.drawable.msg_stats);
                             }
                         }
                         if (allowUnpin) {
@@ -27361,7 +27414,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 createDeleteMessagesAlert(selectedObject, selectedObjectGroup, 1,true);
                 break;
             }
-            case OPTION_FORWARD: {
+            case OPTION_FORWARD:
+            case OPTION_FORWARD_NO_QUOTE: {
+                setForwardParams(option == OPTION_FORWARD_NO_QUOTE);
                 forwardingMessage = selectedObject;
                 forwardingMessageGroup = selectedObjectGroup;
                 Bundle args = new Bundle();
@@ -28134,6 +28189,37 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         closeMenu(!preserveDim);
     }
 
+
+    public ArrayList<MessageObject> getForwardingMessages() {
+        ArrayList<MessageObject> fMessages = new ArrayList<>();
+        if (forwardingMessage == null && selectedMessagesIds[0].size() == 0 && selectedMessagesIds[1].size() == 0) {
+            return fMessages;
+        }
+        if (forwardingMessage != null) {
+            if (forwardingMessageGroup != null) {
+                fMessages.addAll(forwardingMessageGroup.messages);
+            } else {
+                fMessages.add(forwardingMessage);
+            }
+        } else {
+            for (int a = 1; a >= 0; a--) {
+                ArrayList<Integer> ids = new ArrayList<>();
+                for (int b = 0; b < selectedMessagesIds[a].size(); b++) {
+                    ids.add(selectedMessagesIds[a].keyAt(b));
+                }
+                Collections.sort(ids);
+                for (int b = 0; b < ids.size(); b++) {
+                    Integer id = ids.get(b);
+                    MessageObject messageObject = selectedMessagesIds[a].get(id);
+                    if (messageObject != null) {
+                        fMessages.add(messageObject);
+                    }
+                }
+            }
+        }
+        return fMessages;
+    }
+
     @Override
     public boolean didSelectDialogs(DialogsActivity fragment, ArrayList<MessagesStorage.TopicKey> dids, CharSequence message, boolean param, TopicsFragment topicsFragment) {
         if ((messagePreviewParams == null && (!fragment.isQuote || replyingMessageObject == null) || fragment.isQuote && replyingMessageObject == null) && forwardingMessage == null && selectedMessagesIds[0].size() == 0 && selectedMessagesIds[1].size() == 0) {
@@ -28196,7 +28282,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (message != null) {
                     getSendMessagesHelper().sendMessage(SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, true, 0, null, false));
                 }
-                getSendMessagesHelper().sendMessage(fmessages, did, false, false,true, 0);
+                getSendMessagesHelper().sendMessage(fmessages, did, forwardParams.noQuote, forwardParams.noCaption, forwardParams.notify, forwardParams.scheduleDate);
             }
             fragment.finishFragment();
             createUndoView();
@@ -28212,6 +28298,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             long did = topicKey.dialogId;
             if (did != dialog_id || getTopicId() != topicKey.topicId || chatMode == MODE_PINNED) {
                 Bundle args = new Bundle();
+                args.putBoolean("forward_noQuote", forwardParams.noQuote);
+                args.putBoolean("forward_noCaption", forwardParams.noCaption);
                 args.putBoolean("scrollToTopOnResume", scrollToTopOnResume);
                 if (DialogObject.isEncryptedDialog(did)) {
                     args.putInt("enc_id", DialogObject.getEncryptedChatId(did));
