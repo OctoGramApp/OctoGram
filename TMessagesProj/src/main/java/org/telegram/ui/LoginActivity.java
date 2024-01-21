@@ -2312,10 +2312,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         List<String> phoneFormats = new ArrayList<>();
                         phoneFormats.add("XX X XXXX");
                         phoneFormatMap.put(test_code, phoneFormats);
+                        BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString("TestBackendOn", R.string.TestBackendOn)).show();
                     } else {
                         countriesArray.remove(countryWithCode);
                         codesMap.remove(test_code);
                         phoneFormatMap.remove(test_code);
+                        BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString("TestBackendOff", R.string.TestBackendOff)).show();
                     }
                     codeField.setText(codeField.getText());
                 });
