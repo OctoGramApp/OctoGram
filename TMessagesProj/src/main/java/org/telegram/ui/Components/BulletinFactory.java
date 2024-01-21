@@ -81,6 +81,7 @@ public final class BulletinFactory {
     }
 
     public enum FileType {
+        STICKER("StickerSavedHint", R.string.StickerSavedHint, Icon.SAVED_TO_GALLERY),
 
         PHOTO("PhotoSavedHint", R.string.PhotoSavedHint, Icon.SAVED_TO_GALLERY),
         PHOTOS("PhotosSavedHint", Icon.SAVED_TO_GALLERY),
@@ -961,6 +962,11 @@ public final class BulletinFactory {
     @CheckResult
     public static Bulletin createSaveToGalleryBulletin(BaseFragment fragment, boolean video, Theme.ResourcesProvider resourcesProvider) {
         return of(fragment).createDownloadBulletin(video ? FileType.VIDEO : FileType.PHOTO, resourcesProvider);
+    }
+
+    @CheckResult
+    public static Bulletin createSaveToGalleryBulletin(BaseFragment fragment, boolean video, boolean sticker, Theme.ResourcesProvider resourcesProvider) {
+        return sticker ? of(fragment).createDownloadBulletin(FileType.STICKER, resourcesProvider) : createSaveToGalleryBulletin(fragment, video, resourcesProvider);
     }
 
     @CheckResult

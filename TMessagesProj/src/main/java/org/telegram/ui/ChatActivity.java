@@ -25563,6 +25563,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 icons.add(R.drawable.msg_callback);
                             }
                         } else if (type == 9) {
+                            if (!selectedObject.isAnimatedSticker()) {
+                                items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
+                                options.add(OPTION_SAVE_TO_GALLERY2);
+                                icons.add(R.drawable.msg_gallery);
+                            }
                             TLRPC.Document document = selectedObject.getDocument();
                             if (!getMediaDataController().isStickerInFavorites(document)) {
                                 if (MessageObject.isStickerHasSet(document)) {
@@ -27636,7 +27641,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     return;
                 }
                 MediaController.saveFile(path, getParentActivity(), 0, null, null);
-                BulletinFactory.createSaveToGalleryBulletin(this, selectedObject.isVideo(), themeDelegate).show();
+                BulletinFactory.createSaveToGalleryBulletin(this, selectedObject.isVideo(), selectedObject.isSticker(), themeDelegate).show();
                 break;
             }
             case OPTION_REPLY: {
