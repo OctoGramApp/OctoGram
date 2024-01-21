@@ -289,6 +289,9 @@
     <string name="StickerSavedHint">Sticker saved to gallery.</string>
     <string name="NoQuoteForward">NoQuote Forward</string>
 
+    <string name="MutualContact">Mutual Contact</string>
+    <string name="MutualContactDesc">**%s** and you have added each other in the contacts list.</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
