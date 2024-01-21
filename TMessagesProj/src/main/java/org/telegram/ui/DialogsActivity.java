@@ -2202,9 +2202,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                 }
                                 ((DialogCell) view).startOutAnimation();
                                 parentPage.archivePullViewState = ARCHIVE_ITEM_STATE_SHOWED;
-                                if (AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
-                                    AndroidUtilities.makeAccessibilityAnnouncement(LocaleController.getString(R.string.AccDescrArchivedChatsShown));
-                                }
                                 if (OctoConfig.INSTANCE.openArchiveOnPull.getValue()) {
                                     AndroidUtilities.runOnUIThread(() -> {
                                         Bundle args = new Bundle();
@@ -2214,6 +2211,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                         dialogsActivity.setDelegate(delegate);
                                         presentFragment(dialogsActivity, onlySelect);
                                     }, 200);
+                                } else if (AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
+                                    AndroidUtilities.makeAccessibilityAnnouncement(LocaleController.getString(R.string.AccDescrArchivedChatsShown));
                                 }
                             }
                         }
