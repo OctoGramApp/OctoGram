@@ -40,6 +40,7 @@ import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
+import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -103,14 +104,17 @@ public class CrashesActivity extends BaseFragment {
         }
         fragmentView = new FrameLayout(context);
         fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
+
         FrameLayout frameLayout = (FrameLayout) fragmentView;
         listView = new RecyclerListView(context);
         listView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         listView.setVerticalScrollBarEnabled(false);
+
         DefaultItemAnimator itemAnimator = new DefaultItemAnimator();
         itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
         itemAnimator.setDelayAnimations(false);
         listView.setItemAnimator(itemAnimator);
+
         listAdapter = new ListAdapter(context);
         listView.setAdapter(listAdapter);
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
@@ -153,11 +157,27 @@ public class CrashesActivity extends BaseFragment {
         return fragmentView;
     }
 
+    private void showWarningDialog(String text) {
+        AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
+        warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
+        warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> dialog1.dismiss());
+        warningBuilder.setMessage(text);
+        showDialog(warningBuilder.create());
+
+    }
+
+    private void copyShowBulletin (CharSequence text) {
+        if (AndroidUtilities.addToClipboard(text)) {
+            BulletinFactory.of(CrashesActivity.this).createCopyBulletin(LocaleController.getString("CrashLogCopied", R.string.CrashLogCopied)).show();
+        }
+    }
+
+
     private void onItemClick(View view, int position, float x, float y) {
         if (position == copyInfoRow) {
             try {
                 String configuration = Crashlytics.getSystemInfo();
-                AndroidUtilities.addToClipboard(configuration);
+                copyShowBulletin(configuration);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -175,10 +195,10 @@ public class CrashesActivity extends BaseFragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), getResourceProvider());
                 builder.setTitle("Crash settings");
                 CharSequence[] items = new CharSequence[]{
-                        "Open crash log",
-                        "Send crash log",
-                        "Copy crash log",
-                        "Report crash",
+                        LocaleController.getString("OpenCrashLog", R.string.OpenCrashLog),
+                        LocaleController.getString("SendCrashLog", R.string.SendCrashLog),
+                        LocaleController.getString("CopyCrashLog", R.string.CopyCrashLog),
+                        LocaleController.getString("ReportCrash", R.string.ReportCrash),
                 };
                 int[] icons = new int[]{
                         R.drawable.msg_openin,
@@ -190,26 +210,12 @@ public class CrashesActivity extends BaseFragment {
                     if (which == 0) {
                         File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
                         if (!openLog(file)) {
-                            // Show popup error
-                            AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
-                            warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-                            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> {
-                                dialog1.dismiss();
-                            });
-                            warningBuilder.setMessage(LocaleController.getString(R.string.ErrorSendingCrashContent));
-                            showDialog(warningBuilder.create());
+                            showWarningDialog(LocaleController.getString(R.string.ErrorSendingCrashContent));
                         }
                     } else if (which == 1) {
                         File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
                         if (!sendLog(file)) {
-                            // Show popup error
-                            AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
-                            warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-                            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> {
-                                dialog1.dismiss();
-                            });
-                            warningBuilder.setMessage(LocaleController.getString(R.string.ErrorSendingCrashContent));
-                            showDialog(warningBuilder.create());
+                            showWarningDialog(LocaleController.getString(R.string.ErrorSendingCrashContent));
                         }
                     } else if (which == 2) {
                         copyCrashLine(position);
@@ -242,7 +248,7 @@ public class CrashesActivity extends BaseFragment {
             BulletinFactory.of(CrashesActivity.this).createErrorBulletin(LocaleController.getString(R.string.CouldNotCopyFile)).show();
         }
 
-        AndroidUtilities.addToClipboard(String.join("\n", lines));
+        copyShowBulletin(String.join("\n", lines));
     }
 
     protected void updateRowsId() {
@@ -506,15 +512,11 @@ public class CrashesActivity extends BaseFragment {
                             AlertDialog.Builder unableToDeleteBuilder = new AlertDialog.Builder(context);
                             unableToDeleteBuilder.setTitle(LocaleController.getString(R.string.BuildAppName));
                             unableToDeleteBuilder.setMessage(message);
-                            unableToDeleteBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> {
-                                dialog1.dismiss();
-                            });
+                            unableToDeleteBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> dialog1.dismiss());
                         }
                         BulletinFactory.of(CrashesActivity.this).createErrorBulletin(message).show();
                     });
-                    builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> {
-                        dialog.dismiss();
-                    });
+                    builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> dialog.dismiss());
 
                     String message;
                     if (toDelete.size() > 1) {
@@ -542,9 +544,7 @@ public class CrashesActivity extends BaseFragment {
                         }
                         BulletinFactory.of(CrashesActivity.this).createErrorBulletin(message1).show();
                     });
-                    allBuilder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> {
-                        dialog.dismiss();
-                    });
+                    allBuilder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> dialog.dismiss());
 
                     File[] filesToDelete = Crashlytics.getArchivedCrashFiles();
                     String allMessage;

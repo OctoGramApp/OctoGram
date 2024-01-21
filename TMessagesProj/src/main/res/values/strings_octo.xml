@@ -49,7 +49,7 @@
 
     <!--Crashlytics-->
     <string name="OctoCrashedTitle">OctoGram has stopped working!</string>
-    <string name="OctoCrashedSubTitle">OctoGram has crashed, and we\'re sorry for the trouble. Please report this crash by going to the "Crash History" tab in the Octogram settings page</string>
+    <string name="OctoCrashedSubTitle">OctoGram has crashed, and we\'re sorry for the trouble. Please report this crash by going to the "Crash History" tab in the OctoGram settings page</string>
     <string name="SendLogsButton">Send logs</string>
     <string name="CancelArchiveButton">Cancel &amp; Archive logs</string>
     <string name="ErrorSendingCrashContent">There was an error while sending crash logs</string>
@@ -255,7 +255,7 @@
     <string name="CrashHistory_Desc">View crash logs and configuration</string>
     <string name="NoCrashLogFound">No crash log found</string>
     <string name="CouldNotCopyFile">Could not copy file</string>
-    <string name="CopyOctogramConfiguration">Copy Octogram Configuration</string>
+    <string name="CopyOctogramConfiguration">Copy OctoGram Configuration</string>
     <string name="CopyLatestCrashLog">Copy Latest Crash Log</string>
     <string name="CrashLogInfo">Crash logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
     <string name="CrashesDeleteConfirmation">Do you want to delete %s crash logs? This action is irreversible</string>
@@ -264,6 +264,11 @@
     <string name="CrashesUnableToDelete">Could not delete %s crash logs!</string>
     <string name="CrashDeleted">One crash log has been cleared</string>
     <string name="CrashedOnDate">Crashed on: %s</string>
+    <string name="CrashLogCopied">Crash log copied to clipboard</string>
+    <string name="OpenCrashLog">Open crash log</string>
+    <string name="SendCrashLog">Send crash log</string>
+    <string name="CopyCrashLog">Copy crash log</string>
+    <string name="ReportCrash">Report crash</string>
 
     <!-- Permissions -->
     <string name="SendMediaPermissionStickers">Stickers</string>
