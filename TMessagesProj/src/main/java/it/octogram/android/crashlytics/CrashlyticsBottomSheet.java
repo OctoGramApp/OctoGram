@@ -23,7 +23,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.StickerImageView;
+import org.telegram.ui.Components.RLottieImageView;
 
 public class CrashlyticsBottomSheet extends BottomSheet {
 
@@ -36,10 +36,10 @@ public class CrashlyticsBottomSheet extends BottomSheet {
         LinearLayout linearLayout = new LinearLayout(activity);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        StickerImageView imageView = new StickerImageView(activity, currentAccount);
-        imageView.setStickerPackName("UtyaDuck");
-        imageView.setStickerNum(5);
-        imageView.getImageReceiver().setAutoRepeat(1);
+        RLottieImageView imageView = new RLottieImageView(activity);
+        imageView.setAutoRepeat(true);
+        imageView.setAnimation(R.raw.utyan_crash, AndroidUtilities.dp(130), AndroidUtilities.dp(130));
+        imageView.playAnimation();
         linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 16));
 
         TextView textView = new TextView(activity);

@@ -23,6 +23,7 @@ import android.util.Xml;
 import androidx.annotation.StringRes;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.LanguageController;
 import it.octogram.android.utils.OctoUtils;
 
 import org.telegram.messenger.time.FastDateFormat;
@@ -1002,6 +1003,7 @@ public class LocaleController {
             currentLocaleInfo = localeInfo;
             FileLog.d("applyLanguage: currentLocaleInfo is set");
 
+            LanguageController.loadRemoteLanguageFromCache(newLocale, true);
             if (!TextUtils.isEmpty(currentLocaleInfo.pluralLangCode)) {
                 currentPluralRules = allRules.get(currentLocaleInfo.pluralLangCode);
             }
@@ -1110,6 +1112,10 @@ public class LocaleController {
             }
         }
         return value;
+    }
+
+    public static void addLocaleValue(HashMap<String, String> vars) {
+        getInstance().localeValues.putAll(vars);
     }
 
     public static String getString(@StringRes int res) {
@@ -2394,6 +2400,7 @@ public class LocaleController {
                         localeValues = valuesToSet;
                         currentLocale = newLocale;
                         currentLocaleInfo = localeInfo;
+                        LanguageController.loadRemoteLanguageFromCache(newLocale,true);
                         if (!TextUtils.isEmpty(currentLocaleInfo.pluralLangCode)) {
                             currentPluralRules = allRules.get(currentLocaleInfo.pluralLangCode);
                         }

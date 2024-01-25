@@ -218,6 +218,7 @@ import java.util.regex.Pattern;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.ForwardContext;
+import it.octogram.android.utils.LanguageController;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
     public final static String EXTRA_FORCE_NOT_INTERNAL_APPS = "force_not_internal_apps";
@@ -6157,6 +6158,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         } else if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.can_not_skip) {
             showUpdateActivity(UserConfig.selectedAccount, SharedConfig.pendingAppUpdate, true);
         }
+        LanguageController.loadRemoteLanguageFromCache(LocaleController.getInstance().getCurrentLocale(), false);
         checkAppUpdate(false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

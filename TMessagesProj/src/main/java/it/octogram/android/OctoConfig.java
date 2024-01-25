@@ -127,9 +127,10 @@ public class OctoConfig {
     public final ConfigProperty<Integer> gcOutputType = newConfigProperty("gcOutputType", AudioType.MONO);
     public final ConfigProperty<Boolean> mediaInGroupCall = newConfigProperty("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
-
     public final ConfigProperty<Boolean> showRPCErrors = newConfigProperty("showRPCErrors", false);
 
+    /* Multi-Language */
+    public final ConfigProperty<String> languagePackVersioning = newConfigProperty("languagePackVersioning", "{}");
     /**
      * Creates a new config property and adds it to the list of properties.
      *
@@ -219,6 +220,10 @@ public class OctoConfig {
         SharedPreferences.Editor editor = PREFS.edit();
         editor.putInt(property.getKey(), property.getValue());
         editor.apply();
+    }
+
+    public void setPackLangVersion (String data) {
+        updateStringSetting(OctoConfig.INSTANCE.languagePackVersioning, data);
     }
 
     public static class DcIdStyle {
