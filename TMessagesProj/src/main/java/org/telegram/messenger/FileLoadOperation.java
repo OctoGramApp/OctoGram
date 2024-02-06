@@ -2446,7 +2446,7 @@ public class FileLoadOperation {
                 }
             }, null, null, flags, datacenterId, connectionType, isLast);
             if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("debug_loading: " + cacheFileFinal.getName() + " dc=" + datacenterId + " send reqId " + requestInfo.requestToken + " offset=" + requestInfo.offset + " conType=" + connectionType + " priority=");
+                FileLog.d("debug_loading: " + cacheFileFinal.getName() + " dc=" + datacenterId + " send reqId " + requestInfo.requestToken + " offset=" + requestInfo.offset + " conType=" + connectionType + " priority=" + priority);
             }
             requestsCount++;
         }
