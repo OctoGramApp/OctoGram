@@ -71,5 +71,9 @@ public class OctoUtils {
             FileLog.e(e);
         }
     }
+
+    public static int getNotificationIcon() {
+        return R.drawable.call_custom_notification_icon;
+    }
 }
 
