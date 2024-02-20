@@ -32,6 +32,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.camera.CameraSessionWrapper;
 import org.telegram.messenger.camera.CameraView;
 import org.telegram.messenger.camera.Size;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -56,6 +57,8 @@ public class CameraXView extends BaseCameraView {
     private float outerAlpha;
     private final DecelerateInterpolator interpolator = new DecelerateInterpolator();
     private long lastDrawTime;
+    private final CameraSessionWrapper[] cameraSession = new CameraSessionWrapper[2];
+
     private int cx;
     private int cy;
     private CameraXController controller;
@@ -142,6 +145,20 @@ public class CameraXView extends BaseCameraView {
         innerPaint.setColor(0x7fffffff);
         ((DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE)).registerDisplayListener(displayOrientationListener, null);
         worldOrientationListener.enable();
+    }
+
+    @Override
+    public CameraSessionWrapper getCameraSession() {
+        return getCameraSession(0);
+    }
+    @Override
+    public Object getCameraSessionObject() {
+        if (cameraSession[0] == null) return null;
+        return cameraSession[0].getObject();
+    }
+
+    public CameraSessionWrapper getCameraSession(int i) {
+        return cameraSession[i];
     }
 
     public boolean isInited() {

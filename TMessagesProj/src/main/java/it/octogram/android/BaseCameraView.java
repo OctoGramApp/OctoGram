@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.telegram.messenger.camera.CameraSessionWrapper;
 import org.telegram.messenger.camera.CameraView;
 
 import java.io.File;
@@ -33,6 +34,10 @@ public abstract class BaseCameraView extends FrameLayout {
     public BaseCameraView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+
+    public abstract CameraSessionWrapper getCameraSession();
+
+    public abstract Object getCameraSessionObject();
 
     public interface CameraViewDelegate {
         void onCameraCreated();
