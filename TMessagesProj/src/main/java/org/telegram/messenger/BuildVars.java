@@ -12,10 +12,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 
-import it.octogram.android.StoreUtils;
 import com.android.billingclient.api.ProductDetails;
 
 import java.util.Objects;
+
+import it.octogram.android.StoreUtils;
 
 public class BuildVars {
 
@@ -26,8 +27,8 @@ public class BuildVars {
     public static boolean CHECK_UPDATES = false;
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
     public static String BUILD_VERSION_STRING = BuildConfig.BUILD_VERSION_STRING;
-    public static int TELEGRAM_BUILD_VERSION = 4365;
-    public static String TELEGRAM_VERSION_STRING = "10.6.4";
+    public static int TELEGRAM_BUILD_VERSION = 4404;
+    public static String TELEGRAM_VERSION_STRING = "10.8.1";
     public static int APP_ID = 14565251;
     public static String APP_HASH = "9952ccf3124c8fa7835d9b8e091dfb4a";
 
