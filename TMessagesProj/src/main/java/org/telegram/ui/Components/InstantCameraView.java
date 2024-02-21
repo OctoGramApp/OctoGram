@@ -178,7 +178,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private Size aspectRatio = SharedConfig.roundCamera16to9 ? new Size(16, 9) : new Size(4, 3);
     private TextureView textureView;
     private BackupImageView textureOverlayView;
-    private final boolean useCamera2 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && SharedConfig.useCamera2;
+    private final boolean useCamera2 = false; //Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && SharedConfig.useCamera2;
     private final boolean supportHotSwap = useCamera2 && DualCameraView.dualAvailableStatic(ApplicationLoader.applicationContext);
     private CameraSession cameraSession;
     private Camera2Session camera2Session;
