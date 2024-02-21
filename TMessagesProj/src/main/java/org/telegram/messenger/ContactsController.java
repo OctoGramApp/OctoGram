@@ -11,11 +11,11 @@ package org.telegram.messenger;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
@@ -31,14 +31,13 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Bulletin;
+import org.telegram.ui.Components.BulletinFactory;
 
 import java.text.CollationKey;
 import java.text.Collator;
@@ -555,6 +554,7 @@ public class ContactsController extends BaseController {
         });
     }
 
+    @SuppressLint("Range")
     private boolean checkContactsInternal() {
         boolean reload = false;
         try {
@@ -2456,33 +2456,28 @@ public class ContactsController extends BaseController {
         }, ConnectionsManager.RequestFlagFailOnServerErrors | ConnectionsManager.RequestFlagCanCompress);
     }
 
-    public void deleteContactsUndoable(Context context, BaseFragment fragment, final ArrayList<TLRPC.User> users) {
+    public void deleteContactsUndoable(BaseFragment fragment, final ArrayList<TLRPC.User> users) {
         if (users == null || users.isEmpty()) {
             return;
         }
 
         HashMap<TLRPC.User, TLRPC.TL_contact> deletedContacts = new HashMap<>();
 
-        for (int i = 0, N = users.size(); i < N; i++) {
-            TLRPC.User user = users.get(i);
+        for (TLRPC.User user : users) {
             TLRPC.TL_contact contact = contactsDict.get(user.id);
 
-            user.contact = false;
-            contacts.remove(contact);
-            contactsDict.remove(user.id);
-
-            deletedContacts.put(user, contact);
+            if (contact != null) {
+                user.contact = false;
+                contacts.remove(contact);
+                contactsDict.remove(user.id);
+                deletedContacts.put(user, contact);
+            }
         }
-        buildContactsSectionsArrays(false);
-        getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, MessagesController.UPDATE_MASK_NAME);
-        getNotificationCenter().postNotificationName(NotificationCenter.contactsDidLoad);
-        Log.e("AAA", "Fake delete");
 
-        Bulletin.SimpleLayout layout = new Bulletin.SimpleLayout(context, fragment.getResourceProvider());
-        layout.setTimer();
-        layout.textView.setText(LocaleController.formatPluralString("ContactsDeletedUndo", deletedContacts.size()));
-        Bulletin.UndoButton undoButton = new Bulletin.UndoButton(context, true, true, fragment.getResourceProvider());
-        undoButton.setUndoAction(() -> {
+        buildContactsSectionsArrays(false);
+        reloadContactInterface();
+
+        BulletinFactory.of(fragment).createUndoBulletin(LocaleController.formatPluralString("ContactsDeletedUndo", deletedContacts.size()), () -> {
             for (HashMap.Entry<TLRPC.User, TLRPC.TL_contact> entry : deletedContacts.entrySet()) {
                 TLRPC.User user = entry.getKey();
                 TLRPC.TL_contact contact = entry.getValue();
@@ -2494,15 +2489,12 @@ public class ContactsController extends BaseController {
             buildContactsSectionsArrays(true);
             getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, MessagesController.UPDATE_MASK_NAME);
             getNotificationCenter().postNotificationName(NotificationCenter.contactsDidLoad);
-            Log.e("AAA", "Fake undo");
-        });
-        undoButton.setDelayedAction(() -> {
-            deleteContact(users, false);
-            Log.e("AAA", "Actual delete");
-        });
-        layout.setButton(undoButton);
-        Bulletin bulletin = Bulletin.make(fragment, layout, Bulletin.DURATION_PROLONG);
-        bulletin.show();
+        }, () -> deleteContact(users, false)).show();
+    }
+
+    private void reloadContactInterface() {
+        getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, MessagesController.UPDATE_MASK_NAME);
+        getNotificationCenter().postNotificationName(NotificationCenter.contactsDidLoad);
     }
 
     public void deleteContact(final ArrayList<TLRPC.User> users, boolean showBulletin) {

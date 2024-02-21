@@ -988,7 +988,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                 contacts.add(contact);
             }
 
-            getContactsController().deleteContactsUndoable(getContext(), ContactsActivity.this, contacts);
+            getContactsController().deleteContactsUndoable(ContactsActivity.this, contacts);
 
             hideActionMode();
         });
