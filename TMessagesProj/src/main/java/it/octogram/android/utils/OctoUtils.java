@@ -73,7 +73,7 @@ public class OctoUtils {
     }
 
     public static int getNotificationIcon() {
-        return R.drawable.call_custom_notification_icon;
+        return R.drawable.notification;
     }
 }
 
