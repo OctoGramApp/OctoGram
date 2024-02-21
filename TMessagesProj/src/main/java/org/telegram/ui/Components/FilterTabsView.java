@@ -46,9 +46,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
-import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.FolderIconController;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
@@ -63,6 +60,9 @@ import org.telegram.ui.ActionBar.Theme;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.FolderIconController;
 
 public class FilterTabsView extends FrameLayout {
 
@@ -726,7 +726,7 @@ public class FilterTabsView extends FrameLayout {
                     changed = true;
                 }
 
-                if (lastEmoticon != null && !currentTab.emoticon.equals(lastEmoticon)) {
+                if (lastEmoticon != null && currentTab != null && !currentTab.emoticon.equals(lastEmoticon)) {
                     int emoticonWidth = FolderIconController.getIconWidth();
                     android.graphics.Rect bounds = new android.graphics.Rect(0, 0, emoticonWidth, emoticonWidth);
                     iconAnimateOutDrawable = getResources().getDrawable(FolderIconController.getTabIcon(lastEmoticon)).mutate();

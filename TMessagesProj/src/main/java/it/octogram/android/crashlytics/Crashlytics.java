@@ -175,7 +175,7 @@ public class Crashlytics {
             String line = reader.readLine();
             reader.close();
 
-            return line.replace(" ", "_").replace(",", "").replace(":", "_");
+            return (line != null) ? line.replace(" ", "_").replace(",", "").replace(":", "_") : "null";
         } catch (IOException e) {
             FileLog.e(e);
             return "null";
