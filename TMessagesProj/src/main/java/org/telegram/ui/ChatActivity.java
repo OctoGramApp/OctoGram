@@ -28210,7 +28210,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     bigEmptyView.setStatusText(AndroidUtilities.replaceTags(LocaleController.getString("GroupEmptyTitle1", R.string.GroupEmptyTitle1)));
                 }
             } else {
-                String emptyMessage = LocaleController.getString("NoMessages", R.string.NoMessages);
+                String emptyMessage = null;
                 if (isThreadChat() && chatMode == 0) {
                     if (isComments) {
                         emptyMessage = LocaleController.getString(R.string.NoComments);
@@ -28223,8 +28223,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     emptyMessage = LocaleController.getString(R.string.GotAQuestion);
                 } else if (currentUser == null || currentUser.self || currentUser.deleted || userBlocked) {
                     emptyMessage = LocaleController.getString(R.string.NoMessages);
+                } else if (OctoConfig.INSTANCE.hideGreetingSticker.getValue()) {
+                    emptyMessage = LocaleController.getString(R.string.NoMessages);
                 }
-                if (emptyMessage == null && !OctoConfig.INSTANCE.hideGreetingSticker.getValue()) {
+                if (emptyMessage == null) {
                     greetingsViewContainer = new ChatGreetingsView(getContext(), currentUser, distance, currentAccount, preloadedGreetingsSticker, themeDelegate);
                     greetingsViewContainer.setPremiumLock(userInfo != null && userInfo.contact_require_premium && !getUserConfig().isPremium(), dialog_id);
                     greetingsViewContainer.setListener((sticker) -> {
