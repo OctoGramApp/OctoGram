@@ -28848,6 +28848,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         progressDialog.setCanCancel(false);
                         progressDialog.showDelayed(300);
 
+                    } else if (locFile.getName().toLowerCase().endsWith(".octo")) {
+                        // TODO??
                     } else  {
                         if (LocaleController.getInstance().applyLanguageFile(locFile, currentAccount)) {
                             presentFragment(new LanguageSelectActivity());

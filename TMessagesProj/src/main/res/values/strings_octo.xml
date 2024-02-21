@@ -292,6 +292,21 @@
     <string name="MutualContact">Mutual Contact</string>
     <string name="MutualContactDesc">**%s** and you have added each other in the contacts list.</string>
 
+    <!-- MultiSelect Deleting Strings -->
+    <string name="DeleteContactTitle">Delete contact</string>
+    <string name="DeleteContactSubtitle">Are you sure you want to delete this contact?</string>
+    <string name="DeleteContactsTitle_one">Delete %d contact</string>
+    <string name="DeleteContactsTitle_two">Delete %d contacts</string>
+    <string name="DeleteContactsTitle_few">Delete %d contacts</string>
+    <string name="DeleteContactsTitle_many">Delete %d contacts</string>
+    <string name="DeleteContactsTitle_other">Delete %d contacts</string>
+    <string name="DeleteContactsSubtitle">Are you sure you want to delete these contacts?</string>
+    <string name="ContactsDeletedUndo_one">%d contact deleted.</string>
+    <string name="ContactsDeletedUndo_two">%d contacts deleted.</string>
+    <string name="ContactsDeletedUndo_few">%d contacts deleted.</string>
+    <string name="ContactsDeletedUndo_many">%d contacts deleted.</string>
+    <string name="ContactsDeletedUndo_other">%d contacts deleted.</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>
