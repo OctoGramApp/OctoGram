@@ -15419,7 +15419,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     public void destroyPhotoViewer() {
-        if (parentActivity == null || windowView == null) {
+        if (parentActivity == null && windowView == null) {
             return;
         }
         if (PipVideoOverlay.isVisible()) {
