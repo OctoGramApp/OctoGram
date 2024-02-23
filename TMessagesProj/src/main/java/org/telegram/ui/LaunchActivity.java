@@ -6806,7 +6806,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     }
                     case Bulletin.TYPE_ERROR:
                         if (fragment != null) {
-                            BulletinFactory.of(fragment).createErrorBulletin((String) args[1]).show();
+                            if (args[1] instanceof SpannableStringBuilder) {
+                                BulletinFactory.of(fragment).createErrorBulletin((SpannableStringBuilder) args[1]).show();
+                            } else {
+                                BulletinFactory.of(fragment).createErrorBulletin((String) args[1]).show();
+                            }
                         } else {
                             BulletinFactory.of(container, null).createErrorBulletin((String) args[1]).show();
                         }

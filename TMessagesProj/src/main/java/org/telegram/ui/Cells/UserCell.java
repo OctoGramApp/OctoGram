@@ -109,22 +109,22 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
     protected long dialogId;
 
     public UserCell(Context context, int padding, int checkbox, boolean admin) {
-        this(context, padding, checkbox, admin, false, null, false, false);
+        this(context, padding, checkbox, admin, false, null, false);
     }
 
     public UserCell(Context context, int padding, int checkbox, boolean admin, Theme.ResourcesProvider resourcesProvider) {
-        this(context, padding, checkbox, admin, false, resourcesProvider, false, false);
+        this(context, padding, checkbox, admin, false, resourcesProvider, false);
     }
 
     public UserCell(Context context, int padding, int checkbox, boolean admin, boolean needAddButton) {
-        this(context, padding, checkbox, admin, needAddButton, null, false, false);
+        this(context, padding, checkbox, admin, needAddButton, null, false);
     }
 
     public UserCell(Context context, int padding, int checkbox, boolean admin, boolean needAddButton, boolean needMutualIcon) {
-        this(context, padding, checkbox, admin, needAddButton, null, needMutualIcon, false);
+        this(context, padding, checkbox, admin, needAddButton, null, needMutualIcon);
     }
 
-    public UserCell(Context context, int padding, int checkbox, boolean admin, boolean needAddButton, Theme.ResourcesProvider resourcesProvider, boolean needMutualIcon, boolean needRightCheck) {
+    public UserCell(Context context, int padding, int checkbox, boolean admin, boolean needAddButton, Theme.ResourcesProvider resourcesProvider, boolean needMutualIcon) {
         super(context);
         this.resourcesProvider = resourcesProvider;
 
@@ -223,13 +223,6 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
             addView(mutualView, LayoutHelper.createFrame(40, 40, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 8 : 0, 0, LocaleController.isRTL ? 0 : 8, 0));
         }
 
-        if (needRightCheck) {
-            checkImageView = new ImageView(context);
-            checkImageView.setImageResource(R.drawable.account_check);
-            checkImageView.setScaleType(ImageView.ScaleType.CENTER);
-            checkImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked), PorterDuff.Mode.MULTIPLY));
-            addView(checkImageView, LayoutHelper.createFrame(40, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, LocaleController.isRTL ? 8 : 0, 0, LocaleController.isRTL ? 0 : 8, 0));
-        }
         setFocusable(true);
     }
 
