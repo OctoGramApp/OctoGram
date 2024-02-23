@@ -35,7 +35,6 @@ import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 
@@ -2454,47 +2453,6 @@ public class ContactsController extends BaseController {
                 getNotificationCenter().postNotificationName(NotificationCenter.contactsDidLoad);
             });
         }, ConnectionsManager.RequestFlagFailOnServerErrors | ConnectionsManager.RequestFlagCanCompress);
-    }
-
-    public void deleteContactsUndoable(BaseFragment fragment, final ArrayList<TLRPC.User> users) {
-        if (users == null || users.isEmpty()) {
-            return;
-        }
-
-        HashMap<TLRPC.User, TLRPC.TL_contact> deletedContacts = new HashMap<>();
-
-        for (TLRPC.User user : users) {
-            TLRPC.TL_contact contact = contactsDict.get(user.id);
-
-            if (contact != null) {
-                user.contact = false;
-                contacts.remove(contact);
-                contactsDict.remove(user.id);
-                deletedContacts.put(user, contact);
-            }
-        }
-
-        buildContactsSectionsArrays(false);
-        reloadContactInterface();
-
-        BulletinFactory.of(fragment).createUndoBulletin(LocaleController.formatPluralString("ContactsDeletedUndo", deletedContacts.size()), () -> {
-            for (HashMap.Entry<TLRPC.User, TLRPC.TL_contact> entry : deletedContacts.entrySet()) {
-                TLRPC.User user = entry.getKey();
-                TLRPC.TL_contact contact = entry.getValue();
-
-                user.contact = true;
-                contacts.add(contact);
-                contactsDict.put(user.id, contact);
-            }
-            buildContactsSectionsArrays(true);
-            getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, MessagesController.UPDATE_MASK_NAME);
-            getNotificationCenter().postNotificationName(NotificationCenter.contactsDidLoad);
-        }, () -> deleteContact(users, false)).show();
-    }
-
-    private void reloadContactInterface() {
-        getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, MessagesController.UPDATE_MASK_NAME);
-        getNotificationCenter().postNotificationName(NotificationCenter.contactsDidLoad);
     }
 
     public void deleteContact(final ArrayList<TLRPC.User> users, boolean showBulletin) {
