@@ -307,6 +307,20 @@
     <string name="ContactsDeletedUndo_many">%d contacts deleted.</string>
     <string name="ContactsDeletedUndo_other">%d contacts deleted.</string>
 
+    <!-- Double Bottom -->
+    <string name="AccountProtection">Account Protection</string>
+    <string name="AccountProtectionDesc">Protect your accounts with a unique passcode. Tap the lock icon above your chat list to access them.</string>
+    <string name="CreatePasscodeInfoPIN2">Please enter any 4 digits that you will use to unlock your Telegram account.</string>
+    <string name="CreatePasscodeInfoPassword2">Please enter the password you will use to unlock your Telegram account.</string>
+    <string name="SelectAccountDesc">Choose the account to lock with the passcode.</string>
+    <string name="PasscodeAlreadyUsed">Passcode already used. Please choose another one.</string>
+    <string name="DisableAccountProtection">Disable Account Protection</string>
+    <string name="DisableAccountProtectionAlert">Are you sure you want to disable the account protection feature?</string>
+    <string name="AutoLockInstant">Instant</string>
+    <string name="EnableAccountProtection">Enable Account Protection</string>
+    <string name="AccountProtectionHint1">Tap the lock icon above your chat list to access your hidden accounts.</string>
+    <string name="AccountProtectionHint2">When an account is protected with a passcode, it will be hidden from the side menu.</string>
+
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>
     <string name="TestBackend">Test Backend</string>

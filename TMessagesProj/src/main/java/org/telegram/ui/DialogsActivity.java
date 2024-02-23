@@ -230,6 +230,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.SendMessageOptions;
 
@@ -3555,6 +3556,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
                 TLRPC.User u = AccountInstance.getInstance(a).getUserConfig().getCurrentUser();
                 if (u != null) {
+                    if (PasscodeController.isProtectedAccount(u.id)) continue;
                     AccountSelectCell cell = new AccountSelectCell(context, false);
                     cell.setAccount(a, true);
                     switchItem.addSubItem(10 + a, cell, AndroidUtilities.dp(230), AndroidUtilities.dp(48));

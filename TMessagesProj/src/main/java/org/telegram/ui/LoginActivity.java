@@ -180,6 +180,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+
 @SuppressLint("HardwareIds")
 public class LoginActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
     public final static boolean ENABLE_PASTED_TEXT_PROCESSING = false;
@@ -1609,6 +1611,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     }
 
     private void onAuthSuccess(TLRPC.TL_auth_authorization res, boolean afterSignup) {
+        PasscodeController.removePasscodeForAccount(res.user.id);
         MessagesController.getInstance(currentAccount).cleanup();
         ConnectionsManager.getInstance(currentAccount).setUserId(res.user.id);
         UserConfig.getInstance(currentAccount).clearConfig();

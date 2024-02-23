@@ -73,6 +73,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+
 public class PasscodeView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
     private final static float BACKGROUND_SPRING_STIFFNESS = 300f;
 
@@ -944,7 +946,7 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
                 onPasscodeError();
                 return;
             }
-            if (!SharedConfig.checkPasscode(password)) {
+            if (!PasscodeController.checkPasscode((Activity) getContext(), password) && !SharedConfig.checkPasscode(password)) {
                 SharedConfig.increaseBadPasscodeTries();
                 if (SharedConfig.passcodeRetryInMs > 0) {
                     checkRetryTextView();

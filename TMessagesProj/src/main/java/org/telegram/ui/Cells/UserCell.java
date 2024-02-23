@@ -24,7 +24,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
@@ -43,7 +42,6 @@ import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.Bulletin;
-import org.telegram.ui.Components.CheckBox;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CheckBoxSquare;
 import org.telegram.ui.Components.LayoutHelper;
@@ -52,6 +50,8 @@ import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.NotificationsSettingsActivity;
 import org.telegram.ui.Stories.StoriesListPlaceProvider;
 import org.telegram.ui.Stories.StoriesUtilities;
+
+import it.octogram.android.OctoConfig;
 
 public class UserCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -213,12 +213,13 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
         if (needMutualIcon) {
             mutualView = new ImageView(context);
             mutualView.setImageResource(R.drawable.ic_round_swap_horiz_24);
-            mutualView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_player_actionBarSelector)));
+            mutualView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_player_actionBarSelector, resourcesProvider)));
             mutualView.setScaleType(ImageView.ScaleType.CENTER);
-            mutualView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
+            mutualView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon, resourcesProvider), PorterDuff.Mode.MULTIPLY));
             mutualView.setVisibility(GONE);
             mutualView.setContentDescription(LocaleController.getString("MutualContact", R.string.MutualContact));
             mutualView.setOnClickListener(v -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, AndroidUtilities.replaceTags(LocaleController.formatString("MutualContactDesc", R.string.MutualContactDesc, lastName))));
+            mutualView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
             addView(mutualView, LayoutHelper.createFrame(40, 40, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 8 : 0, 0, LocaleController.isRTL ? 0 : 8, 0));
         }
 
@@ -277,6 +278,16 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
 
     public CharSequence getName() {
         return nameTextView.getText();
+    }
+
+    public void setCheckedRight(boolean enabled) {
+        super.setEnabled(enabled);
+        checkImageView = new ImageView(getContext());
+        checkImageView.setImageResource(R.drawable.account_check);
+        checkImageView.setAlpha(enabled ? 1.0f : 0f);
+        checkImageView.setScaleType(ImageView.ScaleType.CENTER);
+        checkImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked), PorterDuff.Mode.MULTIPLY));
+        addView(checkImageView, LayoutHelper.createFrame(40, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, LocaleController.isRTL ? 8 : 0, 0, LocaleController.isRTL ? 0 : 8, 0));
     }
 
     public void setData(Object object, CharSequence name, CharSequence status, int resId) {
