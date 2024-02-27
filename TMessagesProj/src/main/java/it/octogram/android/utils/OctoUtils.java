@@ -79,5 +79,12 @@ public class OctoUtils {
     public static int getNotificationIcon() {
         return R.drawable.notification;
     }
+
+    public static String fixBrokenLang(String lang) {
+        if (lang.equals("in")) {
+            return "id";
+        }
+        return lang;
+    }
 }
 

@@ -31,7 +31,7 @@ public class LanguageController {
     public static void loadRemoteLanguageFromCache(Locale locale, boolean withReload) {
         new Thread(() -> {
             try {
-                String langCode = locale.getLanguage();
+                String langCode = OctoUtils.fixBrokenLang(locale.getLanguage());
                 File fileFromLang = getFileFromLang(langCode);
 
                 if (fileFromLang.exists() && withReload) {
