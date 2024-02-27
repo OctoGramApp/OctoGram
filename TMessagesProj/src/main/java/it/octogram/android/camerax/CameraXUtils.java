@@ -225,14 +225,15 @@ public class CameraXUtils {
             try {
                 CameraCharacteristics cameraCharacteristics = Camera2CameraInfo.from(cameraInfo).getCameraCharacteristicsMap().get(id);
                 if (cameraCharacteristics != null) {
-                    if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == LENS_FACING_BACK) {
+                    Integer lensFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
+                    if (lensFacing != null && lensFacing == LENS_FACING_BACK) {
                         availableBackCamera++;
                         ZoomState zoomState = cameraInfo.getZoomState().getValue();
                         if (zoomState != null && zoomState.getMinZoomRatio() < 1.0F && zoomState.getMinZoomRatio() > 0) {
                             foundWideAngleOnPrimaryCamera = true;
                         }
                         float[] listLensAngle = cameraCharacteristics.get(LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
-                        if (listLensAngle.length > 0) {
+                        if (listLensAngle != null && listLensAngle.length > 0) {
                             if (listLensAngle[0] < 3.0f && listLensAngle[0] < lowestAngledCamera) {
                                 lowestAngledCamera = listLensAngle[0];
                                 cameraId = id;
