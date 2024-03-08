@@ -21,7 +21,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -42,7 +41,6 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.DialogsSearchAdapter;
-import org.telegram.ui.Business.QuickRepliesController;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.DialogsActivity;
@@ -355,7 +353,7 @@ public class MessagesStorage extends BaseController {
                     }
                 }
                 try {
-                    database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter_octo(id INTEGER PRIMARY KEY, ord INTEGER, unread_count INTEGER, flags INTEGER, title TEXT, emoticon TEXT)").stepThis().dispose();
+                    database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter_octo(id INTEGER PRIMARY KEY, ord INTEGER, unread_count INTEGER, flags INTEGER, title TEXT, emoticon TEXT, color INTEGER DEFAULT -1)").stepThis().dispose();
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
