@@ -301,7 +301,7 @@ target_include_directories(breakpad PUBLIC
 #voip
 include(${CMAKE_HOME_DIRECTORY}/voip/CMakeLists.txt)
 
-set(NATIVE_LIB "octo.47")
+set(NATIVE_LIB "octo.48")
 
 #tmessages
 add_library(${NATIVE_LIB} SHARED

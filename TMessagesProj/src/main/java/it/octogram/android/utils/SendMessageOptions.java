@@ -30,6 +30,27 @@ public class SendMessageOptions extends LinearLayout {
     private ActionBarMenuSubItem showCaptionView;
     private ActionBarMenuSubItem hideCaptionView;
 
+    /* TODO: NEED REVISION
+    });
+        sendPopupLayout2.setDispatchKeyEventListener(keyEvent -> {
+            if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getRepeatCount() == 0 && sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                sendPopupWindow.dismiss();
+            }
+        });
+        sendPopupLayout2.setShownFromBottom(false);
+        sendPopupLayout2.setupRadialSelectors(getThemedColor(Theme.key_dialogButtonSelector));
+
+        ActionBarMenuSubItem sendWithoutSound = new ActionBarMenuSubItem(parentActivity, true, true, resourcesProvider);
+        sendWithoutSound.setTextAndIcon(LocaleController.getString("SendWithoutSound", R.string.SendWithoutSound), R.drawable.input_notify_off);
+        sendWithoutSound.setMinimumWidth(dp(196));
+        sendPopupLayout2.addView(sendWithoutSound, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        sendWithoutSound.setOnClickListener(v -> {
+            if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                sendPopupWindow.dismiss();
+            }
+            this.notify = false;
+     */
+
     public SendMessageOptions(Context parentActivity, ForwardContext forwardContext, boolean showSchedule, boolean showNotify, Delegate delegate, Theme.ResourcesProvider resourcesProvider) {
         super(parentActivity);
         setOrientation(VERTICAL);

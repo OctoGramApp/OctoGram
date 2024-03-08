@@ -40,6 +40,7 @@ import org.json.JSONObject;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Adapters.DrawerLayoutAdapter;
 import org.telegram.ui.Components.ForegroundDetector;
 import org.telegram.ui.Components.Premium.boosts.BoostRepository;
@@ -604,7 +605,7 @@ public class ApplicationLoader extends Application {
 
     }
 
-    public boolean onSuggestionFill(String suggestion, String[] output, boolean[] closeable) {
+    public boolean onSuggestionFill(String suggestion, CharSequence[] output, boolean[] closeable) {
         return false;
     }
 
@@ -622,6 +623,18 @@ public class ApplicationLoader extends Application {
 
     public boolean consumePush(int account, JSONObject json) {
         return false;
+    }
+
+    public void onResume() {
+
+    }
+
+    public boolean onPause() {
+        return false;
+    }
+
+    public BaseFragment openSettings(int n) {
+        return null;
     }
 
 }

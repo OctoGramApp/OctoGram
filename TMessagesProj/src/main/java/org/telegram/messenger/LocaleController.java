@@ -39,6 +39,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -63,6 +66,7 @@ public class LocaleController {
     public static boolean is24HourFormat = false;
     public FastDateFormat formatterDay;
     public FastDateFormat formatterDayWithSeconds;
+    public FastDateFormat formatterConstDay;
     public FastDateFormat formatterWeek;
     public FastDateFormat formatterWeekLong;
     public FastDateFormat formatterDayMonth;
@@ -1883,7 +1887,7 @@ public class LocaleController {
         return "LOC_ERR";
     }
 
-    public static String formatDateTime(long date) {
+    public static String formatDateTime(long date, boolean useToday) {
         try {
             date *= 1000;
             Calendar rightNow = Calendar.getInstance();
@@ -1893,14 +1897,28 @@ public class LocaleController {
             int dateDay = rightNow.get(Calendar.DAY_OF_YEAR);
             int dateYear = rightNow.get(Calendar.YEAR);
 
-            if (dateDay == day && year == dateYear) {
+            if (dateDay == day && year == dateYear && useToday) {
                 return LocaleController.formatString("TodayAtFormattedWithToday", R.string.TodayAtFormattedWithToday, getInstance().formatterDay.format(new Date(date)));
-            } else if (dateDay + 1 == day && year == dateYear) {
+            } else if (dateDay + 1 == day && year == dateYear && useToday) {
                 return LocaleController.formatString("YesterdayAtFormatted", R.string.YesterdayAtFormatted, getInstance().formatterDay.format(new Date(date)));
             } else if (Math.abs(System.currentTimeMillis() - date) < 31536000000L) {
                 return LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().chatDate.format(new Date(date)), getInstance().formatterDay.format(new Date(date)));
             } else {
                 return LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, getInstance().chatFullDate.format(new Date(date)), getInstance().formatterDay.format(new Date(date)));
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+        return "LOC_ERR";
+    }
+
+    public static String formatShortDateTime(long date) {
+        try {
+            date *= 1000;
+            if (Math.abs(System.currentTimeMillis() - date) < 31536000000L) {
+                return getInstance().formatterScheduleDay.format(new Date(date)) + ", " + getInstance().formatterDay.format(new Date(date));
+            } else {
+                return getInstance().formatterScheduleYear.format(new Date(date)) + ", " + getInstance().formatterDay.format(new Date(date));
             }
         } catch (Exception e) {
             FileLog.e(e);
@@ -2048,6 +2066,7 @@ public class LocaleController {
         formatterDay = createFormatter(lang.toLowerCase().equals("ar") || lang.toLowerCase().equals("ko") ? locale : Locale.US, is24HourFormat ? getStringInternal("formatterDay24H", R.string.formatterDay24H) : getStringInternal("formatterDay12H", R.string.formatterDay12H), is24HourFormat ? "HH:mm" : "h:mm a");
         formatterDayWithSeconds = createFormatter(lang.toLowerCase().equals("ar") || lang.toLowerCase().equals("ko") ? locale : Locale.US, is24HourFormat ? getStringInternal("FormatterDay24HSec", R.string.FormatterDay24HSec) : getStringInternal("FormatterDay12HSec", R.string.FormatterDay12HSec), is24HourFormat ? "HH:mm:ss" : "h:mm:ss a");
         if (OctoConfig.INSTANCE.formatTimeWithSeconds.getValue()) formatterDay = formatterDayWithSeconds;
+        formatterConstDay = createFormatter(lang.toLowerCase().equals("ar") || lang.toLowerCase().equals("ko") ? locale : Locale.US, is24HourFormat ? "HH:mm" : "h:mm a", is24HourFormat ? "HH:mm" : "h:mm a");
         formatterStats = createFormatter(locale, is24HourFormat ? getStringInternal("formatterStats24H", R.string.formatterStats24H) : getStringInternal("formatterStats12H", R.string.formatterStats12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
         formatterFull = createFormatter(locale, "MMM dd yyyy, HH:mm:ss", "MMM dd yyyy, HH:mm:ss");
         formatterBannedUntil = createFormatter(locale, is24HourFormat ? getStringInternal("formatterBannedUntil24H", R.string.formatterBannedUntil24H) : getStringInternal("formatterBannedUntil12H", R.string.formatterBannedUntil12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
@@ -3594,5 +3613,18 @@ public class LocaleController {
             FileLog.d("set as patched " + lng + " langpack");
         }
         MessagesController.getGlobalMainSettings().edit().putBoolean("lngpack_patched_" + lng, true).apply();
+    }
+
+    public static String getTimeZoneName(String timeZoneId, boolean full) {
+        TimeZone timeZone = TimeZone.getTimeZone(timeZoneId);
+        if (timeZone == null) return "";
+        String name = timeZone.getDisplayName(true, TimeZone.SHORT, getInstance().getCurrentLocale());
+        if (full) {
+            String longname = timeZone.getDisplayName(true, TimeZone.LONG, getInstance().getCurrentLocale());
+            if (!TextUtils.equals(longname, name)) {
+                name = longname + ", " + name;
+            }
+        }
+        return name;
     }
 }

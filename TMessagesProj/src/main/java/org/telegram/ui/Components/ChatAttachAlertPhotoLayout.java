@@ -273,6 +273,9 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             if (checkSendMediaEnabled(photoEntry)) {
                 return -1;
             }
+            if (selectedPhotos.size() + 1 > maxCount()) {
+                return -1;
+            }
             boolean add = true;
             int num;
             if ((num = addToSelectedPhotos(photoEntry, -1)) == -1) {
@@ -1685,6 +1688,13 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             return true;
         }
         return false;
+    }
+
+    private int maxCount() {
+        if (parentAlert.baseFragment instanceof ChatActivity && ((ChatActivity) parentAlert.baseFragment).getChatMode() == ChatActivity.MODE_QUICK_REPLIES) {
+            return parentAlert.baseFragment.getMessagesController().quickReplyMessagesLimit - ((ChatActivity) parentAlert.baseFragment).messages.size();
+        }
+        return Integer.MAX_VALUE;
     }
 
     private int addToSelectedPhotos(MediaController.PhotoEntry object, int index) {
@@ -3285,17 +3295,17 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void scrollToTop() {
+    public void scrollToTop() {
         gridView.smoothScrollToPosition(0);
     }
 
     @Override
-    int needsActionBar() {
+    public int needsActionBar() {
         return 1;
     }
 
     @Override
-    void onMenuItemClick(int id) {
+    public void onMenuItemClick(int id) {
         if (id == group || id == compress) {
             if (parentAlert.maxSelectedPhotos > 0 && selectedPhotosOrder.size() > 1) {
                 TLRPC.Chat chat = parentAlert.getChat();
@@ -3425,12 +3435,12 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    int getSelectedItemsCount() {
+    public int getSelectedItemsCount() {
         return selectedPhotosOrder.size();
     }
 
     @Override
-    void onSelectedItemsCountChanged(int count) {
+    public void onSelectedItemsCountChanged(int count) {
         if (count <= 1 || parentAlert.editingMessageObject != null) {
             parentAlert.selectedMenuItem.hideSubItem(group);
             if (count == 0) {
@@ -3473,7 +3483,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void applyCaption(CharSequence text) {
+    public void applyCaption(CharSequence text) {
         for (int a = 0; a < selectedPhotosOrder.size(); a++) {
             if (a == 0) {
                 final Object key = selectedPhotosOrder.get(a);
@@ -3518,13 +3528,13 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onDestroy() {
+    public void onDestroy() {
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.cameraInitied);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.albumsDidLoad);
     }
 
     @Override
-    void onPause() {
+    public void onPause() {
         if (shutterButton == null) {
             return;
         }
@@ -3552,21 +3562,21 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onResume() {
+    public void onResume() {
         if (parentAlert.isShowing() && !parentAlert.isDismissed() && !PhotoViewer.getInstance().isVisible()) {
             checkCamera(false);
         }
     }
 
     @Override
-    int getListTopPadding() {
+    public int getListTopPadding() {
         return gridView.getPaddingTop();
     }
 
     public int currentItemTop = 0;
 
     @Override
-    int getCurrentItemTop() {
+    public int getCurrentItemTop() {
         if (gridView.getChildCount() <= 0) {
             gridView.setTopGlowOffset(currentItemTop = gridView.getPaddingTop());
             progressView.setTranslationY(0);
@@ -3585,12 +3595,12 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    int getFirstOffset() {
+    public int getFirstOffset() {
         return getListTopPadding() + AndroidUtilities.dp(56);
     }
 
     @Override
-    void checkColors() {
+    public void checkColors() {
         if (cameraIcon != null) {
             cameraIcon.invalidate();
         }
@@ -3611,7 +3621,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onInit(boolean hasVideo, boolean hasPhoto, boolean hasDocuments) {
+    public void onInit(boolean hasVideo, boolean hasPhoto, boolean hasDocuments) {
         mediaEnabled = hasVideo || hasPhoto;
         videoEnabled = hasVideo;
         photoEnabled = hasPhoto;
@@ -3674,7 +3684,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    boolean canScheduleMessages() {
+    public boolean canScheduleMessages() {
         boolean hasTtl = false;
         for (HashMap.Entry<Object, Object> entry : selectedPhotos.entrySet()) {
             Object object = entry.getValue();
@@ -3699,7 +3709,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onButtonsTranslationYUpdated() {
+    public void onButtonsTranslationYUpdated() {
         checkCameraViewPosition();
         invalidate();
     }
@@ -3737,7 +3747,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     private ViewPropertyAnimator headerAnimator;
 
     @Override
-    void onShow(ChatAttachAlert.AttachAlertLayout previousLayout) {
+    public void onShow(ChatAttachAlert.AttachAlertLayout previousLayout) {
         if (headerAnimator != null) {
             headerAnimator.cancel();
         }
@@ -3767,7 +3777,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onShown() {
+    public void onShown() {
         isHidden = false;
         if (cameraView != null) {
             cameraView.setVisibility(VISIBLE);
@@ -3796,7 +3806,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onHideShowProgress(float progress) {
+    public void onHideShowProgress(float progress) {
         if (cameraView != null) {
             cameraView.setAlpha(progress);
             cameraIcon.setAlpha(progress);
@@ -3884,7 +3894,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onHidden() {
+    public void onHidden() {
         if (cameraView != null) {
             cameraView.setVisibility(GONE);
             cameraIcon.setVisibility(GONE);
@@ -3955,7 +3965,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    boolean canDismissWithTouchOutside() {
+    public boolean canDismissWithTouchOutside() {
         return !cameraOpened;
     }
 
@@ -3976,7 +3986,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onContainerTranslationUpdated(float currentPanTranslationY) {
+    public void onContainerTranslationUpdated(float currentPanTranslationY) {
         this.currentPanTranslationY = currentPanTranslationY;
         checkCameraViewPosition();
         if (cameraView != null) {
@@ -3993,12 +4003,12 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    void onOpenAnimationEnd() {
+    public void onOpenAnimationEnd() {
         checkCamera(parentAlert != null && parentAlert.baseFragment instanceof ChatActivity);
     }
 
     @Override
-    void onDismissWithButtonClick(int item) {
+    public void onDismissWithButtonClick(int item) {
         hideCamera(item != 0 && item != 2);
     }
 
@@ -4110,7 +4120,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     @Override
-    protected boolean onCustomLayout(View view, int left, int top, int right, int bottom) {
+    public boolean onCustomLayout(View view, int left, int top, int right, int bottom) {
         int width = (right - left);
         int height = (bottom - top);
         boolean isPortrait = width < height;
@@ -4312,6 +4322,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 int index = (Integer) v.getTag();
                 MediaController.PhotoEntry photoEntry = v.getPhotoEntry();
                 if (checkSendMediaEnabled(photoEntry)) {
+                    return;
+                }
+                if (selectedPhotos.size() + 1 > maxCount()) {
+                    BulletinFactory.of(parentAlert.sizeNotifierFrameLayout, resourcesProvider).createErrorBulletin(AndroidUtilities.replaceTags(LocaleController.formatPluralString("BusinessRepliesToastLimit", parentAlert.baseFragment.getMessagesController().quickReplyMessagesLimit))).show();
                     return;
                 }
                 boolean added = !selectedPhotos.containsKey(photoEntry.imageId);
