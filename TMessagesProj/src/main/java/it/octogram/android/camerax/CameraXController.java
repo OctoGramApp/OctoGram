@@ -432,7 +432,7 @@ public class CameraXController {
                 //.disableAutoCancel()
                 .build();
 
-        camera.getCameraControl().startFocusAndMetering(action);
+        if (camera.getCameraControl() != null) camera.getCameraControl().startFocusAndMetering(action);
     }
 
 
