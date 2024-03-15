@@ -184,6 +184,7 @@
     <string name="UploadBoost">Upload boost</string>
     <string name="DownloadBoost">Download boost</string>
     <string name="DownloadBoostType">Download Boost type</string>
+    <string name="DownloadAndUploadBoost">Upload &amp; Download Boost</string>
     <string name="Fast">Fast</string>
     <string name="Extreme">Extreme</string>
     <string name="TabletMode">Force Tablet Mode</string>

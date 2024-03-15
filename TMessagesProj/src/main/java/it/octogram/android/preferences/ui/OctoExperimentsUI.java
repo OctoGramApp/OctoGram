@@ -101,7 +101,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .title(LocaleController.getString("MaxRecentStickers", R.string.MaxRecentStickers))
                             .build());
                 })
-                .category("Upload & Download Boost", category -> {
+                .category(LocaleController.getString(R.string.DownloadAndUploadBoost), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.uploadBoost)
