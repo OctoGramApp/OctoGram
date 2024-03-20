@@ -64,6 +64,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.SSLException;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
+
 public class ConnectionsManager extends BaseController {
 
     public final static int ConnectionTypeGeneric = 1;
@@ -367,6 +370,9 @@ public class ConnectionsManager extends BaseController {
                         error.text = errorText;
                         if (BuildVars.LOGS_ENABLED && error.code != -2000) {
                             FileLog.e(object + " got error " + error.code + " " + error.text);
+                        }
+                        if (OctoConfig.INSTANCE.showRPCErrors.getValue()) {
+                            OctoUtils.showToast(errorText);
                         }
                     }
                     if (BuildVars.DEBUG_PRIVATE_VERSION && !getUserConfig().isClientActivated() && error != null && error.code == 400 && Objects.equals(error.text, "CONNECTION_NOT_INITED")) {
@@ -1007,7 +1013,7 @@ public class ConnectionsManager extends BaseController {
                     }
                 }
             }
-            if (hasIpv6) {
+            if (OctoConfig.INSTANCE.forceUseIpV6.getValue() && hasIpv6) {
                 if (forceTryIpV6) {
                     return USE_IPV6_ONLY;
                 }

@@ -27,6 +27,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.pm.ShortcutManagerCompat;
 
+import it.octogram.android.OctoConfig;
 import org.json.JSONObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
@@ -1675,7 +1676,7 @@ public class SharedConfig {
     }
 
     public static boolean chatBlurEnabled() {
-        return canBlurChat() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BLUR);
+        return (canBlurChat() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BLUR)) || OctoConfig.INSTANCE.forceChatBlurEffect.getValue();
     }
 
     public static class BackgroundActivityPrefs {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="monetRedLight">#B3262E</color>
+    <color name="monetRedDark">#F2B8B5</color>
+    <color name="colorCallGreen">#4CAF50</color>
+    <color name="colorCallRed">#EF5350</color>
+</resources>

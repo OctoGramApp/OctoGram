@@ -176,6 +176,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import it.octogram.android.OctoConfig;
+
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate {
 
     private int commonInputType;
@@ -9116,7 +9118,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             defPeer = delegate.getSendAsPeers().peers.get(0).peer;
         }
         boolean isVisible = defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
-            !isEditingMessage() && !isRecordingAudioVideo() && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE);
+            !isEditingMessage() && !isRecordingAudioVideo() && !OctoConfig.INSTANCE.hideSendAsChannel.getValue() && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE);
         if (isVisible) {
             createSenderSelectView();
         }

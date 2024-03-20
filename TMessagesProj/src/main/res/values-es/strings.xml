@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Telegram</string>
-    <string name="AppNameBeta">Telegram Beta</string>
+    <string name="AppName">OctoGram</string>
+    <string name="AppNameBeta">OctoGram Beta</string>
     <string name="LanguageName">Español</string>
     <string name="English">Inglés</string>
     <string name="LanguageNameInEnglish">Spanish</string>
@@ -1096,7 +1096,7 @@
     <string name="URL">URL</string>
     <string name="MapPreviewProvider">Vista previa del mapa</string>
     <string name="MapPreviewProviderTitle">Proveedor de vista previa de mapas</string>
-    <string name="MapPreviewProviderTelegram">Telegram</string>
+    <string name="MapPreviewProviderTelegram">OctoGram</string>
     <string name="MapPreviewProviderGoogle">Google</string>
     <string name="MapPreviewProviderYandex">Yandex</string>
     <string name="MapPreviewProviderNobody">Ninguno</string>
@@ -1274,8 +1274,8 @@
     <string name="NotificationGroupFew">%1$s envió %3$s al grupo %2$s</string>
     <string name="NotificationGroupAlbum">%1$s envió un álbum al grupo %2$s</string>
     <string name="NotificationGroupForwardedFew">%1$s reenvió %3$s al grupo %2$s</string>
-    <string name="NotificationHiddenName">Telegram</string>
-    <string name="NotificationHiddenChatName">Telegram</string>
+    <string name="NotificationHiddenName">OctoGram</string>
+    <string name="NotificationHiddenChatName">OctoGram</string>
     <string name="NotificationHiddenChatUserName">Usuario</string>
     <string name="NotificationHiddenMessage">Mensaje nuevo</string>
     <string name="Reply">Responder</string>
@@ -1340,7 +1340,8 @@
     <string name="NotificationActionPinnedGeoLiveUser">%1$s fijó una ubicación en tiempo real</string>
     <string name="NotificationActionPinnedGifUser">%1$s fijó un GIF</string>
     <string name="NotificationActionPinnedMusicUser">%1$s fijó un audio</string>
-    <string name="SecretChatName">Telegram</string>
+    <string name="SecretChatName">OctoGram</string>
+
     <!--contacts view-->
     <string name="SelectContact">Elige un contacto</string>
     <string name="SelectContacts">Elige los contactos</string>
@@ -2026,7 +2027,7 @@
     <string name="Emoji">Emoji</string>
     <string name="LargeEmoji">Emojis grandes</string>
     <string name="EmojiUseDefault">Usar emoji predeterminado</string>
-    <string name="TelegramVersion">Telegram para Android %1$s</string>
+    <string name="TelegramVersion">OctoGram para Android %1$s</string>
     <string name="DebugMenu">Menú de depuración</string>
     <string name="DebugSendLogs">Enviar registros</string>
     <string name="DebugSendLastLogs">Enviar últimos registros</string>
@@ -3365,7 +3366,7 @@
     <string name="ViewMessageStatistic">Estadísticas del mensaje</string>
     <string name="ViewMessage">Abrir mensaje</string>
     <!--Intro view-->
-    <string name="Page1Title">Telegram</string>
+    <string name="Page1Title">OctoGram</string>
     <string name="Page2Title">Rápido</string>
     <string name="Page3Title">Gratuito</string>
     <string name="Page4Title">Seguro</string>

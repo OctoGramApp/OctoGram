@@ -46,6 +46,7 @@ import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.billingclient.api.ProductDetails;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLiteException;
@@ -882,7 +883,7 @@ public class MediaDataController extends BaseController {
         if (type == TYPE_PREMIUM_STICKERS) {
             return new ArrayList<>(recentStickers[type]);
         }
-        return new ArrayList<>(arrayList.subList(0, Math.min(arrayList.size(), 20)));
+        return new ArrayList<>(arrayList.subList(0, Math.min(arrayList.size(), OctoConfig.getMaxRecentSticker())));
     }
 
     public ArrayList<TLRPC.Document> getRecentStickersNoCopy(int type) {

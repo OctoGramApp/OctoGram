@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.SimpleTextView;
@@ -369,6 +370,11 @@ public class TextCell extends FrameLayout {
         setTextAndValue(text, value, false, divider);
     }
 
+//    public void setValue(String value, boolean animated) {
+//        valueTextView.setText(value, animated);
+//        valueTextView.setVisibility(VISIBLE);
+//    }
+
     public void setTextAndValue(CharSequence text, CharSequence value, boolean animated, boolean divider) {
         imageLeft = 21;
         offsetFromImage = getOffsetFromImage(false);
@@ -567,7 +573,7 @@ public class TextCell extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             Paint paint = resourcesProvider != null ? resourcesProvider.getPaint(Theme.key_paint_divider) : null;
             if (paint == null) {
                 paint = Theme.dividerPaint;

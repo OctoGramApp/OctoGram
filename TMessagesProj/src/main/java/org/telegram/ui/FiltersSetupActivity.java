@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.Emoji;
@@ -48,6 +49,7 @@ import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.HeaderCell;
+import org.telegram.ui.Cells.RadioCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
@@ -69,6 +71,8 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.UndoView;
 
 import java.util.ArrayList;
+
+import it.octogram.android.OctoConfig;
 
 public class FiltersSetupActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -208,7 +212,7 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
 
         @Override
         protected void onDraw(Canvas canvas) {
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawLine(0, getHeight() - 1, getWidth() - getPaddingRight(), getHeight() - 1, Theme.dividerPaint);
             }
         }
@@ -499,7 +503,7 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
 
         @Override
         protected void onDraw(Canvas canvas) {
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawLine(LocaleController.isRTL ? 0 : dp(62), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? dp(62) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
             }
             if (currentFilter != null) {
@@ -549,6 +553,11 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         ArrayList<TLRPC.TL_dialogFilterSuggested> suggestedFilters = getMessagesController().suggestedFilters;
         ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
         items.add(ItemInner.asHint());
+        items.add(ItemInner.asHeader(LocaleController.getString("FoldersType", R.string.FoldersType)));
+        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeTitles", R.string.FoldersTypeTitles), OctoConfig.TabMode.TEXT));
+        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIcons", R.string.FoldersTypeIcons), OctoConfig.TabMode.ICON));
+        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIconsTitles", R.string.FoldersTypeIconsTitles), OctoConfig.TabMode.MIXED));
+        items.add(ItemInner.asShadow(null));
         if (!suggestedFilters.isEmpty() && dialogFilters.size() < 10) {
             items.add(ItemInner.asHeader(LocaleController.getString("FilterRecommended", R.string.FilterRecommended)));
             for (int i = 0; i < suggestedFilters.size(); ++i) {
@@ -719,6 +728,10 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                 } else {
                     presentFragment(new FilterCreateActivity());
                 }
+            } else if (item.viewType == VIEW_TYPE_RADIO) {
+                OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.tabMode, item.folderType);
+                updateRows(true);
+                getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             }
         });
 
@@ -768,6 +781,7 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
     private static final int VIEW_TYPE_SHADOW = 3;
     private static final int VIEW_TYPE_BUTTON = 4;
     private static final int VIEW_TYPE_FILTER_SUGGESTION = 5;
+    private static final int VIEW_TYPE_RADIO = 99;
     private static final int VIEW_TYPE_CHECK = 6;
 
     private int shiftDp = -4;
@@ -778,6 +792,8 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         }
 
         CharSequence text;
+        boolean selectedRadio;
+        int folderType;
         MessagesController.DialogFilter filter;
         int filterColor;
         TLRPC.TL_dialogFilterSuggested suggested;
@@ -790,6 +806,15 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         public static ItemInner asHint() {
             return new ItemInner(VIEW_TYPE_HINT);
         }
+
+        public static ItemInner asRadio(CharSequence text, int type) {
+            ItemInner i = new ItemInner(VIEW_TYPE_RADIO);
+            i.text = text;
+            i.folderType = type;
+            i.selectedRadio = OctoConfig.INSTANCE.tabMode.getValue() == i.folderType;
+            return i;
+        }
+
         public static ItemInner asShadow(CharSequence text) {
             ItemInner i = new ItemInner(VIEW_TYPE_SHADOW);
             i.text = text;
@@ -847,6 +872,11 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                     return false;
                 }
                 if (suggested != null && suggested.filter.id != other.suggested.filter.id) {
+                    return false;
+                }
+            }
+            if (viewType == VIEW_TYPE_RADIO) {
+                if (text != other.text || selectedRadio != other.selectedRadio) {
                     return false;
                 }
             }
@@ -1018,12 +1048,16 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                         if (suggested.filter.exclude_muted) {
                             filter.flags |= MessagesController.DIALOG_FILTER_FLAG_EXCLUDE_MUTED;
                         }
-                        FilterCreateActivity.saveFilterToServer(filter, filter.flags, filter.name, filter.color, filter.alwaysShow, filter.neverShow, filter.pinnedDialogs, true, true, true, true, true, FiltersSetupActivity.this, () -> {
+                        FilterCreateActivity.saveFilterToServer(filter, filter.flags, filter.emoticon, filter.name, filter.color, filter.alwaysShow, filter.neverShow, filter.pinnedDialogs, true, true, true, true, true, FiltersSetupActivity.this, () -> {
                             getMessagesController().suggestedFilters.remove(suggested);
                             getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
                         });
                     });
                     view = suggestedFilterCell;
+                    break;
+                case VIEW_TYPE_RADIO:
+                    view = new RadioCell(mContext);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
             }
             return new RecyclerListView.Holder(view);
@@ -1082,6 +1116,11 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                 case VIEW_TYPE_FILTER_SUGGESTION: {
                     SuggestedFilterCell filterCell = (SuggestedFilterCell) holder.itemView;
                     filterCell.setFilter(item.suggested, divider);
+                    break;
+                }
+                case VIEW_TYPE_RADIO: {
+                    RadioCell radioCell = (RadioCell) holder.itemView;
+                    radioCell.setText(item.text.toString(), OctoConfig.INSTANCE.tabMode.getValue() == item.folderType, true);
                     break;
                 }
             }

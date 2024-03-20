@@ -62,6 +62,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
+import it.octogram.android.OctoConfig;
+
 public class VoIPHelper {
 
 	public static long lastCallTime = 0;
@@ -69,6 +71,10 @@ public class VoIPHelper {
 	private static final int VOIP_SUPPORT_ID = 4244000;
 
 	public static void startCall(TLRPC.User user, boolean videoCall, boolean canVideoCall, final Activity activity, TLRPC.UserFull userFull, AccountInstance accountInstance) {
+		startCall(user, videoCall, canVideoCall, activity, userFull, accountInstance, false);
+	}
+
+	public static void startCall(TLRPC.User user, boolean videoCall, boolean canVideoCall, final Activity activity, TLRPC.UserFull userFull, AccountInstance accountInstance, boolean callConfirmed) {
 		if (userFull != null && userFull.phone_calls_private) {
 			new AlertDialog.Builder(activity)
 					.setTitle(LocaleController.getString("VoipFailed", R.string.VoipFailed))
@@ -98,6 +104,14 @@ public class VoIPHelper {
 			return;
 		}
 
+		if (OctoConfig.INSTANCE.promptBeforeCalling.getValue() && !callConfirmed && activity instanceof LaunchActivity) {
+			final BaseFragment lastFragment = ((LaunchActivity) activity).getActionBarLayout().getLastFragment();
+			if (lastFragment != null) {
+				AlertsCreator.createCallDialogAlert(lastFragment, lastFragment.getMessagesController().getUser(user.id), videoCall);
+			}
+			return;
+		}
+
 		if (Build.VERSION.SDK_INT >= 23) {
 			int code;
 			ArrayList<String> permissions = new ArrayList<>();
@@ -106,6 +120,9 @@ public class VoIPHelper {
 			}
 			if (videoCall && activity.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 				permissions.add(Manifest.permission.CAMERA);
+			}
+			if (Build.VERSION.SDK_INT >= 31 && activity.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+				permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
 			}
 			if (permissions.isEmpty()) {
 				initiateCall(user, null, null, videoCall, canVideoCall, false, null, activity, null, accountInstance);
@@ -150,6 +167,9 @@ public class VoIPHelper {
 			ChatObject.Call call = accountInstance.getMessagesController().getGroupCall(chat.id, false);
 			if (activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && !(call != null && call.call.rtmp_stream)) {
 				permissions.add(Manifest.permission.RECORD_AUDIO);
+			}
+			if (Build.VERSION.SDK_INT >= 31 && activity.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+				permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
 			}
 			if (permissions.isEmpty()) {
 				initiateCall(null, chat, hash, false, false, createCall, checkJoiner, activity, fragment, accountInstance);

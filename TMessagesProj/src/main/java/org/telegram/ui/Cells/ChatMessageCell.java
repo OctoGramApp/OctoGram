@@ -199,6 +199,9 @@ import java.util.Locale;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.MessageResourceHelper;
+
 public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate, ImageReceiver.ImageReceiverDelegate, DownloadController.FileDownloadProgressListener, TextSelectionHelper.SelectableView, NotificationCenter.NotificationCenterDelegate {
     private final static int TIME_APPEAR_MS = 200;
     private final static int UPLOADING_ALLOWABLE_ERROR = 1024 * 1024;
@@ -1576,6 +1579,30 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
     }
 
+    public void drawStatusWithImage(Canvas canvas, ImageReceiver imageReceiver, int radius) {
+        int x = Math.round(imageReceiver.getImageX2());
+        int y = Math.round(imageReceiver.getImageY2());
+        int circleRadius = radius - AndroidUtilities.dp(2.25f);
+        int spaceLeft = radius - circleRadius;
+        int xCenterRegion = x - spaceLeft;
+        int yCenterRegion = y - spaceLeft;
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Theme.getColor(Theme.key_chats_onlineCircle));
+        String formatUserStatus = currentUser != null ? LocaleController.formatUserStatus(this.currentAccount, currentUser) : "";
+        if (!OctoConfig.INSTANCE.showOnlineStatus.getValue() || currentUser == null || currentUser.bot || !formatUserStatus.equals(LocaleController.getString("Online", R.string.Online))) {
+            imageReceiver.draw(canvas);
+            return;
+        }
+        canvas.save();
+        Path p = new Path();
+        p.addCircle(x - radius, y - radius, radius, Path.Direction.CW);
+        p.toggleInverseFillType();
+        canvas.clipPath(p);
+        imageReceiver.draw(canvas);
+        canvas.restore();
+        canvas.drawCircle(xCenterRegion - circleRadius, yCenterRegion - circleRadius, circleRadius, paint);
+    }
+    
     public Theme.ResourcesProvider getResourcesProvider() {
         return resourcesProvider;
     }
@@ -7600,9 +7627,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     float maxHeight;
                     int maxWidth;
                     if (AndroidUtilities.isTablet()) {
-                        maxHeight = maxWidth = (int) (AndroidUtilities.getMinTabletSide() * 0.4f);
+                        maxHeight = maxWidth = (int) (AndroidUtilities.getMinTabletSide() * (0.4f + (OctoConfig.INSTANCE.maxStickerSize.getValue() - 14.0f) / 40));
                     } else {
-                        maxHeight = maxWidth = (int) (Math.min(getParentWidth(), AndroidUtilities.displaySize.y) * 0.5f);
+                        maxHeight = maxWidth = (int) (Math.min(getParentWidth(), AndroidUtilities.displaySize.y) * (0.5f + (OctoConfig.INSTANCE.maxStickerSize.getValue() - 14.0f) / 30));
                     }
                     String filter;
                     if (messageObject.isAnimatedEmoji() || messageObject.isDice()) {
@@ -14308,7 +14335,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else {
             signString = null;
         }
-        String timeString;
+        CharSequence timeString;
         TLRPC.User author = null;
         if (currentMessageObject.isFromUser()) {
             author = MessagesController.getInstance(currentAccount).getUser(fromId);
@@ -14338,7 +14365,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else if (currentMessageObject.isRepostPreview) {
             timeString = LocaleController.formatSmallDateChat(messageObject.messageOwner.date) + ", " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
         } else if (edited) {
-            timeString = LocaleController.getString("EditedMessage", R.string.EditedMessage) + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            // timeString = LocaleController.getString("EditedMessage", R.string.EditedMessage) + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            timeString = MessageResourceHelper.createEditedString(messageObject);
         } else if (currentMessageObject.isSaved && currentMessageObject.messageOwner.fwd_from != null && (currentMessageObject.messageOwner.fwd_from.date != 0 || currentMessageObject.messageOwner.fwd_from.saved_date != 0)) {
             int date = currentMessageObject.messageOwner.fwd_from.saved_date;
             if (date == 0) {
@@ -14358,6 +14386,11 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             currentTimeString = timeString;
         }
         timeTextWidth = timeWidth = (int) Math.ceil(Theme.chat_timePaint.measureText(currentTimeString, 0, currentTimeString == null ? 0 : currentTimeString.length()));
+        if (timeString instanceof SpannableStringBuilder) {
+            if (edited && OctoConfig.INSTANCE.pencilIconForEditedMessages.getValue()) {
+                timeTextWidth = timeWidth += MessageResourceHelper.editedDrawable.getIntrinsicWidth();
+            }
+        }
         if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE) {
             timeWidth -= AndroidUtilities.dp(8);
         }
@@ -18245,7 +18278,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     }
 
     public void drawTime(Canvas canvas, float alpha, boolean fromParent) {
-        if (!drawFromPinchToZoom && delegate != null && delegate.getPinchToZoomHelper() != null && delegate.getPinchToZoomHelper().isInOverlayModeFor(this) && shouldDrawTimeOnMedia()) {
+        if (!drawFromPinchToZoom && delegate != null && delegate.getPinchToZoomHelper() != null && delegate.getPinchToZoomHelper().isInOverlayModeFor(this) && shouldDrawTimeOnMedia() || (OctoConfig.INSTANCE.hideSentTimeOnStickers.getValue() && !isDrawSelectionBackground() && currentMessageObject.isAnyKindOfSticker())) {
             return;
         }
         if (currentMessageObject != null && currentMessageObject.type == MessageObject.TYPE_JOINED_CHANNEL) {

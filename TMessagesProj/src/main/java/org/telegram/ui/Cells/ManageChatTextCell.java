@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.SimpleTextView;
@@ -127,7 +128,7 @@ public class ManageChatTextCell extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (divider) {
+        if (divider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             if (dividerColor != 0) {
                 Theme.dividerExtraPaint.setColor(Theme.getColor(dividerColor));
             }

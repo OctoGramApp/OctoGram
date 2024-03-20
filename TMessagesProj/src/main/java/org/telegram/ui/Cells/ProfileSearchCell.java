@@ -27,6 +27,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
@@ -749,7 +750,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             return;
         }
 
-        if (useSeparator) {
+        if (useSeparator && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             Paint dividerPaint = null;
             if (customPaints && resourcesProvider != null) {
                 dividerPaint = resourcesProvider.getPaint(Theme.key_paint_divider);

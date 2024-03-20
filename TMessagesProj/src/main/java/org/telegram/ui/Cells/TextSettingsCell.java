@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
@@ -346,7 +347,7 @@ public class TextSettingsCell extends FrameLayout {
         valueTextView.setAlpha(1f - drawLoadingProgress);
         super.dispatchDraw(canvas);
 
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             int offset = AndroidUtilities.dp(imageView.getVisibility() == View.VISIBLE ? 71 : 20);
             canvas.drawLine(LocaleController.isRTL ? 0 : offset, getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? offset : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
         }

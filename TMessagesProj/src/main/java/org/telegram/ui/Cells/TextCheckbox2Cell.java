@@ -16,6 +16,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -284,7 +285,7 @@ public class TextCheckbox2Cell extends FrameLayout {
             float animatedRad = rad * animationProgress;
             canvas.drawCircle(cx, cy, animatedRad, animationPaint);
         }
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(64), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(64) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
     }

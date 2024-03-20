@@ -97,8 +97,10 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
+import it.octogram.android.BaseCameraView;
+
 @SuppressLint("NewApi")
-public class CameraView extends FrameLayout implements TextureView.SurfaceTextureListener, CameraController.ICameraView, CameraController.ErrorCallback  {
+public class CameraView extends BaseCameraView implements TextureView.SurfaceTextureListener, CameraController.ICameraView, CameraController.ErrorCallback  {
 
     public boolean WRITE_TO_FILE_IN_BACKGROUND = false;
 
@@ -121,7 +123,8 @@ public class CameraView extends FrameLayout implements TextureView.SurfaceTextur
     private int focusAreaSize;
     private Drawable thumbDrawable;
 
-    private final boolean useCamera2 = false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && SharedConfig.useCamera2;
+    private final boolean useCamera2 = false; //Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && SharedConfig.useCamera2;
+    // private final boolean useCamera2 = false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && SharedConfig.useCamera2;
     private final CameraSessionWrapper[] cameraSession = new CameraSessionWrapper[2];
     private CameraSessionWrapper cameraSessionRecording;
 

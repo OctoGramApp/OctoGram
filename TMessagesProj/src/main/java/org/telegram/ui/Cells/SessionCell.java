@@ -31,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
@@ -431,7 +432,7 @@ public class SessionCell extends FrameLayout {
                 canvas.restore();
             }
         }
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             int margin = currentType == 1 ? 49 : 72;
             canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(margin), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(margin) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
         }

@@ -11,6 +11,7 @@ package org.telegram.messenger;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -31,14 +32,13 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Bulletin;
+import org.telegram.ui.Components.BulletinFactory;
 
 import java.text.CollationKey;
 import java.text.Collator;
@@ -363,7 +363,7 @@ public class ContactsController extends BaseController {
     }
 
     public String getInviteText(int contacts) {
-        String link = inviteLink == null ? "https://telegram.org/dl" : inviteLink;
+        String link = inviteLink == null ? "https://octogram.site/" : inviteLink;
         if (contacts <= 1) {
             return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
         } else {
@@ -378,7 +378,7 @@ public class ContactsController extends BaseController {
     public void checkAppAccount() {
         AccountManager am = AccountManager.get(ApplicationLoader.applicationContext);
         try {
-            Account[] accounts = am.getAccountsByType("org.telegram.messenger");
+            Account[] accounts = am.getAccountsByType("it.octogram.android");
             systemAccount = null;
             for (int a = 0; a < accounts.length; a++) {
                 Account acc = accounts[a];
@@ -411,7 +411,7 @@ public class ContactsController extends BaseController {
             readContacts();
             if (systemAccount == null) {
                 try {
-                    systemAccount = new Account("" + getUserConfig().getClientUserId(), "org.telegram.messenger");
+                    systemAccount = new Account("" + getUserConfig().getClientUserId(), "it.octogram.android");
                     am.addAccountExplicitly(systemAccount, "", null);
                 } catch (Exception ignore) {
 
@@ -424,7 +424,7 @@ public class ContactsController extends BaseController {
         try {
             systemAccount = null;
             AccountManager am = AccountManager.get(ApplicationLoader.applicationContext);
-            Account[] accounts = am.getAccountsByType("org.telegram.messenger");
+            Account[] accounts = am.getAccountsByType("it.octogram.android");
             for (int a = 0; a < accounts.length; a++) {
                 Account acc = accounts[a];
                 boolean found = false;
@@ -500,7 +500,7 @@ public class ContactsController extends BaseController {
                 AndroidUtilities.runOnUIThread(() -> {
                     AccountManager am = AccountManager.get(ApplicationLoader.applicationContext);
                     try {
-                        Account[] accounts = am.getAccountsByType("org.telegram.messenger");
+                        Account[] accounts = am.getAccountsByType("it.octogram.android");
                         systemAccount = null;
                         for (int a = 0; a < accounts.length; a++) {
                             Account acc = accounts[a];
@@ -518,7 +518,7 @@ public class ContactsController extends BaseController {
 
                     }
                     try {
-                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "org.telegram.messenger");
+                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "it.octogram.android");
                         am.addAccountExplicitly(systemAccount, "", null);
                     } catch (Exception ignore) {
 
@@ -555,6 +555,7 @@ public class ContactsController extends BaseController {
         });
     }
 
+    @SuppressLint("Range")
     private boolean checkContactsInternal() {
         boolean reload = false;
         try {
@@ -2285,7 +2286,7 @@ public class ContactsController extends BaseController {
 
         builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.profile");
+        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.it.octogram.android.android.profile");
         builder.withValue(ContactsContract.Data.DATA1, user.id);
         builder.withValue(ContactsContract.Data.DATA2, "Telegram Profile");
         builder.withValue(ContactsContract.Data.DATA3, LocaleController.formatString("ContactShortcutMessage", R.string.ContactShortcutMessage, phoneOrName));
@@ -2294,7 +2295,7 @@ public class ContactsController extends BaseController {
 
         builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.call");
+        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.it.octogram.android.android.call");
         builder.withValue(ContactsContract.Data.DATA1, user.id);
         builder.withValue(ContactsContract.Data.DATA2, "Telegram Voice Call");
         builder.withValue(ContactsContract.Data.DATA3, LocaleController.formatString("ContactShortcutVoiceCall", R.string.ContactShortcutVoiceCall, phoneOrName));
@@ -2303,7 +2304,7 @@ public class ContactsController extends BaseController {
 
         builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.call.video");
+        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.it.octogram.android.android.call.video");
         builder.withValue(ContactsContract.Data.DATA1, user.id);
         builder.withValue(ContactsContract.Data.DATA2, "Telegram Video Call");
         builder.withValue(ContactsContract.Data.DATA3, LocaleController.formatString("ContactShortcutVideoCall", R.string.ContactShortcutVideoCall, phoneOrName));

@@ -32,10 +32,9 @@ import android.telephony.TelephonyManager;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.multidex.MultiDex;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.json.JSONObject;
 import org.telegram.messenger.voip.VideoCapturerDevice;
@@ -50,6 +49,8 @@ import org.telegram.ui.LauncherIconController;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import it.octogram.android.camerax.CameraXUtils;
 
 public class ApplicationLoader extends Application {
 
@@ -75,6 +76,7 @@ public class ApplicationLoader extends Application {
     public static volatile boolean mainInterfacePausedStageQueue = true;
     public static boolean canDrawOverlays;
     public static volatile long mainInterfacePausedStageQueueTime;
+    public static boolean hasPlayServices;
 
     private static PushListenerController.IPushListenerServiceProvider pushProvider;
     private static IMapsProvider mapsProvider;
@@ -83,7 +85,6 @@ public class ApplicationLoader extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        MultiDex.install(this);
     }
 
     public static ILocationServiceProvider getLocationServiceProvider() {
@@ -133,7 +134,7 @@ public class ApplicationLoader extends Application {
     }
 
     public static boolean isStandaloneBuild() {
-        return applicationLoaderInstance.isStandalone();
+        return BuildVars.isStandaloneApp();
     }
 
     protected boolean isHuaweiBuild() {
@@ -141,7 +142,7 @@ public class ApplicationLoader extends Application {
     }
 
     protected boolean isStandalone() {
-        return false;
+        return isStandaloneBuild();
     }
 
     public static File getFilesDirFixed() {
@@ -217,8 +218,9 @@ public class ApplicationLoader extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        hasPlayServices = checkPlayServices();
         SharedConfig.loadConfig();
+        CameraXUtils.loadCameraXSizes();
         SharedPrefsHelper.init(applicationContext);
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) { //TODO improve account
             UserConfig.getInstance(a).loadConfig();
@@ -277,11 +279,7 @@ public class ApplicationLoader extends Application {
         }
 
         NativeLoader.initNativeLibs(ApplicationLoader.applicationContext);
-        try {
-            ConnectionsManager.native_setJava(false);
-        } catch (UnsatisfiedLinkError error) {
-            throw new RuntimeException("can't load native libraries " +  Build.CPU_ABI + " lookup folder " + NativeLoader.getAbiFolder());
-        }
+        ConnectionsManager.native_setJava(false);
         new ForegroundDetector(this) {
             @Override
             public void onActivityStarted(Activity activity) {
@@ -310,7 +308,7 @@ public class ApplicationLoader extends Application {
         if (preferences.contains("pushService")) {
             enabled = preferences.getBoolean("pushService", true);
         } else {
-            enabled = MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("keepAliveService", false);
+            enabled = MessagesController.getMainSettings(UserConfig.selectedAccount).getBoolean("keepAliveService", !ApplicationLoader.hasPlayServices);
         }
         if (enabled) {
             try {
@@ -350,9 +348,9 @@ public class ApplicationLoader extends Application {
         }, 1000);
     }
 
-    private boolean checkPlayServices() {
+    private static boolean checkPlayServices() {
         try {
-            int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+            int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(ApplicationLoader.applicationContext);
             return resultCode == ConnectionResult.SUCCESS;
         } catch (Exception e) {
             FileLog.e(e);

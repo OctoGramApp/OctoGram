@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
@@ -153,7 +154,7 @@ public class DialogRadioCell extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             canvas.drawLine(dp(LocaleController.isRTL ? 0 : 60), getHeight() - 1, getMeasuredWidth() - dp(LocaleController.isRTL ? 60 : 0), getHeight() - 1, Theme.dividerPaint);
         }
     }

@@ -64,6 +64,7 @@ import android.widget.Toast;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
 
+import it.octogram.android.OctoConfig;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.telegram.PhoneFormat.PhoneFormat;
@@ -503,7 +504,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
 
         @Override
         protected void onDraw(Canvas canvas) {
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(20), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(20) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
             }
         }
