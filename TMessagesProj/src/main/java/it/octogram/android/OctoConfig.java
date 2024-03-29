@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.media.AudioFormat;
 
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.tgnet.TLRPC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +132,10 @@ public class OctoConfig {
 
     /* Multi-Language */
     public final ConfigProperty<String> languagePackVersioning = newConfigProperty("languagePackVersioning", "{}");
+
+    /* Search Message Filter */
+    public final ConfigProperty<Integer> searchFilterType = newConfigProperty("searchFilterType", Filter.None);
+
     /**
      * Creates a new config property and adds it to the list of properties.
      *
@@ -147,23 +152,6 @@ public class OctoConfig {
 
     private OctoConfig() {
         loadConfig();
-    }
-
-    public static int getMaxRecentSticker() {
-        int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200};
-        Integer value = OctoConfig.INSTANCE.maxRecentStickers.getValue();
-        if (value >= 0 && value < sizes.length) {
-            return sizes[value];
-        }
-        return 20;
-    }
-
-    public static int getAudioType() {
-        if (OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO) {
-            return AudioFormat.CHANNEL_OUT_MONO;
-        } else {
-            return AudioFormat.CHANNEL_OUT_STEREO;
-        }
     }
 
     /*
@@ -200,10 +188,21 @@ public class OctoConfig {
         editor.apply();
     }
 
-    public void unlockIcon(ConfigProperty<Boolean> property, boolean value) {
-        SharedPreferences.Editor editor = PREFS.edit();
-        editor.putBoolean(property.getKey(), value);
-        editor.apply();
+    public static int getMaxRecentSticker() {
+        int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200};
+        Integer value = OctoConfig.INSTANCE.maxRecentStickers.getValue();
+        if (value >= 0 && value < sizes.length) {
+            return sizes[value];
+        }
+        return 20;
+    }
+
+    public static int getAudioType() {
+        if (OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO) {
+            return AudioFormat.CHANNEL_OUT_MONO;
+        } else {
+            return AudioFormat.CHANNEL_OUT_STEREO;
+        }
     }
 
     public void updateStringSetting(ConfigProperty<String> property, String value) {
@@ -222,7 +221,35 @@ public class OctoConfig {
         editor.apply();
     }
 
-    public void setPackLangVersion (String data) {
+    public TLRPC.MessagesFilter getSearchFilterType() {
+        switch (OctoConfig.INSTANCE.searchFilterType.getValue()) {
+            case OctoConfig.Filter.PHOTOS:
+                return new TLRPC.TL_inputMessagesFilterPhotos();
+            case OctoConfig.Filter.VIDEOS:
+                return new TLRPC.TL_inputMessagesFilterVideo();
+            case OctoConfig.Filter.VOICE_MESSAGES:
+                return new TLRPC.TL_inputMessagesFilterVoice();
+            case OctoConfig.Filter.VIDEO_MESSAGES:
+                return new TLRPC.TL_inputMessagesFilterRoundVideo();
+            case OctoConfig.Filter.FILES:
+                return new TLRPC.TL_inputMessagesFilterDocument();
+            case OctoConfig.Filter.MUSIC:
+                return new TLRPC.TL_inputMessagesFilterMusic();
+            case OctoConfig.Filter.GIFS:
+                return new TLRPC.TL_inputMessagesFilterGif();
+            case OctoConfig.Filter.GEO:
+                return new TLRPC.TL_inputMessagesFilterGeo();
+            case OctoConfig.Filter.CONTACTS:
+                return new TLRPC.TL_inputMessagesFilterContacts();
+            case OctoConfig.Filter.MENTIONS:
+                return new TLRPC.TL_inputMessagesFilterMyMentions();
+            default:
+                return new TLRPC.TL_inputMessagesFilterEmpty();
+        }
+    }
+
+
+    public void setPackLangVersion(String data) {
         updateStringSetting(OctoConfig.INSTANCE.languagePackVersioning, data);
     }
 
@@ -286,5 +313,19 @@ public class OctoConfig {
         public static final int NORMAL = 0;
         public static final int FAST = 1;
         public static final int EXTREME = 2;
+    }
+
+    public static class Filter {
+        public static final int None = 0;
+        public static final int PHOTOS = 1;
+        public static final int VIDEOS = 2;
+        public static final int VOICE_MESSAGES = 3;
+        public static final int VIDEO_MESSAGES = 4;
+        public static final int FILES = 5;
+        public static final int MUSIC = 6;
+        public static final int GIFS = 7;
+        public static final int GEO = 8;
+        public static final int CONTACTS = 9;
+        public static final int MENTIONS = 10;
     }
 }

@@ -306,6 +306,21 @@
     <string name="EnableAccountProtection">Enable Account Protection</string>
     <string name="AccountProtectionHint1">Tap the lock icon above your chat list to access your hidden accounts.</string>
     <string name="AccountProtectionHint2">When an account is protected with a passcode, it will be hidden from the side menu.</string>
+    
+    <!--Search filter-->
+    
+    <string name="SearchFilter">Filter search results</string>
+    <string name="SearchFilter_None">None</string>
+    <string name="SearchFilter_Photos">Photos</string>
+    <string name="SearchFilter_Videos">Videos</string>
+    <string name="SearchFilter_VoiceMessages">Voice messages</string>
+    <string name="SearchFilter_VideoMessages">Video messages</string>
+    <string name="SearchFilter_Files">Files/Documents</string>
+    <string name="SearchFilter_Music">Music</string>
+    <string name="SearchFilter_GIFs">GIFs</string>
+    <string name="SearchFilter_Geolocation">Geolocation</string>
+    <string name="SearchFilter_Contacts">Contacts</string>
+    <string name="SearchFilter_MyMentions">My mentions</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

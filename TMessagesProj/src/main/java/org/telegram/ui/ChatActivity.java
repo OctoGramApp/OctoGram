@@ -108,6 +108,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.util.Supplier;
 import androidx.dynamicanimation.animation.FloatValueHolder;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
@@ -122,11 +123,6 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.zxing.common.detector.MathUtils;
 
-import it.octogram.android.CustomEmojiController;
-import it.octogram.android.preferences.ui.DetailsActivity;
-import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
-import it.octogram.android.utils.ForwardContext;
-import it.octogram.android.utils.MessageHelper;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -264,7 +260,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.DetailsActivity;
+import it.octogram.android.preferences.ui.custom.EasyAlertDialog;
+import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
+import it.octogram.android.utils.ForwardContext;
+import it.octogram.android.utils.MessageHelper;
 
 @SuppressWarnings("unchecked")
 public class ChatActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, LocationActivity.LocationActivityDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate, ChatActivityInterface, FloatingDebugProvider, InstantCameraView.Delegate, ForwardContext {
@@ -472,6 +474,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private BlurredFrameLayout searchContainer;
     private ImageView searchCalendarButton;
     private ImageView searchUserButton;
+    private ImageView searchFilterButton;
     private AnimatedTextView searchCountText;
     private AnimatedTextView searchExpandList;
     private AnimatedTextView searchOtherButton;
@@ -2334,6 +2337,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     @Override
     public boolean onFragmentCreate() {
+        OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.searchFilterType, OctoConfig.Filter.None);
+
         final long chatId = arguments.getLong("chat_id", 0);
         final long userId = arguments.getLong("user_id", 0);
         final int encId = arguments.getInt("enc_id", 0);
@@ -3429,7 +3434,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else if (id == bot_settings) {
                     getSendMessagesHelper().sendMessage(SendMessagesHelper.SendMessageParams.of("/settings", dialog_id, null, null, null, false, null, null, null, true, 0, null, false));
                 } else if (id == search) {
-                    openSearchWithText(isSupportedTags() ? "" : null);
+                    OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.searchFilterType, OctoConfig.Filter.None);
+                    openSearchWithText(/*isSupportedTags() ? "" : */null);
                 } else if (id == translate) {
                     getMessagesController().getTranslateController().setHideTranslateDialog(getDialogId(), false, true);
                     if (!getMessagesController().getTranslateController().toggleTranslatingDialog(getDialogId(), true)) {
@@ -7964,6 +7970,54 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     }
 
+    private void showMessageFilterSelector(Context context) {
+        ArrayList<String> filterNames = new ArrayList<>();
+        ArrayList<Integer> filterTypes = new ArrayList<>();
+
+        String[] filterKeys = {
+                "SearchFilter_None",
+                "SearchFilter_Photos",
+                "SearchFilter_Videos",
+                "SearchFilter_VoiceMessages",
+                "SearchFilter_VideoMessages",
+                "SearchFilter_Files",
+                "SearchFilter_Music",
+                "SearchFilter_GIFs",
+                "SearchFilter_Geolocation",
+                "SearchFilter_Contacts",
+                "SearchFilter_MyMentions"
+        };
+
+        int[] filterValues = {
+                OctoConfig.Filter.None,
+                OctoConfig.Filter.PHOTOS,
+                OctoConfig.Filter.VIDEOS,
+                OctoConfig.Filter.VOICE_MESSAGES,
+                OctoConfig.Filter.VIDEO_MESSAGES,
+                OctoConfig.Filter.FILES,
+                OctoConfig.Filter.MUSIC,
+                OctoConfig.Filter.GIFS,
+                OctoConfig.Filter.GEO,
+                OctoConfig.Filter.CONTACTS,
+                OctoConfig.Filter.MENTIONS
+        };
+
+        for (int i = 0; i < filterKeys.length; i++) {
+            String name = LocaleController.getString(filterKeys[i]);
+            filterNames.add(name);
+            filterTypes.add(filterValues[i]);
+        }
+
+        int currentFilter = OctoConfig.INSTANCE.getSearchFilterType().flags;
+
+        EasyAlertDialog.show(filterNames, LocaleController.getString(R.string.SearchFilter), filterTypes.indexOf(currentFilter), context, selectedIndex -> {
+            int selectedFilter = filterTypes.get(selectedIndex);
+            OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.searchFilterType, selectedFilter);
+            openSearchWithText(null);
+            showMessagesSearchListView(true);
+        });
+    }
+
     private void setFilterMessages(boolean filter) {
         setFilterMessages(filter, false, true);
     }
@@ -9045,6 +9099,20 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }, themeDelegate).create());
         });
         searchCalendarButton.setContentDescription(LocaleController.getString("JumpToDate", R.string.JumpToDate));
+
+        searchFilterButton = new ImageView(getContext());
+        searchFilterButton.setScaleType(ImageView.ScaleType.CENTER);
+        searchFilterButton.setImageResource(R.drawable.msg_customize);
+        searchFilterButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_searchPanelIcons), PorterDuff.Mode.MULTIPLY));
+        searchFilterButton.setBackgroundDrawable(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 1));
+        searchContainer.addView(searchFilterButton, LayoutHelper.createFrame(48, 48, Gravity.CENTER | Gravity.TOP, 0, 0, 0, 0));
+        searchFilterButton.setOnClickListener(view -> {
+            if (getParentActivity() == null) {
+                return;
+            }
+            showMessageFilterSelector(getContext());
+        });
+        searchFilterButton.setContentDescription(LocaleController.getString("SearchFilter", R.string.SearchFilter));
     }
 
     private void showSearchShowOther(boolean show) {

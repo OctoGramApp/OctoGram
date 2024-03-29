@@ -41,7 +41,6 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -60,6 +59,8 @@ import org.telegram.ui.Stories.StoriesUtilities;
 import org.telegram.ui.TopicsFragment;
 
 import java.util.concurrent.atomic.AtomicReference;
+
+import it.octogram.android.OctoConfig;
 
 public class ChatAvatarContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -333,6 +334,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         pressed = false;
         bounce.setPressed(false);
         if (canSearch()) {
+            OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.searchFilterType, OctoConfig.Filter.None);
             openSearch();
         }
     };

@@ -3660,7 +3660,7 @@ public class MediaDataController extends BaseController {
                     req.saved_reaction.add(reaction.toTLReaction());
                     req.flags |= 8;
                 }
-                req.filter = new TLRPC.TL_inputMessagesFilterEmpty();
+                req.filter = OctoConfig.INSTANCE.getSearchFilterType();
                 mergeReqId = getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                     if (lastMergeDialogId == mergeDialogId) {
                         mergeReqId = 0;
@@ -3745,7 +3745,7 @@ public class MediaDataController extends BaseController {
             req.saved_reaction.add(reaction.toTLReaction());
             req.flags |= 8;
         }
-        req.filter = new TLRPC.TL_inputMessagesFilterEmpty();
+        req.filter = OctoConfig.INSTANCE.getSearchFilterType();
         lastSearchQuery = query;
         long queryWithDialogFinal = queryWithDialog;
         String finalQuery = query;
