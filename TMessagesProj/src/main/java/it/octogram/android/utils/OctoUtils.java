@@ -45,7 +45,7 @@ public class OctoUtils {
     }
 
     public static String getCorrectAppName() {
-        return BuildConfig.BUILD_TYPE.equals("debug") || BuildConfig.BUILD_TYPE.equals("pbeta") ? "OctoGram Beta" : "OctoGram";
+        return BuildConfig.BUILD_TYPE.equals("debug") || BuildConfig.BUILD_TYPE.equals("pbeta") ? "OctoGram β" : "OctoGram";
     }
 
 
