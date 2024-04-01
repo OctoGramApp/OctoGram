@@ -107,7 +107,7 @@ import java.util.regex.Pattern;
 
 public class StickersAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
-    public final static boolean DISABLE_STICKER_EDITOR = !BuildVars.DEBUG_PRIVATE_VERSION;
+    public final static boolean DISABLE_STICKER_EDITOR = false;//!BuildVars.DEBUG_PRIVATE_VERSION;
 
     public interface StickersAlertDelegate {
         void onStickerSelected(TLRPC.Document sticker, String query, Object parent, MessageObject.SendAnimationData sendAnimationData, boolean clearsInputField, boolean notify, int scheduleDate);
