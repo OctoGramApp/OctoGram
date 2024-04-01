@@ -142,6 +142,7 @@ dependencies {
     implementation "androidx.camera:camera-view:${camerax_version}"
     implementation "androidx.camera:camera-video:${camerax_version}"
     implementation 'androidx.interpolator:interpolator:1.0.0'
+    implementation 'androidx.biometric:biometric:1.1.0'
 
     // GOOGLE PLAY UPDATE CHECKER
     implementation 'com.google.android.play:core:1.10.3'
