@@ -143,6 +143,11 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("OpenArchiveOnPull", R.string.OpenArchiveOnPull))
                             .description(LocaleController.formatString("OpenArchiveOnPull_Desc", R.string.OpenArchiveOnPull_Desc))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory)
+                            .title(LocaleController.formatString("WarningBeforeDeletingChatHistory", R.string.WarningBeforeDeletingChatHistory))
+                            .description(LocaleController.formatString("WarningBeforeDeletingChatHistory_Desc", R.string.WarningBeforeDeletingChatHistory_Desc))
+                            .build());
                 })
                 .category(LocaleController.formatString("MediaTab", R.string.MediaTab), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()

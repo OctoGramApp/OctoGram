@@ -65,6 +65,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> openArchiveOnPull = newConfigProperty("openArchiveOnPull", false);
     public final ConfigProperty<Boolean> tabletMode = newConfigProperty("tabletMode", false);
     public final ConfigProperty<Boolean> forceUseIpV6 = newConfigProperty("forceUseIpV6", false);
+    public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
 
     /*Appearance*/
     public final ConfigProperty<Boolean> showNameInActionBar = newConfigProperty("showNameInActionBar", false);

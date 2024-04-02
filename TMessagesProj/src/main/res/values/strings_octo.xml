@@ -113,6 +113,8 @@
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
     <string name="OpenArchiveOnPull_Desc">Automatically opens the archive when pulling down</string>
+    <string name="WarningBeforeDeletingChatHistory">Warning before deleting chat history</string>
+    <string name="WarningBeforeDeletingChatHistory_Desc">Create a warning before deleting chat history for a user (to avoid accidental deletions)</string>
     <string name="DoubleTapActionsHeader">Double tap actions</string>
     <string name="PreferredActionIncoming">Incoming messages</string>
     <string name="PreferredActionOutgoing">Outgoing messages</string>
@@ -306,6 +308,8 @@
     <string name="EnableAccountProtection">Enable Account Protection</string>
     <string name="AccountProtectionHint1">Tap the lock icon above your chat list to access your hidden accounts.</string>
     <string name="AccountProtectionHint2">When an account is protected with a passcode, it will be hidden from the side menu.</string>
+
+    <string name="AreYouSureDeleteXMessages">Are you sure you want to delete the chat history for this user?</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

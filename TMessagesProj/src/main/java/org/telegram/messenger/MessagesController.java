@@ -41,6 +41,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.util.Consumer;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLiteException;
@@ -8090,7 +8091,19 @@ public class MessagesController extends BaseController implements NotificationCe
         });
     }
 
-    public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, int offset) {
+    public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, BaseFragment fragment, int offset, boolean force) {
+        if (!force && OctoConfig.INSTANCE.warningBeforeDeletingChatHistory.getValue()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getParentActivity(), fragment.getResourceProvider())
+                    .setTitle(LocaleController.getString(R.string.Warning))
+                    .setMessage(LocaleController.getString(R.string.AreYouSureDeleteXMessages))
+                    .setPositiveButton(LocaleController.getString(R.string.OK), (dialogInterface, i) -> {
+                        deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, offset, true);
+                    })
+                    .setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+            fragment.showDialog(builder.create());
+            return;
+        }
+
         long fromId = 0;
         if (fromUser != null) {
             fromId = fromUser.id;
@@ -8107,7 +8120,7 @@ public class MessagesController extends BaseController implements NotificationCe
             if (error == null) {
                 TLRPC.TL_messages_affectedHistory res = (TLRPC.TL_messages_affectedHistory) response;
                 if (res.offset > 0) {
-                    deleteUserChannelHistory(currentChat, fromUser, fromChat, res.offset);
+                    deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, res.offset, false);
                 }
                 processNewChannelDifferenceParams(res.pts, res.pts_count, currentChat.id);
             }
