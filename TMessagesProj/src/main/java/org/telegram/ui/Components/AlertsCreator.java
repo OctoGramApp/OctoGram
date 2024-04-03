@@ -6281,7 +6281,7 @@ public class AlertsCreator {
                     });
                 }
                 if (checks[2]) {
-                    MessagesController.getInstance(currentAccount).deleteUserChannelHistory(chat, userFinal, chatFinal, fragment, 0, false);
+                    MessagesController.getInstance(currentAccount).deleteUserChannelHistory(chat, userFinal, chatFinal, fragment, 0);
                 }
             }
             if (onDelete != null) {

@@ -15,6 +15,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -32,6 +33,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8091,16 +8093,24 @@ public class MessagesController extends BaseController implements NotificationCe
         });
     }
 
+    public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, BaseFragment fragment, int offset) {
+        deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, offset, false);
+    }
+
     public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, BaseFragment fragment, int offset, boolean force) {
         if (!force && OctoConfig.INSTANCE.warningBeforeDeletingChatHistory.getValue()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getParentActivity(), fragment.getResourceProvider())
+            AlertDialog alertDialog = new AlertDialog.Builder(fragment.getParentActivity(), fragment.getResourceProvider())
                     .setTitle(LocaleController.getString(R.string.Warning))
                     .setMessage(LocaleController.getString(R.string.AreYouSureDeleteXMessages))
-                    .setPositiveButton(LocaleController.getString(R.string.OK), (dialogInterface, i) -> {
+                    .setPositiveButton(LocaleController.getString(R.string.Delete), (dialogInterface, i) -> {
                         deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, offset, true);
                     })
-                    .setNegativeButton(LocaleController.getString(R.string.Cancel), null);
-            fragment.showDialog(builder.create());
+                    .setNegativeButton(LocaleController.getString(R.string.Cancel), null).create();
+            TextView button = (TextView) alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            if (button != null) {
+                button.setTextColor(Theme.getColor(Theme.key_text_RedBold));
+            }
+            fragment.showDialog(alertDialog);
             return;
         }
 
@@ -8120,7 +8130,7 @@ public class MessagesController extends BaseController implements NotificationCe
             if (error == null) {
                 TLRPC.TL_messages_affectedHistory res = (TLRPC.TL_messages_affectedHistory) response;
                 if (res.offset > 0) {
-                    deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, res.offset, false);
+                    deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, res.offset);
                 }
                 processNewChannelDifferenceParams(res.pts, res.pts_count, currentChat.id);
             }
