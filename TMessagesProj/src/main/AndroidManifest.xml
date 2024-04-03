@@ -257,6 +257,7 @@
             android:hardwareAccelerated="@bool/useHardwareAcceleration"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize"
+            android:label="@string/AppName"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
