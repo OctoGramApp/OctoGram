@@ -1325,7 +1325,9 @@ public class Theme {
                     dst.compress(Bitmap.CompressFormat.JPEG, 87, stream);
                 } else {
                     FileOutputStream stream = new FileOutputStream(toFile);
-                    patternBitmap.compress(Bitmap.CompressFormat.PNG, 87, stream);
+                    Bitmap bitmap = patternBitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 87, stream);
+                    bitmap.recycle();
                     stream.close();
                 }
             } catch (Throwable e) {
@@ -2629,12 +2631,12 @@ public class Theme {
                 }
 
                 //override default themes
-                if (isHome(themeAccent) && name.equals("Dark Blue") || name.equals("Night")) {
+                if (isHome(themeAccent) && name.equals("Dark Blue") || name.equals("Night") || "Amoled".equals(name)) {
                     themeAccent.myMessagesAccentColor = 0xff6573f8;
                     themeAccent.myMessagesGradientAccentColor1 = 0xff7644cb;
                     themeAccent.myMessagesGradientAccentColor2 = 0xff8849b4;
                     themeAccent.myMessagesGradientAccentColor3 = 0xffa751a8;
-                    if (name.equals("Night")) {
+                    if (name.equals("Night") || "Amoled".equals(name)) {
                         themeAccent.patternIntensity = -0.57f;
                         themeAccent.backgroundOverrideColor = 0xff6c7fa6;
                         themeAccent.backgroundGradientOverrideColor1 = 0xff2e344b;
@@ -4114,6 +4116,7 @@ public class Theme {
     public static final int key_color_yellow = colorsCount++;
     public static final int key_color_purple = colorsCount++;
     public static final int key_color_cyan = colorsCount++;
+    public static final int key_color_dark_violet = colorsCount++;
     public static final int[] keys_colors = {key_color_lightblue, key_color_blue, key_color_green, key_color_lightgreen, key_color_red, key_color_orange, key_color_yellow, key_color_purple, key_color_cyan};
 
     public static final int key_chat_inReactionButtonBackground = colorsCount++;
@@ -4408,6 +4411,7 @@ public class Theme {
         fallbackKeys.put(key_statisticChartLine_purple, key_color_purple);
         fallbackKeys.put(key_statisticChartLine_indigo, key_color_purple);
         fallbackKeys.put(key_statisticChartLine_cyan, key_color_cyan);
+        fallbackKeys.put(key_statisticChartLine_purple, key_color_dark_violet);
 
         fallbackKeys.put(key_actionBarActionModeReaction, key_windowBackgroundGray);
         fallbackKeys.put(key_actionBarActionModeReactionText, key_chat_inReactionButtonText);
@@ -4941,6 +4945,8 @@ public class Theme {
                     if (accent != null) {
                         info.overrideWallpaper = accent.overrideWallpaper;
                     }
+                } else if (info.isMonet()) {
+                    info.loadWallpapers(themeConfig);
                 }
             }
             if (oldEditor != null) {
@@ -7222,7 +7228,7 @@ public class Theme {
                 switchingNightTheme = false;
             }
         } else {
-            if (currentTheme != currentDayTheme && (currentTheme == null || currentDayTheme != null && currentTheme.isLight() != currentDayTheme.isLight())) {
+            if (currentTheme != currentDayTheme && (currentTheme == null || currentDayTheme != null && currentTheme.isDark() != currentDayTheme.isDark())) {
                 isInNigthMode = false;
                 lastThemeSwitchTime = SystemClock.elapsedRealtime();
                 switchingNightTheme = true;
@@ -8155,13 +8161,13 @@ public class Theme {
                         } else {
                             if ((idx = line.indexOf('=')) != -1) {
                                 String key = line.substring(0, idx);
-                                String param = line.substring(idx + 1);
+                                String param = line.substring(idx + 1).trim();
                                 int value;
                                 if (!param.isEmpty() && param.charAt(0) == '#') {
                                     try {
-                                        value = Color.parseColor(param.trim());
+                                        value = Color.parseColor(param);
                                     } catch (Exception ignore) {
-                                        value = Utilities.parseInt(param.trim());
+                                        value = Utilities.parseInt(param);
                                     }
                                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (param.startsWith("a") || param.startsWith("n") || param.startsWith("monet"))) {
                                     value = MonetThemeController.getColor(param.trim());
@@ -9976,6 +9982,7 @@ public class Theme {
                     settings.isCustomTheme = true;
                 } catch (Throwable e) {
                     FileLog.e(e);
+                    bitmapCreated = false;
                 }
             }
             if (bitmapCreated) {
