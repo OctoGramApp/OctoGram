@@ -84,7 +84,7 @@ public class CustomEmojiController {
     static {
         var files = ApplicationLoader.applicationContext.getExternalFilesDir(null);
         var cache = ApplicationLoader.applicationContext.getExternalCacheDir();
-        if (files != null) {
+        if (files != null && cache != null) {
             EMOJI_PACKS_FILE_DIR = files.getAbsolutePath() + "/emojis/";
             EMOJI_PACKS_TMP_DIR = cache.getAbsolutePath() + "/emojis/tmp/";
         } else {
@@ -351,11 +351,11 @@ public class CustomEmojiController {
     }
 
     public static boolean isInstalledOldVersion(String emojiID, String versionWithMd5) {
-        return getAllVersions(emojiID, versionWithMd5).size() > 0;
+        return !getAllVersions(emojiID, versionWithMd5).isEmpty();
     }
 
     public static boolean isInstalledOffline(String emojiID) {
-        return getAllVersions(emojiID, null).size() > 0;
+        return !getAllVersions(emojiID, null).isEmpty();
     }
 
     public static ArrayList<File> getAllVersions(String emojiID) {
@@ -783,16 +783,18 @@ public class CustomEmojiController {
             File file = new File(EMOJI_PACKS_TMP_DIR, docId.substring(4));
             try {
                 final InputStream inputStream = ApplicationLoader.applicationContext.getContentResolver().openInputStream(uri);
-                OutputStream outputStream = new FileOutputStream(file);
-                final byte[] buffer = new byte[4 * 1024];
-                int read;
-                while ((read = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, read);
+                if (inputStream != null) {
+                    OutputStream outputStream = new FileOutputStream(file);
+                    final byte[] buffer = new byte[4 * 1024];
+                    int read;
+                    while ((read = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, read);
+                    }
+                    inputStream.close();
+                    outputStream.flush();
+                    outputStream.close();
+                    return file;
                 }
-                inputStream.close();
-                outputStream.flush();
-                outputStream.close();
-                return file;
             } catch (IOException e) {
                 FileLog.e(e);
             }
