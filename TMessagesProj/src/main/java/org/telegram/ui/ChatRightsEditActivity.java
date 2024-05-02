@@ -111,6 +111,7 @@ public class ChatRightsEditActivity extends BaseFragment {
     private TLRPC.TL_chatAdminRights myAdminRights;
     private TLRPC.TL_chatBannedRights bannedRights;
     private TLRPC.TL_chatBannedRights defaultBannedRights;
+    public boolean banning;
     private String currentBannedRights = "";
     private String currentRank;
     private String initialRank;
@@ -598,6 +599,7 @@ public class ChatRightsEditActivity extends BaseFragment {
                     }
                     finishFragment();
                 } else if (currentType == TYPE_BANNED) {
+                    banning = true;
                     bannedRights = new TLRPC.TL_chatBannedRights();
                     bannedRights.view_messages = true;
                     bannedRights.send_media = true;
