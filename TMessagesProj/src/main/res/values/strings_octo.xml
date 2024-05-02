@@ -236,7 +236,6 @@
     <string name="EditedDate">Edited Date</string>
     <string name="MessageDate">Date</string>
     <string name="ForwardsNumber">Forwards</string>
-    <string name="ForwardedFrom">Forwarded from</string>
     <string name="MessageScheduledDate">Scheduled date</string>
     <string name="MessageScheduledWhenOnline">When online</string>
     <string name="MessageInReply">Message in reply</string>

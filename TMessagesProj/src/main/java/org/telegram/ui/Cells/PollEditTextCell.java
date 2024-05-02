@@ -33,7 +33,6 @@ import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import it.octogram.android.OctoConfig;
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -51,6 +50,8 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.SuggestEmojiView;
 
 import java.util.ArrayList;
+
+import it.octogram.android.OctoConfig;
 
 public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.AnchorViewDelegate {
 
@@ -139,7 +140,7 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
         textView.setHintTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteHintText));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
         textView.setMaxLines(type == TYPE_EMOJI ? 4 : Integer.MAX_VALUE);
-//      textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
+//        textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
         textView.setBackgroundDrawable(null);
         textView.setImeOptions(textView.getImeOptions() | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
         textView.setInputType(textView.getInputType() | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES);

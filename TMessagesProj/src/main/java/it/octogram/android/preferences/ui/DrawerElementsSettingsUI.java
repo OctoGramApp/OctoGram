@@ -31,11 +31,6 @@ public class DrawerElementsSettingsUI implements PreferencesEntry {
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new CheckboxRow.CheckboxRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.drawerMyStories)
-                            .title(LocaleController.getString(R.string.ProfileMyStories))
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build());
-                    category.row(new CheckboxRow.CheckboxRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.drawerNewGroup)
                             .title(LocaleController.getString(R.string.NewGroup))
                             .postNotificationName(NotificationCenter.reloadInterface)

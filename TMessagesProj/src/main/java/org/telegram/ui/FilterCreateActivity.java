@@ -1304,7 +1304,7 @@ public class FilterCreateActivity extends BaseFragment {
                     break;
                 }
                 case VIEW_TYPE_EDIT: {
-                    PollEditTextCell cell = new PollEditTextCell(mContext, false, null, view1 -> {
+                    PollEditTextCell cell = new PollEditTextCell(mContext, false, PollEditTextCell.TYPE_DEFAULT, null, view1 -> {
                         iconSelectorAlert = new IconSelectorAlert(mContext) {
                             @Override
                             protected void onItemClick(String emoticon) {
