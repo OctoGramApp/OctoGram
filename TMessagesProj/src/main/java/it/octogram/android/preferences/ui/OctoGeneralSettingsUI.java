@@ -104,9 +104,9 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 })
                 .category(LocaleController.formatString("Chats", R.string.Chats), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.jumpToNextChannel)
-                            .title(LocaleController.formatString("JumpToNextChannel", R.string.JumpToNextChannel))
-                            .description(LocaleController.formatString("JumpToNextChannel_Desc", R.string.JumpToNextChannel_Desc))
+                            .preferenceValue(OctoConfig.INSTANCE.jumpToNextChannelOrTopic)
+                            .title(LocaleController.formatString(R.string.JumpToNextChannelOrTopic))
+                            .description(LocaleController.formatString(R.string.JumpToNextChannelOrTopic_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideGreetingSticker)

@@ -83,8 +83,8 @@
     <string name="DcIdTypeDescription">Telegram\'s API displays IDs as they are, while the Bot API introduces a "-" sign for groups and prepends "-100" for supergroups, broadcast groups, and channels.</string>
     <string name="ShowRegistrationDate">Show registration date</string>
     <string name="ShowRegistrationDate_Desc">Show user\'s registration date in profiles. Note that this is achieved through guessing, so it may show inaccurate results</string>
-    <string name="JumpToNextChannel">Jump to next channel</string>
-    <string name="JumpToNextChannel_Desc">Allows to swipe up from a channel to jump to next one</string>
+    <string name="JumpToNextChannelOrTopic">Jump to next channel / topic</string>
+    <string name="JumpToNextChannelOrTopic_Desc">Allows to swipe up from a channel / topic to jump to next one</string>
     <string name="HideGreetingSticker">Hide greeting sticker</string>
     <string name="HideGreetingSticker_Desc">Hides the greeting sticker when messaging a new contact</string>
     <string name="PlayGifsAsVideo">Play GIFs as Videos</string>

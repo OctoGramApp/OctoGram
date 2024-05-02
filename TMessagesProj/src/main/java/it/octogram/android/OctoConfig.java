@@ -42,7 +42,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM);
     public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API);
     public final ConfigProperty<Boolean> registrationDateInProfiles = newConfigProperty("registrationDateInProfiles", false);
-    public final ConfigProperty<Boolean> jumpToNextChannel = newConfigProperty("jumpToNextChannel", true);
+    public final ConfigProperty<Boolean> jumpToNextChannelOrTopic = newConfigProperty("jumpToNextChannel", true);
     public final ConfigProperty<Boolean> hideGreetingSticker = newConfigProperty("hideGreetingSticker", false);
     public final ConfigProperty<Boolean> playGifAsVideo = newConfigProperty("playGifAsVideo", false);
     public final ConfigProperty<Boolean> hideKeyboardOnScroll = newConfigProperty("hideKeyboardOnScroll", false);
