@@ -6,8 +6,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
+
+import java.io.File;
 
 public class OctoUtils {
     public static String phoneNumberReplacer(String input, String phoneCountry) {
@@ -48,7 +53,6 @@ public class OctoUtils {
         return BuildConfig.BUILD_TYPE.equals("debug") || BuildConfig.BUILD_TYPE.equals("pbeta") ? "OctoGram Beta" : "OctoGram";
     }
 
-
     public static boolean isTelegramString(String string, int resId) {
         return "Telegram".equals(string) ||
                 "Telegram Beta".equals(string) ||
@@ -85,6 +89,14 @@ public class OctoUtils {
             return "id";
         }
         return lang;
+    }
+
+    public static File getFileContentFromMessage(MessageObject message) {
+        File f = FileLoader.getInstance(UserConfig.selectedAccount).getPathToMessage(message.messageOwner);
+        if (f.exists()) {
+            return f; // TODO: handle cache
+        }
+        return null;
     }
 }
 

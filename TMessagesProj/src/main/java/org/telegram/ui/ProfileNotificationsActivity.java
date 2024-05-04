@@ -69,6 +69,9 @@ import org.telegram.ui.Components.RecyclerListView;
 
 import java.util.ArrayList;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.custom.AllowSmartNotificationsBottomSheet;
+
 public class ProfileNotificationsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private RecyclerListView listView;
@@ -175,11 +178,12 @@ public class ProfileNotificationsActivity extends BaseFragment implements Notifi
         }
         soundRow = rowCount++;
         vibrateRow = rowCount++;
-        if (DialogObject.isChatDialog(dialogId)) {
+        /*if (DialogObject.isChatDialog(dialogId)) {
             smartRow = rowCount++;
         } else {
             smartRow = -1;
-        }
+        }*/
+        smartRow = rowCount++;
         if (Build.VERSION.SDK_INT >= 21) {
             priorityRow = rowCount++;
         } else {
@@ -467,6 +471,20 @@ public class ProfileNotificationsActivity extends BaseFragment implements Notifi
                 if (getParentActivity() == null) {
                     return;
                 }
+
+                if (!DialogObject.isChatDialog(dialogId) && !OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue()) {
+                    AllowSmartNotificationsBottomSheet sheet = new AllowSmartNotificationsBottomSheet(context);
+                    View finalView = view;
+                    sheet.setCallback(() -> {
+                        listView.getOnItemClickListener().onItemClick(finalView, position);
+                        if (adapter != null) {
+                            adapter.notifyItemChanged(smartRow);
+                        }
+                    });
+                    sheet.show();
+                    return;
+                }
+
                 SharedPreferences preferences = MessagesController.getNotificationsSettings(currentAccount);
                 int notifyMaxCount = preferences.getInt("smart_max_count_" + key, 2);
                 int notifyDelay = preferences.getInt("smart_delay_" + key, 3 * 60);
@@ -819,7 +837,7 @@ public class ProfileNotificationsActivity extends BaseFragment implements Notifi
                         } else if (position == smartRow) {
                             int notifyMaxCount = preferences.getInt("smart_max_count_" + key, 2);
                             int notifyDelay = preferences.getInt("smart_delay_" + key, 3 * 60);
-                            if (notifyMaxCount == 0) {
+                            if (notifyMaxCount == 0 || (!DialogObject.isChatDialog(dialogId) && !OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue())) {
                                 textCell.setTextAndValue(LocaleController.getString("SmartNotifications", R.string.SmartNotifications), LocaleController.getString("SmartNotificationsDisabled", R.string.SmartNotificationsDisabled), priorityRow != -1);
                             } else {
                                 String minutes = LocaleController.formatPluralString("Minutes", notifyDelay / 60);

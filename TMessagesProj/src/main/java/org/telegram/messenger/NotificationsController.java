@@ -91,6 +91,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.NotificationColorize;
 import it.octogram.android.utils.OctoUtils;
 
@@ -4036,7 +4037,7 @@ public class NotificationsController extends BaseController {
                 notifyDisabled = true;
             }
 
-            if (!notifyDisabled && dialog_id == override_dialog_id && chat != null) {
+            if (!notifyDisabled && dialog_id == override_dialog_id && (chat != null || OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue())) {
                 int notifyMaxCount;
                 int notifyDelay;
                 if (preferences.getBoolean("custom_" + dialog_id, false)) {

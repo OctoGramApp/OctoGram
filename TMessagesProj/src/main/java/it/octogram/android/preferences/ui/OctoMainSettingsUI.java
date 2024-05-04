@@ -25,6 +25,7 @@ import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.FooterRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.preferences.ui.custom.ExportDoneReadyBottomSheet;
 
 public class OctoMainSettingsUI implements PreferencesEntry {
 
@@ -79,6 +80,13 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("Updates", R.string.Updates))
                             .build());
                 })
+                .category(LocaleController.formatString("OctoMainSettingsManageCategory", R.string.OctoMainSettingsManageCategory), category -> {
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> openExportSettingsProcedure(fragment, context))
+                            .icon(R.drawable.msg_customize)
+                            .title(LocaleController.formatString("Export settings", R.string.Export))
+                            .build());
+                })
                 .category(LocaleController.formatString("OctoMainSettingsInfoCategory", R.string.OctoMainSettingsInfoCategory), category -> {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
@@ -127,5 +135,11 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                 })
                 .row(new FooterRow.FooterRowBuilder().title(footer).build())
                 .build();
+    }
+
+    public void openExportSettingsProcedure(PreferencesFragment fragment, Context context) {
+        var bottomSheet = new ExportDoneReadyBottomSheet(context);
+        bottomSheet.setOriginalActivity(fragment.getParentActivity());
+        bottomSheet.show();
     }
 }

@@ -56,6 +56,7 @@
 
     <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
     <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
+    <string name="OctoMainSettingsManageCategory">Manage</string>
     <string name="OctoMainSettingsInfoCategory">Info</string>
     <string name="OfficialChannel">Official Channel</string>
     <string name="OfficialChannel_Desc">Stay informed about new updates</string>
@@ -111,6 +112,7 @@
     <string name="HideAllChatFolders">Remove all folders</string>
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
+    <string name="EnableSmartNotificationsForPrivateChats">Enable smart notifications for private chats</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
     <string name="OpenArchiveOnPull_Desc">Automatically opens the archive when pulling down</string>
     <string name="WarningBeforeDeletingChatHistory">Warning before deleting chat history</string>
@@ -197,6 +199,9 @@
     <string name="FoldersTypeIconsTitles">Icons with Titles</string>
     <string name="ChooseFolderIcon">Choose an Icon</string>
     <string name="ForceTableMode">Force Tablet Mode</string>
+    <string name="SmartNotificationsPvtDialogMessage">This option is, by default, disabled on the official Telegram clients and therefore in private chats all notifications were sent with sound or vibration.\n\nBy enabling it, the behavior of notifications will vary in all chats: as well as in groups, all private chats will default to 2 notifications every 3 minutes.</string>
+    <string name="SmartNotificationsPvtDialogMessagePlus">You can manage this option from OctoGram settings.</string>
+    <string name="SmartNotificationsPvtDialogButton">Enable smart notifications</string>
 
     <!-- RESOLUTION STRING SECTION -->
 
@@ -293,6 +298,25 @@
 
     <string name="MutualContact">Mutual Contact</string>
     <string name="MutualContactDesc">**%s** and you have added each other in the contacts list.</string>
+
+    <!-- Export/Import -->
+    <string name="Export">Export settings</string>
+    <string name="ExportDataReady">Export is ready</string>
+    <string name="ExportDataDescription">Choose a custom name for the file or press share directly to send it to a trusted chat.</string>
+    <string name="ExportDataFilename">Custom file name</string>
+    <string name="ExportDataShare">Share</string>
+    <string name="ExportDataShareFailedTitle">Error</string>
+    <string name="ExportDataShareFailedCustomFileName">The specified file name cannot be used. Try another name.</string>
+    <string name="ImportReady">Import settings</string>
+    <string name="ImportReadyDescription">An OctoGram configuration was detected in this file. Keep in mind that this will overwrite your settings. Do you want to proceed with the import?</string>
+    <string name="ImportReadyDescriptionFromExternal">This file, sent by an external user, contains a configuration of OctoGram and may activate unwanted experimental options. Are you sure you want to apply it?</string>
+    <string name="ImportReadyImport">Proceed with import</string>
+    <string name="ImportReadyImportSelected">Import selected</string>
+    <string name="ImportReadyOtherOptions">Another %d unspecified options will be imported automatically.</string>
+    <string name="ImportReadyImportDone">%d options have been imported successfully.</string>
+    <string name="ImportReadyImportFailedZeroTitle">Error</string>
+    <string name="ImportReadyImportFailedZeroCaption">You must select at least one option in order to proceed with the import.</string>
+    <string name="ImportReadyOpenFile">Open file preview</string>
 
     <!-- Double Bottom -->
     <string name="AccountProtection">Account Protection</string>

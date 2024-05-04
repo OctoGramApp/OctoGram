@@ -11,10 +11,23 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
 
-import org.telegram.messenger.ApplicationLoader;
+import com.google.android.exoplayer2.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.MessageObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import it.octogram.android.utils.OctoUtils;
 
 
 /*
@@ -66,6 +79,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> tabletMode = newConfigProperty("tabletMode", false);
     public final ConfigProperty<Boolean> forceUseIpV6 = newConfigProperty("forceUseIpV6", false);
     public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
+    public final ConfigProperty<Boolean> enableSmartNotificationsForPrivateChats = newConfigProperty("enableSmartNotificationsForPrivateChats", false);
 
     /*Appearance*/
     public final ConfigProperty<Boolean> showNameInActionBar = newConfigProperty("showNameInActionBar", false);
@@ -186,6 +200,157 @@ public class OctoConfig {
                     integerProperty.setValue(PREFS.getInt(integerProperty.getKey(), integerProperty.getValue()));
                 }
             }
+        }
+    }
+
+    public static boolean isValidMessageExport(MessageObject message) {
+        File downloadedFile = OctoUtils.getFileContentFromMessage(message);
+
+        if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
+            try {
+                FileInputStream downloadedFileStream = new FileInputStream(downloadedFile);
+
+                StringBuilder jsonStringBuilder = new StringBuilder();
+                int character;
+                while ((character = downloadedFileStream.read()) != -1) {
+                    jsonStringBuilder.append((char) character);
+                }
+
+                downloadedFileStream.close();
+
+                JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
+                if (INSTANCE.isJSONArrayValidData(result)) {
+                    return true;
+                }
+            } catch (IOException e) {
+                Log.e(OctoConfig.class.getName(), "an io exception occurred internally during isvalidmessageexport octoconfig", e);
+            } catch (JSONException e) {
+                Log.e(OctoConfig.class.getName(), "a json exception occurred internally during isvalidmessageexport octoconfig", e);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isJSONArrayValidData(JSONObject result) {
+        for (Iterator<String> it = result.keys(); it.hasNext(); ) {
+            try {
+                String key = it.next();
+                Object value = result.get(key);
+
+                if (!(value instanceof String || value instanceof Integer || value instanceof Boolean)) {
+                    return false;
+                }
+            } catch (JSONException e) {
+                Log.e(getClass().getName(), "failed to handle isjoinarrayvaliddata octoconfig", e);
+            }
+        }
+
+        return true;
+    }
+
+    public int importMessageExport(MessageObject message, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
+        File downloadedFile = OctoUtils.getFileContentFromMessage(message);
+        int changed = 0;
+
+        if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
+            try {
+                FileInputStream downloadedFileStream = new FileInputStream(downloadedFile);
+
+                StringBuilder jsonStringBuilder = new StringBuilder();
+                int character;
+                while ((character = downloadedFileStream.read()) != -1) {
+                    jsonStringBuilder.append((char) character);
+                }
+
+                downloadedFileStream.close();
+
+                JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
+                if (INSTANCE.isJSONArrayValidData(result)) {
+                    for (Field field : this.getClass().getDeclaredFields()) {
+                        if (field.getType().equals(ConfigProperty.class)) {
+                            try {
+                                ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
+                                String fieldName = field.getName();
+                                Object fieldValue = null;
+                                if (configProperty != null) {
+                                    fieldValue = configProperty.getValue();
+                                }
+
+                                if (!result.has(fieldName) || !dataToImport.contains(fieldName) || excludedOptionsByConfig.contains(fieldName)) {
+                                    continue;
+                                }
+
+                                assert fieldValue != null;
+                                if (result.get(fieldName).getClass().equals(fieldValue.getClass())) { // same type
+                                    changed++;
+
+                                    if (fieldValue == result.get(fieldName)) {
+                                        continue;
+                                    }
+
+                                    Object exportFileSettingsValue = result.get(fieldName);
+                                    if (exportFileSettingsValue instanceof Boolean) {
+                                        this.updateBooleanSetting((ConfigProperty<Boolean>) configProperty, (Boolean) exportFileSettingsValue);
+                                    } else if (exportFileSettingsValue instanceof Integer) {
+                                        if (!isIntegerValueValid(fieldName, (Integer) exportFileSettingsValue)) {
+                                            continue;
+                                        }
+
+                                        this.updateIntegerSetting((ConfigProperty<Integer>) configProperty, (Integer) exportFileSettingsValue);
+                                    } else if (exportFileSettingsValue instanceof String) {
+                                        // конфигурация в настоящее время не содержит строковых значений.
+                                        //this.updateStringSetting((ConfigProperty<String>) configProperty, (String) exportFileSettingsValue);
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                android.util.Log.e(getClass().getName(), "Error validating put-settings export", e);
+                            } catch (IllegalAccessException e) {
+                                android.util.Log.e(getClass().getName(), "Error getting settings export", e);
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                Log.e(OctoConfig.class.getName(), "an io exception occurred internally during isvalidmessageexport octoconfig", e);
+            } catch (JSONException e) {
+                Log.e(OctoConfig.class.getName(), "a json exception occurred internally during isvalidmessageexport octoconfig", e);
+            }
+        }
+
+        return changed;
+    }
+
+    private boolean isIntegerValueValid(String fieldName, int value) {
+        switch (fieldName) {
+            case "blurEffectStrength":
+                return value >= 0 && value <= 255;
+            case "cameraXResolution":
+                return value >= CameraXResolution.SD && value <= CameraXResolution.UHD;
+            case "dcIdStyle":
+                return value >= DcIdStyle.NONE && value <= DcIdStyle.MINIMAL;
+            case "dcIdType":
+                return value == DcIdType.BOT_API || value == DcIdType.TELEGRAM;
+            case "doubleTapAction":
+            case "doubleTapActionOut":
+                return value >= DoubleTapAction.DISABLED && value <= DoubleTapAction.EDIT;
+            case "downloadBoostValue":
+                return value >= DownloadBoost.NORMAL && value <= DownloadBoost.EXTREME;
+            case "eventType":
+                return value >= EventType.DEFAULT && value <= EventType.NONE;
+            case "gcOutputType":
+                return value == AudioType.MONO || value == AudioType.STEREO;
+            case "maxRecentStickers":
+                return value >= 0 && value <= 9;
+            case "maxStickerSize":
+                return value >= 2 && value <= 20;
+            case "photoResolution":
+                return value >= PhotoResolution.LOW && value <= PhotoResolution.HIGH;
+            case "tabMode":
+                return value >= TabMode.TEXT && value <= TabMode.ICON;
+            default:
+                // в любом другом случае считайте значение недействительным.
+                return false;
         }
     }
 

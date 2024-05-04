@@ -125,6 +125,7 @@ import com.google.zxing.common.detector.MathUtils;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.preferences.ui.DetailsActivity;
+import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
@@ -35389,7 +35390,17 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                 }
                 boolean handled = false;
-                if (message.canPreviewDocument()) {
+                if (message.getDocumentName().toLowerCase().endsWith("octoexport")) {
+                    boolean isValid = OctoConfig.isValidMessageExport(message);
+                    if (isValid) {
+                        ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(ChatActivity.this, message);
+                        sheet.setOriginalActivity(getParentActivity());
+                        sheet.setThemeDelegate(themeDelegate);
+                        sheet.show();
+                        handled = true;
+                    }
+                }
+                if (!handled && message.canPreviewDocument()) {
                     PhotoViewer.getInstance().setParentActivity(ChatActivity.this, themeDelegate);
                     PhotoViewer.getInstance().openPhoto(message, ChatActivity.this, message.type != 0 ? dialog_id : 0, message.type != 0 ? mergeDialogId : 0, message.type != 0 ? getTopicId() : 0, photoViewerProvider);
                     handled = true;

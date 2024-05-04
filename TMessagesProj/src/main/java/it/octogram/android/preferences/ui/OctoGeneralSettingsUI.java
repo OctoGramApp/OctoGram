@@ -15,6 +15,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.ui.ActionBar.AlertDialog;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 import kotlin.Triple;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
+    SwitchRow enableSmartNotificationsSwitchRow;
 
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
@@ -239,11 +241,30 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                         .preferenceValue(OctoConfig.INSTANCE.forceUseIpV6)
                         .title(LocaleController.getString(R.string.TryConnectWithIPV6))
                         .build()))
-                .category(LocaleController.getString("Notifications", R.string.Notifications), category -> category.row(new SwitchRow.SwitchRowBuilder()
-                        .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
-                        .title(LocaleController.getString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))
-                        .build()))
+                .category(LocaleController.getString("Notifications", R.string.Notifications), category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
+                            .title(LocaleController.getString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))
+                            .build());
+                    category.row(enableSmartNotificationsSwitchRow = new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkSmartNotificationsEnabled(fragment))
+                            .preferenceValue(OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats)
+                            .title(LocaleController.getString("EnableSmartNotificationsForPrivateChats", R.string.EnableSmartNotificationsForPrivateChats))
+                            .build());
+                })
                 .build();
     }
 
+    private boolean checkSmartNotificationsEnabled(PreferencesFragment fragment) {
+        if (OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue()) return true;
+
+        AlertDialog.Builder warningBuilder = new AlertDialog.Builder(fragment.getContext());
+        warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
+        warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> dialog1.dismiss());
+        warningBuilder.setMessage(LocaleController.getString("SmartNotificationsPvtDialogMessage", R.string.SmartNotificationsPvtDialogMessage));
+        AlertDialog alertDialog = warningBuilder.create();
+        alertDialog.show();
+
+        return true;
+    }
 }
