@@ -134,6 +134,8 @@ import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
+
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.utils.CustomHtml;
@@ -3776,6 +3778,16 @@ public class AndroidUtilities {
             f = FileLoader.getInstance(UserConfig.selectedAccount).getPathToMessage(message.messageOwner);
         }
         if (f != null && f.exists()) {
+            if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith("octoexport")) {
+                boolean isValid = OctoConfig.isValidMessageExport(message);
+                if (isValid) {
+                    ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(parentFragment, message);
+                    sheet.setOriginalActivity(parentFragment.getParentActivity());
+                    sheet.show();
+                    return;
+                }
+            }
+
             if (parentFragment != null && f.getName().toLowerCase().endsWith("attheme")) {
                 Theme.ThemeInfo themeInfo = Theme.applyThemeFile(f, message.getDocumentName(), null, true);
                 if (themeInfo != null) {

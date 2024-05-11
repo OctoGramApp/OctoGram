@@ -10,6 +10,7 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 import android.os.Parcelable;
+import android.util.Pair;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +18,10 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
+
+import java.util.List;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
@@ -26,19 +30,37 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.preferences.ui.custom.StickerSize;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
 
 public class OctoAppearanceUI implements PreferencesEntry {
 
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
-        return OctoPreferences.builder(LocaleController.formatString("Appearance", R.string.Appearance))
+        return OctoPreferences.builder(LocaleController.formatString(R.string.Appearance))
                 .sticker(context, R.raw.utyan_appearance, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
+                .category(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(new StickerSize(context, INavigationLayout.newLayout(context)))
+                            .build()
+                    );
+                })
+                .category(LocaleController.getString(R.string.StickerShape), category -> category.row(new ListRow.ListRowBuilder()
+                    .currentValue(OctoConfig.INSTANCE.stickerShape)
+                    .options(List.of(
+                            new Pair<>(OctoConfig.Shape.DEFAULT, LocaleController.getString(R.string.StyleTypeDefault)),
+                            new Pair<>(OctoConfig.Shape.ROUND, LocaleController.getString(R.string.StickerShapeRounded)),
+                            new Pair<>(OctoConfig.Shape.MESSAGE, LocaleController.getString(R.string.StyleTypeMessage))
+                    ))
+                    .postNotificationName(NotificationCenter.reloadInterface)
+                    .title(LocaleController.formatString(R.string.Style))
+                    .build()))
                 .category(LocaleController.getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
@@ -132,6 +154,11 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .description(LocaleController.getString("ShowNameActionBar_Desc", R.string.ShowNameActionBar_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.showUserIconsInChatsList)
+                            .title(LocaleController.getString("ShowUserIconsInChatsList", R.string.ShowUserIconsInChatsList))
+                            .description(LocaleController.getString("ShowUserIconsInChatsList_Desc", R.string.ShowUserIconsInChatsList_Desc))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.searchIconInHeader)
                             .title(LocaleController.getString("SearchIconInHeader", R.string.SearchIconInHeader))
                             .build());
@@ -160,13 +187,6 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .showIf(OctoConfig.INSTANCE.forceChatBlurEffect)
                             .build());
                 })
-                .row(new HeaderRow(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader)))
-                .row(new SliderRow.SliderRowBuilder()
-                        .min(2)
-                        .max(20)
-                        .preferenceValue(OctoConfig.INSTANCE.maxStickerSize)
-                        .build())
-                .row(new ShadowRow())
                 .category(LocaleController.getString("ArchiveHeader", R.string.ArchiveHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)

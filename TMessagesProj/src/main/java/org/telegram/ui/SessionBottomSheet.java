@@ -20,9 +20,13 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.custom.CustomDeviceNameBottomSheet;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -228,8 +232,32 @@ public class SessionBottomSheet extends BottomSheet {
         acceptCalls.descriptionText.setText(LocaleController.getString("AcceptCallsChatsDescription", R.string.AcceptCallsChatsDescription));
         linearLayout.addView(acceptCalls);
 
-        if (!isCurrentSession) {
-            TextView buttonTextView = new TextView(context);
+        TextView buttonTextView = new TextView(context);
+        if (isCurrentSession) {
+            buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+            buttonTextView.setGravity(Gravity.CENTER);
+            buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            buttonTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            buttonTextView.setText(LocaleController.getString("UseCustomDeviceName", R.string.UseCustomDeviceName));
+
+            buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+            buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+
+            linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 16));
+
+            buttonTextView.setOnClickListener((e) -> {
+                dismiss();
+
+                CustomDeviceNameBottomSheet sheet = new CustomDeviceNameBottomSheet(parentFragment.getParentActivity(), session.device_model, (CustomDeviceNameBottomSheet.CustomDeviceNameCallback) deviceName -> {
+                    session.device_model = deviceName;
+                    callback.onMySessionNameUpdated();
+
+                    SessionBottomSheet sessionSheet = new SessionBottomSheet(fragment, session, isCurrentSession, callback);
+                    sessionSheet.show();
+                });
+                sheet.show();
+            });
+        } else {
             buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
             buttonTextView.setGravity(Gravity.CENTER);
             buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -437,6 +465,7 @@ public class SessionBottomSheet extends BottomSheet {
 
     public interface Callback {
         void onSessionTerminated(TLRPC.TL_authorization session);
+        void onMySessionNameUpdated();
     }
 
     @Override

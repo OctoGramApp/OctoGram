@@ -310,6 +310,17 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             inviteIcon = R.drawable.msg_invite_hw;
             helpIcon = R.drawable.msg_help_hw;
             peopleNearbyIcon = R.drawable.msg_secret_hw;
+        } else if (eventType == 3) {
+            newGroupIcon = R.drawable.menu_groups_cn;
+            newSecretIcon = R.drawable.menu_secret_cn;
+            newChannelIcon = R.drawable.menu_broadcast_cn;
+            contactsIcon = R.drawable.menu_contacts_cn;
+            callsIcon = R.drawable.menu_calls_cn;
+            savedIcon = R.drawable.menu_bookmarks_cn;
+            settingsIcon = R.drawable.menu_settings_cn;
+            inviteIcon = R.drawable.menu_invite_cn;
+            helpIcon = R.drawable.msg_help_hw;
+            peopleNearbyIcon = R.drawable.menu_nearby_cn;
         } else {
             newGroupIcon = R.drawable.msg_groups;
             //newSecretIcon = R.drawable.msg_secret;

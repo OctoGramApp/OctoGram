@@ -41,7 +41,6 @@ import it.octogram.android.utils.OctoUtils;
  * -
  */
 public class OctoConfig {
-
     public static final OctoConfig INSTANCE = new OctoConfig();
     private final List<ConfigProperty<?>> properties = new ArrayList<>();
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
@@ -83,6 +82,7 @@ public class OctoConfig {
 
     /*Appearance*/
     public final ConfigProperty<Boolean> showNameInActionBar = newConfigProperty("showNameInActionBar", false);
+    public final ConfigProperty<Boolean> showUserIconsInChatsList = newConfigProperty("showUserIconsInChatsList", true);
     public final ConfigProperty<Boolean> forceChatBlurEffect = newConfigProperty("forceChatBlurEffect", false);
     public final ConfigProperty<Integer> blurEffectStrength = newConfigProperty("blurEffectStrength", 155);
     public final ConfigProperty<Boolean> forcePacmanAnimation = newConfigProperty("forcePacmanAnimation", false);
@@ -98,6 +98,7 @@ public class OctoConfig {
     public final ConfigProperty<String> selectedEmojiPack = newConfigProperty("selectedEmojiPack", "default");
     public final ConfigProperty<Boolean> showSnowflakes = newConfigProperty("showSnowflakes", false);
     public final ConfigProperty<Boolean> disableDividers = newConfigProperty("disableDividers", false);
+    public final ConfigProperty<Integer> stickerShape = newConfigProperty("stickerShape", Shape.DEFAULT);
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED);
     /*Drawer elements*/
@@ -143,6 +144,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> mediaInGroupCall = newConfigProperty("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
     public final ConfigProperty<Boolean> showRPCErrors = newConfigProperty("showRPCErrors", false);
+    public final ConfigProperty<Boolean> useTranslationsArgsFix = newConfigProperty("useTranslationsArgsFix", true);
 
     /* Multi-Language */
     public final ConfigProperty<String> languagePackVersioning = newConfigProperty("languagePackVersioning", "{}");
@@ -200,6 +202,16 @@ public class OctoConfig {
                     integerProperty.setValue(PREFS.getInt(integerProperty.getKey(), integerProperty.getValue()));
                 }
             }
+        }
+    }
+
+    public void resetConfig() {
+        synchronized (this) {
+            SharedPreferences.Editor editor = PREFS.edit();
+            for (ConfigProperty<?> property : properties) {
+                editor.remove(property.getKey());
+            }
+            editor.apply();
         }
     }
 
@@ -421,6 +433,7 @@ public class OctoConfig {
         public static final int HOLIDAY = 1;
         public static final int VALENTINE = 2;
         public static final int HALLOWEEN = 3;
+        public static final int LUNAR_NEW_YEAR = 4;
     }
 
     public static class AudioType {
@@ -452,5 +465,11 @@ public class OctoConfig {
         public static final int NORMAL = 0;
         public static final int FAST = 1;
         public static final int EXTREME = 2;
+    }
+
+    public static class Shape {
+        public static final int DEFAULT = 0;
+        public static final int ROUND = 1;
+        public static final int MESSAGE = 2;
     }
 }

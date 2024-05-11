@@ -4,6 +4,7 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -48,6 +49,7 @@ import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.Premium.boosts.cells.selector.SelectorBtnCell;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.Switch;
+import org.telegram.ui.LaunchActivity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -58,11 +60,11 @@ import java.util.Objects;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.components.ImportSettingsTopLayerCell;
+import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 
 public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private Activity originalActivity;
-    private Theme.ResourcesProvider themeDelegate;
     private final MessageObject message;
     private Adapter adapter;
     private final ImportButton actionButton;
@@ -139,12 +141,11 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setOnClickListener(view -> {
             dismiss();
-            if (originalActivity != null && themeDelegate != null) {
-                AndroidUtilities.openForView(message, originalActivity, themeDelegate);
+            if (originalActivity != null) {
+                AndroidUtilities.openForView(message, originalActivity, null);
             }
         });
         buttonContainer.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
-
         containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
 
         updateItems();
@@ -203,8 +204,28 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         int changedOptions = OctoConfig.INSTANCE.importMessageExport(message, dataToImport, settingsScan.excludedOptions);
 
         if (changedOptions > 0) {
-            dismiss();
-            BulletinFactory.of(getBaseFragment()).createSimpleBulletin(R.raw.info, LocaleController.formatString("ImportReadyImportDone", R.string.ImportReadyImportDone, changedOptions)).show();
+            boolean isReloadRequested = false;
+            for (String field : dataToImport) {
+                if (settingsScan.forceRequestReloadOptions.contains(field)) {
+                    isReloadRequested = true;
+                    break;
+                }
+            }
+
+            if (isReloadRequested) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
+                alertDialogBuilder.setTitle(LocaleController.getString("ImportReadyImportDonePopup", R.string.ImportReadyImportDonePopup));
+                alertDialogBuilder.setMessage(LocaleController.getString("ImportReadyImportDonePopupDescription", R.string.ImportReadyImportDonePopupDescription));
+                alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> {
+                    AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
+                });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.setCanceledOnTouchOutside(false);
+                alertDialog.show();
+            } else {
+                dismiss();
+                BulletinFactory.of(getBaseFragment()).createSimpleBulletin(R.raw.info, LocaleController.formatString("ImportReadyImportDone", R.string.ImportReadyImportDone, changedOptions)).show();
+            }
         }
     }
 
@@ -220,10 +241,6 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
     public void setOriginalActivity(Activity originalActivity) {
         this.originalActivity = originalActivity;
-    }
-
-    public void setThemeDelegate(Theme.ResourcesProvider themeDelegate) {
-        this.themeDelegate = themeDelegate;
     }
 
     private void handleOnClickPosition(View view, Item item, float x) {
@@ -471,7 +488,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            return true;
+            return holder.getItemViewType() == VIEW_TYPE_CHECKBOX || holder.getItemViewType() == VIEW_TYPE_SWITCH;
         }
     }
 

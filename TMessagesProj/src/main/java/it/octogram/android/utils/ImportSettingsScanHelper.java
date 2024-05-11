@@ -9,8 +9,43 @@ import java.util.ArrayList;
 public class ImportSettingsScanHelper {
     public JSONObject data = new JSONObject();
     public ArrayList<String> excludedOptions = new ArrayList<>();
+    public ArrayList<String> forceRequestReloadOptions = new ArrayList<>();
 
     public ImportSettingsScanHelper() {
+        fillForceReloadOptions();
+        fillExcludedOptions();
+
+        try {
+            data.put("general", getGeneralOptions());
+            data.put("general_string", R.string.General);
+            data.put("general_icon", R.drawable.msg_media);
+            data.put("appearance", getAppearance());
+            data.put("appearance_string", R.string.Appearance);
+            data.put("appearance_icon", R.drawable.settings_appearance);
+            data.put("chatcamera", getChatCamera());
+            data.put("chatcamera_string", R.string.ChatCamera);
+            data.put("chatcamera_icon", R.drawable.msg_camera);
+            data.put("experiments", getExperiments());
+            data.put("experiments_string", R.string.Experiments);
+            data.put("experiments_icon", R.drawable.outline_science_white);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void fillForceReloadOptions() {
+        forceRequestReloadOptions.clear();
+        forceRequestReloadOptions.add("tabletMode");
+        forceRequestReloadOptions.add("alternativeNavigation");
+        forceRequestReloadOptions.add("hideOnlyAllChatsFolder");
+        forceRequestReloadOptions.add("hideChatFolders");
+        forceRequestReloadOptions.add("hideFoldersWhenForwarding");
+        forceRequestReloadOptions.add("useSystemFont");
+        forceRequestReloadOptions.add("hideStories");
+        forceRequestReloadOptions.add("showSnowflakes");
+    }
+
+    private void fillExcludedOptions() {
         excludedOptions.clear();
         excludedOptions.add("unlockedYuki");
         excludedOptions.add("unlockedChupa");
@@ -33,23 +68,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add("context_reportMessage");
         excludedOptions.add("context_messageDetails");
         excludedOptions.add("context_noQuoteForward");
-
-        try {
-            data.put("general", getGeneralOptions());
-            data.put("general_string", R.string.General);
-            data.put("general_icon", R.drawable.msg_media);
-            data.put("appearance", getAppearance());
-            data.put("appearance_string", R.string.Appearance);
-            data.put("appearance_icon", R.drawable.settings_appearance);
-            data.put("chatcamera", getChatCamera());
-            data.put("chatcamera_string", R.string.ChatCamera);
-            data.put("chatcamera_icon", R.drawable.msg_camera);
-            data.put("experiments", getExperiments());
-            data.put("experiments_string", R.string.Experiments);
-            data.put("experiments_icon", R.drawable.outline_science_white);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        excludedOptions.add("useTranslationsArgsFix");
     }
 
     private JSONObject getGeneralOptions() {
@@ -104,6 +123,7 @@ public class ImportSettingsScanHelper {
             appearance.put("pencilIconForEditedMessages", R.string.PencilIconForEdited);
             appearance.put("disableDividers", R.string.HideDividers);
             appearance.put("showNameInActionBar", R.string.ShowNameActionBar);
+            appearance.put("showUserIconsInChatsList", R.string.ShowUserIconsInChatsList);
             appearance.put("searchIconInHeader", R.string.SearchIconInHeader);
             appearance.put("slidingTitle", R.string.SlidingTitle);
             appearance.put("hideStories", R.string.HideStories);

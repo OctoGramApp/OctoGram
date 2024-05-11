@@ -3097,7 +3097,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         imagePressed = true;
                         result = true;
                     }
-                } else if (!currentMessageObject.isAnyKindOfSticker() || currentMessageObject.getInputStickerSet() != null || currentMessageObject.isAnimatedEmoji() || currentMessageObject.isDice()) {
+                } else if (!currentMessageObject.isAnyKindOfSticker() || currentMessageObject.getInputStickerSet() != null || currentMessageObject.isAnimatedEmoji() || currentMessageObject.isDice() /* Sticker Custom Logic=> */ || currentMessageObject.getInputStickerSet() == null && currentMessageObject.isSticker()) {
                     if (x >= photoImage.getImageX() && x <= photoImage.getImageX() + photoImage.getImageWidth() && y >= photoImage.getImageY() && y <= photoImage.getImageY() + photoImage.getImageHeight()) {
                         if (isRoundVideo) {
                             if ((x - photoImage.getCenterX()) * (x - photoImage.getCenterX()) + (y - photoImage.getCenterY()) * (y - photoImage.getCenterY()) < (photoImage.getImageWidth() / 2f) * (photoImage.getImageWidth() / 2)) {
@@ -7849,8 +7849,14 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     availableTimeWidth = photoWidth - AndroidUtilities.dp(14);
                     backgroundWidth = photoWidth + AndroidUtilities.dp(12);
 
-                    photoImage.setRoundRadius(0);
                     canChangeRadius = false;
+                    if (OctoConfig.INSTANCE.stickerShape.getValue() == OctoConfig.Shape.MESSAGE) {
+                        photoImage.setRoundRadius(AndroidUtilities.dp(6));
+                    } else if (OctoConfig.INSTANCE.stickerShape.getValue() == OctoConfig.Shape.ROUND) {
+                        canChangeRadius = true;
+                    } else {
+                        photoImage.setRoundRadius(AndroidUtilities.dp(0));
+                    }
                     if (!messageObject.isOutOwner() && MessageObject.isPremiumSticker(messageObject.getDocument())) {
                         flipImage = true;
                     }
@@ -7881,6 +7887,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     } else {
                         photoImage.setImage(null, null, thumb, null, messageObject, 0);
                     }
+                    /* Sticker Custom Logic=> */ if (messageObject.useCustomPhoto) {
+                    /* Sticker Custom Logic=> */     photoImage.setImageBitmap(ContextCompat.getDrawable(getContext(), R.drawable.sticker));
+                    /* Sticker Custom Logic=> */ }
                     if (!reactionsLayoutInBubble.isSmall) {
                         reactionsLayoutInBubble.measure(maxWidth + AndroidUtilities.dp(36), currentMessageObject.isOutOwner() && (currentMessageObject.isAnimatedEmoji() || currentMessageObject.isAnyKindOfSticker()) ? Gravity.RIGHT : Gravity.LEFT);
                         reactionsLayoutInBubble.drawServiceShaderBackground = 1f;
@@ -18754,7 +18763,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             paint.setAlpha((int) (oldAlpha * timeAlpha * alpha * .6f));
 
             int r;
-            if (documentAttachType != DOCUMENT_ATTACH_TYPE_ROUND && documentAttachType != DOCUMENT_ATTACH_TYPE_STICKER && currentMessageObject.type != MessageObject.TYPE_EMOJIS) {
+            if (documentAttachType != DOCUMENT_ATTACH_TYPE_ROUND && documentAttachType != DOCUMENT_ATTACH_TYPE_STICKER && currentMessageObject.type != MessageObject.TYPE_EMOJIS || (documentAttachType == DOCUMENT_ATTACH_TYPE_STICKER && OctoConfig.INSTANCE.stickerShape.getValue() == OctoConfig.Shape.ROUND)) {
                 int[] rad = photoImage.getRoundRadius();
                 r = Math.min(AndroidUtilities.dp(8), Math.max(rad[2], rad[3]));
                 bigRadius = SharedConfig.bubbleRadius >= 10;

@@ -1256,6 +1256,10 @@ public class LocaleController {
                 }
             }
 
+            if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
+                OctoUtils.fixBrokenStringArgs(args);
+            }
+
             if (getInstance().currentLocale != null) {
                 return String.format(getInstance().currentLocale, value, args);
             } else {
@@ -1535,6 +1539,11 @@ public class LocaleController {
     }
 
     public static String formatStringSimple(String string, Object... args) {
+
+        if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
+            OctoUtils.fixBrokenStringArgs(args);
+        }
+
         try {
             if (getInstance().currentLocale != null) {
                 return String.format(getInstance().currentLocale, string, args);

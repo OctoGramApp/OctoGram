@@ -1,5 +1,7 @@
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -31,6 +32,7 @@ public class ThemeSelectorCell extends FrameLayout {
     private int valentineTheme = 0;
     private int halloweenTheme = 0;
     private int holidayTheme = 0;
+    private int lunarNewYearTheme = 0;
     private final Map<Integer, Integer> map;
 
     private int rowCount = 0;
@@ -86,7 +88,7 @@ public class ThemeSelectorCell extends FrameLayout {
             currItem.playEmojiAnimation();
         });
         recyclerView.setFocusable(false);
-        recyclerView.setPadding(AndroidUtilities.dp(12), 0, AndroidUtilities.dp(12), 0);
+        recyclerView.setPadding(dp(12), 0, dp(12), 0);
         addView(recyclerView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 150, Gravity.START, 0, 8, 0, 8));
         updateRowsId();
         recyclerView.post(() -> {
@@ -116,6 +118,8 @@ public class ThemeSelectorCell extends FrameLayout {
         map.put(OctoConfig.EventType.HALLOWEEN, halloweenTheme);
         holidayTheme = rowCount++;
         map.put(OctoConfig.EventType.HOLIDAY, holidayTheme);
+        lunarNewYearTheme = rowCount++;
+        map.put(OctoConfig.EventType.LUNAR_NEW_YEAR, lunarNewYearTheme);
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
@@ -141,10 +145,11 @@ public class ThemeSelectorCell extends FrameLayout {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ThemeDrawer drawerCell2 = (ThemeDrawer) holder.itemView;
-            boolean animated = oldSelectedItem != -1;
+            boolean animated = drawerCell2.canBeAnimate() && oldSelectedItem != -1;
             if (position == noTheme) {
                 drawerCell2.setEvent(
                         OctoConfig.EventType.NONE,
+                        R.raw.cross,
                         new int[]{
                                 R.drawable.msg_block,
                                 R.drawable.msg_block,
@@ -156,6 +161,7 @@ public class ThemeSelectorCell extends FrameLayout {
             } else if (position == timedTheme) {
                 drawerCell2.setEvent(
                         OctoConfig.EventType.DEFAULT,
+                        R.raw.automatic,
                         new int[]{
                                 R.drawable.msg_groups,
                                 R.drawable.msg_contacts,
@@ -167,6 +173,7 @@ public class ThemeSelectorCell extends FrameLayout {
             } else if (position == valentineTheme) {
                 drawerCell2.setEvent(
                         OctoConfig.EventType.VALENTINE,
+                        R.raw.valentine,
                         new int[]{
                                 R.drawable.msg_groups_14,
                                 R.drawable.msg_contacts_14,
@@ -178,6 +185,7 @@ public class ThemeSelectorCell extends FrameLayout {
             } else if (position == halloweenTheme) {
                 drawerCell2.setEvent(
                         OctoConfig.EventType.HALLOWEEN,
+                        R.raw.halloween,
                         new int[]{
                                 R.drawable.msg_groups_hw,
                                 R.drawable.msg_contacts_hw,
@@ -189,12 +197,25 @@ public class ThemeSelectorCell extends FrameLayout {
             } else if (position == holidayTheme) {
                 drawerCell2.setEvent(
                         OctoConfig.EventType.HOLIDAY,
+                        R.raw.christmas,
                         new int[]{
                                 R.drawable.msg_groups_ny,
                                 R.drawable.msg_contacts_ny,
                                 R.drawable.msg_calls_ny,
                                 R.drawable.msg_saved_ny,
                                 R.drawable.msg_settings_ny,
+                        }
+                );
+            } else if (position == lunarNewYearTheme) {
+                drawerCell2.setEvent(
+                        OctoConfig.EventType.LUNAR_NEW_YEAR,
+                        R.raw.lunar_new_year,
+                        new int[]{
+                                R.drawable.menu_groups_cn,
+                                R.drawable.menu_contacts_cn,
+                                R.drawable.menu_calls_cn,
+                                R.drawable.menu_bookmarks_cn,
+                                R.drawable.menu_settings_cn,
                         }
                 );
             }
@@ -231,6 +252,6 @@ public class ThemeSelectorCell extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawLine(AndroidUtilities.dp(8), getMeasuredHeight() - 1, getMeasuredWidth() - AndroidUtilities.dp(8), getMeasuredHeight() - 1, Theme.dividerPaint);
+        canvas.drawLine(dp(8), getMeasuredHeight() - 1, getMeasuredWidth() - dp(8), getMeasuredHeight() - 1, Theme.dividerPaint);
     }
 }

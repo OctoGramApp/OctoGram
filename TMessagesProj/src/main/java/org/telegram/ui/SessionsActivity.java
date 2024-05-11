@@ -534,6 +534,12 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
                     }
                 }));
             }
+            @Override
+            public void onMySessionNameUpdated() {
+                if (listAdapter != null) {
+                    listAdapter.notifyItemChanged(currentSessionRow);
+                }
+            }
         });
         bottomSheet.show();
 

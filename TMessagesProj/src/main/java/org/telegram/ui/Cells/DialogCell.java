@@ -51,7 +51,11 @@ import androidx.collection.LongSparseArray;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
+import com.google.android.exoplayer2.util.Log;
+
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
@@ -399,6 +403,9 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
     public ImageReceiver avatarImage = new ImageReceiver(this);
     private AvatarDrawable avatarDrawable = new AvatarDrawable();
+
+    public ImageReceiver avatarGroupSenderImage = new ImageReceiver(this);
+    private AvatarDrawable avatarGroupSenderDrawable = new AvatarDrawable();
     private boolean animatingArchiveAvatar;
     private float animatingArchiveAvatarProgress;
     private BounceInterpolator interpolator = new BounceInterpolator();
@@ -582,6 +589,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         parentFragment = fragment;
         Theme.createDialogsResources(context);
         avatarImage.setRoundRadius(dp(28));
+        avatarGroupSenderImage.setRoundRadius(dp(28));
         for (int i = 0; i < thumbImage.length; ++i) {
             thumbImage[i] = new ImageReceiver(this);
             thumbImage[i].ignoreNotifications = true;
@@ -593,6 +601,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
         emojiStatus = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(this, dp(22));
         avatarImage.setAllowLoadingOnAttachedOnly(true);
+        avatarGroupSenderImage.setAllowLoadingOnAttachedOnly(true);
     }
 
     public void setDialog(TLRPC.Dialog dialog, int type, int folder) {
@@ -736,6 +745,9 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         attachedToWindow = false;
         reorderIconProgress = getIsPinned() && drawReorder ? 1.0f : 0.0f;
         avatarImage.onDetachedFromWindow();
+        if (avatarGroupSenderImage != null) {
+            avatarGroupSenderImage.onDetachedFromWindow();
+        }
         for (int i = 0; i < thumbImage.length; ++i) {
             thumbImage[i].onDetachedFromWindow();
         }
@@ -764,6 +776,9 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         avatarImage.onAttachedToWindow();
+        if (avatarGroupSenderImage != null) {
+            avatarGroupSenderImage.onAttachedToWindow();
+        }
         for (int i = 0; i < thumbImage.length; ++i) {
             thumbImage[i].onAttachedToWindow();
         }
@@ -2188,6 +2203,16 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             drawMention = false;
         }
 
+        if (handleCurrentPreviewData() != null) {
+            int showUserIconsW = dp(18) + dp(4); // 4 => padding
+            messageNameLeft += showUserIconsW;
+
+            if (!SharedConfig.useThreeLinesLayout || hasTags()) {
+                messageLeft += showUserIconsW;
+                messageWidth -= showUserIconsW;
+            }
+        }
+
         if (checkMessage) {
             if (messageString == null) {
                 messageString = "";
@@ -2446,7 +2471,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                     for (int a = 0; a < lineCount; a++) {
                         left = Math.min(left, messageLayout.getLineLeft(a));
                     }
-                    messageLeft -= left;
+                    //messageLeft -= left;
+                    // TODO: debug test
                 }
             }
             if (buttonLayout != null) {
@@ -2470,7 +2496,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 }
             }
             if (messageNameLayout != null && messageNameLayout.getLineCount() > 0) {
-                messageNameLeft -= messageNameLayout.getLineLeft(0);
+                //messageNameLeft -= messageNameLayout.getLineLeft(0);
+                // TODO: test
             }
         }
         if (typingLayout != null && printingStringType >= 0 && typingLayout.getText().length() > 0) {
@@ -2496,7 +2523,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         switch (messageFormatType) {
             case 1:
                 //"%2$s: \u2068%1$s\u2069"
-                spannableStringBuilder.append(s2).append(": \u2068").append(s1).append("\u2069");
+                spannableStringBuilder.append(OctoUtils.fixBrokenStringData(s2)).append(": \u2068").append(s1).append("\u2069");
                 break;
             case 2:
                 //"\u2068%1$s\u2069"
@@ -2504,7 +2531,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 break;
             case 3:
                 //"%2$s: %1$s"
-                spannableStringBuilder.append(s2).append(": ").append(s1);
+                spannableStringBuilder.append(OctoUtils.fixBrokenStringData(s2)).append(": ").append(s1);
                 break;
             case 4:
                 //"%1$s"
@@ -3023,10 +3050,17 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 Theme.dialogs_archiveAvatarDrawable.setCallback(this);
                 avatarDrawable.setAvatarType(AvatarDrawable.AVATAR_TYPE_ARCHIVED);
                 avatarImage.setImage(null, null, avatarDrawable, null, user, 0);
+
+                avatarGroupSenderImage.clearImage();
+                avatarGroupSenderImage.clearDecorators();
             } else {
+                avatarGroupSenderImage.clearImage();
+                avatarGroupSenderImage.clearDecorators();
+
                 if (useFromUserAsAvatar && message != null) {
                     avatarDrawable.setInfo(currentAccount, message.getFromPeerObject());
                     avatarImage.setForUserOrChat(message.getFromPeerObject(), avatarDrawable);
+                    tryToUpdateCurrentPreview();
                 } else if (user != null) {
                     avatarDrawable.setInfo(currentAccount, user);
                     if (UserObject.isReplyUser(user)) {
@@ -3047,6 +3081,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 } else if (chat != null) {
                     avatarDrawable.setInfo(currentAccount, chat);
                     avatarImage.setForUserOrChat(chat, avatarDrawable);
+                    tryToUpdateCurrentPreview();
                 }
             }
 
@@ -3172,6 +3207,64 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
         updatePremiumBlocked(animated);
         return requestLayout;
+    }
+
+    private void tryToUpdateCurrentPreview() {
+        Object currentPreviewData = handleCurrentPreviewData();
+        if (currentPreviewData != null) {
+            TLObject finalData = null;
+            if (currentPreviewData instanceof Long && (Long) currentPreviewData < 0) {
+                finalData = MessagesController.getInstance(currentAccount).getChat(-((Long) currentPreviewData));
+            } else if (currentPreviewData instanceof Long) {
+                finalData = MessagesController.getInstance(currentAccount).getUser((Long) currentPreviewData);
+            }
+
+            if (finalData != null) {
+                avatarGroupSenderDrawable.setInfo(currentAccount, finalData);
+                avatarGroupSenderImage.setForUserOrChat(finalData, avatarGroupSenderDrawable);
+            }
+        }
+    }
+
+    private Object handleCurrentPreviewData() {
+        if (message == null) {
+            return null;
+        }
+
+        boolean customC = drawAvatar;
+        customC &= chat != null;
+        //customC &= user != null;
+
+        if (customC) {
+            customC = OctoConfig.INSTANCE.showUserIconsInChatsList.getValue();
+            customC &= !ChatObject.isChannelOrGiga(chat);
+            customC &= !ChatObject.isForum(chat);
+            customC &= !UserObject.isAnonymous(user);
+            customC &= !message.isOut();
+            customC &= draftMessage == null;
+            customC &= !(message.messageOwner instanceof TLRPC.TL_messageService);
+            customC &= currentDialogFolderId != 1; // archived chats
+        }
+
+        // If you are a person from another alternative client who is reading these
+        // comments, perhaps you are better off copying the condition as it is without
+        // going into depth if you don't want to go crazy. We've already gone crazy.
+
+        if (customC) {
+            return message.getSenderId();
+        } else if (message.isForwarded() && (ChatObject.isChannelOrGiga(chat) || (chat == null && user != null))) {
+            // show forwarded channel image just in channels/gigagroups or private chats
+            boolean canTryToShowForwarded = drawAvatar;
+            canTryToShowForwarded &= !message.isOut();
+            canTryToShowForwarded &= draftMessage == null;
+            canTryToShowForwarded &= message.messageOwner.fwd_from.from_id instanceof TLRPC.TL_peerChannel;
+
+            if (canTryToShowForwarded) {
+                return -message.messageOwner.fwd_from.from_id.channel_id;
+            }
+        }
+
+        return null;
     }
 
     private int getTopicId() {
@@ -3932,6 +4025,50 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 Theme.dialogs_pinnedDrawable.draw(canvas);
             }
 
+            if (handleCurrentPreviewData() != null && avatarGroupSenderImage.hasImageSet() && updateHelper.typingProgres != 1f) {
+                int showUserIconsW = dp(18) + dp(4); // 4 => padding
+                StoriesUtilities.AvatarStoryParams params = new StoriesUtilities.AvatarStoryParams(false);
+                params.drawSegments = false;
+                params.animate = false;
+                params.isDrawingMiniUserProfile = true;
+
+                int cTop;
+                int cLeft;
+                if ((SharedConfig.useThreeLinesLayout || useForceThreeLines) && !isForumCell()) {
+                    cTop = messageNameTop;
+                    cLeft = messageNameLeft - showUserIconsW;
+                } else {
+                    cTop = messageTop;
+                    if (hasTags() || isForumCell()) {
+                        cTop -= dp(isForumCell() ? 10 : 11);
+                    }
+
+                    cLeft = messageLeft - showUserIconsW;
+                }
+
+                params.originalAvatarRect = new RectF(cLeft, cTop, cLeft + dp(18), cTop + dp(18));
+
+                boolean animateAvatar = updateHelper.typingProgres > 0 && (!SharedConfig.useThreeLinesLayout || hasTags());
+
+                if (animateAvatar) {
+                    float alpha = (1f - updateHelper.typingProgres);
+                    canvas.saveLayerAlpha(0, 0, getWidth(), getHeight(), (int) (255 * alpha), Canvas.ALL_SAVE_FLAG);
+                    float top;
+                    if (updateHelper.typingOutToTop) {
+                        top = -dp(14) * updateHelper.typingProgres;
+                    } else {
+                        top = dp(14) * updateHelper.typingProgres;
+                    }
+                    canvas.translate(0, top);
+                }
+
+                StoriesUtilities.drawAvatarWithStory(currentDialogId, canvas, avatarGroupSenderImage, params);
+
+                if (animateAvatar) {
+                    canvas.restore();
+                }
+            }
+
             if (thumbsCount > 0 && updateHelper.typingProgres != 1f) {
                 float alpha = 1f;
                 if (updateHelper.typingProgres > 0) {
@@ -4030,6 +4167,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             if (drawAvatarOverlays(canvas)) {
                 needInvalidate = true;
             }
+        }
+
+        if (avatarGroupSenderImage.hasBitmapImage() && avatarGroupSenderImage.getVisible()) {
+            needInvalidate = true;
         }
 
         if (rightFragmentOpenedProgress > 0 && currentDialogFolderId == 0) {
@@ -4176,9 +4317,13 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             }
         }
 
-        if (needInvalidate) {
+        if (isNeedInvalidate(needInvalidate)) {
             invalidate();
         }
+    }
+
+    private static boolean isNeedInvalidate(boolean needInvalidate) {
+        return needInvalidate;
     }
 
     private PremiumGradient.PremiumGradientTools premiumGradient;
@@ -4921,6 +5066,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 thumbImage[index].setImage(ImageLocation.getForObject(selectedThumb, photoThumbsObject), filter, ImageLocation.getForObject(smallThumb, photoThumbsObject), filter, size, null, message, 0);
                 thumbImage[index].setRoundRadius(message.isRoundVideo() ? dp(18) : dp(2));
                 needEmoji = false;
+                return;
             }
         }
     }

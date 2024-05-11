@@ -140,10 +140,11 @@ public class ThemeDrawer extends FrameLayout {
         return lottieImageView.getAnimatedDrawable() != null;
     }
 
-    public void setEvent(int eventId, int[] icons) {
+    public void setEvent(int eventId, int icon, int[] icons) {
         if (lottieImageView.getAnimatedDrawable() == null) {
             this.icons = icons;
             this.eventId = eventId;
+            lottieImageView.setAnimation(icon, 32, 32);
         }
     }
 

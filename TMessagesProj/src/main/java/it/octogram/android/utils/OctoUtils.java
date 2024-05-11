@@ -1,5 +1,6 @@
 package it.octogram.android.utils;
 
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
@@ -89,6 +90,30 @@ public class OctoUtils {
             return "id";
         }
         return lang;
+    }
+
+    public static void fixBrokenStringArgs(Object... args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] instanceof String) {
+                args[i] = OctoUtils.fixBrokenStringData((String) args[i]);
+            }
+        }
+    }
+
+    public static String fixBrokenStringData(String data) {
+        if (data.contains("\u2067")) {
+            data = TextUtils.replace(data, new String[]{"\u2067"}, new String[]{""}).toString();
+        }
+
+        return data;
+    }
+
+    public static CharSequence fixBrokenStringData(CharSequence data) {
+        if (data.toString().contains("\u2067")) {
+            data = TextUtils.replace(data, new String[]{"\u2067"}, new CharSequence[]{""}).toString();
+        }
+
+        return data;
     }
 
     public static File getFileContentFromMessage(MessageObject message) {

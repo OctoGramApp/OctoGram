@@ -11,7 +11,6 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
@@ -19,17 +18,23 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
+import androidx.collection.LongSparseArray;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.FileLoadOperation;
+import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.FileUploadOperation;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SendMessagesHelper;
+import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -45,7 +50,7 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.NumberTextView;
 import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.Components.ShareAlert;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -298,20 +303,71 @@ public class CrashesActivity extends BaseFragment {
     private boolean sendLog(File file) {
         try {
             File cacheFile = Crashlytics.shareLog(file);
-            Uri uri;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                uri = FileProvider.getUriForFile(getParentActivity(), ApplicationLoader.getApplicationId() + ".provider", cacheFile);
-            } else {
-                uri = Uri.fromFile(cacheFile);
-            }
-            Intent i = new Intent(Intent.ACTION_SEND);
-            if (Build.VERSION.SDK_INT >= 24) {
-                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
-            i.setType("message/rfc822");
-            i.putExtra(Intent.EXTRA_STREAM, uri);
-            i.setClass(getParentActivity(), LaunchActivity.class);
-            getParentActivity().startActivity(i);
+
+            ShareAlert shAlert = new ShareAlert(getParentActivity(), null, null, false, null, false) {
+
+                @Override
+                protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                    FileLoader instance = FileLoader.getInstance(getCurrentAccount());
+                    instance.setDelegate(new FileLoader.FileLoaderDelegate() {
+                        @Override
+                        public void fileUploadProgressChanged(FileUploadOperation operation, String location, long uploadedSize, long totalSize, boolean isEncrypted) {
+
+                        }
+
+                        @Override
+                        public void fileDidUploaded(String location, TLRPC.InputFile inputFile, TLRPC.InputEncryptedFile inputEncryptedFile, byte[] key, byte[] iv, long totalFileSize) {
+                            if (inputFile == null) {
+                                return;
+                            }
+
+                            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(CrashesActivity.this).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.SendCrashLogDone)).show());
+
+                            TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
+                            attr.file_name = cacheFile.getName();
+
+                            TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
+                            inputMediaDocument.file = inputFile;
+                            inputMediaDocument.attributes.add(attr);
+                            inputMediaDocument.mime_type = "text/json";
+
+                            for (int i = 0; i < dids.size(); i++) {
+                                TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
+                                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dids.keyAt(i));
+                                req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
+                                req.message = "";
+                                req.silent = true;
+                                req.media = inputMediaDocument;
+                                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+                            }
+                        }
+
+                        @Override
+                        public void fileDidFailedUpload(String location, boolean isEncrypted) {
+
+                        }
+
+                        @Override
+                        public void fileDidLoaded(String location, File finalFile, Object parentObject, int type) {
+
+                        }
+
+                        @Override
+                        public void fileDidFailedLoad(String location, int state) {
+
+                        }
+
+                        @Override
+                        public void fileLoadProgressChanged(FileLoadOperation operation, String location, long uploadedSize, long totalSize) {
+
+                        }
+                    });
+
+                    instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
+                }
+            };
+            shAlert.show();
+
             return true;
         } catch (IOException e) {
             Log.e(getClass().getName(), "Error sending crash content", e);

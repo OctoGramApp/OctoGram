@@ -71,6 +71,8 @@ import org.telegram.ui.bots.BotBiometrySettings;
 
 import java.util.ArrayList;
 
+import it.octogram.android.preferences.ui.custom.DeleteAccountBottomSheet;
+
 public class PrivacySettingsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ListAdapter listAdapter;
@@ -305,7 +307,8 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                         LocaleController.formatPluralString("Months", 1),
                         LocaleController.formatPluralString("Months", 3),
                         LocaleController.formatPluralString("Months", 6),
-                        LocaleController.formatPluralString("Years", 1)
+                        LocaleController.formatPluralString("Years", 1),
+                        LocaleController.formatString("DeleteAccountContextButton", R.string.DeleteAccountContextButton),
                 };
                 final LinearLayout linearLayout = new LinearLayout(getParentActivity());
                 linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -331,6 +334,24 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                             value = 182;
                         } else if (which == 3) {
                             value = 365;
+                        } else if (which == 4) {
+                            if (currentPassword != null && currentPassword.has_password) {
+                                LogoutActivity currentLogoutActivity = new LogoutActivity();
+                                currentLogoutActivity.isDeleteAccountActivity = true;
+                                currentLogoutActivity.runnable = () -> {
+                                    var bottomSheet = new DeleteAccountBottomSheet(context, this, this::finishFragment);
+                                    bottomSheet.show();
+                                };
+                                presentFragment(currentLogoutActivity);
+                            } else {
+                                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getContext());
+                                alertBuilder.setTitle(LocaleController.getString("DeleteAccount", R.string.DeleteAccount));
+                                alertBuilder.setMessage(LocaleController.getString("DeleteAccountLastPopupFailed", R.string.DeleteAccountLastPopupFailed));
+                                alertBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
+                                alertBuilder.show();
+                            }
+
+                            return;
                         }
                         final AlertDialog progressDialog = new AlertDialog(getParentActivity(), AlertDialog.ALERT_TYPE_SPINNER);
                         progressDialog.setCanCancel(false);

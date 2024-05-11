@@ -3666,6 +3666,20 @@ void ConnectionsManager::setLangCode(std::string langCode) {
     });
 }
 
+
+void ConnectionsManager::setSessionName(std::string sessionName) {
+    scheduleTask([&, sessionName] {
+        if (currentDeviceModel == sessionName) {
+            return;
+        }
+        currentDeviceModel = sessionName;
+        for (auto & datacenter : datacenters) {
+            datacenter.second->resetInitVersion();
+        }
+        updateDcSettings(0, false, true);
+    });
+}
+
 void ConnectionsManager::setRegId(std::string regId) {
     scheduleTask([&, regId] {
         if (currentRegId == regId) {

@@ -227,10 +227,12 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             ))
                             .title(LocaleController.getString(R.string.PreferredActionOutgoing))
                             .build());
-//                    category.row(new TextDetailRow.TextDetailRowBuilder()
-//                            .title(LocaleController.getString(R.string.CustomEmojiReaction))
-//                            .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
-//                            .build());
+/*/
+                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                            .title(LocaleController.getString(R.string.CustomEmojiReaction))
+                            .description(LocaleController.getString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable))
+                            .build());
+*/
                 })
                 .category(LocaleController.getString("TabletModeSection", R.string.TabletModeSection), category -> category.row(new SwitchRow.SwitchRowBuilder()
                         .preferenceValue(OctoConfig.INSTANCE.tabletMode)

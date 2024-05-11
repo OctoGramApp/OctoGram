@@ -473,9 +473,8 @@ public class ProfileNotificationsActivity extends BaseFragment implements Notifi
                 }
 
                 if (!DialogObject.isChatDialog(dialogId) && !OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue()) {
-                    AllowSmartNotificationsBottomSheet sheet = new AllowSmartNotificationsBottomSheet(context);
                     View finalView = view;
-                    sheet.setCallback(() -> {
+                    AllowSmartNotificationsBottomSheet sheet = new AllowSmartNotificationsBottomSheet(context, () -> {
                         listView.getOnItemClickListener().onItemClick(finalView, position);
                         if (adapter != null) {
                             adapter.notifyItemChanged(smartRow);

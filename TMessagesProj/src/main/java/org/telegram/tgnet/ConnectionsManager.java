@@ -14,7 +14,7 @@ import android.util.Base64;
 import android.util.LongSparseArray;
 import android.util.SparseIntArray;
 
-import com.google.android.exoplayer2.util.Log;
+import android.util.Log;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.json.JSONArray;
@@ -617,6 +617,10 @@ public class ConnectionsManager extends BaseController {
         }
     }
 
+    public static void setSessionName(String sessionName) {
+        native_setSessionName(UserConfig.selectedAccount, sessionName);
+    }
+
     public static void setRegId(String regId, @PushListenerController.PushType int type, String status) {
         String pushString = regId;
         if (!TextUtils.isEmpty(pushString) && type == PushListenerController.PUSH_TYPE_HUAWEI) {
@@ -643,7 +647,7 @@ public class ConnectionsManager extends BaseController {
 
     public void switchBackend(boolean restart) {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        preferences.edit().remove("language_showed2").commit();
+        preferences.edit().remove("language_showed2").apply();
         native_switchBackend(currentAccount, restart);
     }
 
@@ -933,6 +937,7 @@ public class ConnectionsManager extends BaseController {
     public static native void native_init(int currentAccount, int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion, String langCode, String systemLangCode, String configPath, String logPath, String regId, String cFingerprint, String installer, String packageId, int timezoneOffset, long userId, boolean userPremium, boolean enablePushConnection, boolean hasNetwork, int networkType, int performanceClass);
     public static native void native_setProxySettings(int currentAccount, String address, int port, String username, String password, String secret);
     public static native void native_setLangCode(int currentAccount, String langCode);
+    public static native void native_setSessionName(int currentAccount, String sessionName);
     public static native void native_setRegId(int currentAccount, String regId);
     public static native void native_setSystemLangCode(int currentAccount, String langCode);
     public static native void native_seSystemLangCode(int currentAccount, String langCode);

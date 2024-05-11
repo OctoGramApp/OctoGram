@@ -82,7 +82,7 @@ public class StoriesUtilities {
     public static void drawAvatarWithStory(long dialogId, Canvas canvas, ImageReceiver avatarImage, AvatarStoryParams params) {
         StoriesController storiesController = MessagesController.getInstance(UserConfig.selectedAccount).getStoriesController();
         boolean hasStories = storiesController.hasStories(dialogId);
-        drawAvatarWithStory(dialogId, canvas, avatarImage, UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId() != dialogId && hasStories, params);
+        drawAvatarWithStory(dialogId, canvas, avatarImage, UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId() != dialogId && hasStories && !params.isDrawingMiniUserProfile, params);
     }
 
     static boolean scheduled = false;
@@ -1099,6 +1099,8 @@ public class StoriesUtilities {
         public boolean allowLongress = false;
 
         public Theme.ResourcesProvider resourcesProvider;
+
+        public boolean isDrawingMiniUserProfile = false;
 
         public AvatarStoryParams(boolean isStoryCell) {
             this(isStoryCell, null);

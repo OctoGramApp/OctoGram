@@ -23,8 +23,10 @@ import it.octogram.android.OctoConfig;
 public class AllowSmartNotificationsBottomSheet extends BottomSheet {
     private AllowSmartNotificationsCallback callback;
 
-    public AllowSmartNotificationsBottomSheet(Context context) {
+    public AllowSmartNotificationsBottomSheet(Context context, AllowSmartNotificationsCallback callback) {
         super(context, false);
+
+        this.callback = callback;
 
         FrameLayout frameLayout = new FrameLayout(context);
         LinearLayout linearLayout = new LinearLayout(context);
@@ -83,10 +85,6 @@ public class AllowSmartNotificationsBottomSheet extends BottomSheet {
         linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 0));
 
         setCustomView(linearLayout);
-    }
-
-    public void setCallback(AllowSmartNotificationsCallback callback) {
-        this.callback = callback;
     }
 
     public interface AllowSmartNotificationsCallback {

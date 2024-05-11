@@ -355,6 +355,16 @@ void setLangCode(JNIEnv *env, jclass c, jint instanceNum, jstring langCode) {
     }
 }
 
+void setSessionName(JNIEnv *env, jclass c, jint instanceNum, jstring sessionName) {
+    const char *sessionNameStr = env->GetStringUTFChars(sessionName, 0);
+
+    ConnectionsManager::getInstance(instanceNum).setSessionName(std::string(sessionNameStr));
+
+    if (sessionNameStr != 0) {
+        env->ReleaseStringUTFChars(sessionName, sessionNameStr);
+    }
+}
+
 void setRegId(JNIEnv *env, jclass c, jint instanceNum, jstring regId) {
     const char *regIdStr = env->GetStringUTFChars(regId, 0);
 
@@ -451,6 +461,7 @@ static JNINativeMethod ConnectionsManagerMethods[] = {
         {"native_init", "(IIIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZZZII)V", (void *) init},
         {"native_setLangCode", "(ILjava/lang/String;)V", (void *) setLangCode},
         {"native_setRegId", "(ILjava/lang/String;)V", (void *) setRegId},
+        {"native_setSessionName", "(ILjava/lang/String;)V", (void *) setSessionName},
         {"native_setSystemLangCode", "(ILjava/lang/String;)V", (void *) setSystemLangCode},
         {"native_switchBackend", "(IZ)V", (void *) switchBackend},
         {"native_pauseNetwork", "(I)V", (void *) pauseNetwork},

@@ -5201,6 +5201,8 @@ public class Theme {
             eventType = 1;
         } else if (monthOfYear == 9 && dayOfMonth >= 30 || monthOfYear == 10 && dayOfMonth == 1 && hour < 12) {
             eventType = 2;
+        } else if (monthOfYear == 1 && dayOfMonth <= 14) {
+            eventType = 3;
         }
         return eventType;
     }

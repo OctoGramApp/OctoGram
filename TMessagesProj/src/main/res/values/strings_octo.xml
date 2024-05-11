@@ -22,6 +22,14 @@
     <string name="PhotoCopied">Photo copied to clipboard.</string>
     <string name="Acknowledge">Acknowledge</string>
 
+    <!--Devices: Custom device name-->
+    <string name="UseCustomDeviceName">Use custom name</string>
+    <string name="UseCustomDeviceNameTitle">Device custom name</string>
+    <string name="UseCustomDeviceNameDescription">Enter below the name you want to associate with this device. You can also choose to use the default name.</string>
+    <string name="UseCustomDeviceNameRename">Rename device</string>
+    <string name="UseCustomDeviceNameRenameDefault">Use default name</string>
+
+
     <!--Emoji Sets-->
     <string name="MyEmojiSets">My Emoji Sets</string>
     <string name="InstalledEmojiSet">Installed</string>
@@ -143,7 +151,6 @@
     <string name="SearchIconInHeader">Search icon in header bar</string>
     <string name="SlidingTitle">Sliding title</string>
     <string name="SlidingTitle_Desc">The title will slide on screen when it\'s too long</string>
-    <string name="StickersSizeHeader">Sticker Size</string>
     <string name="HideStories">Hide stories</string>
     <string name="HideStories_Desc">You won\'t see stories in the main header, but you can still find them on a user\'s profile.</string>
     <!--<string name="StickerSizePreviewMessage1">New octo update just dropped!</string>
@@ -162,6 +169,8 @@
     <string name="ContextElements">Context menu Elements</string>
     <string name="ContextElements_Desc">Customize the elements in the context menu</string>
 
+    <string name="ShowUserIconsInChatsList">Show user icons in chats list</string>
+    <string name="ShowUserIconsInChatsList_Desc">Show user icons in chats list near sender name in groups.</string>
     <string name="RestrictionReason">Restriction Reason</string>
     <string name="RegistrationDate">Registration Date</string>
     <string name="OctoGramVersion">OctoGram %1$s\nBased on Telegram %2$s</string>
@@ -274,6 +283,7 @@
     <string name="CrashLogCopied">Crash log copied to clipboard</string>
     <string name="OpenCrashLog">Open crash log</string>
     <string name="SendCrashLog">Send crash log</string>
+    <string name="SendCrashLogDone">Crash log has been sent successfully.</string>
     <string name="CopyCrashLog">Copy crash log</string>
     <string name="ReportCrash">Report crash</string>
 
@@ -299,12 +309,13 @@
     <string name="MutualContact">Mutual Contact</string>
     <string name="MutualContactDesc">**%s** and you have added each other in the contacts list.</string>
 
-    <!-- Export/Import -->
+    <!-- Manage settings -->
     <string name="Export">Export settings</string>
     <string name="ExportDataReady">Export is ready</string>
     <string name="ExportDataDescription">Choose a custom name for the file or press share directly to send it to a trusted chat.</string>
     <string name="ExportDataFilename">Custom file name</string>
     <string name="ExportDataShare">Share</string>
+    <string name="ExportDataShareDone">Export file has been sent successfully.</string>
     <string name="ExportDataShareFailedTitle">Error</string>
     <string name="ExportDataShareFailedCustomFileName">The specified file name cannot be used. Try another name.</string>
     <string name="ImportReady">Import settings</string>
@@ -314,9 +325,32 @@
     <string name="ImportReadyImportSelected">Import selected</string>
     <string name="ImportReadyOtherOptions">Another %d unspecified options will be imported automatically.</string>
     <string name="ImportReadyImportDone">%d options have been imported successfully.</string>
+    <string name="ImportReadyImportDonePopup">To complete...</string>
+    <string name="ImportReadyImportDonePopupDescription">Some of the imported options require a restart of the app for proper operation.</string>
     <string name="ImportReadyImportFailedZeroTitle">Error</string>
     <string name="ImportReadyImportFailedZeroCaption">You must select at least one option in order to proceed with the import.</string>
     <string name="ImportReadyOpenFile">Open file preview</string>
+    <string name="ResetSettings">Reset settings</string>
+    <string name="ResetSettingsTitle">Reset settings</string>
+    <string name="ResetSettingsDescription">Are you really sure you want to reset all OctoGram settings? Any options applied will not be retained after restart.\n\nKeep in mind that before resetting, you may want to make a backup so that you can recover these settings in the future.</string>
+    <string name="ResetSettingsButton">Reset and restart</string>
+
+    <!-- Delete account -->
+    <string name="DeleteAccount">Delete account</string>
+    <string name="DeleteAccountContextButton">Delete this account now</string>
+    <string name="DeleteAccountMainButton">Come back later</string>
+    <string name="DeleteAccountContinue">Continue</string>
+    <string name="DeleteAccountContinueDelete">Delete account</string>
+    <string name="DeleteAccountStep1Title">Your Free Cloud Storage</string>
+    <string name="DeleteAccountStep1Description">You will lose access to all your Saved Messages as well as all messages, media and files from your chats.</string>
+    <string name="DeleteAccountStep2Title">Your Groups and Channels</string>
+    <string name="DeleteAccountStep2Description">The groups and channels you created will either get new admins or become orphaned.</string>
+    <string name="DeleteAccountStep2Counter">More than %d channels and groups will be deleted</string>
+    <string name="DeleteAccountStep3Title">Your Message History</string>
+    <string name="DeleteAccountStep3Description">Your chat partners will keep their message history with you, including the messages you shared in Secret Chats.\n\nYou can remove any messages for both sides at any time, but this will not be possible if you delete your account.</string>
+    <string name="DeleteAccountStep3Counter">More than %d chats with other users will be deleted</string>
+    <string name="DeleteAccountLastPopup">Wait, let\'s talk seriously. This is the last popup that appears. Once you confirm this, you will no longer be able to do anything. Are you sure you want to continue?</string>
+    <string name="DeleteAccountLastPopupFailed">In order to verify your identity, you need to set up two-factor authentication.</string>
 
     <!-- Double Bottom -->
     <string name="AccountProtection">Account Protection</string>
@@ -333,6 +367,24 @@
     <string name="AccountProtectionHint2">When an account is protected with a passcode, it will be hidden from the side menu.</string>
 
     <string name="AreYouSureDeleteXMessages">Are you sure you want to delete the chat history for this user?</string>
+
+    <!-- Sticker Size Preview -->
+    <string name="StickersSizeHeader">Sticker Size</string>
+
+    <string name="StickerSizePreviewMessage1">Oh, I love OctoGram 🐙! I just learned today that it\'s Italian, how cool!</string>
+    <string name="StickerSizePreviewMessage2">In Italy, they say the pizza 🍕 is really good... When are we going?</string>
+
+    <string name="StickerSizePreviewMessage3">New octo update just dropped!</string>
+    <string name="StickerSizePreviewMessage4">Neat!</string>
+
+    <string name="StickerSizePreviewMessage5">I love the new octo update!</string>
+    <string name="StickerSizePreviewMessage6">Cool! I\'m going to try it out now!</string>
+
+    <!-- Sticker Shape -->
+    <string name="StickerShape">Sticker Shape</string>
+    <string name="StyleTypeDefault">Default</string>
+    <string name="StickerShapeRounded">Rounded</string>
+    <string name="StyleTypeMessage">Message</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

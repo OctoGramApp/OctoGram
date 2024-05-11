@@ -2,8 +2,6 @@ package it.octogram.android.preferences.ui.custom;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Vibrator;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -16,23 +14,31 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.core.content.FileProvider;
+import androidx.collection.LongSparseArray;
 import androidx.core.graphics.ColorUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.FileLoadOperation;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.FileUploadOperation;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SendMessagesHelper;
+import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CodepointsLengthInputFilter;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
-import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.Components.ShareAlert;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,14 +50,18 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 
 public class ExportDoneReadyBottomSheet extends BottomSheet {
-    private Activity originalActivity;
+    private final Activity originalActivity;
+    private final BaseFragment baseFragment;
     private final EditTextBoldCursor editText;
     private static final ImportSettingsScanHelper settingsScan = new ImportSettingsScanHelper();
 
-    public ExportDoneReadyBottomSheet(Context context) {
+    public ExportDoneReadyBottomSheet(Context context, Activity originalActivity, BaseFragment baseFragment) {
         super(context, true);
         setApplyBottomPadding(false);
         setApplyTopPadding(false);
+
+        this.originalActivity = originalActivity;
+        this.baseFragment = baseFragment;
 
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -141,10 +151,6 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
         setCustomView(linearLayout);
     }
 
-    public void setOriginalActivity(Activity originalActivity) {
-        this.originalActivity = originalActivity;
-    }
-
     private void shareExport(String fileNameText) {
         if (fileNameText.contains("/") || fileNameText.length() > 40) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
@@ -162,27 +168,82 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
             JSONObject mainObject = createOctoExport();
 
             File cacheDir = AndroidUtilities.getCacheDir();
-            File cacheFile;
             if (fileNameText.isEmpty()) {
-                cacheFile = File.createTempFile("temp", ".octoexport", cacheDir);
-            } else {
-                cacheFile = new File(cacheDir.getPath(), fileNameText + ".octoexport");
-                if (cacheFile.exists()) {
-                    cacheFile.delete();
-                }
+                fileNameText = "my-octogram-export";
+            }
+
+            File cacheFile = new File(cacheDir.getPath(), fileNameText + ".octoexport");
+            if (cacheFile.exists()) {
+                cacheFile.delete();
             }
 
             FileOutputStream fos = new FileOutputStream(cacheFile);
             fos.write(mainObject.toString(4).getBytes());
             fos.close();
 
-            Uri uri = FileProvider.getUriForFile(ApplicationLoader.applicationContext, ApplicationLoader.getApplicationId() + ".provider", cacheFile);
+            ShareAlert shAlert = new ShareAlert(baseFragment.getParentActivity(), null, null, false, null, false) {
 
-            Intent intent = new Intent(getContext(), LaunchActivity.class);
-            intent.setAction(Intent.ACTION_SEND);
-            intent.setType("text/json");
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
-            getContext().startActivity(intent);
+                @Override
+                protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                    FileLoader instance = FileLoader.getInstance(baseFragment.getCurrentAccount());
+                    instance.setDelegate(new FileLoader.FileLoaderDelegate() {
+                        @Override
+                        public void fileUploadProgressChanged(FileUploadOperation operation, String location, long uploadedSize, long totalSize, boolean isEncrypted) {
+
+                        }
+
+                        @Override
+                        public void fileDidUploaded(String location, TLRPC.InputFile inputFile, TLRPC.InputEncryptedFile inputEncryptedFile, byte[] key, byte[] iv, long totalFileSize) {
+                            if (inputFile == null) {
+                                return;
+                            }
+
+                            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.ExportDataShareDone)).show());
+
+                            TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
+                            attr.file_name = cacheFile.getName();
+
+                            TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
+                            inputMediaDocument.file = inputFile;
+                            inputMediaDocument.attributes.add(attr);
+                            inputMediaDocument.mime_type = "text/json";
+
+                            for (int i = 0; i < dids.size(); i++) {
+                                TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
+                                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dids.keyAt(i));
+                                req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
+                                req.message = "";
+                                req.silent = true;
+                                req.media = inputMediaDocument;
+                                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+                            }
+                        }
+
+                        @Override
+                        public void fileDidFailedUpload(String location, boolean isEncrypted) {
+
+                        }
+
+                        @Override
+                        public void fileDidLoaded(String location, File finalFile, Object parentObject, int type) {
+
+                        }
+
+                        @Override
+                        public void fileDidFailedLoad(String location, int state) {
+
+                        }
+
+                        @Override
+                        public void fileLoadProgressChanged(FileLoadOperation operation, String location, long uploadedSize, long totalSize) {
+
+                        }
+                    });
+
+                    instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
+                }
+            };
+            baseFragment.showDialog(shAlert);
         } catch (JSONException e) {
             Log.e(getClass().getName(), "Error sharing settings export", e);
         } catch (IOException e) {

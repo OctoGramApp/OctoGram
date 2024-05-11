@@ -2711,6 +2711,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         } else {
                                             open_settings = 1;
                                         }
+                                    } else if (url.startsWith("tg:francesco") || url.startsWith("tg://francesco")) {
+                                        BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
+
+                                        if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
+                                            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Broken name fix has been disabled.").show();
+                                        } else {
+                                            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Broken name fix has been enabled.").show();
+                                        }
+
+                                        OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.useTranslationsArgsFix, !OctoConfig.INSTANCE.useTranslationsArgsFix.getValue());
                                     } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
                                         if (!OctoConfig.INSTANCE.unlockedChupa.getValue()) {
                                             BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);

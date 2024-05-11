@@ -35395,7 +35395,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (isValid) {
                         ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(ChatActivity.this, message);
                         sheet.setOriginalActivity(getParentActivity());
-                        sheet.setThemeDelegate(themeDelegate);
                         sheet.show();
                         handled = true;
                     }
