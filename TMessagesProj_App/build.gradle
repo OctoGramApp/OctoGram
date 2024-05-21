@@ -76,6 +76,7 @@ android {
             if (abi == null) abi = 'universal'
             outputFileName = "OctoGram-${defaultConfig.versionName}-${defaultConfig.versionCode}-${abi}.apk"
             def abiVersionCode = project.ext.abiCodes.get(abi)
+            if (abiVersionCode == null) abiVersionCode = 0
             output.versionCodeOverride = defaultConfig.versionCode * 10 + abiVersionCode
         }
     }
@@ -95,9 +96,15 @@ android {
     splits.abi {
         enable true
         universalApk true
+
+        reset()
+        include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
     }
 
     dependenciesInfo.includeInApk false
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 tasks.register('buildRelease') {

@@ -71,63 +71,43 @@
 -keepclasseswithmembers class com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource$Factory {
   <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
 }
+# Keep OctoConfig fields
+-keepnames class it.octogram.android.OctoConfig { <fields>; }
+
+# Used by AtomicReferenceFieldUpdater and sun.misc.Unsafe
+-keepclassmembers class com.google.common.util.concurrent.AbstractFuture** {
+  *** waiters;
+  *** value;
+  *** listeners;
+  *** thread;
+  *** next;
+}
+
+# Since Unsafe is using the field offsets of these inner classes, we don't want
+# to have class merging or similar tricks applied to these classes and their
+# fields. It's safe to allow obfuscation, since the by-name references are
+# already preserved in the -keep statement above.
+-keep,allowshrinking,allowobfuscation class com.google.common.util.concurrent.AbstractFuture** {
+  <fields>;
+}
+
+-keepclasseswithmembers,allowobfuscation class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Gson uses generic type information stored in a class file when working with fields. Proguard
+# removes such information by default, so configure it to keep all of it.
+-keepattributes Signature,InnerClasses,EnclosingMethod
 
 -keep class org.telegram.messenger.voip.* { *; }
 -keep class org.telegram.messenger.AnimatedFileDrawableStream { <methods>; }
 -keep class org.telegram.SQLite.SQLiteException { <methods>; }
 -keep class org.telegram.tgnet.ConnectionsManager { <methods>; }
 -keep class org.telegram.tgnet.NativeByteBuffer { <methods>; }
--keepnames class org.telegram.tgnet.TLRPC$TL_* {}
--keepclassmembernames class org.telegram.ui.* { <fields>; }
--keepclassmembernames class org.telegram.ui.Cells.* { <fields>; }
--keepclassmembernames class org.telegram.ui.Components.* { <fields>; }
--keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.GroupCreateSpan {
-    public void updateColors();
- }
--keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.Premium.GLIcon.ObjLoader {
-    public <init>();
- }
-
-# Huawei Services
--keep class com.huawei.hianalytics.**{ *; }
--keep class com.huawei.updatesdk.**{ *; }
--keep class com.huawei.hms.**{ *; }
-
-# Don't warn about checkerframework and Kotlin annotations
--dontwarn org.checkerframework.**
--dontwarn javax.annotation.**
-
-# Keep OctoConfig fields
--keepnames class it.octogram.android.OctoConfig { <fields>; }
--keepclassmembers class it.octogram.android.utils.DatacenterController { *; }
--keepclassmembers class it.octogram.android.utils.DatacenterController$DCInfo { *; }
--keepclassmembers class it.octogram.android.utils.DatacenterController$DCStatus { *; }
--keep class it.octogram.android.utils.DatacenterController { *; }
--keep class it.octogram.android.utils.DatacenterController$DCInfo { *; }
--keep class it.octogram.android.utils.DatacenterController$DCStatus { *; }
-
-# removes such information by default, so configure it to keep all of it.
--keepattributes Signature
-
-# For using GSON annotations
--keepattributes *Annotation*
-
-# Gson specific classes
--dontwarn sun.misc.**
-#-keep class com.google.gson.stream.** { *; }
-
-# Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
-# JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
--keep class * extends com.google.gson.TypeAdapter
--keep class * implements com.google.gson.TypeAdapterFactory
--keep class * implements com.google.gson.JsonSerializer
--keep class * implements com.google.gson.JsonDeserializer
-
-# Prevent R8 from leaving Data object members always null
--keepclassmembers,allowobfuscation class * {
-  @com.google.gson.annotations.SerializedName <fields>;
-}
-
+-keepnames class org.telegram.tgnet.** extends org.telegram.tgnet.TLObject
+-keepclassmembernames,allowshrinking class org.telegram.ui.* { <fields>; }
+-keepclassmembernames,allowshrinking class org.telegram.ui.Cells.* { <fields>; }
+-keepclassmembernames,allowshrinking class org.telegram.ui.Components.* { <fields>; }
 -keep class org.telegram.ui.Components.RLottieDrawable$LottieMetadata { <fields>; }
 
 # Retain generic signatures of TypeToken and its subclasses with R8 version 3.0 and higher.
@@ -136,14 +116,18 @@
 
 # Keep all classes of Apache Commons
 -keep class org.apache.commons.text.** { *; }
+-dontwarn org.apache.commons.text.**
 
 # Keep all class member names of CameraX
 -keep class androidx.camera.extensions.** { *; }
+-keep class androidx.camera.extensions.impl.** { *; }
+-keep class androidx.camera.extensions.impl.advanced.** { *; }
 -keep class androidx.camera.camera2.internal.** { *; }
 -keep class androidx.camera.camera2.interop.** { *; }
 -keep class androidx.camera.core.** { *; }
 -keep class androidx.camera.core.impl.** { *; }
 -keep class androidx.camera.video.** { *; }
+-dontwarn androidx.camera.extensions.**
 
 -keepclassmembernames class androidx.core.widget.NestedScrollView {
     private android.widget.OverScroller mScroller;
@@ -157,24 +141,33 @@
     @android.webkit.JavascriptInterface <methods>;
 }
 
+-assumenosideeffects class kotlin.jvm.internal.Intrinsics {
+    public static void check*(...);
+    public static void throw*(...);
+}
+
 -assumenosideeffects class android.util.Log {
     public static *** v(...);
     public static *** d(...);
 }
 
--dontwarn org.jetbrains.annotations.NotNull
--dontwarn org.jetbrains.annotations.Nullable
--dontwarn androidx.camera.extensions.**
--dontwarn javax.script.**
--dontwarn com.google.j2objc.annotations.RetainedWith
--dontwarn com.google.j2objc.annotations.Weak
+-keepclassmembers enum * {
+     public static **[] values();
+     public static ** valueOf(java.lang.String);
+}
+
+-keepnames class androidx.recyclerview.widget.RecyclerView
+-keepclassmembers class androidx.recyclerview.widget.RecyclerView {
+    public void suppressLayout(boolean);
+    public boolean isLayoutSuppressed();
+}
 
 -repackageclasses
 -allowaccessmodification
--overloadaggressively
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
-
-# Use -keep to explicitly keep any other classes shrinking would remove
 -dontoptimize
--dontobfuscate
+
+-dontwarn com.google.j2objc.annotations.ReflectionSupport
+-dontwarn com.google.j2objc.annotations.RetainedWith
+-dontwarn com.google.j2objc.annotations.Weak

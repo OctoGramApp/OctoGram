@@ -11,31 +11,22 @@ configurations.configureEach {
     exclude group: 'androidx.recyclerview', module: 'recyclerview'
 }
 
-def getGitHash = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
+def getGitHash = {
+    return providers.exec {
         commandLine 'git', 'rev-parse', '--short', 'HEAD'
-        standardOutput = stdout
-    }
-    return stdout.toString().trim().substring(0, 8)
+    }.standardOutput.asText.get().trim().substring(0, 8)
 }
 
 def getGitDate = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
+    return providers.exec {
         commandLine 'git', 'show', '-s', '--format=%ct'
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
+    }.standardOutput.asText.get().trim()
 }
 
-def getGitBranch = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
+def getGitBranch = {
+    return providers.exec {
         commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
-        standardOutput = stdout
-    }
-    return stdout.toString().replace("feature/", "").trim()
+    }.standardOutput.asText.get().replace("feature/", "").trim()
 }
 
 def getVersionPBetaName = { ->
@@ -50,31 +41,21 @@ def getCCacheExecutable = {
     def pathName
     if (isWindows) {
         pathName = "windows"
-    } else if (isMacOs) {
-        // Check if ccache is installed
-        if (new ProcessBuilder("which", "ccache").start().waitFor() == 0) {
-            def stdout = new ByteArrayOutputStream()
-            exec {
-                commandLine 'which', 'ccache'
-                standardOutput = stdout
-            }
-            pathName = stdout.toString().trim()
-            // Get the path to the ccache executable
-            return Paths.get(pathName).toFile()
-        }
-        pathName = "macOs"
     } else {
-        if (new ProcessBuilder("which", "ccache").start().waitFor() == 0) {
-            def stdout = new ByteArrayOutputStream()
-            exec {
-                commandLine 'which', 'ccache'
-                standardOutput = stdout
-            }
-            pathName = stdout.toString().trim()
-            // Get the path to the ccache executable
-            return Paths.get(pathName).toFile()
+        // Check if ccache is installed
+        def ccCacheRes = providers.exec {
+            commandLine 'which', 'ccache'
         }
-        pathName = "linux"
+        if (ccCacheRes.result.get().exitValue == 0) {
+            return Paths.get(
+                ccCacheRes.standardOutput.asText.get().trim()
+            ).toFile()
+        }
+        if (isMacOs) {
+            pathName = "macOs"
+        } else {
+            pathName = "linux"
+        }
     }
     def executableFile = "ccache"
     if (isWindows) {
@@ -86,8 +67,8 @@ def getCCacheExecutable = {
 
 dependencies {
     // AndroidX dependencies
-    implementation 'androidx.fragment:fragment:1.6.2'
-    implementation 'androidx.core:core:1.10.1' // REQUIRES MIGRATING GRADLE TO A MORE UP-TO-DATE VERSION
+    implementation 'androidx.fragment:fragment:1.7.1'
+    implementation 'androidx.core:core:1.13.1'
     implementation 'androidx.palette:palette:1.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.3.7'
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
@@ -95,19 +76,19 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
 
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
-    //noinspection GradleDependency
-    compileOnly 'org.checkerframework:checker-qual:3.36.0' // REQUIRES MIGRATING GRADLE TO A MORE UP-TO-DATE VERSION
+    compileOnly 'org.checkerframework:checker-qual:3.42.0'
     compileOnly 'org.checkerframework:checker-compat-qual:2.5.5'
 
     // Firebase dependencies
-    implementation 'com.google.firebase:firebase-messaging:23.4.1'
-    implementation 'com.google.firebase:firebase-config:21.6.3'
-    implementation 'com.google.firebase:firebase-datatransport:18.2.1'
+    //noinspection GradleDependency
+    implementation 'com.google.firebase:firebase-messaging:23.4.1' // NOT YET SUPPORTED BY LOCAL VERSION OF EXOPLAYER
+    implementation 'com.google.firebase:firebase-config:22.0.0'
+    implementation 'com.google.firebase:firebase-datatransport:19.0.0'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
 
     // Google Play Services dependencies
     implementation 'com.google.android.gms:play-services-maps:18.2.0'
-    implementation 'com.google.android.gms:play-services-auth:21.0.0'
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
     implementation 'com.google.android.gms:play-services-vision:20.1.3'
     implementation 'com.google.android.gms:play-services-wearable:18.1.0'
     //noinspection GradleDependency
@@ -120,11 +101,11 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.stripe:stripe-android:2.0.2' // NOT YET SUPPORTED BY TELEGRAM
     implementation 'com.google.mlkit:language-id:17.0.5'
-    implementation 'com.android.billingclient:billing:6.2.0'
+    implementation 'com.android.billingclient:billing:7.0.0'
     implementation 'org.apache.commons:commons-text:1.10.0'
     implementation 'org.codeberg.qwerty287:prism4j:003cb5e380'
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation ('com.google.guava:guava:31.1-jre') {
+    implementation ('com.google.guava:guava:32.0.1-jre') {
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
         exclude group: 'org.checkerframework', module: 'checker-compat-qual'
         exclude group: 'org.checkerframework', module: 'checker-qual'
@@ -134,7 +115,7 @@ dependencies {
     }
 
     // CameraX Implementation
-    def camerax_version = "1.3.0-beta01"
+    def camerax_version = "1.4.0-beta01"
     implementation "androidx.camera:camera-camera2:${camerax_version}"
     implementation "androidx.camera:camera-core:${camerax_version}"
     implementation "androidx.camera:camera-extensions:${camerax_version}"
@@ -171,6 +152,7 @@ android {
 
     buildFeatures {
         prefab true
+        buildConfig true
     }
 
     externalNativeBuild {
