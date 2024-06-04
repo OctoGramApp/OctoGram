@@ -5756,7 +5756,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         containerView.addView(qualityPicker, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.LEFT));
         qualityPicker.cancelButton.setOnClickListener(view -> {
             selectedCompression = previousCompression;
-            OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.lastSelectedCompression, selectedCompression);
+            OctoConfig.INSTANCE.lastSelectedCompression.updateValue(selectedCompression);
             didChangedCompressionLevel(false);
             showQualityView(false);
             requestVideoPreview(2);
@@ -5766,7 +5766,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             if (object instanceof MediaController.MediaEditState) {
                 ((MediaController.MediaEditState) object).editedInfo = getCurrentVideoEditedInfo();
             }
-            OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.lastSelectedCompression, selectedCompression);
+            OctoConfig.INSTANCE.lastSelectedCompression.updateValue(selectedCompression);
             showQualityView(false);
             requestVideoPreview(2);
         });
@@ -13198,7 +13198,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 menuItem.showSubItem(gallery_menu_save);
                 menuItem.showSubItem(gallery_menu_share);
             }
-            if (newMessageObject.isPhoto()) {
+            if (!noforwards && newMessageObject.isPhoto()) {
                 menuItem.showSubItem(gallery_menu_copy);
             } else {
                 menuItem.hideSubItem(gallery_menu_copy);

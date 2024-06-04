@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
@@ -32,7 +33,7 @@ import it.octogram.android.utils.UserAccountInfoController;
 public class DatacenterCell extends LinearLayout {
     private final TextView dcNameView;
     private final TextView idView;
-    private final ImageView dcIconView;
+    private final AppCompatImageView dcIconView;
     private final CardView mainCardView;
     private boolean needDivider = false;
     private final Theme.ResourcesProvider resourcesProvider;
@@ -57,7 +58,7 @@ public class DatacenterCell extends LinearLayout {
         ll.setLayoutParams(new CardView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         ll.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
 
-        dcIconView = new ImageView(context) {
+        dcIconView = new AppCompatImageView(context) {
             @Override
             public void invalidate() {
                 super.invalidate();

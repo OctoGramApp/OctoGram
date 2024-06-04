@@ -143,7 +143,7 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
             }
         }
 
-        if (customDeviceName != currentDeviceModel) {
+        if (!customDeviceName.equals(currentDeviceModel)) {
             ConnectionsManager.setSessionName(customDeviceName);
         }
 

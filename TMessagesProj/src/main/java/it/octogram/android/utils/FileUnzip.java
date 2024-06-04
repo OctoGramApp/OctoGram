@@ -19,14 +19,13 @@ public class FileUnzip {
     private static final HashMap<String, UnzipThread> unzipThreads = new HashMap<>();
     private final static HashMap<String, UnzipListener> listeners = new HashMap<>();
 
-    public static boolean unzipFile(Context context, String id, File input, File output) {
-        if (unzipThreads.get(id) != null) return false;
+    public static void unzipFile(Context context, String id, File input, File output) {
+        if (unzipThreads.get(id) != null) return;
         if (output.exists())
             deleteFolder(output);
         UnzipThread unzipThread = new UnzipThread(context, output, id);
         unzipThread.unzipFile(input);
         unzipThreads.put(id, unzipThread);
-        return true;
     }
 
     public static boolean isRunningUnzip(String id) {

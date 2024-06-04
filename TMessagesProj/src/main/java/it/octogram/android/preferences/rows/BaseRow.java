@@ -14,6 +14,7 @@ public abstract class BaseRow {
     private final String summary;
     private final boolean requiresRestart;
     private final ConfigProperty<Boolean> showIfPreferenceValue;
+    private final boolean showIfReverse;
     private boolean divider;
     private final PreferenceType type;
     private final int[] postNotificationName;
@@ -24,40 +25,41 @@ public abstract class BaseRow {
 
 
     public BaseRow(PreferenceType type) {
-        this(null, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
+        this(null, null, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
     public BaseRow(@Nullable String title, PreferenceType type) {
-        this(title, null, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
+        this(title, null, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, PreferenceType type) {
-        this(title, summary, false, null, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
+        this(title, summary, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, PreferenceType type) {
-        this(title, summary, requiresRestart, showIf, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, PreferenceType type) {
+        this(title, summary, requiresRestart, showIf, showIfReverse, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type) {
-        this(title, summary, requiresRestart, showIf, divider, type, false, (int[]) null);
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type) {
+        this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, false, (int[]) null);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type, boolean premium) {
-        this(title, summary, requiresRestart, showIf, divider, type, premium, (int[]) null);
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium) {
+        this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, premium, (int[]) null);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, PreferenceType type, boolean premium, @Nullable int... postNotificationName) {
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, @Nullable int... postNotificationName) {
         this.title = title;
         this.summary = summary;
         this.requiresRestart = requiresRestart;
         this.showIfPreferenceValue = showIf;
+        this.showIfReverse = showIfReverse;
         this.divider = divider;
         this.type = type;
         this.postNotificationName = postNotificationName;
         this.premium = premium;
 
-        this.currentlyHidden = showIfPreferenceValue != null && !showIfPreferenceValue.getValue();
+        this.currentlyHidden = showIfPreferenceValue != null && showIfReverse == showIfPreferenceValue.getValue();
     }
 
     @Nullable
@@ -76,6 +78,10 @@ public abstract class BaseRow {
 
     public ConfigProperty<Boolean> getShowIfPreferenceValue() {
         return showIfPreferenceValue;
+    }
+
+    public boolean getShowIfReverse() {
+        return showIfReverse;
     }
 
     public boolean hasDivider() {

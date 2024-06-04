@@ -8,9 +8,6 @@
 
 package org.telegram.messenger;
 
-import it.octogram.android.OctoConfig;
-import android.util.Log;
-
 import org.telegram.messenger.utils.ImmutableByteArrayOutputStream;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
@@ -32,6 +29,9 @@ import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipException;
+
+import it.octogram.android.DownloadBoost;
+import it.octogram.android.OctoConfig;
 
 public class FileLoadOperation {
 
@@ -281,11 +281,11 @@ public class FileLoadOperation {
     }
 
     private void updateParams() {
-        if (OctoConfig.INSTANCE.downloadBoostValue.getValue() == OctoConfig.DownloadBoost.FAST || MessagesController.getInstance(currentAccount).getfileExperimentalParams) {
+        if (OctoConfig.INSTANCE.downloadBoostValue.getValue() == DownloadBoost.FAST.getValue() || MessagesController.getInstance(currentAccount).getfileExperimentalParams) {
             downloadChunkSizeBig = 1024 * 512;
             maxDownloadRequests = 8;
             maxDownloadRequestsBig = 8;
-        } else if (OctoConfig.INSTANCE.downloadBoostValue.getValue() == OctoConfig.DownloadBoost.EXTREME) {
+        } else if (OctoConfig.INSTANCE.downloadBoostValue.getValue() == DownloadBoost.EXTREME.getValue()) {
             downloadChunkSizeBig = 1024 * 1024;
             maxDownloadRequests = 12;
             maxDownloadRequestsBig = 12;

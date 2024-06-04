@@ -12,32 +12,17 @@ import org.telegram.ui.Components.StickerImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.impl.EmptyCellRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 
-public class OctoPreferences {
-
-    private final String title;
-    private final List<BaseRow> preferences;
-
-    public OctoPreferences(String title, List<BaseRow> preferences) {
-        this.title = title;
-        this.preferences = preferences;
-    }
+public record OctoPreferences(String title, List<BaseRow> preferences) {
 
     public static OctoPreferencesBuilder builder(String name) {
         return new OctoPreferencesBuilder(name);
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public List<BaseRow> getPreferences() {
-        return preferences;
     }
 
     public static class OctoPreferencesBuilder {
@@ -50,6 +35,13 @@ public class OctoPreferences {
 
         public OctoPreferencesBuilder category(String title, Consumer<OctoPreferencesBuilder> consumer) {
             preferences.add(new HeaderRow(title));
+            consumer.accept(this);
+            preferences.add(new ShadowRow());
+            return this;
+        }
+
+        public OctoPreferencesBuilder category(String title, ConfigProperty<Boolean> showIf, Consumer<OctoPreferencesBuilder> consumer) {
+            preferences.add(new HeaderRow(title, showIf));
             consumer.accept(this);
             preferences.add(new ShadowRow());
             return this;

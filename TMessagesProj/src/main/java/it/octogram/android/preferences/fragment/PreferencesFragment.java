@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.fragment;
@@ -93,7 +93,7 @@ public class PreferencesFragment extends BaseFragment {
 
     private void updatePreferences() {
         OctoPreferences preferences = entry.getPreferences(this, context);
-        List<BaseRow> preferenceList = preferences.getPreferences();
+        List<BaseRow> preferenceList = preferences.preferences();
 
         if (OctoConfig.INSTANCE.disableDividers.getValue()) {
             for (BaseRow baseRow : preferenceList) {
@@ -107,10 +107,11 @@ public class PreferencesFragment extends BaseFragment {
     public void updateRows() {
         positions.clear();
         rowCount = 0;
-        for (BaseRow category : preferences.getPreferences()) {
-            if (category.getShowIfPreferenceValue() != null && !category.getShowIfPreferenceValue().getValue()) {
+        for (BaseRow category : preferences.preferences()) {
+            if (category.getShowIfPreferenceValue() != null && category.getShowIfReverse() == category.getShowIfPreferenceValue().getValue()) {
                 positions.put(-1, category);
                 category.setRow(-1);
+                category.setCurrentlyHidden(true);
                 continue;
             }
             positions.put(rowCount++, category);
@@ -131,7 +132,7 @@ public class PreferencesFragment extends BaseFragment {
         updateRows();
 
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setTitle(preferences.getTitle());
+        actionBar.setTitle(preferences.title());
         if (AndroidUtilities.isTablet()) {
             actionBar.setOccupyStatusBar(false);
         }
@@ -168,7 +169,12 @@ public class PreferencesFragment extends BaseFragment {
                     return;
                 }
 
-                boolean success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
+                boolean success;
+                if (row instanceof ListRow) {
+                    success = ((ListRow) row).onCustomClick(this, getParentActivity(), view, position, x, y, this::reloadUIAfterValueUpdate);
+                } else {
+                    success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
+                }
                 if (success) {
                     if (row.doesRequireRestart()) {
                         restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
@@ -180,25 +186,29 @@ public class PreferencesFragment extends BaseFragment {
                 }
             }
 
-            List<BaseRow> toShow = preferences.getPreferences().stream()
-                    .filter(fi -> fi.getShowIfPreferenceValue() != null)
-                    .filter(BaseRow::isCurrentlyHidden)
-                    .filter(fi -> fi.getShowIfPreferenceValue().getValue())
-                    .collect(Collectors.toList());
-            if (!toShow.isEmpty()) {
-                updateUI(toShow, true);
-            }
-
-            List<BaseRow> toHide = preferences.getPreferences().stream()
-                    .filter(fi -> fi.getShowIfPreferenceValue() != null)
-                    .filter(fi -> !fi.isCurrentlyHidden())
-                    .filter(fi -> !fi.getShowIfPreferenceValue().getValue())
-                    .collect(Collectors.toList());
-            if (!toHide.isEmpty()) {
-                updateUI(toHide, false);
-            }
+            reloadUIAfterValueUpdate();
         });
         return fragmentView;
+    }
+
+    public void reloadUIAfterValueUpdate() {
+        List<BaseRow> toShow = preferences.preferences().stream()
+                .filter(fi -> fi.getShowIfPreferenceValue() != null)
+                .filter(BaseRow::isCurrentlyHidden)
+                .filter(fi -> fi.getShowIfReverse() != fi.getShowIfPreferenceValue().getValue())
+                .collect(Collectors.toList());
+        if (!toShow.isEmpty()) {
+            updateUI(toShow, true);
+        }
+
+        List<BaseRow> toHide = preferences.preferences().stream()
+                .filter(fi -> fi.getShowIfPreferenceValue() != null)
+                .filter(fi -> !fi.isCurrentlyHidden())
+                .filter(fi -> fi.getShowIfReverse() == fi.getShowIfPreferenceValue().getValue())
+                .collect(Collectors.toList());
+        if (!toHide.isEmpty()) {
+            updateUI(toHide, false);
+        }
     }
 
     private void updateUI(List<BaseRow> rows, boolean show) {
@@ -388,7 +398,7 @@ public class PreferencesFragment extends BaseFragment {
                     SliderChooseRow sliderRow = (SliderChooseRow) positions.get(position);
                     slideChooseView.setCallback(index -> {
                         int id = sliderRow.getIds().get(index);
-                        OctoConfig.INSTANCE.updateIntegerSetting(sliderRow.getPreferenceValue(), sliderRow.getOptions().get(id).first);
+                        sliderRow.getPreferenceValue().updateValue(sliderRow.getOptions().get(id).first);
                     });
                     slideChooseView.setOptions(sliderRow.getIntValue(), sliderRow.getValues());
                     break;

@@ -113,15 +113,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+
 import org.telegram.PhoneFormat.CallingCodeInfo;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.AuthTokensHelper;
 import org.telegram.messenger.BillingController;
 import org.telegram.messenger.BirthdayController;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ChatThemeController;
@@ -253,7 +254,6 @@ import org.telegram.ui.Components.SharedMediaLayout;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.StickerEmptyView;
 import org.telegram.ui.Components.TextViewSwitcher;
-import org.telegram.ui.Components.Text;
 import org.telegram.ui.Components.TimerDrawable;
 import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.Components.TypefaceSpan;
@@ -294,6 +294,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import it.octogram.android.DcIdStyle;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -4069,7 +4070,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             } else if (which == 8) {
                                 SharedConfig.toggleRoundCamera16to9();
                             } else if (which == 9) {
-                                ((LaunchActivity) getParentActivity()).checkAppUpdate(true, null);
+                                // ((LaunchActivity) getParentActivity()).checkAppUpdate(true, null);
+
+                                if (OctoConfig.INSTANCE.autoCheckUpdates.getValue() || OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
+                                    AndroidUtilities.runOnUIThread(() -> {
+                                        ((LaunchActivity) getParentActivity()).checkAppUpdate(false, null);
+                                    }, 1000);
+                                }
                             } else if (which == 10) {
                                 getMessagesStorage().readAllDialogs(-1);
                             } else if (which == 11) {
@@ -4821,7 +4828,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         // Octogram - Minimal dc id style
         dcIdTextView = new TextViewSwitcher(context);
-        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.MINIMAL ? View.VISIBLE : View.GONE);
+        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() ? View.VISIBLE : View.GONE);
         dcIdTextView.setFactory(() -> {
             TextView view = new TextView(context);
             view.setTextColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue));
@@ -7371,7 +7378,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
             }
 
-            if (!searchMode && OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.MINIMAL) {
+            if (!searchMode && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) {
                 dcIdTextView.setAlpha(diff);
                 dcIdTextView.setTag(diff);
                 if (diff == 0) {
@@ -8781,13 +8788,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 numberSectionRow = rowCount++;
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM)
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue())
                     dcIdRow = rowCount++;
 
                 numberRow = rowCount++;
                 setUsernameRow = rowCount++;
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM)
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue())
                     dcIdRow = rowCount++;
 
                 if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat())
@@ -8847,7 +8854,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 questionRow = rowCount++;
                 faqRow = rowCount++;
                 policyRow = rowCount++;
-                if (BuildVars.LOGS_ENABLED || BuildVars.DEBUG_PRIVATE_VERSION) {
+                if (BuildVars.LOGS_ENABLED /*|| BuildVars.DEBUG_PRIVATE_VERSION*/) {
                     helpSectionCell = rowCount++;
                     debugHeaderRow = rowCount++;
                 }
@@ -8876,7 +8883,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 infoStartRow = rowCount;
                 infoHeaderRow = rowCount++;
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM) {
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue()) {
                     dcIdRow = rowCount++;
                 };
 
@@ -8890,7 +8897,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     usernameRow = rowCount++;
                 }
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM) {
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue()) {
                     dcIdRow = rowCount++;
                 }
                 if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat()){
@@ -8972,7 +8979,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 sharedMediaRow = rowCount++;
             }
         } else if (chatId != 0) {
-            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM) {
+            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue()) {
                 infoHeaderRow = rowCount++;
                 // todo current user current chat
                 dcIdRow = rowCount++;
@@ -8981,7 +8988,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (LocaleController.isRTL && ChatObject.isChannel(currentChat) && chatInfo != null && !currentChat.megagroup && chatInfo.linked_chat_id != 0) {
                     emptyRow = rowCount++;
                 }
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() != OctoConfig.DcIdStyle.OWLGRAM) {
+                if (OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.OWLGRAM.getValue()) {
                     infoHeaderRow = rowCount++;
                 }
                 if (chatInfo != null) {
@@ -9002,7 +9009,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 //            if (infoHeaderRow != -1) {
 //                notificationsDividerRow = rowCount++;
 //            }
-            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM) {
+            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue()) {
                 dcIdRow = rowCount++;
             }
             notificationsRow = rowCount++;
@@ -10319,7 +10326,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         avatarContainer.setVisibility(View.VISIBLE);
         nameTextView[1].setVisibility(View.VISIBLE);
         onlineTextView[1].setVisibility(View.VISIBLE);
-        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.MINIMAL ? View.VISIBLE : View.GONE);
+        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() ? View.VISIBLE : View.GONE);
         onlineTextView[3].setVisibility(View.VISIBLE);
 
         actionBar.onSearchFieldVisibilityChanged(searchTransitionProgress > 0.5f);
@@ -10451,7 +10458,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         nameTextView[1].setVisibility(hide);
         onlineTextView[1].setVisibility(hide);
-        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.MINIMAL ? hide : View.GONE);
+        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() ? hide : View.GONE);
         onlineTextView[3].setVisibility(hide);
 
         if (otherItem != null) {
@@ -11000,34 +11007,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         } else if (StoreUtils.isFromHuaweiStore()) {
                             abi = "huawei ";
                         }
-                        switch (pInfo.versionCode % 10) {
-                            case 1:
-                            case 3:
-                                abi += "arm-v7a";
-                                break;
-                            case 2:
-                            case 4:
-                                abi += "x86";
-                                break;
-                            case 5:
-                            case 7:
-                                abi += "arm64-v8a";
-                                break;
-                            case 6:
-                            case 8:
-                                abi += "x86_64";
-                                break;
-                            case 0:
-                            case 9:
-                                //if (ApplicationLoader.isStandaloneBuild()) {
-                                //    abi = "direct " + Build.CPU_ABI + " " + Build.CPU_ABI2;
-                                if (StoreUtils.isDownloadedFromAnyStore()) {
-                                    abi = "universal/" + Build.CPU_ABI + " " + Build.CPU_ABI2;
-                                } else {
-                                    abi += "universal/" + Build.CPU_ABI + " " + Build.CPU_ABI2;
-                                }
-                                break;
-                        }
+                        abi += OctoUtils.getCurrentAbi();
                         String version_info = LocaleController.formatString("OctoGramVersion", R.string.OctoGramVersion, String.format(Locale.US, "v%s (%s) %s", BuildVars.BUILD_VERSION_STRING, BuildVars.DEBUG_PRIVATE_VERSION ? BuildConfig.GIT_COMMIT_HASH:BuildConfig.BUILD_VERSION, abi), String.format(Locale.US, "v%s (%d)", BuildVars.TELEGRAM_VERSION_STRING, BuildVars.TELEGRAM_BUILD_VERSION));
                         cell.setText(version_info);
                         // cell.setText(formatString("TelegramVersion", R.string.TelegramVersion, String.format(Locale.US, "v%s (%d) %s", pInfo.versionName, code, abi)));
@@ -11858,7 +11838,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == octoGramSettingsRow) {
                 return VIEW_TYPE_HEADER;
             } else if (position == phoneRow || position == locationRow || position == numberRow || position == birthdayRow || position == restrictionReasonRow || position == registrationDataRow
-                    || (position == dcIdRow && OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.TELEGRAM)) {
+                    || (position == dcIdRow && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue())) {
                 return VIEW_TYPE_TEXT_DETAIL;
             } else if (position == usernameRow || position == setUsernameRow) {
                 return VIEW_TYPE_TEXT_DETAIL_MULTILINE;
@@ -11903,7 +11883,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 return VIEW_TYPE_ADDTOGROUP_INFO;
             } else if (position == premiumRow) {
                 return VIEW_TYPE_PREMIUM_TEXT_CELL;
-            } else if (position == dcIdRow && OctoConfig.INSTANCE.dcIdStyle.getValue() == OctoConfig.DcIdStyle.OWLGRAM) {
+            } else if (position == dcIdRow && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue()) {
                 return VIEW_TYPE_DATACENTER_INFO;
             } else if (position == starsRow) {
                 return VIEW_TYPE_STARS_TEXT_CELL;

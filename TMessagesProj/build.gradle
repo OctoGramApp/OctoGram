@@ -4,6 +4,13 @@ import java.nio.file.Paths
 
 plugins {
     id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force 'org.checkerframework:checker-qual:3.42.0'
+    }
 }
 
 configurations.configureEach {
@@ -126,7 +133,7 @@ dependencies {
     implementation 'androidx.biometric:biometric:1.1.0'
 
     // GOOGLE PLAY UPDATE CHECKER
-    implementation 'com.google.android.play:core:1.10.3'
+    //implementation 'com.google.android.play:core:1.10.3'
 
     // NATIVE LIBS
     implementation 'com.getkeepsafe.relinker:relinker:1.4.5'

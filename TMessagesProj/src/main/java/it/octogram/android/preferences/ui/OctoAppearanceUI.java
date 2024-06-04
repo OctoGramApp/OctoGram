@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.ui;
@@ -25,6 +25,7 @@ import java.util.List;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.Shape;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -54,9 +55,9 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 .category(LocaleController.getString(R.string.StickerShape), category -> category.row(new ListRow.ListRowBuilder()
                     .currentValue(OctoConfig.INSTANCE.stickerShape)
                     .options(List.of(
-                            new Pair<>(OctoConfig.Shape.DEFAULT, LocaleController.getString(R.string.StyleTypeDefault)),
-                            new Pair<>(OctoConfig.Shape.ROUND, LocaleController.getString(R.string.StickerShapeRounded)),
-                            new Pair<>(OctoConfig.Shape.MESSAGE, LocaleController.getString(R.string.StyleTypeMessage))
+                            new Pair<>(Shape.DEFAULT.getValue(), LocaleController.getString(R.string.StyleTypeDefault)),
+                            new Pair<>(Shape.ROUND.getValue(), LocaleController.getString(R.string.StickerShapeRounded)),
+                            new Pair<>(Shape.MESSAGE.getValue(), LocaleController.getString(R.string.StyleTypeMessage))
                     ))
                     .postNotificationName(NotificationCenter.reloadInterface)
                     .title(LocaleController.formatString(R.string.Style))
@@ -67,7 +68,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                                 @Override
                                 protected void onSelectedEvent(int eventSelected) {
                                     super.onSelectedEvent(eventSelected);
-                                    OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.eventType, eventSelected);
+                                    OctoConfig.INSTANCE.eventType.updateValue(eventSelected);
 
                                     Theme.lastHolidayCheckTime = 0;
                                     Theme.dialogs_holidayDrawable = null;

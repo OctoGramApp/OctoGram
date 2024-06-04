@@ -956,7 +956,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
 
         deleteAll.forEachSelected((participant, i) -> {
             if (participant instanceof TLRPC.User) {
-                MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, (TLRPC.User) participant, null, getBaseFragment(),0);
+                MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, (TLRPC.User) participant, null, getBaseFragment(), 0);
             } else if (participant instanceof TLRPC.Chat) {
                 MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, null, (TLRPC.Chat) participant, getBaseFragment(), 0);
             }

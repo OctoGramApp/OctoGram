@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.ui;
@@ -11,14 +11,19 @@ package it.octogram.android.preferences.ui;
 import android.content.Context;
 import android.util.Pair;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.AlertDialog;
 
 import java.util.List;
 
+import it.octogram.android.DcIdStyle;
+import it.octogram.android.DcIdType;
+import it.octogram.android.DoubleTapAction;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
@@ -83,10 +88,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             })
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
-                                    new Pair<>(OctoConfig.DcIdStyle.NONE, LocaleController.formatString("Nothing", R.string.Nothing)),
-                                    new Pair<>(OctoConfig.DcIdStyle.OWLGRAM, "OwlGram"),
-                                    new Pair<>(OctoConfig.DcIdStyle.TELEGRAM, "Telegram"),
-                                    new Pair<>(OctoConfig.DcIdStyle.MINIMAL, "Minimal")
+                                    new Pair<>(DcIdStyle.NONE.getValue(), LocaleController.formatString("Nothing", R.string.Nothing)),
+                                    new Pair<>(DcIdStyle.OWLGRAM.getValue(), "OwlGram"),
+                                    new Pair<>(DcIdStyle.TELEGRAM.getValue(), "Telegram"),
+                                    new Pair<>(DcIdStyle.MINIMAL.getValue(), "Minimal")
                             ))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .title(LocaleController.formatString("Style", R.string.Style))
@@ -94,8 +99,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.dcIdType)
                             .options(List.of(
-                                    new Pair<>(OctoConfig.DcIdType.BOT_API, "Bot API"),
-                                    new Pair<>(OctoConfig.DcIdType.TELEGRAM, "Telegram")
+                                    new Pair<>(DcIdType.BOT_API.getValue(), "Bot API"),
+                                    new Pair<>(DcIdType.TELEGRAM.getValue(), "Telegram")
                             ))
                             .title(LocaleController.formatString("Type", R.string.Type))
                             .postNotificationName(NotificationCenter.reloadInterface)
@@ -203,27 +208,27 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapAction)
                             .optionsIcons(List.of(
-                                    new Triple<>(OctoConfig.DoubleTapAction.DISABLED, LocaleController.getString(R.string.Disable), R.drawable.msg_block),
-                                    new Triple<>(OctoConfig.DoubleTapAction.REACTION, LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
-                                    new Triple<>(OctoConfig.DoubleTapAction.COPY, LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
-                                    new Triple<>(OctoConfig.DoubleTapAction.FORWARD, LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
-                                    new Triple<>(OctoConfig.DoubleTapAction.REPLY, LocaleController.getString(R.string.Reply), R.drawable.msg_reply),
-                                    new Triple<>(OctoConfig.DoubleTapAction.DELETE, LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
-                                    new Triple<>(OctoConfig.DoubleTapAction.SAVE, LocaleController.getString(R.string.Save), R.drawable.msg_saved)
+                                    new Triple<>(DoubleTapAction.DISABLED.getValue(), LocaleController.getString(R.string.Disable), R.drawable.msg_block),
+                                    new Triple<>(DoubleTapAction.REACTION.getValue(), LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
+                                    new Triple<>(DoubleTapAction.COPY.getValue(), LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
+                                    new Triple<>(DoubleTapAction.FORWARD.getValue(), LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
+                                    new Triple<>(DoubleTapAction.REPLY.getValue(), LocaleController.getString(R.string.Reply), R.drawable.menu_reply),
+                                    new Triple<>(DoubleTapAction.DELETE.getValue(), LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
+                                    new Triple<>(DoubleTapAction.SAVE.getValue(), LocaleController.getString(R.string.Save), R.drawable.msg_saved)
                             ))
                             .title(LocaleController.getString(R.string.PreferredActionIncoming))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapActionOut)
                             .optionsIcons(List.of(
-                                    new Triple<>(OctoConfig.DoubleTapAction.DISABLED, LocaleController.getString(R.string.Disable), R.drawable.msg_block),
-                                    new Triple<>(OctoConfig.DoubleTapAction.REACTION, LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
-                                    new Triple<>(OctoConfig.DoubleTapAction.COPY, LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
-                                    new Triple<>(OctoConfig.DoubleTapAction.FORWARD, LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
-                                    new Triple<>(OctoConfig.DoubleTapAction.REPLY, LocaleController.getString(R.string.Reply), R.drawable.msg_reply),
-                                    new Triple<>(OctoConfig.DoubleTapAction.DELETE, LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
-                                    new Triple<>(OctoConfig.DoubleTapAction.SAVE, LocaleController.getString(R.string.Save), R.drawable.msg_saved),
-                                    new Triple<>(OctoConfig.DoubleTapAction.EDIT, LocaleController.getString(R.string.Edit), R.drawable.msg_edit)
+                                    new Triple<>(DoubleTapAction.DISABLED.getValue(), LocaleController.getString(R.string.Disable), R.drawable.msg_block),
+                                    new Triple<>(DoubleTapAction.REACTION.getValue(), LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
+                                    new Triple<>(DoubleTapAction.COPY.getValue(), LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
+                                    new Triple<>(DoubleTapAction.FORWARD.getValue(), LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
+                                    new Triple<>(DoubleTapAction.REPLY.getValue(), LocaleController.getString(R.string.Reply), R.drawable.menu_reply),
+                                    new Triple<>(DoubleTapAction.DELETE.getValue(), LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
+                                    new Triple<>(DoubleTapAction.SAVE.getValue(), LocaleController.getString(R.string.Save), R.drawable.msg_saved),
+                                    new Triple<>(DoubleTapAction.EDIT.getValue(), LocaleController.getString(R.string.Edit), R.drawable.msg_edit)
                             ))
                             .title(LocaleController.getString(R.string.PreferredActionOutgoing))
                             .build());
@@ -240,6 +245,16 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                         .requiresRestart(true)
                         .build()))
                 .category(LocaleController.getString(R.string.ConnectionSection), category -> category.row(new SwitchRow.SwitchRowBuilder()
+                        .onClick(() -> {
+                            AndroidUtilities.runOnUIThread(() -> {
+                                for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
+                                    if (UserConfig.getInstance(i).isClientActivated()) {
+                                        ConnectionsManager.getInstance(i).checkConnection();
+                                    }
+                                }
+                            }, 300);
+                            return true;
+                        })
                         .preferenceValue(OctoConfig.INSTANCE.forceUseIpV6)
                         .title(LocaleController.getString(R.string.TryConnectWithIPV6))
                         .build()))

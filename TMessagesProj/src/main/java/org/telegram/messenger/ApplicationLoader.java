@@ -51,6 +51,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 import it.octogram.android.camerax.CameraXUtils;
+import it.octogram.android.tgastandaloneexport.UpdateAppAlertDialog;
+import it.octogram.android.tgastandaloneexport.UpdateLayout;
 
 public class ApplicationLoader extends Application {
 
@@ -134,7 +136,7 @@ public class ApplicationLoader extends Application {
     }
 
     public static boolean isStandaloneBuild() {
-        return BuildVars.isStandaloneApp();
+        return true; //BuildVars.isStandaloneApp();
     }
 
     protected boolean isHuaweiBuild() {
@@ -590,11 +592,20 @@ public class ApplicationLoader extends Application {
     }
 
     public boolean showUpdateAppPopup(Context context, TLRPC.TL_help_appUpdate update, int account) {
-        return false;
+        try {
+            (new UpdateAppAlertDialog(context, update, account)).show();
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+        // UpdateAppAlertDialog IS PART OF TGA STANDALONE BUILD
+        // THE OCTOGRAM BEHAVIOR IS MUCH DIFFERENT THAN TGA ONE
+        return true;
     }
 
     public IUpdateLayout takeUpdateLayout(Activity activity, ViewGroup sideMenu, ViewGroup sideMenuContainer) {
-        return null;
+        // UpdateLayout IS PART OF TGA STANDALONE BUILD
+        // THE OCTOGRAM BEHAVIOR IS MUCH DIFFERENT THAN TGA ONE
+        return new UpdateLayout(activity, sideMenu, sideMenuContainer);
     }
 
     public TLRPC.Update parseTLUpdate(int constructor) {

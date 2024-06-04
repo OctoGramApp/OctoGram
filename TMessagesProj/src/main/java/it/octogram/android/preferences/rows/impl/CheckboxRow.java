@@ -11,7 +11,6 @@ import org.telegram.ui.Cells.CheckBoxCell;
 import java.util.function.Supplier;
 
 import it.octogram.android.ConfigProperty;
-import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
@@ -22,8 +21,8 @@ public class CheckboxRow extends BaseRow implements Clickable {
     private final ConfigProperty<Boolean> preferenceValue;
     private final Supplier<Boolean> supplierClickable;
 
-    private CheckboxRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, boolean premium, int... posts) {
-        super(title, summary, requiresRestart, showIf, divider, PreferenceType.CHECKBOX, premium, posts);
+    private CheckboxRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, boolean premium, int... posts) {
+        super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.CHECKBOX, premium, posts);
         this.preferenceValue = preferenceValue;
         this.supplierClickable = supplierClickable;
     }
@@ -37,7 +36,7 @@ public class CheckboxRow extends BaseRow implements Clickable {
         if (supplierClickable != null && !supplierClickable.get()) {
             return false;
         }
-        OctoConfig.INSTANCE.toggleBooleanSetting(preferenceValue);
+        preferenceValue.updateValue(!preferenceValue.getValue());
 
         CheckBoxCell cell = (CheckBoxCell) view;
         cell.setChecked(preferenceValue.getValue(), true);
@@ -53,7 +52,7 @@ public class CheckboxRow extends BaseRow implements Clickable {
         }
 
         public CheckboxRow build() {
-            return new CheckboxRow(title, description, requiresRestart, showIf, divider, preferenceValue, supplierClickable, premium, postNotificationName);
+            return new CheckboxRow(title, description, requiresRestart, showIf, showIfReverse, divider, preferenceValue, supplierClickable, premium, postNotificationName);
         }
     }
 

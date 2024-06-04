@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 package it.octogram.android.camerax.components;
 
@@ -83,19 +83,13 @@ public class ButtonEffectView extends RelativeLayout {
     }
 
     private int getIconRes(int icon) {
-        switch (icon) {
-            case CameraXController.CAMERA_HDR:
-                return R.drawable.round_hdr_on_black;
-            case CameraXController.CAMERA_NIGHT:
-                return R.drawable.round_bedtime_black;
-            case CameraXController.CAMERA_AUTO:
-                return R.drawable.round_auto_fix_high_black;
-            case CameraXController.CAMERA_WIDE:
-                return R.drawable.round_landscape_black;
-            case CameraXController.CAMERA_NONE:
-            default:
-                return R.drawable.round_photo_camera_black;
-        }
+        return switch (icon) {
+            case CameraXController.CAMERA_HDR -> R.drawable.round_hdr_on_black;
+            case CameraXController.CAMERA_NIGHT -> R.drawable.round_bedtime_black;
+            case CameraXController.CAMERA_AUTO -> R.drawable.round_auto_fix_high_black;
+            case CameraXController.CAMERA_WIDE -> R.drawable.round_landscape_black;
+            default -> R.drawable.round_photo_camera_black;
+        };
     }
 
     public void toggleButton(boolean enabled, boolean animated) {

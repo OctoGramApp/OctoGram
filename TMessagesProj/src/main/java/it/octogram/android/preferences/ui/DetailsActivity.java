@@ -38,6 +38,7 @@ import it.octogram.android.Datacenter;
 import it.octogram.android.preferences.ui.custom.DetailsPreviewMessages;
 import it.octogram.android.preferences.ui.custom.TextDetailCellMultiline;
 import it.octogram.android.utils.MessageStringHelper;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UserAccountInfoController;
 
 public class DetailsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
@@ -99,6 +100,8 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
     private int fileMimeType;
     private int fileSizeRow;
     private int fileDuration;
+    private int fileFramerate;
+    private int fileBitrate;
     private int fileDCRow;
     private int fileEmojiRow;
     private int fileDividerRow;
@@ -118,6 +121,8 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
     private UserAccountInfoController.UserAccountInfo fromRepliedUserInfo;
     private UserAccountInfoController.UserAccountInfo fromUserInfo;
     private UserAccountInfoController.UserAccountInfo fromChatInfo;
+
+    private double fileBitrateCachedValue;
 
     public DetailsActivity(MessageObject messageObject) {
         this.messageObject = messageObject;
@@ -275,6 +280,8 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         filePathRow = -1;
         fileSizeRow = -1;
         fileDuration = -1;
+        fileFramerate = -1;
+        fileBitrate = -1;
         fileDCRow = -1;
         fileEmojiRow = -1;
         fileDividerRow = -1;
@@ -401,6 +408,13 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                             Emoji.preloadEmoji(attribute.alt);
                             emoji = attribute.alt;
                             fileEmojiRow = rowCount++;
+                        }
+
+                        if (messageObject.messageOwner.media.document.attributes.get(a) instanceof TLRPC.TL_documentAttributeVideo) {
+                            fileBitrate = rowCount++;
+
+                            long bitSizeData = messageObject.messageOwner.media.document.size;
+                            fileBitrateCachedValue = bitSizeData / messageObject.messageOwner.media.document.attributes.get(a).duration;
                         }
                     }
                 }
@@ -581,6 +595,10 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                         textDetailCell.setTextAndValue(LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().formatterYear.format(new Date(date)), LocaleController.getInstance().formatterDayWithSeconds.format(new Date(date))), LocaleController.getString("EditedDate", R.string.EditedDate), true);
                     } else if (position == fileDuration) {
                         textDetailCell.setTextAndValue(durationString, LocaleController.getString("UserRestrictionsDuration", R.string.UserRestrictionsDuration), true);
+                    } else if (position == fileFramerate) {
+                        //textDetailCell.setTextAndValue(String.valueOf(videoInfo.getFrameRate()), LocaleController.getString("FileFrameRate", R.string.FileFrameRate), true);
+                    } else if (position == fileBitrate) {
+                        textDetailCell.setTextAndValue(OctoUtils.formatBitrate(fileBitrateCachedValue), LocaleController.getString("FileBitrate", R.string.FileBitrate), true);
                     } else if (position == fileEmojiRow) {
                         textDetailCell.setTextWithEmojiAndValue(emoji, LocaleController.getString("AssociatedEmoji", R.string.AssociatedEmoji), true);
                     } else if (position == fileMimeType) {
@@ -649,8 +667,8 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     position == repliedMessageIdRow || position == repliedUserNameRow || position == repliedUserUsernameRow ||
                     position == repliedUserIdRow || position == groupNameRow || position == groupIdRow || position == groupUsernameRow ||
                     position == fileNameRow || position == filePathRow || position == fileSizeRow || position == fileDCRow ||
-                    position == messageForwardsRow || position == messageDateEditedRow || position == fileDuration ||
-                    position == fileEmojiRow || position == fileMimeType || position == groupDatacenterRow ||
+                    position == messageForwardsRow || position == messageDateEditedRow || position == fileDuration || position == fileFramerate ||
+                    position == fileBitrate || position == fileEmojiRow || position == fileMimeType || position == groupDatacenterRow ||
                     position == repliedUserDatacenterRow || position == forwardUserDatacenterRow || position == dcRow ||
                     position == messageTextLengthRow || position == repliedMessageTextLengthRow) {
                 return 3;

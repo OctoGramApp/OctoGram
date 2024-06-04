@@ -19,14 +19,9 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.custom.CustomDeviceNameBottomSheet;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -38,6 +33,9 @@ import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.Switch;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.custom.CustomDeviceNameBottomSheet;
 
 public class SessionBottomSheet extends BottomSheet {
 
@@ -403,6 +401,22 @@ public class SessionBottomSheet extends BottomSheet {
         } else {
             imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId));
         }
+
+        /* TODO: WIP New Logic for Session Icons
+        SessionIcon sessionIcons = new SessionIcon();
+        SessionIcon.DeviceAttributes attributes = sessionIcons.setDeviceAttributes(session);
+
+        var colorKey = attributes.getColorKey();
+        var iconId = attributes.getIconId();
+        var iconAnimated = attributes.getAnimationId();
+
+        imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey)));
+        if (iconAnimated != 0) {
+            int[] colors = new int[]{0x000000, Theme.getColor(colorKey)};
+            imageView.setAnimation(iconAnimated, 50, 50, colors);
+        } else {
+            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId));
+        }*/
     }
 
     private static class ItemView extends FrameLayout {

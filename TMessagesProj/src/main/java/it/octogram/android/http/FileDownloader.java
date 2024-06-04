@@ -24,14 +24,13 @@ public class FileDownloader {
     private final static HashMap<String, FileDownloadListener> listeners = new HashMap<>();
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static boolean downloadFile(Context context, String id, File output, String link) {
-        if (downloadThreads.get(id) != null) return false;
+    public static void downloadFile(Context context, String id, File output, String link) {
+        if (downloadThreads.get(id) != null) return;
         if (output.exists())
             output.delete();
         DownloadThread downloadThread = new DownloadThread(context, output, id);
         downloadThread.downloadFile(link);
         downloadThreads.put(id, downloadThread);
-        return true;
     }
 
     public static void cancel(String id) {

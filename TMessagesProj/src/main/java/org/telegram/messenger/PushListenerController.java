@@ -3,7 +3,6 @@ package org.telegram.messenger;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.IntDef;
@@ -1471,6 +1470,9 @@ public class PushListenerController {
                                     PushListenerController.sendRegistrationToServer(getPushType(), null);
                                     return;
                                 }
+
+                                FirebaseMessaging.getInstance().subscribeToTopic("octoUpdatesTopic");
+
                                 String token = task.getResult();
                                 if (!TextUtils.isEmpty(token)) {
                                     PushListenerController.sendRegistrationToServer(getPushType(), token);

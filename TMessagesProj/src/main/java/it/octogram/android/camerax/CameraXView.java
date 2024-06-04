@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.view.PreviewView;
 
@@ -379,7 +380,7 @@ public class CameraXView extends BaseCameraView {
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected void dispatchDraw(@NonNull Canvas canvas) {
         if (flipAnimator != null) {
             canvas.drawColor(Color.BLACK);
         }
@@ -415,15 +416,11 @@ public class CameraXView extends BaseCameraView {
     }
 
     public String mapFlashMode(int result) {
-        switch (result) {
-            case ImageCapture.FLASH_MODE_ON:
-                return "on";
-            case ImageCapture.FLASH_MODE_OFF:
-                return "off";
-            case ImageCapture.FLASH_MODE_AUTO:
-            default:
-                return "auto";
-        }
+        return switch (result) {
+            case ImageCapture.FLASH_MODE_ON -> "on";
+            case ImageCapture.FLASH_MODE_OFF -> "off";
+            default -> "auto";
+        };
     }
 
     public boolean isFlashAvailable() {
@@ -513,7 +510,7 @@ public class CameraXView extends BaseCameraView {
     }
 
     @Override
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+    protected boolean drawChild(@NonNull Canvas canvas, View child, long drawingTime) {
         boolean result = super.drawChild(canvas, child, drawingTime);
         if (focusProgress != 1.0f || innerAlpha != 0.0f || outerAlpha != 0.0f) {
             int baseRad = AndroidUtilities.dp(30);
@@ -617,7 +614,7 @@ public class CameraXView extends BaseCameraView {
     Rect bounds = new Rect();
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         if (thumbDrawable != null) {
             bounds.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
             int W = thumbDrawable.getIntrinsicWidth(), H = thumbDrawable.getIntrinsicHeight();

@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.ui;
@@ -17,7 +17,9 @@ import org.telegram.messenger.R;
 
 import java.util.ArrayList;
 
+import it.octogram.android.AudioType;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhotoResolution;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -37,11 +39,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     !OctoConfig.INSTANCE.downloadBoost.getValue() &&
                     !OctoConfig.INSTANCE.mediaInGroupCall.getValue() &&
                     !OctoConfig.INSTANCE.showRPCErrors.getValue() &&
-                    OctoConfig.INSTANCE.gcOutputType.getValue() == OctoConfig.AudioType.MONO &&
+                    OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO.getValue() &&
                     OctoConfig.INSTANCE.maxRecentStickers.getValue() == 0 &&
-                    OctoConfig.INSTANCE.photoResolution.getValue() == OctoConfig.PhotoResolution.DEFAULT) {
+                    OctoConfig.INSTANCE.photoResolution.getValue() == PhotoResolution.DEFAULT.getValue()) {
                 Log.d("OctoExperiments", "Experiments disabled");
-                OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled, false);
+                OctoConfig.INSTANCE.experimentsEnabled.updateValue(false);
             }
         }
         return OctoPreferences.builder(LocaleController.getString("Experiments", R.string.Experiments))
@@ -67,8 +69,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .options(new ArrayList<>() {{
-                                add(new Pair<>(OctoConfig.AudioType.MONO, LocaleController.getString(R.string.AudioTypeMono)));
-                                add(new Pair<>(OctoConfig.AudioType.STEREO, LocaleController.getString(R.string.AudioTypeStereo)));
+                                add(new Pair<>(AudioType.MONO.getValue(), LocaleController.getString(R.string.AudioTypeMono)));
+                                add(new Pair<>(AudioType.STEREO.getValue(), LocaleController.getString(R.string.AudioTypeStereo)));
                             }})
                             .currentValue(OctoConfig.INSTANCE.gcOutputType)
                             .title(LocaleController.getString(R.string.AudioTypeInCall))
@@ -76,9 +78,9 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .options(new ArrayList<>() {{
-                                add(new Pair<>(OctoConfig.PhotoResolution.LOW, LocaleController.getString(R.string.ResolutionLow)));
-                                add(new Pair<>(OctoConfig.PhotoResolution.DEFAULT, LocaleController.getString(R.string.ResolutionMedium)));
-                                add(new Pair<>(OctoConfig.PhotoResolution.HIGH, LocaleController.getString(R.string.ResolutionHigh)));
+                                add(new Pair<>(PhotoResolution.LOW.getValue(), LocaleController.getString(R.string.ResolutionLow)));
+                                add(new Pair<>(PhotoResolution.DEFAULT.getValue(), LocaleController.getString(R.string.ResolutionMedium)));
+                                add(new Pair<>(PhotoResolution.HIGH.getValue(), LocaleController.getString(R.string.ResolutionHigh)));
                             }})
                             .currentValue(OctoConfig.INSTANCE.photoResolution)
                             .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))

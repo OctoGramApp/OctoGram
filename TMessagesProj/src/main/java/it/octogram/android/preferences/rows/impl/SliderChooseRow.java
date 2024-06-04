@@ -15,8 +15,8 @@ public class SliderChooseRow extends BaseRow {
     private final List<Pair<Integer, String>> options;
     private final ConfigProperty<Integer> preferenceValue;
 
-    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<Integer> currentValue, ConfigProperty<Boolean> showIf) {
-        super(null, null, false, showIf, PreferenceType.SLIDER_CHOOSE);
+    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<Integer> currentValue, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+        super(null, null, false, showIf, showIfReverse, PreferenceType.SLIDER_CHOOSE);
         this.options = options;
         this.preferenceValue = currentValue;
     }
@@ -51,6 +51,7 @@ public class SliderChooseRow extends BaseRow {
         return idArray;
     }
 
+
     public static class SliderChooseRowBuilder extends ToggleableBaseRowBuilder<SliderChooseRow, Integer> {
         private final List<Pair<Integer, String>> options = new ArrayList<>();
 
@@ -60,7 +61,7 @@ public class SliderChooseRow extends BaseRow {
         }
 
         public SliderChooseRow build() {
-            return new SliderChooseRow(options, preferenceValue, showIf);
+            return new SliderChooseRow(options, preferenceValue, showIf, showIfReverse);
         }
     }
 }

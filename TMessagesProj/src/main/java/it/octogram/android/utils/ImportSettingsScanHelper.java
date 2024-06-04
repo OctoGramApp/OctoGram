@@ -19,6 +19,9 @@ public class ImportSettingsScanHelper {
             data.put("general", getGeneralOptions());
             data.put("general_string", R.string.General);
             data.put("general_icon", R.drawable.msg_media);
+            data.put("translator", getTranslatorOptions());
+            data.put("translator_string", R.string.Translator);
+            data.put("translator_icon", R.drawable.msg_translate);
             data.put("appearance", getAppearance());
             data.put("appearance_string", R.string.Appearance);
             data.put("appearance_icon", R.drawable.settings_appearance);
@@ -69,6 +72,12 @@ public class ImportSettingsScanHelper {
         excludedOptions.add("context_messageDetails");
         excludedOptions.add("context_noQuoteForward");
         excludedOptions.add("useTranslationsArgsFix");
+        excludedOptions.add("autoCheckUpdates"); // deprecated - available just in octo pbeta 2.2.1
+        excludedOptions.add("autoCheckUpdatesTimer"); // deprecated - available just in octo pbeta 2.2.1
+        excludedOptions.add("autoCheckUpdateStatus");
+        excludedOptions.add("preferBetaVersion");
+        excludedOptions.add("receivePBetaUpdates");
+        excludedOptions.add("mediaFilteringId");
     }
 
     private JSONObject getGeneralOptions() {
@@ -110,6 +119,19 @@ public class ImportSettingsScanHelper {
         }
 
         return generalOptions;
+    }
+
+    private JSONObject getTranslatorOptions() {
+        JSONObject translatorOptions = new JSONObject();
+        try {
+            translatorOptions.put("translatorMode", R.string.TranslatorMode);
+            translatorOptions.put("translatorProvider", R.string.TranslatorProvider);
+            translatorOptions.put("translatorFormality", R.string.TranslatorFormality);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        return translatorOptions;
     }
 
     private JSONObject getAppearance() {

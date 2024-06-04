@@ -12,7 +12,6 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.SeekBarView;
 
-import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.rows.impl.SliderRow;
 
 public class SliderCell extends FrameLayout {
@@ -34,17 +33,9 @@ public class SliderCell extends FrameLayout {
 
         sizeBar = new SeekBarView(context);
         sizeBar.setReportChanges(true);
-        sizeBar.setDelegate(new SeekBarView.SeekBarViewDelegate() {
-            @Override
-            public void onSeekBarDrag(boolean stop, float progress) {
-                OctoConfig.INSTANCE.updateIntegerSetting(sliderRow.getPreferenceValue(), Math.round(startRadius + (endRadius - startRadius) * progress));
-                requestLayout();
-            }
-
-            @Override
-            public void onSeekBarPressed(boolean pressed) {
-
-            }
+        sizeBar.setDelegate((stop, progress) -> {
+            sliderRow.getPreferenceValue().updateValue(Math.round(startRadius + (endRadius - startRadius) * progress));
+            requestLayout();
         });
         addView(sizeBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 38, Gravity.START | Gravity.TOP, 5, 5, 39, 0));
     }

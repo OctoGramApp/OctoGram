@@ -23,7 +23,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-import it.octogram.android.OctoConfig;
+import it.octogram.android.EventType;
 
 @SuppressLint("ViewConstructor")
 public class ThemeSelectorCell extends FrameLayout {
@@ -109,17 +109,17 @@ public class ThemeSelectorCell extends FrameLayout {
         map.clear();
         rowCount = 0;
         noTheme = rowCount++;
-        map.put(OctoConfig.EventType.NONE, noTheme);
+        map.put(EventType.NONE.getValue(), noTheme);
         timedTheme = rowCount++;
-        map.put(OctoConfig.EventType.DEFAULT, timedTheme);
+        map.put(EventType.DEFAULT.getValue(), timedTheme);
         valentineTheme = rowCount++;
-        map.put(OctoConfig.EventType.VALENTINE, valentineTheme);
+        map.put(EventType.VALENTINE.getValue(), valentineTheme);
         halloweenTheme = rowCount++;
-        map.put(OctoConfig.EventType.HALLOWEEN, halloweenTheme);
+        map.put(EventType.HALLOWEEN.getValue(), halloweenTheme);
         holidayTheme = rowCount++;
-        map.put(OctoConfig.EventType.HOLIDAY, holidayTheme);
+        map.put(EventType.HOLIDAY.getValue(), holidayTheme);
         lunarNewYearTheme = rowCount++;
-        map.put(OctoConfig.EventType.LUNAR_NEW_YEAR, lunarNewYearTheme);
+        map.put(EventType.LUNAR_NEW_YEAR.getValue(), lunarNewYearTheme);
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
@@ -148,7 +148,7 @@ public class ThemeSelectorCell extends FrameLayout {
             boolean animated = drawerCell2.canBeAnimate() && oldSelectedItem != -1;
             if (position == noTheme) {
                 drawerCell2.setEvent(
-                        OctoConfig.EventType.NONE,
+                        EventType.NONE.getValue(),
                         R.raw.cross,
                         new int[]{
                                 R.drawable.msg_block,
@@ -160,7 +160,7 @@ public class ThemeSelectorCell extends FrameLayout {
                 );
             } else if (position == timedTheme) {
                 drawerCell2.setEvent(
-                        OctoConfig.EventType.DEFAULT,
+                        EventType.DEFAULT.getValue(),
                         R.raw.automatic,
                         new int[]{
                                 R.drawable.msg_groups,
@@ -172,7 +172,7 @@ public class ThemeSelectorCell extends FrameLayout {
                 );
             } else if (position == valentineTheme) {
                 drawerCell2.setEvent(
-                        OctoConfig.EventType.VALENTINE,
+                        EventType.VALENTINE.getValue(),
                         R.raw.valentine,
                         new int[]{
                                 R.drawable.msg_groups_14,
@@ -184,7 +184,7 @@ public class ThemeSelectorCell extends FrameLayout {
                 );
             } else if (position == halloweenTheme) {
                 drawerCell2.setEvent(
-                        OctoConfig.EventType.HALLOWEEN,
+                        EventType.HALLOWEEN.getValue(),
                         R.raw.halloween,
                         new int[]{
                                 R.drawable.msg_groups_hw,
@@ -196,7 +196,7 @@ public class ThemeSelectorCell extends FrameLayout {
                 );
             } else if (position == holidayTheme) {
                 drawerCell2.setEvent(
-                        OctoConfig.EventType.HOLIDAY,
+                        EventType.HOLIDAY.getValue(),
                         R.raw.christmas,
                         new int[]{
                                 R.drawable.msg_groups_ny,
@@ -208,7 +208,7 @@ public class ThemeSelectorCell extends FrameLayout {
                 );
             } else if (position == lunarNewYearTheme) {
                 drawerCell2.setEvent(
-                        OctoConfig.EventType.LUNAR_NEW_YEAR,
+                        EventType.LUNAR_NEW_YEAR.getValue(),
                         R.raw.lunar_new_year,
                         new int[]{
                                 R.drawable.menu_groups_cn,

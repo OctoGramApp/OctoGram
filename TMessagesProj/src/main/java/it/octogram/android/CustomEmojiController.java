@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android;
@@ -23,6 +23,8 @@ import android.os.SystemClock;
 import android.provider.DocumentsContract;
 import android.text.TextPaint;
 import android.text.TextUtils;
+
+import androidx.annotation.RequiresApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -104,6 +106,7 @@ public class CustomEmojiController {
         return statusLoading >= LOADING && statusLoading < LOADED_REMOTE;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public static Typeface getCurrentTypeface() {
         if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) return getSystemEmojiTypeface();
         return getSelectedTypeface();
@@ -144,6 +147,7 @@ public class CustomEmojiController {
         return systemEmojiTypeface;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private static Typeface getSelectedTypeface() {
         return getEmojiCustomPacksInfo()
                 .stream()
@@ -488,7 +492,7 @@ public class CustomEmojiController {
             synchronized (emojiPacksInfo) {
                 if (emojiPacksInfo.isEmpty()) {
                     if (!isInstalledOffline(OctoConfig.INSTANCE.selectedEmojiPack.getValue())) {
-                        OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, "default");
+                        OctoConfig.INSTANCE.selectedEmojiPack.updateValue("default");
                     }
                     Emoji.reloadEmoji();
                     AndroidUtilities.cancelRunOnUIThread(invalidateUiRunnable);
@@ -529,7 +533,7 @@ public class CustomEmojiController {
                                         } else if (isFailed) {
                                             CustomEmojiController.emojiTmp(id).delete();
                                             if (!isUpdate) {
-                                                OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, "default");
+                                                OctoConfig.INSTANCE.selectedEmojiPack.updateValue("default");
                                             }
                                             Emoji.reloadEmoji();
                                             AndroidUtilities.cancelRunOnUIThread(invalidateUiRunnable);
@@ -702,7 +706,7 @@ public class CustomEmojiController {
         onUndoBulletinAction.onPreStart();
         boolean wasSelected = emojiPackBase.getPackId().equals(OctoConfig.INSTANCE.selectedEmojiPack.getValue());
         if (wasSelected) {
-            OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, "default");
+            OctoConfig.INSTANCE.selectedEmojiPack.updateValue("default");
         }
         EmojiSetBulletinLayout bulletinLayout = new EmojiSetBulletinLayout(
                 fragment.getParentActivity(),
@@ -713,7 +717,7 @@ public class CustomEmojiController {
         );
         Bulletin.UndoButton undoButton = new Bulletin.UndoButton(fragment.getParentActivity(), false).setUndoAction(() -> {
             if (wasSelected) {
-                OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, pendingDeleteEmojiPackId);
+                OctoConfig.INSTANCE.selectedEmojiPack.updateValue(pendingDeleteEmojiPackId);
             }
             pendingDeleteEmojiPackId = null;
             onUndoBulletinAction.onUndo();
@@ -746,7 +750,7 @@ public class CustomEmojiController {
             emojiPacksInfo.remove(emojiPackBase);
         }
         if (emojiPackBase.getPackId().equals(OctoConfig.INSTANCE.selectedEmojiPack.getValue())) {
-            OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, "default");
+            OctoConfig.INSTANCE.selectedEmojiPack.updateValue("default");
         }
     }
 

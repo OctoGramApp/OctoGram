@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 package it.octogram.android.camerax.components;
 
@@ -16,6 +16,8 @@ import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.WindowInsets;
 import android.widget.LinearLayout;
+
+import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.LayoutHelper;
@@ -58,20 +60,7 @@ public class EffectSelectorView extends LinearLayout {
 
     public void loadEffects(CameraXView cameraXView) {
         if (getChildCount() == 0) {
-            ArrayList<Integer> list_effect = new ArrayList<>();
-            if (cameraXView.isNightModeSupported()) {
-                list_effect.add(CameraXController.CAMERA_NIGHT);
-            }
-            if (cameraXView.isAutoModeSupported()) {
-                list_effect.add(CameraXController.CAMERA_AUTO);
-            }
-            list_effect.add(CameraXController.CAMERA_NONE);
-            if (cameraXView.isWideModeSupported()) {
-                list_effect.add(CameraXController.CAMERA_WIDE);
-            }
-            if (cameraXView.isHdrModeSupported()) {
-                list_effect.add(CameraXController.CAMERA_HDR);
-            }
+            ArrayList<Integer> list_effect = getListEffect(cameraXView);
             if (list_effect.size() == 1) {
                 return;
             }
@@ -80,21 +69,7 @@ public class EffectSelectorView extends LinearLayout {
                 LinearLayout linearLayout = new LinearLayout(getContext());
                 linearLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
                 linearLayout.setGravity(Gravity.CENTER);
-                ButtonEffectView buttonEffect = new ButtonEffectView(getContext(), effect) {
-                    @Override
-                    protected void onItemClick(ButtonEffectView buttonEffect, int camera_type) {
-                        if (isEnabledButtons) {
-                            super.onItemClick(buttonEffect, camera_type);
-                            if (oldSelection != null) {
-                                oldSelection.toggleButton(false, true);
-                            }
-                            buttonEffect.toggleButton(true, true);
-                            oldSelection = buttonEffect;
-                            onEffectSelected(camera_type);
-                        }
-                    }
-                };
-                buttonEffect.toggleButton(effect == CameraXController.CAMERA_NONE, false);
+                ButtonEffectView buttonEffect = getButtonEffect(effect);
                 if (effect == CameraXController.CAMERA_NONE) {
                     oldSelection = buttonEffect;
                 }
@@ -102,6 +77,43 @@ public class EffectSelectorView extends LinearLayout {
                 addView(linearLayout);
             }
         }
+    }
+
+    private @NonNull ButtonEffectView getButtonEffect(int effect) {
+        ButtonEffectView buttonEffect = new ButtonEffectView(getContext(), effect) {
+            @Override
+            protected void onItemClick(ButtonEffectView buttonEffect, int camera_type) {
+                if (isEnabledButtons) {
+                    super.onItemClick(buttonEffect, camera_type);
+                    if (oldSelection != null) {
+                        oldSelection.toggleButton(false, true);
+                    }
+                    buttonEffect.toggleButton(true, true);
+                    oldSelection = buttonEffect;
+                    onEffectSelected(camera_type);
+                }
+            }
+        };
+        buttonEffect.toggleButton(effect == CameraXController.CAMERA_NONE, false);
+        return buttonEffect;
+    }
+
+    private static @NonNull ArrayList<Integer> getListEffect(CameraXView cameraXView) {
+        ArrayList<Integer> list_effect = new ArrayList<>();
+        if (cameraXView.isNightModeSupported()) {
+            list_effect.add(CameraXController.CAMERA_NIGHT);
+        }
+        if (cameraXView.isAutoModeSupported()) {
+            list_effect.add(CameraXController.CAMERA_AUTO);
+        }
+        list_effect.add(CameraXController.CAMERA_NONE);
+        if (cameraXView.isWideModeSupported()) {
+            list_effect.add(CameraXController.CAMERA_WIDE);
+        }
+        if (cameraXView.isHdrModeSupported()) {
+            list_effect.add(CameraXController.CAMERA_HDR);
+        }
+        return list_effect;
     }
 
     protected void onEffectSelected(int cameraEffect) {
@@ -147,7 +159,7 @@ public class EffectSelectorView extends LinearLayout {
                 DisplayCutout cutout = windowInsets.getDisplayCutout();
                 if (cutout != null) {
                     List<Rect> boundRect = cutout.getBoundingRects();
-                    if (boundRect.size() > 0) {
+                    if (!boundRect.isEmpty()) {
                         if (getOrientation() == HORIZONTAL) {
                             notchSize = boundRect.get(0).bottom;
                         } else {

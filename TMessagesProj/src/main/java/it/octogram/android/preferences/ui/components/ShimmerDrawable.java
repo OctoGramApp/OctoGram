@@ -82,7 +82,7 @@ public final class ShimmerDrawable extends Drawable {
     }
 
     @Override
-    public void onBoundsChange(Rect bounds) {
+    public void onBoundsChange(@NonNull Rect bounds) {
         super.onBoundsChange(bounds);
         mDrawRect.set(bounds);
         updateShader();
@@ -102,6 +102,7 @@ public final class ShimmerDrawable extends Drawable {
         final float dy;
         final float animatedValue =
                 mValueAnimator != null ? (float) mValueAnimator.getAnimatedValue() : 0f;
+        //noinspection EnhancedSwitchMigration
         switch (mShimmer.direction) {
             default:
             case Shimmer.Direction.LEFT_TO_RIGHT:
@@ -123,10 +124,12 @@ public final class ShimmerDrawable extends Drawable {
         }
 
         mShaderMatrix.reset();
-        mShaderMatrix.setRotate(mShimmer.tilt, mDrawRect.width() / 2f, mDrawRect.height() / 2f);
-        mShaderMatrix.postTranslate(dx, dy);
-        mShimmerPaint.getShader().setLocalMatrix(mShaderMatrix);
-        canvas.drawRect(mDrawRect, mShimmerPaint);
+        if (mShimmer != null) {
+            mShaderMatrix.setRotate(mShimmer.tilt, mDrawRect.width() / 2f, mDrawRect.height() / 2f);
+            mShaderMatrix.postTranslate(dx, dy);
+            mShimmerPaint.getShader().setLocalMatrix(mShaderMatrix);
+            canvas.drawRect(mDrawRect, mShimmerPaint);
+        }
     }
 
     @Override

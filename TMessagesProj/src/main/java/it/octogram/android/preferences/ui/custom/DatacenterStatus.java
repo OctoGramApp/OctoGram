@@ -12,12 +12,12 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
@@ -38,10 +38,10 @@ import it.octogram.android.preferences.ui.components.ShimmerFrameLayout;
 public class DatacenterStatus extends LinearLayout {
 
     private final RadialProgressView radialProgressView;
-    private final TextView textView;
-    private final TextView ipTextView;
-    private final TextView statusTextView;
-    private final ImageView imageView;
+    private final AppCompatTextView textView;
+    private final AppCompatTextView ipTextView;
+    private final AppCompatTextView statusTextView;
+    private final AppCompatImageView imageView;
     private final ShimmerFrameLayout shimmerFrameLayout;
     private final LinearLayout linearLayout;
     private boolean needDivider = false;
@@ -53,7 +53,7 @@ public class DatacenterStatus extends LinearLayout {
         setPadding(AndroidUtilities.dp(13), AndroidUtilities.dp(5), AndroidUtilities.dp(13), AndroidUtilities.dp(5));
         RelativeLayout relativeLayout = new RelativeLayout(context);
         radialProgressView = new RadialProgressView(context, Color.TRANSPARENT);
-        imageView = new ImageView(context);
+        imageView = new AppCompatImageView(context);
         relativeLayout.addView(radialProgressView, LayoutHelper.createRelative(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         relativeLayout.addView(imageView, LayoutHelper.createRelative(25, 25, RelativeLayout.CENTER_IN_PARENT));
         addView(relativeLayout, LayoutHelper.createLinear(65, 65));
@@ -64,19 +64,19 @@ public class DatacenterStatus extends LinearLayout {
         linearLayout.setVisibility(GONE);
         addView(linearLayout, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
 
-        textView = new TextView(context);
+        textView = new AppCompatTextView(context);
         textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         textView.setTextSize(16);
         linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 10, 0, 0, 0));
 
-        ipTextView = new TextView(context);
+        ipTextView = new AppCompatTextView(context);
         ipTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
         ipTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         ipTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         ipTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         linearLayout.addView(ipTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 10, 0, 0, 0));
 
-        statusTextView = new TextView(context);
+        statusTextView = new AppCompatTextView(context);
         statusTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         statusTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         statusTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);

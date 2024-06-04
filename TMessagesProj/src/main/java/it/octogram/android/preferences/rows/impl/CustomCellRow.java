@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.rows.impl;
@@ -26,8 +26,8 @@ public class CustomCellRow extends BaseRow implements Clickable {
     private final Runnable onClick;
     private final View layout;
 
-    private CustomCellRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, Runnable onClick, View layout) {
-        super(title, summary, requiresRestart, showIf, divider, PreferenceType.CUSTOM);
+    private CustomCellRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, Runnable onClick, View layout) {
+        super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.CUSTOM);
         this.onClick = onClick;
         this.layout = layout;
     }
@@ -60,7 +60,7 @@ public class CustomCellRow extends BaseRow implements Clickable {
 
         @Override
         public CustomCellRow build() {
-            return new CustomCellRow(title, description, requiresRestart, showIf, divider, onClick, layout);
+            return new CustomCellRow(title, description, requiresRestart, showIf, showIfReverse, divider, onClick, layout);
         }
     }
 }

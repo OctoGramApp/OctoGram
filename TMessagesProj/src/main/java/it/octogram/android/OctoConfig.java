@@ -3,15 +3,14 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 package it.octogram.android;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
-
-import com.google.android.exoplayer2.util.Log;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,16 +31,17 @@ import it.octogram.android.utils.OctoUtils;
 
 /*
  * Super big TODO list:
- *
  * - Option to delete account
  * - Option to delete all personal messages in a chat
  * - two-way translation. And automatically turn over the text sent by the user
  * - custom double tap action
- * - zalgo filters?
- * -
+ * - Zalgo filters?
+ * - ???
  */
+@SuppressWarnings("unchecked")
 public class OctoConfig {
     public static final OctoConfig INSTANCE = new OctoConfig();
+    private static final String TAG = "OctoConfig";
     private final List<ConfigProperty<?>> properties = new ArrayList<>();
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
 
@@ -51,8 +51,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> showUsernameAsPhoneNumber = newConfigProperty("showUsernameAsPhoneNumber", false);
     public final ConfigProperty<Boolean> hideOtherPhoneNumber = newConfigProperty("hideOtherPhoneNumber", true);
     public final ConfigProperty<Boolean> promptBeforeCalling = newConfigProperty("promptBeforeCalling", true);
-    public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM);
-    public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API);
+    public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM.getValue());
+    public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API.getValue());
     public final ConfigProperty<Boolean> registrationDateInProfiles = newConfigProperty("registrationDateInProfiles", false);
     public final ConfigProperty<Boolean> jumpToNextChannelOrTopic = newConfigProperty("jumpToNextChannel", true);
     public final ConfigProperty<Boolean> hideGreetingSticker = newConfigProperty("hideGreetingSticker", false);
@@ -70,8 +70,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideOnlyAllChatsFolder = newConfigProperty("hideOnlyAllChatsFolder", false);
     public final ConfigProperty<Boolean> hideChatFolders = newConfigProperty("hideChatFolders", false);
     public final ConfigProperty<Boolean> hideStories = newConfigProperty("hideStories", false);
-    public final ConfigProperty<Integer> doubleTapAction = newConfigProperty("doubleTapAction", DoubleTapAction.REACTION);
-    public final ConfigProperty<Integer> doubleTapActionOut = newConfigProperty("doubleTapActionOut", DoubleTapAction.REACTION);
+    public final ConfigProperty<Integer> doubleTapAction = newConfigProperty("doubleTapAction", DoubleTapAction.REACTION.getValue());
+    public final ConfigProperty<Integer> doubleTapActionOut = newConfigProperty("doubleTapActionOut", DoubleTapAction.REACTION.getValue());
     public final ConfigProperty<Boolean> hideFoldersWhenForwarding = newConfigProperty("showFoldersWhenForwarding", false);
     public final ConfigProperty<Boolean> accentColorAsNotificationColor = newConfigProperty("accentColorAsNotificationColor", false);
     public final ConfigProperty<Boolean> openArchiveOnPull = newConfigProperty("openArchiveOnPull", false);
@@ -91,19 +91,21 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> pencilIconForEditedMessages = newConfigProperty("pencilIconForEditedMessages", false);
     public final ConfigProperty<Boolean> searchIconInHeader = newConfigProperty("searchIconInHeader", false);
     public final ConfigProperty<Boolean> slidingTitle = newConfigProperty("slidingTitle", false);
-    public final ConfigProperty<Integer> eventType = newConfigProperty("eventType", EventType.NONE);
+    public final ConfigProperty<Integer> eventType = newConfigProperty("eventType", EventType.NONE.getValue());
     public final ConfigProperty<Integer> maxStickerSize = newConfigProperty("maxStickerSize", 14);
     public final ConfigProperty<Boolean> useSystemFont = newConfigProperty("useSystemFont", false);
     public final ConfigProperty<Boolean> useSystemEmoji = newConfigProperty("useSystemEmoji", false);
     public final ConfigProperty<String> selectedEmojiPack = newConfigProperty("selectedEmojiPack", "default");
     public final ConfigProperty<Boolean> showSnowflakes = newConfigProperty("showSnowflakes", false);
     public final ConfigProperty<Boolean> disableDividers = newConfigProperty("disableDividers", false);
-    public final ConfigProperty<Integer> stickerShape = newConfigProperty("stickerShape", Shape.DEFAULT);
+    public final ConfigProperty<Integer> stickerShape = newConfigProperty("stickerShape", Shape.DEFAULT.getValue());
+
     /*Folders*/
-    public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED);
+    public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
+
     /*Drawer elements*/
     public final ConfigProperty<Boolean> drawerChangeStatus = newConfigProperty("drawer_changeStatus", true);
-    public final ConfigProperty<Boolean> drawerMyStories = newConfigProperty("drawer_myStories", true);
+    // public final ConfigProperty<Boolean> drawerMyStories = newConfigProperty("drawer_myStories", true);
     public final ConfigProperty<Boolean> drawerNewGroup = newConfigProperty("drawer_newGroup", true);
     public final ConfigProperty<Boolean> drawerNewChannel = newConfigProperty("drawer_newChannel", false);
     public final ConfigProperty<Boolean> drawerContacts = newConfigProperty("drawer_contacts", true);
@@ -114,6 +116,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> drawerDatacenterInfo = newConfigProperty("drawer_datacenterInfo", true);
     public final ConfigProperty<Boolean> drawerInviteFriends = newConfigProperty("drawer_inviteFriends", true);
     public final ConfigProperty<Boolean> drawerTelegramFeatures = newConfigProperty("drawer_telegramFeatures", true);
+
     /*Context menu elements*/
     public final ConfigProperty<Boolean> contextClearFromCache = newConfigProperty("context_clearFromCache", false);
     public final ConfigProperty<Boolean> contextCopyPhoto = newConfigProperty("context_copyPhoto", true);
@@ -137,17 +140,41 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
     public final ConfigProperty<Boolean> uploadBoost = newConfigProperty("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = newConfigProperty("downloadBoost", false);
-    public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", DownloadBoost.NORMAL);
-    public final ConfigProperty<Integer> photoResolution = newConfigProperty("photoResolution", PhotoResolution.DEFAULT);
+    public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", DownloadBoost.NORMAL.getValue());
+    public final ConfigProperty<Integer> photoResolution = newConfigProperty("photoResolution", PhotoResolution.DEFAULT.getValue());
     public final ConfigProperty<Integer> lastSelectedCompression = newConfigProperty("lastSelectedCompression", 3);
-    public final ConfigProperty<Integer> gcOutputType = newConfigProperty("gcOutputType", AudioType.MONO);
+    public final ConfigProperty<Integer> gcOutputType = newConfigProperty("gcOutputType", AudioType.MONO.getValue());
     public final ConfigProperty<Boolean> mediaInGroupCall = newConfigProperty("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
     public final ConfigProperty<Boolean> showRPCErrors = newConfigProperty("showRPCErrors", false);
     public final ConfigProperty<Boolean> useTranslationsArgsFix = newConfigProperty("useTranslationsArgsFix", true);
 
-    /* Multi-Language */
+    /*Updates*/
+    public final ConfigProperty<Boolean> autoCheckUpdates = newConfigProperty("autoCheckUpdateStatus", true);
+    public final ConfigProperty<Boolean> preferBetaVersion = newConfigProperty("preferBetaVersion", false);
+    public final ConfigProperty<Boolean> receivePBetaUpdates = newConfigProperty("receivePBetaUpdates", false);
+
+    /*Translator*/
+    public final ConfigProperty<Integer> translatorMode = newConfigProperty("translatorMode", TranslatorMode.DEFAULT.getValue());
+    public final ConfigProperty<Integer> translatorProvider = newConfigProperty("translatorProvider", TranslatorProvider.DEFAULT.getValue());
+    public final ConfigProperty<Integer> translatorFormality = newConfigProperty("translatorFormality", TranslatorFormality.DEFAULT.getValue());
+    public final ConfigProperty<Boolean> translatorKeepMarkdown = newConfigProperty("translatorKeepMarkdown", true);
+
+    /*Lite Mode: sync power saver with device settings*/
+    public final ConfigProperty<Boolean> syncPowerSaver = newConfigProperty("syncPowerSaver", false);
+
+    /*Media filtering*/
+    public final ConfigProperty<Integer> mediaFiltering = newConfigProperty("mediaFilteringId", 0);
+
+    /*Multi-Language*/
     public final ConfigProperty<String> languagePackVersioning = newConfigProperty("languagePackVersioning", "{}");
+
+    /*Migrate Logs*/
+    public final ConfigProperty<Boolean> isMigrateOldLogs = newConfigProperty("isMigrateOldLogs", false);
+
+    /* Drawer Reorder */
+    public final ConfigProperty<String> drawerItems = newConfigProperty("drawerItems", "[]");
+
     /**
      * Creates a new config property and adds it to the list of properties.
      *
@@ -176,18 +203,17 @@ public class OctoConfig {
     }
 
     public static int getAudioType() {
-        if (OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO) {
+        if (OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO.getValue()) {
             return AudioFormat.CHANNEL_OUT_MONO;
         } else {
             return AudioFormat.CHANNEL_OUT_STEREO;
         }
     }
 
-    /*
+    /**
      * It is safe to suppress this warning because the method loadConfig() is only called once in the static block above.
      * Also the semantics of the data structure is pretty solid, so there is no need to worry about it.
      */
-    @SuppressWarnings("unchecked")
     private void loadConfig() {
         synchronized (this) {
             for (ConfigProperty<?> property : properties) {
@@ -235,9 +261,9 @@ public class OctoConfig {
                     return true;
                 }
             } catch (IOException e) {
-                Log.e(OctoConfig.class.getName(), "an io exception occurred internally during isvalidmessageexport octoconfig", e);
+                Log.e(TAG, "an io exception occurred internally during isValidMessageExport OctoConfig", e);
             } catch (JSONException e) {
-                Log.e(OctoConfig.class.getName(), "a json exception occurred internally during isvalidmessageexport octoconfig", e);
+                Log.e(TAG, "a json exception occurred internally during isValidMessageExport OctoConfig", e);
             }
         }
 
@@ -254,7 +280,7 @@ public class OctoConfig {
                     return false;
                 }
             } catch (JSONException e) {
-                Log.e(getClass().getName(), "failed to handle isjoinarrayvaliddata octoconfig", e);
+                Log.e(TAG, "failed to handle isJSONArrayValidData OctoConfig", e);
             }
         }
 
@@ -303,30 +329,31 @@ public class OctoConfig {
 
                                     Object exportFileSettingsValue = result.get(fieldName);
                                     if (exportFileSettingsValue instanceof Boolean) {
-                                        this.updateBooleanSetting((ConfigProperty<Boolean>) configProperty, (Boolean) exportFileSettingsValue);
+                                        configProperty.updateValue((ConfigProperty<Boolean>) configProperty, (Boolean) exportFileSettingsValue);
                                     } else if (exportFileSettingsValue instanceof Integer) {
                                         if (!isIntegerValueValid(fieldName, (Integer) exportFileSettingsValue)) {
                                             continue;
                                         }
 
-                                        this.updateIntegerSetting((ConfigProperty<Integer>) configProperty, (Integer) exportFileSettingsValue);
-                                    } else if (exportFileSettingsValue instanceof String) {
+                                        configProperty.updateValue((ConfigProperty<Integer>) configProperty, (Integer) exportFileSettingsValue);
+                                    } else //noinspection StatementWithEmptyBody
+                                        if (exportFileSettingsValue instanceof String) {
                                         // конфигурация в настоящее время не содержит строковых значений.
-                                        //this.updateStringSetting((ConfigProperty<String>) configProperty, (String) exportFileSettingsValue);
+                                        //configProperty.updateSetting((ConfigProperty<String>) configProperty, (String) exportFileSettingsValue);
                                     }
                                 }
                             } catch (JSONException e) {
-                                android.util.Log.e(getClass().getName(), "Error validating put-settings export", e);
+                                android.util.Log.e(TAG, "Error validating put-settings export", e);
                             } catch (IllegalAccessException e) {
-                                android.util.Log.e(getClass().getName(), "Error getting settings export", e);
+                                android.util.Log.e(TAG, "Error getting settings export", e);
                             }
                         }
                     }
                 }
             } catch (IOException e) {
-                Log.e(OctoConfig.class.getName(), "an io exception occurred internally during isvalidmessageexport octoconfig", e);
+                Log.e(TAG, "an io exception occurred internally during isValidMessageExport octoconfig", e);
             } catch (JSONException e) {
-                Log.e(OctoConfig.class.getName(), "a json exception occurred internally during isvalidmessageexport octoconfig", e);
+                Log.e(TAG, "a json exception occurred internally during isValidMessageExport octoconfig", e);
             }
         }
 
@@ -334,142 +361,27 @@ public class OctoConfig {
     }
 
     private boolean isIntegerValueValid(String fieldName, int value) {
-        switch (fieldName) {
-            case "blurEffectStrength":
-                return value >= 0 && value <= 255;
-            case "cameraXResolution":
-                return value >= CameraXResolution.SD && value <= CameraXResolution.UHD;
-            case "dcIdStyle":
-                return value >= DcIdStyle.NONE && value <= DcIdStyle.MINIMAL;
-            case "dcIdType":
-                return value == DcIdType.BOT_API || value == DcIdType.TELEGRAM;
-            case "doubleTapAction":
-            case "doubleTapActionOut":
-                return value >= DoubleTapAction.DISABLED && value <= DoubleTapAction.EDIT;
-            case "downloadBoostValue":
-                return value >= DownloadBoost.NORMAL && value <= DownloadBoost.EXTREME;
-            case "eventType":
-                return value >= EventType.DEFAULT && value <= EventType.NONE;
-            case "gcOutputType":
-                return value == AudioType.MONO || value == AudioType.STEREO;
-            case "maxRecentStickers":
-                return value >= 0 && value <= 9;
-            case "maxStickerSize":
-                return value >= 2 && value <= 20;
-            case "photoResolution":
-                return value >= PhotoResolution.LOW && value <= PhotoResolution.HIGH;
-            case "tabMode":
-                return value >= TabMode.TEXT && value <= TabMode.ICON;
-            default:
+        return switch (fieldName) {
+            case "blurEffectStrength" -> value >= 0 && value <= 255;
+            case "cameraXResolution" ->
+                    value >= CameraXResolution.SD.getValue() && value <= CameraXResolution.UHD.getValue();
+            case "dcIdStyle" -> value >= DcIdStyle.NONE.getValue() && value <= DcIdStyle.MINIMAL.getValue();
+            case "dcIdType" -> value == DcIdType.BOT_API.getValue() || value == DcIdType.TELEGRAM.getValue();
+            case "doubleTapAction", "doubleTapActionOut" ->
+                    value >= DoubleTapAction.DISABLED.getValue() && value <= DoubleTapAction.EDIT.getValue();
+            case "downloadBoostValue" ->
+                    value >= DownloadBoost.NORMAL.getValue() && value <= DownloadBoost.EXTREME.getValue();
+            case "eventType" -> value >= EventType.DEFAULT.getValue() && value <= EventType.NONE.getValue();
+            case "gcOutputType" -> value == AudioType.MONO.getValue() || value == AudioType.STEREO.getValue();
+            case "maxRecentStickers" -> value >= 0 && value <= 9;
+            case "maxStickerSize" -> value >= 2 && value <= 20;
+            case "photoResolution" -> value >= PhotoResolution.LOW.getValue() && value <= PhotoResolution.HIGH.getValue();
+            case "tabMode" -> value >= TabMode.TEXT.getValue() && value <= TabMode.ICON.getValue();
+            case "translatorMode" -> value >= TranslatorMode.DEFAULT.getValue() && value <= TranslatorMode.EXTERNAL.getValue();
+            case "translatorProvider" -> value >= TranslatorProvider.DEFAULT.getValue() && value <= TranslatorProvider.YANDEX.getValue();
+            default ->
                 // в любом другом случае считайте значение недействительным.
-                return false;
-        }
-    }
-
-    public void toggleBooleanSetting(ConfigProperty<Boolean> property) {
-        updateBooleanSetting(property, !property.getValue());
-    }
-
-    public void updateBooleanSetting(ConfigProperty<Boolean> property, boolean value) {
-        property.setValue(value);
-
-        SharedPreferences.Editor editor = PREFS.edit();
-        editor.putBoolean(property.getKey(), property.getValue());
-        editor.apply();
-    }
-
-    public void unlockIcon(ConfigProperty<Boolean> property, boolean value) {
-        SharedPreferences.Editor editor = PREFS.edit();
-        editor.putBoolean(property.getKey(), value);
-        editor.apply();
-    }
-
-    public void updateStringSetting(ConfigProperty<String> property, String value) {
-        property.setValue(value);
-
-        SharedPreferences.Editor editor = PREFS.edit();
-        editor.putString(property.getKey(), property.getValue());
-        editor.apply();
-    }
-
-    public void updateIntegerSetting(ConfigProperty<Integer> property, int value) {
-        property.setValue(value);
-
-        SharedPreferences.Editor editor = PREFS.edit();
-        editor.putInt(property.getKey(), property.getValue());
-        editor.apply();
-    }
-
-    public void setPackLangVersion (String data) {
-        updateStringSetting(OctoConfig.INSTANCE.languagePackVersioning, data);
-    }
-
-    public static class DcIdStyle {
-        public static final int NONE = 0;
-        public static final int OWLGRAM = 1;
-        public static final int TELEGRAM = 2;
-        public static final int MINIMAL = 3;
-    }
-
-    public static class DcIdType {
-        public static final int BOT_API = 0;
-        public static final int TELEGRAM = 1;
-    }
-
-    public static class DoubleTapAction {
-        public static final int DISABLED = 0;
-        public static final int REACTION = 1;
-        public static final int COPY = 2;
-        public static final int FORWARD = 3;
-        public static final int REPLY = 4;
-        public static final int DELETE = 5;
-        public static final int SAVE = 6;
-        public static final int EDIT = 7;
-    }
-
-    public static class EventType {
-        public static final int NONE = 5;
-        public static final int DEFAULT = 0;
-        public static final int HOLIDAY = 1;
-        public static final int VALENTINE = 2;
-        public static final int HALLOWEEN = 3;
-        public static final int LUNAR_NEW_YEAR = 4;
-    }
-
-    public static class AudioType {
-        public static final int MONO = 0;
-        public static final int STEREO = 1;
-    }
-
-    public static class CameraXResolution {
-        public static final int SD = 0;
-        public static final int HD = 1;
-        public static final int FHD = 2;
-        public static final int UHD = 3;
-    }
-
-    public static class PhotoResolution {
-        public static final int LOW = 0;
-        public static final int DEFAULT = 1;
-        public static final int HIGH = 2;
-    }
-
-    public static class TabMode {
-        public static final int TEXT = 0;
-        public static final int MIXED = 1;
-        public static final int ICON = 2;
-
-    }
-
-    public static class DownloadBoost {
-        public static final int NORMAL = 0;
-        public static final int FAST = 1;
-        public static final int EXTREME = 2;
-    }
-
-    public static class Shape {
-        public static final int DEFAULT = 0;
-        public static final int ROUND = 1;
-        public static final int MESSAGE = 2;
+                    false;
+        };
     }
 }

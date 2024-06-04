@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.TabMode;
 import it.octogram.android.utils.FolderIconController;
 
 public class FilterTabsView extends FrameLayout {
@@ -120,7 +121,7 @@ public class FilterTabsView extends FrameLayout {
 
         public Tab(int i, String t, String e) {
             id = i;
-            title = !Objects.equals(OctoConfig.INSTANCE.tabMode.getValue(), OctoConfig.TabMode.ICON) ? t:"";
+            title = !Objects.equals(OctoConfig.INSTANCE.tabMode.getValue(), TabMode.ICON.getValue()) ? t:"";
             realTitle = t;
             emoticon = e;
         }
@@ -154,7 +155,7 @@ public class FilterTabsView extends FrameLayout {
             if (TextUtils.equals(title, newTitle)) {
                 return false;
             }
-            title = OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.ICON ? newTitle:"";
+            title = OctoConfig.INSTANCE.tabMode.getValue() != TabMode.ICON.getValue() ? newTitle:"";
             realTitle = newTitle;
             return true;
         }
@@ -353,7 +354,7 @@ public class FilterTabsView extends FrameLayout {
             if (showRemove && (isEditing || editingStartAnimationProgress != 0)) {
                 countWidth = (int) (countWidth + (AndroidUtilities.dp(20) - countWidth) * editingStartAnimationProgress);
             }
-            if (OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.ICON) {
+            if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.ICON.getValue()) {
                 tabWidth = currentTab.iconWidth + currentTab.titleWidth + ((countWidth != 0 && !animateCounterRemove) ? countWidth + AndroidUtilities.dp(6 * (counterText != null ? 1.0f : editingStartAnimationProgress)) : 0);
             } else {
                 tabWidth = currentTab.iconWidth + ((countWidth != 0 && !animateCounterRemove) ? countWidth + AndroidUtilities.dp(6 * (counterText != null ? 1.0f : editingStartAnimationProgress)) : 0);
@@ -410,7 +411,7 @@ public class FilterTabsView extends FrameLayout {
 
             int iconTab = 0;
             // TAB ICON
-            if (OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.TEXT) {
+            if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.TEXT.getValue()) {
                 int emoticonSize = FolderIconController.getIconWidth();
                 if (!TextUtils.equals(currentTab.emoticon, currentEmoticon)) {
                     currentEmoticon = currentTab.emoticon;
@@ -479,7 +480,7 @@ public class FilterTabsView extends FrameLayout {
                 if (animateTextChange) {
                     titleWidth = animateFromTitleWidth * (1f - changeProgress) + currentTab.titleWidth * changeProgress;
                 }
-                int textSpace = OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.ICON ? AndroidUtilities.dp(6) : 0;
+                int textSpace = OctoConfig.INSTANCE.tabMode.getValue() != TabMode.ICON.getValue() ? AndroidUtilities.dp(6) : 0;
                 if (animateTextChange && titleAnimateOutLayout == null) {
                     x = textX - titleXOffset + titleOffsetX + titleWidth + textSpace;
                 } else {
@@ -659,7 +660,7 @@ public class FilterTabsView extends FrameLayout {
                 countWidth = 0;
             }
             int tabWidth;
-            if (OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.ICON) {
+            if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.ICON.getValue()) {
                 tabWidth = currentTab.iconWidth + currentTab.titleWidth + (countWidth != 0 ? countWidth + AndroidUtilities.dp(6 * 1.0f) : 0);
             } else {
                 tabWidth = currentTab.iconWidth + (countWidth != 0 ? countWidth + AndroidUtilities.dp(6 * 1.0f) : 0);
@@ -717,7 +718,7 @@ public class FilterTabsView extends FrameLayout {
                 }
             }
 
-            if (OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.TEXT) {
+            if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.TEXT.getValue()) {
                 int iconX = (int) ((getMeasuredWidth() - tabWidth) / 2f);
 
                 if (iconX != lastIconTab) {

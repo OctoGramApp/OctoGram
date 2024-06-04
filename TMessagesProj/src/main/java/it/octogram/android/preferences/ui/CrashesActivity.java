@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.ui;
@@ -25,12 +25,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.FileLoadOperation;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.FileUploadOperation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.tgnet.ConnectionsManager;
@@ -60,13 +59,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.preferences.ui.custom.CrashLogCell;
 
-public class CrashesActivity extends BaseFragment {
+public class CrashesActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private final Object PARTIAL = new Object();
 
@@ -86,6 +86,10 @@ public class CrashesActivity extends BaseFragment {
     protected RecyclerListView listView;
     private ListAdapter listAdapter;
     private NumberTextView selectedCountTextView;
+
+    private String sharingFullLocation;
+    private String sharingFileName;
+    private LongSparseArray<TLRPC.Dialog> sharingDids;
 
     private final int MENU_DELETE = 1;
     private final int MENU_DELETE_ALL = 2;
@@ -291,7 +295,7 @@ public class CrashesActivity extends BaseFragment {
 
     private boolean openLog(File file) {
         try {
-            File cacheFile = Crashlytics.shareLog(file);
+            File cacheFile = Crashlytics.shareLog(file.getAbsoluteFile());
             AndroidUtilities.openForView(cacheFile, cacheFile.getName(), "text/plain", getParentActivity(), getResourceProvider());
             return true;
         } catch (IOException e) {
@@ -308,61 +312,13 @@ public class CrashesActivity extends BaseFragment {
 
                 @Override
                 protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                    sharingFileName = cacheFile.getName();
+                    sharingFullLocation = cacheFile.getAbsolutePath();
+                    sharingDids = dids;
+
                     FileLoader instance = FileLoader.getInstance(getCurrentAccount());
-                    instance.setDelegate(new FileLoader.FileLoaderDelegate() {
-                        @Override
-                        public void fileUploadProgressChanged(FileUploadOperation operation, String location, long uploadedSize, long totalSize, boolean isEncrypted) {
 
-                        }
-
-                        @Override
-                        public void fileDidUploaded(String location, TLRPC.InputFile inputFile, TLRPC.InputEncryptedFile inputEncryptedFile, byte[] key, byte[] iv, long totalFileSize) {
-                            if (inputFile == null) {
-                                return;
-                            }
-
-                            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(CrashesActivity.this).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.SendCrashLogDone)).show());
-
-                            TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
-                            attr.file_name = cacheFile.getName();
-
-                            TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
-                            inputMediaDocument.file = inputFile;
-                            inputMediaDocument.attributes.add(attr);
-                            inputMediaDocument.mime_type = "text/json";
-
-                            for (int i = 0; i < dids.size(); i++) {
-                                TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
-                                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dids.keyAt(i));
-                                req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
-                                req.message = "";
-                                req.silent = true;
-                                req.media = inputMediaDocument;
-                                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
-                            }
-                        }
-
-                        @Override
-                        public void fileDidFailedUpload(String location, boolean isEncrypted) {
-
-                        }
-
-                        @Override
-                        public void fileDidLoaded(String location, File finalFile, Object parentObject, int type) {
-
-                        }
-
-                        @Override
-                        public void fileDidFailedLoad(String location, int state) {
-
-                        }
-
-                        @Override
-                        public void fileLoadProgressChanged(FileLoadOperation operation, String location, long uploadedSize, long totalSize) {
-
-                        }
-                    });
-
+                    initUpdateReceiver();
                     instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
                 }
             };
@@ -625,4 +581,61 @@ public class CrashesActivity extends BaseFragment {
         }
     }
 
+
+
+    private void initUpdateReceiver() {
+        NotificationCenter.getInstance(getCurrentAccount()).addObserver(this, NotificationCenter.fileUploaded);
+        NotificationCenter.getInstance(getCurrentAccount()).addObserver(this, NotificationCenter.fileUploadFailed);
+    }
+
+    private void stopUpdateReceiver() {
+        NotificationCenter.getInstance(getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploaded);
+        NotificationCenter.getInstance(getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploadFailed);
+    }
+
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.fileUploaded) {
+            String location = (String) args[0];
+            TLRPC.InputFile inputFile = (TLRPC.InputFile) args[1];
+
+            if (inputFile == null) {
+                return;
+            }
+
+            if (!Objects.equals(location, sharingFullLocation)) {
+                return;
+            }
+
+            stopUpdateReceiver();
+
+            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(CrashesActivity.this).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.SendCrashLogDone)).show());
+
+            TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
+            attr.file_name = sharingFileName;
+
+            TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
+            inputMediaDocument.file = inputFile;
+            inputMediaDocument.attributes.add(attr);
+            inputMediaDocument.mime_type = "text/json";
+
+            for (int i = 0; i < sharingDids.size(); i++) {
+                TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
+                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDids.keyAt(i));
+                req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
+                req.message = "";
+                req.silent = true;
+                req.media = inputMediaDocument;
+                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+            }
+        } else if (id == NotificationCenter.fileUploadFailed) {
+            String location = (String) args[0];
+
+            if (!Objects.equals(location, sharingFullLocation)) {
+                return;
+            }
+
+            stopUpdateReceiver();
+        }
+    }
 }

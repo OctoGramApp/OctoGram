@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.rows;
@@ -16,6 +16,7 @@ public abstract class BaseRowBuilder<T> {
     protected String description;
     protected boolean requiresRestart = false;
     protected ConfigProperty<Boolean> showIf;
+    protected boolean showIfReverse;
     protected boolean divider = true;
     protected int[] postNotificationName;
 
@@ -34,9 +35,14 @@ public abstract class BaseRowBuilder<T> {
         return this;
     }
 
-    public BaseRowBuilder<T> showIf(ConfigProperty<Boolean> val) {
+    public BaseRowBuilder<T> showIf(ConfigProperty<Boolean> val, boolean isReverse) {
         showIf = val;
+        showIfReverse = isReverse;
         return this;
+    }
+
+    public BaseRowBuilder<T> showIf(ConfigProperty<Boolean> val) {
+        return showIf(val, false);
     }
 
     public BaseRowBuilder<T> divider(boolean val) {

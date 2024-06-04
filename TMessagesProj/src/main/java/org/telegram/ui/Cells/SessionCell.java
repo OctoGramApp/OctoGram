@@ -370,6 +370,22 @@ public class SessionCell extends FrameLayout {
         Drawable bgDrawable = new CircleGradientDrawable(AndroidUtilities.dp(sz), colorKey == -1 ? 0xFF000000 : Theme.getColor(colorKey), colorKey2 == -1 ? 0xFF000000 : Theme.getColor(colorKey2));
         CombinedDrawable combinedDrawable = new CombinedDrawable(bgDrawable, iconDrawable);
         return combinedDrawable;
+
+        /* TODO: WIP New Logic for Session Icons
+        SessionIcon sessionIcons = new SessionIcon();
+        SessionIcon.DeviceAttributes attributes = sessionIcons.setDeviceAttributes(session);
+
+        var colorKey = attributes.getColorKey();
+        var colorKey2 = attributes.getColorKey2();
+        var iconId = attributes.getIconId();
+
+        Drawable iconDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, iconId);
+        if (iconDrawable != null) {
+            iconDrawable.mutate();
+            iconDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_avatar_text), PorterDuff.Mode.SRC_IN));
+        }
+        Drawable bgDrawable = new CircleGradientDrawable(AndroidUtilities.dp(sz), colorKey == -1 ? 0xFF000000 : Theme.getColor(colorKey), colorKey2 == -1 ? 0xFF000000 : Theme.getColor(colorKey2));
+        return new CombinedDrawable(bgDrawable, iconDrawable);*/
     }
 
     public static class CircleGradientDrawable extends Drawable {

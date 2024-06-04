@@ -136,7 +136,7 @@ public class StickerSizePreviewMessages extends LinearLayout {
         messageObjects[1].replyMessageObject = messageObjects[0];
 
         for (int a = 0; a < cells.length; a++) {
-            cells[a] = new ChatMessageCell(context);
+            cells[a] = new ChatMessageCell(context, UserConfig.selectedAccount);
             cells[a].setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
             });
             cells[a].isChat = false;

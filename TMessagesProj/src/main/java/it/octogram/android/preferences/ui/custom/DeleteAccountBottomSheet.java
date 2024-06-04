@@ -1,6 +1,7 @@
 package it.octogram.android.preferences.ui.custom;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.util.TypedValue;
@@ -18,11 +19,8 @@ import androidx.core.graphics.ColorUtils;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
@@ -37,13 +35,14 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarsImageView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
-import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.TwoStepVerificationActivity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
+
+import it.octogram.android.utils.OctoUtils;
 
 public class DeleteAccountBottomSheet extends BottomSheet {
 
@@ -63,6 +62,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
         FrameLayout frameLayout = new FrameLayout(getContext());
 
         ViewPager viewPager = new ViewPager(getContext()) {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouchEvent(MotionEvent ev) {
                 return false;
@@ -217,39 +217,33 @@ public class DeleteAccountBottomSheet extends BottomSheet {
     }
 
     private int getStickerForStepId(int stepId) {
-        switch (stepId) {
-            case CurrentStep.FREE_CLOUD_STORAGE:
-                return R.raw.utyan_size;
-            case CurrentStep.GROUPS_AND_CHANNELS:
-                return R.raw.utyan_vitnam;
-            default:
-            case CurrentStep.MESSAGE_HISTORY:
-                return R.raw.utyan_private;
-        }
+        return switch (stepId) {
+            case CurrentStep.FREE_CLOUD_STORAGE -> R.raw.utyan_size;
+            case CurrentStep.GROUPS_AND_CHANNELS -> R.raw.utyan_vitnam;
+            default -> R.raw.utyan_private;
+        };
     }
 
     private String getTitleForStepId(int stepId) {
-        switch (stepId) {
-            case CurrentStep.FREE_CLOUD_STORAGE:
-                return LocaleController.getString("DeleteAccountStep1Title", R.string.DeleteAccountStep1Title);
-            case CurrentStep.GROUPS_AND_CHANNELS:
-                return LocaleController.getString("DeleteAccountStep2Title", R.string.DeleteAccountStep2Title);
-            default:
-            case CurrentStep.MESSAGE_HISTORY:
-                return LocaleController.getString("DeleteAccountStep3Title", R.string.DeleteAccountStep3Title);
-        }
+        return switch (stepId) {
+            case CurrentStep.FREE_CLOUD_STORAGE ->
+                    LocaleController.getString("DeleteAccountStep1Title", R.string.DeleteAccountStep1Title);
+            case CurrentStep.GROUPS_AND_CHANNELS ->
+                    LocaleController.getString("DeleteAccountStep2Title", R.string.DeleteAccountStep2Title);
+            default ->
+                    LocaleController.getString("DeleteAccountStep3Title", R.string.DeleteAccountStep3Title);
+        };
     }
 
     private String getDescriptionForStepId(int stepId) {
-        switch (stepId) {
-            case CurrentStep.FREE_CLOUD_STORAGE:
-                return LocaleController.getString("DeleteAccountStep1Description", R.string.DeleteAccountStep1Description);
-            case CurrentStep.GROUPS_AND_CHANNELS:
-                return LocaleController.getString("DeleteAccountStep2Description", R.string.DeleteAccountStep2Description);
-            default:
-            case CurrentStep.MESSAGE_HISTORY:
-                return LocaleController.getString("DeleteAccountStep3Description", R.string.DeleteAccountStep3Description);
-        }
+        return switch (stepId) {
+            case CurrentStep.FREE_CLOUD_STORAGE ->
+                    LocaleController.getString("DeleteAccountStep1Description", R.string.DeleteAccountStep1Description);
+            case CurrentStep.GROUPS_AND_CHANNELS ->
+                    LocaleController.getString("DeleteAccountStep2Description", R.string.DeleteAccountStep2Description);
+            default ->
+                    LocaleController.getString("DeleteAccountStep3Description", R.string.DeleteAccountStep3Description);
+        };
     }
 
     private void showLastDeleteStep() {
@@ -266,7 +260,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                 progressDialog.setCanCancel(false);
 
                 TLRPC.TL_account_deleteAccount req = new TLRPC.TL_account_deleteAccount();
-                req.reason = "deletion requested by the user via octogram.site - request made after 2fa confirmation";
+                req.reason = String.format("\"deletion requested by the user via %s - request made after 2fa confirmation", OctoUtils.getDomain()) ;
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                     if (response instanceof TLRPC.TL_boolTrue) {
                         AccountInstance accountInstance = AccountInstance.getInstance(currentAccount);

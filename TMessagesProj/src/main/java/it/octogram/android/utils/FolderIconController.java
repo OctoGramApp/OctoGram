@@ -9,6 +9,7 @@ import org.telegram.messenger.R;
 import java.util.LinkedHashMap;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.TabMode;
 
 public class FolderIconController {
     public static LinkedHashMap<String, Integer> folderIcons = new LinkedHashMap<>();
@@ -51,7 +52,7 @@ public class FolderIconController {
     }
 
     public static int getPadding() {
-        if (OctoConfig.INSTANCE.tabMode.getValue() == OctoConfig.TabMode.MIXED) {
+        if (OctoConfig.INSTANCE.tabMode.getValue() == TabMode.MIXED.getValue()) {
             return AndroidUtilities.dp(6);
         }
         return 0;
@@ -59,14 +60,14 @@ public class FolderIconController {
 
     public static int getTotalIconWidth() {
         int result = 0;
-        if (OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.TEXT) {
+        if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.TEXT.getValue()) {
             result = getIconWidth() + getPadding();
         }
         return result;
     }
 
     public static int getPaddingTab() {
-        if (OctoConfig.INSTANCE.tabMode.getValue() != OctoConfig.TabMode.ICON) {
+        if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.ICON.getValue()) {
             return AndroidUtilities.dp(32);
         }
         return AndroidUtilities.dp(16);

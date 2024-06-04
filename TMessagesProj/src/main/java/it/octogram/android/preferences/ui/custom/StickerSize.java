@@ -43,7 +43,7 @@ public class StickerSize extends FrameLayout {
         sizeBar.setDelegate((stop, progress) -> {
             sizeBar.getSeekBarAccessibilityDelegate().postAccessibilityEventRunnable(StickerSize.this);
             int progressSave = Math.round(startStickerSize + (endStickerSize - startStickerSize) * progress);
-            OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.maxStickerSize, progressSave);
+            OctoConfig.INSTANCE.maxStickerSize.updateValue(progressSave);
             onSeek();
             StickerSize.this.invalidate();
         });

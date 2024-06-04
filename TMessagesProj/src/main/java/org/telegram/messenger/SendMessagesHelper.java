@@ -80,6 +80,7 @@ import org.telegram.ui.PaymentFormActivity;
 import org.telegram.ui.Stories.MessageMediaStoryFull;
 import org.telegram.ui.TwoStepVerificationActivity;
 import org.telegram.ui.TwoStepVerificationSetupActivity;
+import org.telegram.ui.bots.BotWebViewSheet;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -99,6 +100,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhotoResolution;
 import it.octogram.android.utils.VideoUtils;
 
 public class SendMessagesHelper extends BaseController implements NotificationCenter.NotificationCenterDelegate {
@@ -6759,13 +6761,12 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     private static int getPhotoResolution(int photoResolution) {
-        switch (photoResolution) {
-            case OctoConfig.PhotoResolution.LOW:
-                return 800;
-            case OctoConfig.PhotoResolution.HIGH:
-                return 2560;
-            default:
-                return 1280;
+        if (photoResolution == PhotoResolution.LOW.getValue()) {
+            return 800;
+        } else if (photoResolution == PhotoResolution.HIGH.getValue()) {
+            return 2560;
+        } else {
+            return 1280;
         }
     }
 

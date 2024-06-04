@@ -52,7 +52,7 @@ public class LanguageController {
 
                     loadRemoteLanguage(langCode);
                     versioning.put(langCode, remoteMD5);
-                    OctoConfig.INSTANCE.setPackLangVersion(versioning.toString());
+                    OctoConfig.INSTANCE.languagePackVersioning.updateValue(versioning.toString());
                 }
             } catch (Exception ignore) {}
         }).start();

@@ -1,10 +1,18 @@
 package org.telegram.messenger;
 
 
+import static androidx.core.content.ContextCompat.registerReceiver;
+
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.PowerManager;
+import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.math.MathUtils;
@@ -12,10 +20,13 @@ import androidx.core.math.MathUtils;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
+import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+
+import it.octogram.android.OctoConfig;
 
 public class LiteMode {
 
@@ -84,6 +95,7 @@ public class LiteMode {
 
     private static int value;
     private static boolean loaded;
+    private static boolean loadedIntent;
 
     public static int getValue() {
         return getValue(false);
@@ -94,6 +106,20 @@ public class LiteMode {
             loadPreference();
         }
         if (!ignorePowerSaving && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (OctoConfig.INSTANCE.syncPowerSaver.getValue()) {
+                if (usingDevicePowerSaverMode()) {
+                    if (!lastPowerSaverApplied) {
+                        onPowerSaverApplied(lastPowerSaverApplied = true);
+                    }
+                    return PRESET_POWER_SAVER;
+                }
+                if (lastPowerSaverApplied) {
+                    onPowerSaverApplied(lastPowerSaverApplied = false);
+                }
+
+                return value;
+            }
+
             if (getBatteryLevel() <= powerSaverLevel && powerSaverLevel > 0) {
                 if (!lastPowerSaverApplied) {
                     onPowerSaverApplied(lastPowerSaverApplied = true);
@@ -121,6 +147,45 @@ public class LiteMode {
             }
         }
         return lastBatteryLevelCached;
+    }
+
+    private static boolean lastPowerSaverModeCached = false;
+    private static long lastPowerSaverModeChecked = -1;
+
+    public static boolean usingDevicePowerSaverMode() {
+        if (!loadedIntent) {
+            loadIntent();
+        }
+
+        long time = 0;
+        if (lastPowerSaverModeChecked == -1 || (time = System.currentTimeMillis()) - lastPowerSaverModeChecked > 1000 * 12) {
+            boolean checkedViaAlternativeWay = false;
+
+            try {
+                if (AndroidUtilities.isHonor()) {
+                    int value = android.provider.Settings.System.getInt(LaunchActivity.instance.getContentResolver(), "SmartModeStatus");
+                    lastPowerSaverModeCached = value == 4;
+                    lastPowerSaverModeChecked = time;
+                    checkedViaAlternativeWay = true;
+                } else if (XiaomiUtilities.isMIUI()) {
+                    int value = android.provider.Settings.System.getInt(LaunchActivity.instance.getContentResolver(), "POWER_SAVE_MODE_OPEN");
+                    lastPowerSaverModeCached = value == 1;
+                    lastPowerSaverModeChecked = time;
+                    checkedViaAlternativeWay = true;
+                }
+            } catch (Settings.SettingNotFoundException e) {
+                FileLog.e(e);
+            }
+
+            if (!checkedViaAlternativeWay) {
+                PowerManager powerManager = (PowerManager) ApplicationLoader.applicationContext.getSystemService(Context.POWER_SERVICE);
+                if (powerManager != null) {
+                    lastPowerSaverModeCached = powerManager.isPowerSaveMode();
+                    lastPowerSaverModeChecked = time;
+                }
+            }
+        }
+        return lastPowerSaverModeCached;
     }
 
     private static int preprocessFlag(int flag) {
@@ -262,6 +327,34 @@ public class LiteMode {
         }
         powerSaverLevel = preferences.getInt("lite_mode_battery_level", batteryDefaultValue);
         loaded = true;
+    }
+
+    private static void loadIntent() {
+        if (AndroidUtilities.isHonor() || XiaomiUtilities.isMIUI()) {
+            loadedIntent = true;
+            // it doesn't work on honor and miui
+            return;
+        }
+
+        if (LaunchActivity.instance == null) {
+            return;
+        }
+
+        loadedIntent = true;
+
+        BroadcastReceiver powerSaverChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (OctoConfig.INSTANCE.syncPowerSaver.getValue()) {
+                    lastPowerSaverModeChecked = -1; // force reload powersavermode
+                    getValue(false);
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+        LaunchActivity.instance.registerReceiver(powerSaverChangeReceiver, filter);
     }
 
     public static void savePreference() {

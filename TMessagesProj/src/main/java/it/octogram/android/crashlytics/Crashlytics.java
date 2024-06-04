@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.crashlytics;
@@ -44,20 +44,24 @@ import java.lang.reflect.Field;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.NotificationColorize;
+import it.octogram.android.utils.OctoUtils;
 
+/**
+ * @noinspection deprecation
+ */
 public class Crashlytics {
 
-    private final Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
-    private final static File filesDir = ApplicationLoader.applicationContext.getFilesDir();
-
+    private final static File filesDir = OctoUtils.getLogsDir();
     public static void init() {
         Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler((thread, th) -> uncaughtException(exceptionHandler, thread, th));
+        Thread.setDefaultUncaughtExceptionHandler((thread, th) -> {
+            if (exceptionHandler != null) {
+                uncaughtException(exceptionHandler, thread, th);
+            }
+        });
     }
 
-    private static void uncaughtException(@NonNull Thread.UncaughtExceptionHandler exceptionHandler,
-                                          @NonNull Thread t,
-                                          @NonNull Throwable e) {
+    private static void uncaughtException(@NonNull Thread.UncaughtExceptionHandler exceptionHandler, @NonNull Thread t, @NonNull Throwable e) {
         Writer result = new StringWriter();
         PrintWriter printWriter = new PrintWriter(result);
         e.printStackTrace(printWriter);
@@ -104,16 +108,26 @@ public class Crashlytics {
     }
 
     public static String getSystemInfo() throws IllegalAccessException {
-        return LocaleController.getInstance().formatterFull.format(System.currentTimeMillis()) + "\n\n" +
+        return getSystemInfo(true);
+    }
+
+    public static String getSystemInfo(boolean includeConfiguration) throws IllegalAccessException {
+        String baseInfo = LocaleController.getInstance().formatterFull.format(System.currentTimeMillis()) + "\n\n" +
                 "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildConfig.BUILD_VERSION + ")\n" +
                 "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
+                "Commit: " + BuildConfig.GIT_COMMIT_HASH + "\n" +
                 "Device: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
                 "OS Version: " + Build.VERSION.RELEASE + "\n" +
                 "Google Play Services: " + ApplicationLoader.hasPlayServices + "\n" +
                 "Performance Class: " + getPerformanceClassString() + "\n" +
                 "Locale: " + LocaleController.getSystemLocaleStringIso639() + "\n" +
-                "Language CW: " + Resources.getSystem().getConfiguration().locale.getLanguage() + "\n" +
-                "Configuration: " + getOctoConfiguration() + "\n";
+                "Language CW: " + Resources.getSystem().getConfiguration().locale.getLanguage();
+
+        if (includeConfiguration) {
+            baseInfo += "\nConfiguration: " + getOctoConfiguration() + "\n";
+        }
+
+        return baseInfo;
     }
 
     // I don't even know why I did this
@@ -141,32 +155,25 @@ public class Crashlytics {
     }
 
     private static String getPerformanceClassString() {
-        switch (SharedConfig.getDevicePerformanceClass()) {
-            case SharedConfig.PERFORMANCE_CLASS_LOW:
-                return "LOW";
-            case SharedConfig.PERFORMANCE_CLASS_AVERAGE:
-                return "AVERAGE";
-            case SharedConfig.PERFORMANCE_CLASS_HIGH:
-                return "HIGH";
-            default:
-                return "UNKNOWN";
-        }
+        return switch (SharedConfig.getDevicePerformanceClass()) {
+            case SharedConfig.PERFORMANCE_CLASS_LOW -> "LOW";
+            case SharedConfig.PERFORMANCE_CLASS_AVERAGE -> "AVERAGE";
+            case SharedConfig.PERFORMANCE_CLASS_HIGH -> "HIGH";
+            default -> "UNKNOWN";
+        };
     }
 
     public static void deleteCrashLogs() {
-        File[] files = getArchivedCrashFiles();
-        for (File file : files) {
-            file.delete();
+        for (File file : getArchivedCrashFiles()) {
+            if (!file.delete()) {
+                FileLog.e("Failed to delete file: " + file.getAbsolutePath());
+            }
         }
     }
 
     public static File getLatestArchivedCrashFile() {
         File[] files = getArchivedCrashFiles();
-        if (files.length > 0) {
-            return files[files.length - 1];
-        } else {
-            return null;
-        }
+        return files.length > 0 ? files[files.length - 1] : null;
     }
 
     public static String getLatestCrashDate() {
@@ -175,7 +182,7 @@ public class Crashlytics {
             String line = reader.readLine();
             reader.close();
 
-            return (line != null) ? line.replace(" ", "_").replace(",", "").replace(":", "_") : "null";
+            return line.replace(" ", "_").replace(",", "").replace(":", "_");
         } catch (IOException e) {
             FileLog.e(e);
             return "null";
@@ -183,7 +190,7 @@ public class Crashlytics {
     }
 
     public static File[] getArchivedCrashFiles() {
-        return filesDir.listFiles((dir1, name) -> name.endsWith(".log"));
+        return filesDir.listFiles((dir, name) -> name.endsWith(".log"));
     }
 
     public static File getLatestCrashFile() {
@@ -194,7 +201,9 @@ public class Crashlytics {
         File file = getLatestCrashFile();
         if (file.exists()) {
             File archived = new File(filesDir, getLatestCrashDate() + ".log");
-            file.renameTo(archived);
+            if (!file.renameTo(archived)) {
+                FileLog.e("Failed to archive file: " + file.getAbsolutePath());
+            }
         }
     }
 
@@ -206,12 +215,11 @@ public class Crashlytics {
             builder.append(line).append("\n");
         }
         reader.close();
-        File shareLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), file.getName());
+        File shareLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), file.getAbsoluteFile().getName());
         BufferedWriter writer = new BufferedWriter(new FileWriter(shareLogFile));
         writer.write(builder.toString());
         writer.flush();
         writer.close();
         return shareLogFile;
     }
-
 }

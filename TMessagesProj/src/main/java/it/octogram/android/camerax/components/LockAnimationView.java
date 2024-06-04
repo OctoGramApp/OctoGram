@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.camerax.components;
@@ -16,8 +16,9 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.view.Gravity;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import androidx.appcompat.widget.AppCompatImageView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
@@ -30,7 +31,7 @@ public class LockAnimationView extends LinearLayout {
     public LockAnimationView(Context context) {
         super(context);
         setGravity(Gravity.CENTER_HORIZONTAL);
-        ImageView imageView = new ImageView(context) {
+        var imageView = new AppCompatImageView(context) {
             float idleProgress;
             boolean incIdle;
             private final int lockColor = Theme.getColor(Theme.key_chat_messagePanelVoiceLock);

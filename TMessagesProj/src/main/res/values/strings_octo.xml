@@ -18,9 +18,47 @@
     <string name="FeatureCurrentlyUnavailable">This feature is currently unavailable :(</string>
     <string name="FormatterDay24HSec">HH:mm:ss</string>
     <string name="FormatterDay12HSec">h:mm:ss a</string>
-    <string name="DatacenterStatus">Datacenter Status</string>
     <string name="PhotoCopied">Photo copied to clipboard.</string>
     <string name="Acknowledge">Acknowledge</string>
+
+    <!-- Media filtering -->
+    <string name="MediaFilter">Filter by media type</string>
+    <string name="MediaFilterItemAll">No filter</string>
+    <string name="MediaFilterItemPhotos">Photos</string>
+    <string name="MediaFilterItemVideos">Videos</string>
+    <string name="MediaFilterItemVoiceM">Voice messages</string>
+    <string name="MediaFilterItemVideoM">Video messages</string>
+    <string name="MediaFilterItemFiles">Files</string>
+    <string name="MediaFilterItemMusic">Music</string>
+    <string name="MediaFilterItemGifs">Gifs</string>
+    <string name="MediaFilterItemLocations">Locations</string>
+    <string name="MediaFilterItemContacts">Contacts</string>
+    <string name="MediaFilterItemMentions">Mentions</string>
+    <string name="MediaFilterItemUrl">Links</string>
+    <string name="MediaFilterItemPinnedM">Pinned messages</string>
+    <string name="MediaFilterItemChatPhotos">Chat photos</string>
+
+    <!-- Translator -->
+    <string name="TranslatorHeader">Customize the integrated message translation experience</string>
+    <string name="TranslatorHeaderLong">You can customize the integrated message translation experience in OctoGram settings.</string>
+    <string name="TranslatorCategoryGeneral">General</string>
+    <string name="TranslatorCategoryOptions">Options</string>
+    <string name="TranslatorMode">Mode</string>
+    <string name="TranslatorModeDefault">Popup</string>
+    <string name="TranslatorModeInline">In-Message</string>
+    <string name="TranslatorModeExternal">External app</string>
+    <string name="TranslatorProvider">Provider</string>
+    <string name="TranslatorProviderUnsupported">The currently set language (%s) is not supported by the selected provider.</string>
+    <string name="TranslatorProviderUnsupportedDialogs">The translation target language of some chats has been changed because the previously set language is not supported by the selected provider.</string>
+    <string name="TranslatorFormality">Formality</string>
+    <string name="TranslatorFormalityDefault">Default</string>
+    <string name="TranslatorFormalityLow">Informal</string>
+    <string name="TranslatorFormalityHigh">Formal</string>
+    <string name="TranslatorKeepMarkdown">Keep formatting</string>
+    <string name="TranslateEntireChatDescription">You can choose to show the button to translate an entire chat. </string>
+    <string name="TranslatorInMessageBadge">translated</string>
+    <string name="TranslatorFailed">Translation language.</string>
+    <string name="TranslatorUnsupportedLanguage">Selected language isn\'t supported by the selected provider.</string>
 
     <!--Devices: Custom device name-->
     <string name="UseCustomDeviceName">Use custom name</string>
@@ -29,6 +67,31 @@
     <string name="UseCustomDeviceNameRename">Rename device</string>
     <string name="UseCustomDeviceNameRenameDefault">Use default name</string>
 
+    <!--LiteMode: sync battery saver with device-->
+    <string name="LiteModeSyncBatterySaver">Sync battery saver with device</string>
+    <string name="LiteModeSyncBatterySaverInfo">You can choose to synchronize OctoGram\'s power-saving mode with your device\'s power-saving mode.</string>
+
+    <!--Updates-->
+    <string name="AppUpdateCustomTitle">Update OctoGram</string>
+    <string name="UpdatesSettingsHeader">Stay up to date with the latest news from OctoGram.</string>
+    <string name="UpdatesSettingsVerify">Verify</string>
+    <string name="UpdatesSettingsCheck">Search for updates</string>
+    <string name="UpdatesSettingsCheckAvailable">Update is available</string>
+    <string name="UpdatesSettingsCheckReady">Update is ready</string>
+    <string name="UpdatesSettingsCheckButton">Check</string>
+    <string name="UpdatesSettingsCheckButtonDownload">Download</string>
+    <string name="UpdatesSettingsCheckButtonInstall">Install</string>
+    <string name="UpdatesSettingsCheckButtonUpdate">Update</string>
+    <string name="UpdatesSettingsCheckButtonChecking">Checking...</string>
+    <string name="UpdatesSettingsCheckUpdated">You are using the latest version available.</string>
+    <string name="UpdatesSettingsCheckFailed">An error occurred while checking for updates. Please try again later.</string>
+    <string name="UpdatesSettingsBeta">Prefer beta version</string>
+    <string name="UpdatesSettingsAuto">Automatically check</string>
+    <string name="UpdatesSettingsAutoDescription">If enabled, server will notify the app when to check for new updates.</string>
+    <string name="UpdatesSettingsPBeta">Receive PBeta updates</string>
+    <string name="UpdatesSettingsLinks">Other sources</string>
+    <string name="UpdatesSettingsPbetaDescription">Your main account is part of OctoGram\'s private beta program.\n\nBy activating this option, you can receive updates from the private beta program directly via OTA like other stable and beta updates, but some updates settings (like "%s") will be forcibly activated.</string>
+    <string name="UpdatesPbetaWarning">Please note that the update you are installing is part of the private beta program you joined and may have instabilities. If so, please report it in our official internal testing group.</string>
 
     <!--Emoji Sets-->
     <string name="MyEmojiSets">My Emoji Sets</string>
@@ -73,7 +136,6 @@
     <string name="TranslateOcto">Translate OctoGram</string>
     <string name="TranslateOcto_Desc">Help us translating OctoGram in your language</string>
     <string name="SourceCode">View Source Code</string>
-    <string name="DatacenterStatus_Desc">View datacenter info</string>
 
     <string name="OctoGeneralSettings">General Settings</string>
     <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app, as well as privacy</string>
@@ -213,7 +275,6 @@
     <string name="SmartNotificationsPvtDialogButton">Enable smart notifications</string>
 
     <!-- RESOLUTION STRING SECTION -->
-
     <string name="PhotoResolution">Photo Resolution</string>
     <string name="ResolutionLow">Low (800x)</string>
     <string name="ResolutionMedium">Default (1280x)</string>
@@ -260,6 +321,8 @@
     <string name="FileDC">Datacenter</string>
     <string name="FilePath">Path</string>
     <string name="FileSize">Size</string>
+    <string name="FileFrameRate">FPS</string>
+    <string name="FileBitrate">Bitrate</string>
 
     <!-- Context menu -->
     <string name="CopyPhoto">Copy photo</string>
@@ -385,6 +448,12 @@
     <string name="StyleTypeDefault">Default</string>
     <string name="StickerShapeRounded">Rounded</string>
     <string name="StyleTypeMessage">Message</string>
+
+    <!-- Datacenter Section -->
+    <string name="DatacenterStatus">Datacenter Status</string>
+    <string name="DatacenterStatus_Desc">View datacenter info</string>
+    <string name="DatacenterStatusSection_Desc">Check the Telegram\'s <![CDATA[<a href="https://core.telegram.org/api/datacenter">Datacenter</a>]]> Status in realtime.</string>
+    <string name="WebVersion">Open Web Version</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

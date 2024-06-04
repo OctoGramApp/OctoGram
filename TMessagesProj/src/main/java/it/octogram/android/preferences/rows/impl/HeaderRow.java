@@ -11,7 +11,7 @@ public class HeaderRow extends BaseRow {
     }
 
     public HeaderRow(String title, ConfigProperty<Boolean> showIf) {
-        super(title, null, false, showIf, PreferenceType.HEADER);
+        super(title, null, false, showIf, false, PreferenceType.HEADER);
     }
 
 }

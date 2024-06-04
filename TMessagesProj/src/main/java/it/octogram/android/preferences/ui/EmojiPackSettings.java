@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 /*
@@ -181,12 +181,12 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             }
             if (isDownloading || isUnzipping) return;
             if (CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5).exists() || cell.packId.equals("default")) {
-                OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, cell.packId);
+                OctoConfig.INSTANCE.selectedEmojiPack.updateValue(cell.packId);
                 cell.setChecked(true, true);
                 Emoji.reloadEmoji();
                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
                 if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) {
-                    OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.useSystemEmoji);
+                    OctoConfig.INSTANCE.useSystemEmoji.updateValue(!OctoConfig.INSTANCE.useSystemEmoji.getValue());
                     listAdapter.notifyItemChanged(useSystemEmojiRow, PARTIAL);
                 }
             } else {
@@ -196,7 +196,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             }
             listAdapter.notifyEmojiSetsChanged();
         } else if (position == useSystemEmojiRow) {
-            OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.useSystemEmoji);
+            OctoConfig.INSTANCE.useSystemEmoji.updateValue(!OctoConfig.INSTANCE.useSystemEmoji.getValue());
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(OctoConfig.INSTANCE.useSystemEmoji.getValue());
             }
@@ -220,13 +220,13 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 if (cell.isChecked()) return;
                 cell.setChecked(true, true);
                 listAdapter.notifyEmojiSetsChanged();
-                OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, cell.packId);
+                OctoConfig.INSTANCE.selectedEmojiPack.updateValue(cell.packId);
                 FileDownloader.cancel(getCurrentDownloading());
                 FileUnzip.cancel(getCurrentUnzipping());
                 Emoji.reloadEmoji();
                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
                 if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) {
-                    OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.useSystemEmoji);
+                    OctoConfig.INSTANCE.useSystemEmoji.updateValue(!OctoConfig.INSTANCE.useSystemEmoji.getValue());
                     listAdapter.notifyItemChanged(useSystemEmojiRow, PARTIAL);
                 }
             }
@@ -287,12 +287,12 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             if (cell.packId.equals(id)) {
                 CustomEmojiController.emojiTmp(cell.packId).delete();
                 if (CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5).exists()) {
-                    OctoConfig.INSTANCE.updateStringSetting(OctoConfig.INSTANCE.selectedEmojiPack, cell.packId);
+                    OctoConfig.INSTANCE.selectedEmojiPack.updateValue(cell.packId);
                     CustomEmojiController.deleteOldVersions(cell.packId, cell.versionWithMD5);
                     Emoji.reloadEmoji();
                     NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
                     if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) {
-                        OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.useSystemEmoji);
+                        OctoConfig.INSTANCE.useSystemEmoji.updateValue(!OctoConfig.INSTANCE.useSystemEmoji.getValue());
                         listAdapter.notifyItemChanged(useSystemEmojiRow, PARTIAL);
                     }
                 }
@@ -371,7 +371,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
     }
 
     @Override
-    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fMessages, boolean notify, int scheduleDate) {
+    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fMessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
         ArrayList<File> filesToUpload = new ArrayList<>();
         for (String file : files) {
             File f = new File(file);

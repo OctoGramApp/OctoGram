@@ -38,7 +38,6 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Bulletin;
-import org.telegram.ui.Components.BulletinFactory;
 
 import java.text.CollationKey;
 import java.text.Collator;
@@ -50,6 +49,8 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import it.octogram.android.utils.OctoUtils;
 
 public class ContactsController extends BaseController {
 
@@ -366,7 +367,7 @@ public class ContactsController extends BaseController {
     }
 
     public String getInviteText(int contacts) {
-        String link = inviteLink == null ? "https://octogram.site/" : inviteLink;
+        String link = inviteLink == null ? String.format("https://%s", OctoUtils.getDomain()) : inviteLink;
         if (contacts <= 1) {
             return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
         } else {

@@ -139,7 +139,7 @@ public class ShimmerFrameLayout extends FrameLayout {
     }
 
     @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         // View's constructor directly invokes this method, in which case no fields on
         // this class have been fully initialized yet.
@@ -168,7 +168,7 @@ public class ShimmerFrameLayout extends FrameLayout {
     }
 
     @Override
-    public void dispatchDraw(Canvas canvas) {
+    public void dispatchDraw(@NonNull Canvas canvas) {
         super.dispatchDraw(canvas);
         if (mShowShimmer) {
             mShimmerDrawable.draw(canvas);

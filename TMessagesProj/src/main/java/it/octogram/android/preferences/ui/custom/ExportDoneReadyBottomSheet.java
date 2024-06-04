@@ -20,11 +20,10 @@ import androidx.core.graphics.ColorUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.FileLoadOperation;
 import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.FileUploadOperation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.tgnet.ConnectionsManager;
@@ -44,16 +43,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 
-public class ExportDoneReadyBottomSheet extends BottomSheet {
+public class ExportDoneReadyBottomSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
     private final Activity originalActivity;
     private final BaseFragment baseFragment;
     private final EditTextBoldCursor editText;
     private static final ImportSettingsScanHelper settingsScan = new ImportSettingsScanHelper();
+
+    private String sharingFullLocation;
+    private String sharingFileName;
+    private LongSparseArray<TLRPC.Dialog> sharingDids;
 
     public ExportDoneReadyBottomSheet(Context context, Activity originalActivity, BaseFragment baseFragment) {
         super(context, true);
@@ -143,9 +147,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
         buttonTextView.setText(LocaleController.getString("ExportDataShare", R.string.ExportDataShare));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
-        buttonTextView.setOnClickListener(view -> {
-            shareExport(editText.getText().toString().trim());
-        });
+        buttonTextView.setOnClickListener(view -> shareExport(editText.getText().toString().trim()));
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         setCustomView(linearLayout);
@@ -185,61 +187,13 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
 
                 @Override
                 protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                    sharingFileName = cacheFile.getName();
+                    sharingFullLocation = cacheFile.getAbsolutePath();
+                    sharingDids = dids;
+
                     FileLoader instance = FileLoader.getInstance(baseFragment.getCurrentAccount());
-                    instance.setDelegate(new FileLoader.FileLoaderDelegate() {
-                        @Override
-                        public void fileUploadProgressChanged(FileUploadOperation operation, String location, long uploadedSize, long totalSize, boolean isEncrypted) {
 
-                        }
-
-                        @Override
-                        public void fileDidUploaded(String location, TLRPC.InputFile inputFile, TLRPC.InputEncryptedFile inputEncryptedFile, byte[] key, byte[] iv, long totalFileSize) {
-                            if (inputFile == null) {
-                                return;
-                            }
-
-                            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.ExportDataShareDone)).show());
-
-                            TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
-                            attr.file_name = cacheFile.getName();
-
-                            TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
-                            inputMediaDocument.file = inputFile;
-                            inputMediaDocument.attributes.add(attr);
-                            inputMediaDocument.mime_type = "text/json";
-
-                            for (int i = 0; i < dids.size(); i++) {
-                                TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
-                                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dids.keyAt(i));
-                                req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
-                                req.message = "";
-                                req.silent = true;
-                                req.media = inputMediaDocument;
-                                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
-                            }
-                        }
-
-                        @Override
-                        public void fileDidFailedUpload(String location, boolean isEncrypted) {
-
-                        }
-
-                        @Override
-                        public void fileDidLoaded(String location, File finalFile, Object parentObject, int type) {
-
-                        }
-
-                        @Override
-                        public void fileDidFailedLoad(String location, int state) {
-
-                        }
-
-                        @Override
-                        public void fileLoadProgressChanged(FileLoadOperation operation, String location, long uploadedSize, long totalSize) {
-
-                        }
-                    });
-
+                    initUpdateReceiver();
                     instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
                 }
             };
@@ -278,5 +232,61 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
         }
 
         return mainObject;
+    }
+
+    private void initUpdateReceiver() {
+        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).addObserver(this, NotificationCenter.fileUploaded);
+        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).addObserver(this, NotificationCenter.fileUploadFailed);
+    }
+
+    private void stopUpdateReceiver() {
+        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploaded);
+        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploadFailed);
+    }
+
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.fileUploaded) {
+            String location = (String) args[0];
+            TLRPC.InputFile inputFile = (TLRPC.InputFile) args[1];
+
+            if (inputFile == null) {
+                return;
+            }
+
+            if (!Objects.equals(location, sharingFullLocation)) {
+                return;
+            }
+
+            stopUpdateReceiver();
+
+            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.ExportDataShareDone)).show());
+
+            TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
+            attr.file_name = sharingFileName;
+
+            TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
+            inputMediaDocument.file = inputFile;
+            inputMediaDocument.attributes.add(attr);
+            inputMediaDocument.mime_type = "text/json";
+
+            for (int i = 0; i < sharingDids.size(); i++) {
+                TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
+                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDids.keyAt(i));
+                req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
+                req.message = "";
+                req.silent = true;
+                req.media = inputMediaDocument;
+                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+            }
+        } else if (id == NotificationCenter.fileUploadFailed) {
+            String location = (String) args[0];
+
+            if (!Objects.equals(location, sharingFullLocation)) {
+                return;
+            }
+
+            stopUpdateReceiver();
+        }
     }
 }

@@ -29,7 +29,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
@@ -70,6 +69,7 @@ import org.telegram.ui.Components.UndoView;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.TabMode;
 
 public class FiltersSetupActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -550,9 +550,9 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
         items.add(ItemInner.asHint());
         items.add(ItemInner.asHeader(LocaleController.getString("FoldersType", R.string.FoldersType)));
-        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeTitles", R.string.FoldersTypeTitles), OctoConfig.TabMode.TEXT));
-        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIcons", R.string.FoldersTypeIcons), OctoConfig.TabMode.ICON));
-        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIconsTitles", R.string.FoldersTypeIconsTitles), OctoConfig.TabMode.MIXED));
+        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeTitles", R.string.FoldersTypeTitles), TabMode.TEXT.getValue()));
+        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIcons", R.string.FoldersTypeIcons), TabMode.ICON.getValue()));
+        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIconsTitles", R.string.FoldersTypeIconsTitles), TabMode.MIXED.getValue()));
         items.add(ItemInner.asShadow(null));
         if (!suggestedFilters.isEmpty() && dialogFilters.size() < 10) {
             items.add(ItemInner.asHeader(LocaleController.getString("FilterRecommended", R.string.FilterRecommended)));
@@ -708,7 +708,7 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                     presentFragment(new FilterCreateActivity());
                 }
             } else if (item.viewType == VIEW_TYPE_RADIO) {
-                OctoConfig.INSTANCE.updateIntegerSetting(OctoConfig.INSTANCE.tabMode, item.folderType);
+                OctoConfig.INSTANCE.tabMode.updateValue(item.folderType);
                 updateRows(true);
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             }

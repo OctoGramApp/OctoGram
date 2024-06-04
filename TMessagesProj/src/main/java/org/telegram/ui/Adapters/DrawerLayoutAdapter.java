@@ -239,7 +239,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
     private void resetItems() {
         accountNumbers.clear();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
-            if (PasscodeController.isProtectedAccount(UserConfig.getInstance(a).getClientUserId())) continue;
+            if (PasscodeController.isProtectedAccount(UserConfig.getInstance(a).getClientUserId()))
+                continue;
             if (UserConfig.getInstance(a).isClientActivated()) {
                 accountNumbers.add(a);
             }

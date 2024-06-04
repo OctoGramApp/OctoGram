@@ -3,60 +3,22 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.utils;
 
 import android.os.SystemClock;
 
-import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
-
+import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
+import java.util.ArrayList;
+
+import it.octogram.android.Datacenter;
+import it.octogram.android.http.StandardHTTPRequest;
 
 public class DatacenterController {
-
-    private static int token = 1;
-    private static final Gson GSON = new Gson();
-    private static final Object lock = new Object();
-
-    private static DCInfo fetchDCStatus() {
-        synchronized (lock) {
-            try {
-                String assetsUrl = "https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json?token=" + ++token;
-                URL url = new URL(assetsUrl);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-
-                int responseCode = connection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        stringBuilder.append(line);
-                    }
-                    reader.close();
-
-                    String json = stringBuilder.toString();
-                    // Parse the JSON string and create an instance of DCInfo
-                    return parseJson(json);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
     public static class DatacenterStatusChecker {
         private UpdateCallback updateCallback;
         private boolean isRunning = false;
@@ -76,14 +38,23 @@ public class DatacenterController {
                 public void run() {
                     while (isRunning) {
                         try {
-                            DCInfo currentDCStatus = fetchDCStatus();
-                            if (currentDCStatus != null) {
-                                if (updateCallback != null) {
-                                    AndroidUtilities.runOnUIThread(() -> updateCallback.onUpdate(currentDCStatus));
-                                }
-                                SystemClock.sleep(1000L * currentDCStatus.refresh_in_time);
+                            var url = String.format("https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json?token=%s",(int) (Math.random() * 10000));
+                            var obj = new JSONObject(new StandardHTTPRequest(url).request());
+                            var listDatacenters = obj.getJSONArray("status");
+                            int refreshTimeIn = obj.getInt("refresh_in_time");
+                            var infoArrayList = new DCInfo();
+                            for (int i = 0; i < listDatacenters.length(); i++) {
+                                var dcInfo = listDatacenters.getJSONObject(i);
+                                var dcID = dcInfo.getInt("dc_id");
+                                var status = dcInfo.getInt("dc_status");
+                                var ping = StandardHTTPRequest.ping(Datacenter.getDcInfo(dcInfo.getInt("dc_id")).ip);  //dcInfo.getInt("ping");
+                                infoArrayList.add(new DCStatus(dcID, status, ping));
+                                SystemClock.sleep(25);
                             }
-                            SystemClock.sleep(1000L);
+                            if (updateCallback != null) {
+                                AndroidUtilities.runOnUIThread(() -> updateCallback.onUpdate(infoArrayList));
+                            }
+                            SystemClock.sleep(1000L * refreshTimeIn);
                         } catch (Exception ignored) {
                             SystemClock.sleep(1000L);
                         }
@@ -107,60 +78,24 @@ public class DatacenterController {
         }
     }
 
-    private static DCInfo parseJson(String json) {
-        return GSON.fromJson(json, DCInfo.class);
-    }
+    public static class DCInfo extends ArrayList<DCStatus> {
 
-    public static class DCInfo {
-        @SerializedName("status")
-        public List<DCStatus> status;
-
-        @SerializedName("last_refresh")
-        public int last_refresh;
-
-        @SerializedName("refresh_in_time")
-        public int refresh_in_time;
-
-        @SerializedName("is_refreshing")
-        public boolean is_refreshing;
-
-        public DCInfo(List<DCStatus> dc_status, int last_refresh, int refresh_in_time, boolean is_refreshing) {
-            this.status = dc_status;
-            this.last_refresh = last_refresh;
-            this.refresh_in_time = refresh_in_time;
-            this.is_refreshing = is_refreshing;
-        }
-
-        public DCStatus getByDc(int id) {
-            for (DCStatus datacenterInfo : status) {
-                if (datacenterInfo.dc_id == id) return datacenterInfo;
+        public DCStatus getByDc(int dcID) {
+            for (int i = 0; i < size(); i++) {
+                DCStatus DCStatus = get(i);
+                if (DCStatus.dcID == dcID) return DCStatus;
             }
             return null;
         }
     }
 
     public static class DCStatus {
-        @SerializedName("dc_id")
-        public int dc_id;
+        public final int dcID, status, ping;
 
-        @SerializedName("ping")
-        public int ping;
-
-        @SerializedName("dc_status")
-        public int dc_status;
-
-        @SerializedName("last_down")
-        public int last_down;
-
-        @SerializedName("last_lag")
-        public int last_lag;
-
-        public DCStatus(int dc_id, int ping, int dc_status, int last_down, int last_lag) {
-            this.dc_id = dc_id;
+        DCStatus(int dcID, int status, int ping) {
+            this.dcID = dcID;
+            this.status = status;
             this.ping = ping;
-            this.dc_status = dc_status;
-            this.last_down = last_down;
-            this.last_lag = last_lag;
         }
     }
 }

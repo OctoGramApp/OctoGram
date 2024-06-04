@@ -4,7 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.SocketException;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Scanner;
@@ -22,7 +22,13 @@ public class StandardHTTPRequest {
         return this;
     }
 
-    public native static int ping(String ip) throws SocketException;
+    //public native static int ping(String ip) throws SocketException;
+    public static int ping(String address) throws IOException {
+        long dnsResolved = System.currentTimeMillis();
+        Socket socket = new Socket(address, 80);
+        socket.close();
+        return Math.round(System.currentTimeMillis() - dnsResolved);
+    }
 
     public StandardHTTPRequest data(String data) throws IOException {
         httpURLConnection.setDoOutput(true);

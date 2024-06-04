@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.ui;
@@ -17,10 +17,8 @@ import android.widget.TextView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
-import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.Locale;
@@ -34,6 +32,8 @@ import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.ExportDoneReadyBottomSheet;
 import it.octogram.android.utils.AppRestartHelper;
+import it.octogram.android.utils.LogsMigrator;
+import it.octogram.android.utils.OctoUtils;
 
 public class OctoMainSettingsUI implements PreferencesEntry {
 
@@ -65,7 +65,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .build());
 
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoTranslatorUI())))
                             .icon(R.drawable.msg_translate)
                             .title(LocaleController.formatString("Translator", R.string.Translator))
                             .build());
@@ -85,7 +85,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString("Experiments", R.string.Experiments))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> BulletinFactory.of(fragment).createErrorBulletin(comingSoon, fragment.getResourceProvider()).show())
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoUpdatesUI())))
                             .icon(R.drawable.round_update_white_28)
                             .title(LocaleController.formatString("Updates", R.string.Updates))
                             .build());
@@ -110,37 +110,25 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .description(LocaleController.formatString("DatacenterStatus_Desc", R.string.DatacenterStatus_Desc))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new CrashesActivity()))
+                            .onClick(() -> {
+                                LogsMigrator.migrateOldLogs();
+                                fragment.presentFragment(new CrashesActivity());
+                            })
                             .icon(R.drawable.msg_secret_hw)
                             .title(LocaleController.getString("CrashHistory", R.string.CrashHistory))
                             .description(LocaleController.getString("CrashHistory_Desc", R.string.CrashHistory_Desc))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://octogram.site/privacy"));
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://%s/privacy", OctoUtils.getDomain())));
                                 fragment.getParentActivity().startActivity(browserIntent);
                             })
                             .icon(R.drawable.msg2_policy)
                             .title(LocaleController.formatString("OctoPrivacyPolicy", R.string.OctoPrivacyPolicy))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
-                            .icon(R.drawable.msg_channel)
-                            .title(LocaleController.formatString("OfficialChannel", R.string.OfficialChannel))
-                            .description(LocaleController.formatString("OfficialChannel_Desc", R.string.OfficialChannel_Desc))
-                            .build());
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/OctoGramApp/OctoGram"));
-                                fragment.getParentActivity().startActivity(browserIntent);
-                            })
-                            .icon(R.drawable.outline_source_white_28)
-                            .title(LocaleController.formatString("SourceCode", R.string.SourceCode))
-                            .description(String.format("%s commit, %s", BuildConfig.GIT_COMMIT_HASH, LocaleController.formatDateAudio(BuildConfig.GIT_COMMIT_DATE, false)))
-                            .build());
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://translations.octogram.site"));
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://translations.%s", OctoUtils.getDomain())));
                                 fragment.getParentActivity().startActivity(browserIntent);
                             })
                             .icon(R.drawable.msg_translate)

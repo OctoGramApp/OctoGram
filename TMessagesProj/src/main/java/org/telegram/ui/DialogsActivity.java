@@ -8846,6 +8846,21 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             previewMenu[0].addView(muteItem);
         }
 
+        ActionBarMenuSubItem archiveItem = new ActionBarMenuSubItem(getParentActivity(), false, true);
+        archiveItem.setSelectorColor(Theme.multAlpha(getThemedColor(Theme.key_text_RedBold), .12f));
+        if (isArchive()) {
+            canUnarchiveCount++;
+            archiveItem.setTextAndIcon(LocaleController.getString("Unarchive", R.string.Unarchive), R.drawable.msg_unarchive);
+        } else {
+            archiveItem.setTextAndIcon(LocaleController.getString("Archive", R.string.Archive), R.drawable.msg_archive);
+        }
+        archiveItem.setMinimumWidth(160);
+        archiveItem.setOnClickListener(e -> {
+            performSelectedDialogsAction(dialogIdArray, archive2, false, false);
+            finishPreviewFragment();
+        });
+        previewMenu[0].addView(archiveItem);
+
         ActionBarMenuSubItem deleteItem = new ActionBarMenuSubItem(getParentActivity(), false, true);
         deleteItem.setIconColor(getThemedColor(Theme.key_text_RedRegular));
         deleteItem.setTextColor(getThemedColor(Theme.key_text_RedBold));

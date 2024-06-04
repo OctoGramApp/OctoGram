@@ -168,11 +168,11 @@ public class CameraXController {
                                 onPreInit.run();
                                 isInitiated = true;
                             } catch (ExecutionException | InterruptedException e) {
-                                e.printStackTrace();
+                                FileLog.e(e);
                             }
                         }, ContextCompat.getMainExecutor(context));
                     } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
+                        FileLog.e(e);
                     }
                 }, ContextCompat.getMainExecutor(context)
         );
@@ -215,14 +215,11 @@ public class CameraXController {
     }
 
     private int getNextFlashMode(int legacyMode) {
-        switch (legacyMode) {
-            case ImageCapture.FLASH_MODE_AUTO:
-                return ImageCapture.FLASH_MODE_ON;
-            case ImageCapture.FLASH_MODE_ON:
-                return ImageCapture.FLASH_MODE_OFF;
-            default:
-                return ImageCapture.FLASH_MODE_AUTO;
-        }
+        return switch (legacyMode) {
+            case ImageCapture.FLASH_MODE_AUTO -> ImageCapture.FLASH_MODE_ON;
+            case ImageCapture.FLASH_MODE_ON -> ImageCapture.FLASH_MODE_OFF;
+            default -> ImageCapture.FLASH_MODE_AUTO;
+        };
     }
 
     public int setNextFlashMode() {
@@ -301,9 +298,9 @@ public class CameraXController {
     @SuppressLint({"RestrictedApi", "UnsafeExperimentalUsageError", "UnsafeOptInUsageError"})
     public void bindUseCases() {
         if (provider == null) return;
-        android.util.Size targetSize = getVideoBestSize();
+        var targetSize = getVideoBestSize();
         Preview.Builder previewBuilder = new Preview.Builder();
-        previewBuilder.setTargetResolution(targetSize);
+        previewBuilder.setTargetResolution(targetSize); // Need to migrate to ResolutionSelector
         if (!isFrontface && selectedEffect == CAMERA_WIDE) {
             cameraSelector = CameraXUtils.getDefaultWideAngleCamera(provider);
         } else {
@@ -615,17 +612,13 @@ public class CameraXController {
     public int getDisplayOrientation() {
         WindowManager mgr = (WindowManager) ApplicationLoader.applicationContext.getSystemService(Context.WINDOW_SERVICE);
         int rotation = mgr.getDefaultDisplay().getRotation();
-        switch (rotation) {
-            case Surface.ROTATION_90:
-                return 90;
-            case Surface.ROTATION_180:
-                return 180;
-            case Surface.ROTATION_270:
-                return 270;
-            case Surface.ROTATION_0:
-            default:
-                return 0;
-        }
+        return switch (rotation) {
+            case Surface.ROTATION_90 -> 90;
+            case Surface.ROTATION_180 -> 180;
+            case Surface.ROTATION_270 -> 270;
+            case Surface.ROTATION_0 -> 0;
+            default -> 0;
+        };
     }
 
     private int getDeviceDefaultOrientation() {

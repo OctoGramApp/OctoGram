@@ -11,20 +11,14 @@ package it.octogram.android.utils;
 public class VideoUtils {
     public static float getMaxSize(int w, int h, int selectedCompression) {
         float ratio = (float) w / (float) h;
-        switch (Quality.fromInt(selectedCompression)) {
-            case SD:
-                return getNewSide(480, ratio);
-            case HD:
-                return getNewSide(720, ratio);
-            case FULL_HD:
-                return getNewSide(1080, ratio);
-            case QUAD_HD:
-                return getNewSide(1440, ratio);
-            case ULTRA_HD:
-                return getNewSide(2160, ratio);
-            default:
-                return getNewSide(270, ratio);
-        }
+        return switch (Quality.fromInt(selectedCompression)) {
+            case SD -> getNewSide(480, ratio);
+            case HD -> getNewSide(720, ratio);
+            case FULL_HD -> getNewSide(1080, ratio);
+            case QUAD_HD -> getNewSide(1440, ratio);
+            case ULTRA_HD -> getNewSide(2160, ratio);
+            default -> getNewSide(270, ratio);
+        };
     }
 
     public static int getCompressionsCount(int width, int height) {

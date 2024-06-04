@@ -3,7 +3,7 @@
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright OctoGram, 2023.
+ * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.utils;
@@ -15,6 +15,7 @@ import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 
 import it.octogram.android.Datacenter;
+import it.octogram.android.DcIdType;
 import it.octogram.android.OctoConfig;
 
 public class UserAccountInfoController {
@@ -51,7 +52,7 @@ public class UserAccountInfoController {
     }
 
     public static long getNiceId(TLRPC.Chat chat, long id) {
-        if (OctoConfig.INSTANCE.dcIdType.getValue() == OctoConfig.DcIdType.BOT_API) {
+        if (OctoConfig.INSTANCE.dcIdType.getValue() == DcIdType.BOT_API.getValue()) {
             if (ChatObject.isChannel(chat)) {
                 id = -1000000000000L - id;
             }

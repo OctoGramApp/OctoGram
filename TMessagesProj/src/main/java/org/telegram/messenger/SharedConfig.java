@@ -781,12 +781,12 @@ public class SharedConfig {
         if (versionCode == 0) {
             versionCode = buildVersion();
         }
-        if (updateVersionString == null) {
+        /*if (updateVersionString == null) {
             updateVersionString = BuildVars.BUILD_VERSION_STRING;
         }
         if (update.version == null || versionBiggerOrEqual(updateVersionString, update.version)) {
             return false;
-        }
+        }*/
         pendingAppUpdate = update;
         pendingAppUpdateBuildVersion = versionCode;
         saveConfig();

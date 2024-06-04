@@ -63,6 +63,7 @@ import org.telegram.ui.Components.Reactions.ReactionsUtils;
 import org.telegram.ui.Components.Text;
 import org.telegram.ui.Components.TextStyleSpan;
 import org.telegram.ui.Components.TranscribeButton;
+import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.Components.TypefaceSpan;
 import org.telegram.ui.Components.URLSpanBotCommand;
 import org.telegram.ui.Components.URLSpanBrowser;
@@ -94,6 +95,8 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import it.octogram.android.OctoConfig;
 
 public class MessageObject {
 
@@ -3296,11 +3299,12 @@ public class MessageObject {
         boolean replyUpdated = replyMessageObject != null && replyMessageObject.updateTranslation(force);
         TranslateController translateController = MessagesController.getInstance(currentAccount).getTranslateController();
         if (
-            TranslateController.isTranslatable(this) &&
-            translateController.isTranslatingDialog(getDialogId()) &&
+            //TranslateController.isTranslatable(this) &&
+            /*translateController.isTranslatingDialog(getDialogId()) &&*/
+            (translateController.isManualTranslated(this) || (translateController.isTranslatingDialog(getDialogId()) && TranslateController.isTranslatable(this))) &&
             messageOwner != null &&
             messageOwner.translatedText != null &&
-            TextUtils.equals(translateController.getDialogTranslateTo(getDialogId()), messageOwner.translatedToLanguage)
+            TextUtils.equals(translateController.isManualTranslated(this) ? TranslateAlert2.getToLanguage() : translateController.getDialogTranslateTo(getDialogId()), messageOwner.translatedToLanguage)
         ) {
             if (translated) {
                 return replyUpdated || false;
@@ -3332,7 +3336,8 @@ public class MessageObject {
             fromUser = MessagesController.getInstance(currentAccount).getUser(messageOwner.from_id.user_id);
         }
         messageText = text;
-        ArrayList<TLRPC.MessageEntity> entities = translated && messageOwner.translatedText != null ? messageOwner.translatedText.entities : messageOwner.entities;
+        ArrayList<TLRPC.MessageEntity> entities = translated && messageOwner.translatedText != null ? reparseMessageEntities(messageOwner.translatedText.entities) : messageOwner.entities;
+        //ArrayList<TLRPC.MessageEntity> entities = translated && messageOwner.translatedText != null ? messageOwner.translatedText.entities : messageOwner.entities;
         TextPaint paint;
         if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaGame) {
             paint = Theme.chat_msgGameTextPaint;
@@ -3348,6 +3353,26 @@ public class MessageObject {
         checkEmojiOnly(emojiOnly);
         generateLayout(fromUser);
         setType();
+    }
+
+    private ArrayList<TLRPC.MessageEntity> reparseMessageEntities(ArrayList<TLRPC.MessageEntity> translatedEntities) {
+        if (!OctoConfig.INSTANCE.translatorKeepMarkdown.getValue()) {
+            ArrayList<TLRPC.MessageEntity> entities = new ArrayList<>();
+            for (TLRPC.MessageEntity entity : translatedEntities) {
+                boolean isMarkdownEntity = entity instanceof TLRPC.TL_messageEntitySpoiler;
+                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityBold;
+                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityItalic;
+                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityCode;
+                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityStrike;
+                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityUnderline;
+                if (!isMarkdownEntity) {
+                    entities.add(entity);
+                }
+            }
+            return entities;
+        }
+
+        return translatedEntities;
     }
 
     private boolean allowsBigEmoji() {
@@ -5808,7 +5833,8 @@ public class MessageObject {
         }
         if (captionTranslated = translated) {
             text = messageOwner.translatedText.text;
-            entities = messageOwner.translatedText.entities;
+            //entities = messageOwner.translatedText.entities;
+            entities = reparseMessageEntities(messageOwner.translatedText.entities);
         }
         if (!isMediaEmpty() && !(getMedia(messageOwner) instanceof TLRPC.TL_messageMediaGame) && !TextUtils.isEmpty(text)) {
             caption = Emoji.replaceEmoji(text, Theme.chat_msgTextPaint.getFontMetricsInt(), dp(20), false);
@@ -6102,7 +6128,8 @@ public class MessageObject {
                 if (messageOwner.translatedText == null) {
                     entities = null;
                 } else {
-                    entities = messageOwner.translatedText.entities;
+                    //entities = messageOwner.translatedText.entities;
+                    entities = reparseMessageEntities(messageOwner.translatedText.entities);
                 }
             } else {
                 entities = messageOwner.entities;
@@ -6601,7 +6628,8 @@ public class MessageObject {
     private boolean applyEntities() {
         generateLinkDescription();
 
-        ArrayList<TLRPC.MessageEntity> entities = translated && messageOwner.translatedText != null ? messageOwner.translatedText.entities : messageOwner.entities;
+        //ArrayList<TLRPC.MessageEntity> entities = translated && messageOwner.translatedText != null ? messageOwner.translatedText.entities : messageOwner.entities;
+        ArrayList<TLRPC.MessageEntity> entities = translated && messageOwner.translatedText != null ? reparseMessageEntities(messageOwner.translatedText.entities) : messageOwner.entities;
         spoilLoginCode();
 
         boolean hasEntities;

@@ -21,6 +21,7 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
@@ -30,6 +31,9 @@ import it.octogram.android.utils.DatacenterController;
 
 public class DatacenterActivity extends BaseFragment {
     private int rowCount;
+    private int headerImageRow;
+    private int dividerRow;
+    private int headerDcListRow;
     private int datacenterStart;
     private ListAdapter listAdapter;
     private DatacenterController.DatacenterStatusChecker datacenterStatusChecker;
@@ -90,10 +94,8 @@ public class DatacenterActivity extends BaseFragment {
         datacenterStatusChecker = new DatacenterController.DatacenterStatusChecker();
         datacenterStatusChecker.setOnUpdate(result -> {
             datacenterList = result;
-            for (int i = 0; i < 5; i++) {
-                listAdapter.notifyItemChanged(datacenterStart + i, new Object());
-                updateRowsId(false);
-            }
+            updateRowsId(false);
+            listAdapter.notifyItemRangeChanged(datacenterStart, 5, new Object());
         });
         datacenterStatusChecker.runListener();
         return fragmentView;
@@ -114,6 +116,9 @@ public class DatacenterActivity extends BaseFragment {
     @SuppressLint("NotifyDataSetChanged")
     private void updateRowsId(boolean notify) {
         rowCount = 0;
+        headerImageRow = rowCount++;
+        dividerRow = rowCount++;
+        headerDcListRow = rowCount++;
         datacenterStart = rowCount;
         rowCount += 5;
         if (listAdapter != null && notify) {
@@ -135,19 +140,27 @@ public class DatacenterActivity extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            if (holder.getItemViewType() == 2) {
-                DatacenterStatus datacenterStatusCell = (DatacenterStatus) holder.itemView;
-                int status = -1;
-                int ping = -1;
-                int dcID = (position - datacenterStart) + 1;
-                if (datacenterList != null) {
-                    DatacenterController.DCStatus datacenterInfo = datacenterList.getByDc(dcID);
-                    if (datacenterInfo != null) {
-                        status = datacenterInfo.dc_status;
-                        ping = datacenterInfo.ping;
+            switch (holder.getItemViewType()) {
+                case 2:
+                    DatacenterStatus datacenterStatusCell = (DatacenterStatus) holder.itemView;
+                    int status = -1;
+                    int ping = -1;
+                    int dcID = (position - datacenterStart) + 1;
+                    if (datacenterList != null) {
+                        DatacenterController.DCStatus datacenterInfo = datacenterList.getByDc(dcID);
+                        if (datacenterInfo != null) {
+                            status = datacenterInfo.status;
+                            ping = datacenterInfo.ping;
+                        }
                     }
-                }
-                datacenterStatusCell.setData(dcID, ping, status, true);
+                    datacenterStatusCell.setData(dcID, ping, status, true);
+                    break;
+                case 3:
+                    HeaderCell headerCell = (HeaderCell) holder.itemView;
+                    if (position == headerDcListRow) {
+                        headerCell.setText(LocaleController.getString("DatacenterStatus", R.string.DatacenterStatus));
+                    }
+                    break;
             }
         }
 
@@ -161,11 +174,22 @@ public class DatacenterActivity extends BaseFragment {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view;
-            if (viewType == 2) {
-                view = new DatacenterStatus(mContext);
-                view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-            } else {
-                view = new ShadowSectionCell(mContext);
+            switch (viewType) {
+                case 2:
+                    view = new DatacenterStatus(mContext);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
+                case 3:
+                    view = new HeaderCell(mContext);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
+                case 4:
+                    view = new DatacenterHeader(mContext);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
+                default:
+                    view = new ShadowSectionCell(mContext);
+                    break;
             }
             view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
             return new RecyclerListView.Holder(view);
@@ -173,8 +197,14 @@ public class DatacenterActivity extends BaseFragment {
 
         @Override
         public int getItemViewType(int position) {
-            if (position >= datacenterStart) {
+            if (position == dividerRow) {
+                return 1;
+            } else if (position >= datacenterStart) {
                 return 2;
+            } else if (position == headerDcListRow) {
+                return 3;
+            } else if (position == headerImageRow) {
+                return 4;
             }
             return 1;
         }

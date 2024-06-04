@@ -16,11 +16,11 @@ import it.octogram.android.preferences.rows.Clickable;
 
 public class TextDetailRow extends BaseRow implements Clickable {
 
-    private int icon = -1;
+    private final int icon;
     private final Runnable onClick;
 
-    private TextDetailRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean divider, int icon, Runnable onClick) {
-        super(title, summary, requiresRestart, showIf, divider, PreferenceType.TEXT_DETAIL);
+    private TextDetailRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, int icon, Runnable onClick) {
+        super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_DETAIL);
         this.icon = icon;
         this.onClick = onClick;
     }
@@ -55,7 +55,7 @@ public class TextDetailRow extends BaseRow implements Clickable {
         }
 
         public TextDetailRow build() {
-            return new TextDetailRow(title, description, requiresRestart, showIf, divider, icon, onClick);
+            return new TextDetailRow(title, description, requiresRestart, showIf, showIfReverse, divider, icon, onClick);
         }
     }
 }

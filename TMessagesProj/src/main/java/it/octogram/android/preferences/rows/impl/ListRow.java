@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import it.octogram.android.ConfigProperty;
-import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
@@ -31,27 +30,38 @@ public class ListRow extends BaseRow implements Clickable {
     private final ConfigProperty<Integer> currentValue;
 
     private final Supplier<Boolean> supplierClickable;
+    private final Runnable supplierClickableSelected;
 
     public ListRow(@Nullable String title,
                    boolean divider,
                    boolean requiresRestart,
                    ConfigProperty<Boolean> showIf,
+                   boolean showIfReverse,
                    List<Pair<Integer, String>> options,
                    @Nullable List<Triple<Integer, String, Integer>> optionsIcons,
                    ConfigProperty<Integer> currentValue,
-                   Supplier<Boolean> supplierClickable) {
-        super(title, null, requiresRestart, showIf, divider, PreferenceType.LIST);
+                   Supplier<Boolean> supplierClickable,
+                   Runnable supplierClickableSelected
+               ) {
+        super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.LIST);
         this.options = options;
         this.optionsIcons = optionsIcons;
         this.currentValue = currentValue;
         this.supplierClickable = supplierClickable;
+        this.supplierClickableSelected = supplierClickableSelected;
     }
 
     @Override
     public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
+        // onClick is useless and it isn't used as PreferencesFragment uses onCustomClick wsith Runnable reloadPreferencesUI
+        return false;
+    }
+
+    public boolean onCustomClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y, Runnable reloadPreferencesUI) {
         if (supplierClickable != null && !supplierClickable.get()) {
             return false;
         }
+
         int selected = 0;
         List<String> titleArray = new ArrayList<>();
         List<Integer> idArray = new ArrayList<>();
@@ -77,7 +87,11 @@ public class ListRow extends BaseRow implements Clickable {
                     selected,
                     (dialogInterface, sel) -> {
                         int id = idArray.get(sel);
-                        OctoConfig.INSTANCE.updateIntegerSetting(currentValue, optionsIcons.get(id).component1());
+                        currentValue.updateValue(optionsIcons.get(id).component1());
+                        if (supplierClickableSelected != null) {
+                            supplierClickableSelected.run();
+                        }
+                        reloadPreferencesUI.run();
                         if (view instanceof TextSettingsCell) {
                             ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), true, hasDivider());
                         }
@@ -100,7 +114,11 @@ public class ListRow extends BaseRow implements Clickable {
                     selected,
                     (dialogInterface, sel) -> {
                         int id = idArray.get(sel);
-                        OctoConfig.INSTANCE.updateIntegerSetting(currentValue, options.get(id).first);
+                        currentValue.updateValue(options.get(id).first);
+                        if (supplierClickableSelected != null) {
+                            supplierClickableSelected.run();
+                        }
+                        reloadPreferencesUI.run();
                         if (view instanceof TextSettingsCell) {
                             ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), true, hasDivider());
                         }
@@ -141,6 +159,7 @@ public class ListRow extends BaseRow implements Clickable {
         private final List<Pair<Integer, String>> options = new ArrayList<>();
         private final List<Triple<Integer, String, Integer>> optionsIcons = new ArrayList<>();
         private Supplier<Boolean> supplierClickable;
+        private Runnable supplierClickableSelected;
         private ConfigProperty<Integer> currentValue;
 
         public ListRowBuilder options(List<Pair<Integer, String>> opt) {
@@ -163,9 +182,14 @@ public class ListRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public ListRowBuilder onSelected(Runnable supplierClickableSelected) {
+            this.supplierClickableSelected = supplierClickableSelected;
+            return this;
+        }
+
         @Override
         public ListRow build() {
-            return new ListRow(title, divider, requiresRestart, showIf, options, optionsIcons, currentValue, supplierClickable);
+            return new ListRow(title, divider, requiresRestart, showIf, showIfReverse, options, optionsIcons, currentValue, supplierClickable, supplierClickableSelected);
         }
     }
 }

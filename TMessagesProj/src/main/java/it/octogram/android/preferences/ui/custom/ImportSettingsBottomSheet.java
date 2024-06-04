@@ -216,9 +216,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
                 alertDialogBuilder.setTitle(LocaleController.getString("ImportReadyImportDonePopup", R.string.ImportReadyImportDonePopup));
                 alertDialogBuilder.setMessage(LocaleController.getString("ImportReadyImportDonePopupDescription", R.string.ImportReadyImportDonePopupDescription));
-                alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> {
-                    AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
-                });
+                alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.setCanceledOnTouchOutside(false);
                 alertDialog.show();

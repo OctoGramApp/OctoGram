@@ -75,7 +75,7 @@ public class AllowSmartNotificationsBottomSheet extends BottomSheet {
         textView.setText(LocaleController.getString("SmartNotificationsPvtDialogButton", R.string.SmartNotificationsPvtDialogButton));
         textView.setTextColor(Theme.getColor(Theme.key_color_red));
         textView.setOnClickListener(view -> {
-            OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats);
+            OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.updateValue(!OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue());
             dismiss();
 
             if (callback != null) {

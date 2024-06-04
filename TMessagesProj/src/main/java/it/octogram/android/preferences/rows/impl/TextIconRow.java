@@ -10,7 +10,6 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextCell;
 
 import it.octogram.android.ConfigProperty;
-import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
@@ -18,20 +17,21 @@ import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
 
 public class TextIconRow extends BaseRow implements Clickable {
 
-    private int icon = -1;
+    private final int icon;
     private final Runnable onClick;
     private final ConfigProperty<Boolean> preference;
     private final String value;
 
     private TextIconRow(String title,
-                        ConfigProperty<Boolean> hidden,
+                        ConfigProperty<Boolean> showIf,
+                        boolean showIfReverse,
                         boolean divider,
                         int icon,
                         @Nullable String value,
                         boolean requiresRestart,
                         ConfigProperty<Boolean> preferenceValue,
                         Runnable onClick) {
-        super(title, null, requiresRestart, hidden, divider, PreferenceType.TEXT_ICON);
+        super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_ICON);
         this.icon = icon;
         this.onClick = onClick;
         this.preference = preferenceValue;
@@ -70,7 +70,7 @@ public class TextIconRow extends BaseRow implements Clickable {
         if (preference == null)
             return false;
 
-        OctoConfig.INSTANCE.toggleBooleanSetting(preference);
+        preference.updateValue(!preference.getValue());
         FrameLayout cell = (FrameLayout) view;
         TextCell textCell = (TextCell) cell.getChildAt(0);
         textCell.setChecked(preference.getValue());
@@ -98,7 +98,7 @@ public class TextIconRow extends BaseRow implements Clickable {
         }
 
         public TextIconRow build() {
-            return new TextIconRow(title, showIf, divider, icon, value, requiresRestart, preferenceValue, onClick);
+            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, onClick);
         }
     }
 

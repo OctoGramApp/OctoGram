@@ -71,7 +71,7 @@ public class AllowExperimentalBottomSheet extends BottomSheet {
         textView.setText(LocaleController.getString("OctoExperimentsDialogButton", R.string.OctoExperimentsDialogButton));
         textView.setTextColor(Theme.getColor(Theme.key_color_red));
         textView.setOnClickListener(view -> {
-            OctoConfig.INSTANCE.toggleBooleanSetting(OctoConfig.INSTANCE.experimentsEnabled);
+            OctoConfig.INSTANCE.experimentsEnabled.updateValue(!OctoConfig.INSTANCE.experimentsEnabled.getValue());
             dismiss();
         });
         linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 0));

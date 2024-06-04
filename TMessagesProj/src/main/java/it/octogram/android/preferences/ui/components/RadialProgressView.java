@@ -14,6 +14,7 @@ import android.graphics.Shader;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.ui.Components.BlobDrawable;
@@ -44,7 +45,7 @@ public class RadialProgressView extends FrameLayout {
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected void dispatchDraw(@NonNull Canvas canvas) {
         float showWavesProgressInterpolated = overshootInterpolator.getInterpolation(1f);
         showWavesProgressInterpolated = 0.4f + 0.6f * showWavesProgressInterpolated;
         float amplitude = 0F;

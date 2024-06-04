@@ -2203,7 +2203,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             drawMention = false;
         }
 
-        if (handleCurrentPreviewData() != null) {
+        if (handleCurrentPreviewData() != null && !useForceThreeLines) {
             int showUserIconsW = dp(18) + dp(4); // 4 => padding
             messageNameLeft += showUserIconsW;
 
@@ -4025,7 +4025,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 Theme.dialogs_pinnedDrawable.draw(canvas);
             }
 
-            if (handleCurrentPreviewData() != null && avatarGroupSenderImage.hasImageSet() && updateHelper.typingProgres != 1f) {
+            if (handleCurrentPreviewData() != null && avatarGroupSenderImage.hasImageSet() && updateHelper.typingProgres != 1f && !useForceThreeLines) {
                 int showUserIconsW = dp(18) + dp(4); // 4 => padding
                 StoriesUtilities.AvatarStoryParams params = new StoriesUtilities.AvatarStoryParams(false);
                 params.drawSegments = false;
@@ -4034,7 +4034,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
                 int cTop;
                 int cLeft;
-                if ((SharedConfig.useThreeLinesLayout || useForceThreeLines) && !isForumCell()) {
+                if (SharedConfig.useThreeLinesLayout) {
                     cTop = messageNameTop;
                     cLeft = messageNameLeft - showUserIconsW;
                 } else {

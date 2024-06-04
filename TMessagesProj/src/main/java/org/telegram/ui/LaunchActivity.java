@@ -48,6 +48,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.util.Base64;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.ActionMode;
@@ -94,6 +95,8 @@ import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
 import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+
+import org.json.JSONObject;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -216,6 +219,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -225,6 +229,7 @@ import java.util.regex.Pattern;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.LanguageController;
+import it.octogram.android.utils.UpdatesManager;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
     public final static String EXTRA_FORCE_NOT_INTERNAL_APPS = "force_not_internal_apps";
@@ -325,6 +330,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     private Runnable lockRunnable;
 
     private List<Runnable> onUserLeaveHintListeners = new ArrayList<>();
+
+    private Timer autoUpdateTimerSchedule;
 
     private static final int PLAY_SERVICES_REQUEST_CHECK_SETTINGS = 140;
     public static final int SCREEN_CAPTURE_REQUEST_CODE = 520;
@@ -963,6 +970,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         checkLayout();
         checkSystemBarColors();
         handleIntent(getIntent(), false, savedInstanceState != null, false);
+
+
         try {
             String os1 = Build.DISPLAY;
             String os2 = Build.USER;
@@ -2721,6 +2730,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         } else {
                                             open_settings = 1;
                                         }
+                                    } else if (url.startsWith("tg:update") || url.startsWith("tg://update")) {
+                                        checkAppUpdate(true, null);
                                     } else if (url.startsWith("tg:francesco") || url.startsWith("tg://francesco")) {
                                         BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
 
@@ -2730,7 +2741,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Broken name fix has been enabled.").show();
                                         }
 
-                                        OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.useTranslationsArgsFix, !OctoConfig.INSTANCE.useTranslationsArgsFix.getValue());
+                                        OctoConfig.INSTANCE.useTranslationsArgsFix.updateValue(!OctoConfig.INSTANCE.useTranslationsArgsFix.getValue());
                                     } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
                                         if (!OctoConfig.INSTANCE.unlockedChupa.getValue()) {
                                             BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
@@ -2739,7 +2750,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             fireworksOverlay.start();
                                             layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
-                                            OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.unlockedChupa, true);
+                                            OctoConfig.INSTANCE.unlockedChupa.updateValue(true);
                                         }
                                     } else if (url.startsWith("tg:yukigram") || url.startsWith("tg://yukigram")) {
                                         if (!OctoConfig.INSTANCE.unlockedYuki.getValue()) {
@@ -2749,7 +2760,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             fireworksOverlay.start();
                                             layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                             Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
-                                            OctoConfig.INSTANCE.updateBooleanSetting(OctoConfig.INSTANCE.unlockedYuki, true);
+                                            OctoConfig.INSTANCE.unlockedYuki.updateValue(true);
                                         }
                                     } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
                                         AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoExperimentsUI())));
@@ -5573,12 +5584,53 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     }
 
     public void checkAppUpdate(boolean force, Browser.Progress progress) {
-        if (!force && BuildVars.DEBUG_VERSION || !force && !BuildVars.CHECK_UPDATES) {
+        /*if (!force && BuildVars.DEBUG_VERSION || !force && !BuildVars.CHECK_UPDATES) {
             return;
-        }
-        if (!force && Math.abs(System.currentTimeMillis() - SharedConfig.lastUpdateCheckTime) < MessagesController.getInstance(0).updateCheckDelay * 1000) {
-            return;
-        }
+        }*/
+
+        SharedConfig.lastUpdateCheckTime = System.currentTimeMillis();
+        SharedConfig.saveConfig();
+        UpdatesManager.isUpdateAvailable(new UpdatesManager.UpdatesManagerCheckInterface() {
+            @Override
+            public void onThereIsUpdate(JSONObject updateData) {
+                if (updateData != null) {
+                    UpdatesManager.getTLRPCUpdateFromObject(updateData, update -> {
+                        handleNewUpdate(update, progress);
+                    });
+                }
+            }
+
+            @Override
+            public void onThereIsUpdate(TLRPC.TL_help_appUpdate appUpdate) {
+                handleNewUpdate(appUpdate, progress);
+            }
+
+            @Override
+            public void onNoUpdate() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    resetUpdateInstance();
+
+                    if (force) {
+                        BulletinFactory.of(LaunchActivity.getLastFragment()).createSimpleBulletin(R.raw.done, LocaleController.formatString("UpdatesSettingsCheckUpdated", R.string.UpdatesSettingsCheckUpdated)).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onError() {
+                if (force) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LaunchActivity.this);
+                        alertDialogBuilder.setTitle(LocaleController.getString("AppName", R.string.AppName));
+                        alertDialogBuilder.setMessage(LocaleController.getString("UpdatesSettingsCheckFailed", R.string.UpdatesSettingsCheckFailed));
+                        alertDialogBuilder.setPositiveButton("OK", null);
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                    });
+                }
+            }
+        });
+        /*
         TLRPC.TL_help_getAppUpdate req = new TLRPC.TL_help_getAppUpdate();
         try {
             req.source = ApplicationLoader.applicationContext.getPackageManager().getInstallerPackageName(ApplicationLoader.applicationContext.getPackageName());
@@ -5588,7 +5640,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (req.source == null) {
             req.source = "";
         }
-        final int accountNum = currentAccount;
+
         int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
             SharedConfig.lastUpdateCheckTime = System.currentTimeMillis();
             SharedConfig.saveConfig();
@@ -5643,7 +5695,59 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (progress != null) {
             progress.init();
             progress.onCancel(() -> ConnectionsManager.getInstance(currentAccount).cancelRequest(reqId, true));
+        }*/
+    }
+
+    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress, boolean forceShowPopup) {
+        if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.version.equals(res.version)) {
+            if (forceShowPopup && !FileLoader.getInstance(currentAccount).isLoadingFile(FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document))) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
+                });
+            }
+
+            return;
         }
+
+        final boolean newVersionAvailable = SharedConfig.setNewAppVersionAvailable(res);
+        SharedConfig.saveConfig();
+        if (newVersionAvailable) {
+            AndroidUtilities.runOnUIThread(() -> {
+                if (res.can_not_skip) {
+                    showUpdateActivity(currentAccount, res, false);
+                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION) {
+                    drawerLayoutAdapter.notifyDataSetChanged();
+
+                    File updateFile = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
+                    if (!updateFile.exists()) {
+                        ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
+                    }
+                }
+                NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.appUpdateAvailable);
+            });
+        }
+        if (progress != null) {
+            progress.end();
+            if (!newVersionAvailable) {
+                BaseFragment fragment = getLastFragment();
+                if (fragment != null) {
+                    BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString(R.string.YourVersionIsLatest)).show();
+                }
+            }
+        }
+    }
+
+    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress) {
+        handleNewUpdate(res, progress, false);
+    }
+
+    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, boolean forceShowPopup) {
+        handleNewUpdate(res, null, forceShowPopup);
+    }
+
+    public void resetUpdateInstance() {
+        SharedConfig.setNewAppVersionAvailable(null);
+        drawerLayoutAdapter.notifyDataSetChanged();
     }
 
     public Dialog showAlertDialog(AlertDialog.Builder builder) {
@@ -6386,7 +6490,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             showUpdateActivity(UserConfig.selectedAccount, SharedConfig.pendingAppUpdate, true);
         }
         LanguageController.loadRemoteLanguageFromCache(LocaleController.getInstance().getCurrentLocale(), false);
-        checkAppUpdate(false, null);
+        // checkAppUpdate(false, null);
+
+        if (OctoConfig.INSTANCE.autoCheckUpdates.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
+            checkAppUpdate(false, null);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ApplicationLoader.canDrawOverlays = Settings.canDrawOverlays(this);
