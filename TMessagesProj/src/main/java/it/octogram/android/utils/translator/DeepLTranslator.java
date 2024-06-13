@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.octogram.android.TranslatorFormality;
-import it.octogram.android.utils.translator.raw.RawDeeplTranslator;
+import it.octogram.android.utils.translator.raw.RawDeepLTranslator;
 
-public class DeeplTranslator {
-    private static final RawDeeplTranslator rawInstance = new RawDeeplTranslator();
+public class DeepLTranslator {
+    private static final RawDeepLTranslator rawInstance = new RawDeepLTranslator();
 
     private static final List<String> targetLanguages = List.of(
             "bg", "cs", "da", "de", "el", "en", "en-GB", "en-US", "es", "fi", "fr", "hu", "id",

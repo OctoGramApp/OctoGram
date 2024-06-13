@@ -66,7 +66,7 @@ public class TranslationsWrapper {
         } else if (translationProvider == TranslatorProvider.YANDEX.getValue()) {
             return YandexTranslator.isUnsupportedLanguage(currentLanguage);
         } else if (translationProvider == TranslatorProvider.DEEPL.getValue()) {
-            return DeeplTranslator.isUnsupportedLanguage(currentLanguage);
+            return DeepLTranslator.isUnsupportedLanguage(currentLanguage);
         } else return translationProvider != TranslatorProvider.DEFAULT.getValue();
     }
 

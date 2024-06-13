@@ -170,7 +170,7 @@ public class SingleTranslationManager {
         } else if (translationProvider == TranslatorProvider.YANDEX.getValue()) {
             YandexTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
         } else if (translationProvider == TranslatorProvider.DEEPL.getValue()) {
-            DeeplTranslator.executeTranslation(text.toString(), entities, toLanguage, OctoConfig.INSTANCE.translatorFormality.getValue(), callback);
+            DeepLTranslator.executeTranslation(text.toString(), entities, toLanguage, OctoConfig.INSTANCE.translatorFormality.getValue(), callback);
         } else {
             callback.onResponseReceived();
             callback.onError();

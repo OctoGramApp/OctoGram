@@ -200,7 +200,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                         .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedGeneral", R.string.TranslatorProviderSuggestedGeneral))),
                 updateProviderAvailability(new PopupChoiceDialogOption()
                         .setId(TranslatorProvider.DEEPL.getValue())
-                        .setItemTitle("Deepl")
+                        .setItemTitle("DeepL")
                         .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedAccurate", R.string.TranslatorProviderSuggestedAccurate))),
                 updateProviderAvailability(new PopupChoiceDialogOption().setId(TranslatorProvider.YANDEX.getValue()).setItemTitle("Yandex"))
         );

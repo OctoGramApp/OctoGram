@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-public class RawDeeplTranslator {
+public class RawDeepLTranslator {
     private static final String internalRequest = "https://www2.deepl.com/jsonrpc";
     private static final String referer = "https://www.deepl.com/";
 
@@ -45,9 +45,9 @@ public class RawDeeplTranslator {
     public void setParams(int retry_429, int retry_timeout, long sleepTime_429) throws Exception {
         if (retry_429 >= 0 && retry_timeout >= 0) {
             this.lock.lock();
-            RawDeeplTranslator.retry_429 = retry_429;
-            RawDeeplTranslator.retry_timeout = retry_timeout;
-            RawDeeplTranslator.sleepTime_429 = sleepTime_429;
+            RawDeepLTranslator.retry_429 = retry_429;
+            RawDeepLTranslator.retry_timeout = retry_timeout;
+            RawDeepLTranslator.sleepTime_429 = sleepTime_429;
             this.lock.unlock();
         } else {
             throw new Exception("Unable to set params");
