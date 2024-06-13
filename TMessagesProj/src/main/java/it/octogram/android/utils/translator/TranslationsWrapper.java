@@ -57,8 +57,10 @@ public class TranslationsWrapper {
     }
 
     public static boolean isLanguageUnavailable(String currentLanguage) {
-        int translationProvider = OctoConfig.INSTANCE.translatorProvider.getValue();
+        return isLanguageUnavailable(currentLanguage, OctoConfig.INSTANCE.translatorProvider.getValue());
+    }
 
+    public static boolean isLanguageUnavailable(String currentLanguage, int translationProvider) {
         if (translationProvider == TranslatorProvider.GOOGLE.getValue()) {
             return GoogleTranslator.isUnsupportedLanguage(currentLanguage);
         } else if (translationProvider == TranslatorProvider.YANDEX.getValue()) {

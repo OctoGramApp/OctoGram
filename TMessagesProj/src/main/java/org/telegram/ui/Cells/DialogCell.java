@@ -2496,8 +2496,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 }
             }
             if (messageNameLayout != null && messageNameLayout.getLineCount() > 0) {
-                //messageNameLeft -= messageNameLayout.getLineLeft(0);
-                // TODO: test
+                messageNameLeft -= messageNameLayout.getLineLeft(0);
             }
         }
         if (typingLayout != null && printingStringType >= 0 && typingLayout.getText().length() > 0) {
@@ -4025,7 +4024,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 Theme.dialogs_pinnedDrawable.draw(canvas);
             }
 
-            if (handleCurrentPreviewData() != null && avatarGroupSenderImage.hasImageSet() && updateHelper.typingProgres != 1f && !useForceThreeLines) {
+            if (handleCurrentPreviewData() != null && avatarGroupSenderImage.hasImageSet() && !useForceThreeLines) {
                 int showUserIconsW = dp(18) + dp(4); // 4 => padding
                 StoriesUtilities.AvatarStoryParams params = new StoriesUtilities.AvatarStoryParams(false);
                 params.drawSegments = false;

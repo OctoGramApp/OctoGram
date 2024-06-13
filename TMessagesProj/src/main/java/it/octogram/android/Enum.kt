@@ -12,6 +12,13 @@ enum class DcIdType(val value: Int) {
     TELEGRAM(1)
 }
 
+enum class DefaultEmojiButtonAction(val value: Int) {
+    DEFAULT(0),
+    EMOJIS(1),
+    STICKERS(2),
+    GIFS(3)
+}
+
 enum class DoubleTapAction(val value: Int) {
     DISABLED(0),
     REACTION(1),

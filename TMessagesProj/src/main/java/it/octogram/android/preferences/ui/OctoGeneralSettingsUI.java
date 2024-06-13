@@ -9,7 +9,6 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.util.Pair;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -23,6 +22,7 @@ import java.util.List;
 
 import it.octogram.android.DcIdStyle;
 import it.octogram.android.DcIdType;
+import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.DoubleTapAction;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
@@ -31,7 +31,7 @@ import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
-import kotlin.Triple;
+import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
     SwitchRow enableSmartNotificationsSwitchRow;
@@ -88,10 +88,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             })
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
-                                    new Pair<>(DcIdStyle.NONE.getValue(), LocaleController.formatString("Nothing", R.string.Nothing)),
-                                    new Pair<>(DcIdStyle.OWLGRAM.getValue(), "OwlGram"),
-                                    new Pair<>(DcIdStyle.TELEGRAM.getValue(), "Telegram"),
-                                    new Pair<>(DcIdStyle.MINIMAL.getValue(), "Minimal")
+                                    new PopupChoiceDialogOption().setId(DcIdStyle.NONE.getValue()).setItemTitle(LocaleController.getString("Nothing", R.string.Nothing)),
+                                    new PopupChoiceDialogOption().setId(DcIdStyle.OWLGRAM.getValue()).setItemTitle("OwlGram"),
+                                    new PopupChoiceDialogOption().setId(DcIdStyle.TELEGRAM.getValue()).setItemTitle("Telegram"),
+                                    new PopupChoiceDialogOption().setId(DcIdStyle.MINIMAL.getValue()).setItemTitle("Minimal")
                             ))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .title(LocaleController.formatString("Style", R.string.Style))
@@ -99,8 +99,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.dcIdType)
                             .options(List.of(
-                                    new Pair<>(DcIdType.BOT_API.getValue(), "Bot API"),
-                                    new Pair<>(DcIdType.TELEGRAM.getValue(), "Telegram")
+                                    new PopupChoiceDialogOption().setId(DcIdType.BOT_API.getValue()).setItemTitle("Bot API"),
+                                    new PopupChoiceDialogOption().setId(DcIdType.TELEGRAM.getValue()).setItemTitle("Telegram")
                             ))
                             .title(LocaleController.formatString("Type", R.string.Type))
                             .postNotificationName(NotificationCenter.reloadInterface)
@@ -110,6 +110,28 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.formatString("Chats", R.string.Chats), category -> {
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.defaultEmojiButtonAction)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.DEFAULT.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.DefaultEmojiButtonTypeDefault))
+                                            .setItemIcon(R.drawable.msg_forward_replace),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.EMOJIS.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Emoji))
+                                            .setItemIcon(R.drawable.msg_emoji_smiles),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.STICKERS.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.AttachSticker))
+                                            .setItemIcon(R.drawable.msg_sticker),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.GIFS.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.AttachGif))
+                                            .setItemIcon(R.drawable.msg_gif)
+                            ))
+                            .title(LocaleController.getString(R.string.DefaultEmojiButtonType))
+                            .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.jumpToNextChannelOrTopic)
                             .title(LocaleController.formatString(R.string.JumpToNextChannelOrTopic))
@@ -207,28 +229,73 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .category(LocaleController.getString(R.string.DoubleTapActionsHeader), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapAction)
-                            .optionsIcons(List.of(
-                                    new Triple<>(DoubleTapAction.DISABLED.getValue(), LocaleController.getString(R.string.Disable), R.drawable.msg_block),
-                                    new Triple<>(DoubleTapAction.REACTION.getValue(), LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
-                                    new Triple<>(DoubleTapAction.COPY.getValue(), LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
-                                    new Triple<>(DoubleTapAction.FORWARD.getValue(), LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
-                                    new Triple<>(DoubleTapAction.REPLY.getValue(), LocaleController.getString(R.string.Reply), R.drawable.menu_reply),
-                                    new Triple<>(DoubleTapAction.DELETE.getValue(), LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
-                                    new Triple<>(DoubleTapAction.SAVE.getValue(), LocaleController.getString(R.string.Save), R.drawable.msg_saved)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.DISABLED.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Disable))
+                                            .setItemIcon(R.drawable.msg_block),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.REACTION.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Reaction))
+                                            .setItemIcon(R.drawable.msg_emoji_cat),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.COPY.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Copy))
+                                            .setItemIcon(R.drawable.msg_copy),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.FORWARD.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Forward))
+                                            .setItemIcon(R.drawable.msg_forward),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.REPLY.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Reply))
+                                            .setItemIcon(R.drawable.menu_reply),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.DELETE.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Delete))
+                                            .setItemIcon(R.drawable.msg_delete),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.SAVE.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Save))
+                                            .setItemIcon(R.drawable.msg_saved)
                             ))
                             .title(LocaleController.getString(R.string.PreferredActionIncoming))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapActionOut)
-                            .optionsIcons(List.of(
-                                    new Triple<>(DoubleTapAction.DISABLED.getValue(), LocaleController.getString(R.string.Disable), R.drawable.msg_block),
-                                    new Triple<>(DoubleTapAction.REACTION.getValue(), LocaleController.getString(R.string.Reaction), R.drawable.msg_emoji_cat),
-                                    new Triple<>(DoubleTapAction.COPY.getValue(), LocaleController.getString(R.string.Copy), R.drawable.msg_copy),
-                                    new Triple<>(DoubleTapAction.FORWARD.getValue(), LocaleController.getString(R.string.Forward), R.drawable.msg_forward),
-                                    new Triple<>(DoubleTapAction.REPLY.getValue(), LocaleController.getString(R.string.Reply), R.drawable.menu_reply),
-                                    new Triple<>(DoubleTapAction.DELETE.getValue(), LocaleController.getString(R.string.Delete), R.drawable.msg_delete),
-                                    new Triple<>(DoubleTapAction.SAVE.getValue(), LocaleController.getString(R.string.Save), R.drawable.msg_saved),
-                                    new Triple<>(DoubleTapAction.EDIT.getValue(), LocaleController.getString(R.string.Edit), R.drawable.msg_edit)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.DISABLED.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Disable))
+                                            .setItemIcon(R.drawable.msg_block),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.REACTION.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Reaction))
+                                            .setItemIcon(R.drawable.msg_emoji_cat),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.COPY.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Copy))
+                                            .setItemIcon(R.drawable.msg_copy),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.FORWARD.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Forward))
+                                            .setItemIcon(R.drawable.msg_forward),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.REPLY.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Reply))
+                                            .setItemIcon(R.drawable.menu_reply),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.DELETE.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Delete))
+                                            .setItemIcon(R.drawable.msg_delete),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.SAVE.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Save))
+                                            .setItemIcon(R.drawable.msg_saved),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DoubleTapAction.EDIT.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Edit))
+                                            .setItemIcon(R.drawable.msg_edit)
                             ))
                             .title(LocaleController.getString(R.string.PreferredActionOutgoing))
                             .build());
@@ -264,7 +331,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.getString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))
                             .build());
                     category.row(enableSmartNotificationsSwitchRow = new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkSmartNotificationsEnabled(fragment))
+                            .onClick(() -> {
+                                checkSmartNotificationsEnabled(fragment);
+                                return true;
+                            })
                             .preferenceValue(OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats)
                             .title(LocaleController.getString("EnableSmartNotificationsForPrivateChats", R.string.EnableSmartNotificationsForPrivateChats))
                             .build());
@@ -272,8 +342,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .build();
     }
 
-    private boolean checkSmartNotificationsEnabled(PreferencesFragment fragment) {
-        if (OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue()) return true;
+    private void checkSmartNotificationsEnabled(PreferencesFragment fragment) {
+        if (OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue()) {
+            return;
+        }
 
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(fragment.getContext());
         warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
@@ -281,7 +353,5 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
         warningBuilder.setMessage(LocaleController.getString("SmartNotificationsPvtDialogMessage", R.string.SmartNotificationsPvtDialogMessage));
         AlertDialog alertDialog = warningBuilder.create();
         alertDialog.show();
-
-        return true;
     }
 }

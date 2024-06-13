@@ -79,6 +79,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> forceUseIpV6 = newConfigProperty("forceUseIpV6", false);
     public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
     public final ConfigProperty<Boolean> enableSmartNotificationsForPrivateChats = newConfigProperty("enableSmartNotificationsForPrivateChats", false);
+    public final ConfigProperty<Integer> defaultEmojiButtonAction = newConfigProperty("defaultEmojiButtonAction", DefaultEmojiButtonAction.DEFAULT.getValue());
 
     /*Appearance*/
     public final ConfigProperty<Boolean> showNameInActionBar = newConfigProperty("showNameInActionBar", false);
@@ -131,7 +132,7 @@ public class OctoConfig {
 
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXEnabled = newConfigProperty("cameraXEnabled", true);
-    public final ConfigProperty<Boolean> cameraXPerfOverQuality = newConfigProperty("cameraXPerformanceMode", false);
+    public final ConfigProperty<Boolean> cameraXPerformanceMode = newConfigProperty("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = newConfigProperty("cameraXZeroShutter", false);
     public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", -1);
 
@@ -150,7 +151,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> useTranslationsArgsFix = newConfigProperty("useTranslationsArgsFix", true);
 
     /*Updates*/
-    public final ConfigProperty<Boolean> autoCheckUpdates = newConfigProperty("autoCheckUpdateStatus", true);
+    public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
     public final ConfigProperty<Boolean> preferBetaVersion = newConfigProperty("preferBetaVersion", false);
     public final ConfigProperty<Boolean> receivePBetaUpdates = newConfigProperty("receivePBetaUpdates", false);
 
@@ -164,7 +165,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> syncPowerSaver = newConfigProperty("syncPowerSaver", false);
 
     /*Media filtering*/
-    public final ConfigProperty<Integer> mediaFiltering = newConfigProperty("mediaFilteringId", 0);
+    public final ConfigProperty<Integer> mediaFiltering = newConfigProperty("mediaFiltering", 0);
 
     /*Multi-Language*/
     public final ConfigProperty<String> languagePackVersioning = newConfigProperty("languagePackVersioning", "{}");
@@ -309,17 +310,17 @@ public class OctoConfig {
                         if (field.getType().equals(ConfigProperty.class)) {
                             try {
                                 ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
-                                String fieldName = field.getName();
-                                Object fieldValue = null;
-                                if (configProperty != null) {
-                                    fieldValue = configProperty.getValue();
-                                }
-
-                                if (!result.has(fieldName) || !dataToImport.contains(fieldName) || excludedOptionsByConfig.contains(fieldName)) {
+                                if (configProperty == null) {
                                     continue;
                                 }
 
-                                assert fieldValue != null;
+                                String fieldName = configProperty.getKey();
+                                Object fieldValue = configProperty.getValue();
+
+                                if (fieldName == null || fieldValue == null || !result.has(fieldName) || !dataToImport.contains(fieldName) || excludedOptionsByConfig.contains(fieldName)) {
+                                    continue;
+                                }
+
                                 if (result.get(fieldName).getClass().equals(fieldValue.getClass())) { // same type
                                     changed++;
 
@@ -343,11 +344,16 @@ public class OctoConfig {
                                     }
                                 }
                             } catch (JSONException e) {
-                                android.util.Log.e(TAG, "Error validating put-settings export", e);
+                                Log.e(TAG, "Error validating put-settings export", e);
                             } catch (IllegalAccessException e) {
-                                android.util.Log.e(TAG, "Error getting settings export", e);
+                                Log.e(TAG, "Error getting settings export", e);
                             }
                         }
+                    }
+
+                    if (!OctoConfig.INSTANCE.experimentsEnabled.getValue()) {
+                        OctoConfig.INSTANCE.experimentsEnabled.updateValue(true);
+                        // force enable experiments after import
                     }
                 }
             } catch (IOException e) {
@@ -379,6 +385,7 @@ public class OctoConfig {
             case "tabMode" -> value >= TabMode.TEXT.getValue() && value <= TabMode.ICON.getValue();
             case "translatorMode" -> value >= TranslatorMode.DEFAULT.getValue() && value <= TranslatorMode.EXTERNAL.getValue();
             case "translatorProvider" -> value >= TranslatorProvider.DEFAULT.getValue() && value <= TranslatorProvider.YANDEX.getValue();
+            case "defaultEmojiButtonAction" -> value >= DefaultEmojiButtonAction.DEFAULT.getValue() && value <= DefaultEmojiButtonAction.STICKERS.getValue();
             default ->
                 // в любом другом случае считайте значение недействительным.
                     false;

@@ -235,7 +235,7 @@ public class SessionBottomSheet extends BottomSheet {
             buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
             buttonTextView.setGravity(Gravity.CENTER);
             buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            buttonTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            buttonTextView.setTypeface(AndroidUtilities.bold());
             buttonTextView.setText(LocaleController.getString("UseCustomDeviceName", R.string.UseCustomDeviceName));
 
             buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
@@ -401,22 +401,6 @@ public class SessionBottomSheet extends BottomSheet {
         } else {
             imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId));
         }
-
-        /* TODO: WIP New Logic for Session Icons
-        SessionIcon sessionIcons = new SessionIcon();
-        SessionIcon.DeviceAttributes attributes = sessionIcons.setDeviceAttributes(session);
-
-        var colorKey = attributes.getColorKey();
-        var iconId = attributes.getIconId();
-        var iconAnimated = attributes.getAnimationId();
-
-        imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey)));
-        if (iconAnimated != 0) {
-            int[] colors = new int[]{0x000000, Theme.getColor(colorKey)};
-            imageView.setAnimation(iconAnimated, 50, 50, colors);
-        } else {
-            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId));
-        }*/
     }
 
     private static class ItemView extends FrameLayout {

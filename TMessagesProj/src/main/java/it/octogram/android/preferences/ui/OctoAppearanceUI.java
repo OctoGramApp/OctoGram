@@ -39,6 +39,7 @@ import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.StickerSize;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
+import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoAppearanceUI implements PreferencesEntry {
 
@@ -55,9 +56,9 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 .category(LocaleController.getString(R.string.StickerShape), category -> category.row(new ListRow.ListRowBuilder()
                     .currentValue(OctoConfig.INSTANCE.stickerShape)
                     .options(List.of(
-                            new Pair<>(Shape.DEFAULT.getValue(), LocaleController.getString(R.string.StyleTypeDefault)),
-                            new Pair<>(Shape.ROUND.getValue(), LocaleController.getString(R.string.StickerShapeRounded)),
-                            new Pair<>(Shape.MESSAGE.getValue(), LocaleController.getString(R.string.StyleTypeMessage))
+                            new PopupChoiceDialogOption().setId(Shape.DEFAULT.getValue()).setItemTitle(LocaleController.getString("StyleTypeDefault", R.string.StyleTypeDefault)),
+                            new PopupChoiceDialogOption().setId(Shape.ROUND.getValue()).setItemTitle(LocaleController.getString("StickerShapeRounded", R.string.StickerShapeRounded)),
+                            new PopupChoiceDialogOption().setId(Shape.MESSAGE.getValue()).setItemTitle(LocaleController.getString("StyleTypeMessage", R.string.StyleTypeMessage))
                     ))
                     .postNotificationName(NotificationCenter.reloadInterface)
                     .title(LocaleController.formatString(R.string.Style))

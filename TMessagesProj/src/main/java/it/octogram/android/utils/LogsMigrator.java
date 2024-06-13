@@ -46,6 +46,7 @@ public class LogsMigrator {
         OctoConfig.INSTANCE.isMigrateOldLogs.updateValue(true);
     }
 
+    /** @noinspection ResultOfMethodCallIgnored*/
     private static void copyFile(File sourceFile, File destFile) throws IOException {
         try (FileInputStream in = new FileInputStream(sourceFile);
              FileOutputStream out = new FileOutputStream(destFile)) {
@@ -55,6 +56,9 @@ public class LogsMigrator {
                 out.write(buffer, 0, length);
             }
         }
+
+        long lastModified = sourceFile.lastModified();
+        destFile.setLastModified(lastModified);
     }
 }
 

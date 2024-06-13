@@ -10,6 +10,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -31,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
@@ -111,17 +113,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             handleOnClickPosition(view, item, x);
         });
         this.takeTranslationIntoAccount = true;
-        DefaultItemAnimator itemAnimator = new DefaultItemAnimator() {
-            @Override
-            protected void onMoveAnimationUpdate(RecyclerView.ViewHolder holder) {
-                super.onMoveAnimationUpdate(holder);
-                containerView.invalidate();
-            }
-        };
-        itemAnimator.setSupportsChangeAnimations(false);
-        itemAnimator.setDelayAnimations(false);
-        itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
-        itemAnimator.setDurations(350);
+        DefaultItemAnimator itemAnimator = getDefaultItemAnimator();
         recyclerListView.setItemAnimator(itemAnimator);
 
         SelectorBtnCell buttonContainer = new SelectorBtnCell(getContext(), resourcesProvider, null);
@@ -151,6 +143,22 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         updateItems();
     }
 
+    @NonNull
+    private DefaultItemAnimator getDefaultItemAnimator() {
+        DefaultItemAnimator itemAnimator = new DefaultItemAnimator() {
+            @Override
+            protected void onMoveAnimationUpdate(RecyclerView.ViewHolder holder) {
+                super.onMoveAnimationUpdate(holder);
+                containerView.invalidate();
+            }
+        };
+        itemAnimator.setSupportsChangeAnimations(false);
+        itemAnimator.setDelayAnimations(false);
+        itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+        itemAnimator.setDurations(350);
+        return itemAnimator;
+    }
+
     private void initDataToImportList() {
         dataToImport.clear();
         externalKeysUnavailableInScan = 0;
@@ -161,10 +169,9 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         while (keys.hasNext()) {
             String key = keys.next();
             try {
-                if (settingsScan.data.get(key) instanceof JSONObject) {
+                if (settingsScan.data.get(key) instanceof JSONObject singleSettings) {
                     dataToImport.add(key);
 
-                    JSONObject singleSettings = (JSONObject) settingsScan.data.get(key);
                     Iterator<String> singleSettingsKeys = singleSettings.keys();
                     while (singleSettingsKeys.hasNext()) {
                         String singleSettingKey = singleSettingsKeys.next();
@@ -179,12 +186,25 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         for (Field field : OctoConfig.INSTANCE.getClass().getDeclaredFields()) {
             if (field.getType().equals(ConfigProperty.class)) {
-                String fieldName = field.getName();
-                // здесь фильтрация является основополагающей, иначе будут показаны дополнительные элементы, которые не следует импортировать.
-                if (!dataToImport.contains(fieldName) && !settingsScan.excludedOptions.contains(fieldName)) {
-                    dataToImport.add(fieldName);
-                    externalKeysUnavailableInScan++;
-                    totalImportableKeysCounter++;
+                try {
+                    ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
+                    if (configProperty == null) {
+                        continue;
+                    }
+
+                    String fieldName = configProperty.getKey();
+                    // здесь фильтрация является основополагающей, иначе будут показаны дополнительные элементы, которые не следует импортировать.
+                    if (!dataToImport.contains(fieldName) && !settingsScan.excludedOptions.contains(fieldName)) {
+                        dataToImport.add(fieldName);
+                        externalKeysUnavailableInScan++;
+                        totalImportableKeysCounter++;
+
+                        if (BuildConfig.DEBUG) {
+                            Log.d("ImportSettings", "Unknown dataset option is going to be imported:" + fieldName);
+                        }
+                    }
+                } catch (IllegalAccessException e) {
+                    Log.e(getClass().getName(), "Error getting settings state during import", e);
                 }
             }
         }
@@ -255,7 +275,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             }
 
             try {
-                if (settingsScan.data.get(item.itemRelationId) instanceof JSONObject) {
+                if (settingsScan.data.get(item.itemRelationId) instanceof JSONObject singleSettings) {
                     if (dataToImport.contains(item.itemRelationId)) {
                         dataToImport.remove(item.itemRelationId);
                     } else {
@@ -263,7 +283,6 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                     }
 
                     boolean mustBeEnabled = dataToImport.contains(item.itemRelationId);
-                    JSONObject singleSettings = (JSONObject) settingsScan.data.get(item.itemRelationId);
                     Iterator<String> singleSettingsKeys = singleSettings.keys();
                     while (singleSettingsKeys.hasNext()) {
                         String singleSettingKey = singleSettingsKeys.next();
@@ -316,20 +335,20 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         while (keys.hasNext()) {
             String key = keys.next();
             try {
-                if (settingsScan.data.get(key) instanceof JSONObject) {
-                    JSONObject singleSettings = (JSONObject) settingsScan.data.get(key);
+                if (settingsScan.data.get(key) instanceof JSONObject singleSettings) {
                     if (singleSettings.has(itemRelationId)) {
-                        boolean areAllOptionsSelected = true;
+                        boolean isOneOptionSelected = false;
                         Iterator<String> singleSettingsKeys = singleSettings.keys();
                         while (singleSettingsKeys.hasNext()) {
                             String singleSettingKey = singleSettingsKeys.next();
-                            if (!dataToImport.contains(singleSettingKey)) {
-                                areAllOptionsSelected = false;
+                            if (dataToImport.contains(singleSettingKey)) {
+                                isOneOptionSelected = true;
+                                break;
                             }
                         }
-                        if (areAllOptionsSelected && !dataToImport.contains(key)) {
+                        if (isOneOptionSelected && !dataToImport.contains(key)) {
                             dataToImport.add(key);
-                        } else if (!areAllOptionsSelected) {
+                        } else if (!isOneOptionSelected) {
                             dataToImport.remove(key);
                         }
                         break;
@@ -381,6 +400,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                             Object translationRowId = singleSettings.get(singleSettingKey);
                             if (translationRowId instanceof Integer) {
                                 translationRow1 = LocaleController.getString((Integer) translationRowId);
+                            } else if (translationRowId instanceof String) {
+                                translationRow1 = (String) translationRowId;
                             }
                             items.add(Item.asCheckbox(translationRow1, singleSettingKey));
                         }
@@ -527,10 +548,9 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof Item)) {
+            if (!(o instanceof Item item)) {
                 return false;
             }
-            Item item = (Item) o;
             if (item.viewType != viewType) {
                 return false;
             }
@@ -596,7 +616,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
             countTextView = new AnimatedTextView(context, false, true, true);
             countTextView.setAnimationProperties(.35f, 0, 200, CubicBezierInterpolator.EASE_OUT_QUINT);
-            countTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            countTextView.setTypeface(AndroidUtilities.bold());
             countTextView.setTextSize(dp(14));
             countTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
             countTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -672,6 +692,25 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                     isExpanded = currentExpanded;
                     arrowView.animate().rotation(isExpanded ? 180 : 0).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).setDuration(240).start();
                 }
+
+                int selectedOptionsOnTotal = 0;
+                int totalOptions = 0;
+                try {
+                    if (settingsScan.data.get(item.itemRelationId) instanceof JSONObject singleSettings) {
+                        Iterator<String> singleSettingsKeys = singleSettings.keys();
+                        totalOptions = singleSettings.length();
+                        while (singleSettingsKeys.hasNext()) {
+                            String singleSettingKey = singleSettingsKeys.next();
+                            if (dataToImport.contains(singleSettingKey)) {
+                                selectedOptionsOnTotal++;
+                            }
+                        }
+                    }
+
+                    countTextView.setText(selectedOptionsOnTotal + "/" + totalOptions);
+                } catch (JSONException ignored) {
+
+                }
             } else {
                 checkBoxView.setVisibility(VISIBLE);
                 checkBoxView.setChecked(dataToImport.contains(item.itemRelationId), true);
@@ -690,7 +729,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         @Override
-        protected void onDraw(Canvas canvas) {
+        protected void onDraw(@NonNull Canvas canvas) {
             super.onDraw(canvas);
             if (LocaleController.isRTL) {
                 if (needLine) {
@@ -724,7 +763,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
             button = new FrameLayout(context) {
                 @Override
-                protected void dispatchDraw(Canvas canvas) {
+                protected void dispatchDraw(@NonNull Canvas canvas) {
                     final int margin = dp(8);
                     int x = (getMeasuredWidth() - margin - (int) valueTextView.getCurrentWidth() + (int) textView.getCurrentWidth()) / 2;
 
@@ -764,7 +803,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 rtlTextView.setText(LocaleController.getString("ImportReadyImport", R.string.ImportReadyImport));
                 rtlTextView.setGravity(Gravity.CENTER);
                 rtlTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                rtlTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+                rtlTextView.setTypeface(AndroidUtilities.bold());
                 rtlTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
                 button.addView(rtlTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER));
             }
@@ -775,14 +814,14 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             textView.setTextSize(dp(14));
             textView.setText(LocaleController.getString("ImportReadyImport", R.string.ImportReadyImport));
             textView.setGravity(Gravity.RIGHT);
-            textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            textView.setTypeface(AndroidUtilities.bold());
             textView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
 
             valueTextView = new AnimatedTextView.AnimatedTextDrawable(true, true, true);
             valueTextView.setAnimationProperties(.25f, 0, 300, CubicBezierInterpolator.EASE_OUT_QUINT);
             valueTextView.setCallback(button);
             valueTextView.setTextSize(dp(14));
-            valueTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            valueTextView.setTypeface(AndroidUtilities.bold());
             valueTextView.setTextColor(Theme.blendOver(Theme.getColor(Theme.key_featuredStickers_addButton), Theme.multAlpha(Theme.getColor(Theme.key_featuredStickers_buttonText), .7f)));
             valueTextView.setText("");
 

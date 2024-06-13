@@ -335,7 +335,7 @@ public class CameraXController {
         ImageCapture.Builder iCaptureBuilder = new ImageCapture.Builder()
                 .setCaptureMode(OctoConfig.INSTANCE.cameraXZeroShutter.getValue() ?
                         ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG :
-                        (OctoConfig.INSTANCE.cameraXPerfOverQuality.getValue() ? ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY : ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                        (OctoConfig.INSTANCE.cameraXPerformanceMode.getValue() ? ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY : ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 )
                 .setTargetAspectRatio(AspectRatio.RATIO_16_9);
 

@@ -164,9 +164,14 @@ public class PreferencesFragment extends BaseFragment {
         listView.setOnItemClickListener((view, position, x, y) -> {
             BaseRow row = positions.get(position);
             if (row instanceof Clickable) {
+                boolean isProceedingForPremiumAlert = false;
                 if (row.isPremium() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
-                    showDialog(new PremiumFeatureBottomSheet(this, PremiumPreviewFragment.PREMIUM_FEATURE_ADVANCED_CHAT_MANAGEMENT, false));
-                    return;
+                    if (row.getAutoShowPremiumAlert()) {
+                        showDialog(new PremiumFeatureBottomSheet(this, PremiumPreviewFragment.PREMIUM_FEATURE_ADVANCED_CHAT_MANAGEMENT, false));
+                        return;
+                    } else {
+                        isProceedingForPremiumAlert = true;
+                    }
                 }
 
                 boolean success;
@@ -175,7 +180,7 @@ public class PreferencesFragment extends BaseFragment {
                 } else {
                     success = ((Clickable) row).onClick(this, getParentActivity(), view, position, x, y);
                 }
-                if (success) {
+                if (success && !isProceedingForPremiumAlert) {
                     if (row.doesRequireRestart()) {
                         restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
                     }

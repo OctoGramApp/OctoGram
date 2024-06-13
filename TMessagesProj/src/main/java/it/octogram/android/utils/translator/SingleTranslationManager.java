@@ -2,6 +2,7 @@ package it.octogram.android.utils.translator;
 
 import static org.telegram.ui.Components.TranslateAlert2.preprocess;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.text.style.URLSpan;
@@ -17,6 +18,7 @@ import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.TranslateAlert2;
@@ -28,6 +30,8 @@ import java.util.Objects;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TranslatorMode;
 import it.octogram.android.TranslatorProvider;
+import it.octogram.android.preferences.ui.OctoTranslatorUI;
+import it.octogram.android.utils.PopupChoiceDialogUtils;
 
 public class SingleTranslationManager {
     private Integer reqId;
@@ -121,7 +125,31 @@ public class SingleTranslationManager {
 
             @Override
             public void onUnavailableLanguage() {
-                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage)));
+                AndroidUtilities.runOnUIThread(() -> {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+                    alertDialogBuilder.setTitle(LocaleController.getString("Warning", R.string.Warning));
+                    alertDialogBuilder.setMessage(LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage));
+                    alertDialogBuilder.setPositiveButton(LocaleController.getString("TranslatorUnsupportedLanguageChange", R.string.TranslatorUnsupportedLanguageChange), (dialog, which1) -> {
+                        dialog.dismiss();
+                        Dialog selectNewProviderDialog = PopupChoiceDialogUtils.createChoiceDialog(
+                                fragment.getParentActivity(),
+                                OctoTranslatorUI.getProvidersPopupOptions(),
+                                LocaleController.getString("TranslatorProvider", R.string.TranslatorProvider),
+                                OctoConfig.INSTANCE.translatorProvider.getValue(),
+                                (dialogInterface, sel) -> {
+                                    OctoConfig.INSTANCE.translatorProvider.updateValue(sel);
+                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_SUCCESS, LocaleController.getString("TranslatorUnsupportedLanguageChangeDone", R.string.TranslatorUnsupportedLanguageChangeDone));
+                                    translateAsInlineMode();
+                                }
+                        );
+
+                        fragment.setVisibleDialog(selectNewProviderDialog);
+                        selectNewProviderDialog.show();
+                    });
+                    alertDialogBuilder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                });
             }
         });
     }
@@ -129,31 +157,19 @@ public class SingleTranslationManager {
     public void initTranslationProcess(OnTranslationResultCallback callback) {
         int translationProvider = OctoConfig.INSTANCE.translatorProvider.getValue();
 
+        if (TranslationsWrapper.isLanguageUnavailable(toLanguage)) {
+            callback.onResponseReceived();
+            callback.onUnavailableLanguage();
+            return;
+        }
+
         if (translationProvider == TranslatorProvider.DEFAULT.getValue()) {
             translateWithDefault(callback);
         } else if (translationProvider == TranslatorProvider.GOOGLE.getValue()) {
-            if (GoogleTranslator.isUnsupportedLanguage(toLanguage)) {
-                callback.onResponseReceived();
-                callback.onUnavailableLanguage();
-                return;
-            }
-
             GoogleTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
         } else if (translationProvider == TranslatorProvider.YANDEX.getValue()) {
-            if (YandexTranslator.isUnsupportedLanguage(toLanguage)) {
-                callback.onResponseReceived();
-                callback.onUnavailableLanguage();
-                return;
-            }
-
             YandexTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
         } else if (translationProvider == TranslatorProvider.DEEPL.getValue()) {
-            if (DeeplTranslator.isUnsupportedLanguage(toLanguage)) {
-                callback.onResponseReceived();
-                callback.onUnavailableLanguage();
-                return;
-            }
-
             DeeplTranslator.executeTranslation(text.toString(), entities, toLanguage, OctoConfig.INSTANCE.translatorFormality.getValue(), callback);
         } else {
             callback.onResponseReceived();

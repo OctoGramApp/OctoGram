@@ -15,6 +15,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.octogram.android.CameraXResolution;
 import it.octogram.android.OctoConfig;
@@ -23,6 +24,7 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoCameraSettingsUI implements PreferencesEntry {
 
@@ -43,18 +45,18 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                             .showIf(OctoConfig.INSTANCE.cameraXEnabled)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.cameraXPerfOverQuality)
+                            .preferenceValue(OctoConfig.INSTANCE.cameraXPerformanceMode)
                             .title(LocaleController.getString("PerformanceMode", R.string.PerformanceMode))
                             .description(LocaleController.getString("PerformanceMode_Desc", R.string.PerformanceMode_Desc))
                             .showIf(OctoConfig.INSTANCE.cameraXEnabled)
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .options(new ArrayList<>() {{
-                                add(new Pair<>(CameraXResolution.SD.getValue(), "480p"));
-                                add(new Pair<>(CameraXResolution.HD.getValue(), "720p"));
-                                add(new Pair<>(CameraXResolution.FHD.getValue(), "1080p"));
-                                add(new Pair<>(CameraXResolution.UHD.getValue(), "2160p"));
-                            }})
+                            .options(List.of(
+                                    new PopupChoiceDialogOption().setId(CameraXResolution.SD.getValue()).setItemTitle("480p"),
+                                    new PopupChoiceDialogOption().setId(CameraXResolution.HD.getValue()).setItemTitle("720p"),
+                                    new PopupChoiceDialogOption().setId(CameraXResolution.FHD.getValue()).setItemTitle("1080p"),
+                                    new PopupChoiceDialogOption().setId(CameraXResolution.UHD.getValue()).setItemTitle("2160p")
+                            ))
                             .currentValue(OctoConfig.INSTANCE.cameraXResolution)
                             .title(LocaleController.getString("CurrentCameraXResolution", R.string.CurrentCameraXResolution))
                             .build());

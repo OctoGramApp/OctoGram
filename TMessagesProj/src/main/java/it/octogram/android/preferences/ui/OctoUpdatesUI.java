@@ -58,7 +58,7 @@ public class OctoUpdatesUI implements PreferencesEntry {
                         .layout(checkCell = new CustomUpdatesCheckCell(context, () -> checkForUpdates(fragment, context)))
                         .build())
                 .row(new SwitchRow.SwitchRowBuilder()
-                        .preferenceValue(OctoConfig.INSTANCE.autoCheckUpdates)
+                        .preferenceValue(OctoConfig.INSTANCE.autoCheckUpdateStatus)
                         .title(LocaleController.formatString("UpdatesSettingsAuto", R.string.UpdatesSettingsAuto))
                         .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
                         .build())

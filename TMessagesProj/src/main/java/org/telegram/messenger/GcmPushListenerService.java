@@ -34,7 +34,7 @@ public class GcmPushListenerService extends FirebaseMessagingService {
         }
 
         if (data.containsKey("loc_key") && Objects.equals(data.get("loc_key"), "NEW_UPDATE")) {
-            if (OctoConfig.INSTANCE.autoCheckUpdates.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
+            if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
                 LaunchActivity.instance.checkAppUpdate(false, null);
             }
 

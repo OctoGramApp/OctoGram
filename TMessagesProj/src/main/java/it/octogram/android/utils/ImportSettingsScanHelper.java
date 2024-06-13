@@ -2,6 +2,7 @@ package it.octogram.android.utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class ImportSettingsScanHelper {
 
     private void fillForceReloadOptions() {
         forceRequestReloadOptions.clear();
+        forceRequestReloadOptions.add("eventType");
         forceRequestReloadOptions.add("tabletMode");
         forceRequestReloadOptions.add("alternativeNavigation");
         forceRequestReloadOptions.add("hideOnlyAllChatsFolder");
@@ -65,6 +67,8 @@ public class ImportSettingsScanHelper {
         excludedOptions.add("drawer_octogramSettings");
         excludedOptions.add("drawer_inviteFriends");
         excludedOptions.add("drawer_telegramFeatures");
+        excludedOptions.add("drawer_datacenterInfo");
+        excludedOptions.add("drawer_peopleNearby");
         excludedOptions.add("context_clearFromCache");
         excludedOptions.add("context_copyPhoto");
         excludedOptions.add("context_saveMessage");
@@ -77,7 +81,11 @@ public class ImportSettingsScanHelper {
         excludedOptions.add("autoCheckUpdateStatus");
         excludedOptions.add("preferBetaVersion");
         excludedOptions.add("receivePBetaUpdates");
-        excludedOptions.add("mediaFilteringId");
+        excludedOptions.add("mediaFiltering");
+        excludedOptions.add("isMigrateOldLogs");
+        excludedOptions.add("syncPowerSaver");
+        excludedOptions.add("drawerItems"); // part of next octogram update 2.4.0
+        excludedOptions.add("experimentsEnabled");
     }
 
     private JSONObject getGeneralOptions() {
@@ -87,9 +95,12 @@ public class ImportSettingsScanHelper {
             generalOptions.put("hideOtherPhoneNumber", R.string.HideOtherPhoneNumber);
             generalOptions.put("showFakePhoneNumber", R.string.ShowFakePhoneNumber);
             generalOptions.put("showUsernameAsPhoneNumber", R.string.ShowUsernameAsPhoneNumber);
+            generalOptions.put("dcIdStyle", LocaleController.getString(R.string.DcIdHeader) + ": " + LocaleController.getString(R.string.Style));
+            generalOptions.put("dcIdType", LocaleController.getString(R.string.DcIdHeader) + ": " + LocaleController.getString(R.string.Type));
             generalOptions.put("promptBeforeCalling", R.string.PromptBeforeCalling);
             generalOptions.put("registrationDateInProfiles", R.string.ShowRegistrationDate);
-            generalOptions.put("jumpToNextChannelOrTopic", R.string.JumpToNextChannelOrTopic);
+            generalOptions.put("defaultEmojiButtonAction", R.string.DefaultEmojiButtonType);
+            generalOptions.put("jumpToNextChannel", R.string.JumpToNextChannelOrTopic);
             generalOptions.put("registrationDateInProfiles", R.string.ShowRegistrationDate);
             generalOptions.put("hideGreetingSticker", R.string.HideGreetingSticker);
             generalOptions.put("playGifAsVideo", R.string.PlayGifsAsVideo);
@@ -107,7 +118,7 @@ public class ImportSettingsScanHelper {
             generalOptions.put("hideSentTimeOnStickers", R.string.RemoveTimeOnStickers);
             generalOptions.put("hideOnlyAllChatsFolder", R.string.HideAllChatFolder);
             generalOptions.put("hideChatFolders", R.string.HideAllChatFolders);
-            generalOptions.put("hideFoldersWhenForwarding", R.string.HideChatFoldersWhenForwarding);
+            generalOptions.put("showFoldersWhenForwarding", R.string.HideChatFoldersWhenForwarding);
             generalOptions.put("doubleTapActionOut", R.string.PreferredActionOutgoing);
             generalOptions.put("doubleTapAction", R.string.PreferredActionIncoming);
             generalOptions.put("tabletMode", R.string.ForceTableMode);
@@ -127,6 +138,7 @@ public class ImportSettingsScanHelper {
             translatorOptions.put("translatorMode", R.string.TranslatorMode);
             translatorOptions.put("translatorProvider", R.string.TranslatorProvider);
             translatorOptions.put("translatorFormality", R.string.TranslatorFormality);
+            translatorOptions.put("translatorKeepMarkdown", R.string.TranslatorKeepMarkdown);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -137,7 +149,9 @@ public class ImportSettingsScanHelper {
     private JSONObject getAppearance() {
         JSONObject appearance = new JSONObject();
         try {
-            appearance.put("eventType", R.string.OctoAppearanceSettingsHeader);
+            appearance.put("tabMode", R.string.FoldersType);
+            appearance.put("stickerShape", R.string.StickerShape);
+            appearance.put("eventType", R.string.EventType);
             appearance.put("useSystemEmoji", R.string.UseSystemEmojis);
             appearance.put("useSystemFont", R.string.UseSystemFont);
             appearance.put("formatTimeWithSeconds", R.string.FormatTimeWithSeconds);
@@ -167,7 +181,7 @@ public class ImportSettingsScanHelper {
         try {
             chatCamera.put("cameraXEnabled", R.string.UseCameraX);
             chatCamera.put("cameraXZeroShutter", R.string.ZeroShutter);
-            chatCamera.put("cameraXPerfOverQuality", R.string.PerformanceMode);
+            chatCamera.put("cameraXPerformanceMode", R.string.PerformanceMode);
             chatCamera.put("cameraXResolution", R.string.CurrentCameraXResolution);
         } catch (JSONException e) {
             throw new RuntimeException(e);

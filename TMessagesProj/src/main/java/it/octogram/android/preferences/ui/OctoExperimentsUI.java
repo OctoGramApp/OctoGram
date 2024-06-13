@@ -16,6 +16,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.octogram.android.AudioType;
 import it.octogram.android.OctoConfig;
@@ -28,6 +29,7 @@ import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
+import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoExperimentsUI implements PreferencesEntry {
 
@@ -68,38 +70,38 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
-                            .options(new ArrayList<>() {{
-                                add(new Pair<>(AudioType.MONO.getValue(), LocaleController.getString(R.string.AudioTypeMono)));
-                                add(new Pair<>(AudioType.STEREO.getValue(), LocaleController.getString(R.string.AudioTypeStereo)));
-                            }})
+                            .options(List.of(
+                                    new PopupChoiceDialogOption().setId(AudioType.MONO.getValue()).setItemTitle(LocaleController.getString("AudioTypeMono", R.string.AudioTypeMono)),
+                                    new PopupChoiceDialogOption().setId(AudioType.STEREO.getValue()).setItemTitle(LocaleController.getString("AudioTypeStereo", R.string.AudioTypeStereo))
+                            ))
                             .currentValue(OctoConfig.INSTANCE.gcOutputType)
                             .title(LocaleController.getString(R.string.AudioTypeInCall))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
-                            .options(new ArrayList<>() {{
-                                add(new Pair<>(PhotoResolution.LOW.getValue(), LocaleController.getString(R.string.ResolutionLow)));
-                                add(new Pair<>(PhotoResolution.DEFAULT.getValue(), LocaleController.getString(R.string.ResolutionMedium)));
-                                add(new Pair<>(PhotoResolution.HIGH.getValue(), LocaleController.getString(R.string.ResolutionHigh)));
-                            }})
+                            .options(List.of(
+                                    new PopupChoiceDialogOption().setId(PhotoResolution.LOW.getValue()).setItemTitle(LocaleController.getString("ResolutionLow", R.string.ResolutionLow)),
+                                    new PopupChoiceDialogOption().setId(PhotoResolution.DEFAULT.getValue()).setItemTitle(LocaleController.getString("ResolutionMedium", R.string.ResolutionMedium)),
+                                    new PopupChoiceDialogOption().setId(PhotoResolution.HIGH.getValue()).setItemTitle(LocaleController.getString("ResolutionHigh", R.string.ResolutionHigh))
+                            ))
                             .currentValue(OctoConfig.INSTANCE.photoResolution)
                             .title(LocaleController.getString("PhotoResolution", R.string.PhotoResolution))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .currentValue(OctoConfig.INSTANCE.maxRecentStickers)
-                            .options(new ArrayList<>() {{
-                                add(new Pair<>(0, LocaleController.getString("MaxStickerSizeDefault", R.string.MaxStickerSizeDefault)));
-                                add(new Pair<>(1, "30"));
-                                add(new Pair<>(2, "40"));
-                                add(new Pair<>(3, "50"));
-                                add(new Pair<>(4, "80"));
-                                add(new Pair<>(5, "100"));
-                                add(new Pair<>(6, "120"));
-                                add(new Pair<>(7, "150"));
-                                add(new Pair<>(8, "180"));
-                                add(new Pair<>(9, "200"));
-                            }})
+                            .options(List.of(
+                                    new PopupChoiceDialogOption().setId(0).setItemTitle(LocaleController.formatString("MaxStickerSizeDefault", R.string.MaxStickerSizeDefault)),
+                                    new PopupChoiceDialogOption().setId(1).setItemTitle("30"),
+                                    new PopupChoiceDialogOption().setId(2).setItemTitle("40"),
+                                    new PopupChoiceDialogOption().setId(3).setItemTitle("50"),
+                                    new PopupChoiceDialogOption().setId(4).setItemTitle("80"),
+                                    new PopupChoiceDialogOption().setId(5).setItemTitle("100"),
+                                    new PopupChoiceDialogOption().setId(6).setItemTitle("120"),
+                                    new PopupChoiceDialogOption().setId(7).setItemTitle("150"),
+                                    new PopupChoiceDialogOption().setId(8).setItemTitle("180"),
+                                    new PopupChoiceDialogOption().setId(9).setItemTitle("200")
+                            ))
                             .title(LocaleController.getString("MaxRecentStickers", R.string.MaxRecentStickers))
                             .build());
                 })

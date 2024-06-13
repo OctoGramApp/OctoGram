@@ -6492,7 +6492,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         LanguageController.loadRemoteLanguageFromCache(LocaleController.getInstance().getCurrentLocale(), false);
         // checkAppUpdate(false, null);
 
-        if (OctoConfig.INSTANCE.autoCheckUpdates.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
+        if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
             checkAppUpdate(false, null);
         }
 

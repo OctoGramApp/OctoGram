@@ -4072,7 +4072,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             } else if (which == 9) {
                                 // ((LaunchActivity) getParentActivity()).checkAppUpdate(true, null);
 
-                                if (OctoConfig.INSTANCE.autoCheckUpdates.getValue() || OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
+                                if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
                                     AndroidUtilities.runOnUIThread(() -> {
                                         ((LaunchActivity) getParentActivity()).checkAppUpdate(false, null);
                                     }, 1000);

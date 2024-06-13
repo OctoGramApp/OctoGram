@@ -47,9 +47,16 @@
     <string name="TranslatorModeDefault">Popup</string>
     <string name="TranslatorModeInline">In-Message</string>
     <string name="TranslatorModeExternal">External app</string>
+    <string name="TranslatorEntireUnavailable">This feature is not available with the selected provider because you do not have a Telegram Premium subscription.</string>
     <string name="TranslatorProvider">Provider</string>
+    <string name="TranslatorProviderSuggestedPremium">Recommended if the account has a Telegram Premium subscription.</string>
+    <string name="TranslatorProviderSuggestedGeneral">It\'s the fastest provider but may resort to translation errors.</string>
+    <string name="TranslatorProviderSuggestedAccurate">It\'s very accurate but not recommended because of high limits.</string>
+    <string name="TranslatorProviderUnsuggested">It doesn\'t support the language currently set.</string>
     <string name="TranslatorProviderUnsupported">The currently set language (%s) is not supported by the selected provider.</string>
     <string name="TranslatorProviderUnsupportedDialogs">The translation target language of some chats has been changed because the previously set language is not supported by the selected provider.</string>
+    <string name="TranslatorDestination">Destination</string>
+    <string name="TranslatorDestinationFollow">Follow app</string>
     <string name="TranslatorFormality">Formality</string>
     <string name="TranslatorFormalityDefault">Default</string>
     <string name="TranslatorFormalityLow">Informal</string>
@@ -59,6 +66,8 @@
     <string name="TranslatorInMessageBadge">translated</string>
     <string name="TranslatorFailed">Translation language.</string>
     <string name="TranslatorUnsupportedLanguage">Selected language isn\'t supported by the selected provider.</string>
+    <string name="TranslatorUnsupportedLanguageChange">Edit provider</string>
+    <string name="TranslatorUnsupportedLanguageChangeDone">Provider has been updated successfully.</string>
 
     <!--Devices: Custom device name-->
     <string name="UseCustomDeviceName">Use custom name</string>
@@ -113,6 +122,7 @@
     <string name="EmojiSetAppliedInfo">%1$s is now your emoji set.</string>
     <string name="EmojiSetAlreadyApplied">Emoji set already applied.</string>
     <string name="EmojiSetErrorDownloading">Error downloading emoji set.</string>
+    <string name="EventType">Default Event Type</string>
     <string name="UseSystemEmojis">Use System Emoji</string>
     <string name="UseSystemEmojisDesc">Use system\'s emoji instead of the chosen ones</string>
     <string name="DownloadUpdate">Download</string>
@@ -194,6 +204,8 @@
     <string name="TabletModeSection">Tablet Mode</string>
     <string name="ConnectionSection">Connection</string>
     <string name="TryConnectWithIPV6">Try connecting through IPv6</string>
+    <string name="DefaultEmojiButtonType">Emoji button action</string>
+    <string name="DefaultEmojiButtonTypeDefault">Default</string>
 
     <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
     <string name="BlurHeader">Blur</string>

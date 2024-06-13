@@ -42,6 +42,7 @@ import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.utils.PopupChoiceDialogOption;
 import it.octogram.android.utils.translator.TranslationsWrapper;
 
 public class OctoTranslatorUI implements PreferencesEntry {
@@ -58,12 +59,18 @@ public class OctoTranslatorUI implements PreferencesEntry {
 
         updateItemsVisibility();
 
-        List<Pair<Integer, String>> translatorModeOptions = new ArrayList<>();
-        translatorModeOptions.add(new Pair<>(TranslatorMode.DEFAULT.getValue(), LocaleController.getString("TranslatorModeDefault", R.string.TranslatorModeDefault)));
-        translatorModeOptions.add(new Pair<>(TranslatorMode.INLINE.getValue(), LocaleController.getString("TranslatorModeInline", R.string.TranslatorModeInline)));
+        List<PopupChoiceDialogOption> translatorModeOptions = new ArrayList<>();
+        translatorModeOptions.add(new PopupChoiceDialogOption()
+                .setId(TranslatorMode.DEFAULT.getValue())
+                .setItemTitle(LocaleController.getString("TranslatorModeDefault", R.string.TranslatorModeDefault)));
+        translatorModeOptions.add(new PopupChoiceDialogOption()
+                .setId(TranslatorMode.INLINE.getValue())
+                .setItemTitle(LocaleController.getString("TranslatorModeInline", R.string.TranslatorModeInline)));
 
         if (TranslationsWrapper.canUseExternalApp()) {
-            translatorModeOptions.add(new Pair<>(TranslatorMode.EXTERNAL.getValue(), LocaleController.getString("TranslatorModeExternal", R.string.TranslatorModeExternal)));
+            translatorModeOptions.add(new PopupChoiceDialogOption()
+                    .setId(TranslatorMode.EXTERNAL.getValue())
+                    .setItemTitle(LocaleController.getString("TranslatorModeExternal", R.string.TranslatorModeExternal)));
         } else if (OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.EXTERNAL.getValue()) {
             OctoConfig.INSTANCE.translatorMode.updateValue(TranslatorMode.DEFAULT.getValue());
             canSelectProvider.setValue(showButtonBool.getValue());
@@ -85,7 +92,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onClick(() -> {
                             if (!translateEntireChat.getValue() && OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
-                                fragment.showDialog(new PremiumFeatureBottomSheet(fragment, PremiumPreviewFragment.PREMIUM_FEATURE_TRANSLATIONS, false));
+                                showUnavailableFeatureTgPremium(fragment, context);
                                 return false;
                             }
 
@@ -95,6 +102,8 @@ public class OctoTranslatorUI implements PreferencesEntry {
 
                             return true;
                         })
+                        .premium(OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium())
+                        .autoShowPremiumAlert(false)
                         .preferenceValue(translateEntireChat)
                         .title(LocaleController.getString("ShowTranslateChatButton", R.string.ShowTranslateChatButton))
                         .build()
@@ -116,6 +125,13 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             .build()
                     );
                     category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new DestinationlanguageSettings()))
+                            .value(getTranslateDestinationStatus())
+                            .showIf(canSelectDoNotTranslate)
+                            .title(LocaleController.getString("TranslatorDestination", R.string.TranslatorDestination))
+                            .build()
+                    );
+                    category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new RestrictedLanguagesSelectActivity()))
                             .value(getDoNotTranslateStatus())
                             .showIf(canSelectDoNotTranslate)
@@ -124,17 +140,14 @@ public class OctoTranslatorUI implements PreferencesEntry {
                     );
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.translatorProvider)
-                            .options(List.of(
-                                    new Pair<>(TranslatorProvider.DEFAULT.getValue(), "Telegram"),
-                                    new Pair<>(TranslatorProvider.GOOGLE.getValue(), "Google"),
-                                    new Pair<>(TranslatorProvider.YANDEX.getValue(), "Yandex"),
-                                    new Pair<>(TranslatorProvider.DEEPL.getValue(), "Deepl")
-                            ))
+                            .options(getProvidersPopupOptions())
                             .onSelected(() -> {
                                 boolean needEntireChatReload = false;
-                                if (OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium() && translateEntireChat.getValue()) {
-                                    MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().setChatTranslateEnabled(false);
-                                    NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.updateSearchSettings);
+                                if (!UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+                                    if (OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && translateEntireChat.getValue()) {
+                                        MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().setChatTranslateEnabled(false);
+                                        NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.updateSearchSettings);
+                                    }
                                     needEntireChatReload = true;
                                 }
 
@@ -152,9 +165,15 @@ public class OctoTranslatorUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.translatorFormality)
                             .options(List.of(
-                                    new Pair<>(TranslatorFormality.DEFAULT.getValue(), LocaleController.getString("TranslatorFormalityDefault", R.string.TranslatorFormalityDefault)),
-                                    new Pair<>(TranslatorFormality.LOW.getValue(), LocaleController.getString("TranslatorFormalityLow", R.string.TranslatorFormalityLow)),
-                                    new Pair<>(TranslatorFormality.HIGH.getValue(), LocaleController.getString("TranslatorFormalityHigh", R.string.TranslatorFormalityHigh))
+                                    new PopupChoiceDialogOption()
+                                            .setId(TranslatorFormality.DEFAULT.getValue())
+                                            .setItemTitle(LocaleController.getString("TranslatorFormalityDefault", R.string.TranslatorFormalityDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(TranslatorFormality.LOW.getValue())
+                                            .setItemTitle(LocaleController.getString("TranslatorFormalityLow", R.string.TranslatorFormalityLow)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(TranslatorFormality.HIGH.getValue())
+                                            .setItemTitle(LocaleController.getString("TranslatorFormalityHigh", R.string.TranslatorFormalityHigh))
                             ))
                             .showIf(canSelectFormality)
                             .title(LocaleController.getString("TranslatorFormality", R.string.TranslatorFormality))
@@ -167,6 +186,33 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             .build()
                     );
                 }).build();
+    }
+
+    public static List<PopupChoiceDialogOption> getProvidersPopupOptions() {
+        return List.of(
+                updateProviderAvailability(new PopupChoiceDialogOption()
+                        .setId(TranslatorProvider.DEFAULT.getValue())
+                        .setItemTitle("Telegram")
+                        .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedPremium", R.string.TranslatorProviderSuggestedPremium))),
+                updateProviderAvailability(new PopupChoiceDialogOption()
+                        .setId(TranslatorProvider.GOOGLE.getValue())
+                        .setItemTitle("Google")
+                        .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedGeneral", R.string.TranslatorProviderSuggestedGeneral))),
+                updateProviderAvailability(new PopupChoiceDialogOption()
+                        .setId(TranslatorProvider.DEEPL.getValue())
+                        .setItemTitle("Deepl")
+                        .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedAccurate", R.string.TranslatorProviderSuggestedAccurate))),
+                updateProviderAvailability(new PopupChoiceDialogOption().setId(TranslatorProvider.YANDEX.getValue()).setItemTitle("Yandex"))
+        );
+    }
+
+    private static PopupChoiceDialogOption updateProviderAvailability(PopupChoiceDialogOption provider) {
+        if (TranslationsWrapper.isLanguageUnavailable(TranslateAlert2.getToLanguage(), provider.id)) {
+            provider.setClickable(false);
+            provider.setItemDescription(LocaleController.getString("TranslatorProviderUnsuggested", R.string.TranslatorProviderUnsuggested));
+        }
+
+        return provider;
     }
 
     private void updateItemsVisibility(ConfigProperty<Boolean> except) {
@@ -215,6 +261,15 @@ public class OctoTranslatorUI implements PreferencesEntry {
         }
     }
 
+    private String getTranslateDestinationStatus() {
+        String currentDestination = MessagesController.getGlobalMainSettings().getString("translate_to_language", null);
+        if (currentDestination == null || currentDestination.isEmpty()) {
+            return LocaleController.getString("TranslatorDestinationFollow", R.string.TranslatorDestinationFollow);
+        } else {
+            return TranslateAlert2.capitalFirst(TranslateAlert2.languageName(currentDestination, null));
+        }
+    }
+
     private void resetManualSavedMessages() {
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
             if (UserConfig.getInstance(a).isClientActivated()) {
@@ -223,6 +278,23 @@ public class OctoTranslatorUI implements PreferencesEntry {
                 controller.resetManualTranslations();
             }
         }
+    }
+
+    private void showUnavailableFeatureTgPremium(PreferencesFragment fragment, Context context) {
+        AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
+        warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
+        if (MessagesController.getInstance(UserConfig.selectedAccount).premiumFeaturesBlocked()) {
+            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
+        } else {
+            warningBuilder.setPositiveButton(LocaleController.getString("MoreInfo", R.string.MoreInfo), (dialog1, which1) -> {
+                dialog1.dismiss();
+                fragment.showDialog(new PremiumFeatureBottomSheet(fragment, PremiumPreviewFragment.PREMIUM_FEATURE_TRANSLATIONS, false));
+            });
+            warningBuilder.setNeutralButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        }
+        warningBuilder.setMessage(LocaleController.getString("TranslatorEntireUnavailable", R.string.TranslatorEntireUnavailable));
+        AlertDialog alertDialog = warningBuilder.create();
+        alertDialog.show();
     }
 
     private void checkProviderAvailability(PreferencesFragment fragment, Context context) {
@@ -264,7 +336,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
         if (!finalPopupText.isEmpty()) {
             AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
             warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> dialog1.dismiss());
+            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
             warningBuilder.setMessage(finalPopupText);
             AlertDialog alertDialog = warningBuilder.create();
             alertDialog.show();

@@ -14,6 +14,7 @@ public abstract class ToggleableBaseRowBuilder<T, G> extends BaseRowBuilder<T> {
 
     protected ConfigProperty<G> preferenceValue;
     protected boolean premium;
+    protected boolean autoShowPremiumAlert = true;
 
     public ToggleableBaseRowBuilder<T, G> preferenceValue(ConfigProperty<G> val) {
         preferenceValue = val;
@@ -22,6 +23,11 @@ public abstract class ToggleableBaseRowBuilder<T, G> extends BaseRowBuilder<T> {
 
     public ToggleableBaseRowBuilder<T, G> premium(boolean val) {
         premium = val;
+        return this;
+    }
+
+    public ToggleableBaseRowBuilder<T, G> autoShowPremiumAlert(boolean val) {
+        autoShowPremiumAlert = val;
         return this;
     }
 }

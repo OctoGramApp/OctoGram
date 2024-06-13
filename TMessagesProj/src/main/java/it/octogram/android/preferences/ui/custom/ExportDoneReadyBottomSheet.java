@@ -78,7 +78,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
 
         TextView textView = new TextView(context);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
-        textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setText(LocaleController.getString("ExportDataReady", R.string.ExportDataReady));
@@ -143,7 +143,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        buttonTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        buttonTextView.setTypeface(AndroidUtilities.bold());
         buttonTextView.setText(LocaleController.getString("ExportDataShare", R.string.ExportDataShare));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
@@ -212,17 +212,14 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             if (field.getType().equals(ConfigProperty.class)) {
                 try {
                     ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
-                    String fieldName = field.getName();
 
-                    if (settingsScan.excludedOptions.contains(fieldName)) {
-                        continue;
-                    }
-
-                    Object fieldValue = null;
                     if (configProperty != null) {
-                        fieldValue = configProperty.getValue();
+                        if (settingsScan.excludedOptions.contains(configProperty.getKey())) {
+                            continue;
+                        }
+
+                        mainObject.put(configProperty.getKey(), configProperty.getValue());
                     }
-                    mainObject.put(fieldName, fieldValue);
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 } catch (IllegalAccessException e) {

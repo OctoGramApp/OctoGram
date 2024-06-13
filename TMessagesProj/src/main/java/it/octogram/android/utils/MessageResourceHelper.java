@@ -39,7 +39,7 @@ public class MessageResourceHelper {
         initItems();
 
         SpannableStringBuilder builder = new SpannableStringBuilder();
-        builder.append(' ');
+        //builder.append(' ');
 
         if (edited) {
             builder.append(OctoConfig.INSTANCE.pencilIconForEditedMessages.getValue() ? editedSpan : LocaleController.getString("EditedMessage", R.string.EditedMessage));
@@ -85,8 +85,7 @@ public class MessageResourceHelper {
 
     private static boolean canShowTranslatedItem(MessageObject messageObject) {
         if (messageObject.translated) {
-            TranslateController controller = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController();
-            return controller.isManualTranslated(messageObject) && !controller.isTranslatingDialog(messageObject.getDialogId());
+            return MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isManualTranslated(messageObject);
         }
 
         return false;

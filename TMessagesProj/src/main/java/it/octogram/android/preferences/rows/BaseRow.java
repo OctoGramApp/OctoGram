@@ -19,6 +19,7 @@ public abstract class BaseRow {
     private final PreferenceType type;
     private final int[] postNotificationName;
     private final boolean premium;
+    private final boolean autoShowPremiumAlert;
 
     private boolean currentlyHidden;
     private int row;
@@ -41,14 +42,18 @@ public abstract class BaseRow {
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type) {
-        this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, false, (int[]) null);
+        this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, false);
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium) {
-        this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, premium, (int[]) null);
+        this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, premium, true);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, @Nullable int... postNotificationName) {
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, boolean autoShowPremiumAlert) {
+        this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, premium, autoShowPremiumAlert, (int[]) null);
+    }
+
+    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, boolean autoShowPremiumAlert, @Nullable int... postNotificationName) {
         this.title = title;
         this.summary = summary;
         this.requiresRestart = requiresRestart;
@@ -58,6 +63,7 @@ public abstract class BaseRow {
         this.type = type;
         this.postNotificationName = postNotificationName;
         this.premium = premium;
+        this.autoShowPremiumAlert = autoShowPremiumAlert;
 
         this.currentlyHidden = showIfPreferenceValue != null && showIfReverse == showIfPreferenceValue.getValue();
     }
@@ -82,6 +88,10 @@ public abstract class BaseRow {
 
     public boolean getShowIfReverse() {
         return showIfReverse;
+    }
+
+    public boolean getAutoShowPremiumAlert() {
+        return autoShowPremiumAlert;
     }
 
     public boolean hasDivider() {

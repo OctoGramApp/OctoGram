@@ -279,7 +279,7 @@ public class TranslateController extends BaseController {
         }
         NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.dialogTranslate, dialogId, false);
 
-        TranslateAlert2.setToLanguage(language);
+        //TranslateAlert2.setToLanguage(language);
     }
 
     public int getDialogsWithUnavailableLanguage() {
@@ -455,11 +455,7 @@ public class TranslateController extends BaseController {
         }
 
         if (OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEFAULT.getValue()) {
-            for (String lang : langs) {
-                if (!TranslationsWrapper.isLanguageUnavailable(lang)) {
-                    langs.remove(lang);
-                }
-            }
+            langs.removeIf(lang -> !TranslationsWrapper.isLanguageUnavailable(lang));
         }
 
         suggestedLanguageCodes = langs;

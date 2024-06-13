@@ -2,14 +2,12 @@ package it.octogram.android.preferences.rows.impl;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextSettingsCell;
-import org.telegram.ui.Components.AlertsCreator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +18,12 @@ import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
 import it.octogram.android.preferences.rows.Clickable;
+import it.octogram.android.utils.PopupChoiceDialogOption;
 import it.octogram.android.utils.PopupChoiceDialogUtils;
-import kotlin.Triple;
 
 public class ListRow extends BaseRow implements Clickable {
 
-    private final List<Pair<Integer, String>> options;
-    private final List<Triple<Integer, String, Integer>> optionsIcons;
+    private final List<PopupChoiceDialogOption> options;
     private final ConfigProperty<Integer> currentValue;
 
     private final Supplier<Boolean> supplierClickable;
@@ -37,15 +34,13 @@ public class ListRow extends BaseRow implements Clickable {
                    boolean requiresRestart,
                    ConfigProperty<Boolean> showIf,
                    boolean showIfReverse,
-                   List<Pair<Integer, String>> options,
-                   @Nullable List<Triple<Integer, String, Integer>> optionsIcons,
+                   List<PopupChoiceDialogOption> options,
                    ConfigProperty<Integer> currentValue,
                    Supplier<Boolean> supplierClickable,
                    Runnable supplierClickableSelected
                ) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.LIST);
         this.options = options;
-        this.optionsIcons = optionsIcons;
         this.currentValue = currentValue;
         this.supplierClickable = supplierClickable;
         this.supplierClickableSelected = supplierClickableSelected;
@@ -62,92 +57,63 @@ public class ListRow extends BaseRow implements Clickable {
             return false;
         }
 
-        int selected = 0;
-        List<String> titleArray = new ArrayList<>();
-        List<Integer> idArray = new ArrayList<>();
-        Dialog dialog;
-
-        if (!optionsIcons.isEmpty()) {
-            List<Integer> icons = new ArrayList<>();
-            for (int index = 0; index < optionsIcons.size(); index++) {
-                Triple<Integer, String, Integer> triple = optionsIcons.get(index);
-                titleArray.add(triple.component2());
-                idArray.add(triple.component1());
-                icons.add(triple.component3());
-
-                if (currentValue.getValue().equals(triple.component1())) {
-                    selected = index;
-                }
-            }
-            dialog = PopupChoiceDialogUtils.createSingleChoiceIconsDialog(
-                    activity,
-                    titleArray.toArray(new String[0]),
-                    icons.stream().mapToInt(i -> i).toArray(),
-                    getTitle(),
-                    selected,
-                    (dialogInterface, sel) -> {
-                        int id = idArray.get(sel);
-                        currentValue.updateValue(optionsIcons.get(id).component1());
-                        if (supplierClickableSelected != null) {
-                            supplierClickableSelected.run();
-                        }
-                        reloadPreferencesUI.run();
-                        if (view instanceof TextSettingsCell) {
-                            ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), true, hasDivider());
-                        }
+        Dialog dialog = PopupChoiceDialogUtils.createChoiceDialog(
+                activity,
+                options,
+                getTitle(),
+                getSelectedOption() != null ? getSelectedOption().id : 0,
+                (dialogInterface, sel) -> {
+                    PopupChoiceDialogOption currentOption = getOptionFromId(sel);
+                    if (currentOption == null) {
+                        return;
                     }
-            );
-        } else {
-            for (int index = 0; index < options.size(); index++) {
-                Pair<Integer, String> pair = options.get(index);
-                titleArray.add(pair.second);
-                idArray.add(pair.first);
 
-                if (currentValue.getValue().equals(pair.first)) {
-                    selected = index;
-                }
-            }
-            dialog = AlertsCreator.createSingleChoiceDialog(
-                    activity,
-                    titleArray.toArray(new String[0]),
-                    getTitle(),
-                    selected,
-                    (dialogInterface, sel) -> {
-                        int id = idArray.get(sel);
-                        currentValue.updateValue(options.get(id).first);
-                        if (supplierClickableSelected != null) {
-                            supplierClickableSelected.run();
-                        }
-                        reloadPreferencesUI.run();
-                        if (view instanceof TextSettingsCell) {
-                            ((TextSettingsCell) view).setTextAndValue(getTitle(), getTextFromInteger(currentValue.getValue()), true, hasDivider());
-                        }
+                    currentValue.updateValue(currentOption.id);
+                    if (supplierClickableSelected != null) {
+                        supplierClickableSelected.run();
                     }
-            );
-        }
+
+                    reloadPreferencesUI.run();
+                    if (view instanceof TextSettingsCell) {
+                        ((TextSettingsCell) view).setTextAndValue(getTitle(), currentOption.itemTitle, true, hasDivider());
+                    }
+                }
+        );
+
         fragment.setVisibleDialog(dialog);
         dialog.show();
         return true;
     }
 
-    public String getTextFromInteger(int integer) {
-        List<String> titleArray = new ArrayList<>();
-        if (!options.isEmpty()) {
-            options.forEach(pair -> titleArray.add(pair.second));
-            for (int index = 0; index < titleArray.size(); index++) {
-                if (options.get(index).first.equals(integer)) {
-                    return titleArray.get(index);
-                }
-            }
-        } else {
-            optionsIcons.forEach(triple -> titleArray.add(triple.component2()));
-            for (int index = 0; index < titleArray.size(); index++) {
-                if (optionsIcons.get(index).component1().equals(integer)) {
-                    return titleArray.get(index);
-                }
+    private PopupChoiceDialogOption getOptionFromId(int id) {
+        for (int i = 0; i < options.size(); i++) {
+            PopupChoiceDialogOption option = options.get(i);
+            if (option.id == id) {
+                return option;
             }
         }
-        return "";
+        return null;
+    }
+
+    private PopupChoiceDialogOption getSelectedOption() {
+        for (int i = 0; i < options.size(); i++) {
+            PopupChoiceDialogOption option = options.get(i);
+            if (currentValue.getValue() == option.id) {
+                return option;
+            }
+        }
+        return null;
+    }
+
+    public String getTextFromInteger(int id) {
+        for (int i = 0; i < options.size(); i++) {
+            PopupChoiceDialogOption option = options.get(i);
+
+            if (option.id == id) {
+                return option.itemTitle;
+            }
+        }
+        return null;
     }
 
     public ConfigProperty<Integer> getCurrentValue() {
@@ -156,19 +122,13 @@ public class ListRow extends BaseRow implements Clickable {
 
     public static class ListRowBuilder extends BaseRowBuilder<ListRow> {
 
-        private final List<Pair<Integer, String>> options = new ArrayList<>();
-        private final List<Triple<Integer, String, Integer>> optionsIcons = new ArrayList<>();
+        private final List<PopupChoiceDialogOption> options = new ArrayList<>();
         private Supplier<Boolean> supplierClickable;
         private Runnable supplierClickableSelected;
         private ConfigProperty<Integer> currentValue;
 
-        public ListRowBuilder options(List<Pair<Integer, String>> opt) {
+        public ListRowBuilder options(List<PopupChoiceDialogOption> opt) {
             options.addAll(opt);
-            return this;
-        }
-
-        public ListRowBuilder optionsIcons(List<Triple<Integer, String, Integer>> opt) {
-            optionsIcons.addAll(opt);
             return this;
         }
 
@@ -189,7 +149,7 @@ public class ListRow extends BaseRow implements Clickable {
 
         @Override
         public ListRow build() {
-            return new ListRow(title, divider, requiresRestart, showIf, showIfReverse, options, optionsIcons, currentValue, supplierClickable, supplierClickableSelected);
+            return new ListRow(title, divider, requiresRestart, showIf, showIfReverse, options, currentValue, supplierClickable, supplierClickableSelected);
         }
     }
 }

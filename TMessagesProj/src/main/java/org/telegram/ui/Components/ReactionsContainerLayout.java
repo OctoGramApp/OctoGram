@@ -1066,7 +1066,8 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
                 }
             }
         } else {
-            allReactionsAvailable = true;
+            allReactionsAvailable = !OctoConfig.INSTANCE.hideCustomEmojis.getValue();
+            //allReactionsAvailable = true;
             fillRecentReactionsList(visibleReactions);
         }
         filterReactions(visibleReactions);

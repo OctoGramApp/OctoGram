@@ -195,6 +195,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate, SuggestEmojiView.AnchorViewDelegate {
@@ -5135,6 +5136,13 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 } else {
                     currentPage = emojiView.getCurrentPage();
                 }
+
+                int currentSelectedDefaultPage = OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue();
+                if (currentSelectedDefaultPage != DefaultEmojiButtonAction.DEFAULT.getValue()) {
+                    currentPage = currentSelectedDefaultPage - 1;
+                    MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", currentPage).apply();
+                }
+
                 if (currentPage == 0 || !allowStickers && !allowGifs) {
                     allowChangeToSmile = false;
                 }
@@ -10800,6 +10808,11 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 currentPage = MessagesController.getGlobalEmojiSettings().getInt("selected_page", 0);
             } else {
                 currentPage = emojiView.getCurrentPage();
+            }
+            int currentSelectedDefaultPage = OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue();
+            if (currentSelectedDefaultPage != DefaultEmojiButtonAction.DEFAULT.getValue()) {
+                currentPage = currentSelectedDefaultPage - 1;
+                MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", currentPage).commit();
             }
             if (currentPage == 0 || !allowStickers && !allowGifs) {
                 nextIcon = ChatActivityEnterViewAnimatedIconView.State.SMILE;

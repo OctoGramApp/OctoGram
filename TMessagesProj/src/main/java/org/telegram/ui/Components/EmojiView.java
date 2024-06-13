@@ -144,6 +144,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
 
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
@@ -2719,6 +2720,12 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         });
         currentPage = MessagesController.getGlobalEmojiSettings().getInt("selected_page", 0);
 
+        int currentSelectedDefaultPage = OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue();
+        if (currentSelectedDefaultPage != DefaultEmojiButtonAction.DEFAULT.getValue()) {
+            currentPage = currentSelectedDefaultPage - 1;
+            MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", currentPage).commit();
+        }
+
         Emoji.loadRecentEmoji();
         emojiAdapter.notifyDataSetChanged();
 
@@ -5119,8 +5126,13 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             newPage = 0;
         }
         if (currentPage != newPage) {
-            currentPage = newPage;
-            MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", newPage).commit();
+            //currentPage = newPage;
+            //MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", newPage).commit();
+
+            if (OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue() == DefaultEmojiButtonAction.DEFAULT.getValue()) {
+                currentPage = newPage;
+                MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", newPage).commit();
+            }
         }
     }
 

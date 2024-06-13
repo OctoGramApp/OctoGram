@@ -211,7 +211,7 @@ public class CameraXUtils {
                 break;
             case SharedConfig.PERFORMANCE_CLASS_HIGH:
             default:
-                suggestedRes = OctoConfig.INSTANCE.cameraXPerfOverQuality.getValue() && isPreview ? 1080 : 2160;
+                suggestedRes = OctoConfig.INSTANCE.cameraXPerformanceMode.getValue() && isPreview ? 1080 : 2160;
                 break;
         }
         return suggestedRes;
