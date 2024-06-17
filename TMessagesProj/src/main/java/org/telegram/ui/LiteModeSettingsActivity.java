@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LiteMode;
@@ -139,8 +140,14 @@ public class LiteModeSettingsActivity extends BaseFragment {
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putBoolean("view_animations", !animations);
                     SharedConfig.setAnimationsEnabled(!animations);
-                    editor.commit();
+                    editor.apply();
                     ((TextCell) view).setChecked(!animations);
+                } else if (item.type == SWITCH_TYPE_SYNC_POWER_SAVER) {
+                    boolean syncPowerSaver = OctoConfig.INSTANCE.syncPowerSaver.getValue();
+                    OctoConfig.INSTANCE.syncPowerSaver.updateValue(!syncPowerSaver);
+                    ((TextCell) view).setChecked(!syncPowerSaver);
+                    updateItems();
+                    LiteMode.getValue(false);
                 }
             }
         });
@@ -225,7 +232,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
         oldItems.addAll(items);
 
         items.clear();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !OctoConfig.INSTANCE.syncPowerSaver.getValue()) {
             items.add(Item.asSlider());
             items.add(Item.asInfo(
                 LiteMode.getPowerSaverLevel() <= 0 ?
@@ -235,6 +242,11 @@ public class LiteModeSettingsActivity extends BaseFragment {
                     LocaleController.formatString(R.string.LiteBatteryInfoBelow, String.format("%d%%", LiteMode.getPowerSaverLevel()))
             ));
         }
+
+        // doesn't need (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) check as
+        // 21 is already the minimum octogram build sdk id
+        items.add(Item.asSwitch(LocaleController.getString("LiteModeSyncBatterySaver"), SWITCH_TYPE_SYNC_POWER_SAVER));
+        items.add(Item.asInfo(LocaleController.getString("LiteModeSyncBatterySaverInfo")));
 
         items.add(Item.asHeader(LocaleController.getString("LiteOptionsTitle")));
         items.add(Item.asSwitch(R.drawable.msg2_sticker, LocaleController.getString("LiteOptionsStickers", R.string.LiteOptionsStickers), LiteMode.FLAGS_ANIMATED_STICKERS));
@@ -328,6 +340,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
     private static final int VIEW_TYPE_SWITCH2 = 5;
 
     public static final int SWITCH_TYPE_SMOOTH_TRANSITIONS = 1;
+    public static final int SWITCH_TYPE_SYNC_POWER_SAVER = 2;
 
     private class Adapter extends AdapterWithDiffUtils {
 
@@ -414,6 +427,8 @@ public class LiteModeSettingsActivity extends BaseFragment {
                     SharedPreferences preferences = MessagesController.getGlobalMainSettings();
                     boolean animations = preferences.getBoolean("view_animations", true);
                     textCell.setTextAndCheck(item.text, animations, false);
+                } else if (item.type == SWITCH_TYPE_SYNC_POWER_SAVER) {
+                    textCell.setTextAndCheck(item.text, OctoConfig.INSTANCE.syncPowerSaver.getValue(), false);
                 }
             }
         }
@@ -645,7 +660,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
                     float x = dp(19 + 37 + 19);
                     canvas.drawRect(x - dp(0.66f), (getMeasuredHeight() - dp(20)) / 2f, x, (getMeasuredHeight() + dp(20)) / 2f, Theme.dividerPaint);
                 }
-                if (needDivider) {
+                if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                     canvas.drawLine(getMeasuredWidth() - dp(64) + (textView.getTranslationX() < 0 ? dp(-32) : 0), getMeasuredHeight() - 1, 0, getMeasuredHeight() - 1, Theme.dividerPaint);
                 }
             } else {
@@ -653,7 +668,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
                     float x = getMeasuredWidth() - dp(19 + 37 + 19);
                     canvas.drawRect(x - dp(0.66f), (getMeasuredHeight() - dp(20)) / 2f, x, (getMeasuredHeight() + dp(20)) / 2f, Theme.dividerPaint);
                 }
-                if (needDivider) {
+                if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                     canvas.drawLine(dp(64) + textView.getTranslationX(), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight() - 1, Theme.dividerPaint);
                 }
             }

@@ -28,12 +28,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import it.octogram.android.CustomEmojiController;
+import it.octogram.android.OctoConfig;
 import org.checkerframework.checker.units.qual.A;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.ColoredImageSpan;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +84,16 @@ public class Emoji {
 
     private final static int MAX_RECENT_EMOJI_COUNT = 48;
 
+    private static boolean isSelectedCustomEmojiPack;
+    private static File emojiFile;
+    private static boolean isSelectedEmojiPack;
+
+    private static void reloadCache() {
+        isSelectedCustomEmojiPack = CustomEmojiController.isSelectedCustomEmojiPack();
+        emojiFile = CustomEmojiController.getCurrentEmojiPackOffline();
+        isSelectedEmojiPack = !OctoConfig.INSTANCE.selectedEmojiPack.getValue().equals("default") && emojiFile != null && emojiFile.exists();
+    }
+
     static {
         drawImgSize = AndroidUtilities.dp(20);
         bigImgSize = AndroidUtilities.dp(AndroidUtilities.isTablet() ? 40 : 34);
@@ -96,6 +110,24 @@ public class Emoji {
         }
         placeholderPaint = new Paint();
         placeholderPaint.setColor(0x00000000);
+        reloadCache();
+    }
+
+    public static boolean isSelectedCustomPack() {
+        return isSelectedCustomEmojiPack || isSelectedEmojiPack || OctoConfig.INSTANCE.useSystemEmoji.getValue();
+    }
+
+    public static void reloadEmoji() {
+        reloadCache();
+        for (int a = 0; a < emojiBmp.length; a++) {
+            emojiBmp[a] = new Bitmap[emojiCounts[a]];
+            loadingEmoji[a] = new boolean[emojiCounts[a]];
+        }
+        for (int j = 0; j < EmojiData.data.length; j++) {
+            for (int i = 0; i < EmojiData.data[j].length; i++) {
+                rects.put(EmojiData.data[j][i], new DrawableInfo((byte) j, (short) i, i));
+            }
+        }
     }
 
     public static void preloadEmoji(CharSequence code) {
@@ -112,12 +144,13 @@ public class Emoji {
             }
             loadingEmoji[page][page2] = true;
             Utilities.globalQueue.postRunnable(() -> {
-                final Bitmap bitmap = loadBitmap("emoji/" + String.format(Locale.US, "%d_%d.png", page, page2));
-                if (bitmap != null) {
-                    emojiBmp[page][page2] = bitmap;
-                    AndroidUtilities.cancelRunOnUIThread(invalidateUiRunnable);
-                    AndroidUtilities.runOnUIThread(invalidateUiRunnable);
-                }
+//                final Bitmap bitmap = loadBitmap("emoji/" + String.format(Locale.US, "%d_%d.png", page, page2));
+//                if (bitmap != null) {
+//                    emojiBmp[page][page2] = bitmap;
+//                    AndroidUtilities.cancelRunOnUIThread(invalidateUiRunnable);
+//                    AndroidUtilities.runOnUIThread(invalidateUiRunnable);
+//                }
+                loadEmojiInternal(page, page2);
                 loadingEmoji[page][page2] = false;
             });
         }
@@ -160,6 +193,57 @@ public class Emoji {
             }
         } else if (view instanceof TextView) {
             view.invalidate();
+        }
+    }
+
+    private static void loadEmojiInternal(final byte page, final short page2) {
+        try {
+            int imageResize;
+            if (AndroidUtilities.density <= 1.0f) {
+                imageResize = 2;
+            } else {
+                imageResize = 1;
+            }
+
+            Bitmap bitmap = null;
+            try {
+                if (OctoConfig.INSTANCE.useSystemEmoji.getValue() || isSelectedCustomEmojiPack) {
+                    int emojiSize = 66;
+                    bitmap = Bitmap.createBitmap(emojiSize, emojiSize, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    CustomEmojiController.drawEmojiFont(
+                            canvas,
+                            0,
+                            0,
+                            CustomEmojiController.getCurrentTypeface(),
+                            fixEmoji(EmojiData.data[page][page2]),
+                            emojiSize
+                    );
+                } else {
+                    InputStream is;
+                    if (isSelectedEmojiPack) {
+                        is = new FileInputStream(new File(emojiFile, String.format(Locale.US, "%d_%d.png", page, page2)));
+                    } else {
+                        is = ApplicationLoader.applicationContext.getAssets().open("emoji/" + String.format(Locale.US, "%d_%d.png", page, page2));
+                    }
+                    BitmapFactory.Options opts = new BitmapFactory.Options();
+                    opts.inJustDecodeBounds = false;
+                    opts.inSampleSize = imageResize;
+                    bitmap = BitmapFactory.decodeStream(is, null, opts);
+                    is.close();
+                }
+            } catch (Throwable e) {
+                FileLog.e(e);
+            }
+
+            final Bitmap finalBitmap = bitmap;
+            emojiBmp[page][page2] = finalBitmap;
+            AndroidUtilities.cancelRunOnUIThread(invalidateUiRunnable);
+            AndroidUtilities.runOnUIThread(invalidateUiRunnable);
+        } catch (Throwable x) {
+            if (BuildVars.LOGS_ENABLED) {
+                FileLog.e("Error loading emoji", x);
+            }
         }
     }
 
@@ -319,6 +403,12 @@ public class Emoji {
                 b = getDrawRect();
             } else {
                 b = getBounds();
+            }
+
+            if (!isLoaded()) {
+                loadEmoji(info.page, info.page2);
+                canvas.drawRect(getBounds(), placeholderPaint);
+                return;
             }
 
             if (!canvas.quickReject(b.left, b.top, b.right, b.bottom, Canvas.EdgeType.AA)) {

@@ -51,6 +51,8 @@ import org.telegram.ui.Components.SuggestEmojiView;
 
 import java.util.ArrayList;
 
+import it.octogram.android.OctoConfig;
+
 public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.AnchorViewDelegate {
 
     public static final int TYPE_DEFAULT = 0;
@@ -69,10 +71,14 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
     private ValueAnimator valueAnimator;
 
     public PollEditTextCell(Context context, OnClickListener onDelete) {
-        this(context, false, TYPE_DEFAULT, onDelete);
+        this(context, false, TYPE_DEFAULT, onDelete, null);
     }
 
     public PollEditTextCell(Context context, boolean caption, int type, OnClickListener onDelete) {
+        this(context, caption, type, onDelete, null);
+    }
+
+    public PollEditTextCell(Context context, boolean caption, int type, OnClickListener onDelete, OnClickListener onChangeIcon) {
         super(context);
 
         textView = new EditTextCaption(context, null) {
@@ -178,6 +184,16 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
                 }
                 onCheckBoxClick(PollEditTextCell.this, !checkBox.isChecked());
             });
+        } else if (onChangeIcon != null) {
+            addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 19 : 66, 0, !LocaleController.isRTL ? 19 : 66, 0));
+            moveImageView = new ImageView(context);
+            moveImageView.setFocusable(true);
+            moveImageView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_stickers_menuSelector)));
+            moveImageView.setScaleType(ImageView.ScaleType.CENTER);
+            moveImageView.setOnClickListener(onChangeIcon);
+            moveImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
+            moveImageView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            addView(moveImageView, LayoutHelper.createFrame(48, 48, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 8, 2, 8, 0));
         } else {
             int endMargin = type == TYPE_EMOJI ? 80: 19;
             addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL,  LocaleController.isRTL ? endMargin : 19, 0, LocaleController.isRTL ? 19 : endMargin, 0));
@@ -203,8 +219,11 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
         }
     }
 
-    protected void onEditTextFocusChanged(boolean focused) {
+    public void setIcon(int icon) {
+        moveImageView.setImageResource(icon);
+    }
 
+    protected void onEditTextFocusChanged(boolean focused) {
     }
 
     public void createErrorTextView() {
@@ -446,7 +465,7 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (needDivider && drawDivider()) {
+        if (needDivider && drawDivider() && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(moveImageView != null ? 63 : 20), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(moveImageView != null ? 63 : 20) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
     }

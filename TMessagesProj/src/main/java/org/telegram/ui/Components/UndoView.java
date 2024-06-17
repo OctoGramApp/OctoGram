@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -56,10 +57,14 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.Premium.boosts.BoostRepository;
 import org.telegram.ui.PaymentFormActivity;
 
 import java.util.ArrayList;
+
+import it.octogram.android.utils.AppRestartHelper;
 
 @SuppressWarnings("FieldCanBeLocal")
 @Deprecated // use Bulletin instead
@@ -164,6 +169,9 @@ public class UndoView extends FrameLayout {
     public final static int ACTION_LINK_COPIED = 59;
     public final static int ACTION_PHONE_COPIED = 60;
     public final static int ACTION_SHARE_BACKGROUND = 61;
+    public final static int ACTION_CALLBACK_COPIED = 201;
+    public final static int ACTION_ID_COPIED = 202;
+    public final static int ACTION_QUERY_COPIED = 203;
 
     public final static int ACTION_AUTO_DELETE_ON = 70;
     public final static int ACTION_AUTO_DELETE_OFF = 71;
@@ -185,6 +193,8 @@ public class UndoView extends FrameLayout {
 
     public final static int ACTION_PROXY_ADDED = 87;
     public final static int ACTION_SHARED_FOLDER_DELETED = 88;
+    public final static int ACTION_NEED_RESTART = 200;
+
 
     public final static int ACTION_BOOSTING_SELECTOR_WARNING_CHANNEL = 90;
     public final static int ACTION_BOOSTING_SELECTOR_WARNING_USERS = 91;
@@ -333,7 +343,7 @@ public class UndoView extends FrameLayout {
     }
 
     private boolean isTooltipAction() {
-        return currentAction == ACTION_ARCHIVE_HIDDEN || currentAction == ACTION_ARCHIVE_HINT || currentAction == ACTION_ARCHIVE_FEW_HINT ||
+        return currentAction == ACTION_NEED_RESTART || currentAction == ACTION_ARCHIVE_HIDDEN || currentAction == ACTION_ARCHIVE_HINT || currentAction == ACTION_ARCHIVE_FEW_HINT ||
                 currentAction == ACTION_ARCHIVE_PINNED || currentAction == ACTION_CONTACT_ADDED || currentAction == ACTION_PROXY_ADDED || currentAction == ACTION_OWNER_TRANSFERED_CHANNEL ||
                 currentAction == ACTION_OWNER_TRANSFERED_GROUP || currentAction == ACTION_QUIZ_CORRECT || currentAction == ACTION_QUIZ_INCORRECT || currentAction == ACTION_CACHE_WAS_CLEARED ||
                 currentAction == ACTION_ADDED_TO_FOLDER || currentAction == ACTION_REMOVED_FROM_FOLDER || currentAction == ACTION_PROFILE_PHOTO_CHANGED ||
@@ -454,7 +464,7 @@ public class UndoView extends FrameLayout {
     }
 
     public void showWithAction(ArrayList<Long> dialogIds, int action, Object infoObject, Object infoObject2, Runnable actionRunnable, Runnable cancelRunnable) {
-        if (!AndroidUtilities.shouldShowClipboardToast() && (currentAction == ACTION_MESSAGE_COPIED || currentAction == ACTION_USERNAME_COPIED || currentAction == ACTION_HASHTAG_COPIED || currentAction == ACTION_TEXT_COPIED || currentAction == ACTION_LINK_COPIED || currentAction == ACTION_PHONE_COPIED || currentAction == ACTION_EMAIL_COPIED || currentAction == ACTION_VOIP_LINK_COPIED)) {
+        if (!AndroidUtilities.shouldShowClipboardToast() && (currentAction == ACTION_MESSAGE_COPIED || currentAction == ACTION_USERNAME_COPIED || currentAction == ACTION_HASHTAG_COPIED || currentAction == ACTION_TEXT_COPIED || currentAction == ACTION_LINK_COPIED || currentAction == ACTION_PHONE_COPIED || currentAction == ACTION_EMAIL_COPIED || currentAction == ACTION_VOIP_LINK_COPIED || currentAction == ACTION_CALLBACK_COPIED || currentAction == ACTION_ID_COPIED || currentAction == ACTION_QUERY_COPIED)) {
             return;
         }
         if (currentActionRunnable != null) {
@@ -470,7 +480,7 @@ public class UndoView extends FrameLayout {
         currentInfoObject = infoObject;
         currentInfoObject2 = infoObject2;
         lastUpdateTime = SystemClock.elapsedRealtime();
-        undoTextView.setText(LocaleController.getString("Undo", R.string.Undo));
+        undoTextView.setText(LocaleController.getString("Undo", R.string.Undo).toUpperCase());
         undoImageView.setVisibility(VISIBLE);
         leftImageView.setPadding(0, 0, 0, 0);
         leftImageView.setScaleX(1);
@@ -511,7 +521,29 @@ public class UndoView extends FrameLayout {
 
         infoTextView.setMovementMethod(null);
 
-        if (isTooltipAction()) {
+        if (currentAction == ACTION_NEED_RESTART) {
+            infoTextView.setText(LocaleController.formatString("RestartAppToApplyChanges", R.string.RestartAppToApplyChanges));
+            undoTextView.setText(LocaleController.getString("BotUnblock", R.string.BotUnblock));
+
+            layoutParams.leftMargin = AndroidUtilities.dp(58);
+            layoutParams.topMargin = AndroidUtilities.dp(13);
+            layoutParams.rightMargin = (int) Math.ceil(undoTextView.getPaint().measureText(undoTextView.getText().toString())) + AndroidUtilities.dp(26);
+
+            infoTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+            undoButton.setVisibility(VISIBLE);
+            infoTextView.setTypeface(Typeface.DEFAULT);
+            subinfoTextView.setVisibility(GONE);
+
+            leftImageView.setVisibility(VISIBLE);
+            leftImageView.setAnimation(R.raw.chats_infotip, 36, 36);
+            leftImageView.setProgress(0);
+            leftImageView.playAnimation();
+            undoImageView.setVisibility(GONE);
+
+            currentCancelRunnable = () -> {
+                AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
+            };
+        } else if (isTooltipAction()) {
             CharSequence infoText;
             CharSequence subInfoText;
             @DrawableRes
@@ -1004,6 +1036,12 @@ public class UndoView extends FrameLayout {
                 } else if (currentAction == ACTION_LINK_COPIED) {
                     iconRawId = R.raw.voip_invite;
                     infoTextView.setText(LocaleController.getString("LinkCopied", R.string.LinkCopied));
+                } else if (currentAction == ACTION_CALLBACK_COPIED) {
+                    infoTextView.setText(LocaleController.getString("CallbackCopiedHint", R.string.CallbackCopiedHint));
+                } else if (currentAction == ACTION_ID_COPIED) {
+                    infoTextView.setText(LocaleController.getString("IDCopied", R.string.IDCopied));
+                } else if (currentAction == ACTION_QUERY_COPIED) {
+                    infoTextView.setText(LocaleController.getString("InlineQueryCopied", R.string.InlineQueryCopied));
                 } else {
                     infoTextView.setText(LocaleController.getString("TextCopied", R.string.TextCopied));
                 }

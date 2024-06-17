@@ -46,6 +46,7 @@ import android.widget.ImageView;
 
 import androidx.core.graphics.ColorUtils;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
@@ -317,7 +318,7 @@ public class ActionBar extends FrameLayout {
                     }
                 }
 
-                if (Theme.canStartHolidayAnimation()) {
+                if (Theme.canStartHolidayAnimation() || OctoConfig.INSTANCE.showSnowflakes.getValue()) {
                     if (snowflakesEffect == null) {
                         snowflakesEffect = new SnowflakesEffect(0);
                     }

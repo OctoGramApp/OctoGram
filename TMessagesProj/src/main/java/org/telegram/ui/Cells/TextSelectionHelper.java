@@ -49,8 +49,10 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.FloatingActionMode;
@@ -64,6 +66,8 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
 import java.util.ArrayList;
+
+import it.octogram.android.utils.translator.TranslationsWrapper;
 
 public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.SelectableView> {
 
@@ -1426,7 +1430,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                         menu.getItem(2).setVisible(true);
                     }
                 }
-                if (onTranslateListener != null && LanguageDetector.hasSupport() && getSelectedText() != null) {
+                if (/*onTranslateListener != null && */LanguageDetector.hasSupport() && getSelectedText() != null && MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled()) {
                     LanguageDetector.detectLanguage(getSelectedText().toString(), lng -> {
                         translateFromLanguage = lng;
                         updateTranslateButton(menu);
@@ -1447,13 +1451,13 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             private void updateTranslateButton(Menu menu) {
                 String translateToLanguage = LocaleController.getInstance().getCurrentLocale().getLanguage();
                 menu.getItem(3).setVisible(
-                    onTranslateListener != null && (
+                    /*onTranslateListener != null && */(
                         (
                             translateFromLanguage != null &&
                             (!translateFromLanguage.equals(translateToLanguage) || translateFromLanguage.equals("und")) &&
                             !RestrictedLanguagesSelectActivity.getRestrictedLanguages().contains(translateFromLanguage)
                         ) || !LanguageDetector.hasSupport()
-                    )
+                    ) && MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled()
                 );
             }
 
@@ -1479,11 +1483,14 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                     AndroidUtilities.runOnUIThread(showActionsRunnable);
                     return true;
                 } else if (itemId == TRANSLATE) {
+                    String translateToLanguage = LocaleController.getInstance().getCurrentLocale().getLanguage();
                     if (onTranslateListener != null) {
-                        String translateToLanguage = LocaleController.getInstance().getCurrentLocale().getLanguage();
                         onTranslateListener.run(getSelectedText(), translateFromLanguage, translateToLanguage, () -> showActions());
+                    } else {
+                        TranslationsWrapper.initTranslationItem(textSelectionOverlay.getContext(), null, null, UserConfig.selectedAccount, null, 0, translateFromLanguage, translateToLanguage, getSelectedText(), null, false, null, null);
                     }
                     hideActions();
+                    clear(true);
                     return true;
                 } else if (itemId == R.id.menu_quote) {
                     quoteText();

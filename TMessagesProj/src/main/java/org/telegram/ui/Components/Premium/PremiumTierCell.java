@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BillingController;
 import org.telegram.messenger.BuildVars;
@@ -120,7 +121,7 @@ public class PremiumTierCell extends ViewGroup {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (hasDivider) {
+        if (hasDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             if (LocaleController.isRTL) {
                 canvas.drawLine(0, getHeight() - 1, titleView.getRight(), getHeight() - 1, Theme.dividerPaint);
             } else {

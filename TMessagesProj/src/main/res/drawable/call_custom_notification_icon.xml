@@ -4,13 +4,13 @@
         android:width="40dp"
         android:height="40dp">
         <shape android:shape="oval">
-            <solid android:color="#2ca5e0" />
+            <solid android:color="#3D358B" />
         </shape>
     </item>
     <item
-        android:drawable="@drawable/notification"
+        android:drawable="@drawable/octo_notification"
 		android:gravity="center"
-        android:left="-2dp"
+        android:left="0dp"
         android:width="24dp"
         android:height="24dp" />
 </layer-list>

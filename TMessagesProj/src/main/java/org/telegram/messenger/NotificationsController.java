@@ -91,6 +91,10 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.NotificationColorize;
+import it.octogram.android.utils.OctoUtils;
+
 public class NotificationsController extends BaseController {
 
     public static final String EXTRA_VOICE_REPLY = "extra_voice_reply";
@@ -4041,7 +4045,7 @@ public class NotificationsController extends BaseController {
                 notifyDisabled = true;
             }
 
-            if (!notifyDisabled && dialog_id == override_dialog_id && chat != null) {
+            if (!notifyDisabled && dialog_id == override_dialog_id && (chat != null || OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue())) {
                 int notifyMaxCount;
                 int notifyDelay;
                 if (preferences.getBoolean("custom_" + dialog_id, false)) {
@@ -4260,7 +4264,7 @@ public class NotificationsController extends BaseController {
             PendingIntent contentIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
 
             mBuilder.setContentTitle(name)
-                    .setSmallIcon(R.drawable.notification)
+                    .setSmallIcon(OctoUtils.getNotificationIcon())
                     .setAutoCancel(true)
                     .setNumber(total_unread_count)
                     .setContentIntent(contentIntent)
@@ -4268,7 +4272,7 @@ public class NotificationsController extends BaseController {
                     .setGroupSummary(true)
                     .setShowWhen(true)
                     .setWhen(((long) lastMessageObject.messageOwner.date) * 1000)
-                    .setColor(0xff11acfa);
+                    .setColor(NotificationColorize.parseNotificationColor());
 
             long[] vibrationPattern = null;
             Uri sound = null;
@@ -5181,11 +5185,11 @@ public class NotificationsController extends BaseController {
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.applicationContext)
                     .setContentTitle(name)
-                    .setSmallIcon(R.drawable.notification)
+                    .setSmallIcon(OctoUtils.getNotificationIcon())
                     .setContentText(text.toString())
                     .setAutoCancel(true)
                     .setNumber(dialogKey.story ? storyPushMessages.size() : messageObjects.size())
-                    .setColor(0xff11acfa)
+                    .setColor(NotificationColorize.parseNotificationColor())
                     .setGroupSummary(false)
                     .setWhen(date)
                     .setShowWhen(true)

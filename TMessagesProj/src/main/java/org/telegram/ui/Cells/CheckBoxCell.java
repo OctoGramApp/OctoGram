@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import it.octogram.android.OctoConfig;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -538,7 +539,7 @@ public class CheckBoxCell extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             int offset = dp(isCheckboxRound() ? 60 : 20) + (int) Math.abs(textView.getTranslationX());
             if (currentType == TYPE_CHECK_BOX_USER) {
                 offset += dp(39);

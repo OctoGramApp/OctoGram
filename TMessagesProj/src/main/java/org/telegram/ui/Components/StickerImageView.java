@@ -33,6 +33,10 @@ public class StickerImageView extends BackupImageView implements NotificationCen
         this.stickerPackName = stickerPackName;
     }
 
+    public void reloadSticker() {
+        setSticker();
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();

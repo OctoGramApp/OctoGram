@@ -34,6 +34,10 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.Switch;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.custom.CustomDeviceNameBottomSheet;
+import it.octogram.android.utils.SessionIconUtils;
+
 public class SessionBottomSheet extends BottomSheet {
 
     TLRPC.TL_authorization session;
@@ -227,8 +231,32 @@ public class SessionBottomSheet extends BottomSheet {
         acceptCalls.descriptionText.setText(LocaleController.getString("AcceptCallsChatsDescription", R.string.AcceptCallsChatsDescription));
         linearLayout.addView(acceptCalls);
 
-        if (!isCurrentSession) {
-            TextView buttonTextView = new TextView(context);
+        TextView buttonTextView = new TextView(context);
+        if (isCurrentSession) {
+            buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+            buttonTextView.setGravity(Gravity.CENTER);
+            buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            buttonTextView.setTypeface(AndroidUtilities.bold());
+            buttonTextView.setText(LocaleController.getString("UseCustomDeviceName", R.string.UseCustomDeviceName));
+
+            buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+            buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+
+            linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 16));
+
+            buttonTextView.setOnClickListener((e) -> {
+                dismiss();
+
+                CustomDeviceNameBottomSheet sheet = new CustomDeviceNameBottomSheet(parentFragment.getParentActivity(), session.device_model, (CustomDeviceNameBottomSheet.CustomDeviceNameCallback) deviceName -> {
+                    session.device_model = deviceName;
+                    callback.onMySessionNameUpdated();
+
+                    SessionBottomSheet sessionSheet = new SessionBottomSheet(fragment, session, isCurrentSession, callback);
+                    sessionSheet.show();
+                });
+                sheet.show();
+            });
+        } else {
             buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
             buttonTextView.setGravity(Gravity.CENTER);
             buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -301,7 +329,7 @@ public class SessionBottomSheet extends BottomSheet {
     }
 
     private void setAnimation(TLRPC.TL_authorization session, RLottieImageView imageView) {
-        String platform = session.platform.toLowerCase();
+        /*String platform = session.platform.toLowerCase();
         if (platform.isEmpty()) {
             platform = session.system_version.toLowerCase();
         }
@@ -365,14 +393,23 @@ public class SessionBottomSheet extends BottomSheet {
                 colorKey2 = Theme.key_avatar_background2Pink;
             }
         }
+        */
+        SessionIconUtils sessionType = new SessionIconUtils();
+        SessionIconUtils.DeviceAttributes drawableInfo = sessionType.setDeviceAttributes(session);
 
-        imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey)));
+        int iconId = drawableInfo.getIconId();
+        int colorKey = drawableInfo.getColorKey();
+        int animatedIcon = drawableInfo.getAnimatedIcon();
+        int customColor = drawableInfo.getCustomColor();
+
+        imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), colorKey == -1 ? customColor : Theme.getColor(colorKey)
+        ));
 //        imageView.setBackground(new SessionCell.CircleGradientDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey), Theme.getColor(colorKey2)));
-        if (animation) {
+        if (animatedIcon != -1) {
             int[] colors = new int[]{0x000000, Theme.getColor(colorKey)};
-            imageView.setAnimation(iconId, 50, 50, colors);
+            imageView.setAnimation(animatedIcon, 50, 50, colors);
         } else {
-            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId));
+            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId == R.drawable.baseline_octo_24 ? R.drawable.device_octogram : iconId));
         }
     }
 
@@ -417,7 +454,7 @@ public class SessionBottomSheet extends BottomSheet {
         @Override
         protected void dispatchDraw(Canvas canvas) {
             super.dispatchDraw(canvas);
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawRect(AndroidUtilities.dp(64), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight(), Theme.dividerPaint);
             }
         }
@@ -436,6 +473,7 @@ public class SessionBottomSheet extends BottomSheet {
 
     public interface Callback {
         void onSessionTerminated(TLRPC.TL_authorization session);
+        void onMySessionNameUpdated();
     }
 
     @Override

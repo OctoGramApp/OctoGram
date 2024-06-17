@@ -17,7 +17,8 @@ public class MessageCustomParamsHelper {
                 !message.premiumEffectWasPlayed &&
                 message.originalLanguage == null &&
                 message.translatedToLanguage == null &&
-                message.translatedText == null;
+                message.translatedText == null &&
+                message.translatedProviderId == -1;
     }
 
     public static void copyParams(TLRPC.Message fromMessage, TLRPC.Message toMessage) {
@@ -31,6 +32,7 @@ public class MessageCustomParamsHelper {
         toMessage.originalLanguage = fromMessage.originalLanguage;
         toMessage.translatedToLanguage = fromMessage.translatedToLanguage;
         toMessage.translatedText = fromMessage.translatedText;
+        toMessage.translatedProviderId = fromMessage.translatedProviderId;
     }
 
 
@@ -79,6 +81,7 @@ public class MessageCustomParamsHelper {
             flags += message.originalLanguage != null ? 4 : 0;
             flags += message.translatedToLanguage != null ? 8 : 0;
             flags += message.translatedText != null ? 16 : 0;
+            flags += message.translatedProviderId != -1 ? 32 : 0;
         }
 
         @Override
@@ -105,6 +108,9 @@ public class MessageCustomParamsHelper {
             if ((flags & 16) != 0) {
                 message.translatedText.serializeToStream(stream);
             }
+            if ((flags & 32) != 0) {
+                stream.writeInt32(message.translatedProviderId);
+            }
         }
 
         @Override
@@ -129,6 +135,9 @@ public class MessageCustomParamsHelper {
             }
             if ((flags & 16) != 0) {
                 message.translatedText = TLRPC.TL_textWithEntities.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 32) != 0) {
+                message.translatedProviderId = stream.readInt32(exception);
             }
         }
 

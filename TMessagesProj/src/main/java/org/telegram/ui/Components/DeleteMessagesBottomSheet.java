@@ -11,6 +11,7 @@ import static org.telegram.ui.Components.UniversalAdapter.VIEW_TYPE_SWITCH;
 import static org.telegram.ui.Components.UniversalAdapter.VIEW_TYPE_USER_GROUP_CHECKBOX;
 import static org.telegram.ui.Components.UniversalAdapter.VIEW_TYPE_USER_CHECKBOX;
 
+import android.content.DialogInterface;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -44,6 +45,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Collectors;
+
+import it.octogram.android.OctoConfig;
 
 public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
     private UniversalAdapter adapter;
@@ -954,11 +957,38 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
             ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
         });
 
+        if (deleteAll.selectedCount > 0 && OctoConfig.INSTANCE.warningBeforeDeletingChatHistory.getValue()) {
+            String finalStringKey = LocaleController.getString("AreYouSureDeleteXMessages", R.string.AreYouSureDeleteXMessages);
+            if (deleteAll.selectedCount > 1) {
+                finalStringKey = LocaleController.formatString("AreYouSureDeleteXMessagesMultiple", R.string.AreYouSureDeleteXMessagesMultiple, deleteAll.selectedCount);
+            }
+
+            BaseFragment fragment = getBaseFragment();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(fragment.getParentActivity(), fragment.getResourceProvider());
+            alertDialogBuilder.setTitle(LocaleController.getString(R.string.Warning));
+            alertDialogBuilder.setMessage(finalStringKey);
+            alertDialogBuilder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialogInterface, d) -> {
+                deleteAll.forEachSelected((participant, i) -> {
+                    if (participant instanceof TLRPC.User) {
+                        MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, (TLRPC.User) participant, null, getBaseFragment(), 0);
+                    } else if (participant instanceof TLRPC.Chat) {
+                        MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, null, (TLRPC.Chat) participant, getBaseFragment(), 0);
+                    }
+                });
+            });
+            alertDialogBuilder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+
+            AlertDialog dialog = alertDialogBuilder.create();
+            dialog.redPositive();
+            fragment.showDialog(dialog);
+            return;
+        }
+
         deleteAll.forEachSelected((participant, i) -> {
             if (participant instanceof TLRPC.User) {
-                MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, (TLRPC.User) participant, null, 0);
+                MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, (TLRPC.User) participant, null, getBaseFragment(), 0);
             } else if (participant instanceof TLRPC.Chat) {
-                MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, null, (TLRPC.Chat) participant, 0);
+                MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, null, (TLRPC.Chat) participant, getBaseFragment(), 0);
             }
         });
     }

@@ -49,6 +49,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.CustomEmojiController;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.BuildVars;
@@ -149,6 +151,7 @@ public class CacheControlActivity extends BaseFragment implements NotificationCe
 
     private boolean[] selected = new boolean[] { true, true, true, true, true, true, true, true, true, true, true };
     private long databaseSize = -1;
+    private long cacheCustomEmojiSize = -1;
     private long cacheSize = -1, cacheEmojiSize = -1, cacheTempSize = -1;
     private long documentsSize = -1;
     private long audioSize = -1;
@@ -378,7 +381,12 @@ public class CacheControlActivity extends BaseFragment implements NotificationCe
             if (canceled) {
                 return;
             }
+            cacheCustomEmojiSize = CustomEmojiController.getEmojiSize();
+            if (canceled) {
+                return;
+            }
             stickersCacheSize += cacheEmojiSize;
+            stickersCacheSize += cacheCustomEmojiSize;
             audioSize = getDirectorySize(FileLoader.checkDirectory(FileLoader.MEDIA_DIR_AUDIO), 0);
             storiesSize = getDirectorySize(FileLoader.checkDirectory(FileLoader.MEDIA_DIR_STORIES), 0);
             if (canceled) {
@@ -1016,7 +1024,7 @@ public class CacheControlActivity extends BaseFragment implements NotificationCe
                 clearedSize += storiesSize;
             } else if (a == 6) {
                 type = 100;
-                clearedSize += stickersCacheSize;
+                clearedSize += stickersCacheSize + cacheEmojiSize + cacheCustomEmojiSize;
             } else if (a == 7) {
                 clearedSize += cacheSize;
                 documentsMusicType = 5;
@@ -1053,6 +1061,9 @@ public class CacheControlActivity extends BaseFragment implements NotificationCe
                 }
                 clearDirI[0]++;
                 next.run();
+            }
+            if (type == 100) {
+                CustomEmojiController.deleteAll();
             }
             if (type == FileLoader.MEDIA_DIR_IMAGE || type == FileLoader.MEDIA_DIR_VIDEO) {
                 int publicDirectoryType;
@@ -1107,7 +1118,9 @@ public class CacheControlActivity extends BaseFragment implements NotificationCe
                 imagesCleared = true;
                 stickersCacheSize = getDirectorySize(new File(FileLoader.checkDirectory(FileLoader.MEDIA_DIR_CACHE), "acache"), documentsMusicType);
                 cacheEmojiSize = getDirectorySize(FileLoader.checkDirectory(FileLoader.MEDIA_DIR_CACHE), 3);
+                cacheCustomEmojiSize = CustomEmojiController.getEmojiSize();
                 stickersCacheSize += cacheEmojiSize;
+                stickersCacheSize += cacheCustomEmojiSize;
             }
         }
         final boolean imagesClearedFinal = imagesCleared;
@@ -2944,7 +2957,7 @@ public class CacheControlActivity extends BaseFragment implements NotificationCe
         @Override
         protected void dispatchDraw(Canvas canvas) {
             super.dispatchDraw(canvas);
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(72), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(72) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
             }
         }

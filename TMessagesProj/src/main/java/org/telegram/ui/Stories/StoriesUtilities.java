@@ -81,7 +81,7 @@ public class StoriesUtilities {
 
     public static void drawAvatarWithStory(long dialogId, Canvas canvas, ImageReceiver avatarImage, AvatarStoryParams params) {
         StoriesController storiesController = MessagesController.getInstance(UserConfig.selectedAccount).getStoriesController();
-        boolean hasStories = storiesController.hasStories(dialogId);
+        boolean hasStories = !params.isDrawingMiniUserProfile && storiesController.hasStories(dialogId);
         drawAvatarWithStory(dialogId, canvas, avatarImage, UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId() != dialogId && hasStories, params);
     }
 
@@ -141,6 +141,13 @@ public class StoriesUtilities {
             }
         } else {
             unreadState = state = getPredictiveUnreadState(storiesController, dialogId);
+        }
+
+        if (params.isDrawingMiniUserProfile) {
+            unreadState = StoriesController.STATE_READ;
+            state = STATE_EMPTY;
+            animated = false;
+            // force disable stories circle when using mini user profile pictures
         }
 
         if (params.forceState != 0) {
@@ -1099,6 +1106,8 @@ public class StoriesUtilities {
         public boolean allowLongress = false;
 
         public Theme.ResourcesProvider resourcesProvider;
+
+        public boolean isDrawingMiniUserProfile = false;
 
         public AvatarStoryParams(boolean isStoryCell) {
             this(isStoryCell, null);

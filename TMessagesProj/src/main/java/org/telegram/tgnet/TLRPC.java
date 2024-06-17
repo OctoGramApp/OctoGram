@@ -67515,6 +67515,7 @@ public class TLRPC {
         public boolean premiumEffectWasPlayed; //custom
         public String originalLanguage; //custom
         public String translatedToLanguage; //custom
+        public int translatedProviderId = -1; //custom
         public TL_textWithEntities translatedText; // custom
         public TL_stories.StoryItem replyStory; //custom
         public InputQuickReplyShortcut quick_reply_shortcut; //custom

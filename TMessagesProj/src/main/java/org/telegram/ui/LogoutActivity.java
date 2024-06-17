@@ -64,6 +64,9 @@ public class LogoutActivity extends BaseFragment {
     private int logoutSectionRow;
     private int rowCount;
 
+    public boolean isDeleteAccountActivity = false;
+    public LogoutInterface runnable;
+
     @Override
     public boolean onFragmentCreate() {
         super.onFragmentCreate();
@@ -85,7 +88,12 @@ public class LogoutActivity extends BaseFragment {
         supportRow = rowCount++;
         alternativeSectionRow = rowCount++;
         logoutRow = rowCount++;
-        logoutSectionRow = rowCount++;
+
+        if (!isDeleteAccountActivity) {
+            logoutSectionRow = rowCount++;
+        } else {
+            logoutSectionRow = -1;
+        }
 
         return true;
     }
@@ -93,7 +101,7 @@ public class LogoutActivity extends BaseFragment {
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setTitle(LocaleController.getString("LogOutTitle", R.string.LogOutTitle));
+        actionBar.setTitle(isDeleteAccountActivity ? LocaleController.getString("DeleteAccount", R.string.DeleteAccount) : LocaleController.getString("LogOutTitle", R.string.LogOutTitle));
         if (AndroidUtilities.isTablet()) {
             actionBar.setOccupyStatusBar(false);
         }
@@ -151,7 +159,11 @@ public class LogoutActivity extends BaseFragment {
                 if (getParentActivity() == null) {
                     return;
                 }
-                showDialog(makeLogOutDialog(getParentActivity(), currentAccount));
+                if (isDeleteAccountActivity && runnable != null) {
+                    runnable.onDeleteAccountButtonClick();
+                } else {
+                    showDialog(makeLogOutDialog(getParentActivity(), currentAccount));
+                }
             }
         });
 
@@ -227,7 +239,7 @@ public class LogoutActivity extends BaseFragment {
                     TextSettingsCell view = (TextSettingsCell) holder.itemView;
                     if (position == logoutRow) {
                         view.setTextColor(Theme.getColor(Theme.key_text_RedRegular));
-                        view.setText(LocaleController.getString("LogOutTitle", R.string.LogOutTitle), false);
+                        view.setText(isDeleteAccountActivity ? LocaleController.getString("DeleteAccount", R.string.DeleteAccount) : LocaleController.getString("LogOutTitle", R.string.LogOutTitle), false);
                     }
                     break;
                 }
@@ -330,5 +342,9 @@ public class LogoutActivity extends BaseFragment {
         themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{TextDetailSettingsCell.class}, new String[]{"imageView"}, null, null, null, Theme.key_windowBackgroundWhiteGrayIcon));
 
         return themeDescriptions;
+    }
+
+    public interface LogoutInterface {
+        void onDeleteAccountButtonClick();
     }
 }

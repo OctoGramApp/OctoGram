@@ -57,6 +57,8 @@ import org.telegram.ui.ChatBackgroundDrawable;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import it.octogram.android.OctoConfig;
+
 public class SizeNotifierFrameLayout extends FrameLayout {
 
     public boolean DRAW_USING_RENDERNODE() {
@@ -537,7 +539,7 @@ public class SizeNotifierFrameLayout extends FrameLayout {
     }
 
     private void checkSnowflake(Canvas canvas) {
-        if (backgroundView != null && Theme.canStartHolidayAnimation() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BACKGROUND)) {
+        if (backgroundView != null && (Theme.canStartHolidayAnimation() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BACKGROUND)) || OctoConfig.INSTANCE.showSnowflakes.getValue()) {
             if (snowflakesEffect == null) {
                 snowflakesEffect = new SnowflakesEffect(1);
             }
@@ -583,6 +585,9 @@ public class SizeNotifierFrameLayout extends FrameLayout {
         }
 
         int blurAlpha = Color.alpha(Theme.getColor(Theme.key_chat_BlurAlphaSlow));
+        if (OctoConfig.INSTANCE.forceChatBlurEffect.getValue()) {
+            blurAlpha = OctoConfig.INSTANCE.blurEffectStrength.getValue();
+        }
         if (blurAlpha == 255) {
             return;
         }
@@ -915,6 +920,9 @@ public class SizeNotifierFrameLayout extends FrameLayout {
 
     public void drawBlurRect(Canvas canvas, float y, Rect rectTmp, Paint blurScrimPaint, boolean top) {
         int blurAlpha = Color.alpha(Theme.getColor(DRAW_USING_RENDERNODE() && SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_HIGH ? Theme.key_chat_BlurAlpha : Theme.key_chat_BlurAlphaSlow));
+        if (OctoConfig.INSTANCE.forceChatBlurEffect.getValue()) {
+            blurAlpha = OctoConfig.INSTANCE.blurEffectStrength.getValue();
+        }
         if (!SharedConfig.chatBlurEnabled()) {
             canvas.drawRect(rectTmp, blurScrimPaint);
             return;

@@ -2,15 +2,61 @@
 buildscript {
     repositories {
         mavenCentral()
-        google()
-        maven { url 'https://developer.huawei.com/repo/' }
+        //maven { url 'https://developer.huawei.com/repo/' }
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.3'
-        classpath 'com.google.gms:google-services:4.3.10'
-        classpath 'com.huawei.agconnect:agcp:1.6.0.300'
+    /*dependencies {
+        classpath group: 'com.huawei.agconnect', name: 'agcp', version: '1.6.0.300'
+    }*/
+}
+
+plugins {
+    id 'com.android.application' version '8.4.1' apply false
+    id 'com.google.gms.google-services' version '4.4.1' apply false
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin' version '2.0.1' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+}
+
+subprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin('com.android.library') ||
+                plugins.hasPlugin('com.android.application')) {
+            android {
+                compileSdkVersion 34
+                buildToolsVersion '34.0.0'
+                ndkVersion '23.2.8568313'
+
+                lint {
+                    checkReleaseBuilds false
+                    disable 'MissingTranslation', 'ExtraTranslation', 'BlockedPrivateApi'
+                }
+
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+
+                    coreLibraryDesugaringEnabled true
+                }
+
+                defaultConfig {
+                    minSdkVersion 21
+                    //noinspection OldTargetApi
+                    targetSdkVersion 33
+                }
+
+                buildTypes {
+                    play {
+                        initWith release
+                    }
+                }
+            }
+
+            dependencies {
+                coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+            }
+        }
     }
 }
-repositories {
-    google()
+
+tasks.register('clean', Delete) {
+    delete layout.buildDirectory.get()
 }

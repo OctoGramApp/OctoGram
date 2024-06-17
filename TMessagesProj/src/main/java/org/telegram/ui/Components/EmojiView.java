@@ -144,6 +144,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import it.octogram.android.DefaultEmojiButtonAction;
+import it.octogram.android.OctoConfig;
+
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     private final static int TAB_EMOJI = 0;
@@ -1729,7 +1732,8 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             }
         });
 
-        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, true, needAnimatedEmoji, 0, fragment != null ? () -> {
+        allowAnimatedEmoji = !OctoConfig.INSTANCE.hideCustomEmojis.getValue();
+        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, allowAnimatedEmoji, needAnimatedEmoji, 0, fragment != null ? () -> {
             if (delegate != null) {
                 delegate.onEmojiSettingsClick(emojiAdapter.frozenEmojiPacks);
             }
@@ -2715,6 +2719,12 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             }
         });
         currentPage = MessagesController.getGlobalEmojiSettings().getInt("selected_page", 0);
+
+        int currentSelectedDefaultPage = OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue();
+        if (currentSelectedDefaultPage != DefaultEmojiButtonAction.DEFAULT.getValue()) {
+            currentPage = currentSelectedDefaultPage - 1;
+            MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", currentPage).commit();
+        }
 
         Emoji.loadRecentEmoji();
         emojiAdapter.notifyDataSetChanged();
@@ -3899,7 +3909,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         private Paint dividerPaint;
         @Override
         protected void onDraw(Canvas canvas) {
-            if (divider) {
+            if (divider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 if (dividerPaint == null) {
                     dividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                     dividerPaint.setStrokeWidth(1);
@@ -5116,8 +5126,13 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             newPage = 0;
         }
         if (currentPage != newPage) {
-            currentPage = newPage;
-            MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", newPage).commit();
+            //currentPage = newPage;
+            //MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", newPage).commit();
+
+            if (OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue() == DefaultEmojiButtonAction.DEFAULT.getValue()) {
+                currentPage = newPage;
+                MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", newPage).commit();
+            }
         }
     }
 

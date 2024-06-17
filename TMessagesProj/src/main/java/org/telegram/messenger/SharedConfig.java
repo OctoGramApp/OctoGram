@@ -27,6 +27,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.pm.ShortcutManagerCompat;
 
+import it.octogram.android.OctoConfig;
 import org.json.JSONObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
@@ -780,12 +781,12 @@ public class SharedConfig {
         if (versionCode == 0) {
             versionCode = buildVersion();
         }
-        if (updateVersionString == null) {
+        /*if (updateVersionString == null) {
             updateVersionString = BuildVars.BUILD_VERSION_STRING;
         }
         if (update.version == null || versionBiggerOrEqual(updateVersionString, update.version)) {
             return false;
-        }
+        }*/
         pendingAppUpdate = update;
         pendingAppUpdateBuildVersion = versionCode;
         saveConfig();
@@ -1678,7 +1679,7 @@ public class SharedConfig {
     }
 
     public static boolean chatBlurEnabled() {
-        return canBlurChat() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BLUR);
+        return (canBlurChat() && LiteMode.isEnabled(LiteMode.FLAG_CHAT_BLUR)) || OctoConfig.INSTANCE.forceChatBlurEffect.getValue();
     }
 
     public static class BackgroundActivityPrefs {
@@ -1757,7 +1758,7 @@ public class SharedConfig {
     public static void toggleUseCamera2(int currentAccount) {
         ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE)
                 .edit()
-                .putBoolean("useCamera2", useCamera2Force = !isUsingCamera2(currentAccount))
+                .putBoolean("useCamera2Force", useCamera2Force = !isUsingCamera2(currentAccount))
                 .apply();
     }
 
