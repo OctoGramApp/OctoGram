@@ -109,6 +109,7 @@
 -keepclassmembernames,allowshrinking class org.telegram.ui.Cells.* { <fields>; }
 -keepclassmembernames,allowshrinking class org.telegram.ui.Components.* { <fields>; }
 -keep class org.telegram.ui.Components.RLottieDrawable$LottieMetadata { <fields>; }
+-keep class org.telegram.ui.Stars.* { public <init>(...); }
 
 # Retain generic signatures of TypeToken and its subclasses with R8 version 3.0 and higher.
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken

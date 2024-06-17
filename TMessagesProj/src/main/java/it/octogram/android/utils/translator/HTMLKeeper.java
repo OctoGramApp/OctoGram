@@ -17,6 +17,8 @@ import android.text.util.Linkify;
 import androidx.core.text.HtmlCompat;
 import androidx.core.util.Pair;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MediaDataController;
@@ -77,6 +79,7 @@ public class HTMLKeeper {
             }
         }
         String html_result = Html.toHtml(messSpan);
+        Log.e("html_res", html_result);
         html_result = html_result.replace("<p dir=\"ltr\">", "");
         html_result = html_result.replace("<p dir=\"rtl\">", "");
         html_result = html_result.replace("</p>", "");
