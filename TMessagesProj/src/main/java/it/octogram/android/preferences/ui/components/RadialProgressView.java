@@ -27,6 +27,7 @@ public class RadialProgressView extends FrameLayout {
     private final BlobDrawable tinyWaveDrawable;
     private boolean isInitiated = false;
     private int colorKey1, colorKey2;
+    private boolean drawRadialBackShadow = true;
 
     public RadialProgressView(Context context, int colorKey1) {
         super(context);
@@ -42,6 +43,10 @@ public class RadialProgressView extends FrameLayout {
     public void setColor(int colorKey1) {
         this.colorKey1 = colorKey1;
         this.colorKey2 = colorKey1;
+    }
+
+    public void setDrawRadialBackShadow(boolean drawRadialBackShadow) {
+        this.drawRadialBackShadow = drawRadialBackShadow;
     }
 
     @Override
@@ -76,7 +81,7 @@ public class RadialProgressView extends FrameLayout {
             int w = Math.round((getMeasuredWidth() * 75f) / 100f);
             paint.setShader(new RadialGradient(w, w, w, new int[]{colorKey1, colorKey2}, null, Shader.TileMode.CLAMP));
             paint.setAlpha(76);
-            if (i == 1) {
+            if (i == 1 && drawRadialBackShadow) {
                 canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), getRadialPaint());
                 canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), getRadialPaint());
             }

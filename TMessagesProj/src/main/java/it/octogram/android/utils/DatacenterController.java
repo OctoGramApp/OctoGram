@@ -47,8 +47,10 @@ public class DatacenterController {
                                 var dcInfo = listDatacenters.getJSONObject(i);
                                 var dcID = dcInfo.getInt("dc_id");
                                 var status = dcInfo.getInt("dc_status");
+                                var lastDown = dcInfo.getInt("last_down");
+                                var lastLag = dcInfo.getInt("last_lag");
                                 var ping = StandardHTTPRequest.ping(Datacenter.getDcInfo(dcInfo.getInt("dc_id")).ip);  //dcInfo.getInt("ping");
-                                infoArrayList.add(new DCStatus(dcID, status, ping));
+                                infoArrayList.add(new DCStatus(dcID, status, ping, lastDown, lastLag));
                                 SystemClock.sleep(25);
                             }
                             if (updateCallback != null) {
@@ -90,12 +92,14 @@ public class DatacenterController {
     }
 
     public static class DCStatus {
-        public final int dcID, status, ping;
+        public final int dcID, status, ping, lastDown, lastLag;
 
-        DCStatus(int dcID, int status, int ping) {
+        DCStatus(int dcID, int status, int ping, int lastDown, int lastLag) {
             this.dcID = dcID;
             this.status = status;
             this.ping = ping;
+            this.lastDown = lastDown;
+            this.lastLag = lastLag;
         }
     }
 }

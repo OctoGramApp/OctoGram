@@ -305,6 +305,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             @Override
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 firstTranslation = false;
+
                 CharSequence translated = SpannableStringBuilder.valueOf(finalText.text);
                 MessageObject.addEntitiesToText(translated, finalText.entities, false, true, false, false);
                 translated = preprocessText(translated);
@@ -1230,6 +1231,10 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
 
     public static String getToLanguage() {
         return MessagesController.getGlobalMainSettings().getString("translate_to_language", LocaleController.getInstance().getCurrentLocale().getLanguage());
+    }
+
+    public static boolean isDestinationFollowApp() {
+        return MessagesController.getGlobalMainSettings().getString("translate_to_language", null) == null;
     }
 
     public static void setToLanguage(String toLang) {

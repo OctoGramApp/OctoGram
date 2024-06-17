@@ -15,13 +15,12 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.widget.LinearLayout;
 
-import org.telegram.messenger.AndroidUtilities;
+import org.apache.commons.lang3.NotImplementedException;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.RadioColorCell;
-import org.telegram.ui.Components.LayoutHelper;
 
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class PopupChoiceDialogUtils {
                 if (option.itemDescription != null) {
                     // as soon as it will be needed
                     // create a custom AlertDialogCell instance and integrate text2
-                    throw new UnsupportedOperationException();
+                    throw new NotImplementedException();
                 }
 
                 AlertDialog.AlertDialogCell cell = new AlertDialog.AlertDialogCell(parentActivity.getBaseContext(), null);
@@ -89,7 +88,6 @@ public class PopupChoiceDialogUtils {
         }
 
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
-        builder.show();
         return builder.create();
     }
 

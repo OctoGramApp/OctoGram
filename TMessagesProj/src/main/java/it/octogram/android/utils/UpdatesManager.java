@@ -15,7 +15,6 @@ import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

@@ -10,7 +10,6 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 import android.os.Parcelable;
-import android.util.Pair;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -98,7 +97,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 })
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new DrawerElementsSettingsUI())))
-                        .icon(R.drawable.msg_message)
+                        .icon(R.drawable.msg_new_filter)
                         .title(LocaleController.getString("DrawerElements", R.string.DrawerElements))
                         .description(LocaleController.getString("DrawerElements_Desc", R.string.DrawerElements_Desc))
                         .build())

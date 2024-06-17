@@ -8272,22 +8272,6 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, BaseFragment fragment, int offset, boolean force) {
-        if (!force && OctoConfig.INSTANCE.warningBeforeDeletingChatHistory.getValue()) {
-            AlertDialog alertDialog = new AlertDialog.Builder(fragment.getParentActivity(), fragment.getResourceProvider())
-                    .setTitle(LocaleController.getString(R.string.Warning))
-                    .setMessage(LocaleController.getString(R.string.AreYouSureDeleteXMessages))
-                    .setPositiveButton(LocaleController.getString(R.string.Delete), (dialogInterface, i) -> {
-                        deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, offset, true);
-                    })
-                    .setNegativeButton(LocaleController.getString(R.string.Cancel), null).create();
-            TextView button = (TextView) alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            if (button != null) {
-                button.setTextColor(Theme.getColor(Theme.key_text_RedBold));
-            }
-            fragment.showDialog(alertDialog);
-            return;
-        }
-
         long fromId = 0;
         if (fromUser != null) {
             fromId = fromUser.id;

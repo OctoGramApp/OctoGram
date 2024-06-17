@@ -3304,6 +3304,7 @@ public class MessageObject {
             (translateController.isManualTranslated(this) || (translateController.isTranslatingDialog(getDialogId()) && TranslateController.isTranslatable(this))) &&
             messageOwner != null &&
             messageOwner.translatedText != null &&
+            messageOwner.translatedProviderId == OctoConfig.INSTANCE.translatorProvider.getValue() &&
             TextUtils.equals(translateController.isManualTranslated(this) ? TranslateAlert2.getToLanguage() : translateController.getDialogTranslateTo(getDialogId()), messageOwner.translatedToLanguage)
         ) {
             if (translated) {

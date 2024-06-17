@@ -9,9 +9,7 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.util.Pair;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
@@ -28,7 +26,6 @@ import org.telegram.ui.RestrictedLanguagesSelectActivity;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
@@ -125,7 +122,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             .build()
                     );
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new DestinationlanguageSettings()))
+                            .onClick(() -> fragment.presentFragment(new DestinationLanguageSettings()))
                             .value(getTranslateDestinationStatus())
                             .showIf(canSelectDoNotTranslate)
                             .title(LocaleController.getString("TranslatorDestination", R.string.TranslatorDestination))
@@ -152,7 +149,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                                 }
 
                                 updateItemsVisibility();
-                                checkProviderAvailability(fragment, context);
+                                checkProviderAvailability(context);
 
                                 if (needEntireChatReload) {
                                     fragment.getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
@@ -242,7 +239,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
         }
 
         if (except != canSelectKeepMarkdown) {
-            canSelectKeepMarkdown.setValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue() && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.YANDEX.getValue());
+            canSelectKeepMarkdown.setValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue());
         }
     }
 
@@ -297,47 +294,25 @@ public class OctoTranslatorUI implements PreferencesEntry {
         alertDialog.show();
     }
 
-    private void checkProviderAvailability(PreferencesFragment fragment, Context context) {
-        String finalPopupText = "";
+    private void checkProviderAvailability(Context context) {
+        int dialogsWithUnavailableLanguage = 0;
+        for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
+            if (UserConfig.getInstance(a).isClientActivated()) {
+                TranslateController currentTranslateController = MessagesController.getInstance(a).getTranslateController();
+                int dialogsBrokenCurrentAccount = currentTranslateController.getDialogsWithUnavailableLanguage();
 
-        String currentTranslateToDefault = TranslateAlert2.getToLanguage();
-        if (currentTranslateToDefault != null && TranslationsWrapper.isLanguageUnavailable(currentTranslateToDefault)) {
-            TranslateAlert2.resetToLanguage();
-        }
-
-        Locale currentLocale = LocaleController.getInstance().getCurrentLocale();
-        if (TranslationsWrapper.isLanguageUnavailable(currentLocale.getLanguage())) {
-            AndroidUtilities.runOnUIThread(() -> {
-                OctoConfig.INSTANCE.translatorProvider.updateValue(TranslatorProvider.DEFAULT.getValue());
-                fragment.getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
-            });
-            finalPopupText = LocaleController.formatString("TranslatorProviderUnsupported", R.string.TranslatorProviderUnsupported, currentLocale.getDisplayName());
-        }
-
-        if (finalPopupText.isEmpty()) {
-            int dialogsWithUnavailableLanguage = 0;
-            for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
-                if (UserConfig.getInstance(a).isClientActivated()) {
-                    TranslateController currentTranslateController = MessagesController.getInstance(a).getTranslateController();
-                    int dialogsBrokenCurrentAccount = currentTranslateController.getDialogsWithUnavailableLanguage();
-
-                    if (dialogsBrokenCurrentAccount > 0) {
-                        dialogsWithUnavailableLanguage += dialogsBrokenCurrentAccount;
-                        currentTranslateController.fixChatsWithUnavailableLanguage();
-                    }
+                if (dialogsBrokenCurrentAccount > 0) {
+                    dialogsWithUnavailableLanguage += dialogsBrokenCurrentAccount;
+                    currentTranslateController.fixChatsWithUnavailableLanguage();
                 }
             }
-
-            if (dialogsWithUnavailableLanguage > 0) {
-                finalPopupText = LocaleController.getString("TranslatorProviderUnsupportedDialogs", R.string.TranslatorProviderUnsupportedDialogs);
-            }
         }
 
-        if (!finalPopupText.isEmpty()) {
+        if (dialogsWithUnavailableLanguage > 0) {
             AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
             warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
             warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
-            warningBuilder.setMessage(finalPopupText);
+            warningBuilder.setMessage(LocaleController.getString("TranslatorProviderUnsupportedDialogs", R.string.TranslatorProviderUnsupportedDialogs));
             AlertDialog alertDialog = warningBuilder.create();
             alertDialog.show();
         }

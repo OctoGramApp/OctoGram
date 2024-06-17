@@ -8847,7 +8847,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         ActionBarMenuSubItem archiveItem = new ActionBarMenuSubItem(getParentActivity(), false, true);
-        archiveItem.setSelectorColor(Theme.multAlpha(getThemedColor(Theme.key_text_RedBold), .12f));
         if (isArchive()) {
             canUnarchiveCount++;
             archiveItem.setTextAndIcon(LocaleController.getString("Unarchive", R.string.Unarchive), R.drawable.msg_unarchive);

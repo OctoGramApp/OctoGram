@@ -161,20 +161,22 @@ public class LiteMode {
         if (lastPowerSaverModeChecked == -1 || (time = System.currentTimeMillis()) - lastPowerSaverModeChecked > 1000 * 12) {
             boolean checkedViaAlternativeWay = false;
 
-            try {
-                if (AndroidUtilities.isHonor()) {
-                    int value = android.provider.Settings.System.getInt(LaunchActivity.instance.getContentResolver(), "SmartModeStatus");
-                    lastPowerSaverModeCached = value == 4;
-                    lastPowerSaverModeChecked = time;
-                    checkedViaAlternativeWay = true;
-                } else if (XiaomiUtilities.isMIUI()) {
-                    int value = android.provider.Settings.System.getInt(LaunchActivity.instance.getContentResolver(), "POWER_SAVE_MODE_OPEN");
-                    lastPowerSaverModeCached = value == 1;
-                    lastPowerSaverModeChecked = time;
-                    checkedViaAlternativeWay = true;
+            if (LaunchActivity.instance != null) {
+                try {
+                    if (AndroidUtilities.isHonor()) {
+                        int value = android.provider.Settings.System.getInt(LaunchActivity.instance.getContentResolver(), "SmartModeStatus");
+                        lastPowerSaverModeCached = value == 4;
+                        lastPowerSaverModeChecked = time;
+                        checkedViaAlternativeWay = true;
+                    } else if (XiaomiUtilities.isMIUI()) {
+                        int value = android.provider.Settings.System.getInt(LaunchActivity.instance.getContentResolver(), "POWER_SAVE_MODE_OPEN");
+                        lastPowerSaverModeCached = value == 1;
+                        lastPowerSaverModeChecked = time;
+                        checkedViaAlternativeWay = true;
+                    }
+                } catch(Settings.SettingNotFoundException e){
+                    FileLog.e(e);
                 }
-            } catch (Settings.SettingNotFoundException e) {
-                FileLog.e(e);
             }
 
             if (!checkedViaAlternativeWay) {

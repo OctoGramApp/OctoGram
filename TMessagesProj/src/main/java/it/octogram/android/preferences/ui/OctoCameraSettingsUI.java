@@ -9,12 +9,10 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.util.Pair;
 
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import it.octogram.android.CameraXResolution;

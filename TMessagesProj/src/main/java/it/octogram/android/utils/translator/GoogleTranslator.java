@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.Components.TranslateAlert2;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -59,8 +60,12 @@ public class GoogleTranslator {
             @Override
             public void run() {
                 try {
+                    TLRPC.TL_textWithEntities originalText = new TLRPC.TL_textWithEntities();
+                    originalText.text = text;
+                    originalText.entities = entities;
+
                     StringBuilder finalString = new StringBuilder();
-                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, true);
+                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
                     ArrayList<String> parts = OctoUtils.getStringParts(text2, 2500);
 
                     for (String part : parts) {
@@ -79,9 +84,10 @@ public class GoogleTranslator {
 
                     TLRPC.TL_textWithEntities finalText = new TLRPC.TL_textWithEntities();
                     if (entities != null) {
-                        Pair<String, ArrayList<TLRPC.MessageEntity>> text3 = HTMLKeeper.htmlToEntities(finalString.toString(), entities, true, true);
+                        Pair<String, ArrayList<TLRPC.MessageEntity>> text3 = HTMLKeeper.htmlToEntities(finalString.toString(), entities, false);
                         finalText.text = text3.first;
                         finalText.entities = text3.second;
+                        finalText = TranslateAlert2.preprocess(originalText, finalText);
                     } else {
                         finalText.text = finalString.toString();
                     }

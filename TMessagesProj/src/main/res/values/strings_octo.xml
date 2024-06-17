@@ -64,7 +64,7 @@
     <string name="TranslatorKeepMarkdown">Keep formatting</string>
     <string name="TranslateEntireChatDescription">You can choose to show the button to translate an entire chat. </string>
     <string name="TranslatorInMessageBadge">translated</string>
-    <string name="TranslatorFailed">Translation language.</string>
+    <string name="TranslatorFailed">Translation failed.</string>
     <string name="TranslatorUnsupportedLanguage">Selected language isn\'t supported by the selected provider.</string>
     <string name="TranslatorUnsupportedLanguageChange">Edit provider</string>
     <string name="TranslatorUnsupportedLanguageChangeDone">Provider has been updated successfully.</string>
@@ -442,6 +442,7 @@
     <string name="AccountProtectionHint2">When an account is protected with a passcode, it will be hidden from the side menu.</string>
 
     <string name="AreYouSureDeleteXMessages">Are you sure you want to delete the chat history for this user?</string>
+    <string name="AreYouSureDeleteXMessagesMultiple">Are you sure you want to delete the chat history for %d users?</string>
 
     <!-- Sticker Size Preview -->
     <string name="StickersSizeHeader">Sticker Size</string>
@@ -466,6 +467,10 @@
     <string name="DatacenterStatus_Desc">View datacenter info</string>
     <string name="DatacenterStatusSection_Desc">Check the Telegram\'s <![CDATA[<a href="https://core.telegram.org/api/datacenter">Datacenter</a>]]> Status in realtime.</string>
     <string name="WebVersion">Open Web Version</string>
+    <string name="DatacenterStatusSheetPing">Ping</string>
+    <string name="DatacenterStatusSheetIP">IP Address</string>
+    <string name="DatacenterStatusSheetLastLag">Last lag time</string>
+    <string name="DatacenterStatusSheetLastDowntime">Last down time</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

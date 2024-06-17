@@ -36,6 +36,7 @@ import org.telegram.ui.Components.Switch;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.CustomDeviceNameBottomSheet;
+import it.octogram.android.utils.SessionIconUtils;
 
 public class SessionBottomSheet extends BottomSheet {
 
@@ -328,7 +329,7 @@ public class SessionBottomSheet extends BottomSheet {
     }
 
     private void setAnimation(TLRPC.TL_authorization session, RLottieImageView imageView) {
-        String platform = session.platform.toLowerCase();
+        /*String platform = session.platform.toLowerCase();
         if (platform.isEmpty()) {
             platform = session.system_version.toLowerCase();
         }
@@ -392,14 +393,23 @@ public class SessionBottomSheet extends BottomSheet {
                 colorKey2 = Theme.key_avatar_background2Pink;
             }
         }
+        */
+        SessionIconUtils sessionType = new SessionIconUtils();
+        SessionIconUtils.DeviceAttributes drawableInfo = sessionType.setDeviceAttributes(session);
 
-        imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey)));
+        int iconId = drawableInfo.getIconId();
+        int colorKey = drawableInfo.getColorKey();
+        int animatedIcon = drawableInfo.getAnimatedIcon();
+        int customColor = drawableInfo.getCustomColor();
+
+        imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), colorKey == -1 ? customColor : Theme.getColor(colorKey)
+        ));
 //        imageView.setBackground(new SessionCell.CircleGradientDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey), Theme.getColor(colorKey2)));
-        if (animation) {
+        if (animatedIcon != -1) {
             int[] colors = new int[]{0x000000, Theme.getColor(colorKey)};
-            imageView.setAnimation(iconId, 50, 50, colors);
+            imageView.setAnimation(animatedIcon, 50, 50, colors);
         } else {
-            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId));
+            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId == R.drawable.baseline_octo_24 ? R.drawable.device_octogram : iconId));
         }
     }
 

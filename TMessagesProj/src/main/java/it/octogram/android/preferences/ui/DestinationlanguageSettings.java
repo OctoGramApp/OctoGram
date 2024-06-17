@@ -37,7 +37,7 @@ import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
 
-public class DestinationlanguageSettings extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
+public class DestinationLanguageSettings extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ListAdapter listAdapter;
     private RecyclerListView listView;
@@ -49,6 +49,7 @@ public class DestinationlanguageSettings extends BaseFragment implements Notific
     private ArrayList<TranslateController.Language> allLanguages;
 
     private String firstSelectedLanguage;
+    private OnSelectedDestinationCallback callback;
 
     @Override
     public boolean onFragmentCreate() {
@@ -143,13 +144,19 @@ public class DestinationlanguageSettings extends BaseFragment implements Notific
                 }
             }
             if (language != null && language.code != null) {
-                if (language.code.equals("app")) {
-                    TranslateAlert2.resetToLanguage();
-                } else {
-                    TranslateAlert2.setToLanguage(language.code);
-                }
+                if (callback == null) {
+                    if (language.code.equals("app")) {
+                        TranslateAlert2.resetToLanguage();
+                    } else {
+                        TranslateAlert2.setToLanguage(language.code);
+                    }
 
-                getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+                    getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+                } else {
+                    if (!language.code.equals("app")) {
+                        callback.onSelected(language.code);
+                    }
+                }
                 finishFragment();
             }
         });
@@ -174,6 +181,10 @@ public class DestinationlanguageSettings extends BaseFragment implements Notific
                 listAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    public void setCallback(OnSelectedDestinationCallback callback) {
+        this.callback = callback;
     }
 
     private void fillLanguages() {
@@ -209,8 +220,10 @@ public class DestinationlanguageSettings extends BaseFragment implements Notific
             allLanguages.add(0, currentLanguage);
             separatorRow++;
         }
-        allLanguages.add(0, followAppL);
-        separatorRow++;
+        if (callback == null) {
+            allLanguages.add(0, followAppL);
+            separatorRow++;
+        }
     }
 
     @Override
@@ -326,7 +339,11 @@ public class DestinationlanguageSettings extends BaseFragment implements Notific
                     if (language.code.equals("app")) {
                         textSettingsCell.setTextAndCheck(ownDisplayName, firstSelectedLanguage == null, !OctoConfig.INSTANCE.disableDividers.getValue());
                     } else {
-                        textSettingsCell.setTextAndValueAndCheck(ownDisplayName, language.displayName, firstSelectedLanguage != null && firstSelectedLanguage.equals(language.code), false, !OctoConfig.INSTANCE.disableDividers.getValue());
+                        boolean isChecked = firstSelectedLanguage != null && firstSelectedLanguage.equals(language.code);
+                        if (!isChecked && firstSelectedLanguage == null && callback != null) {
+                            isChecked = language.code.equals(LocaleController.getInstance().getCurrentLocaleInfo().pluralLangCode);
+                        }
+                        textSettingsCell.setTextAndValueAndCheck(ownDisplayName, language.displayName, isChecked, false, !OctoConfig.INSTANCE.disableDividers.getValue());
                     }
                     break;
                 }
@@ -381,5 +398,9 @@ public class DestinationlanguageSettings extends BaseFragment implements Notific
         themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{LanguageCell.class}, new String[]{"checkImage"}, null, null, null, Theme.key_featuredStickers_addedIcon));
 
         return themeDescriptions;
+    }
+
+    public interface OnSelectedDestinationCallback {
+        void onSelected(String toLanguage);
     }
 }

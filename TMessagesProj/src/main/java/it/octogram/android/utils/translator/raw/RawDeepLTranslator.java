@@ -11,8 +11,8 @@ import org.telegram.messenger.FileLog;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PushbackInputStream;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;

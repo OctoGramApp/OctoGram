@@ -2771,7 +2771,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         default void onReleasePlayerBeforeClose(int currentIndex) {};
     }
 
-    private class FrameLayoutDrawer extends SizeNotifierFrameLayoutPhoto {
+    public class FrameLayoutDrawer extends SizeNotifierFrameLayoutPhoto {
 
         private Paint paint = new Paint();
         private boolean ignoreLayout;
@@ -5423,7 +5423,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         menuItem.showSubItem(gallery_menu_hide_translation);
                     }, 32);
                     updateCaptionTranslated();
-                    MessagesController.getInstance(currentAccount).getTranslateController().translatePhoto(messageObject, PhotoViewer.this::updateCaptionTranslated);
+                    MessagesController.getInstance(currentAccount).getTranslateController().translatePhoto(messageObject, containerView, resourcesProvider, PhotoViewer.this::updateCaptionTranslated);
                 } else if (id == gallery_menu_hide_translation) {
                     captionTranslated = false;
                     AndroidUtilities.runOnUIThread(() -> {

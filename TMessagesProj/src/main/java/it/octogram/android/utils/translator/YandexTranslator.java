@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.Components.TranslateAlert2;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -40,7 +41,11 @@ public class YandexTranslator {
             @Override
             public void run() {
                 try {
-                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, true);
+                    TLRPC.TL_textWithEntities originalText = new TLRPC.TL_textWithEntities();
+                    originalText.text = text;
+                    originalText.entities = entities;
+
+                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
                     StandardHTTPRequest request = new StandardHTTPRequest(composeUrl());
                     request.header("User-Agent", userAgent);
                     request.header("Content-Type", contentType);
@@ -55,9 +60,10 @@ public class YandexTranslator {
 
                     TLRPC.TL_textWithEntities finalText = new TLRPC.TL_textWithEntities();
                     if (entities != null) {
-                        Pair<String, ArrayList<TLRPC.MessageEntity>> text3 = HTMLKeeper.htmlToEntities(composeResult(response), entities, true, true);
+                        Pair<String, ArrayList<TLRPC.MessageEntity>> text3 = HTMLKeeper.htmlToEntities(composeResult(response), entities, false);
                         finalText.text = text3.first;
                         finalText.entities = text3.second;
+                        finalText = TranslateAlert2.preprocess(originalText, finalText);
                     } else {
                         finalText.text = composeResult(response);
                     }
@@ -83,7 +89,6 @@ public class YandexTranslator {
 
     private static String composeData(String part, String toLanguage) {
         String data = "lang=" + toLanguage;
-
         try {
             data += "&text=" + URLEncoder.encode(part, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {

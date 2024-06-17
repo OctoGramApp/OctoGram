@@ -25,8 +25,11 @@ import androidx.annotation.StringRes;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.LanguageController;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.translator.TranslationsWrapper;
 
 import org.telegram.messenger.time.FastDateFormat;
+import org.telegram.ui.Components.TranslateAlert2;
+import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Stars.StarsController;
 import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.tgnet.ConnectionsManager;
@@ -1058,6 +1061,13 @@ public class LocaleController {
         if (force) {
             MediaDataController.getInstance(currentAccount).loadAttachMenuBots(false, true);
         }
+
+        if (TranslateAlert2.isDestinationFollowApp() && TranslationsWrapper.isLanguageUnavailable(currentLocale.getLanguage())) {
+            AndroidUtilities.runOnUIThread(() -> {
+                TranslationsWrapper.suggestProviderUpdate(LaunchActivity.instance, LaunchActivity.getSafeLastFragment(), null);
+            });
+        }
+
         return requestId;
     }
 

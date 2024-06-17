@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import it.octogram.android.MediaFilter;
-import it.octogram.android.StoreUtils;
 
 
 public class OctoUtils {

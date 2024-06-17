@@ -5,6 +5,7 @@ import androidx.core.util.Pair;
 import org.json.JSONException;
 import org.telegram.messenger.FileLog;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.Components.TranslateAlert2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,14 +27,19 @@ public class DeepLTranslator {
             @Override
             public void run() {
                 try {
-                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, true);
+                    TLRPC.TL_textWithEntities originalText = new TLRPC.TL_textWithEntities();
+                    originalText.text = text;
+                    originalText.entities = entities;
+
+                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
                     String result = rawInstance.executeTranslation(text2, "", toLanguage, getFormalityString(formality), "newlines");
 
                     TLRPC.TL_textWithEntities finalText = new TLRPC.TL_textWithEntities();
                     if (entities != null) {
-                        Pair<String, ArrayList<TLRPC.MessageEntity>> text3 = HTMLKeeper.htmlToEntities(result, entities, true, true);
+                        Pair<String, ArrayList<TLRPC.MessageEntity>> text3 = HTMLKeeper.htmlToEntities(result, entities, false);
                         finalText.text = text3.first;
                         finalText.entities = text3.second;
+                        finalText = TranslateAlert2.preprocess(originalText, finalText);
                     } else {
                         finalText.text = result;
                     }

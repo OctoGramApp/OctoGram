@@ -26,6 +26,8 @@ import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 
+import it.octogram.android.Datacenter;
+import it.octogram.android.preferences.ui.custom.DatacenterBottomSheet;
 import it.octogram.android.preferences.ui.custom.DatacenterStatus;
 import it.octogram.android.utils.DatacenterController;
 
@@ -90,6 +92,10 @@ public class DatacenterActivity extends BaseFragment {
         if (listView.getItemAnimator() != null) {
             ((DefaultItemAnimator) listView.getItemAnimator()).setDelayAnimations(false);
         }
+        listView.setOnItemClickListener((view, position) -> {
+            int dcID = (position - datacenterStart) + 1;
+            openSingleBottomSheet(dcID);
+        });
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         datacenterStatusChecker = new DatacenterController.DatacenterStatusChecker();
         datacenterStatusChecker.setOnUpdate(result -> {
@@ -124,6 +130,25 @@ public class DatacenterActivity extends BaseFragment {
         if (listAdapter != null && notify) {
             listAdapter.notifyDataSetChanged();
         }
+    }
+
+    private void openSingleBottomSheet(int dcID) {
+        if (datacenterList == null) {
+            return;
+        }
+
+        Datacenter dcInfo = Datacenter.getDcInfo(dcID);
+        if (dcInfo == null) {
+            return;
+        }
+
+        DatacenterController.DCStatus datacenterInfo = datacenterList.getByDc(dcID);
+        if (datacenterInfo == null) {
+            return;
+        }
+
+        var bottomSheet = new DatacenterBottomSheet(this, dcInfo, datacenterInfo);
+        bottomSheet.show();
     }
 
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
