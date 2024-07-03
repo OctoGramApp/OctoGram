@@ -4693,6 +4693,7 @@ public class Theme {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // MONET LIGHT
             themeInfo = new ThemeInfo();
+            themeInfo.isDark = ThemeInfo.LIGHT;
             themeInfo.name = "Monet Light";
             themeInfo.assetName = "monet_light.attheme";
             themeInfo.previewBackgroundColor = MonetThemeController.getColor("n1_50");
@@ -4704,6 +4705,7 @@ public class Theme {
 
             // MONET DARK
             themeInfo = new ThemeInfo();
+            themeInfo.isDark = ThemeInfo.DARK;
             themeInfo.name = "Monet Dark";
             themeInfo.assetName = "monet_dark.attheme";
             themeInfo.previewBackgroundColor = MonetThemeController.getColor("n1_900");
@@ -4715,6 +4717,7 @@ public class Theme {
 
             // MONET AMOLED
             themeInfo = new ThemeInfo();
+            themeInfo.isDark = ThemeInfo.DARK;
             themeInfo.name = "Monet Amoled";
             themeInfo.assetName = "monet_amoled.attheme";
             themeInfo.previewBackgroundColor = MonetThemeController.getColor("n1_1000");

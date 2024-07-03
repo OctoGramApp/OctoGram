@@ -80,7 +80,7 @@ public class TranslateController extends BaseController {
     }
 
     public boolean isFeatureAvailable() {
-        return isChatTranslateEnabled();// && UserConfig.getInstance(currentAccount).isPremium();
+        return isChatTranslateEnabled() && (UserConfig.getInstance(currentAccount).isPremium() || OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEFAULT.getValue());
     }
 
     private Boolean chatTranslateEnabled;

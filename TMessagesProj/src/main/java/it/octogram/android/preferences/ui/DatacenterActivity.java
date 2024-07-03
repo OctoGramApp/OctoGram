@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,6 +39,7 @@ public class DatacenterActivity extends BaseFragment {
     private int headerDcListRow;
     private int datacenterStart;
     private ListAdapter listAdapter;
+    private RecyclerListView listView;
     private DatacenterController.DatacenterStatusChecker datacenterStatusChecker;
     private DatacenterController.DCInfo datacenterList;
 
@@ -85,7 +87,7 @@ public class DatacenterActivity extends BaseFragment {
         fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
         FrameLayout frameLayout = (FrameLayout) fragmentView;
 
-        RecyclerListView listView = new RecyclerListView(context);
+        listView = new RecyclerListView(context);
         listView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         listView.setVerticalScrollBarEnabled(false);
         listView.setAdapter(listAdapter);
@@ -137,10 +139,7 @@ public class DatacenterActivity extends BaseFragment {
             return;
         }
 
-        Datacenter dcInfo = Datacenter.getDcInfo(dcID);
-        if (dcInfo == null) {
-            return;
-        }
+        Datacenter dcInfo = Datacenter.Companion.getDcInfo(dcID);
 
         DatacenterController.DCStatus datacenterInfo = datacenterList.getByDc(dcID);
         if (datacenterInfo == null) {
@@ -232,6 +231,97 @@ public class DatacenterActivity extends BaseFragment {
                 return 4;
             }
             return 1;
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        @Override
+        public void notifyDataSetChanged() {
+            if (listView.isComputingLayout()) {
+                listView.post(this::notifyDataSetChanged);
+                return;
+            }
+            super.notifyDataSetChanged();
+        }
+
+        @Override
+        public void notifyItemChanged(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemChanged(position));
+                return;
+            }
+            super.notifyItemChanged(position);
+        }
+
+        @Override
+        public void notifyItemChanged(int position, @Nullable Object payload) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemChanged(position, payload));
+                return;
+            }
+            super.notifyItemChanged(position, payload);
+        }
+
+        @Override
+        public void notifyItemRangeChanged(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeChanged(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeChanged(positionStart, itemCount, payload));
+                return;
+            }
+            super.notifyItemRangeChanged(positionStart, itemCount, payload);
+        }
+
+        @Override
+        public void notifyItemInserted(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemInserted(position));
+                return;
+            }
+            super.notifyItemInserted(position);
+        }
+
+        @Override
+        public void notifyItemMoved(int fromPosition, int toPosition) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemMoved(fromPosition, toPosition));
+                return;
+            }
+            super.notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void notifyItemRangeInserted(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeInserted(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRangeRemoved(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeRemoved(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRemoved(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRemoved(position));
+                return;
+            }
+            super.notifyItemRemoved(position);
         }
     }
 }

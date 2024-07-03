@@ -18,6 +18,9 @@ import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -82,20 +85,22 @@ public class ThemeDrawer extends FrameLayout {
             };
             if (icons != null) {
                 for (int i = 0; i < icons.length; i++) {
-                    Drawable icon = getResources().getDrawable(icons[i]);
-                    int iconSize = Math.round(nav_width * 0.19f);
-                    int textSize = Math.round(iconSize * 0.6f);
-                    int yOffsetText = Math.round((iconSize - textSize) / 2.0f);
-                    int xOffset = Math.round(nav_width * 0.12f);
-                    int xEndOffset = Math.round(nav_width * 0.11f);
-                    int yOffset = (iconSize * i) + avatarHeight + Math.round(nav_width * 0.10f) * (i + 1);
-                    int radius = Math.round(iconSize / 2.0f);
-                    Rect rectParams = new Rect(xOffset, yOffset, xOffset + iconSize, yOffset + iconSize);
-                    icon.setBounds(rectParams);
-                    icon.setColorFilter(colorFilter);
-                    icon.draw(canvas);
-                    RectF roundRectParams = new RectF((xOffset * 2) + iconSize, yOffset + yOffsetText, Math.round((nav_width - xEndOffset) * text_widths[i]), yOffsetText + yOffset + textSize);
-                    canvas.drawRoundRect(roundRectParams, radius, radius, level_paint5);
+                    Drawable icon = ContextCompat.getDrawable(getContext(), icons[i]);
+                    if (icon != null){
+                        int iconSize = Math.round(nav_width * 0.19f);
+                        int textSize = Math.round(iconSize * 0.6f);
+                        int yOffsetText = Math.round((iconSize - textSize) / 2.0f);
+                        int xOffset = Math.round(nav_width * 0.12f);
+                        int xEndOffset = Math.round(nav_width * 0.11f);
+                        int yOffset = (iconSize * i) + avatarHeight + Math.round(nav_width * 0.10f) * (i + 1);
+                        int radius = Math.round(iconSize / 2.0f);
+                        Rect rectParams = new Rect(xOffset, yOffset, xOffset + iconSize, yOffset + iconSize);
+                        icon.setBounds(rectParams);
+                        icon.setColorFilter(colorFilter);
+                        icon.draw(canvas);
+                        RectF roundRectParams = new RectF((xOffset * 2) + iconSize, yOffset + yOffsetText, Math.round((nav_width - xEndOffset) * text_widths[i]), yOffsetText + yOffset + textSize);
+                        canvas.drawRoundRect(roundRectParams, radius, radius, level_paint5);
+                    }
                 }
             }
             int height = Math.round((getHeight() * 30) / 100f);
@@ -126,9 +131,9 @@ public class ThemeDrawer extends FrameLayout {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        if (w == oldw && h == oldh) {
+    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
+        super.onSizeChanged(w, h, oldW, oldH);
+        if (w == oldW && h == oldH) {
             return;
         }
         rectF.set(INNER_RECT_SPACE, INNER_RECT_SPACE, w - INNER_RECT_SPACE, h - INNER_RECT_SPACE);
@@ -206,7 +211,7 @@ public class ThemeDrawer extends FrameLayout {
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected void dispatchDraw(@NonNull Canvas canvas) {
         if (changeThemeProgress != 0) {
             themeDrawable.drawBackground(canvas);
         }

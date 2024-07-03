@@ -209,7 +209,7 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.Shape;
+import it.octogram.android.StickerShape;
 import it.octogram.android.utils.MessageResourceHelper;
 
 public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate, ImageReceiver.ImageReceiverDelegate, DownloadController.FileDownloadProgressListener, TextSelectionHelper.SelectableView, NotificationCenter.NotificationCenterDelegate {
@@ -8502,9 +8502,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     backgroundWidth = photoWidth + AndroidUtilities.dp(12);
 
                     canChangeRadius = false;
-                    if (OctoConfig.INSTANCE.stickerShape.getValue() == Shape.MESSAGE.getValue()) {
+                    if (OctoConfig.INSTANCE.stickerShape.getValue() == StickerShape.MESSAGE.getValue()) {
                         photoImage.setRoundRadius(AndroidUtilities.dp(6));
-                    } else if (OctoConfig.INSTANCE.stickerShape.getValue() == Shape.ROUND.getValue()) {
+                    } else if (OctoConfig.INSTANCE.stickerShape.getValue() == StickerShape.ROUND.getValue()) {
                         canChangeRadius = true;
                     } else {
                         photoImage.setRoundRadius(AndroidUtilities.dp(0));
@@ -20159,7 +20159,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             paint.setAlpha((int) (oldAlpha * timeAlpha * alpha * .6f));
 
             int r;
-            if (documentAttachType != DOCUMENT_ATTACH_TYPE_ROUND && documentAttachType != DOCUMENT_ATTACH_TYPE_STICKER && currentMessageObject.type != MessageObject.TYPE_EMOJIS || (documentAttachType == DOCUMENT_ATTACH_TYPE_STICKER && OctoConfig.INSTANCE.stickerShape.getValue() == Shape.ROUND.getValue())) {
+            if (documentAttachType != DOCUMENT_ATTACH_TYPE_ROUND && documentAttachType != DOCUMENT_ATTACH_TYPE_STICKER && currentMessageObject.type != MessageObject.TYPE_EMOJIS || (documentAttachType == DOCUMENT_ATTACH_TYPE_STICKER && OctoConfig.INSTANCE.stickerShape.getValue() == StickerShape.ROUND.getValue())) {
                 int[] rad = photoImage.getRoundRadius();
                 r = Math.min(AndroidUtilities.dp(8), Math.max(rad[2], rad[3]));
                 bigRadius = SharedConfig.bubbleRadius >= 10;

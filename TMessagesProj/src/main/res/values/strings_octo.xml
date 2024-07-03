@@ -57,6 +57,7 @@
     <string name="TranslatorProviderUnsupportedDialogs">The translation target language of some chats has been changed because the previously set language is not supported by the selected provider.</string>
     <string name="TranslatorDestination">Destination</string>
     <string name="TranslatorDestinationFollow">Follow app</string>
+    <string name="TranslatorDestinationFollowDestination">Follow default destination</string>
     <string name="TranslatorFormality">Formality</string>
     <string name="TranslatorFormalityDefault">Default</string>
     <string name="TranslatorFormalityLow">Informal</string>
@@ -91,13 +92,18 @@
     <string name="UpdatesSettingsCheckButtonDownload">Download</string>
     <string name="UpdatesSettingsCheckButtonInstall">Install</string>
     <string name="UpdatesSettingsCheckButtonUpdate">Update</string>
-    <string name="UpdatesSettingsCheckButtonChecking">Checking...</string>
+    <string name="UpdatesSettingsCheckButtonChecking">Checking…</string>
     <string name="UpdatesSettingsCheckUpdated">You are using the latest version available.</string>
     <string name="UpdatesSettingsCheckFailed">An error occurred while checking for updates. Please try again later.</string>
     <string name="UpdatesSettingsBeta">Prefer beta version</string>
     <string name="UpdatesSettingsAuto">Automatically check</string>
     <string name="UpdatesSettingsAutoDescription">If enabled, server will notify the app when to check for new updates.</string>
     <string name="UpdatesSettingsPBeta">Receive PBeta updates</string>
+    <string name="UpdatesSettingsAutoDownload">Automatic download</string>
+    <string name="UpdatesSettingsAutoDownloadAlways">Always</string>
+    <string name="UpdatesSettingsAutoDownloadAlwaysDesc">An OctoGram update uses approximately 80 MB. Additional costs may be charged by your phone company.</string>
+    <string name="UpdatesSettingsAutoDownloadWifi">Only on Wi-Fi</string>
+    <string name="UpdatesSettingsAutoDownloadNever">Never</string>
     <string name="UpdatesSettingsLinks">Other sources</string>
     <string name="UpdatesSettingsPbetaDescription">Your main account is part of OctoGram\'s private beta program.\n\nBy activating this option, you can receive updates from the private beta program directly via OTA like other stable and beta updates, but some updates settings (like "%s") will be forcibly activated.</string>
     <string name="UpdatesPbetaWarning">Please note that the update you are installing is part of the private beta program you joined and may have instabilities. If so, please report it in our official internal testing group.</string>
@@ -151,17 +157,20 @@
     <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app, as well as privacy</string>
     <string name="PrivacyHeader">Privacy</string>
     <string name="HidePhoneNumber">Hide phone number</string>
-    <string name="HidePhoneNumber_Desc">Hide your phone number from other users</string>
+    <string name="HidePhoneNumber_Desc">Hide your phone number in the app interfaces</string>
     <string name="HideOtherPhoneNumber">Hide other people\'s phone number</string>
     <string name="HideOtherPhoneNumber_Desc">Hide other people\'s phone number from their profile</string>
+    <string name="InsteadPhoneNumber">Behavior</string>
+    <string name="ShowHiddenNumber">Show %s</string>
     <string name="ShowFakePhoneNumber">Show fake phone number</string>
-    <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile. This fake phone number is only shown to yourself! If you disable phone privacy, people will see your real phone number</string>
-    <string name="ShowUsernameAsPhoneNumber">Show username as phone number</string>
-    <string name="ShowUsernameAsPhoneNumber_Desc">Show your username as your phone number in your profile. This will only be shown to yourself!</string>
+    <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile, like %s.</string>
+    <string name="ShowUsernameAsPhoneNumber">Show username</string>
+    <string name="ShowUsernameAsPhoneNumber_Desc">Show your username as your phone number in your profile.</string>
     <string name="PromptBeforeCalling">Prompt before calling</string>
     <string name="PromptBeforeCalling_Desc">Show a prompt to avoid accidental calls</string>
     <string name="DcIdHeader">Datacenter and User ID</string>
-    <string name="DcIdTypeDescription">Telegram\'s API displays IDs as they are, while the Bot API introduces a "-" sign for groups and prepends "-100" for supergroups, broadcast groups, and channels.</string>
+    <string name="DcIdTypeDescriptionBotapi">It introduces a "-" sign for groups and prepends "-100" for supergroups, broadcast groups, and channels.</string>
+    <string name="DcIdTypeDescriptionTelegram">It shows IDs directly as they are provided by Telegram.</string>
     <string name="ShowRegistrationDate">Show registration date</string>
     <string name="ShowRegistrationDate_Desc">Show user\'s registration date in profiles. Note that this is achieved through guessing, so it may show inaccurate results</string>
     <string name="JumpToNextChannelOrTopic">Jump to next channel / topic</string>
@@ -189,20 +198,18 @@
     <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
     <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
     <string name="HideAllChatFolder">Hide \"All Chats\" tab</string>
-    <string name="HideAllChatFolders">Remove all folders</string>
+    <string name="HideAllChatFolders">Totally hide folders</string>
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="EnableSmartNotificationsForPrivateChats">Enable smart notifications for private chats</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
     <string name="OpenArchiveOnPull_Desc">Automatically opens the archive when pulling down</string>
-    <string name="WarningBeforeDeletingChatHistory">Warning before deleting chat history</string>
-    <string name="WarningBeforeDeletingChatHistory_Desc">Create a warning before deleting chat history for a user (to avoid accidental deletions)</string>
+    <string name="PromptBeforeDeletingChatHistory">Prompt before deleting chat history</string>
+    <string name="PromptBeforeDeletingChatHistory_Desc">Show a prompt to avoid accidental deletions</string>
     <string name="DoubleTapActionsHeader">Double tap actions</string>
     <string name="PreferredActionIncoming">Incoming messages</string>
     <string name="PreferredActionOutgoing">Outgoing messages</string>
     <string name="CustomEmojiReaction">Custom emoji reaction</string>
-    <string name="TabletModeSection">Tablet Mode</string>
-    <string name="ConnectionSection">Connection</string>
     <string name="TryConnectWithIPV6">Try connecting through IPv6</string>
     <string name="DefaultEmojiButtonType">Emoji button action</string>
     <string name="DefaultEmojiButtonTypeDefault">Default</string>
@@ -211,6 +218,7 @@
     <string name="BlurHeader">Blur</string>
     <string name="ForceChatBlurEffect">Force chat blur effect</string>
     <string name="ForceChatBlurEffectName">Alpha</string>
+    <string name="InterfaceHeader">Interface</string>
     <string name="FormattingHeader">Formatting</string>
     <string name="FormatTimeWithSeconds">Format time with seconds</string>
     <string name="FormatTimeWithSeconds_Desc">10:20 > 10:20:22</string>
@@ -219,9 +227,17 @@
     <string name="PencilIconForEdited">Pencil icon for edited messages</string>
     <string name="PencilIconForEdited_Desc">This will replace the text "Edited" with a pencil icon</string>
     <string name="HideDividers">Hide dividers</string>
+    <string name="RepliesLinksHeader">Replies and Links</string>
+    <string name="RepliesLinksShowColors">Show custom colors</string>
+    <string name="RepliesLinksShowEmojis">Show emojis</string>
     <string name="HeaderHeader">Header</string>
-    <string name="ShowNameActionBar">Show name in header bar</string>
-    <string name="ShowNameActionBar_Desc">You will see your name on the header bar instead of "OctoGram"</string>
+    <string name="ActionBarTitle">Title shown in header</string>
+    <string name="ActionBarTitleAccountName">Account name</string>
+    <string name="ActionBarTitleAccountUsername">Account username</string>
+    <string name="ActionBarTitleCustom">Header custom title</string>
+    <string name="ActionBarTitleCustomDescription">Enter here the custom title that will appear in the header bar instead of \"%s\".</string>
+    <string name="ActionBarTitleCustomEmpty">Empty</string>
+    <string name="ActionBarTitleCustomSet">Set name</string>
     <string name="SearchIconInHeader">Search icon in header bar</string>
     <string name="SlidingTitle">Sliding title</string>
     <string name="SlidingTitle_Desc">The title will slide on screen when it\'s too long</string>
@@ -235,13 +251,33 @@
     <string name="EmojiSets_Desc">Customize your emoji sets</string>
     <string name="UseSystemFont">Use system font</string>
     <string name="ShowSnowflakes">Show snowflakes</string>
-    <string name="ArchiveHeader">Archive</string>
     <string name="ForcePacmanAnimation">Force pacman animation</string>
     <string name="ForcePacmanAnimation_Desc">Force pacman animation when archiving a chat</string>
     <string name="DrawerElements">Drawer Elements</string>
     <string name="DrawerElements_Desc">Customize the elements in the drawer</string>
     <string name="ContextElements">Context menu Elements</string>
     <string name="ContextElements_Desc">Customize the elements in the context menu</string>
+
+    <string name="ChatTitle">Chats</string>
+    <string name="Chat_Desc">Customize the appearance of chats</string>
+
+    <string name="DrawerTitle">Drawer</string>
+    <string name="Drawer_Desc">Customize the appearance of the drawer</string>
+    <string name="DrawerBackground">Background Type</string>
+    <string name="DrawerBackgroundTransparent">Transparent</string>
+    <string name="DrawerBackgroundWallpaper">Wallpaper</string>
+    <string name="DrawerBackgroundProfilePhoto">Profile Photo</string>
+    <string name="DrawerBackgroundColor">Accent Color</string>
+    <string name="DrawerShowProfilePic">Show Profile Photo</string>
+    <string name="DrawerGradientBackground">Gradient Background</string>
+    <string name="DrawerBlurBackground">Blur Background</string>
+    <string name="DrawerBlurBackgroundLevel">Blur Background Level</string>
+    <string name="DrawerDarkenBackground">Darken Background</string>
+    <string name="DrawerDarkenBackgroundLevel">Darken Background Level</string>
+    <string name="DrawerFavoriteOption">Favorite Option</string>
+    <string name="DrawerFavoriteOptionDefault">Default</string>
+    <string name="DrawerFavoriteOptionNone">Empty</string>
+    <string name="DrawerFavoriteOptionUnavailable">Since the Settings element is hidden by the drawer elements, the preferred option must necessarily be the settings one.</string>
 
     <string name="ShowUserIconsInChatsList">Show user icons in chats list</string>
     <string name="ShowUserIconsInChatsList_Desc">Show user icons in chats list near sender name in groups.</string>
@@ -260,14 +296,26 @@
     <string name="MonetIcon">Force Monet Icon</string>
     <string name="AppIconChupa">Chupa Icon</string>
     <string name="AppIconYuki">Yuki Icon</string>
+    <string name="AppIconConfetti">Confetti</string>
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
     <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
+    <string name="UnlockedHiddenConfettiIcon">You have unlocked the confections! Activate the new secret icon from settings.</string>
     <string name="OctoExperimentsSettingsHeader">Try out new and shiny features</string>
     <string name="OctoExperimentsDialogMessage">These features are experimental and may not work as expected. You may experience crashes and other issues. Please report any issues you encounter to the developers</string>
     <string name="OctoExperimentsDialogButton">Enable experimental settings</string>
     <string name="ExperimentalSettings">Experimental Settings</string>
+    <string name="Navigation">Navigation</string>
+    <string name="NavigationSettings">Other options</string>
+    <string name="NavigationDiscardReload">You have changed some navigation settings. Do you want to apply the changes?</string>
+    <string name="NavigationPreviewTitle">Page %d</string>
+    <string name="NavigationPreviewPage1">Click anywhere in the preview to open a new page and check the smoothness</string>
+    <string name="NavigationPreviewPage2">Try scrolling using gestures to try the animated action bar</string>
     <string name="AlternativeNavigation">Alternative navigation</string>
     <string name="AlternativeNavigation_Desc">Use a different navigation style when navigating through the app</string>
+    <string name="SmootherNavigation">Smoothness</string>
+    <string name="SmootherNavigation_Desc">Choose the fluidity of individual screens in the app</string>
+    <string name="AnimatedActionBar">Animated action bar</string>
+    <string name="AnimatedActionBarn_Desc">Make the action bar transition animation more linear</string>
     <string name="UploadBoost">Upload boost</string>
     <string name="DownloadBoost">Download boost</string>
     <string name="DownloadBoostType">Download Boost type</string>
@@ -281,7 +329,12 @@
     <string name="FoldersTypeIcons">Icons</string>
     <string name="FoldersTypeIconsTitles">Icons with Titles</string>
     <string name="ChooseFolderIcon">Choose an Icon</string>
-    <string name="ForceTableMode">Force Tablet Mode</string>
+    <string name="DeviceIdentifyStatus">Identify device as…</string>
+    <string name="DeviceIdentifyDefault">Default</string>
+    <string name="DeviceIdentifySmartphone">Smartphone</string>
+    <string name="DeviceIdentifySmartphoneDesc">The interface will be forcibly adapted to a smartphone.</string>
+    <string name="DeviceIdentifyTablet">Tablet</string>
+    <string name="DeviceIdentifyTabletDesc">The interface will be forcibly adapted to a tablet.</string>
     <string name="SmartNotificationsPvtDialogMessage">This option is, by default, disabled on the official Telegram clients and therefore in private chats all notifications were sent with sound or vibration.\n\nBy enabling it, the behavior of notifications will vary in all chats: as well as in groups, all private chats will default to 2 notifications every 3 minutes.</string>
     <string name="SmartNotificationsPvtDialogMessagePlus">You can manage this option from OctoGram settings.</string>
     <string name="SmartNotificationsPvtDialogButton">Enable smart notifications</string>
@@ -400,7 +453,7 @@
     <string name="ImportReadyImportSelected">Import selected</string>
     <string name="ImportReadyOtherOptions">Another %d unspecified options will be imported automatically.</string>
     <string name="ImportReadyImportDone">%d options have been imported successfully.</string>
-    <string name="ImportReadyImportDonePopup">To complete...</string>
+    <string name="ImportReadyImportDonePopup">To complete…</string>
     <string name="ImportReadyImportDonePopupDescription">Some of the imported options require a restart of the app for proper operation.</string>
     <string name="ImportReadyImportFailedZeroTitle">Error</string>
     <string name="ImportReadyImportFailedZeroCaption">You must select at least one option in order to proceed with the import.</string>
@@ -446,9 +499,11 @@
 
     <!-- Sticker Size Preview -->
     <string name="StickersSizeHeader">Sticker Size</string>
+    <string name="StickersSizeChannelTitle">OctoGram Channel - News and tips for your client</string>
+    <string name="StickersSizeChannelTitleMini">OctoGram Channel</string>
 
     <string name="StickerSizePreviewMessage1">Oh, I love OctoGram 🐙! I just learned today that it\'s Italian, how cool!</string>
-    <string name="StickerSizePreviewMessage2">In Italy, they say the pizza 🍕 is really good... When are we going?</string>
+    <string name="StickerSizePreviewMessage2">In Italy, they say the pizza 🍕 is really good… When are we going?</string>
 
     <string name="StickerSizePreviewMessage3">New OctoGram update just dropped!</string>
     <string name="StickerSizePreviewMessage4">Neat!</string>
@@ -471,6 +526,7 @@
     <string name="DatacenterStatusSheetIP">IP Address</string>
     <string name="DatacenterStatusSheetLastLag">Last lag time</string>
     <string name="DatacenterStatusSheetLastDowntime">Last down time</string>
+    <string name="Divider">Divider</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

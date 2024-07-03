@@ -72,15 +72,15 @@ public class DatacenterBottomSheet extends BottomSheet {
         statusView.setGravity(Gravity.CENTER);
         linearLayout.addView(statusView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 21, 4, 21, 21));
 
-        Drawable d = ContextCompat.getDrawable(getContext(), generalInfo.icon);
+        Drawable d = ContextCompat.getDrawable(getContext(), generalInfo.getIcon());
         if (d != null) {
             d.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhite), PorterDuff.Mode.SRC_ATOP));
             imageView.setImageBitmap(drawableToBitmap(d));
         }
-        imageView.setBackgroundResource(generalInfo.icon);
-        radialProgressView.setColor(generalInfo.color);
+        imageView.setBackgroundResource(generalInfo.getIcon());
+        radialProgressView.setColor(generalInfo.getColor());
 
-        nameView.setText(generalInfo.dcName);
+        nameView.setText(generalInfo.getDcName());
 
         String statusText;
         int colorKey;
@@ -113,9 +113,9 @@ public class DatacenterBottomSheet extends BottomSheet {
         drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.SRC_IN));
         ItemView ipItemView = new ItemView(context, false);
         ipItemView.iconView.setImageDrawable(drawable);
-        ipItemView.valueText.setText(generalInfo.ip);
+        ipItemView.valueText.setText(generalInfo.getIp());
         ipItemView.descriptionText.setText(LocaleController.getString("DatacenterStatusSheetIP", R.string.DatacenterStatusSheetIP));
-        applyCopyItem(ipItemView, generalInfo.ip);
+        applyCopyItem(ipItemView, generalInfo.getIp());
         linearLayout.addView(ipItemView);
 
         ItemView prevItem = ipItemView;

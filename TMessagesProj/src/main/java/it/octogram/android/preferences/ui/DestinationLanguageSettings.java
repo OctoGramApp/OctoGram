@@ -1,5 +1,6 @@
 package it.octogram.android.preferences.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -54,6 +56,11 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
     @Override
     public boolean onFragmentCreate() {
         firstSelectedLanguage = MessagesController.getGlobalMainSettings().getString("translate_to_language", null);
+
+        if (callback != null) {
+            firstSelectedLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+        }
+
         fillLanguages();
         return super.onFragmentCreate();
     }
@@ -153,9 +160,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
 
                     getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
                 } else {
-                    if (!language.code.equals("app")) {
-                        callback.onSelected(language.code);
-                    }
+                    callback.onSelected(language.code.equals("app") ? null : language.code);
                 }
                 finishFragment();
             }
@@ -211,6 +216,10 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
         followAppL.displayName = followAppL.ownDisplayName = LocaleController.getString("TranslatorDestinationFollow", R.string.TranslatorDestinationFollow);
         followAppL.q = "";
 
+        if (callback != null) {
+            followAppL.displayName = followAppL.ownDisplayName = LocaleController.getString("TranslatorDestinationFollowDestination", R.string.TranslatorDestinationFollowDestination);
+        }
+
         separatorRow = 0;
         if (selectedLanguage != null) {
             allLanguages.add(0, selectedLanguage);
@@ -220,10 +229,8 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
             allLanguages.add(0, currentLanguage);
             separatorRow++;
         }
-        if (callback == null) {
-            allLanguages.add(0, followAppL);
-            separatorRow++;
-        }
+        allLanguages.add(0, followAppL);
+        separatorRow++;
     }
 
     @Override
@@ -339,11 +346,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
                     if (language.code.equals("app")) {
                         textSettingsCell.setTextAndCheck(ownDisplayName, firstSelectedLanguage == null, !OctoConfig.INSTANCE.disableDividers.getValue());
                     } else {
-                        boolean isChecked = firstSelectedLanguage != null && firstSelectedLanguage.equals(language.code);
-                        if (!isChecked && firstSelectedLanguage == null && callback != null) {
-                            isChecked = language.code.equals(LocaleController.getInstance().getCurrentLocaleInfo().pluralLangCode);
-                        }
-                        textSettingsCell.setTextAndValueAndCheck(ownDisplayName, language.displayName, isChecked, false, !OctoConfig.INSTANCE.disableDividers.getValue());
+                        textSettingsCell.setTextAndValueAndCheck(ownDisplayName, language.displayName, firstSelectedLanguage != null && firstSelectedLanguage.equals(language.code), false, !OctoConfig.INSTANCE.disableDividers.getValue());
                     }
                     break;
                 }
@@ -367,6 +370,97 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
             } else {
                 return 0;
             }
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        @Override
+        public void notifyDataSetChanged() {
+            if (listView.isComputingLayout()) {
+                listView.post(this::notifyDataSetChanged);
+                return;
+            }
+            super.notifyDataSetChanged();
+        }
+
+        @Override
+        public void notifyItemChanged(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemChanged(position));
+                return;
+            }
+            super.notifyItemChanged(position);
+        }
+
+        @Override
+        public void notifyItemChanged(int position, @Nullable Object payload) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemChanged(position, payload));
+                return;
+            }
+            super.notifyItemChanged(position, payload);
+        }
+
+        @Override
+        public void notifyItemRangeChanged(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeChanged(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeChanged(positionStart, itemCount, payload));
+                return;
+            }
+            super.notifyItemRangeChanged(positionStart, itemCount, payload);
+        }
+
+        @Override
+        public void notifyItemInserted(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemInserted(position));
+                return;
+            }
+            super.notifyItemInserted(position);
+        }
+
+        @Override
+        public void notifyItemMoved(int fromPosition, int toPosition) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemMoved(fromPosition, toPosition));
+                return;
+            }
+            super.notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void notifyItemRangeInserted(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeInserted(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRangeRemoved(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeRemoved(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRemoved(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRemoved(position));
+                return;
+            }
+            super.notifyItemRemoved(position);
         }
     }
 

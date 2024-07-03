@@ -321,7 +321,7 @@ public class TranslateButton extends FrameLayout {
             }
             textView.setText(TextUtils.concat(translateIcon, " ", text));
         }
-        menuView.setImageResource(R.drawable.msg_mini_customize);
-        //menuView.setImageResource(UserConfig.getInstance(currentAccount).isPremium() ? R.drawable.msg_mini_customize : R.drawable.msg_close);
+        //menuView.setImageResource(R.drawable.msg_mini_customize);
+        menuView.setImageResource(translateController.isFeatureAvailable() ? R.drawable.msg_mini_customize : R.drawable.msg_close);
     }
 }

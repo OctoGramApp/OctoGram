@@ -8,12 +8,14 @@
 
 package org.telegram.ui.Cells;
 
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -25,7 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
-import android.text.TextUtils;
+import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -53,9 +55,12 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.CallLogActivity;
+import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
@@ -69,11 +74,20 @@ import org.telegram.ui.Components.Reactions.AnimatedEmojiEffect;
 import org.telegram.ui.Components.Reactions.HwEmojis;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Components.SnowflakesEffect;
+import org.telegram.ui.ContactsActivity;
+import org.telegram.ui.DialogsActivity;
+import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.ThemeActivity;
 
 import java.util.ArrayList;
 
+import it.octogram.android.DrawerBackgroundState;
+import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhoneNumberAlternative;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.utils.OctoUtils;
 
 public class DrawerProfileCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
@@ -107,8 +121,75 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     StarParticlesView.Drawable starParticlesDrawable;
     PremiumGradient.PremiumGradientTools gradientTools;
 
+    private ImageView darkenBackground;
+    private ImageView customMiniIcon;
+    private final DrawerLayoutContainer drawerLayoutContainer;
+    private final ImageReceiver imageReceiver;
+    private Bitmap lastBitmap;
+    private final ImageView gradientBackground;
+    private boolean avatarAsDrawerBackground = false;
+
+    public boolean isPreviewMode = false;
+    private boolean isPreviewModeFirstDraw = true;
+    private boolean lastStateShowProfilePic = true;
+    private boolean lastStateGradientBackground = true;
+    private boolean lastStateDarkenBackground = true;
+    private int lastStateFavoriteIcon = -1;
+
     public DrawerProfileCell(Context context, DrawerLayoutContainer drawerLayoutContainer) {
         super(context);
+
+        this.drawerLayoutContainer = drawerLayoutContainer;
+
+        imageReceiver = new ImageReceiver(this);
+        imageReceiver.setCrossfadeWithOldImage(true);
+        imageReceiver.setForceCrossfade(true);
+        imageReceiver.setDelegate((imageReceiver, set, thumb, memCache) -> {
+            if (OctoConfig.INSTANCE.drawerBlurBackground.getValue()) {
+                if (thumb) {
+                    return;
+                }
+
+                ImageReceiver.BitmapHolder holder = imageReceiver.getBitmapSafe();
+                if (holder != null) {
+                    new Thread(() -> {
+                        int blurLevel = OctoConfig.INSTANCE.drawerBlurBackgroundLevel.getValue();
+                        blurLevel = Math.max(0, Math.min(99, blurLevel));
+                        int width = ((holder.bitmap.getWidth()) * (100 - blurLevel)) / 100;
+                        int height = ((holder.bitmap.getHeight()) * (100 - blurLevel)) / 100;
+                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                        Canvas canvas = new Canvas(bitmap);
+                        canvas.drawBitmap(holder.bitmap, null, new Rect(0, 0, width, height), new Paint(Paint.FILTER_BITMAP_FLAG));
+                        if (OctoConfig.INSTANCE.drawerBlurBackground.getValue()) {
+                            try {
+                                Utilities.stackBlurBitmap(bitmap, 3);
+                            } catch (Exception e) {
+                                FileLog.e(e);
+                            }
+                        }
+                        AndroidUtilities.runOnUIThread(() -> {
+                            if (lastBitmap != null) {
+                                imageReceiver.setCrossfadeWithOldImage(false);
+                                imageReceiver.setImageBitmap(new BitmapDrawable(null, lastBitmap));
+                            }
+                            imageReceiver.setCrossfadeWithOldImage(true);
+                            imageReceiver.setImageBitmap(new BitmapDrawable(null, bitmap));
+                            lastBitmap = bitmap;
+                        });
+                    }).start();
+                }
+
+                return;
+            }
+
+            lastBitmap = null;
+        });
+
+        darkenBackground = new ImageView(context);
+        addView(darkenBackground, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.BOTTOM));
+
+        gradientBackground = new ImageView(context);
+        addView(gradientBackground, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.BOTTOM));
 
         shadowView = new ImageView(context);
         shadowView.setVisibility(INVISIBLE);
@@ -190,7 +271,8 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         addView(arrowView, LayoutHelper.createFrame(59, 59, Gravity.RIGHT | Gravity.BOTTOM));
         setArrowState(false);
 
-        boolean playDrawable;
+        updateMiniIcon();
+        /*boolean playDrawable;
         if (playDrawable = sunDrawable == null) {
             sunDrawable = new RLottieDrawable(R.raw.sun, "" + R.raw.sun, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
             sunDrawable.setPlayInDirectionOfCustomEndFrame(true);
@@ -265,7 +347,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             darkThemeView.playAnimation();
             switchTheme(themeInfo, toDark);
 
-            if (drawerLayoutContainer != null ) {
+            if (drawerLayoutContainer != null) {
                 FrameLayout layout = drawerLayoutContainer.getParent() instanceof FrameLayout ? (FrameLayout) drawerLayoutContainer.getParent() : null;
                 Theme.turnOffAutoNight(layout, () -> {
                     drawerLayoutContainer.closeDrawer(false);
@@ -280,7 +362,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             }
             return false;
         });
-        addView(darkThemeView, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
+        addView(darkThemeView, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));*/
 
         if (Theme.getEventType() == 0 || OctoConfig.INSTANCE.showSnowflakes.getValue()) {
             snowflakesEffect = new SnowflakesEffect(0);
@@ -291,6 +373,269 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         nameTextView.setRightDrawable(status);
         animatedStatus = new AnimatedStatusView(context, 20, 60);
         addView(animatedStatus, LayoutHelper.createFrame(20, 20, Gravity.LEFT | Gravity.TOP));
+    }
+
+    public void updateImageReceiver(TLRPC.User user) {
+        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.PROFILE_PIC.getValue()) {
+            ImageLocation imageLocation = ImageLocation.getForUser(user, ImageLocation.TYPE_BIG);
+            avatarAsDrawerBackground = imageLocation != null;
+            imageReceiver.setImage(imageLocation, "512_512", null, null, new ColorDrawable(0x00000000), 0, null, user, 1);
+        }
+    }
+
+    public void updateMiniIcon() {
+        View currentView = customMiniIcon != null ? customMiniIcon : darkThemeView;
+        final Runnable[] onAnimationEndRunnable = {null};
+        boolean hasAnimatedDisappear = false;
+        boolean animateAppearWithoutWaiting = false;
+
+        if (lastStateFavoriteIcon == OctoConfig.INSTANCE.drawerFavoriteOption.getValue()) {
+            removeView(currentView);
+            customMiniIcon = null;
+            darkThemeView = null;
+        } else {
+            lastStateFavoriteIcon = OctoConfig.INSTANCE.drawerFavoriteOption.getValue();
+            if (currentView != null) {
+                if (isPreviewMode && !isPreviewModeFirstDraw) {
+                    hasAnimatedDisappear = true;
+                    currentView.setScaleX(1f);
+                    currentView.setScaleY(1f);
+                    currentView.setAlpha(1f);
+                    currentView.animate().scaleY(0.5f).scaleX(0.5f).alpha(0).setDuration(200).setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(@NonNull Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(@NonNull Animator animation) {
+                            removeView(currentView);
+                            customMiniIcon = null;
+                            darkThemeView = null;
+
+                            if (onAnimationEndRunnable[0] != null) {
+                                onAnimationEndRunnable[0].run();
+                            }
+                        }
+
+                        @Override
+                        public void onAnimationCancel(@NonNull Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(@NonNull Animator animation) {
+
+                        }
+                    }).start();
+                } else {
+                    removeView(currentView);
+                    customMiniIcon = null;
+                    darkThemeView = null;
+                }
+            } else if (isPreviewMode && !isPreviewModeFirstDraw) {
+                hasAnimatedDisappear = true;
+                animateAppearWithoutWaiting = true;
+            }
+        }
+
+        if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.DEFAULT.getValue()) {
+            boolean playDrawable;
+            if (playDrawable = sunDrawable == null) {
+                sunDrawable = new RLottieDrawable(R.raw.sun, "" + R.raw.sun, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
+                sunDrawable.setPlayInDirectionOfCustomEndFrame(true);
+                if (Theme.isCurrentThemeDay()) {
+                    sunDrawable.setCustomEndFrame(0);
+                    sunDrawable.setCurrentFrame(0);
+                } else {
+                    sunDrawable.setCurrentFrame(35);
+                    sunDrawable.setCustomEndFrame(36);
+                }
+            }
+            RLottieImageView currentDarkThemeView = new RLottieImageView(getContext()) {
+                @Override
+                public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+                    super.onInitializeAccessibilityNodeInfo(info);
+                    if (Theme.isCurrentThemeDark()) {
+                        info.setText(LocaleController.getString("AccDescrSwitchToDayTheme", R.string.AccDescrSwitchToDayTheme));
+                    } else {
+                        info.setText(LocaleController.getString("AccDescrSwitchToNightTheme", R.string.AccDescrSwitchToNightTheme));
+                    }
+                }
+            };
+            currentDarkThemeView.setFocusable(true);
+            currentDarkThemeView.setBackground(Theme.createCircleSelectorDrawable(Theme.getColor(Theme.key_dialogButtonSelector), 0, 0));
+            sunDrawable.beginApplyLayerColors();
+            int color = Theme.getColor(Theme.key_chats_menuName);
+            sunDrawable.setLayerColor("Sunny.**", color);
+            sunDrawable.setLayerColor("Path 6.**", color);
+            sunDrawable.setLayerColor("Path.**", color);
+            sunDrawable.setLayerColor("Path 5.**", color);
+            sunDrawable.commitApplyLayerColors();
+            currentDarkThemeView.setScaleType(ImageView.ScaleType.CENTER);
+            currentDarkThemeView.setAnimation(sunDrawable);
+            if (Build.VERSION.SDK_INT >= 21) {
+                currentDarkThemeView.setBackgroundDrawable(Theme.createSelectorDrawable(darkThemeBackgroundColor = Theme.getColor(Theme.key_listSelector), 1, AndroidUtilities.dp(17)));
+                Theme.setRippleDrawableForceSoftware((RippleDrawable) currentDarkThemeView.getBackground());
+            }
+            if (!playDrawable && sunDrawable.getCustomEndFrame() != sunDrawable.getCurrentFrame()) {
+                currentDarkThemeView.playAnimation();
+            }
+            currentDarkThemeView.setOnClickListener(v -> {
+                if (switchingTheme) {
+                    return;
+                }
+                switchingTheme = true;
+                SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("themeconfig", Activity.MODE_PRIVATE);
+                String dayThemeName = preferences.getString("lastDayTheme", "Blue");
+                if (Theme.getTheme(dayThemeName) == null || Theme.getTheme(dayThemeName).isDark()) {
+                    dayThemeName = "Blue";
+                }
+                String nightThemeName = preferences.getString("lastDarkTheme", "Dark Blue");
+                if (Theme.getTheme(nightThemeName) == null || !Theme.getTheme(nightThemeName).isDark()) {
+                    nightThemeName = "Dark Blue";
+                }
+                Theme.ThemeInfo themeInfo = Theme.getActiveTheme();
+                if (dayThemeName.equals(nightThemeName)) {
+                    if (themeInfo.isDark() || dayThemeName.equals("Dark Blue") || dayThemeName.equals("Night")) {
+                        dayThemeName = "Blue";
+                    } else {
+                        nightThemeName = "Dark Blue";
+                    }
+                }
+
+                boolean toDark;
+                if (toDark = dayThemeName.equals(themeInfo.getKey())) {
+                    themeInfo = Theme.getTheme(nightThemeName);
+                    sunDrawable.setCustomEndFrame(36);
+                } else {
+                    themeInfo = Theme.getTheme(dayThemeName);
+                    sunDrawable.setCustomEndFrame(0);
+                }
+                currentDarkThemeView.playAnimation();
+                switchTheme(themeInfo, toDark);
+
+                if (drawerLayoutContainer != null) {
+                    FrameLayout layout = drawerLayoutContainer.getParent() instanceof FrameLayout ? (FrameLayout) drawerLayoutContainer.getParent() : null;
+                    Theme.turnOffAutoNight(layout, () -> {
+                        drawerLayoutContainer.closeDrawer(false);
+                        drawerLayoutContainer.presentFragment(new ThemeActivity(ThemeActivity.THEME_TYPE_NIGHT));
+                    });
+                }
+            });
+            currentDarkThemeView.setOnLongClickListener(e -> {
+                if (drawerLayoutContainer != null) {
+                    drawerLayoutContainer.presentFragment(new ThemeActivity(ThemeActivity.THEME_TYPE_BASIC));
+                    return true;
+                }
+                return false;
+            });
+
+            currentDarkThemeView.setOnLongClickListener(v -> {
+                drawerLayoutContainer.closeDrawer();
+                LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
+                return true;
+            });
+
+            if (hasAnimatedDisappear) {
+                onAnimationEndRunnable[0] = () -> {
+                    addView(currentDarkThemeView, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
+
+                    darkThemeView = currentDarkThemeView;
+                    darkThemeView.setScaleX(0.5f);
+                    darkThemeView.setScaleY(0.5f);
+                    darkThemeView.setAlpha(0f);
+                    darkThemeView.animate().scaleY(1f).scaleX(1f).alpha(1).setDuration(200).start();
+                };
+
+                if (animateAppearWithoutWaiting) {
+                    onAnimationEndRunnable[0].run();
+                }
+            } else {
+                darkThemeView = currentDarkThemeView;
+                addView(darkThemeView, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
+            }
+        } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.NONE.getValue()) {
+            ImageView currentMiniIcon = new ImageView(getContext());
+            currentMiniIcon.setFocusable(false);
+            currentMiniIcon.setScaleType(ImageView.ScaleType.CENTER);
+            currentMiniIcon.setColorFilter(Theme.getColor(Theme.key_chats_menuName));
+            currentMiniIcon.setBackground(Theme.createCircleSelectorDrawable(Theme.getColor(Theme.key_dialogButtonSelector), 0, 0));
+
+            if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.SAVED_MESSAGES.getValue()) {
+                currentMiniIcon.setImageResource(R.drawable.msg_saved);
+            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.SETTINGS.getValue()) {
+                currentMiniIcon.setImageResource(R.drawable.msg_settings);
+            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.CONTACTS.getValue()) {
+                currentMiniIcon.setImageResource(R.drawable.msg_contacts);
+            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.CALLS.getValue()) {
+                currentMiniIcon.setImageResource(R.drawable.msg_calls);
+            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.DOWNLOADS.getValue()) {
+                currentMiniIcon.setImageResource(R.drawable.msg_download);
+            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.ARCHIVED_CHATS.getValue()) {
+                currentMiniIcon.setImageResource(R.drawable.msg_archive);
+            }
+
+            currentMiniIcon.setOnClickListener(v -> {
+                drawerLayoutContainer.closeDrawer(true);
+
+                Bundle args = new Bundle();
+                args.putLong("user_id", UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId());
+
+                if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.SAVED_MESSAGES.getValue()) {
+                    LaunchActivity.instance.presentFragment(new ChatActivity(args));
+                } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.SETTINGS.getValue()) {
+                    LaunchActivity.instance.presentFragment(new ProfileActivity(args, null));
+                } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.CONTACTS.getValue()) {
+                    args = new Bundle();
+                    args.putBoolean("needFinishFragment", false);
+                    LaunchActivity.instance.presentFragment(new ContactsActivity(args));
+                } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.CALLS.getValue()) {
+                    LaunchActivity.instance.presentFragment(new CallLogActivity());
+                } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.DOWNLOADS.getValue()) {
+                    BaseFragment lastFragment = LaunchActivity.instance.getActionBarLayout().getLastFragment();
+                    if (lastFragment instanceof DialogsActivity dialogsActivity) {
+                        dialogsActivity.showSearch(true, true, true);
+                        dialogsActivity.getActionBar().openSearchField(true);
+                    }
+                } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.ARCHIVED_CHATS.getValue()) {
+                    args = new Bundle();
+                    args.putInt("folderId", 1);
+                    LaunchActivity.instance.presentFragment(new DialogsActivity(args));
+                }
+            });
+
+            currentMiniIcon.setOnLongClickListener(v -> {
+                drawerLayoutContainer.closeDrawer();
+                LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
+                return true;
+            });
+
+            if (hasAnimatedDisappear) {
+                onAnimationEndRunnable[0] = () -> {
+                    addView(currentMiniIcon, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
+
+                    customMiniIcon = currentMiniIcon;
+                    customMiniIcon.setScaleX(0.5f);
+                    customMiniIcon.setScaleY(0.5f);
+                    customMiniIcon.setAlpha(0f);
+                    customMiniIcon.animate().scaleY(1f).scaleX(1f).alpha(1).setDuration(200).start();
+                };
+
+                if (animateAppearWithoutWaiting) {
+                    onAnimationEndRunnable[0].run();
+                }
+            } else {
+                customMiniIcon = currentMiniIcon;
+                addView(customMiniIcon, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
+            }
+        }
+    }
+
+    public void updateDarkerBackgroundLevel(int level) {
+        if (darkenBackground != null) {
+            darkenBackground.setAlpha(level / 255f);
+        }
     }
 
     protected void onPremiumClick() {
@@ -304,12 +649,14 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
 
         private int animationUniq;
         private ArrayList<Object> animations = new ArrayList<>();
+
         public AnimatedStatusView(Context context, int stateSize, int effectsSize) {
             super(context);
             this.stateSize = stateSize;
             this.effectsSize = effectsSize;
             this.renderedEffectsSize = effectsSize;
         }
+
         public AnimatedStatusView(Context context, int stateSize, int effectsSize, int renderedEffectsSize) {
             super(context);
             this.stateSize = stateSize;
@@ -320,12 +667,13 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(
-                MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(Math.max(renderedEffectsSize, Math.max(stateSize, effectsSize))), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(Math.max(renderedEffectsSize, Math.max(stateSize, effectsSize))), MeasureSpec.EXACTLY)
+                    MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(Math.max(renderedEffectsSize, Math.max(stateSize, effectsSize))), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(Math.max(renderedEffectsSize, Math.max(stateSize, effectsSize))), MeasureSpec.EXACTLY)
             );
         }
 
         private float y1, y2;
+
         public void translate(float x, float y) {
             setTranslationX(x - getMeasuredWidth() / 2f);
             setTranslationY((this.y1 = y - getMeasuredHeight() / 2f) + this.y2);
@@ -357,10 +705,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 } else if (animation instanceof AnimatedEmojiEffect) {
                     AnimatedEmojiEffect effect = (AnimatedEmojiEffect) animation;
                     effect.setBounds(
-                        (int) ((getMeasuredWidth() - renderedEffectsSize) / 2f),
-                        (int) ((getMeasuredHeight() - renderedEffectsSize) / 2f),
-                        (int) ((getMeasuredWidth() + renderedEffectsSize) / 2f),
-                        (int) ((getMeasuredHeight() + renderedEffectsSize) / 2f)
+                            (int) ((getMeasuredWidth() - renderedEffectsSize) / 2f),
+                            (int) ((getMeasuredHeight() - renderedEffectsSize) / 2f),
+                            (int) ((getMeasuredWidth() + renderedEffectsSize) / 2f),
+                            (int) ((getMeasuredHeight() + renderedEffectsSize) / 2f)
                     );
                     effect.draw(canvas);
                     if (effect.isDone()) {
@@ -437,6 +785,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         }
 
         private Integer color;
+
         public void setColor(int color) {
             this.color = color;
             final ColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
@@ -481,7 +830,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         status.attach();
         updateColors();
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
-        for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++){
+        for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
             NotificationCenter.getInstance(i).addObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
         }
     }
@@ -491,7 +840,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         super.onDetachedFromWindow();
         status.detach();
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
-        for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++){
+        for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
             NotificationCenter.getInstance(i).removeObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
         }
         if (lastAccount >= 0) {
@@ -541,12 +890,18 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     @Override
     protected void onDraw(Canvas canvas) {
         Drawable backgroundDrawable = Theme.getCachedWallpaper();
-        int backgroundKey = applyBackground(false);
-        boolean useImageBackground = backgroundKey != Theme.key_chats_menuTopBackground && Theme.isCustomTheme() && !Theme.isPatternWallpaper() && backgroundDrawable != null && !(backgroundDrawable instanceof ColorDrawable) && !(backgroundDrawable instanceof GradientDrawable);
+        //int backgroundKey = applyBackground(false);
+        //boolean useImageBackground = backgroundKey != Theme.key_chats_menuTopBackground && Theme.isCustomTheme() && !Theme.isPatternWallpaper() && backgroundDrawable != null && !(backgroundDrawable instanceof ColorDrawable) && !(backgroundDrawable instanceof GradientDrawable);
+        boolean useImageBackground = backgroundDrawable != null;
+
+        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.COLOR.getValue() || OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.TRANSPARENT.getValue()) {
+            useImageBackground = false;
+        }
+
         boolean drawCatsShadow = false;
         int color;
         int darkBackColor = 0;
-        if (!useImageBackground && Theme.hasThemeKey(Theme.key_chats_menuTopShadowCats)) {
+        if (!avatarAsDrawerBackground && !useImageBackground && Theme.hasThemeKey(Theme.key_chats_menuTopShadowCats)) {
             color = Theme.getColor(Theme.key_chats_menuTopShadowCats);
             drawCatsShadow = true;
         } else {
@@ -556,12 +911,13 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 color = Theme.getServiceMessageColor() | 0xff000000;
             }
         }
+
         if (currentColor == null || currentColor != color) {
             currentColor = color;
             shadowView.getDrawable().setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
         }
         color = Theme.getColor(Theme.key_chats_menuName);
-        if (currentMoonColor == null || currentMoonColor != color) {
+        if ((currentMoonColor == null || currentMoonColor != color) && sunDrawable != null) {
             currentMoonColor = color;
             sunDrawable.beginApplyLayerColors();
             sunDrawable.setLayerColor("Sunny.**", currentMoonColor);
@@ -571,17 +927,22 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             sunDrawable.commitApplyLayerColors();
         }
         nameTextView.setTextColor(Theme.getColor(Theme.key_chats_menuName));
-        if (useImageBackground) {
+        if (useImageBackground || avatarAsDrawerBackground) {
             phoneTextView.setTextColor(Theme.getColor(Theme.key_chats_menuPhone));
             if (shadowView.getVisibility() != VISIBLE) {
                 shadowView.setVisibility(VISIBLE);
             }
-            if (backgroundDrawable instanceof ColorDrawable || backgroundDrawable instanceof GradientDrawable) {
+            if (avatarAsDrawerBackground) {
+                imageReceiver.setImageCoords(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                imageReceiver.draw(canvas);
+                darkBackColor = Theme.getColor(Theme.key_listSelector);
+            } else if (backgroundDrawable instanceof ColorDrawable || backgroundDrawable instanceof GradientDrawable) {
                 backgroundDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
                 backgroundDrawable.draw(canvas);
                 darkBackColor = Theme.getColor(Theme.key_listSelector);
             } else if (backgroundDrawable instanceof BitmapDrawable) {
                 Bitmap bitmap = ((BitmapDrawable) backgroundDrawable).getBitmap();
+
                 float scaleX = (float) getMeasuredWidth() / (float) bitmap.getWidth();
                 float scaleY = (float) getMeasuredHeight() / (float) bitmap.getHeight();
                 float scale = Math.max(scaleX, scaleY);
@@ -599,7 +960,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 darkBackColor = (Theme.getServiceMessageColor() & 0x00ffffff) | 0x50000000;
             }
         } else {
-            int visibility = drawCatsShadow? VISIBLE : INVISIBLE;
+            int visibility = drawCatsShadow ? VISIBLE : INVISIBLE;
             if (shadowView.getVisibility() != visibility) {
                 shadowView.setVisibility(visibility);
             }
@@ -607,6 +968,17 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             super.onDraw(canvas);
             darkBackColor = Theme.getColor(Theme.key_listSelector);
         }
+
+        @SuppressLint("DrawAllocation") GradientDrawable gradient = new GradientDrawable(
+                GradientDrawable.Orientation.BOTTOM_TOP,
+                new int[] {
+                        Theme.getColor(Theme.key_chats_menuBackground),
+                        AndroidUtilities.getTransparentColor(Theme.getColor(Theme.key_chats_menuBackground), 0)
+                }
+        );
+        gradientBackground.setBackground(gradient);
+
+        darkenBackground.setBackground(new ColorDrawable(Color.BLACK));
 
 
 //        if (darkBackColor != 0) {
@@ -650,6 +1022,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     }
 
     public boolean isInAvatar(float x, float y) {
+        if (avatarAsDrawerBackground) {
+            return y <= arrowView.getTop();
+        }
+
         return x >= avatarImageView.getLeft() && x <= avatarImageView.getRight() && y >= avatarImageView.getTop() && y <= avatarImageView.getBottom();
     }
 
@@ -672,6 +1048,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     private int lastAccount = -1;
     private TLRPC.User lastUser = null;
     private Drawable premiumStar = null;
+
     @SuppressLint("SetTextI18n")
     public void setUser(TLRPC.User user, boolean accounts) {
         int account = UserConfig.selectedAccount;
@@ -692,7 +1069,8 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         CharSequence text = UserObject.getUserName(user);
         try {
             text = Emoji.replaceEmoji(text, nameTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(22), false);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
 
         drawPremium = false;//user.premium;
         nameTextView.setText(text);
@@ -717,9 +1095,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         animatedStatus.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         status.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         if (OctoConfig.INSTANCE.hidePhoneNumber.getValue()) {
-            if (OctoConfig.INSTANCE.showUsernameAsPhoneNumber.getValue() && user.username != null && !user.username.isEmpty()) {
+            int phoneNumberAlternative = OctoConfig.INSTANCE.phoneNumberAlternative.getValue();
+            if (phoneNumberAlternative == PhoneNumberAlternative.SHOW_USERNAME.getValue() && user.username != null && !user.username.isEmpty()) {
                 phoneTextView.setText(String.format("@%s", user.username));
-            } else if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue()) {
+            } else if (phoneNumberAlternative == PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER.getValue()) {
                 String phoneNumber = user.phone;
                 String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
                 phoneTextView.setText(String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry)));
@@ -732,13 +1111,93 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         AvatarDrawable avatarDrawable = new AvatarDrawable(user);
         avatarDrawable.setColor(Theme.getColor(Theme.key_avatar_backgroundInProfileBlue));
         avatarImageView.setForUserOrChat(user, avatarDrawable);
+
+        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.PROFILE_PIC.getValue()) {
+            ImageLocation imageLocation = ImageLocation.getForUser(user, ImageLocation.TYPE_BIG);
+            avatarAsDrawerBackground = imageLocation != null;
+            imageReceiver.setImage(imageLocation, "512_512", null, null, new ColorDrawable(0x00000000), 0, null, user, 1);
+        } else {
+            avatarAsDrawerBackground = false;
+        }
+
+        boolean drawerShowProfilePic = OctoConfig.INSTANCE.drawerShowProfilePic.getValue();
+        boolean drawerGradientBackground = OctoConfig.INSTANCE.drawerGradientBackground.getValue();
+        boolean drawerDarkenBackground = OctoConfig.INSTANCE.drawerDarkenBackground.getValue();
+        if (isPreviewMode) {
+            avatarImageView.setVisibility(VISIBLE);
+            gradientBackground.setVisibility(VISIBLE);
+            darkenBackground.setVisibility(VISIBLE);
+
+            if (isPreviewModeFirstDraw || lastStateShowProfilePic != drawerShowProfilePic) {
+                float scaleInitialValue = drawerShowProfilePic ? 0.8f : 1f;
+                float scaleFinalValue = drawerShowProfilePic ? 1f : 0.8f;
+                float alphaInitialValue = drawerShowProfilePic ? 0 : 1f;
+                float alphaFinalValue = drawerShowProfilePic ? 1f : 0;
+
+                avatarImageView.setScaleX(isPreviewModeFirstDraw ? scaleFinalValue : scaleInitialValue);
+                avatarImageView.setScaleY(isPreviewModeFirstDraw ? scaleFinalValue : scaleInitialValue);
+                avatarImageView.setAlpha(isPreviewModeFirstDraw ? alphaFinalValue : alphaInitialValue);
+
+                if (!isPreviewModeFirstDraw) {
+                    avatarImageView.animate().scaleX(scaleFinalValue).scaleY(scaleFinalValue).alpha(alphaFinalValue).setDuration(200).start();
+                }
+
+                lastStateShowProfilePic = drawerShowProfilePic;
+            }
+
+            if (isPreviewModeFirstDraw || lastStateGradientBackground != drawerGradientBackground) {
+                float translateInitialValue = drawerGradientBackground ? 200 : 0;
+                float translateFinalValue = drawerGradientBackground ? 0 : 200;
+                float alphaInitialValue = drawerGradientBackground ? 0 : 1f;
+                float alphaFinalValue = drawerGradientBackground ? 1f : 0;
+
+                gradientBackground.setTranslationY(isPreviewModeFirstDraw ? translateFinalValue : translateInitialValue);
+                gradientBackground.setAlpha(isPreviewModeFirstDraw ? alphaFinalValue : alphaInitialValue);
+
+                if (!isPreviewModeFirstDraw) {
+                    gradientBackground.animate().translationY(translateFinalValue).alpha(alphaFinalValue).setDuration(200).start();
+                }
+
+                lastStateGradientBackground = drawerGradientBackground;
+            }
+
+            if (isPreviewModeFirstDraw || lastStateDarkenBackground != drawerDarkenBackground) {
+                float selectedAlpha = OctoConfig.INSTANCE.drawerDarkenBackgroundLevel.getValue() / 255f;
+                float alphaInitialValue = drawerDarkenBackground ? 0 : selectedAlpha;
+                float alphaFinalValue = drawerDarkenBackground ? selectedAlpha : 0;
+
+                darkenBackground.setAlpha(isPreviewModeFirstDraw ? alphaFinalValue : alphaInitialValue);
+
+                if (!isPreviewModeFirstDraw) {
+                    darkenBackground.animate().alpha(alphaFinalValue).setDuration(200).start();
+                }
+
+                lastStateDarkenBackground = drawerDarkenBackground;
+            }
+
+            isPreviewModeFirstDraw = false;
+        } else {
+            avatarImageView.setVisibility(drawerShowProfilePic ? VISIBLE : GONE);
+            gradientBackground.setVisibility(drawerGradientBackground ? VISIBLE : GONE);
+            darkenBackground.setVisibility(drawerDarkenBackground ? VISIBLE : GONE);
+            darkenBackground.setAlpha(OctoConfig.INSTANCE.drawerDarkenBackgroundLevel.getValue() / 255f);
+        }
+
         applyBackground(true);
         updateRightDrawable = true;
+        invalidate();
     }
 
     public Integer applyBackground(boolean force) {
         Integer currentTag = (Integer) getTag();
         int backgroundKey = Theme.hasThemeKey(Theme.key_chats_menuTopBackground) && Theme.getColor(Theme.key_chats_menuTopBackground) != 0 ? Theme.key_chats_menuTopBackground : Theme.key_chats_menuTopBackgroundCats;
+
+        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.TRANSPARENT.getValue()) {
+            backgroundKey = Theme.key_chats_menuBackground;
+        } else if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.COLOR.getValue()) {
+            backgroundKey = Theme.key_switchTrackBlue;
+        }
+
         if (force || currentTag == null || backgroundKey != currentTag) {
             setBackgroundColor(Theme.getColor(backgroundKey));
             setTag(backgroundKey);
@@ -780,8 +1239,8 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         } else if (id == NotificationCenter.updateInterfaces) {
             int flags = (int) args[0];
             if ((flags & MessagesController.UPDATE_MASK_NAME) != 0 || (flags & MessagesController.UPDATE_MASK_AVATAR) != 0 ||
-                (flags & MessagesController.UPDATE_MASK_STATUS) != 0 || (flags & MessagesController.UPDATE_MASK_PHONE) != 0 ||
-                (flags & MessagesController.UPDATE_MASK_EMOJI_STATUS) != 0) {
+                    (flags & MessagesController.UPDATE_MASK_STATUS) != 0 || (flags & MessagesController.UPDATE_MASK_PHONE) != 0 ||
+                    (flags & MessagesController.UPDATE_MASK_EMOJI_STATUS) != 0) {
                 setUser(UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser(), accountsShown);
             }
         }

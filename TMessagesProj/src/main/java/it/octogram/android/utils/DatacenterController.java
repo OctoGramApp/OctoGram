@@ -49,7 +49,7 @@ public class DatacenterController {
                                 var status = dcInfo.getInt("dc_status");
                                 var lastDown = dcInfo.getInt("last_down");
                                 var lastLag = dcInfo.getInt("last_lag");
-                                var ping = StandardHTTPRequest.ping(Datacenter.getDcInfo(dcInfo.getInt("dc_id")).ip);  //dcInfo.getInt("ping");
+                                var ping = StandardHTTPRequest.ping(Datacenter.Companion.getDcInfo(dcInfo.getInt("dc_id")).getIp());  //dcInfo.getInt("ping");
                                 infoArrayList.add(new DCStatus(dcID, status, ping, lastDown, lastLag));
                                 SystemClock.sleep(25);
                             }

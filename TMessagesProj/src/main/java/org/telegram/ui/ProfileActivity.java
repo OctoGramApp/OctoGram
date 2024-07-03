@@ -296,10 +296,12 @@ import java.util.zip.ZipOutputStream;
 
 import it.octogram.android.DcIdStyle;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import it.octogram.android.preferences.ui.custom.DatacenterCell;
+import it.octogram.android.utils.ImportSettingsScanHelper;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.RegistrationDateController;
 import it.octogram.android.utils.UserAccountInfoController;
@@ -7852,7 +7854,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
         } else if (id == NotificationCenter.updateSearchSettings) {
             if (searchAdapter != null) {
-                searchAdapter.searchArray = searchAdapter.onCreateSearchArray();
+                searchAdapter.searchArray = searchAdapter.onFillSearchArray();
+                //searchAdapter.searchArray = searchAdapter.onCreateSearchArray();
                 searchAdapter.recentSearches.clear();
                 searchAdapter.updateSearchArray();
                 searchAdapter.search(searchAdapter.lastSearchString);
@@ -11165,7 +11168,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             phoneNumber = null;
                         }
                         if (OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()) {
-                            if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue() && phoneNumber != null) {
+                            if (OctoConfig.INSTANCE.phoneNumberAlternative.getValue() == PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER.getValue() && phoneNumber != null) {
                                 CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber);
                                 if (info == null) {
                                     text = LocaleController.getString("MobileHidden", R.string.MobileHidden);
@@ -11247,7 +11250,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         if (userAccountInfo == null) {
                             detailCell.setTextAndValue(LocaleController.getString(R.string.NumberUnknown), LocaleController.getString(R.string.NumberUnknown), isSelfSettings);
                         } else {
-                            detailCell.setTextAndValue(userAccountInfo.userId + "", "DC" + userAccountInfo.dcInfo.dcId + " (" + userAccountInfo.dcInfo.dcName + ")", isSelfSettings);
+                            detailCell.setTextAndValue(userAccountInfo.userId + "", "DC" + userAccountInfo.dcInfo.getDcId() + " (" + userAccountInfo.dcInfo.getDcName() + ")", isSelfSettings);
                         }
                     } else if (position == registrationDataRow) {
                         if (!isChat() && userId != 0) {
@@ -11286,7 +11289,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         String value;
                         if (user != null && user.phone != null && user.phone.length() != 0) {
                             if (OctoConfig.INSTANCE.hidePhoneNumber.getValue()) {
-                                if (OctoConfig.INSTANCE.showFakePhoneNumber.getValue() && user.phone != null) {
+                                if (OctoConfig.INSTANCE.phoneNumberAlternative.getValue() == PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER.getValue() && user.phone != null) {
                                     CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(user.phone);
                                     if (info == null) {
                                         value = LocaleController.getString("MobileHidden", R.string.MobileHidden);
@@ -11962,7 +11965,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
         }
 
-        private SearchResult[] searchArray = onCreateSearchArray();
+        //private SearchResult[] searchArray = onCreateSearchArray();
+        private SearchResult[] searchArray = onFillSearchArray();
         private ArrayList<MessagesController.FaqSearchResult> faqSearchArray = new ArrayList<>();
 
         private Context mContext;
@@ -12033,6 +12037,27 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 return 0;
             });
+        }
+
+        private SearchResult[] onFillSearchArray() {
+            ArrayList<SearchResult> defaultList = new ArrayList<>(Arrays.asList(onCreateSearchArray()));
+
+            int minGuid = 1730;
+            ImportSettingsScanHelper helper = new ImportSettingsScanHelper();
+            for (ImportSettingsScanHelper.SettingsScanCategory category : helper.categories) {
+                minGuid++;
+                defaultList.add(new SearchResult(minGuid, category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.get())));
+
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    minGuid++;
+                    defaultList.add(new SearchResult(minGuid, option.getName(), category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.get())));
+                }
+            }
+
+            SearchResult[] combinedResults = new SearchResult[defaultList.size()];
+            combinedResults = defaultList.toArray(combinedResults);
+
+            return combinedResults;
         }
 
         private SearchResult[] onCreateSearchArray() {
@@ -13314,8 +13339,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private String formatMinimalDcId(UserAccountInfoController.UserAccountInfo tInfo) {
-        return tInfo.dcInfo.dcId != -1 ?
-                String.format(Locale.ENGLISH, "id: %s (dc%s)", tInfo.userId, tInfo.dcInfo.dcId) :
+        return tInfo.dcInfo.getDcId() != -1 ?
+                String.format(Locale.ENGLISH, "id: %s (dc%s)", tInfo.userId, tInfo.dcInfo.getDcId()) :
                 String.format(Locale.ENGLISH, "id: %s", tInfo.userId);
     }
 

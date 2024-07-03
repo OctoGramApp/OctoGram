@@ -4490,7 +4490,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             });
         }
         if (translateButtonValue) {
-            String translatedLanguageName = TranslateAlert2.languageName(TranslateAlert2.getToLanguage());
+            String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+            String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
             ActionBarMenuSubItem subItem = new ActionBarMenuSubItem(getContext(), false, false, resourcesProvider);
             subItem.setPadding(dp(18), 0, dp(18), 0);
             subItem.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate, null);
@@ -4498,7 +4499,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             subItem.setColors(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, resourcesProvider), Theme.getColor(Theme.key_actionBarDefaultSubmenuItemIcon, resourcesProvider));
             subItem.setSelectorColor(Theme.multAlpha(Theme.getColor(Theme.key_actionBarDefaultSubmenuItemIcon, resourcesProvider), .12f));
 
-            subItem.setOnClickListener(view1 -> executeMessageTranslation(TranslateAlert2.getToLanguage()));
+            subItem.setOnClickListener(view1 -> executeMessageTranslation(destinationLanguage));
             subItem.setOnLongClickListener(v -> {
                 executeTranslationToCustomDestination();
                 return true;
@@ -4527,7 +4528,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     }
 
     private void executeTranslationToCustomDestination() {
-        if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText())) {
+        if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText().toString().trim())) {
             return;
         }
 
@@ -4544,14 +4545,17 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     }
 
     private void executeMessageTranslation(String toLanguage) {
-        if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText())) {
+        if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText().toString().trim())) {
             return;
         }
+
+        OctoConfig.INSTANCE.lastTranslatePreSendLanguage.updateValue(toLanguage);
+        String realDestination = toLanguage == null ? TranslateAlert2.getToLanguage() : toLanguage;
 
         final AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
         progressDialog.showDelayed(500);
 
-        TranslationsWrapper.translate(UserConfig.selectedAccount, toLanguage, messageEditText.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
+        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, messageEditText.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
             @Override
             public void onGotReqId(int reqId) {
 

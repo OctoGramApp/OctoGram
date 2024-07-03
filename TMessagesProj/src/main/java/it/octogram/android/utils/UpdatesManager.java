@@ -1,5 +1,9 @@
 package it.octogram.android.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import com.google.android.exoplayer2.util.Log;
 
 import org.json.JSONArray;
@@ -14,6 +18,7 @@ import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +26,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.StandardHTTPRequest;
 
@@ -592,6 +598,31 @@ public class UpdatesManager {
         } catch (JSONException e) {
             return null;
         }
+    }
+
+    public static boolean canAutoDownloadUpdates() {
+        int autoDownloadUpdatesStatus = OctoConfig.INSTANCE.autoDownloadUpdatesStatus.getValue();
+
+        if (autoDownloadUpdatesStatus == AutoDownloadUpdate.ALWAYS.getValue()) {
+            return true;
+        }
+
+        if (autoDownloadUpdatesStatus == AutoDownloadUpdate.ONLY_ON_WIFI.getValue()) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) LaunchActivity.instance.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            if (connectivityManager == null) {
+                return false;
+            }
+
+            try {
+                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                return networkInfo != null && networkInfo.isAvailable() && networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
+            } catch (SecurityException e) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     public interface UpdatesManagerPrepareInterface {

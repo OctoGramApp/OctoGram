@@ -662,7 +662,8 @@ public class ActionBar extends FrameLayout {
     public void onDrawCrossfadeContent(Canvas canvas, boolean front, boolean hideBackDrawable, float progress) {
         for (int i = 0; i < getChildCount(); i++) {
             View ch = getChildAt(i);
-            if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && ch instanceof ActionBarMenu) {
+            if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && ch.getAlpha() != 0.0f && ch instanceof ActionBarMenu) {
+            //if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && ch instanceof ActionBarMenu) {
                 canvas.save();
                 canvas.translate(ch.getX(), ch.getY());
                 ch.draw(canvas);
@@ -674,7 +675,8 @@ public class ActionBar extends FrameLayout {
         canvas.translate(front ? getWidth() * progress * 0.5f : -getWidth() * 0.4f * (1f - progress), 0);
         for (int i = 0; i < getChildCount(); i++) {
             View ch = getChildAt(i);
-            if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && !(ch instanceof ActionBarMenu)) {
+            if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && ch.getAlpha() != 0.0f && !(ch instanceof ActionBarMenu)) {
+            //if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && !(ch instanceof ActionBarMenu)) {
                 canvas.save();
                 canvas.translate(ch.getX(), ch.getY());
                 ch.draw(canvas);

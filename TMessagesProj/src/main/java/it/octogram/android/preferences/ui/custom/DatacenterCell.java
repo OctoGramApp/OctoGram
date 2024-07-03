@@ -116,13 +116,13 @@ public class DatacenterCell extends LinearLayout {
     }
 
     public void setIdAndDC(UserAccountInfoController.UserAccountInfo tInfo, boolean divider) {
-        String formatted = tInfo.dcInfo.dcId != -1 ?
-                String.format(Locale.ENGLISH, "%s (DC%d)", tInfo.dcInfo.dcName, tInfo.dcInfo.dcId) :
-                tInfo.dcInfo.dcName;
+        String formatted = tInfo.dcInfo.getDcId() != -1 ?
+                String.format(Locale.ENGLISH, "%s (DC%d)", tInfo.dcInfo.getDcName(), tInfo.dcInfo.getDcId()) :
+                tInfo.dcInfo.getDcName();
         dcNameView.setText(formatted);
         idView.setText(String.valueOf(tInfo.userId));
 
-        Drawable d = ContextCompat.getDrawable(getContext(), tInfo.dcInfo.icon);
+        Drawable d = ContextCompat.getDrawable(getContext(), tInfo.dcInfo.getIcon());
         ColorFilter filter = new PorterDuffColorFilter(Theme.getColor(Theme.key_switch2TrackChecked, resourcesProvider), PorterDuff.Mode.SRC_ATOP);
         Objects.requireNonNull(d).setColorFilter(filter);
         dcIconView.setBackground(d);

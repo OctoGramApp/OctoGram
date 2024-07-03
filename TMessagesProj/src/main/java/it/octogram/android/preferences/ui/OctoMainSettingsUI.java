@@ -24,6 +24,7 @@ import org.telegram.ui.LaunchActivity;
 import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -42,7 +43,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
         String footer = AndroidUtilities.replaceTags(LocaleController.formatString("OctoMainSettingsFooter", R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING)).toString();
         String comingSoon = AndroidUtilities.replaceTags(LocaleController.formatString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable)).toString();
         return OctoPreferences.builder(LocaleController.getString("OctoGramSettings", R.string.OctoGramSettings))
-                .sticker(context, R.raw.utyan_robot, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.MAIN, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
 
 

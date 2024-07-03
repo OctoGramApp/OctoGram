@@ -35,6 +35,12 @@ public class SliderCell extends FrameLayout {
         sizeBar.setReportChanges(true);
         sizeBar.setDelegate((stop, progress) -> {
             sliderRow.getPreferenceValue().updateValue(Math.round(startRadius + (endRadius - startRadius) * progress));
+
+            Runnable runnable = sliderRow.getRunnable();
+            if (runnable != null) {
+                runnable.run();
+            }
+
             requestLayout();
         });
         addView(sizeBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 38, Gravity.START | Gravity.TOP, 5, 5, 39, 0));

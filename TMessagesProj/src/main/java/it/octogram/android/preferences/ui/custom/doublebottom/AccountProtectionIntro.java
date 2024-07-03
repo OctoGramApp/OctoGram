@@ -25,6 +25,7 @@ import org.telegram.ui.PasscodeActivity;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 public class AccountProtectionIntro extends BaseFragment {
     private RLottieImageView imageView;
     private TextView buttonTextView;
@@ -228,7 +229,7 @@ public class AccountProtectionIntro extends BaseFragment {
         });
         switch (currentType) {
             case CONFIRM_DOUBLE_BOTTOM:
-                imageView.setAnimation(R.raw.double_bottom, 200, 200);
+                imageView.setAnimation(R.raw.utyan_private, 200, 200);
                 titleTextView.setText(LocaleController.getString("AccountProtection", R.string.AccountProtection));
                 descriptionText.setText(LocaleController.getString("AccountProtectionDesc", R.string.AccountProtectionDesc));
                 buttonTextView.setText(LocaleController.getString("EnableAccountProtection", R.string.EnableAccountProtection));

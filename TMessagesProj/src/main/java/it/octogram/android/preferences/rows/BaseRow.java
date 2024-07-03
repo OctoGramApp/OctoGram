@@ -25,6 +25,10 @@ public abstract class BaseRow {
     private int row;
 
 
+    public BaseRow(PreferenceType type, ConfigProperty<Boolean> showIf) {
+        this(null, null, false, showIf, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
+    }
+
     public BaseRow(PreferenceType type) {
         this(null, null, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }

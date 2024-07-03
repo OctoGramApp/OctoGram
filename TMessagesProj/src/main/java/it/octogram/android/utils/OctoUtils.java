@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import it.octogram.android.Datacenter;
 import it.octogram.android.MediaFilter;
 
 
@@ -315,6 +317,10 @@ public class OctoUtils {
         } else {
             return String.format(Locale.getDefault(), "%.2f Gbps", bitrate / 1000000000.0);
         }
+    }
+
+    public static int getDcIcon(){
+        return Datacenter.Companion.getDcInfo(AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId()).getIcon();
     }
 }
 

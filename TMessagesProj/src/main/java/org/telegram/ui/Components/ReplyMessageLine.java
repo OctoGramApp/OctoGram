@@ -28,6 +28,8 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatMessageCell;
 
+import it.octogram.android.OctoConfig;
+
 public class ReplyMessageLine {
 
     private final RectF rectF = new RectF();
@@ -231,6 +233,9 @@ public class ReplyMessageLine {
             } else {
                 colorId = 0;
             }
+            if (!OctoConfig.INSTANCE.repliesLinksShowColors.getValue()) {
+                colorId = 0;
+            }
             resolveColor(messageObject, colorId, resourcesProvider);
             backgroundColor = Theme.multAlpha(color1, 0.10f);
             nameColor = color1;
@@ -275,6 +280,9 @@ public class ReplyMessageLine {
             } else {
                 colorId = 0;
             }
+            if (!OctoConfig.INSTANCE.repliesLinksShowColors.getValue()) {
+                colorId = 0;
+            }
             resolveColor(messageObject.replyMessageObject, colorId, resourcesProvider);
             backgroundColor = Theme.multAlpha(color1, 0.10f);
             nameColor = color1;
@@ -310,6 +318,9 @@ public class ReplyMessageLine {
         }
         if ((type == TYPE_REPLY || type == TYPE_LINK || type == TYPE_CONTACT) && messageObject != null && messageObject.overrideLinkEmoji != -1) {
             emojiDocumentId = messageObject.overrideLinkEmoji;
+        }
+        if (!OctoConfig.INSTANCE.repliesLinksShowEmojis.getValue()) {
+            emojiDocumentId = 0;
         }
         if (emojiDocumentId != 0 && emoji == null) {
             emoji = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(parentView, false, dp(20), AnimatedEmojiDrawable.CACHE_TYPE_ALERT_PREVIEW_STATIC);

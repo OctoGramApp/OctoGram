@@ -237,6 +237,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
@@ -3297,9 +3298,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             } else {
                 statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(null, dp(26));
                 statusDrawable.center = true;
-                if (OctoConfig.INSTANCE.showNameInActionBar.getValue()) {
+                if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.ACCOUNT_NAME.getValue()) {
                     TLRPC.User selfUser = UserConfig.getInstance(currentAccount).getCurrentUser();
                     actionBar.setTitle((selfUser.first_name + " " + (selfUser.last_name != null ? selfUser.last_name : "")), statusDrawable);
+                } else if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.ACCOUNT_USERNAME.getValue()) {
+                    TLRPC.User selfUser = UserConfig.getInstance(currentAccount).getCurrentUser();
+                    actionBar.setTitle((selfUser.username != null ? "@"+selfUser.username : (selfUser.first_name + " " + (selfUser.last_name != null ? selfUser.last_name : ""))), statusDrawable);
+                } else if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.EMPTY.getValue()) {
+                    actionBar.setTitle("", statusDrawable);
+                } else if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue()) {
+                    actionBar.setTitle(OctoConfig.INSTANCE.actionBarCustomTitle.getValue(), statusDrawable);
                 } else {
                     actionBar.setTitle(LocaleController.getString("BuildAppName", R.string.BuildAppName), statusDrawable);
                 }
@@ -7253,7 +7261,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         actionBar.openSearchField(query, false);
     }
 
-    private void showSearch(boolean show, boolean startFromDownloads, boolean animated) {
+    public void showSearch(boolean show, boolean startFromDownloads, boolean animated) {
         showSearch(show, startFromDownloads, animated, false);
     }
 
@@ -11614,7 +11622,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 break;
             }
         }
-        SendMessageOptions layout = new SendMessageOptions(parentActivity, forwardContext, selectedDialogs.size() > 1 && !hasEncrypted, selectedDialogs.size() > 1, () -> {
+        SendMessageOptions layout = new SendMessageOptions(parentActivity, this, forwardContext, selectedDialogs.size() > 1 && !hasEncrypted, selectedDialogs.size() > 1, () -> {
             if (delegate == null || selectedDialogs.isEmpty()) {
                 return;
             }
@@ -11623,7 +11631,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 topicKeys.add(MessagesStorage.TopicKey.of(selectedDialogs.get(i), 0));
             }
             delegate.didSelectDialogs(DialogsActivity.this, topicKeys, commentView.getFieldText(), false, null);
-        }, resourcesProvider);
+        }, resourcesProvider, commentView);
 
         sendPopupWindow = new ActionBarPopupWindow(layout, LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT);
         sendPopupWindow.setAnimationEnabled(false);

@@ -649,17 +649,26 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 };
             }
 
+            private Bulletin.Delegate bulletinDelegate = new Bulletin.Delegate() {
+                @Override
+                public int getBottomOffset(int tag) {
+                    return getHeight() - frameLayout2.getTop() + AndroidUtilities.dp(25);
+                }
+            };
+
             @Override
             protected void onAttachedToWindow() {
                 super.onAttachedToWindow();
                 adjustPanLayoutHelper.setResizableView(this);
                 adjustPanLayoutHelper.onAttach();
+                Bulletin.addDelegate(this, bulletinDelegate);
             }
 
             @Override
             protected void onDetachedFromWindow() {
                 super.onDetachedFromWindow();
                 adjustPanLayoutHelper.onDetach();
+                Bulletin.removeDelegate(this);
             }
 
             @Override
@@ -1901,10 +1910,10 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         if (parentActivity == null) {
             return false;
         }
-        SendMessageOptions layout = new SendMessageOptions(parentActivity, forwardContext, true, true, () -> {
+        SendMessageOptions layout = new SendMessageOptions(parentActivity, sizeNotifierFrameLayout, forwardContext, true, true, () -> {
             ForwardContext.ForwardParams params = forwardContext.getForwardParams();
             sendInternal(params.notify, params.scheduleDate);
-        }, resourcesProvider);
+        }, resourcesProvider, commentTextView);
         /*TODO: Rework 
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);

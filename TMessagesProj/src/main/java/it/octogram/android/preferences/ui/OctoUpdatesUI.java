@@ -21,23 +21,31 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
+import java.util.List;
 
+import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
+import it.octogram.android.TranslatorFormality;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
+import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.components.CustomUpdatesCheckCell;
+import it.octogram.android.utils.PopupChoiceDialogOption;
 import it.octogram.android.utils.UpdatesManager;
 
 public class OctoUpdatesUI implements PreferencesEntry {
@@ -53,33 +61,48 @@ public class OctoUpdatesUI implements PreferencesEntry {
         }
 
         OctoPreferences build = OctoPreferences.builder(LocaleController.formatString("Updates", R.string.Updates))
-                .sticker(context, R.raw.updates, true, LocaleController.formatString("UpdatesSettingsHeader", R.string.UpdatesSettingsHeader))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.UPDATES, true, LocaleController.formatString(R.string.UpdatesSettingsHeader))
                 .row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(checkCell = new CustomUpdatesCheckCell(context, () -> checkForUpdates(fragment, context)))
                         .build())
-                .row(new SwitchRow.SwitchRowBuilder()
-                        .preferenceValue(OctoConfig.INSTANCE.autoCheckUpdateStatus)
-                        .title(LocaleController.formatString("UpdatesSettingsAuto", R.string.UpdatesSettingsAuto))
-                        .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
-                        .build())
-                .row(new SwitchRow.SwitchRowBuilder()
-                        .onClick(() -> {
-                            AndroidUtilities.runOnUIThread(() -> checkForUpdates(fragment, context, true), 300);
-                            return true;
-                        })
-                        .preferenceValue(OctoConfig.INSTANCE.preferBetaVersion)
-                        .title(LocaleController.formatString("UpdatesSettingsBeta", R.string.UpdatesSettingsBeta))
-                        .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
-                        .build())
-                .row(new SwitchRow.SwitchRowBuilder()
-                        .onClick(() -> {
-                            AndroidUtilities.runOnUIThread(() -> checkForUpdates(fragment, context, true), 300);
-                            return true;
-                        })
-                        .preferenceValue(OctoConfig.INSTANCE.receivePBetaUpdates)
-                        .title(LocaleController.formatString("UpdatesSettingsPBeta", R.string.UpdatesSettingsPBeta))
-                        .showIf(isPbetaUser)
-                        .build())
+                .row(new ShadowRow())
+                .category("Options", category -> {
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.autoDownloadUpdatesStatus)
+                            .onSelected(this::checkAutoDownloadState)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(AutoDownloadUpdate.ALWAYS.getValue())
+                                            .setItemTitle(LocaleController.getString("UpdatesSettingsAutoDownloadAlways", R.string.UpdatesSettingsAutoDownloadAlways))
+                                            .setItemDescription(LocaleController.formatString("UpdatesSettingsAutoDownloadAlwaysDesc", R.string.UpdatesSettingsAutoDownloadAlwaysDesc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(AutoDownloadUpdate.ONLY_ON_WIFI.getValue())
+                                            .setItemTitle(LocaleController.getString("UpdatesSettingsAutoDownloadWifi", R.string.UpdatesSettingsAutoDownloadWifi)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(AutoDownloadUpdate.NEVER.getValue())
+                                            .setItemTitle(LocaleController.getString("UpdatesSettingsAutoDownloadNever", R.string.UpdatesSettingsAutoDownloadNever))
+                            ))
+                            .title(LocaleController.getString("UpdatesSettingsAutoDownload", R.string.UpdatesSettingsAutoDownload))
+                            .build()
+                    );
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.autoCheckUpdateStatus)
+                            .title(LocaleController.formatString("UpdatesSettingsAuto", R.string.UpdatesSettingsAuto))
+                            .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> checkForUpdates(fragment, context, true))
+                            .preferenceValue(OctoConfig.INSTANCE.preferBetaVersion)
+                            .title(LocaleController.formatString("UpdatesSettingsBeta", R.string.UpdatesSettingsBeta))
+                            .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> checkForUpdates(fragment, context, true))
+                            .preferenceValue(OctoConfig.INSTANCE.receivePBetaUpdates)
+                            .title(LocaleController.formatString("UpdatesSettingsPBeta", R.string.UpdatesSettingsPBeta))
+                            .showIf(isPbetaUser)
+                            .build());
+                })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
                         .title(LocaleController.formatString("UpdatesSettingsAutoDescription", R.string.UpdatesSettingsAutoDescription))
                         .showIf(isPbetaUser, true)
@@ -115,15 +138,25 @@ public class OctoUpdatesUI implements PreferencesEntry {
             String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
             File path = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
             if (path.exists()) {
-                checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY);
+                AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY));
             } else {
                 boolean isDownloading = FileLoader.getInstance(0).isLoadingFile(fileName);
                 if (isDownloading) {
                     Float p = ImageLoader.getInstance().getFileProgress(fileName);
-                    checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING, p != null ? p : 0.0f);
+                    AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING, p != null ? p : 0.0f));
                 } else {
-                    checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
+                    AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD));
                 }
+            }
+        }
+    }
+
+    private void checkAutoDownloadState() {
+        if (UpdatesManager.canAutoDownloadUpdates() && SharedConfig.isAppUpdateAvailable()) {
+            preUpdateUI();
+
+            if (checkCell.getCurrentState() == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
+                LaunchActivity.instance.handleNewUpdate(SharedConfig.pendingAppUpdate, true);
             }
         }
     }
@@ -144,7 +177,7 @@ public class OctoUpdatesUI implements PreferencesEntry {
             return;
         }
 
-        checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.CHECKING_UPDATES);
+        AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.CHECKING_UPDATES));
 
         UpdatesManager.isUpdateAvailable(new UpdatesManager.UpdatesManagerCheckInterface() {
             @Override

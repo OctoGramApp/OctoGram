@@ -25,6 +25,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -34,7 +35,7 @@ import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarsImageView;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieImageView;
+import org.telegram.ui.Components.StickerImageView;
 import org.telegram.ui.TwoStepVerificationActivity;
 
 import java.lang.reflect.Field;
@@ -42,12 +43,14 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 import it.octogram.android.utils.OctoUtils;
 
 public class DeleteAccountBottomSheet extends BottomSheet {
 
     private int selectedPosition;
-    private BaseFragment fragment;
+    private final BaseFragment fragment;
 
     public DeleteAccountBottomSheet(Context context, BaseFragment fragment, DeleteAccountBottomSheetInterface callback) {
         super(context, true);
@@ -161,9 +164,11 @@ public class DeleteAccountBottomSheet extends BottomSheet {
             @Override
             public void onPageSelected(int position) {
                 View child = viewPager.getChildAt(1);
-                // ALWAYS CONSIDER CHILD AT POSITION 1
-                // because every time you change from section B to C, the section A is destroyed
-                // so viewPager childs are ALWAYS just two.
+                /*
+                 ALWAYS CONSIDER CHILD AT POSITION 1
+                 because every time you change from section B to C, the section A is destroyed
+                 so viewPager childs are ALWAYS just two.
+                */
                 if (child != null) {
                     child.measure(
                             View.MeasureSpec.makeMeasureSpec(viewPager.getWidth(), View.MeasureSpec.EXACTLY),
@@ -216,11 +221,11 @@ public class DeleteAccountBottomSheet extends BottomSheet {
         setCustomView(linearLayout);
     }
 
-    private int getStickerForStepId(int stepId) {
+    private StickerUi getStickerForStepId(int stepId) {
         return switch (stepId) {
-            case CurrentStep.FREE_CLOUD_STORAGE -> R.raw.utyan_size;
-            case CurrentStep.GROUPS_AND_CHANNELS -> R.raw.utyan_vitnam;
-            default -> R.raw.utyan_private;
+            case CurrentStep.FREE_CLOUD_STORAGE -> StickerUi.SIZE;
+            case CurrentStep.GROUPS_AND_CHANNELS -> StickerUi.GROUPS_AND_CHANNELS;
+            default -> StickerUi.PRIVATE;
         };
     }
 
@@ -329,10 +334,10 @@ public class DeleteAccountBottomSheet extends BottomSheet {
             LinearLayout linearLayout = new LinearLayout(context);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-            RLottieImageView imageView = new RLottieImageView(context);
-            imageView.setAutoRepeat(true);
-            imageView.setAnimation(getStickerForStepId(p), AndroidUtilities.dp(130), AndroidUtilities.dp(130));
-            imageView.playAnimation();
+            StickerImageView imageView = new StickerImageView(context, UserConfig.selectedAccount);
+            imageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
+            imageView.setStickerNum(getStickerForStepId(p).getValue());
+            imageView.getImageReceiver().setAutoRepeat(1);
             linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 16));
 
             TextView textView = new TextView(context);

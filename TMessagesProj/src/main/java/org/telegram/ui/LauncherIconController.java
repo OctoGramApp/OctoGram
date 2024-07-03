@@ -42,7 +42,8 @@ public class LauncherIconController {
         PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground_sa, R.string.AppIconPremium, true),
         TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.mipmap.icon_5_foreground_sa, R.string.AppIconTurbo, true),
         NOX("NoxIcon", R.mipmap.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox, true),
-        YUKI("YukiIcon", R.drawable.icon_yuki_background_sa, R.mipmap.icon_yuki_foreground_sa, R.string.AppIconYuki, false, true);
+        YUKI("YukiIcon", R.drawable.icon_yuki_background_sa, R.mipmap.icon_yuki_foreground_sa, R.string.AppIconYuki, false, true),
+        CONFETTI("ConfettiIcon", R.mipmap.ic_octo_confetti_background, R.mipmap.icon_foreground_sa, R.string.AppIconConfetti, false, true);
 
         public final String key;
         public final int background;

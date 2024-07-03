@@ -192,6 +192,7 @@ import org.telegram.ui.Components.Premium.boosts.UserSelectorBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.SearchDownloadsContainer;
 import org.telegram.ui.Components.SearchTagsList;
 import org.telegram.ui.Components.SharingLocationsAlert;
 import org.telegram.ui.Components.SideMenultItemAnimator;
@@ -702,6 +703,21 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     presentFragment(new MediaActivity(args, null));
                 } else if (id == 100) {
                     presentFragment(new PreferencesFragment(new OctoMainSettingsUI()));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 912) {
+                    BaseFragment lastFragment = LaunchActivity.instance.getActionBarLayout().getLastFragment();
+                    if (lastFragment instanceof DialogsActivity dialogsActivity) {
+                        dialogsActivity.showSearch(true, true, true);
+                        dialogsActivity.getActionBar().openSearchField(true);
+                        drawerLayoutContainer.closeDrawer(false);
+                    }
+                } else if (id == 913) {
+                    presentFragment(new SessionsActivity(0));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 202) {
+                    Bundle args = new Bundle();
+                    args.putInt("folderId", 1);
+                    presentFragment(new DialogsActivity(args));
                     drawerLayoutContainer.closeDrawer(false);
                 } else if (id == 101) {
                     presentFragment(new DatacenterActivity());
@@ -8564,6 +8580,27 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 }
                 lastFragment.getOrCreateStoryViewer().instantClose();
                 lastFragment.getOrCreateStoryViewer().open(this, null, peerIds, 0, null, null, placeProvider, false);
+            }
+        }
+    }
+
+    public void reloadDrawerState() {
+        TLRPC.User user = UserConfig.getInstance(currentAccount).getCurrentUser();
+        if (user != null) {
+            for (int i = 0; i < sideMenu.getChildCount(); ++i) {
+                View child = sideMenu.getChildAt(i);
+                if (child instanceof DrawerProfileCell) {
+                    ((DrawerProfileCell) child).setUser(user, drawerLayoutAdapter.isAccountsShown());
+                }
+            }
+        }
+    }
+
+    public void reloadDrawerMiniIcon() {
+        for (int i = 0; i < sideMenu.getChildCount(); ++i) {
+            View child = sideMenu.getChildAt(i);
+            if (child instanceof DrawerProfileCell) {
+                ((DrawerProfileCell) child).updateMiniIcon();
             }
         }
     }

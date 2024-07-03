@@ -8,7 +8,7 @@
 
 package it.octogram.android.preferences.fragment;
 
-import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
+import static android.widget.LinearLayout.VERTICAL;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -40,6 +40,7 @@ import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextCheckCell;
+import org.telegram.ui.Cells.TextCheckCell2;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
@@ -86,6 +87,7 @@ public class PreferencesFragment extends BaseFragment {
     private RecyclerListView listView;
     private int rowCount;
     private Context context;
+    private UndoView restartTooltip;
 
     public PreferencesFragment(PreferencesEntry entry) {
         this.entry = entry;
@@ -154,11 +156,11 @@ public class PreferencesFragment extends BaseFragment {
 
         listView = new RecyclerListView(context);
         listView.setVerticalScrollBarEnabled(false);
-        listView.setLayoutManager(new LinearLayoutManager(context, VERTICAL, false));
+        listView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT));
         listView.setAdapter(listAdapter);
 
-        UndoView restartTooltip = new UndoView(context);
+        restartTooltip = new UndoView(context);
         frameLayout.addView(restartTooltip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT, 8, 0, 8, 8));
 
         listView.setOnItemClickListener((view, position, x, y) -> {
@@ -182,7 +184,7 @@ public class PreferencesFragment extends BaseFragment {
                 }
                 if (success && !isProceedingForPremiumAlert) {
                     if (row.doesRequireRestart()) {
-                        restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
+                        showRestartTooltip();
                     }
 
                     if (row.getPostNotificationName() != null) {
@@ -194,6 +196,10 @@ public class PreferencesFragment extends BaseFragment {
             reloadUIAfterValueUpdate();
         });
         return fragmentView;
+    }
+
+    public void showRestartTooltip() {
+        restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
     }
 
     public void reloadUIAfterValueUpdate() {
@@ -260,7 +266,7 @@ public class PreferencesFragment extends BaseFragment {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view;
-            PreferenceType type = PreferenceType.fromAdapterType(viewType);
+            PreferenceType type = PreferenceType.Companion.fromAdapterType(viewType);
             if (type == null) {
                 throw new RuntimeException("No type found for " + viewType);
             }
@@ -337,7 +343,7 @@ public class PreferencesFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            PreferenceType type = PreferenceType.fromAdapterType(holder.getItemViewType());
+            PreferenceType type = PreferenceType.Companion.fromAdapterType(holder.getItemViewType());
             if (type == null) {
                 throw new RuntimeException("No type found for " + holder.getItemViewType());
             }
@@ -349,9 +355,13 @@ public class PreferencesFragment extends BaseFragment {
                     if (frameLayout.getChildCount() > 0) {
                         frameLayout.removeAllViews();
                     }
+
                     // add custom view
-                    View view = ((CustomCellRow) positions.get(position)).getLayout();
-                    frameLayout.addView(view);
+                    CustomCellRow row = (CustomCellRow) positions.get(position);
+                    if (row.getLayout() != null) {
+                        frameLayout.addView(row.getLayout());
+                    }
+
                     break;
                 case SHADOW:
                     holder.itemView.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
@@ -368,8 +378,12 @@ public class PreferencesFragment extends BaseFragment {
                     } else {
                         checkCell.setTextAndCheck(switchRow.getTitle(), switchRow.getPreferenceValue(), switchRow.hasDivider());
                     }
-                    checkCell.setCheckBoxIcon(switchRow.isPremium() ? R.drawable.permission_locked : 0);
+                    checkCell.setCheckBoxIcon(switchRow.isPremium() || switchRow.isLocked() ? R.drawable.permission_locked : 0);
                     break;
+                case SWITCH_COLLAPSIBLE:
+                    TextCheckCell2 checkCellCollapsable = (TextCheckCell2) holder.itemView;
+                    SwitchRow switchRowCollapsable = (SwitchRow) positions.get(position);
+                    checkCellCollapsable.setTextAndCheck(switchRowCollapsable.getTitle(), switchRowCollapsable.getPreferenceValue(), switchRowCollapsable.hasDivider());
                 case TEXT_DETAIL:
                     TextDetailRow textDetailRow = (TextDetailRow) positions.get(position);
                     textDetailRow.bindCell((TextDetailSettingsCell) holder.itemView);

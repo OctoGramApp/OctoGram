@@ -9392,12 +9392,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         translateButton = new TranslateButton(getContext(), this, themeDelegate) {
             @Override
             protected void onButtonClick() {
-                //if (getUserConfig().isPremium()) {
+                if (getMessagesController().getTranslateController().isFeatureAvailable()) {
                     getMessagesController().getTranslateController().toggleTranslatingDialog(getDialogId());
-                /*} else {
+                } else {
                     MessagesController.getNotificationsSettings(currentAccount).edit().putInt("dialog_show_translate_count" + getDialogId(), 14).commit();
                     showDialog(new PremiumFeatureBottomSheet(ChatActivity.this, PremiumPreviewFragment.PREMIUM_FEATURE_TRANSLATIONS, false));
-                }*/
+                }
                 updateTopPanel(true);
             }
 
@@ -30115,7 +30115,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             businessLinksEmptyView = new BusinessLinksEmptyView(getContext(), this, businessLink, getResourceProvider());
             businessLinksEmptyView.setBackground(Theme.createServiceDrawable(AndroidUtilities.dp(16), businessLinksEmptyView, contentView, getThemedPaint(Theme.key_paint_chatActionBackground)));
             emptyViewContainer.addView(businessLinksEmptyView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
-        } else if (/*!OctoConfig.INSTANCE.hideGreetingSticker.getValue() && */(distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked || userInfo != null && getDialogId() != getUserConfig().getClientUserId() && userInfo.contact_require_premium && !getUserConfig().isPremium()) {
+        } else if ((distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked || userInfo != null && getDialogId() != getUserConfig().getClientUserId() && userInfo.contact_require_premium && !getUserConfig().isPremium()) {
             greetingsViewContainer = new ChatGreetingsView(getContext(), currentUser, distance, currentAccount, preloadedGreetingsSticker, themeDelegate) {
                 @Override
                 protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -30162,8 +30162,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else if (currentUser != null && currentUser.id != 777000 && currentUser.id != 429000 && currentUser.id != 4244000 && MessagesController.isSupportUser(currentUser)) {
                     emptyMessage = LocaleController.getString(R.string.GotAQuestion);
                 } else if (currentUser == null || currentUser.self || currentUser.deleted || userBlocked) {
-                    emptyMessage = LocaleController.getString(R.string.NoMessages);
-                } else if (OctoConfig.INSTANCE.hideGreetingSticker.getValue()) {
                     emptyMessage = LocaleController.getString(R.string.NoMessages);
                 }
                 if (emptyMessage == null) {

@@ -290,9 +290,12 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import it.octogram.android.utils.VideoUtils;
+import it.octogram.android.utils.translator.SingleTranslationManager;
+import it.octogram.android.utils.translator.TranslationsWrapper;
 
 @SuppressLint("WrongConstant")
 @SuppressWarnings("unchecked")
@@ -6486,8 +6489,10 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             sendPopupLayout.setBackgroundColor(0xf9222222);
 
             final boolean canReplace = placeProvider != null && placeProvider.canReplace(currentIndex);
-            final int[] order = {4, 3, 2, 0, 1};
-            for (int i = 0; i < 5; i++) {
+            String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+            boolean translateButtonValue = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled();
+            final int[] order = {4, 3, 2, 0, 1, 8};
+            for (int i = 0; i < 6; i++) {
                 final int a = order[i];
                 if (a != 2 && a != 3 && canReplace) {
                     continue;
@@ -6523,6 +6528,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     continue;
                 } else if (a == 4 && (isCurrentVideo || captionEdit.hasTimer())) {
                     continue;
+                } else if (a == 8 && (!translateButtonValue || TextUtils.isEmpty(captionEdit.getText().toString().trim()))) {
+                    continue;
                 }
                 ActionBarMenuSubItem cell = new ActionBarMenuSubItem(parentActivity, a == 0, a == 3, resourcesProvider);
                 if (a == 0) {
@@ -6543,6 +6550,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     } else {
                         cell.setTextAndIcon(LocaleController.getString(R.string.SendAsFile), R.drawable.msg_sendfile);
                     }
+                } else if (a == 8) {
+                    String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
+                    cell.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
                 }
                 cell.setMinimumWidth(dp(196));
                 cell.setColors(0xffffffff, 0xffffffff);
@@ -6561,8 +6571,17 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         sendPressed(true, 0);
                     } else if (a == 4) {
                         sendPressed(true, 0, false, true, false);
+                    } else if (a == 8) {
+                        executeMessageTranslation(destinationLanguage);
                     }
                 });
+
+                if (a == 8) {
+                    cell.setOnLongClickListener((v) ->  {
+                        executeTranslationToCustomDestination();
+                        return true;
+                    });
+                }
             }
             if (sendPopupLayout.getChildCount() == 0) {
                 return false;
@@ -20702,5 +20721,66 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             matrix.preScale(1 - currentMirror * 2, 1f);
             matrix.preSkew(0, 4 * currentMirror * (1f - currentMirror) * .25f);
         }
+    }
+
+    private void executeTranslationToCustomDestination() {
+        if (captionEdit == null || TextUtils.isEmpty(captionEdit.getText().toString().trim())) {
+            return;
+        }
+
+        if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+            sendPopupWindow.dismiss();
+        }
+
+        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        destinationSettings.setCallback(this::executeMessageTranslation);
+        AndroidUtilities.runOnUIThread(() -> {
+            parentFragment.presentFragment(destinationSettings);
+        }, 500);
+    }
+
+    private void executeMessageTranslation(String toLanguage) {
+        if (captionEdit == null || TextUtils.isEmpty(captionEdit.getText().toString().trim())) {
+            return;
+        }
+
+        OctoConfig.INSTANCE.lastTranslatePreSendLanguage.updateValue(toLanguage);
+        String realDestination = toLanguage == null ? TranslateAlert2.getToLanguage() : toLanguage;
+
+        final AlertDialog progressDialog = new AlertDialog(activityContext, AlertDialog.ALERT_TYPE_SPINNER);
+        progressDialog.showDelayed(500);
+
+        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, captionEdit.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
+            @Override
+            public void onGotReqId(int reqId) {
+
+            }
+
+            @Override
+            public void onResponseReceived() {
+                progressDialog.dismiss();
+
+                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                    AndroidUtilities.runOnUIThread(() -> sendPopupWindow.dismiss());
+                }
+            }
+
+            @Override
+            public void onSuccess(TLRPC.TL_textWithEntities finalText) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    captionEdit.setText(finalText.text);
+                });
+            }
+
+            @Override
+            public void onError() {
+                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorFailed", R.string.TranslatorFailed)).show();
+            }
+
+            @Override
+            public void onUnavailableLanguage() {
+                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage)).show();
+            }
+        });
     }
 }

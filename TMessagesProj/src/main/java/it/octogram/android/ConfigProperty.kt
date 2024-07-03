@@ -40,7 +40,7 @@ class ConfigProperty<T>(
             if (key != null) {
                 val editor = octoPreferences.edit()
                 when (newValue) {
-                    is String -> editor.putString(key, newValue)
+                    is String? -> editor.putString(key, newValue)
                     is Int -> editor.putInt(key, newValue)
                     is Boolean -> editor.putBoolean(key, newValue)
                     is Float -> editor.putFloat(key, newValue)

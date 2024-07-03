@@ -43,7 +43,7 @@ public class UserAccountInfoController {
             id = getNiceId(chat, chat.id);
         }
         dc = dc != 0 ? dc : -1;
-        Datacenter dcInfo = Datacenter.getDcInfo(dc);
+        Datacenter dcInfo = Datacenter.Companion.getDcInfo(dc);
         return new UserAccountInfo(id, dcInfo);
     }
 

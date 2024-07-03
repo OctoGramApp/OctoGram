@@ -20,12 +20,14 @@ import androidx.core.graphics.ColorUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -36,8 +38,8 @@ import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CodepointsLengthInputFilter;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.ShareAlert;
+import org.telegram.ui.Components.StickerImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,6 +49,7 @@ import java.util.Objects;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 
 public class ExportDoneReadyBottomSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
@@ -70,10 +73,10 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        RLottieImageView imageView = new RLottieImageView(context);
-        imageView.setAutoRepeat(true);
-        imageView.setAnimation(R.raw.saved_folders, AndroidUtilities.dp(130), AndroidUtilities.dp(130));
-        imageView.playAnimation();
+        StickerImageView imageView = new StickerImageView(getContext(), UserConfig.selectedAccount);
+        imageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
+        imageView.setStickerNum(StickerUi.IMPORT_SETTINGS.getValue());
+        imageView.getImageReceiver().setAutoRepeat(1);
         linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 16));
 
         TextView textView = new TextView(context);
@@ -180,7 +183,11 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             }
 
             FileOutputStream fos = new FileOutputStream(cacheFile);
-            fos.write(mainObject.toString(4).getBytes());
+            if (BuildConfig.DEBUG) {
+                fos.write(mainObject.toString(4).getBytes());
+            } else {
+                fos.write(mainObject.toString().getBytes());
+            }
             fos.close();
 
             ShareAlert shAlert = new ShareAlert(baseFragment.getParentActivity(), null, null, false, null, false) {

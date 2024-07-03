@@ -86,6 +86,8 @@ import org.telegram.ui.Cells.SharedDocumentCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.BackupImageView;
+import org.telegram.ui.Components.Bulletin;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.EditTextEmoji;
@@ -96,9 +98,15 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.RecyclerViewItemRangeSelector;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.StickerEmptyView;
+import org.telegram.ui.Components.TranslateAlert2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.DestinationLanguageSettings;
+import it.octogram.android.utils.translator.SingleTranslationManager;
+import it.octogram.android.utils.translator.TranslationsWrapper;
 
 public class PhotoPickerActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -198,6 +206,8 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
     private final int dialogBackgroundKey;
     private final int textKey;
     private final int selectorKey;
+
+    private ActionBarMenuSubItem translateItem;
 
     private PhotoViewer.PhotoViewerProvider provider = new PhotoViewer.EmptyPhotoViewerProvider() {
         @Override
@@ -594,6 +604,25 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
             private int lastNotifyWidth;
             private boolean ignoreLayout;
             private int lastItemSize;
+
+            private Bulletin.Delegate bulletinDelegate = new Bulletin.Delegate() {
+                @Override
+                public int getBottomOffset(int tag) {
+                    return getHeight() - frameLayout2.getTop() + AndroidUtilities.dp(25);
+                }
+            };
+
+            @Override
+            protected void onAttachedToWindow() {
+                super.onAttachedToWindow();
+                Bulletin.addDelegate(this, bulletinDelegate);
+            }
+
+            @Override
+            protected void onDetachedFromWindow() {
+                super.onDetachedFromWindow();
+                Bulletin.removeDelegate(this);
+            }
 
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -1143,6 +1172,37 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
                     sendPopupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
                     sendPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED);
                     sendPopupWindow.getContentView().setFocusableInTouchMode(true);
+                }
+
+                String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+                String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
+                boolean translateButtonValue = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled();
+
+                if (TextUtils.isEmpty(commentTextView.getText().toString().trim())) {
+                    translateButtonValue = false;
+                }
+
+                if (translateItem != null) {
+                    if (!translateButtonValue) {
+                        translateItem.setVisibility(View.GONE);
+                    } else {
+                        translateItem.setVisibility(View.VISIBLE);
+                        translateItem.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
+                    }
+                } else if (translateButtonValue) {
+                    translateItem = new ActionBarMenuSubItem(getParentActivity(), false, true);
+                    translateItem.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
+                    translateItem.setOnClickListener(v -> {
+                        String destinationLanguage2 = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+                        executeMessageTranslation(destinationLanguage2);
+                    });
+                    translateItem.setOnLongClickListener(v -> {
+                        executeTranslationToCustomDestination();
+                        return true;
+                    });
+                    translateItem.setMinimumWidth(AndroidUtilities.dp(196));
+                    sendPopupLayout.addView(translateItem, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                    sendPopupWindow.setContentView(sendPopupLayout);
                 }
 
                 sendPopupLayout.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST));
@@ -1763,6 +1823,65 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
         if (selectPhotoType != PhotoAlbumPickerActivity.SELECT_TYPE_WALLPAPER && (delegate == null || delegate.canFinishFragment())) {
             finishFragment();
         }
+    }
+
+    private void executeTranslationToCustomDestination() {
+        if (commentTextView == null || TextUtils.isEmpty(commentTextView.getText().toString().trim())) {
+            return;
+        }
+
+        if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+            sendPopupWindow.dismiss();
+        }
+
+        AndroidUtilities.hideKeyboard(commentTextView);
+
+        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        destinationSettings.setCallback(this::executeMessageTranslation);
+        presentFragment(destinationSettings);
+    }
+
+    private void executeMessageTranslation(String toLanguage) {
+        if (commentTextView == null || TextUtils.isEmpty(commentTextView.getText().toString().trim())) {
+            return;
+        }
+
+        OctoConfig.INSTANCE.lastTranslatePreSendLanguage.updateValue(toLanguage);
+        String realDestination = toLanguage == null ? TranslateAlert2.getToLanguage() : toLanguage;
+
+        final AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
+        progressDialog.showDelayed(500);
+
+        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, commentTextView.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
+            @Override
+            public void onGotReqId(int reqId) {
+
+            }
+
+            @Override
+            public void onResponseReceived() {
+                progressDialog.dismiss();
+
+                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                    sendPopupWindow.dismiss();
+                }
+            }
+
+            @Override
+            public void onSuccess(TLRPC.TL_textWithEntities finalText) {
+                AndroidUtilities.runOnUIThread(() -> commentTextView.setText(finalText.text));
+            }
+
+            @Override
+            public void onError() {
+                BulletinFactory.of(sizeNotifierFrameLayout, getResourceProvider()).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorFailed)).show();
+            }
+
+            @Override
+            public void onUnavailableLanguage() {
+                BulletinFactory.of(sizeNotifierFrameLayout, getResourceProvider()).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)).show();
+            }
+        });
     }
 
     private class ListAdapter extends RecyclerListView.SelectionAdapter {

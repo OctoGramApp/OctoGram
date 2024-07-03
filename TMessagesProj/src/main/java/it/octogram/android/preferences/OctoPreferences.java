@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.octogram.android.ConfigProperty;
+import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.impl.EmptyCellRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
@@ -40,10 +41,17 @@ public record OctoPreferences(String title, List<BaseRow> preferences) {
             return this;
         }
 
+        public OctoPreferencesBuilder category(String title, ConfigProperty<Boolean> showIfHeader, ConfigProperty<Boolean> showIfShadow, Consumer<OctoPreferencesBuilder> consumer) {
+            preferences.add(new HeaderRow(title, showIfHeader));
+            consumer.accept(this);
+            preferences.add(new ShadowRow(showIfShadow));
+            return this;
+        }
+
         public OctoPreferencesBuilder category(String title, ConfigProperty<Boolean> showIf, Consumer<OctoPreferencesBuilder> consumer) {
             preferences.add(new HeaderRow(title, showIf));
             consumer.accept(this);
-            preferences.add(new ShadowRow());
+            preferences.add(new ShadowRow(showIf));
             return this;
         }
 
@@ -52,8 +60,8 @@ public record OctoPreferences(String title, List<BaseRow> preferences) {
             return this;
         }
 
-        public OctoPreferencesBuilder sticker(Context context, String packName, int stickerNum, boolean autoRepeat, String description) {
-            StickerImageView stickerImageView = createStickerImageView(context, packName, stickerNum, autoRepeat);
+        public OctoPreferencesBuilder sticker(Context context, String packName, StickerUi stickerNum, boolean autoRepeat, String description) {
+            StickerImageView stickerImageView = createStickerImageView(context, packName, stickerNum.getValue(), autoRepeat);
             preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
                     .stickerView(stickerImageView)
                     .description(description)

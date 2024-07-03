@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
@@ -38,9 +37,11 @@ import org.telegram.ui.Components.SideMenultItemAnimator;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import it.octogram.android.Datacenter;
+import it.octogram.android.MenuItemId;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+import it.octogram.android.utils.OctoUtils;
 
 public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
 
@@ -92,7 +93,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (profileCell != null) {
             profileCell.setAccountsShown(accountsShown, animated);
         }
-        MessagesController.getGlobalMainSettings().edit().putBoolean("accountsShown", accountsShown).commit();
+        MessagesController.getGlobalMainSettings().edit().putBoolean("accountsShown", accountsShown).apply();
         if (animated) {
             itemAnimator.setShouldClipChildren(false);
             if (accountsShown) {
@@ -239,8 +240,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
     private void resetItems() {
         accountNumbers.clear();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
-            if (PasscodeController.isProtectedAccount(UserConfig.getInstance(a).getClientUserId()))
-                continue;
+            if (PasscodeController.isProtectedAccount(UserConfig.getInstance(a).getClientUserId())) continue;
             if (UserConfig.getInstance(a).isClientActivated()) {
                 accountNumbers.add(a);
             }
@@ -260,14 +260,13 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (!UserConfig.getInstance(UserConfig.selectedAccount).isClientActivated()) {
             return;
         }
-        int eventType = Theme.getEventType();
+        var eventType = Theme.getEventType();
         if (OctoConfig.INSTANCE.eventType.getValue() > 0) {
             eventType = OctoConfig.INSTANCE.eventType.getValue() - 1;
         }
-        int datacenterId = AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId();
 
         int newGroupIcon;
-        int newSecretIcon;
+        int newSecretIcon = R.drawable.msg_secret_14;
         int newChannelIcon = R.drawable.msg_channel;
         int contactsIcon;
         int callsIcon;
@@ -277,7 +276,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         int helpIcon;
         int peopleNearbyIcon;
         int octogramIcon = R.drawable.intro_octo;
-        int datacenterIcon = Datacenter.getDcInfo(datacenterId).icon;
+        int datacenterIcon = OctoUtils.getDcIcon();
         if (eventType == 0) {
             newGroupIcon = R.drawable.msg_groups_ny;
             //newSecretIcon = R.drawable.msg_secret_ny;
@@ -334,24 +333,20 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             helpIcon = R.drawable.msg_help;
             peopleNearbyIcon = R.drawable.msg_nearby;
         }
-        UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
+        /*UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
         boolean showDivider = false;
         items.add(new Item(16, LocaleController.getString(R.string.MyProfile), R.drawable.left_status_profile));
         if (me != null && me.isPremium()) {
             if (me.getEmojiStatus() != null) {
-                if (OctoConfig.INSTANCE.drawerChangeStatus.getValue())
-                    items.add(new Item(15, LocaleController.getString("ChangeEmojiStatus", R.string.ChangeEmojiStatus), R.drawable.msg_status_edit));
+                items.add(new Item(15, LocaleController.getString("ChangeEmojiStatus", R.string.ChangeEmojiStatus), R.drawable.msg_status_edit));
             } else {
-                if (OctoConfig.INSTANCE.drawerChangeStatus.getValue())
-                    items.add(new Item(15, LocaleController.getString("SetEmojiStatus", R.string.SetEmojiStatus), R.drawable.msg_status_set));
+                items.add(new Item(15, LocaleController.getString("SetEmojiStatus", R.string.SetEmojiStatus), R.drawable.msg_status_set));
             }
             showDivider = true;
         }
 //        if (MessagesController.getInstance(UserConfig.selectedAccount).storiesEnabled()) {
-//            if (OctoConfig.INSTANCE.drawerMyStories.getValue()) {
-//                items.add(new Item(17, LocaleController.getString("ProfileMyStories", R.string.ProfileMyStories), R.drawable.msg_menu_stories));
-//                showDivider = true;
-//            }
+//            items.add(new Item(17, LocaleController.getString(R.string.ProfileStories), R.drawable.msg_menu_stories));
+//            showDivider = true;
 //        }
         showDivider = true;
         if (ApplicationLoader.applicationLoaderInstance != null) {
@@ -372,43 +367,137 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         if (showDivider) {
             items.add(null); // divider
         }
-
+        items.add(new Item(2, LocaleController.getString("NewGroup", R.string.NewGroup), newGroupIcon));
         //items.add(new Item(3, LocaleController.getString("NewSecretChat", R.string.NewSecretChat), newSecretIcon));
-
-        if (OctoConfig.INSTANCE.drawerNewGroup.getValue()) {
-            items.add(new Item(2, LocaleController.getString("NewGroup", R.string.NewGroup), newGroupIcon));
+        //items.add(new Item(4, LocaleController.getString("NewChannel", R.string.NewChannel), newChannelIcon));
+        items.add(new Item(6, LocaleController.getString("Contacts", R.string.Contacts), contactsIcon));
+        items.add(new Item(10, LocaleController.getString("Calls", R.string.Calls), callsIcon));
+        if (hasGps) {
+            items.add(new Item(12, LocaleController.getString("PeopleNearby", R.string.PeopleNearby), peopleNearbyIcon));
         }
-        if (OctoConfig.INSTANCE.drawerNewChannel.getValue()) {
-            items.add(new Item(4, LocaleController.getString("NewChannel", R.string.NewChannel), newChannelIcon));
-        }
-        if (OctoConfig.INSTANCE.drawerContacts.getValue()) {
-            items.add(new Item(6, LocaleController.getString("Contacts", R.string.Contacts), contactsIcon));
-        }
-        if (OctoConfig.INSTANCE.drawerCalls.getValue()) {
-            items.add(new Item(10, LocaleController.getString("Calls", R.string.Calls), callsIcon));
-        }
-        if (OctoConfig.INSTANCE.drawerPeopleNearby.getValue()) {
-            if (hasGps) {
-                items.add(new Item(12, LocaleController.getString("PeopleNearby", R.string.PeopleNearby), peopleNearbyIcon));
-            }
-        }
-        if (OctoConfig.INSTANCE.drawerSavedMessages.getValue()) {
-            items.add(new Item(11, LocaleController.getString("SavedMessages", R.string.SavedMessages), savedIcon));
-        }
+        items.add(new Item(11, LocaleController.getString("SavedMessages", R.string.SavedMessages), savedIcon));
         items.add(new Item(8, LocaleController.getString("Settings", R.string.Settings), settingsIcon));
-        if (OctoConfig.INSTANCE.drawerOctogramSettings.getValue()) {
-            items.add(new Item(100, LocaleController.getString("OctoGramSettings", R.string.OctoGramSettings), octogramIcon));
-        }
-        if (OctoConfig.INSTANCE.drawerDatacenterInfo.getValue()) {
-            items.add(new Item(101, LocaleController.getString("DatacenterStatus", R.string.DatacenterStatus), datacenterIcon));
-        }
         items.add(null); // divider
+        items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));
+        items.add(new Item(13, LocaleController.getString("TelegramFeatures", R.string.TelegramFeatures), helpIcon));*/
+        UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
+        int item_size = MenuOrderController.sizeAvailable();
+        for (int i = 0; i < item_size; i++) {
+            MenuOrderController.EditableMenuItem data = MenuOrderController.getSingleAvailableMenuItem(i);
+            if (data != null) {
+                MenuItemId menuItemId = MenuItemId.Companion.getById(data.id);
+                if (menuItemId != null) {
+                    int icon;
+                    switch (menuItemId) {
+                        case CONNECTED_DEVICES:
+                            icon = R.drawable.msg2_devices;
+                            break;
+                        case POWER_USAGE:
+                            icon = R.drawable.msg2_battery;
+                            break;
+                        case PROXY_SETTINGS:
+                            icon = R.drawable.msg2_proxy_off;
+                            break;
+                        case DOWNLOADS:
+                            icon = R.drawable.msg_download;
+                            break;
+                        case MY_PROFILE:
+                            icon = R.drawable.left_status_profile;
+                            break;
+                        case NEW_GROUP:
+                            icon = newGroupIcon;
+                            break;
+                        case NEW_CHANNEL:
+                            icon = newChannelIcon;
+                            break;
+                        case NEW_SECRET_CHAT:
+                            icon = newSecretIcon;
+                            break;
+                        case CONTACTS:
+                            icon = contactsIcon;
+                            break;
+                        case CALLS:
+                            icon = callsIcon;
+                            break;
+                        case NEARBY_PEOPLE:
+                            if (hasGps) {
+                                icon = peopleNearbyIcon;
+                                items.add(new Item(menuItemId.getItemId(), data.text, icon));
+                            }
+                            continue;
+                        case SAVED_MESSAGE:
+                            icon = savedIcon;
+                            break;
+                        case SETTINGS:
+                            icon = settingsIcon;
+                            break;
+                        case OCTOGRAM_SETTINGS:
+                            icon = octogramIcon;
+                            break;
+                        case INVITE_FRIENDS:
+                            icon = inviteIcon;
+                            break;
+                        case TELEGRAM_FEATURES:
+                            icon = helpIcon;
+                            break;
+                        case ARCHIVED_MESSAGES:
+                            icon = R.drawable.msg_archive;
+                            break;
+                        case DATACENTER_STATUS:
+                            icon = datacenterIcon;
+                            break;
+                        case QR_LOGIN:
+                            icon = R.drawable.msg_qrcode;
+                            break;
+                        case ATTACH_MENU_BOT:
+                            TLRPC.TL_attachMenuBots menuBots = MediaDataController.getInstance(UserConfig.selectedAccount).getAttachMenuBots();
+                            if (menuBots != null && menuBots.bots != null) {
+                                for (int j = 0; j < menuBots.bots.size(); j++) {
+                                    TLRPC.TL_attachMenuBot bot = menuBots.bots.get(j);
+                                    if (bot.show_in_side_menu) {
+                                        items.add(new Item(bot));
+                                    }
 
-        if (OctoConfig.INSTANCE.drawerInviteFriends.getValue()) {
-            items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));
-        }
-        if (OctoConfig.INSTANCE.drawerTelegramFeatures.getValue()) {
-            items.add(new Item(13, LocaleController.getString("TelegramFeatures", R.string.TelegramFeatures), helpIcon));
+                                    // var addedAnyBot = false;
+                                    // if (bot.show_in_side_menu) {
+                                    //     if (!addedAnyBot && !items.isEmpty() && items.get(items.size() - 1) != null) {
+                                    //         items.add(null);
+                                    //     }
+                                    //     items.add(new Item(bot));
+                                    //     addedAnyBot = true;
+                                    // }
+
+                                }
+                            }
+                            continue;
+                        case SET_STATUS:
+                            if (me != null && me.isPremium()) {
+                                if (me.getEmojiStatus() != null) {
+                                    items.add(new Item(menuItemId.getItemId(), LocaleController.getString("ChangeEmojiStatus", R.string.ChangeEmojiStatus), R.drawable.msg_status_edit));
+                                } else {
+                                    items.add(new Item(menuItemId.getItemId(), LocaleController.getString("SetEmojiStatus", R.string.SetEmojiStatus), R.drawable.msg_status_set));
+                                }
+                            }
+                            continue;
+                        case DIVIDER:
+                            boolean foundPreviousDivider = false;
+                            if (i > 0) {
+                                MenuOrderController.EditableMenuItem previousData = MenuOrderController.getSingleAvailableMenuItem(i - 1);
+                                if (previousData != null && previousData.id.equals("divider")) {
+                                    foundPreviousDivider = true;
+                                }
+                            }
+                            if ((!items.isEmpty() || i == 0) && !foundPreviousDivider) {
+                                items.add(null);
+                            }
+                            continue;
+                        default:
+                            icon = 0;
+                            break;
+                    }
+                    items.add(new Item(menuItemId.getItemId(), data.text, icon));
+                }
+            }
         }
     }
 

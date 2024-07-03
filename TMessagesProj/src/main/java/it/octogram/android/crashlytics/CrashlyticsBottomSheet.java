@@ -19,11 +19,15 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieImageView;
+import org.telegram.ui.Components.StickerImageView;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 
 public class CrashlyticsBottomSheet extends BottomSheet {
 
@@ -36,10 +40,10 @@ public class CrashlyticsBottomSheet extends BottomSheet {
         LinearLayout linearLayout = new LinearLayout(activity);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        RLottieImageView imageView = new RLottieImageView(activity);
-        imageView.setAutoRepeat(true);
-        imageView.setAnimation(R.raw.utyan_crash, AndroidUtilities.dp(130), AndroidUtilities.dp(130));
-        imageView.playAnimation();
+        StickerImageView imageView = new StickerImageView(getContext(), UserConfig.selectedAccount);
+        imageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
+        imageView.setStickerNum(StickerUi.CRASHED.getValue());
+        imageView.getImageReceiver().setAutoRepeat(1);
         linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 16));
 
         TextView textView = new TextView(activity);

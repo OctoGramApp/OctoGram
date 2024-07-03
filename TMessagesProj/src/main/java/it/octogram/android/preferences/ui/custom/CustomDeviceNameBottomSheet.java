@@ -18,13 +18,17 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CodepointsLengthInputFilter;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieImageView;
+import org.telegram.ui.Components.StickerImageView;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 
 public class CustomDeviceNameBottomSheet extends BottomSheet {
     private final EditTextBoldCursor editText;
@@ -42,10 +46,10 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        RLottieImageView imageView = new RLottieImageView(context);
-        imageView.setAutoRepeat(false);
-        imageView.setAnimation(R.raw.custom_device_name, AndroidUtilities.dp(130), AndroidUtilities.dp(130));
-        imageView.playAnimation();
+        StickerImageView imageView = new StickerImageView(getContext(), UserConfig.selectedAccount);
+        imageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
+        imageView.setStickerNum(StickerUi.DUCK_DEV.getValue());
+        imageView.getImageReceiver().setAutoRepeat(1);
         linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 16));
 
         TextView textView = new TextView(context);

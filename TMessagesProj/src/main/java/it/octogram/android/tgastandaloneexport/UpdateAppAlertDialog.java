@@ -19,15 +19,19 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.widget.NestedScrollView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BottomSheet;
@@ -35,45 +39,51 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RadialProgress;
+import org.telegram.ui.LaunchActivity;
 
-public class UpdateAppAlertDialog extends BottomSheet {
+import java.io.File;
 
-    private TLRPC.TL_help_appUpdate appUpdate;
-    private int accountNum;
-    private RadialProgress radialProgress;
-    private FrameLayout radialProgressView;
-    private AnimatorSet progressAnimation;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.components.CustomUpdatesCheckCell;
+import it.octogram.android.utils.UpdatesManager;
 
-    private Drawable shadowDrawable;
-    private TextView textView;
-    private TextView messageTextView;
-    private NestedScrollView scrollView;
+public class UpdateAppAlertDialog extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
+
+    private final TLRPC.TL_help_appUpdate appUpdate;
+    private final int accountNum;
+
+    private final Drawable shadowDrawable;
+    private final NestedScrollView scrollView;
 
     private AnimatorSet shadowAnimation;
 
-    private View shadow;
+    private final View shadow;
 
-    private boolean ignoreLayout;
-
-    private LinearLayout linearLayout;
+    private final LinearLayout linearLayout;
 
     private int scrollOffsetY;
 
-    private int[] location = new int[2];
+    private final int[] location = new int[2];
 
-    private boolean animationInProgress;
+    private final BottomSheetCell doneButton;
+    private final BottomSheetCell scheduleButton;
+    private int state;
 
-    public class BottomSheetCell extends FrameLayout {
 
-        private View background;
-        private TextView[] textView = new TextView[2];
-        private boolean hasBackground;
+    public static class BottomSheetCell extends FrameLayout {
 
-        public BottomSheetCell(Context context, boolean withoutBackground) {
+        private final View background;
+        private final TextView[] textView = new TextView[2];
+        private final boolean hasBackground;
+        private final boolean isScheduleButton;
+        private boolean isFirstUpdate = true;
+        private int state;
+
+        public BottomSheetCell(Context context, boolean withoutBackground, boolean isScheduleButton) {
             super(context);
 
             hasBackground = !withoutBackground;
+            this.isScheduleButton = isScheduleButton;
             setBackground(null);
 
             background = new View(context);
@@ -91,7 +101,7 @@ public class UpdateAppAlertDialog extends BottomSheet {
                 textView[a].setGravity(Gravity.CENTER);
                 if (hasBackground) {
                     textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-                    textView[a].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+                    //textView[a].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
                 } else {
                     textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                 }
@@ -109,12 +119,72 @@ public class UpdateAppAlertDialog extends BottomSheet {
             super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(hasBackground ? 80 : 50), MeasureSpec.EXACTLY));
         }
 
+        public void updateState(int state, float loadProgress) {
+            boolean isCellEnabled = state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING;
+            if (isScheduleButton) {
+                isCellEnabled = state == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD;
+            }
+            background.setClickable(isCellEnabled);
+            background.setEnabled(isCellEnabled);
+
+            if (isScheduleButton) {
+                if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
+                    for (int a = 0; a < 2; a++) {
+                        textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
+                    }
+                    setText(LocaleController.getString("AppUpdateRemindMeLater", R.string.AppUpdateRemindMeLater), !isFirstUpdate);
+                } else if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                    for (int a = 0; a < 2; a++) {
+                        textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+                    }
+                    setText("You can close this popup during the download.", !isFirstUpdate);
+                } else if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY) {
+                    for (int a = 0; a < 2; a++) {
+                        textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+                    }
+                    setText("Install the update by pressing the above button.", !isFirstUpdate);
+                }
+            } else {
+                switch (state) {
+                    case CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
+                        setText(LocaleController.formatString("AppUpdateDownloadNow", R.string.AppUpdateDownloadNow), !isFirstUpdate);
+                        break;
+                    case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING:
+                        setText(LocaleController.formatString("AppUpdateDownloading", R.string.AppUpdateDownloading, (int) (loadProgress * 100)), !isFirstUpdate);
+                        break;
+                    case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY:
+                        setText(LocaleController.getString("UpdatesSettingsCheckButtonInstall", R.string.UpdatesSettingsCheckButtonInstall), !isFirstUpdate);
+                        break;
+                }
+
+                if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                    for (int a = 0; a < 2; a++) {
+                        textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
+                    }
+                    background.setAlpha(1f);
+                    background.animate().alpha(0f).setDuration(200).start();
+                } else if (state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                    for (int a = 0; a < 2; a++) {
+                        textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+                    }
+                    background.setAlpha(0f);
+                    background.animate().alpha(1f).setDuration(200).start();
+                }
+            }
+
+            this.state = state;
+            this.isFirstUpdate = false;
+        }
+
+        public void updateState(int state) {
+            updateState(state, 0);
+        }
+
         public void setText(CharSequence text, boolean animated) {
             if (!animated) {
                 textView[0].setText(text);
             } else {
                 textView[1].setText(text);
-                animationInProgress = true;
                 AnimatorSet animatorSet = new AnimatorSet();
                 animatorSet.setDuration(180);
                 animatorSet.setInterpolator(CubicBezierInterpolator.EASE_OUT);
@@ -127,7 +197,6 @@ public class UpdateAppAlertDialog extends BottomSheet {
                 animatorSet.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        animationInProgress = false;
                         TextView temp = textView[0];
                         textView[0] = textView[1];
                         textView[1] = temp;
@@ -135,6 +204,10 @@ public class UpdateAppAlertDialog extends BottomSheet {
                 });
                 animatorSet.start();
             }
+        }
+
+        public int getState() {
+            return state;
         }
     }
 
@@ -150,35 +223,7 @@ public class UpdateAppAlertDialog extends BottomSheet {
         shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
         shadowDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_dialogBackground), PorterDuff.Mode.MULTIPLY));
 
-        FrameLayout container = new FrameLayout(context) {
-            @Override
-            public void setTranslationY(float translationY) {
-                super.setTranslationY(translationY);
-                updateLayout();
-            }
-
-            @Override
-            public boolean onInterceptTouchEvent(MotionEvent ev) {
-                if (ev.getAction() == MotionEvent.ACTION_DOWN && scrollOffsetY != 0 && ev.getY() < scrollOffsetY) {
-                    dismiss();
-                    return true;
-                }
-                return super.onInterceptTouchEvent(ev);
-            }
-
-            @Override
-            public boolean onTouchEvent(MotionEvent e) {
-                return !isDismissed() && super.onTouchEvent(e);
-            }
-
-            @Override
-            protected void onDraw(Canvas canvas) {
-                int top = (int) (scrollOffsetY - backgroundPaddingTop - getTranslationY());
-                shadowDrawable.setBounds(0, top, getMeasuredWidth(), getMeasuredHeight());
-                shadowDrawable.draw(canvas);
-            }
-        };
-        container.setWillNotDraw(false);
+        FrameLayout container = getFrameLayout(context);
         containerView = container;
 
         scrollView = new NestedScrollView(context) {
@@ -291,21 +336,126 @@ public class UpdateAppAlertDialog extends BottomSheet {
         shadow.setTag(1);
         container.addView(shadow, frameLayoutParams);
 
-        BottomSheetCell doneButton = new BottomSheetCell(context, false);
-        doneButton.setText(LocaleController.formatString("AppUpdateDownloadNow", R.string.AppUpdateDownloadNow), false);
+        doneButton = new BottomSheetCell(context, false, false);
         doneButton.background.setOnClickListener(v -> {
-            FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
-            dismiss();
+            if (doneButton.getState() == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY) {
+                AndroidUtilities.openForView(appUpdate.document, true, LaunchActivity.instance);
+            } else if (doneButton.getState() == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
+                FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
+            }
         });
         container.addView(doneButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 50, Gravity.LEFT | Gravity.BOTTOM, 0, 0, 0, 50));
 
-        BottomSheetCell scheduleButton = new BottomSheetCell(context, true);
-        scheduleButton.setText(LocaleController.getString("AppUpdateRemindMeLater", R.string.AppUpdateRemindMeLater), false);
+        scheduleButton = new BottomSheetCell(context, true, true);
         scheduleButton.background.setOnClickListener(v -> dismiss());
         container.addView(scheduleButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 50, Gravity.LEFT | Gravity.BOTTOM, 0, 0, 0, 0));
+
+        updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
+        if (UpdatesManager.canAutoDownloadUpdates()) {
+            FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
+        }
     }
 
-    private void runShadowAnimation(final int num, final boolean show) {
+    @NonNull
+    private FrameLayout getFrameLayout(Context context) {
+        FrameLayout container = new FrameLayout(context) {
+            @Override
+            public void setTranslationY(float translationY) {
+                super.setTranslationY(translationY);
+                updateLayout();
+            }
+
+            @Override
+            public boolean onInterceptTouchEvent(MotionEvent ev) {
+                if (ev.getAction() == MotionEvent.ACTION_DOWN && scrollOffsetY != 0 && ev.getY() < scrollOffsetY) {
+                    dismiss();
+                    return true;
+                }
+                return super.onInterceptTouchEvent(ev);
+            }
+
+            @Override
+            public boolean onTouchEvent(MotionEvent e) {
+                return !isDismissed() && super.onTouchEvent(e);
+            }
+
+            @Override
+            protected void onDraw(@NonNull Canvas canvas) {
+                int top = (int) (scrollOffsetY - backgroundPaddingTop - getTranslationY());
+                shadowDrawable.setBounds(0, top, getMeasuredWidth(), getMeasuredHeight());
+                shadowDrawable.draw(canvas);
+            }
+        };
+        container.setWillNotDraw(false);
+        return container;
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoaded);
+        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoadProgressChanged);
+        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoadFailed);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoaded);
+        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoadProgressChanged);
+        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoadFailed);
+    }
+
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (!SharedConfig.isAppUpdateAvailable()) {
+            return;
+        }
+
+        String path = (String) args[0];
+        String name = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
+
+        if (!name.equals(path)) {
+            return;
+        }
+
+        if (id == NotificationCenter.fileLoaded) {
+            updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY);
+        } else if (id == NotificationCenter.fileLoadProgressChanged) {
+            Long loadedSize = (Long) args[1];
+            Long totalSize = (Long) args[2];
+            float loadProgress = loadedSize / (float) totalSize;
+
+            updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING, loadProgress);
+        } else if (id == NotificationCenter.fileLoadFailed) {
+            // force re-check data from the beginning
+
+            File completePathFileName = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
+            if (completePathFileName.exists()) {
+                updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY);
+            } else {
+                if (FileLoader.getInstance(0).isLoadingFile(name)) {
+                    Float p = ImageLoader.getInstance().getFileProgress(name);
+                    updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING, (p != null ? p : 0.0f));
+                } else {
+                    updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
+                }
+            }
+        }
+    }
+
+    private void updateState(int state, float loadProgress) {
+        doneButton.updateState(state, loadProgress);
+        scheduleButton.updateState(state, 0);
+
+        this.state = state;
+    }
+
+    private void updateState(int state) {
+        updateState(state, 0);
+    }
+
+    private void runShadowAnimation(final boolean show) {
         if (show && shadow.getTag() != null || !show && shadow.getTag() == null) {
             shadow.setTag(show ? null : 1);
             if (show) {
@@ -344,11 +494,7 @@ public class UpdateAppAlertDialog extends BottomSheet {
         child.getLocationInWindow(location);
         int top = location[1] - AndroidUtilities.dp(24);
         int newOffset = Math.max(top, 0);
-        if (location[1] + linearLayout.getMeasuredHeight() <= container.getMeasuredHeight() - AndroidUtilities.dp(113) + containerView.getTranslationY()) {
-            runShadowAnimation(0, false);
-        } else {
-            runShadowAnimation(0, true);
-        }
+        runShadowAnimation(!(location[1] + linearLayout.getMeasuredHeight() <= container.getMeasuredHeight() - AndroidUtilities.dp(113) + containerView.getTranslationY()));
         if (scrollOffsetY != newOffset) {
             scrollOffsetY = newOffset;
             scrollView.invalidate();

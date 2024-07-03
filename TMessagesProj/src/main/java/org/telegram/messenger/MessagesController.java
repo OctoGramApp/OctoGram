@@ -44,6 +44,8 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.util.Consumer;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
+
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLiteException;
@@ -19805,7 +19807,7 @@ public class MessagesController extends BaseController implements NotificationCe
         }
         for (int a = 0, N = reasons.size(); a < N; a++) {
             TLRPC.TL_restrictionReason reason = reasons.get(a);
-            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform)) {
+            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform) && StoreUtils.isDownloadedFromAnyStore()) {
                 return reason.text;
             }
         }
@@ -19859,7 +19861,7 @@ public class MessagesController extends BaseController implements NotificationCe
         } else {
             reason = getRestrictionReason(user.restriction_reason);
         }
-        if (reason != null) {
+        if (reason != null && StoreUtils.isDownloadedFromAnyStore()) {
             showCantOpenAlert(fragment, reason);
             return false;
         }

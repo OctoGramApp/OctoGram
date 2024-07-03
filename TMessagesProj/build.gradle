@@ -49,7 +49,7 @@ def getCCacheExecutable = {
     if (isWindows) {
         pathName = "windows"
     } else {
-        // Check if ccache is installed
+        /* // Check if ccache is installed
         def ccCacheRes = providers.exec {
             commandLine 'which', 'ccache'
         }
@@ -57,7 +57,7 @@ def getCCacheExecutable = {
             return Paths.get(
                 ccCacheRes.standardOutput.asText.get().trim()
             ).toFile()
-        }
+        }*/
         if (isMacOs) {
             pathName = "macOs"
         } else {
@@ -196,6 +196,8 @@ android {
         buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "false"
         buildConfigField "int", "BUILD_VERSION", "${APP_VERSION_CODE}"
         buildConfigField "String", "BUILD_VERSION_STRING", "\"${APP_VERSION_NAME}\""
+        buildConfigField "int", "TELEGRAM_BUILD_VERSION", "${TELEGRAM_VERSION_CODE}"
+        buildConfigField "String", "TELEGRAM_VERSION_STRING", "\"${TELEGRAM_VERSION_NAME}\""
         buildConfigField "boolean", "BUILD_HOST_IS_WINDOWS", "${isWindows}"
 
         externalNativeBuild {

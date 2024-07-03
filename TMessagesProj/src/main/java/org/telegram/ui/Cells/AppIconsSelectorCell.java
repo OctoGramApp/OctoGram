@@ -170,6 +170,8 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
                     continue;
                 } else if (icon == LauncherIconController.LauncherIcon.CHUPA && OctoConfig.INSTANCE.unlockedChupa.getValue()) {
                     continue;
+                } else if (icon == LauncherIconController.LauncherIcon.CONFETTI && OctoConfig.INSTANCE.unlockedConfetti.getValue()) {
+                    continue;
                 }
                 availableIcons.remove(i);
                 i--;

@@ -21,12 +21,9 @@ import org.telegram.ui.Components.RLottieImageView;
 import it.octogram.android.OctoConfig;
 
 public class AllowSmartNotificationsBottomSheet extends BottomSheet {
-    private AllowSmartNotificationsCallback callback;
 
     public AllowSmartNotificationsBottomSheet(Context context, AllowSmartNotificationsCallback callback) {
         super(context, false);
-
-        this.callback = callback;
 
         FrameLayout frameLayout = new FrameLayout(context);
         LinearLayout linearLayout = new LinearLayout(context);

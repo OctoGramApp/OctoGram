@@ -97,18 +97,11 @@ public class DatacenterStatus extends LinearLayout {
 
         for (int i = 0; i < 3; i++) {
             int radius = i == 0 ? 7 : 5;
-            int w;
-            switch (i) {
-                case 0:
-                    w = 160;
-                    break;
-                case 1:
-                    w = 90;
-                    break;
-                default:
-                    w = 110;
-                    break;
-            }
+            int w = switch (i) {
+                case 0 -> 160;
+                case 1 -> 90;
+                default -> 110;
+            };
             CardView cardView = new CardView(context);
             cardView.setCardElevation(0);
             cardView.setRadius(AndroidUtilities.dp(radius));
@@ -119,16 +112,16 @@ public class DatacenterStatus extends LinearLayout {
 
     public void setData(int dcId, int ping, int status, boolean needDivider) {
         this.needDivider = needDivider;
-        Datacenter dcInfo = Datacenter.getDcInfo(dcId);
+        Datacenter dcInfo = Datacenter.Companion.getDcInfo(dcId);
 
-        Drawable d = ContextCompat.getDrawable(getContext(), dcInfo.icon);
+        Drawable d = ContextCompat.getDrawable(getContext(), dcInfo.getIcon());
         if (d != null) {
             d.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhite), PorterDuff.Mode.SRC_ATOP));
             imageView.setImageBitmap(drawableToBitmap(d));
         }
-        imageView.setBackgroundResource(dcInfo.icon);
+        imageView.setBackgroundResource(dcInfo.getIcon());
 
-        radialProgressView.setColor(dcInfo.color);
+        radialProgressView.setColor(dcInfo.getColor());
         if (status == -1) {
             shimmerFrameLayout.setVisibility(VISIBLE);
             linearLayout.setVisibility(GONE);
@@ -138,7 +131,7 @@ public class DatacenterStatus extends LinearLayout {
             TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
             run.flags |= TextStyleSpan.FLAG_STYLE_BOLD;
             TextStyleSpan mSpan = new TextStyleSpan(run);
-            String DC_NAME = dcInfo.dcName;
+            String DC_NAME = dcInfo.getDcName();
             if (dcId != -1) {
                 DC_NAME = String.format(Locale.ENGLISH, "%s - DC%d", DC_NAME, dcId);
             }
@@ -147,7 +140,7 @@ public class DatacenterStatus extends LinearLayout {
             textView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
             textView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
             textView.setText(spannableString);
-            ipTextView.setText(dcInfo.ip);
+            ipTextView.setText(dcInfo.getIp());
             String statusText;
             int colorKey;
             if (status == 0) {

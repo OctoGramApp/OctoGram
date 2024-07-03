@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -587,7 +588,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                         } else if (messageObject.messageOwner.media.document != null && messageObject.messageOwner.media.document.dc_id > 0) {
                             DC = messageObject.messageOwner.media.document.dc_id;
                         }
-                        textDetailCell.setTextAndValue(Datacenter.getDcInfo(DC).dcName, LocaleController.getString("FileDC", R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(Datacenter.Companion.getDcInfo(DC).getDcName(), LocaleController.getString("FileDC", R.string.FileDC), true);
                     } else if (position == messageForwardsRow) {
                         textDetailCell.setTextAndValue(String.valueOf(messageObject.messageOwner.forwards), LocaleController.getString("ForwardsNumber", R.string.ForwardsNumber), true);
                     } else if (position == messageDateEditedRow) {
@@ -604,13 +605,13 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == fileMimeType) {
                         textDetailCell.setTextAndValue(messageObject.messageOwner.media.document.mime_type, LocaleController.getString("MimeType", R.string.MimeType), true);
                     } else if (position == groupDatacenterRow) {
-                        textDetailCell.setTextAndValue(fromChatInfo.dcInfo.dcName, LocaleController.getString("Datacenter", R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromChatInfo.dcInfo.getDcName(), LocaleController.getString("Datacenter", R.string.FileDC), true);
                     } else if (position == repliedUserDatacenterRow) {
-                        textDetailCell.setTextAndValue(fromRepliedUserInfo.dcInfo.dcName, LocaleController.getString("Datacenter", R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromRepliedUserInfo.dcInfo.getDcName(), LocaleController.getString("Datacenter", R.string.FileDC), true);
                     } else if (position == forwardUserDatacenterRow) {
-                        textDetailCell.setTextAndValue(fromForwardedUserInfo.dcInfo.dcName, LocaleController.getString("Datacenter", R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromForwardedUserInfo.dcInfo.getDcName(), LocaleController.getString("Datacenter", R.string.FileDC), true);
                     } else if (position == dcRow) {
-                        textDetailCell.setTextAndValue(fromUserInfo.dcInfo.dcName, LocaleController.getString("Datacenter", R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromUserInfo.dcInfo.getDcName(), LocaleController.getString("Datacenter", R.string.FileDC), true);
                     }
                     break;
                 case 4:
@@ -676,6 +677,97 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                 return 4;
             }
             return 1;
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        @Override
+        public void notifyDataSetChanged() {
+            if (listView.isComputingLayout()) {
+                listView.post(this::notifyDataSetChanged);
+                return;
+            }
+            super.notifyDataSetChanged();
+        }
+
+        @Override
+        public void notifyItemChanged(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemChanged(position));
+                return;
+            }
+            super.notifyItemChanged(position);
+        }
+
+        @Override
+        public void notifyItemChanged(int position, @Nullable Object payload) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemChanged(position, payload));
+                return;
+            }
+            super.notifyItemChanged(position, payload);
+        }
+
+        @Override
+        public void notifyItemRangeChanged(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeChanged(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeChanged(positionStart, itemCount, payload));
+                return;
+            }
+            super.notifyItemRangeChanged(positionStart, itemCount, payload);
+        }
+
+        @Override
+        public void notifyItemInserted(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemInserted(position));
+                return;
+            }
+            super.notifyItemInserted(position);
+        }
+
+        @Override
+        public void notifyItemMoved(int fromPosition, int toPosition) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemMoved(fromPosition, toPosition));
+                return;
+            }
+            super.notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void notifyItemRangeInserted(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeInserted(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRangeRemoved(int positionStart, int itemCount) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRangeRemoved(positionStart, itemCount));
+                return;
+            }
+            super.notifyItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRemoved(int position) {
+            if (listView.isComputingLayout()) {
+                listView.post(() -> notifyItemRemoved(position));
+                return;
+            }
+            super.notifyItemRemoved(position);
         }
     }
 

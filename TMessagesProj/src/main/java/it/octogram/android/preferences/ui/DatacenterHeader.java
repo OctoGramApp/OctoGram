@@ -8,7 +8,6 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.widget.AppCompatTextView;
@@ -17,14 +16,17 @@ import androidx.core.content.ContextCompat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieImageView;
+import org.telegram.ui.Components.StickerImageView;
 
 import java.util.Objects;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 import it.octogram.android.utils.OctoUtils;
 
 
@@ -33,11 +35,11 @@ public class DatacenterHeader extends LinearLayout {
         super(context);
         setGravity(Gravity.CENTER_HORIZONTAL);
         setOrientation(VERTICAL);
-        RLottieImageView rLottieImageView = new RLottieImageView(context);
-        rLottieImageView.setAutoRepeat(true);
-        rLottieImageView.setScaleType(ImageView.ScaleType.CENTER);
-        rLottieImageView.setAnimation(R.raw.utyan_dc, 120, 120);
-        rLottieImageView.playAnimation();
+        StickerImageView rLottieImageView = new StickerImageView(context, UserConfig.selectedAccount);
+        rLottieImageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
+        rLottieImageView.setStickerNum(StickerUi.DATACENTER_STATUS.getValue());
+        rLottieImageView.getImageReceiver().setAutoRepeat(1);
+
         addView(rLottieImageView, LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 20, 0, 0));
 
         AppCompatTextView textView = new AppCompatTextView(context);

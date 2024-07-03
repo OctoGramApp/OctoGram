@@ -29,6 +29,7 @@ import java.util.List;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 import it.octogram.android.TranslatorFormality;
 import it.octogram.android.TranslatorMode;
 import it.octogram.android.TranslatorProvider;
@@ -74,7 +75,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
         }
 
         return OctoPreferences.builder(LocaleController.formatString("Translator", R.string.Translator))
-                .sticker(context, R.raw.translator_anim, true, LocaleController.formatString("TranslatorHeader", R.string.TranslatorHeader))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.TRANSLATOR, true, LocaleController.formatString("TranslatorHeader", R.string.TranslatorHeader))
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onClick(() -> {
                             controller.setContextTranslateEnabled(!showButtonBool.getValue());
@@ -124,7 +125,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DestinationLanguageSettings()))
                             .value(getTranslateDestinationStatus())
-                            .showIf(canSelectDoNotTranslate)
+                            .showIf(canSelectProvider)
                             .title(LocaleController.getString("TranslatorDestination", R.string.TranslatorDestination))
                             .build()
                     );
@@ -206,7 +207,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
     private static PopupChoiceDialogOption updateProviderAvailability(PopupChoiceDialogOption provider) {
         if (TranslationsWrapper.isLanguageUnavailable(TranslateAlert2.getToLanguage(), provider.id)) {
             provider.setClickable(false);
-            provider.setItemDescription(LocaleController.getString("TranslatorProviderUnsuggested", R.string.TranslatorProviderUnsuggested));
+            provider.setItemDescription(LocaleController.getString(R.string.TranslatorProviderUnsuggested));
         }
 
         return provider;
@@ -215,7 +216,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
     private void updateItemsVisibility(ConfigProperty<Boolean> except) {
         TranslateController translateController = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController();
         boolean isSingleMessageTranslationEnabled = translateController.isContextTranslateEnabled();
-        boolean isTranslateEntireChatEnabled = translateController.isChatTranslateEnabled();
+        boolean isTranslateEntireChatEnabled = translateController.isFeatureAvailable();
         boolean canShowOtherOptions = isSingleMessageTranslationEnabled || isTranslateEntireChatEnabled;
 
         if (except != showButtonBool) {
@@ -295,6 +296,11 @@ public class OctoTranslatorUI implements PreferencesEntry {
     }
 
     private void checkProviderAvailability(Context context) {
+        String preTranslateDestLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+        if (preTranslateDestLanguage != null && TranslationsWrapper.isLanguageUnavailable(preTranslateDestLanguage)) {
+            OctoConfig.INSTANCE.lastTranslatePreSendLanguage.updateValue(null);
+        }
+
         int dialogsWithUnavailableLanguage = 0;
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
             if (UserConfig.getInstance(a).isClientActivated()) {

@@ -9,18 +9,22 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.util.Log;
 import android.util.Pair;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
+import org.telegram.tgnet.ConnectionsManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import it.octogram.android.AudioType;
+import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhotoResolution;
+import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -28,6 +32,7 @@ import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
+import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
@@ -35,29 +40,9 @@ public class OctoExperimentsUI implements PreferencesEntry {
 
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
-        if (OctoConfig.INSTANCE.experimentsEnabled.getValue()) {
-            if (!OctoConfig.INSTANCE.alternativeNavigation.getValue() &&
-                    !OctoConfig.INSTANCE.uploadBoost.getValue() &&
-                    !OctoConfig.INSTANCE.downloadBoost.getValue() &&
-                    !OctoConfig.INSTANCE.mediaInGroupCall.getValue() &&
-                    !OctoConfig.INSTANCE.showRPCErrors.getValue() &&
-                    OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO.getValue() &&
-                    OctoConfig.INSTANCE.maxRecentStickers.getValue() == 0 &&
-                    OctoConfig.INSTANCE.photoResolution.getValue() == PhotoResolution.DEFAULT.getValue()) {
-                Log.d("OctoExperiments", "Experiments disabled");
-                OctoConfig.INSTANCE.experimentsEnabled.updateValue(false);
-            }
-        }
         return OctoPreferences.builder(LocaleController.getString("Experiments", R.string.Experiments))
-                .sticker(context, R.raw.utyan_experiments, true, LocaleController.formatString("OctoExperimentsSettingsHeader", R.string.OctoExperimentsSettingsHeader))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, LocaleController.formatString("OctoExperimentsSettingsHeader", R.string.OctoExperimentsSettingsHeader))
                 .category(LocaleController.getString("ExperimentalSettings", R.string.ExperimentalSettings), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(context))
-                            .preferenceValue(OctoConfig.INSTANCE.alternativeNavigation)
-                            .title(LocaleController.getString("AlternativeNavigation", R.string.AlternativeNavigation))
-                            .description(LocaleController.getString("AlternativeNavigation_Desc", R.string.AlternativeNavigation_Desc))
-                            .requiresRestart(true)
-                            .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
@@ -104,6 +89,50 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             ))
                             .title(LocaleController.getString("MaxRecentStickers", R.string.MaxRecentStickers))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> {
+                                AndroidUtilities.runOnUIThread(() -> {
+                                    for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
+                                        if (UserConfig.getInstance(i).isClientActivated()) {
+                                            ConnectionsManager.getInstance(i).checkConnection();
+                                        }
+                                    }
+                                }, 300);
+                                return true;
+                            })
+                            .preferenceValue(OctoConfig.INSTANCE.forceUseIpV6)
+                            .title(LocaleController.getString(R.string.TryConnectWithIPV6))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .currentValue(OctoConfig.INSTANCE.deviceIdentifyState)
+                            .onSelected(fragment::showRestartTooltip)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(DeviceIdentifyState.DEFAULT.getValue())
+                                            .setItemTitle(LocaleController.getString("DeviceIdentifyDefault", R.string.DeviceIdentifyDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DeviceIdentifyState.FORCE_TABLET.getValue())
+                                            .setItemTitle(LocaleController.getString("DeviceIdentifyTablet", R.string.DeviceIdentifyTablet))
+                                            .setItemDescription(LocaleController.getString("DeviceIdentifyTabletDesc", R.string.DeviceIdentifyTabletDesc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DeviceIdentifyState.FORCE_SMARTPHONE.getValue())
+                                            .setItemTitle(LocaleController.getString("DeviceIdentifySmartphone", R.string.DeviceIdentifySmartphone))
+                                            .setItemDescription(LocaleController.getString("DeviceIdentifySmartphoneDesc", R.string.DeviceIdentifySmartphoneDesc))
+
+                            ))
+                            .title(LocaleController.getString("DeviceIdentifyStatus", R.string.DeviceIdentifyStatus))
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> {
+                                if (checkExperimentsEnabled(context)) {
+                                    fragment.presentFragment(new NavigationSettingsUI());
+                                }
+                            })
+                            .value(LocaleController.getString(OctoConfig.INSTANCE.alternativeNavigation.getValue() ? R.string.NotificationsOn : R.string.NotificationsOff))
+                            .title(LocaleController.getString("AlternativeNavigation", R.string.AlternativeNavigation))
+                            .build()
+                    );
                 })
                 .category(LocaleController.getString(R.string.DownloadAndUploadBoost), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -130,7 +159,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 .build();
     }
 
-    private boolean checkExperimentsEnabled(Context context) {
+    public static boolean checkExperimentsEnabled(Context context) {
         if (OctoConfig.INSTANCE.experimentsEnabled.getValue()) return true;
         var bottomSheet = new AllowExperimentalBottomSheet(context);
         bottomSheet.show();

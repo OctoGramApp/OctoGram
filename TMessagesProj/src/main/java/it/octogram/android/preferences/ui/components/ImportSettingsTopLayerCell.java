@@ -10,9 +10,13 @@ import android.widget.TextView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieImageView;
+import org.telegram.ui.Components.StickerImageView;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 
 @SuppressLint("ViewConstructor")
 public class ImportSettingsTopLayerCell extends LinearLayout {
@@ -21,10 +25,10 @@ public class ImportSettingsTopLayerCell extends LinearLayout {
         super.setOrientation(LinearLayout.VERTICAL);
         super.setMinimumWidth(LayoutParams.MATCH_PARENT);
 
-        RLottieImageView imageView = new RLottieImageView(getContext());
-        imageView.setAutoRepeat(false);
-        imageView.setAnimation(R.raw.saved_folders, AndroidUtilities.dp(130), AndroidUtilities.dp(130));
-        imageView.playAnimation();
+        StickerImageView imageView = new StickerImageView(getContext(), UserConfig.selectedAccount);
+        imageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
+        imageView.setStickerNum(StickerUi.IMPORT_SETTINGS.getValue());
+        imageView.getImageReceiver().setAutoRepeat(1);
 
         TextView textView = new TextView(context);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));

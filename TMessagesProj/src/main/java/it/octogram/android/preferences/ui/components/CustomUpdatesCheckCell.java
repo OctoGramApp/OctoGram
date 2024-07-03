@@ -85,14 +85,6 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
         layoutRight.addView(checkAvailableUpdatesView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 35));
 
         addView(layoutRight, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, 22, 0, 22, 0));
-        setWillNotDraw(false);
-    }
-
-    @Override
-    protected void onDraw(@NonNull Canvas canvas) {
-        if (!OctoConfig.INSTANCE.disableDividers.getValue()) {
-            canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(20), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(20) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
-        }
     }
 
     @Override

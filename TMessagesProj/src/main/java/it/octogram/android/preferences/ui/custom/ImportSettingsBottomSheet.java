@@ -29,8 +29,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
@@ -55,7 +53,6 @@ import org.telegram.ui.LaunchActivity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -164,23 +161,11 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         externalKeysUnavailableInScan = 0;
         totalImportableKeysCounter = 0;
 
-        Iterator<String> keys = settingsScan.data.keys();
-        // settingsScan.data не должен содержать значений, входящих в исключенную конфигурацию
-        while (keys.hasNext()) {
-            String key = keys.next();
-            try {
-                if (settingsScan.data.get(key) instanceof JSONObject singleSettings) {
-                    dataToImport.add(key);
-
-                    Iterator<String> singleSettingsKeys = singleSettings.keys();
-                    while (singleSettingsKeys.hasNext()) {
-                        String singleSettingKey = singleSettingsKeys.next();
-                        dataToImport.add(singleSettingKey);
-                        totalImportableKeysCounter++;
-                    }
-                }
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
+        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+            dataToImport.add(category.categoryId);
+            for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                dataToImport.add(option.optionKey);
+                totalImportableKeysCounter++;
             }
         }
 
@@ -225,10 +210,12 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         if (changedOptions > 0) {
             boolean isReloadRequested = false;
-            for (String field : dataToImport) {
-                if (settingsScan.forceRequestReloadOptions.contains(field)) {
-                    isReloadRequested = true;
-                    break;
+            for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    if (dataToImport.contains(option.optionKey) && option.optionRequiresRestart) {
+                        isReloadRequested = true;
+                        break;
+                    }
                 }
             }
 
@@ -274,31 +261,25 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 return;
             }
 
-            try {
-                if (settingsScan.data.get(item.itemRelationId) instanceof JSONObject singleSettings) {
-                    if (dataToImport.contains(item.itemRelationId)) {
-                        dataToImport.remove(item.itemRelationId);
-                    } else {
-                        dataToImport.add(item.itemRelationId);
-                    }
-
-                    boolean mustBeEnabled = dataToImport.contains(item.itemRelationId);
-                    Iterator<String> singleSettingsKeys = singleSettings.keys();
-                    while (singleSettingsKeys.hasNext()) {
-                        String singleSettingKey = singleSettingsKeys.next();
-
-                        if (mustBeEnabled && !dataToImport.contains(singleSettingKey)) {
-                            dataToImport.add(singleSettingKey);
-                        } else if (!mustBeEnabled) {
-                            dataToImport.remove(singleSettingKey);
-                        }
-                    }
-
-                    updateItems();
-                    reloadActionButtonSize();
+            ImportSettingsScanHelper.SettingsScanCategory category = settingsScan.getCategoryById(item.itemRelationId);
+            if (category != null) {
+                if (dataToImport.contains(item.itemRelationId)) {
+                    dataToImport.remove(item.itemRelationId);
+                } else {
+                    dataToImport.add(item.itemRelationId);
                 }
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
+
+                boolean mustBeEnabled = dataToImport.contains(item.itemRelationId);
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    if (mustBeEnabled && !dataToImport.contains(option.optionKey)) {
+                        dataToImport.add(option.optionKey);
+                    } else if (!mustBeEnabled) {
+                        dataToImport.remove(option.optionKey);
+                    }
+                }
+
+                updateItems();
+                reloadActionButtonSize();
             }
         } else if (item.viewType == VIEW_TYPE_CHECKBOX) {
             if (dataToImport.contains(item.itemRelationId)) {
@@ -319,10 +300,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         // totalImportableKeysCounter не содержит родительских значений.
         // поэтому из счетчика dataToImportSize мы должны удалить их перед сравнением.
 
-        Iterator<String> keys = settingsScan.data.keys();
-        while (keys.hasNext()) {
-            String key = keys.next();
-            if (dataToImport.contains(key)) {
+        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+            if (dataToImport.contains(category.categoryId)) {
                 dataToImportSize--;
             }
         }
@@ -331,31 +310,26 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     }
 
     private void fixItemRelationIdState(String itemRelationId) {
-        Iterator<String> keys = settingsScan.data.keys();
-        while (keys.hasNext()) {
-            String key = keys.next();
-            try {
-                if (settingsScan.data.get(key) instanceof JSONObject singleSettings) {
-                    if (singleSettings.has(itemRelationId)) {
-                        boolean isOneOptionSelected = false;
-                        Iterator<String> singleSettingsKeys = singleSettings.keys();
-                        while (singleSettingsKeys.hasNext()) {
-                            String singleSettingKey = singleSettingsKeys.next();
-                            if (dataToImport.contains(singleSettingKey)) {
-                                isOneOptionSelected = true;
-                                break;
-                            }
-                        }
-                        if (isOneOptionSelected && !dataToImport.contains(key)) {
-                            dataToImport.add(key);
-                        } else if (!isOneOptionSelected) {
-                            dataToImport.remove(key);
-                        }
-                        break;
-                    }
+        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+            boolean hasSelectedOption = false;
+            boolean isOneOptionSelected = false;
+            for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                if (option.optionKey.equals(itemRelationId)) {
+                    hasSelectedOption = true;
                 }
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
+                if (dataToImport.contains(option.optionKey)) {
+                    isOneOptionSelected = true;
+                }
+            }
+
+            if (hasSelectedOption) {
+                if (isOneOptionSelected && !dataToImport.contains(category.categoryId)) {
+                    dataToImport.add(category.categoryId);
+                } else if (!isOneOptionSelected) {
+                    dataToImport.remove(category.categoryId);
+                }
+
+                break;
             }
         }
     }
@@ -367,48 +341,13 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         items.add(Item.asHeader());
 
-        Iterator<String> keys = settingsScan.data.keys();
-        while (keys.hasNext()) {
-            String key = keys.next();
-            try {
-                if (settingsScan.data.get(key) instanceof JSONObject) {
-                    String translation = key;
-                    if (settingsScan.data.has(key + "_string")) {
-                        Object translationId = settingsScan.data.get(key + "_string");
-                        if (translationId instanceof Integer) {
-                            translation = LocaleController.getString((Integer) translationId);
-                        }
-                    }
+        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+            items.add(Item.asSwitch(category.categoryIcon, category.getName(), category.categoryId));
 
-                    int iconResId = R.drawable.msg2_sticker;
-                    if (settingsScan.data.has(key + "_icon")) {
-                        Object iconResIdFromConfig = settingsScan.data.get(key + "_icon");
-                        if (iconResIdFromConfig instanceof Integer) {
-                            iconResId = (Integer) iconResIdFromConfig;
-                        }
-                    }
-
-                    items.add(Item.asSwitch(iconResId, translation, key));
-
-                    if (expanded.contains(key)) {
-                        JSONObject singleSettings = (JSONObject) settingsScan.data.get(key);
-                        Iterator<String> singleSettingsKeys = singleSettings.keys();
-                        while (singleSettingsKeys.hasNext()) {
-                            String singleSettingKey = singleSettingsKeys.next();
-
-                            String translationRow1 = singleSettingKey;
-                            Object translationRowId = singleSettings.get(singleSettingKey);
-                            if (translationRowId instanceof Integer) {
-                                translationRow1 = LocaleController.getString((Integer) translationRowId);
-                            } else if (translationRowId instanceof String) {
-                                translationRow1 = (String) translationRowId;
-                            }
-                            items.add(Item.asCheckbox(translationRow1, singleSettingKey));
-                        }
-                    }
+            if (expanded.contains(category.categoryId)) {
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    items.add(Item.asCheckbox(option.getName(), option.optionKey));
                 }
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
             }
         }
 
@@ -524,7 +463,14 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         private boolean hasInnerData() {
-            return settingsScan.data.has(this.itemRelationId);
+            boolean hasInnerData = false;
+            for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+                if (category.categoryId.equals(this.itemRelationId)) {
+                    hasInnerData = !category.options.isEmpty();
+                    break;
+                }
+            }
+            return hasInnerData;
         }
 
         public static Item asHeader() {
@@ -693,24 +639,16 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                     arrowView.animate().rotation(isExpanded ? 180 : 0).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).setDuration(240).start();
                 }
 
+                ImportSettingsScanHelper.SettingsScanCategory category = settingsScan.getCategoryById(item.itemRelationId);
                 int selectedOptionsOnTotal = 0;
-                int totalOptions = 0;
-                try {
-                    if (settingsScan.data.get(item.itemRelationId) instanceof JSONObject singleSettings) {
-                        Iterator<String> singleSettingsKeys = singleSettings.keys();
-                        totalOptions = singleSettings.length();
-                        while (singleSettingsKeys.hasNext()) {
-                            String singleSettingKey = singleSettingsKeys.next();
-                            if (dataToImport.contains(singleSettingKey)) {
-                                selectedOptionsOnTotal++;
-                            }
-                        }
+                int totalOptions = category.options.size();
+
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    if (dataToImport.contains(option.optionKey)) {
+                        selectedOptionsOnTotal++;
                     }
-
-                    countTextView.setText(selectedOptionsOnTotal + "/" + totalOptions);
-                } catch (JSONException ignored) {
-
                 }
+                countTextView.setText(selectedOptionsOnTotal + "/" + totalOptions);
             } else {
                 checkBoxView.setVisibility(VISIBLE);
                 checkBoxView.setChecked(dataToImport.contains(item.itemRelationId), true);

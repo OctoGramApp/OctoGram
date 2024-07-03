@@ -140,6 +140,7 @@ import com.google.android.gms.auth.api.phone.SmsRetriever;
 import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
+import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 
@@ -2694,8 +2695,9 @@ public class AndroidUtilities {
     }
 
     public static boolean isTabletInternal() {
-        if (OctoConfig.INSTANCE.tabletMode.getValue()) {
-            return true;
+        int deviceIdentifyState = OctoConfig.INSTANCE.deviceIdentifyState.getValue();
+        if (deviceIdentifyState != DeviceIdentifyState.DEFAULT.getValue()) {
+            return deviceIdentifyState == DeviceIdentifyState.FORCE_TABLET.getValue();
         }
         if (isTablet == null) {
             isTablet = isTabletForce();
