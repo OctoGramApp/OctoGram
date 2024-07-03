@@ -16,6 +16,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -32,6 +33,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +42,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.util.Consumer;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
 
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
@@ -1112,6 +1117,8 @@ public class MessagesController extends BaseController implements NotificationCe
 
         public ArrayList<TL_chatlists.TL_exportedChatlistInvite> invites = null;
 
+        public String emoticon;
+
         private static int dialogFilterPointer = 10;
         public int localId = dialogFilterPointer++;
         public boolean locked;
@@ -1431,7 +1438,7 @@ public class MessagesController extends BaseController implements NotificationCe
         ringtoneSizeMax = mainPreferences.getInt("ringtoneSizeMax", 1024_00);
         pmReadDateExpirePeriod = mainPreferences.getInt("pmReadDateExpirePeriod", 7 * 86400);
         suggestStickersApiOnly = mainPreferences.getBoolean("suggestStickersApiOnly", false);
-        roundVideoSize = mainPreferences.getInt("roundVideoSize", 384);
+        roundVideoSize = mainPreferences.getInt("roundVideoSize", 512); // TGA VALUE: 384
         roundVideoBitrate = mainPreferences.getInt("roundVideoBitrate", 1000);
         roundAudioBitrate = mainPreferences.getInt("roundAudioBitrate", 64);
         pendingSuggestions = mainPreferences.getStringSet("pendingSuggestions", null);
@@ -8310,7 +8317,11 @@ public class MessagesController extends BaseController implements NotificationCe
         });
     }
 
-    public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, int offset) {
+    public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, BaseFragment fragment, int offset) {
+        deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, offset, false);
+    }
+
+    public void deleteUserChannelHistory(TLRPC.Chat currentChat, TLRPC.User fromUser, TLRPC.Chat fromChat, BaseFragment fragment, int offset, boolean force) {
         long fromId = 0;
         if (fromUser != null) {
             fromId = fromUser.id;
@@ -8327,7 +8338,7 @@ public class MessagesController extends BaseController implements NotificationCe
             if (error == null) {
                 TLRPC.TL_messages_affectedHistory res = (TLRPC.TL_messages_affectedHistory) response;
                 if (res.offset > 0) {
-                    deleteUserChannelHistory(currentChat, fromUser, fromChat, res.offset);
+                    deleteUserChannelHistory(currentChat, fromUser, fromChat, fragment, res.offset);
                 }
                 processNewChannelDifferenceParams(res.pts, res.pts_count, currentChat.id);
             }
@@ -19796,7 +19807,7 @@ public class MessagesController extends BaseController implements NotificationCe
         }
         for (int a = 0, N = reasons.size(); a < N; a++) {
             TLRPC.TL_restrictionReason reason = reasons.get(a);
-            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform)) {
+            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform) && StoreUtils.isDownloadedFromAnyStore()) {
                 return reason.text;
             }
         }
@@ -19850,7 +19861,7 @@ public class MessagesController extends BaseController implements NotificationCe
         } else {
             reason = getRestrictionReason(user.restriction_reason);
         }
-        if (reason != null) {
+        if (reason != null && StoreUtils.isDownloadedFromAnyStore()) {
             showCantOpenAlert(fragment, reason);
             return false;
         }

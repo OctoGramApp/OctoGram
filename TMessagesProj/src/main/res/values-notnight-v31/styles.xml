@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.TMessages.Start" parent="@android:style/Theme.Material">
+        <item name="android:actionBarStyle">@style/ActionBar.Transparent.TMessages.Start</item>
+        <item name="android:colorBackground">@color/splash_background</item>
+        <item name="android:windowBackground">@color/splash_background</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorPrimaryDark">@color/splash_background</item>
+        <item name="android:colorPrimary">@color/splash_background</item>
+        <item name="android:navigationBarColor">@color/splash_navigation_bar</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <!--<item name="android:windowSplashScreenAnimatedIcon">@drawable/octo_splash_screen</item>
+        <item name="android:windowSplashScreenAnimationDuration">@integer/splash_screen_duration</item>
+        <item name="android:windowSplashScreenBackground">?android:windowBackground</item>-->
+    </style>
+</resources>

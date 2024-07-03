@@ -214,6 +214,11 @@
         <item name="android:textViewStyle">@style/MyTextViewStyle</item>
     </style>
 
+    <style name="Animation.Preference.SimpleMenuCenter" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@anim/shrink_fade_out_center</item>
+    </style>
+
     <style name="TransparentDialog2" parent="TransparentDialog">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowTranslucentStatus">true</item>

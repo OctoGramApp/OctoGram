@@ -147,6 +147,9 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
+
 @SuppressLint("NewApi")
 public class VoIPService extends Service implements SensorEventListener, AudioManager.OnAudioFocusChangeListener, VoIPController.ConnectionStateListener, NotificationCenter.NotificationCenterDelegate {
 
@@ -3457,7 +3460,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 		dispatchStateChanged(STATE_WAITING_INCOMING);
 		if (!notificationsDisabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			showIncomingNotification(ContactsController.formatName(user.first_name, user.last_name), user, privateCall.video, 0);
+			showIncomingNotification(ContactsController.formatName(user.first_name, user.last_name), null, user, privateCall.video, 0);
 			if (BuildVars.LOGS_ENABLED) {
 				FileLog.d("Showing incoming call notification");
 			}
@@ -3592,7 +3595,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				int outFramesPerBuffer = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
 				Instance.setBufferSize(outFramesPerBuffer);
 			} else {
-				Instance.setBufferSize(AudioTrack.getMinBufferSize(48000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT) / 2);
+				Instance.setBufferSize(AudioTrack.getMinBufferSize(48000, OctoConfig.getAudioType(), AudioFormat.ENCODING_PCM_16BIT) / 2);
 			}
 
 			cpuWakelock = ((PowerManager) getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "telegram-voip");
@@ -3689,12 +3692,22 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 	}
 
+	private int currentStreamType;
 	private void loadResources() {
-		if (Build.VERSION.SDK_INT >= 21) {
-			WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+		if (chat != null && OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
+			currentStreamType = AudioManager.STREAM_MUSIC;
+			if (Build.VERSION.SDK_INT >= 21) {
+				WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_MEDIA);
+			}
+		} else {
+			currentStreamType = AudioManager.STREAM_VOICE_CALL;
+			if (Build.VERSION.SDK_INT >= 21) {
+				WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+			}
 		}
+		WebRtcAudioTrack.setAudioStreamType(currentStreamType);
 		Utilities.globalQueue.postRunnable(() -> {
-			soundPool = new SoundPool(1, AudioManager.STREAM_VOICE_CALL, 0);
+			soundPool = new SoundPool(1, currentStreamType, 0);
 			spConnectingId = soundPool.load(this, R.raw.voip_connecting, 1);
 			spRingbackID = soundPool.load(this, R.raw.voip_ringback, 1);
 			spFailedID = soundPool.load(this, R.raw.voip_failed, 1);
@@ -3752,8 +3765,8 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 
 		if (Build.VERSION.SDK_INT >= 21) {
-			WebRtcAudioTrack.setAudioTrackUsageAttribute(hasRtmpStream() ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_VOICE_COMMUNICATION);
-			WebRtcAudioTrack.setAudioStreamType(hasRtmpStream() ? AudioManager.USE_DEFAULT_STREAM_TYPE : AudioManager.STREAM_VOICE_CALL);
+			WebRtcAudioTrack.setAudioTrackUsageAttribute(hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue() ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_VOICE_COMMUNICATION);
+			WebRtcAudioTrack.setAudioStreamType(hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue() ? AudioManager.USE_DEFAULT_STREAM_TYPE : AudioManager.STREAM_VOICE_CALL);
 		}
 
 		needPlayEndSound = true;
@@ -3761,7 +3774,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		if (!USE_CONNECTION_SERVICE) {
 			Utilities.globalQueue.postRunnable(() -> {
 				try {
-					if (hasRtmpStream()) {
+					if (hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
 						am.setMode(AudioManager.MODE_NORMAL);
 						am.setBluetoothScoOn(false);
 						AndroidUtilities.runOnUIThread(() -> {
@@ -3827,7 +3840,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		SensorManager sm = (SensorManager) getSystemService(SENSOR_SERVICE);
 		Sensor proximity = sm.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 		try {
-			if (proximity != null) {
+			if (!OctoConfig.INSTANCE.disableProximityEvents.getValue() && proximity != null) {
 				proximityWakelock = ((PowerManager) getSystemService(Context.POWER_SERVICE)).newWakeLock(PROXIMITY_SCREEN_OFF_WAKE_LOCK, "telegram-voip-prx");
 				sm.registerListener(this, proximity, SensorManager.SENSOR_DELAY_NORMAL);
 			}
@@ -3839,6 +3852,9 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void fetchBluetoothDeviceName() {
+		if (Build.VERSION.SDK_INT >= 31 && ApplicationLoader.applicationContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+			return;
+		}
 		if (fetchingBluetoothDeviceName) {
 			return;
 		}
@@ -4099,13 +4115,15 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		return bitmap;
 	}
 
-	private void showIncomingNotification(String name, TLObject userOrChat, boolean video, int additionalMemberCount) {
+	private void showIncomingNotification(String name, CharSequence subText, TLObject userOrChat, boolean video, int additionalMemberCount) {
 		Intent intent = new Intent(this, LaunchActivity.class);
 		intent.setAction("voip");
 
 		Notification.Builder builder = new Notification.Builder(this)
 				.setContentTitle(video ? LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding) : LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding))
-				.setSmallIcon(R.drawable.ic_call)
+				.setContentText(name)
+				.setSmallIcon(OctoUtils.getNotificationIcon())
+				.setSubText(subText)
 				.setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE));
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			SharedPreferences nprefs = MessagesController.getGlobalNotificationsSettings();
@@ -4165,20 +4183,22 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		endIntent.setAction(getPackageName() + ".DECLINE_CALL");
 		endIntent.putExtra("call_id", getCallID());
 		CharSequence endTitle = LocaleController.getString("VoipDeclineCall", R.string.VoipDeclineCall);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 			endTitle = new SpannableString(endTitle);
 			((SpannableString) endTitle).setSpan(new ForegroundColorSpan(0xFFF44336), 0, endTitle.length(), 0);
 		}
 		PendingIntent endPendingIntent = PendingIntent.getBroadcast(this, 0, endIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
 		Intent answerIntent = new Intent(this, VoIPActionsReceiver.class);
 		answerIntent.setAction(getPackageName() + ".ANSWER_CALL");
 		answerIntent.putExtra("call_id", getCallID());
 		CharSequence answerTitle = LocaleController.getString("VoipAnswerCall", R.string.VoipAnswerCall);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 			answerTitle = new SpannableString(answerTitle);
 			((SpannableString) answerTitle).setSpan(new ForegroundColorSpan(0xFF00AA00), 0, answerTitle.length(), 0);
 		}
 		PendingIntent answerPendingIntent = PendingIntent.getBroadcast(this, 0, answerIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
 		builder.setPriority(Notification.PRIORITY_MAX);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			builder.setShowWhen(false);
@@ -4195,36 +4215,43 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				}
 			}
 		}
-		Notification incomingNotification;
+		Bitmap avatar = getRoundAvatarBitmap(userOrChat);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			Bitmap avatar = getRoundAvatarBitmap(userOrChat);
-			String personName = ContactsController.formatName(userOrChat);
-			if (TextUtils.isEmpty(personName)) {
-				//java.lang.IllegalArgumentException: person must have a non-empty a name
-				personName = "___";
-			}
-			Person person = new Person.Builder()
-					.setName(personName)
-					.setIcon(Icon.createWithAdaptiveBitmap(avatar)).build();
-			Notification.CallStyle notificationStyle = Notification.CallStyle.forIncomingCall(person, endPendingIntent, answerPendingIntent);
-
-			builder.setStyle(notificationStyle);
-			incomingNotification = builder.build();
-		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-			builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
-			builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
-			builder.setContentText(name);
-
+			builder.setColor(0xff282e31);
+			builder.setColorized(true);
+			// String personName = ContactsController.formatName(userOrChat);  ????
+			Person caller = new Person.Builder()
+					.setIcon(Icon.createWithBitmap(avatar))
+					.setName(name)
+					.build();
+			Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, endPendingIntent, answerPendingIntent);
+			callStyle.setIsVideo(videoCall);
+			builder.setStyle(callStyle);
+			builder.setContentText(video ? LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding) : LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding));
+		}
+		builder.setLargeIcon(avatar);
+		Notification notification;
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
 			RemoteViews customView = new RemoteViews(getPackageName(), LocaleController.isRTL ? R.layout.call_notification_rtl : R.layout.call_notification);
 			customView.setTextViewText(R.id.name, name);
-			customView.setViewVisibility(R.id.subtitle, View.GONE);
-			if (UserConfig.getActivatedAccountsCount() > 1) {
-				TLRPC.User self = UserConfig.getInstance(currentAccount).getCurrentUser();
-				customView.setTextViewText(R.id.title, video ? LocaleController.formatString("VoipInVideoCallBrandingWithName", R.string.VoipInVideoCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)) : LocaleController.formatString("VoipInCallBrandingWithName", R.string.VoipInCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)));
+			boolean subtitleVisible = true;
+			if (TextUtils.isEmpty(subText)) {
+				customView.setViewVisibility(R.id.subtitle, View.GONE);
+				if (UserConfig.getActivatedAccountsCount() > 1) {
+					TLRPC.User self = UserConfig.getInstance(currentAccount).getCurrentUser();
+					customView.setTextViewText(R.id.title, video ? LocaleController.formatString("VoipInVideoCallBrandingWithName", R.string.VoipInVideoCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)) : LocaleController.formatString("VoipInCallBrandingWithName", R.string.VoipInCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)));
+				} else {
+					customView.setTextViewText(R.id.title, video ? LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding) : LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding));
+				}
 			} else {
-				customView.setTextViewText(R.id.title, video ? LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding) : LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding));
+				if (UserConfig.getActivatedAccountsCount() > 1) {
+					TLRPC.User self = UserConfig.getInstance(currentAccount).getCurrentUser();
+					customView.setTextViewText(R.id.subtitle, LocaleController.formatString("VoipAnsweringAsAccount", R.string.VoipAnsweringAsAccount, ContactsController.formatName(self.first_name, self.last_name)));
+				} else {
+					customView.setViewVisibility(R.id.subtitle, View.GONE);
+				}
+				customView.setTextViewText(R.id.title, subText);
 			}
-			Bitmap avatar = getRoundAvatarBitmap(userOrChat);
 			customView.setTextViewText(R.id.answer_text, LocaleController.getString("VoipAnswerCall", R.string.VoipAnswerCall));
 			customView.setTextViewText(R.id.decline_text, LocaleController.getString("VoipDeclineCall", R.string.VoipDeclineCall));
 			customView.setImageViewBitmap(R.id.photo, avatar);
@@ -4232,15 +4259,19 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			customView.setOnClickPendingIntent(R.id.decline_btn, endPendingIntent);
 			builder.setLargeIcon(avatar);
 
-			incomingNotification = builder.getNotification();
-			incomingNotification.headsUpContentView = incomingNotification.bigContentView = customView;
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				builder.setCustomHeadsUpContentView(customView);
+				builder.setCustomBigContentView(customView);
+				notification = builder.build();
+			} else {
+				notification = builder.build();
+				notification.headsUpContentView = customView;
+				notification.bigContentView = customView;
+			}
 		} else {
-			builder.setContentText(name);
-			builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
-			builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
-			incomingNotification = builder.getNotification();
+			notification = builder.build();
 		}
-		startForeground(ID_INCOMING_CALL_NOTIFICATION, incomingNotification);
+		startForeground(ID_INCOMING_CALL_NOTIFICATION, notification);
 		startRingtoneAndVibration();
 	}
 
@@ -4479,7 +4510,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 
 	private void acceptIncomingCallFromNotification() {
 		showNotification();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.R && (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED || privateCall.video && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.R && (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED || privateCall.video && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
 			try {
 				//intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
 				PendingIntent.getActivity(VoIPService.this, 0, new Intent(VoIPService.this, VoIPPermissionActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ONE_SHOT).send();
@@ -4501,7 +4532,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	public void updateOutputGainControlState() {
-		if (hasRtmpStream()) {
+		if (hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
 			return;
 		}
 		if (tgVoip[CAPTURE_DEVICE_CAMERA] != null) {
@@ -4555,7 +4586,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		PhoneAccountHandle handle = new PhoneAccountHandle(new ComponentName(this, TelegramConnectionService.class), "" + self.id);
 		PhoneAccount account = new PhoneAccount.Builder(handle, ContactsController.formatName(self.first_name, self.last_name))
 				.setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)
-				.setIcon(Icon.createWithResource(this, R.drawable.ic_launcher_dr))
+				.setIcon(Icon.createWithResource(this, R.mipmap.ic_launcher))
 				.setHighlightColor(0xff2ca5e0)
 				.addSupportedUriScheme("sip")
 				.build();

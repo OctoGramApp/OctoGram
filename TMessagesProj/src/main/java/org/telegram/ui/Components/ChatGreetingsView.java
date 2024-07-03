@@ -227,6 +227,7 @@ public class ChatGreetingsView extends LinearLayout {
 
     private void updateLayout() {
         removeAllViews();
+        // TODO: Скрыть GreetingsView, если пользователь не премиальный
         if (premiumLock) {
             addView(premiumIconView, LayoutHelper.createLinear(78, 78, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 20, 9, 20, 9));
             final boolean premiumLocked = MessagesController.getInstance(currentAccount).premiumFeaturesBlocked();

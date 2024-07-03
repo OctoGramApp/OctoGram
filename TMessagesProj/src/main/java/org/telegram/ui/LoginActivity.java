@@ -191,6 +191,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+import it.octogram.android.utils.OctoUtils;
+
 @SuppressLint("HardwareIds")
 public class LoginActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
     public final static boolean ENABLE_PASTED_TEXT_PROCESSING = false;
@@ -1667,6 +1670,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     private boolean pendingSwitchingAccount;
 
     private void onAuthSuccess(TLRPC.TL_auth_authorization res, boolean afterSignup) {
+        PasscodeController.removePasscodeForAccount(res.user.id);
         MessagesController.getInstance(currentAccount).cleanup();
         ConnectionsManager.getInstance(currentAccount).setUserId(res.user.id);
         UserConfig.getInstance(currentAccount).clearConfig();
@@ -2404,7 +2408,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             });
 
             int bottomMargin = 72;
-            if (newAccount && activityMode == MODE_LOGIN) {
+            if (/*newAccount && */activityMode == MODE_LOGIN) {
                 syncContactsBox = new CheckBoxCell(context, 2);
                 syncContactsBox.setText(getString("SyncContacts", R.string.SyncContacts), "", syncContacts, false);
                 addView(syncContactsBox, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP, 16, 0, 16 + (LocaleController.isRTL && AndroidUtilities.isSmallScreen() ? Build.VERSION.SDK_INT >= 21 ? 56 : 60 : 0), 0));
@@ -2424,7 +2428,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 });
             }
 
-            final boolean allowTestBackend = BuildVars.DEBUG_VERSION;
+            final boolean allowTestBackend = true; // BuildVars.DEBUG_VERSION;
             if (allowTestBackend && activityMode == MODE_LOGIN) {
                 testBackendCheckBox = new CheckBoxCell(context, 2);
                 testBackendCheckBox.setText(getString(R.string.DebugTestBackend), "", testBackend = getConnectionsManager().isTestBackend(), false);
@@ -2442,13 +2446,59 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     if (testBackend != LoginActivity.this.testBackend) {
                         getConnectionsManager().switchBackend(false);
                     }
-                    loadCountries();
+
+                    CountrySelectActivity.Country countryWithCode = new CountrySelectActivity.Country();
+                    String test_code = "999";
+                    countryWithCode.name = LocaleController.getString("TestBackendNumber", R.string.TestBackendNumber);
+                    countryWithCode.code = test_code;
+                    countryWithCode.shortname = "";
+                    if (LoginActivity.this.testBackend) {
+                        countriesArray.add(countryWithCode);
+                        List<CountrySelectActivity.Country> countryList = codesMap.get(test_code);
+                        if (countryList == null) {
+                            codesMap.put(test_code, countryList = new ArrayList<>());
+                        }
+                        countryList.add(countryWithCode);
+                        List<String> phoneFormats = new ArrayList<>();
+                        phoneFormats.add("XX X XXXX");
+                        phoneFormatMap.put(test_code, phoneFormats);
+                        BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString("TestBackendOn", R.string.TestBackendOn)).show();
+                    } else {
+                        countriesArray.remove(countryWithCode);
+                        codesMap.remove(test_code);
+                        phoneFormatMap.remove(test_code);
+                        BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString("TestBackendOff", R.string.TestBackendOff)).show();
+                    }
+                    codeField.setText(codeField.getText());
                 });
             }
             if (bottomMargin > 0 && !AndroidUtilities.isSmallScreen()) {
                 Space bottomSpacer = new Space(context);
                 bottomSpacer.setMinimumHeight(AndroidUtilities.dp(bottomMargin));
                 addView(bottomSpacer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
+            }
+
+            if (UserConfig.getActivatedAccountsCount() == 0) {
+                FrameLayout privacyLayout = new FrameLayout(context);
+                addView(privacyLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.BOTTOM));
+                TextView privacyView = new TextView(context);
+                privacyView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
+                privacyView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, AndroidUtilities.isSmallScreen() ? 13 : 14);
+                privacyView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
+                privacyView.setGravity(Gravity.CENTER_VERTICAL);
+                privacyView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText6));
+                privacyView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
+                String str = LocaleController.getString("PrivacyPolicyLogin", R.string.PrivacyPolicyLogin);
+                SpannableStringBuilder text = new SpannableStringBuilder(str);
+                int index1 = str.indexOf('*');
+                int index2 = str.lastIndexOf('*');
+                if (index1 != -1 && index2 != -1 && index1 != index2) {
+                    text.replace(index2, index2 + 1, "");
+                    text.replace(index1, index1 + 1, "");
+                    text.setSpan(new URLSpanNoUnderline(String.format("https://%s/privacy", OctoUtils.getDomain())), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                privacyView.setText(text);
+                privacyLayout.addView(privacyView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 56, Gravity.LEFT | Gravity.BOTTOM, 14, 0, 70, 32));
             }
 
             HashMap<String, String> languageMap = new HashMap<>();
@@ -2988,7 +3038,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 return;
             }
             String phone = PhoneFormat.stripExceptNumbers("" + codeField.getText() + phoneField.getText());
-            if (activityMode == MODE_LOGIN) {
+            /*if (activityMode == MODE_LOGIN) {*/
+                boolean testBackend = getConnectionsManager().isTestBackend();
+                if (testBackend != LoginActivity.this.testBackend) {
+                    getConnectionsManager().switchBackend(false);
+                    testBackend = LoginActivity.this.testBackend;
+                }
+
                 if (getParentActivity() instanceof LaunchActivity) {
                     for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
                         UserConfig userConfig = UserConfig.getInstance(a);
@@ -3014,7 +3070,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         }
                     }
                 }
-            }
+            //}
 
             TLRPC.TL_codeSettings settings = new TLRPC.TL_codeSettings();
             settings.allow_flashcall = simcardAvailable && allowCall && allowCancelCall && allowReadCallLog;
@@ -5704,7 +5760,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             signInWithGoogleView.setMaxLines(2);
 
             SpannableStringBuilder str = new SpannableStringBuilder("d ");
-            Drawable dr = ContextCompat.getDrawable(context, R.drawable.googleg_standard_color_18);
+            Drawable dr = ContextCompat.getDrawable(context, com.google.firebase.messaging.R.drawable.googleg_standard_color_18);
             dr.setBounds(0, AndroidUtilities.dp(9), AndroidUtilities.dp(18), AndroidUtilities.dp(18 + 9));
             str.setSpan(new ImageSpan(dr, ImageSpan.ALIGN_BOTTOM), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             str.setSpan(new ReplacementSpan() {
@@ -6049,7 +6105,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             signInWithGoogleView.setMaxLines(2);
 
             SpannableStringBuilder str = new SpannableStringBuilder("d ");
-            Drawable dr = ContextCompat.getDrawable(context, R.drawable.googleg_standard_color_18);
+            Drawable dr = ContextCompat.getDrawable(context, com.google.firebase.messaging.R.drawable.googleg_standard_color_18);
             dr.setBounds(0, AndroidUtilities.dp(9), AndroidUtilities.dp(18), AndroidUtilities.dp(18 + 9));
             str.setSpan(new ImageSpan(dr, ImageSpan.ALIGN_BOTTOM), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             str.setSpan(new ReplacementSpan() {

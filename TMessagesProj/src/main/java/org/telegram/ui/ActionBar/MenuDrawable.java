@@ -315,6 +315,10 @@ public class MenuDrawable extends Drawable {
         this.iconColor = iconColor;
     }
 
+    public int getIconColor() {
+        return this.iconColor;
+    }
+
     public void setBackColor(int backColor) {
         this.backColor = backColor;
     }

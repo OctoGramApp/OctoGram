@@ -55,6 +55,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -86,6 +87,18 @@ import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
 
+import it.octogram.android.MonetThemeController;
+import it.octogram.android.crashlytics.Crashlytics;
+import it.octogram.android.CustomEmojiController;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.DatacenterActivity;
+import it.octogram.android.preferences.ui.OctoAppearanceUI;
+import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
+import it.octogram.android.preferences.ui.OctoExperimentsUI;
+import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
+import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+
+import org.json.JSONObject;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -179,6 +192,7 @@ import org.telegram.ui.Components.Premium.boosts.UserSelectorBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.SearchDownloadsContainer;
 import org.telegram.ui.Components.SearchTagsList;
 import org.telegram.ui.Components.SharingLocationsAlert;
 import org.telegram.ui.Components.SideMenultItemAnimator;
@@ -213,11 +227,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.ForwardContext;
+import it.octogram.android.utils.LanguageController;
+import it.octogram.android.utils.UpdatesManager;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
     public final static String EXTRA_FORCE_NOT_INTERNAL_APPS = "force_not_internal_apps";
@@ -319,6 +339,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     private Runnable lockRunnable;
 
     private List<Runnable> onUserLeaveHintListeners = new ArrayList<>();
+
+    private Timer autoUpdateTimerSchedule;
 
     private static final int PLAY_SERVICES_REQUEST_CHECK_SETTINGS = 140;
     public static final int SCREEN_CAPTURE_REQUEST_CODE = 520;
@@ -679,6 +701,64 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     args.putLong("dialog_id", UserConfig.getInstance(currentAccount).getClientUserId());
                     args.putInt("type", MediaActivity.TYPE_STORIES);
                     presentFragment(new MediaActivity(args, null));
+                } else if (id == 100) {
+                    presentFragment(new PreferencesFragment(new OctoMainSettingsUI()));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 912) {
+                    BaseFragment lastFragment = LaunchActivity.instance.getActionBarLayout().getLastFragment();
+                    if (lastFragment instanceof DialogsActivity dialogsActivity) {
+                        dialogsActivity.showSearch(true, true, true);
+                        dialogsActivity.getActionBar().openSearchField(true);
+                        drawerLayoutContainer.closeDrawer(false);
+                    }
+                } else if (id == 913) {
+                    presentFragment(new SessionsActivity(0));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 202) {
+                    Bundle args = new Bundle();
+                    args.putInt("folderId", 1);
+                    presentFragment(new DialogsActivity(args));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 101) {
+                    presentFragment(new DatacenterActivity());
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 204) {
+                    ActionIntroActivity fragment = new ActionIntroActivity(ActionIntroActivity.ACTION_TYPE_QR_LOGIN);
+                    fragment.setQrLoginDelegate(code -> {
+                        AlertDialog progressDialog = new AlertDialog(LaunchActivity.this, 3);
+                        progressDialog.setCanCancel(false);
+                        progressDialog.show();
+                        byte[] token = Base64.decode(code.substring("tg://login?token=".length()), Base64.URL_SAFE);
+                        TLRPC.TL_auth_acceptLoginToken req = new TLRPC.TL_auth_acceptLoginToken();
+                        req.token = token;
+                        ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+                            try {
+                                progressDialog.dismiss();
+                            } catch (Exception ignore) {
+                            }
+                            if (!(response instanceof TLRPC.TL_authorization)) {
+                                AndroidUtilities.runOnUIThread(() -> AlertsCreator.showSimpleAlert(fragment, LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient), LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + error.text));
+                            }
+                        }));
+                    });
+                    actionBarLayout.presentFragment(fragment, false, true, true, false);
+                    if (AndroidUtilities.isTablet()) {
+                        actionBarLayout.showLastFragment();
+                        rightActionBarLayout.showLastFragment();
+                        drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                    } else {
+                        drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                    }
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 205) {
+                    presentFragment(new SessionsActivity(0));
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 206) {
+                    presentFragment(new LiteModeSettingsActivity());
+                    drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 207) {
+                    presentFragment(new ProxyListActivity());
+                    drawerLayoutContainer.closeDrawer(false);
                 }
             }
         });
@@ -990,6 +1070,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         }
                     });
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            MonetThemeController.registerReceiver(this);
+        }
+        CustomEmojiController.checkEmojiPacks();
         BackupAgent.requestBackup(this);
 
         RestrictedLanguagesSelectActivity.checkRestrictedLanguages(false);
@@ -1765,6 +1849,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         long push_user_id = 0;
         long push_chat_id = 0;
         long[] push_story_dids = null;
+
+        long profile_user_id = 0;
         int push_story_id = -1;
         long push_topic_id = 0;
         int push_enc_id = 0;
@@ -2618,6 +2704,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         if (intCode != 0) {
                                             code = "" + intCode;
                                         }
+                                    } else if (url.startsWith("tg:user") || url.startsWith("tg://user")) {
+                                        url = url.replace("tg:user", "tg://telegram.org").replace("tg://user", "tg://telegram.org");
+                                        data = Uri.parse(url);
+                                        String userID = data.getQueryParameter("id");
+                                        if (userID != null) {
+                                            try {
+                                                profile_user_id = Long.parseLong(userID);
+                                            } catch (NumberFormatException ignore) {
+                                            }
+                                        }
                                     } else if (url.startsWith("tg:openmessage") || url.startsWith("tg://openmessage")) {
                                         url = url.replace("tg:openmessage", "tg://telegram.org").replace("tg://openmessage", "tg://telegram.org");
                                         data = Uri.parse(url);
@@ -2689,6 +2785,83 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             open_settings = 13;
                                         } else {
                                             open_settings = 1;
+                                        }
+                                    } else if (url.startsWith("tg:update") || url.startsWith("tg://update")) {
+                                        checkAppUpdate(true, null);
+                                    } else if (url.startsWith("tg:francesco") || url.startsWith("tg://francesco")) {
+                                        BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
+
+                                        if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
+                                            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Broken name fix has been disabled.").show();
+                                        } else {
+                                            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Broken name fix has been enabled.").show();
+                                        }
+
+                                        OctoConfig.INSTANCE.useTranslationsArgsFix.updateValue(!OctoConfig.INSTANCE.useTranslationsArgsFix.getValue());
+                                    } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
+                                        if (!OctoConfig.INSTANCE.unlockedChupa.getValue()) {
+                                            BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
+                                            AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.CHUPA, null);
+                                            layout.textView.setText(LocaleController.getString("UnlockedHiddenChupaIcon", R.string.UnlockedHiddenChupaIcon));
+                                            fireworksOverlay.start();
+                                            layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                            Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
+                                            OctoConfig.INSTANCE.unlockedChupa.updateValue(true);
+                                        }
+                                    } else if (url.startsWith("tg:yukigram") || url.startsWith("tg://yukigram")) {
+                                        if (!OctoConfig.INSTANCE.unlockedYuki.getValue()) {
+                                            BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
+                                            AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.YUKI, null);
+                                            layout.textView.setText(LocaleController.getString("UnlockedHiddenYukiIcon", R.string.UnlockedHiddenYukiIcon));
+                                            fireworksOverlay.start();
+                                            layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                            Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
+                                            OctoConfig.INSTANCE.unlockedYuki.updateValue(true);
+                                        }
+                                    } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoExperimentsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:camera") || url.startsWith("tg://camera")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoCameraSettingsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:general") || url.startsWith("tg://general")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:octosettings") || url.startsWith("tg://octosettings")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoMainSettingsUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                                        }
+                                    } else if (url.startsWith("tg:appearance") || url.startsWith("tg://appearance")) {
+                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoAppearanceUI())));
+                                        if (AndroidUtilities.isTablet()) {
+                                            actionBarLayout.showLastFragment();
+                                            rightActionBarLayout.showLastFragment();
+                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                                        } else {
+                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
                                         }
                                     } else if ((url.startsWith("tg:search") || url.startsWith("tg://search"))) {
                                         url = url.replace("tg:search", "tg://telegram.org").replace("tg://search", "tg://telegram.org");
@@ -2831,9 +3004,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             NotificationCenter.getInstance(intentAccount[0]).postNotificationName(NotificationCenter.closeChats);
                                             push_user_id = userId;
                                             String mimeType = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
-                                            if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.call")) {
+                                            if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.it.octogram.android.android.call")) {
                                                 audioCallUser = true;
-                                            } else if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.org.telegram.messenger.android.call.video")) {
+                                            } else if (TextUtils.equals(mimeType, "vnd.android.cursor.item/vnd.it.octogram.android.android.call.video")) {
                                                 videoCallUser = true;
                                             }
                                         }
@@ -2990,6 +3163,18 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 if (getActionBarLayout().presentFragment(new INavigationLayout.NavigationParams(fragment).setNoAnimation(true))) {
                     pushOpened = true;
                     drawerLayoutContainer.closeDrawer();
+                }
+            } else if (profile_user_id != 0) {
+                Bundle args = new Bundle();
+                args.putLong("user_id", profile_user_id);
+                ProfileActivity fragment = new ProfileActivity(args);
+                AndroidUtilities.runOnUIThread(() -> presentFragment(fragment, false, false));
+                if (AndroidUtilities.isTablet()) {
+                    actionBarLayout.showLastFragment();
+                    rightActionBarLayout.showLastFragment();
+                    drawerLayoutContainer.setAllowOpenDrawer(false, false);
+                } else {
+                    drawerLayoutContainer.setAllowOpenDrawer(true, false);
                 }
             } else if (showDialogsList) {
                 if (!AndroidUtilities.isTablet()) {
@@ -3347,6 +3532,17 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     return videoPath != null || photoPathsArray != null && photoPathsArray.size() > 0;
                 }
                 return false;
+            }
+        };
+        fragment.forwardContext = new ForwardContext() {
+            @Override
+            public ArrayList<MessageObject> getForwardingMessages() {
+                return null;
+            }
+
+            @Override
+            public boolean forceShowScheduleAndSound() {
+                return true;
             }
         };
         fragment.setDelegate(this);
@@ -5463,12 +5659,53 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     }
 
     public void checkAppUpdate(boolean force, Browser.Progress progress) {
-        if (!force && BuildVars.DEBUG_VERSION || !force && !BuildVars.CHECK_UPDATES) {
+        /*if (!force && BuildVars.DEBUG_VERSION || !force && !BuildVars.CHECK_UPDATES) {
             return;
-        }
-        if (!force && Math.abs(System.currentTimeMillis() - SharedConfig.lastUpdateCheckTime) < MessagesController.getInstance(0).updateCheckDelay * 1000) {
-            return;
-        }
+        }*/
+
+        SharedConfig.lastUpdateCheckTime = System.currentTimeMillis();
+        SharedConfig.saveConfig();
+        UpdatesManager.isUpdateAvailable(new UpdatesManager.UpdatesManagerCheckInterface() {
+            @Override
+            public void onThereIsUpdate(JSONObject updateData) {
+                if (updateData != null) {
+                    UpdatesManager.getTLRPCUpdateFromObject(updateData, update -> {
+                        handleNewUpdate(update, progress);
+                    });
+                }
+            }
+
+            @Override
+            public void onThereIsUpdate(TLRPC.TL_help_appUpdate appUpdate) {
+                handleNewUpdate(appUpdate, progress);
+            }
+
+            @Override
+            public void onNoUpdate() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    resetUpdateInstance();
+
+                    if (force) {
+                        BulletinFactory.of(LaunchActivity.getLastFragment()).createSimpleBulletin(R.raw.done, LocaleController.formatString("UpdatesSettingsCheckUpdated", R.string.UpdatesSettingsCheckUpdated)).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onError() {
+                if (force) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LaunchActivity.this);
+                        alertDialogBuilder.setTitle(LocaleController.getString("AppName", R.string.AppName));
+                        alertDialogBuilder.setMessage(LocaleController.getString("UpdatesSettingsCheckFailed", R.string.UpdatesSettingsCheckFailed));
+                        alertDialogBuilder.setPositiveButton("OK", null);
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                    });
+                }
+            }
+        });
+        /*
         TLRPC.TL_help_getAppUpdate req = new TLRPC.TL_help_getAppUpdate();
         try {
             req.source = ApplicationLoader.applicationContext.getPackageManager().getInstallerPackageName(ApplicationLoader.applicationContext.getPackageName());
@@ -5478,7 +5715,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (req.source == null) {
             req.source = "";
         }
-        final int accountNum = currentAccount;
+
         int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
             SharedConfig.lastUpdateCheckTime = System.currentTimeMillis();
             SharedConfig.saveConfig();
@@ -5533,7 +5770,59 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (progress != null) {
             progress.init();
             progress.onCancel(() -> ConnectionsManager.getInstance(currentAccount).cancelRequest(reqId, true));
+        }*/
+    }
+
+    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress, boolean forceShowPopup) {
+        if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.version.equals(res.version)) {
+            if (forceShowPopup && !FileLoader.getInstance(currentAccount).isLoadingFile(FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document))) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
+                });
+            }
+
+            return;
         }
+
+        final boolean newVersionAvailable = SharedConfig.setNewAppVersionAvailable(res);
+        SharedConfig.saveConfig();
+        if (newVersionAvailable) {
+            AndroidUtilities.runOnUIThread(() -> {
+                if (res.can_not_skip) {
+                    showUpdateActivity(currentAccount, res, false);
+                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION) {
+                    drawerLayoutAdapter.notifyDataSetChanged();
+
+                    File updateFile = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
+                    if (!updateFile.exists()) {
+                        ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
+                    }
+                }
+                NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.appUpdateAvailable);
+            });
+        }
+        if (progress != null) {
+            progress.end();
+            if (!newVersionAvailable) {
+                BaseFragment fragment = getLastFragment();
+                if (fragment != null) {
+                    BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString(R.string.YourVersionIsLatest)).show();
+                }
+            }
+        }
+    }
+
+    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress) {
+        handleNewUpdate(res, progress, false);
+    }
+
+    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, boolean forceShowPopup) {
+        handleNewUpdate(res, null, forceShowPopup);
+    }
+
+    public void resetUpdateInstance() {
+        SharedConfig.setNewAppVersionAvailable(null);
+        drawerLayoutAdapter.notifyDataSetChanged();
     }
 
     public Dialog showAlertDialog(AlertDialog.Builder builder) {
@@ -5658,7 +5947,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
             }
         } else {
-            boolean notify = dialogsFragment == null || dialogsFragment.notify;
+            boolean notify = dialogsFragment == null || dialogsFragment.forwardContext == null || dialogsFragment.forwardContext.getForwardParams().notify;
+            int scheduleDate = dialogsFragment == null || dialogsFragment.forwardContext == null ? 0 : dialogsFragment.forwardContext.getForwardParams().scheduleDate;
             final ChatActivity fragment;
             if (dids.size() <= 1) {
                 final long did = dids.get(0).dialogId;
@@ -5674,6 +5964,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     args.putLong("user_id", did);
                 } else {
                     args.putLong("chat_id", -did);
+                }
+                if (scheduleDate != 0) {
+                    args.putInt("chatMode", ChatActivity.MODE_SCHEDULED);
                 }
                 if (!MessagesController.getInstance(account).checkCanOpenChat(args, dialogsFragment)) {
                     return false;
@@ -5721,7 +6014,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             if (contactsToSend != null && contactsToSend.size() == 1 && !mainFragmentsStack.isEmpty()) {
                 presentedFragmentWithRemoveLast = true;
                 PhonebookShareAlert alert = new PhonebookShareAlert(mainFragmentsStack.get(mainFragmentsStack.size() - 1), null, null, contactsToSendUri, null, null, null);
-                alert.setDelegate((user, notify2, scheduleDate, effectId, invertMedia) -> {
+                alert.setDelegate((user, notify2, scheduleDate2, effectId, invertMedia) -> {
                     if (fragment != null) {
                         getActionBarLayout().presentFragment(fragment, true, false, true, false);
                     }
@@ -5788,7 +6081,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             }
                             ArrayList<String> arrayList = new ArrayList<>();
                             arrayList.add(videoPath);
-                            SendMessagesHelper.prepareSendingDocuments(accountInstance, arrayList, arrayList, null, captionToSend, null, did, replyToMsg, replyToMsg, null, null, null, notify, 0, null, null, 0, 0, false);
+                            SendMessagesHelper.prepareSendingDocuments(accountInstance, arrayList, arrayList, null, captionToSend, null, did, replyToMsg, replyToMsg, null, null, null, notify, scheduleDate, null, null, 0, 0, false);
                         }
                     }
                     if (photoPathsArray != null && !photosEditorOpened) {
@@ -5796,14 +6089,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             photoPathsArray.get(0).caption = sendingText;
                             sendingText = null;
                         }
-                        SendMessagesHelper.prepareSendingMedia(accountInstance, photoPathsArray, did, replyToMsg, replyToMsg, null, null, false, false, null, notify, 0, 0, false, null, null, 0, 0, false);
+                        SendMessagesHelper.prepareSendingMedia(accountInstance, photoPathsArray, did, replyToMsg, replyToMsg, null, null, false, false, null, notify, scheduleDate, 0, false, null, null, 0, 0, false);
                     }
                     if (documentsPathsArray != null || documentsUrisArray != null) {
                         if (sendingText != null && sendingText.length() <= 1024 && ((documentsPathsArray != null ? documentsPathsArray.size() : 0) + (documentsUrisArray != null ? documentsUrisArray.size() : 0)) == 1) {
                             captionToSend = sendingText;
                             sendingText = null;
                         }
-                        SendMessagesHelper.prepareSendingDocuments(accountInstance, documentsPathsArray, documentsOriginalPathsArray, documentsUrisArray, captionToSend, documentsMimeType, did, replyToMsg, replyToMsg, null, null, null, notify, 0, null, null, 0, 0, false);
+                        SendMessagesHelper.prepareSendingDocuments(accountInstance, documentsPathsArray, documentsOriginalPathsArray, documentsUrisArray, captionToSend, documentsMimeType, did, replyToMsg, replyToMsg, null, null, null, notify, scheduleDate, null, null, 0, 0, false);
                     }
                     if (voicePath != null) {
                         File file = new File(voicePath);
@@ -5837,11 +6130,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     if (contactsToSend != null && !contactsToSend.isEmpty()) {
                         for (int a = 0; a < contactsToSend.size(); a++) {
                             TLRPC.User user = contactsToSend.get(a);
-                            SendMessagesHelper.getInstance(account).sendMessage(SendMessagesHelper.SendMessageParams.of(user, did, replyToMsg, replyToMsg, null, null, notify, 0));
+                            SendMessagesHelper.getInstance(account).sendMessage(SendMessagesHelper.SendMessageParams.of(user, did, replyToMsg, replyToMsg, null, null, notify, scheduleDate));
                         }
                     }
                     if (!TextUtils.isEmpty(message) && !videoEditorOpened && !photosEditorOpened) {
-                        SendMessagesHelper.prepareSendingText(accountInstance, message.toString(), did, topicId, notify, 0, 0);
+                        SendMessagesHelper.prepareSendingText(accountInstance, message.toString(), did, topicId, notify, scheduleDate, 0);
                     }
                 }
             }
@@ -6125,6 +6418,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     protected void onDestroy() {
         isActive = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            MonetThemeController.unregisterReceiver(this);
+        }
         if (PhotoViewer.getPipInstance() != null) {
             PhotoViewer.getPipInstance().destroyPhotoViewer();
         }
@@ -6177,6 +6473,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         } catch (Exception e) {
             FileLog.e(e);
         }
+        clearFragments();
         super.onDestroy();
         onFinish();
         FloatingDebugController.onDestroy();
@@ -6200,6 +6497,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     protected void onResume() {
         super.onResume();
+        Crashlytics.init();
         isResumed = true;
         if (onResumeStaticCallback != null) {
             onResumeStaticCallback.run();
@@ -6266,7 +6564,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         } else if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.can_not_skip) {
             showUpdateActivity(UserConfig.selectedAccount, SharedConfig.pendingAppUpdate, true);
         }
-        checkAppUpdate(false, null);
+        LanguageController.loadRemoteLanguageFromCache(LocaleController.getInstance().getCurrentLocale(), false);
+        // checkAppUpdate(false, null);
+
+        if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
+            checkAppUpdate(false, null);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ApplicationLoader.canDrawOverlays = Settings.canDrawOverlays(this);
@@ -6861,7 +7164,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     }
                     case Bulletin.TYPE_ERROR:
                         if (fragment != null) {
-                            BulletinFactory.of(fragment).createErrorBulletin((String) args[1]).show();
+                            if (args[1] instanceof SpannableStringBuilder) {
+                                BulletinFactory.of(fragment).createErrorBulletin((SpannableStringBuilder) args[1]).show();
+                            } else {
+                                BulletinFactory.of(fragment).createErrorBulletin((String) args[1]).show();
+                            }
                         } else {
                             BulletinFactory.of(container, null).createErrorBulletin((String) args[1]).show();
                         }
@@ -7608,7 +7915,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         showVoiceChatTooltip(mute ? UndoView.ACTION_VOIP_SOUND_MUTED : UndoView.ACTION_VOIP_SOUND_UNMUTED);
                     }
                 }
-            } else if (!mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0) {
+            } else if ((OctoConfig.INSTANCE.unmuteVideosWithVolumeDown.getValue() || event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP) && (!mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0)) {
                 BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
                 if (fragment instanceof ChatActivity) {
                     if (((ChatActivity) fragment).maybePlayVisibleVideo()) {
@@ -8273,6 +8580,27 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 }
                 lastFragment.getOrCreateStoryViewer().instantClose();
                 lastFragment.getOrCreateStoryViewer().open(this, null, peerIds, 0, null, null, placeProvider, false);
+            }
+        }
+    }
+
+    public void reloadDrawerState() {
+        TLRPC.User user = UserConfig.getInstance(currentAccount).getCurrentUser();
+        if (user != null) {
+            for (int i = 0; i < sideMenu.getChildCount(); ++i) {
+                View child = sideMenu.getChildAt(i);
+                if (child instanceof DrawerProfileCell) {
+                    ((DrawerProfileCell) child).setUser(user, drawerLayoutAdapter.isAccountsShown());
+                }
+            }
+        }
+    }
+
+    public void reloadDrawerMiniIcon() {
+        for (int i = 0; i < sideMenu.getChildCount(); ++i) {
+            View child = sideMenu.getChildAt(i);
+            if (child instanceof DrawerProfileCell) {
+                ((DrawerProfileCell) child).updateMiniIcon();
             }
         }
     }

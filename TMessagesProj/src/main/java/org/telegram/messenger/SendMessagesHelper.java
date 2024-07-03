@@ -81,6 +81,7 @@ import org.telegram.ui.PaymentFormActivity;
 import org.telegram.ui.Stories.MessageMediaStoryFull;
 import org.telegram.ui.TwoStepVerificationActivity;
 import org.telegram.ui.TwoStepVerificationSetupActivity;
+import org.telegram.ui.bots.BotWebViewSheet;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,6 +101,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.PhotoResolution;
+import it.octogram.android.utils.VideoUtils;
 
 public class SendMessagesHelper extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 
@@ -7132,8 +7137,22 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         return generatePhotoSizes(null, path, imageUri);
     }
 
+    private static int getPhotoResolution(int photoResolution) {
+        if (photoResolution == PhotoResolution.LOW.getValue()) {
+            return 800;
+        } else if (photoResolution == PhotoResolution.HIGH.getValue()) {
+            return 2560;
+        } else {
+            return 1280;
+        }
+    }
+
     public TLRPC.TL_photo generatePhotoSizes(TLRPC.TL_photo photo, String path, Uri imageUri) {
-        Bitmap bitmap = ImageLoader.loadBitmap(path, imageUri, AndroidUtilities.getPhotoSize(), AndroidUtilities.getPhotoSize(), true);
+        int maxSize = getPhotoResolution(OctoConfig.INSTANCE.photoResolution.getValue());
+        Bitmap bitmap = ImageLoader.loadBitmap(path, imageUri, maxSize, maxSize, true);
+        if (bitmap == null && maxSize > 2560) {
+            bitmap = ImageLoader.loadBitmap(path, imageUri, 1280, 1280, true);
+        }
         if (bitmap == null) {
             bitmap = ImageLoader.loadBitmap(path, imageUri, 800, 800, true);
         }
@@ -7142,7 +7161,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         if (size != null) {
             sizes.add(size);
         }
-        size = ImageLoader.scaleAndSaveImage(bitmap, AndroidUtilities.getPhotoSize(), AndroidUtilities.getPhotoSize(), true, 80, false, 101, 101);
+        size = ImageLoader.scaleAndSaveImage(bitmap, maxSize, maxSize, true, 80, false, 101, 101);
         if (size != null) {
             sizes.add(size);
         }
@@ -8165,12 +8184,16 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             File bigFile = FileLoader.getInstance(accountInstance.getCurrentAccount()).getPathToAttach(bigSize, false);
             boolean bigExists = bigFile.exists();
             if (!smallExists || !bigExists) {
-                Bitmap bitmap = ImageLoader.loadBitmap(path, uri, AndroidUtilities.getPhotoSize(), AndroidUtilities.getPhotoSize(), true);
+                int maxSize = getPhotoResolution(OctoConfig.INSTANCE.photoResolution.getValue());
+                Bitmap bitmap = ImageLoader.loadBitmap(path, uri, maxSize, maxSize, true);
+                if (bitmap == null && maxSize > 2560) {
+                    bitmap = ImageLoader.loadBitmap(path, uri, 1280, 1280, true);
+                }
                 if (bitmap == null) {
                     bitmap = ImageLoader.loadBitmap(path, uri, 800, 800, true);
                 }
                 if (!bigExists) {
-                    TLRPC.PhotoSize size = ImageLoader.scaleAndSaveImage(bigSize, bitmap, Bitmap.CompressFormat.JPEG, true, AndroidUtilities.getPhotoSize(), AndroidUtilities.getPhotoSize(), 80, false, 101, 101,false);
+                    TLRPC.PhotoSize size = ImageLoader.scaleAndSaveImage(bigSize, bitmap, Bitmap.CompressFormat.JPEG, true, maxSize, maxSize, 80, false, 101, 101,false);
                     if (size != bigSize) {
                         photo.sizes.add(0, size);
                     }
@@ -9035,7 +9058,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             }
             String duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
             if (duration != null) {
-                attributeVideo.duration = Long.parseLong(duration) / 1000.0;
+                attributeVideo.duration = (int) Math.ceil(Long.parseLong(duration) / 1000.0f);
             }
             if (Build.VERSION.SDK_INT >= 17) {
                 String rotation = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
@@ -9066,7 +9089,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             try {
                 MediaPlayer mp = MediaPlayer.create(ApplicationLoader.applicationContext, Uri.fromFile(new File(videoPath)));
                 if (mp != null) {
-                    attributeVideo.duration = mp.getDuration() / 1000.0;
+                    attributeVideo.duration = (int) Math.ceil(mp.getDuration() / 1000.0f);
                     attributeVideo.w = mp.getVideoWidth();
                     attributeVideo.h = mp.getVideoHeight();
                     mp.release();
@@ -9207,9 +9230,12 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         videoEditedInfo.rotationValue = params[AnimatedFileDrawable.PARAM_NUM_ROTATION];
         videoEditedInfo.originalDuration = (long) (videoDuration * 1000);
 
-        int compressionsCount;
+        int compressionsCount = VideoUtils.getCompressionsCount(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight);
+        float maxSize = VideoUtils.getMaxSize(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight, compressionsCount -1);
 
-        float maxSize = Math.max(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight);
+        int selectedCompression = OctoConfig.INSTANCE.lastSelectedCompression.getValue();
+
+        /*float maxSize = Math.max(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight);
         if (maxSize > 1280) {
             compressionsCount = 4;
         } else if (maxSize > 854) {
@@ -9220,16 +9246,16 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             compressionsCount = 1;
         }
 
-        int selectedCompression = Math.round(DownloadController.getInstance(UserConfig.selectedAccount).getMaxVideoBitrate() / (100f / compressionsCount));
+        int selectedCompression = Math.round(DownloadController.getInstance(UserConfig.selectedAccount).getMaxVideoBitrate() / (100f / compressionsCount));*/
 
         if (selectedCompression > compressionsCount) {
             selectedCompression = compressionsCount;
         }
         boolean needCompress = false;
         if (new File(videoPath).length() < 1024L * 1024L * 1000L) {
-            if (selectedCompression != compressionsCount || Math.max(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight) > 1280) {
+            if (selectedCompression != compressionsCount/* || Math.max(videoEditedInfo.originalWidth, videoEditedInfo.originalHeight) > 1280*/) {
                 needCompress = true;
-                switch (selectedCompression) {
+                /*switch (selectedCompression) {
                     case 1:
                         maxSize = 432.0f;
                         break;
@@ -9242,7 +9268,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     default:
                         maxSize = 1280.0f;
                         break;
-                }
+                }*/
                 float scale = videoEditedInfo.originalWidth > videoEditedInfo.originalHeight ? maxSize / videoEditedInfo.originalWidth : maxSize / videoEditedInfo.originalHeight;
                 videoEditedInfo.resultWidth = Math.round(videoEditedInfo.originalWidth * scale / 2) * 2;
                 videoEditedInfo.resultHeight = Math.round(videoEditedInfo.originalHeight * scale / 2) * 2;

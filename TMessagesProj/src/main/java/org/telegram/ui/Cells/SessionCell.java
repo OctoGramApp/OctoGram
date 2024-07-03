@@ -49,6 +49,9 @@ import org.telegram.ui.Components.DotDividerSpan;
 import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.LayoutHelper;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.SessionIconUtils;
+
 public class SessionCell extends FrameLayout {
 
     private int currentType;
@@ -295,7 +298,7 @@ public class SessionCell extends FrameLayout {
     }
 
     public static Drawable createDrawable(int sz, TLRPC.TL_authorization session) {
-        String platform = session.platform.toLowerCase();
+        /*String platform = session.platform.toLowerCase();
         if (platform.isEmpty()) {
             platform = session.system_version.toLowerCase();
         }
@@ -372,6 +375,23 @@ public class SessionCell extends FrameLayout {
         Drawable bgDrawable = new CircleGradientDrawable(AndroidUtilities.dp(sz), colorKey == -1 ? 0xFF000000 : Theme.getColor(colorKey), colorKey2 == -1 ? 0xFF000000 : Theme.getColor(colorKey2));
         CombinedDrawable combinedDrawable = new CombinedDrawable(bgDrawable, iconDrawable);
         return combinedDrawable;
+        */
+
+        SessionIconUtils sessionType = new SessionIconUtils();
+        SessionIconUtils.DeviceAttributes drawableInfo = sessionType.setDeviceAttributes(session);
+
+        int iconId = drawableInfo.getIconId();
+        int colorKey = drawableInfo.getColorKey();
+        int colorKey2 = drawableInfo.getColorKey2();
+        int customColor = drawableInfo.getCustomColor();
+
+        Drawable iconDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, iconId);
+        if (iconDrawable != null) {
+            iconDrawable.mutate();
+            iconDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_avatar_text), PorterDuff.Mode.SRC_IN));
+        }
+        Drawable bgDrawable = new CircleGradientDrawable(AndroidUtilities.dp(sz), colorKey == -1 ? customColor : Theme.getColor(colorKey), colorKey2 == -1 ? customColor : Theme.getColor(colorKey2));
+        return new CombinedDrawable(bgDrawable, iconDrawable);
     }
 
     public static class CircleGradientDrawable extends Drawable {
@@ -453,7 +473,7 @@ public class SessionCell extends FrameLayout {
                 canvas.restore();
             }
         }
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             int margin = currentType == 1 ? 49 : 72;
             canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(margin), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(margin) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
         }

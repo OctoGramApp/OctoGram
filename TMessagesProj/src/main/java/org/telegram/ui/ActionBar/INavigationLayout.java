@@ -79,6 +79,12 @@ public interface INavigationLayout {
     List<BackButtonMenu.PulledDialog> getPulledDialogs();
     void setPulledDialogs(List<BackButtonMenu.PulledDialog> pulledDialogs);
 
+    // exp menu
+    void updateUseAlternativeNavigation(boolean status);
+    void updateUseActionbarCrossfade(boolean status);
+    void updateSpringStiffness(int stiffness);
+    void setDisallowParentIntercept(boolean disallowParentIntercept);
+
     static INavigationLayout newLayout(Context context, boolean main) {
         return new ActionBarLayout(context, main);
     }
@@ -305,6 +311,7 @@ public interface INavigationLayout {
         /**
          * @deprecated You should override {@link INavigationLayoutDelegate#needPresentFragment(INavigationLayout, NavigationParams)} for more fields
          */
+        @Deprecated
         default boolean needPresentFragment(BaseFragment fragment, boolean removeLast, boolean forceWithoutAnimation, INavigationLayout layout) {
             return true;
         }

@@ -23,7 +23,14 @@ import android.util.Xml;
 
 import androidx.annotation.StringRes;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.LanguageController;
+import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.translator.TranslationsWrapper;
+
 import org.telegram.messenger.time.FastDateFormat;
+import org.telegram.ui.Components.TranslateAlert2;
+import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Stars.StarsController;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -37,6 +44,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -76,7 +84,7 @@ public class LocaleController {
                 }
             }
         }
-        return formatterDay;
+        return OctoConfig.INSTANCE.formatTimeWithSeconds.getValue() ? getFormatterDayWithSeconds() : formatterDay;
     }
 
     private volatile FastDateFormat formatterConstDay;
@@ -345,6 +353,31 @@ public class LocaleController {
         return formatterScheduleSend[n];
     }
 
+    private volatile FastDateFormat formatterDayWithSeconds;
+    public FastDateFormat getFormatterDayWithSeconds() {
+        if (formatterDayWithSeconds == null) {
+            synchronized (this) {
+                if (formatterDayWithSeconds == null) {
+                    final Locale locale = currentLocale == null ? Locale.getDefault() : currentLocale;
+                    formatterDayWithSeconds = createFormatter(locale, is24HourFormat ? getStringInternal("FormatterDay24HSec", R.string.FormatterDay24HSec) : getStringInternal("FormatterDay12HSec", R.string.FormatterDay12HSec), is24HourFormat ? "HH:mm:ss" : "h:mm:ss a");
+                }
+            }
+        }
+        return formatterDayWithSeconds;
+    }
+
+    private volatile FastDateFormat formatterFull;
+    public FastDateFormat getFormatterFull() {
+        if (formatterFull == null) {
+            synchronized (this) {
+                if (formatterFull == null) {
+                    final Locale locale = currentLocale == null ? Locale.getDefault() : currentLocale;
+                    formatterFull = createFormatter(locale, "MMM dd yyyy, HH:mm:ss", "MMM dd yyyy, HH:mm:ss");
+                }
+            }
+        }
+        return formatterFull;
+    }
 
     private static HashMap<Integer, String> resourcesCacheMap = new HashMap<>();
 
@@ -1266,6 +1299,7 @@ public class LocaleController {
             currentLocaleInfo = localeInfo;
             FileLog.d("applyLanguage: currentLocaleInfo is set");
 
+            LanguageController.loadRemoteLanguageFromCache(newLocale, true);
             if (!TextUtils.isEmpty(currentLocaleInfo.pluralLangCode)) {
                 currentPluralRules = allRules.get(currentLocaleInfo.pluralLangCode);
             }
@@ -1314,6 +1348,13 @@ public class LocaleController {
         if (force) {
             MediaDataController.getInstance(currentAccount).loadAttachMenuBots(false, true);
         }
+
+        if (TranslateAlert2.isDestinationFollowApp() && TranslationsWrapper.isLanguageUnavailable(currentLocale.getLanguage())) {
+            AndroidUtilities.runOnUIThread(() -> {
+                TranslationsWrapper.suggestProviderUpdate(LaunchActivity.instance, LaunchActivity.getSafeLastFragment(), null);
+            });
+        }
+
         return requestId;
     }
 
@@ -1331,6 +1372,9 @@ public class LocaleController {
     }
 
     private String getStringInternal(String key, int res) {
+        if (OctoUtils.isTelegramString(key, res)) {
+            return OctoUtils.getCorrectAppName();
+        }
         return getStringInternal(key, null, 0, res);
     }
 
@@ -1360,6 +1404,9 @@ public class LocaleController {
     }
 
     public static String getServerString(String key) {
+        if (OctoUtils.isTelegramString(key)) {
+            return OctoUtils.getCorrectAppName();
+        }
         String value = getInstance().localeValues.get(key);
         if (value == null) {
             int resourceId = ApplicationLoader.applicationContext.getResources().getIdentifier(key, "string", ApplicationLoader.applicationContext.getPackageName());
@@ -1368,6 +1415,10 @@ public class LocaleController {
             }
         }
         return value;
+    }
+
+    public static void addLocaleValue(HashMap<String, String> vars) {
+        getInstance().localeValues.putAll(vars);
     }
 
     public static String getString(@StringRes int res) {
@@ -1524,6 +1575,10 @@ public class LocaleController {
                         }
                     }
                 }
+            }
+
+            if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
+                OctoUtils.fixBrokenStringArgs(args);
             }
 
             if (getInstance().currentLocale != null) {
@@ -1810,6 +1865,11 @@ public class LocaleController {
     }
 
     public static String formatStringSimple(String string, Object... args) {
+
+        if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
+            OctoUtils.fixBrokenStringArgs(args);
+        }
+
         try {
             if (getInstance().currentLocale != null) {
                 return String.format(getInstance().currentLocale, string, args);
@@ -2343,6 +2403,8 @@ public class LocaleController {
         formatterStats = null;
         formatterBannedUntil = null;
         formatterBannedUntilThisYear = null;
+        formatterFull = null;
+        formatterDayWithSeconds = null;
         for (int i = 0; i < formatterScheduleSend.length; ++i) {
             formatterScheduleSend[i] = null;
         }
@@ -2473,6 +2535,14 @@ public class LocaleController {
     }
 
     public static String formatShortNumber(int number, int[] rounded) {
+        if (!OctoConfig.INSTANCE.numberRounding.getValue()) {
+            if (rounded != null) {
+                rounded[0] = number;
+            }
+            DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.US);
+            formatter.applyPattern("#,###");
+            return formatter.format(number);
+        }
         StringBuilder K = new StringBuilder();
         int lastDec = 0;
         int KCount = 0;
@@ -2699,6 +2769,7 @@ public class LocaleController {
                         localeValues = valuesToSet;
                         currentLocale = newLocale;
                         currentLocaleInfo = localeInfo;
+                        LanguageController.loadRemoteLanguageFromCache(newLocale,true);
                         if (!TextUtils.isEmpty(currentLocaleInfo.pluralLangCode)) {
                             currentPluralRules = allRules.get(currentLocaleInfo.pluralLangCode);
                         }

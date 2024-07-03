@@ -1780,6 +1780,9 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             }
         };
         setOnDismissListener(dialog -> {
+            if (parentActivity.getActionBarLayout().getFragmentStack().isEmpty()) {
+                return;
+            }
             BaseFragment fragment = parentActivity.getActionBarLayout().getFragmentStack().get(parentActivity.getActionBarLayout().getFragmentStack().size() - 1);
             if (anyEnterEventSent) {
                 if (fragment instanceof ChatActivity) {

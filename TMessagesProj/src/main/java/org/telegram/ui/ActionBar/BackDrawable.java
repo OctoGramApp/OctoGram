@@ -162,4 +162,8 @@ public class BackDrawable extends Drawable {
     public int getIntrinsicHeight() {
         return AndroidUtilities.dp(24);
     }
+
+    public int getColor() {
+        return color;
+    }
 }

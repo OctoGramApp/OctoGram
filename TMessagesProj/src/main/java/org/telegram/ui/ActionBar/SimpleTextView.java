@@ -196,6 +196,10 @@ public class SimpleTextView extends View implements Drawable.Callback {
         requestLayout();
     }
 
+    public boolean hasSpoilers() {
+        return !spoilers.isEmpty();
+    }
+
     public void setEllipsizeByGradient(boolean value) {
         setEllipsizeByGradient(value, null);
     }

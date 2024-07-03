@@ -140,6 +140,10 @@ import com.google.android.gms.auth.api.phone.SmsRetriever;
 import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
+import it.octogram.android.DeviceIdentifyState;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
+
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.utils.CustomHtml;
@@ -914,6 +918,24 @@ public class AndroidUtilities {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String capitalize(String name){
+        String capitalizeString = "";
+        if(!name.trim().equals("")){
+            capitalizeString = name.substring(0,1).toUpperCase() + name.substring(1);
+        }
+        return capitalizeString;
+    }
+
+    public static int getTransparentColor(int color, float opacity) {
+        int alpha = Color.alpha(color);
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        // Set alpha based on your logic, here I'm making it 25% of it's initial value.
+        alpha *= opacity;
+        return Color.argb(alpha, red, green, blue);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -2133,20 +2155,45 @@ public class AndroidUtilities {
         synchronized (typefaceCache) {
             if (!typefaceCache.containsKey(assetPath)) {
                 try {
-                    Typeface t;
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        Typeface.Builder builder = new Typeface.Builder(ApplicationLoader.applicationContext.getAssets(), assetPath);
-                        if (assetPath.contains("medium")) {
-                            builder.setWeight(700);
+                    if (OctoConfig.INSTANCE.useSystemFont.getValue()) {
+                        Typeface t = null;
+                        switch (assetPath) {
+                            case "fonts/rmedium.ttf":
+                                t = Typeface.create("sans-serif-medium", Typeface.NORMAL);
+                                break;
+                            case "fonts/ritalic.ttf":
+                                t = Typeface.create("sans-serif", Typeface.ITALIC);
+                                break;
+                            case "fonts/rmediumitalic.ttf":
+                                t = Typeface.create("sans-serif-medium", Typeface.ITALIC);
+                                break;
+                            case "fonts/rmono.ttf":
+                                t = Typeface.MONOSPACE;
+                                break;
+                            case "fonts/mw_bold.ttf":
+                                t = Typeface.create("serif", Typeface.BOLD);
+                                break;
+                            case "fonts/rcondensedbold.ttf":
+                                t = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+                                break;
                         }
-                        if (assetPath.contains("italic")) {
-                            builder.setItalic(true);
-                        }
-                        t = builder.build();
+                        typefaceCache.put(assetPath, t);
                     } else {
-                        t = Typeface.createFromAsset(ApplicationLoader.applicationContext.getAssets(), assetPath);
+                        Typeface t;
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            Typeface.Builder builder = new Typeface.Builder(ApplicationLoader.applicationContext.getAssets(), assetPath);
+                            if (assetPath.contains("medium")) {
+                                builder.setWeight(700);
+                            }
+                            if (assetPath.contains("italic")) {
+                                builder.setItalic(true);
+                            }
+                            t = builder.build();
+                        } else {
+                            t = Typeface.createFromAsset(ApplicationLoader.applicationContext.getAssets(), assetPath);
+                        }
+                        typefaceCache.put(assetPath, t);
                     }
-                    typefaceCache.put(assetPath, t);
                 } catch (Exception e) {
                     if (BuildVars.LOGS_ENABLED) {
                         FileLog.e("Could not get typeface '" + assetPath + "' because " + e.getMessage());
@@ -2155,6 +2202,12 @@ public class AndroidUtilities {
                 }
             }
             return typefaceCache.get(assetPath);
+        }
+    }
+
+    public static void clearTypefaceCache() {
+        synchronized (typefaceCache) {
+            typefaceCache.clear();
         }
     }
 
@@ -2186,6 +2239,8 @@ public class AndroidUtilities {
     }
 
     public static int getShadowHeight() {
+        if (!OctoConfig.INSTANCE.disableDividers.getValue())
+            return 0;
         if (density >= 4.0f) {
             return 3;
         } else if (density >= 2.0f) {
@@ -2640,6 +2695,10 @@ public class AndroidUtilities {
     }
 
     public static boolean isTabletInternal() {
+        int deviceIdentifyState = OctoConfig.INSTANCE.deviceIdentifyState.getValue();
+        if (deviceIdentifyState != DeviceIdentifyState.DEFAULT.getValue()) {
+            return deviceIdentifyState == DeviceIdentifyState.FORCE_TABLET.getValue();
+        }
         if (isTablet == null) {
             isTablet = isTabletForce();
         }
@@ -2699,7 +2758,7 @@ public class AndroidUtilities {
 
     public static int getPhotoSize() {
         if (photoSize == null) {
-            photoSize = 1280;
+            photoSize = 2560;
         }
         return photoSize;
     }
@@ -3802,6 +3861,16 @@ public class AndroidUtilities {
             f = FileLoader.getInstance(UserConfig.selectedAccount).getPathToMessage(message.messageOwner);
         }
         if (f != null && f.exists()) {
+            if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith("octoexport")) {
+                boolean isValid = OctoConfig.isValidMessageExport(message);
+                if (isValid) {
+                    ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(parentFragment, message);
+                    sheet.setOriginalActivity(parentFragment.getParentActivity());
+                    sheet.show();
+                    return;
+                }
+            }
+
             if (parentFragment != null && f.getName().toLowerCase().endsWith("attheme")) {
                 Theme.ThemeInfo themeInfo = Theme.applyThemeFile(f, message.getDocumentName(), null, true);
                 if (themeInfo != null) {

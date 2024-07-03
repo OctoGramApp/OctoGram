@@ -15,6 +15,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -129,7 +132,7 @@ public class PremiumFeatureCell extends FrameLayout {
             imageDrawable.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueIcon));
             imageDrawable.draw(canvas);
         }
-        if (drawDivider) {
+        if (drawDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             canvas.drawRect(AndroidUtilities.dp(62), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight(), Theme.dividerPaint);
         }
     }

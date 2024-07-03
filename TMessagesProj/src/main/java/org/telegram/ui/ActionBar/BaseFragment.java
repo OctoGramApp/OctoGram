@@ -228,7 +228,8 @@ public abstract class BaseFragment {
     }
 
     public boolean isActionBarCrossfadeEnabled() {
-        return actionBar != null;
+        //return actionBar != null;
+        return actionBar != null && actionBar.getVisibility() == View.VISIBLE && actionBar.getAlpha() != 0.0f && actionBar.getY() >= 0.0f;
     }
 
     public INavigationLayout.BackButtonState getBackButtonState() {
@@ -1170,6 +1171,14 @@ public abstract class BaseFragment {
                     storyViewer.setKeyboardHeightFromParent(keyboardHeight);
                 }
             }
+        }
+    }
+
+    public void rebuild() {
+        isFinished = false;
+        finishing = false;
+        if (actionBar != null) {
+            actionBar.setEnabled(true);
         }
     }
 

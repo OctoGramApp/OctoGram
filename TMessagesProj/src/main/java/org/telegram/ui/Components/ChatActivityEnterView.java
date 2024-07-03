@@ -192,6 +192,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import it.octogram.android.DefaultEmojiButtonAction;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.DestinationLanguageSettings;
+import it.octogram.android.utils.translator.SingleTranslationManager;
+import it.octogram.android.utils.translator.TranslationsWrapper;
+
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate, SuggestEmojiView.AnchorViewDelegate {
 
     private int commonInputType;
@@ -4158,6 +4164,13 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         };
     };
 
+    private final Runnable dismissSendPreviewWithoutSend = () -> {
+        if (messageSendPreview != null) {
+            messageSendPreview.dismiss(false);
+            messageSendPreview = null;
+        };
+    };
+
     @Override
     public boolean hasOverlappingRendering() {
         return false;
@@ -4437,6 +4450,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         final boolean self = parentFragment != null && UserObject.isUserSelf(parentFragment.getCurrentUser());
         boolean scheduleButtonValue = parentFragment != null && parentFragment.canScheduleMessage();
         boolean sendWithoutSoundButtonValue = !(self || slowModeTimer > 0 && !isInScheduleMode());
+        boolean translateButtonValue = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled();
         if (scheduleButtonValue) {
             options.add(R.drawable.msg_calendar2, getString(self ? R.string.SetReminder : R.string.ScheduleMessage), () -> {
                 AlertsCreator.createScheduleDatePickerDialog(parentActivity, parentFragment.getDialogId(), new AlertsCreator.ScheduleDatePickerDelegate() {
@@ -4475,6 +4489,24 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 }
             });
         }
+        if (translateButtonValue) {
+            String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+            String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
+            ActionBarMenuSubItem subItem = new ActionBarMenuSubItem(getContext(), false, false, resourcesProvider);
+            subItem.setPadding(dp(18), 0, dp(18), 0);
+            subItem.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate, null);
+
+            subItem.setColors(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, resourcesProvider), Theme.getColor(Theme.key_actionBarDefaultSubmenuItemIcon, resourcesProvider));
+            subItem.setSelectorColor(Theme.multAlpha(Theme.getColor(Theme.key_actionBarDefaultSubmenuItemIcon, resourcesProvider), .12f));
+
+            subItem.setOnClickListener(view1 -> executeMessageTranslation(destinationLanguage));
+            subItem.setOnLongClickListener(v -> {
+                executeTranslationToCustomDestination();
+                return true;
+            });
+
+            options.addView(subItem, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        }
         options.setupSelectors();
         if (sendWhenOnlineButton != null) {
             TLRPC.User user = parentFragment == null ? null : parentFragment.getCurrentUser();
@@ -4493,6 +4525,72 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         } catch (Exception ignore) {}
 
         return false;
+    }
+
+    private void executeTranslationToCustomDestination() {
+        if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText().toString().trim())) {
+            return;
+        }
+
+        if (messageSendPreview != null) {
+            messageSendPreview.dismiss(false);
+            messageSendPreview = null;
+        }
+
+        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        destinationSettings.setCallback(this::executeMessageTranslation);
+        AndroidUtilities.runOnUIThread(() -> {
+            parentFragment.presentFragment(destinationSettings);
+        }, 500);
+    }
+
+    private void executeMessageTranslation(String toLanguage) {
+        if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText().toString().trim())) {
+            return;
+        }
+
+        OctoConfig.INSTANCE.lastTranslatePreSendLanguage.updateValue(toLanguage);
+        String realDestination = toLanguage == null ? TranslateAlert2.getToLanguage() : toLanguage;
+
+        final AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
+        progressDialog.showDelayed(500);
+
+        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, messageEditText.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
+            @Override
+            public void onGotReqId(int reqId) {
+
+            }
+
+            @Override
+            public void onResponseReceived() {
+                progressDialog.dismiss();
+
+                if (messageSendPreview != null) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        messageSendPreview.dismiss(false);
+                        messageSendPreview = null;
+                    });
+                }
+            }
+
+            @Override
+            public void onSuccess(TLRPC.TL_textWithEntities finalText) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    messageEditText.setText(finalText.text);
+                    messageEditText.selectAll();
+                });
+            }
+
+            @Override
+            public void onError() {
+                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString("TranslatorFailed", R.string.TranslatorFailed)));
+            }
+
+            @Override
+            public void onUnavailableLanguage() {
+                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage)));
+            }
+        });
     }
 
     private void createBotCommandsMenuContainer() {
@@ -5159,6 +5257,13 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 } else {
                     currentPage = emojiView.getCurrentPage();
                 }
+
+                int currentSelectedDefaultPage = OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue();
+                if (currentSelectedDefaultPage != DefaultEmojiButtonAction.DEFAULT.getValue()) {
+                    currentPage = currentSelectedDefaultPage - 1;
+                    MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", currentPage).apply();
+                }
+
                 if (currentPage == 0 || !allowStickers && !allowGifs) {
                     allowChangeToSmile = false;
                 }
@@ -9515,7 +9620,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             defPeer = delegate.getSendAsPeers().peers.get(0).peer;
         }
         boolean isVisible = defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
-            !isEditingMessage() && !isRecordingAudioVideo() && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE);
+            !isEditingMessage() && !isRecordingAudioVideo() && !OctoConfig.INSTANCE.hideSendAsChannel.getValue() && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE);
         if (isVisible) {
             createSenderSelectView();
         }
@@ -10872,6 +10977,11 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 currentPage = MessagesController.getGlobalEmojiSettings().getInt("selected_page", 0);
             } else {
                 currentPage = emojiView.getCurrentPage();
+            }
+            int currentSelectedDefaultPage = OctoConfig.INSTANCE.defaultEmojiButtonAction.getValue();
+            if (currentSelectedDefaultPage != DefaultEmojiButtonAction.DEFAULT.getValue()) {
+                currentPage = currentSelectedDefaultPage - 1;
+                MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", currentPage).commit();
             }
             if (currentPage == 0 || !allowStickers && !allowGifs) {
                 nextIcon = ChatActivityEnterViewAnimatedIconView.State.SMILE;

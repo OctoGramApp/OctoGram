@@ -84,11 +84,12 @@ public class TranslateButton extends FrameLayout {
         menuView.setScaleType(ImageView.ScaleType.CENTER);
         menuView.setImageResource(R.drawable.msg_mini_customize);
         menuView.setOnClickListener(e -> {
-            if (UserConfig.getInstance(currentAccount).isPremium()) {
+            onMenuClick();
+            /*if (UserConfig.getInstance(currentAccount).isPremium()) {
                 onMenuClick();
             } else {
                 onCloseClick();
-            }
+            }*/
         });
         addView(menuView, LayoutHelper.createFrame(32, 32, Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0, 8, 0));
 
@@ -320,6 +321,7 @@ public class TranslateButton extends FrameLayout {
             }
             textView.setText(TextUtils.concat(translateIcon, " ", text));
         }
-        menuView.setImageResource(UserConfig.getInstance(currentAccount).isPremium() ? R.drawable.msg_mini_customize : R.drawable.msg_close);
+        //menuView.setImageResource(R.drawable.msg_mini_customize);
+        menuView.setImageResource(translateController.isFeatureAvailable() ? R.drawable.msg_mini_customize : R.drawable.msg_close);
     }
 }

@@ -8,15 +8,17 @@
 
 package org.telegram.ui.Components;
 
-import android.graphics.*;
+import android.graphics.Canvas;
 import android.view.View;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.GroupCreateSectionCell;
 
-import androidx.recyclerview.widget.RecyclerView;
+import it.octogram.android.OctoConfig;
 
 public class GroupCreateDividerItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -49,7 +51,8 @@ public class GroupCreateDividerItemDecoration extends RecyclerView.ItemDecoratio
                 continue;
             }
             top = child.getBottom();
-            canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(72), top, width - (LocaleController.isRTL ? AndroidUtilities.dp(72) : 0), top, Theme.dividerPaint);
+            if (!OctoConfig.INSTANCE.disableDividers.getValue())
+                canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(72), top, width - (LocaleController.isRTL ? AndroidUtilities.dp(72) : 0), top, Theme.dividerPaint);
         }
     }
 

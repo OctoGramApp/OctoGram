@@ -22,6 +22,7 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import it.octogram.android.OctoConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
@@ -221,7 +222,7 @@ public class LocationCell extends FrameLayout {
         canvas.restore();
         super.onDraw(canvas);
 
-        if (needDivider) {
+        if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             Paint dividerPaint = resourcesProvider == null ? null : resourcesProvider.getPaint(Theme.key_paint_divider);
             if (dividerPaint == null) {
                 dividerPaint = Theme.dividerPaint;

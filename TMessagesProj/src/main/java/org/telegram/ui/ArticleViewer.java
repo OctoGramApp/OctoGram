@@ -108,6 +108,9 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.translator.TranslationsWrapper;
+
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -3766,7 +3769,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         textSelectionHelper.setParentView(listView[0]);
         if (MessagesController.getInstance(currentAccount).getTranslateController().isContextTranslateEnabled()) {
             textSelectionHelper.setOnTranslate((text, fromLang, toLang, onAlertDismiss) -> {
-                TranslateAlert2.showAlert(parentActivity, parentFragment, currentAccount, fromLang, toLang, text, null, false, null, onAlertDismiss);
+                TranslationsWrapper.initTranslationItem(parentActivity, parentFragment, null, currentAccount, null, 0, fromLang, toLang, text, null, false, null, onAlertDismiss);
+                //TranslateAlert2.showAlert(parentActivity, parentFragment, currentAccount, fromLang, toLang, text, null, false, null, onAlertDismiss);
             });
         }
         textSelectionHelper.layoutManager = layoutManager[0];
@@ -9731,7 +9735,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textLayout2.draw(canvas, this);
             }
             canvas.restore();
-            if (divider) {
+            if (divider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawLine(parentAdapter.isRtl ? 0 : AndroidUtilities.dp(17), getMeasuredHeight() - 1, getMeasuredWidth() - (parentAdapter.isRtl ? AndroidUtilities.dp(17) : 0), getMeasuredHeight() - 1, dividerPaint);
             }
         }

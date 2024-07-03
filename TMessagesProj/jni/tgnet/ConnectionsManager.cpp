@@ -150,9 +150,24 @@ ConnectionsManager& ConnectionsManager::getInstance(int32_t instanceNum) {
             static ConnectionsManager instance3(3);
             return instance3;
         case 4:
-        default:
             static ConnectionsManager instance4(4);
             return instance4;
+        case 5:
+            static ConnectionsManager instance5(5);
+            return instance5;
+        case 6:
+            static ConnectionsManager instance6(6);
+            return instance6;
+        case 7:
+            static ConnectionsManager instance7(7);
+            return instance7;
+        case 8:
+            static ConnectionsManager instance8(8);
+            return instance8;
+        case 9:
+        default:
+            static ConnectionsManager instance9(9);
+            return instance9;
     }
 }
 
@@ -3690,6 +3705,20 @@ void ConnectionsManager::setLangCode(std::string langCode) {
             datacenter.second->resetInitVersion();
         }
         saveConfig();
+    });
+}
+
+
+void ConnectionsManager::setSessionName(std::string sessionName) {
+    scheduleTask([&, sessionName] {
+        if (currentDeviceModel == sessionName) {
+            return;
+        }
+        currentDeviceModel = sessionName;
+        for (auto & datacenter : datacenters) {
+            datacenter.second->resetInitVersion();
+        }
+        updateDcSettings(0, false, true);
     });
 }
 

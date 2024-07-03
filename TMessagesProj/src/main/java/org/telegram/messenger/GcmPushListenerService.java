@@ -13,7 +13,13 @@ import androidx.annotation.NonNull;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.telegram.ui.LaunchActivity;
+
 import java.util.Map;
+import java.util.Objects;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.UpdatesManager;
 
 public class GcmPushListenerService extends FirebaseMessagingService {
 
@@ -25,6 +31,14 @@ public class GcmPushListenerService extends FirebaseMessagingService {
 
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("FCM received data: " + data + " from: " + from);
+        }
+
+        if (data.containsKey("loc_key") && Objects.equals(data.get("loc_key"), "NEW_UPDATE")) {
+            if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
+                LaunchActivity.instance.checkAppUpdate(false, null);
+            }
+
+            return;
         }
 
         PushListenerController.processRemoteMessage(PushListenerController.PUSH_TYPE_FIREBASE, data.get("p"), time);

@@ -153,6 +153,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
+
 public class ChannelAdminLogActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     protected TLRPC.Chat currentChat;
@@ -3163,10 +3166,24 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                                     scrollToPositionOnRecreate = -1;
                                 }
                             }
-                            try {
-                                AndroidUtilities.openForView(message, getParentActivity(), null);
-                            } catch (Exception e) {
-                                alertUserOpenError(message);
+
+                            boolean handled = false;
+                            if (message.getDocumentName().toLowerCase().endsWith("octoexport")) {
+                                boolean isValid = OctoConfig.isValidMessageExport(message);
+                                if (isValid) {
+                                    ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(ChannelAdminLogActivity.this, message);
+                                    sheet.setOriginalActivity(getParentActivity());
+                                    sheet.show();
+                                    handled = true;
+                                }
+                            }
+
+                            if (!handled) {
+                                try {
+                                    AndroidUtilities.openForView(message, getParentActivity(), null);
+                                } catch (Exception e) {
+                                    alertUserOpenError(message);
+                                }
                             }
                         }
                     }

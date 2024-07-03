@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import it.octogram.android.OctoConfig;
+
 public class AppIconsSelectorCell extends RecyclerListView implements NotificationCenter.NotificationCenterDelegate {
     public final static float ICONS_ROUND_RADIUS = 18;
 
@@ -80,7 +82,8 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
                 LauncherIconController.LauncherIcon icon = availableIcons.get(position);
                 holderView.bind(icon);
                 holderView.iconView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(ICONS_ROUND_RADIUS), Color.TRANSPARENT, Theme.getColor(Theme.key_listSelector), Color.BLACK));
-                holderView.iconView.setForeground(icon.foreground);
+                if (icon.foreground != -1)
+                    holderView.iconView.setForeground(icon.foreground);
             }
 
             @Override
@@ -158,6 +161,20 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
                     availableIcons.remove(i);
                     i--;
                 }
+            }
+        }
+        for (int i = 0; i < availableIcons.size(); i++) {
+            LauncherIconController.LauncherIcon icon = availableIcons.get(i);
+            if (icon.hidden && !LauncherIconController.isEnabled(icon)) {
+                if (icon == LauncherIconController.LauncherIcon.YUKI && OctoConfig.INSTANCE.unlockedYuki.getValue()) {
+                    continue;
+                } else if (icon == LauncherIconController.LauncherIcon.CHUPA && OctoConfig.INSTANCE.unlockedChupa.getValue()) {
+                    continue;
+                } else if (icon == LauncherIconController.LauncherIcon.CONFETTI && OctoConfig.INSTANCE.unlockedConfetti.getValue()) {
+                    continue;
+                }
+                availableIcons.remove(i);
+                i--;
             }
         }
         getAdapter().notifyDataSetChanged();

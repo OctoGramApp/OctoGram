@@ -50,6 +50,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScrollerCustom;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.util.Consumer;
+
+import it.octogram.android.OctoConfig;
+import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
@@ -2946,7 +2950,7 @@ public class StoryPrivacyBottomSheet extends BottomSheet implements Notification
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            if (needDivider) {
+            if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 dividerPaint.setColor(Theme.getColor(Theme.key_divider, resourcesProvider));
                 if (LocaleController.isRTL) {
                     canvas.drawRect(0, getHeight() - 1, getWidth() - dp(105), getHeight(), dividerPaint);
