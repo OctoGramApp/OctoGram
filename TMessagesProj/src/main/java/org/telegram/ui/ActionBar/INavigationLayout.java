@@ -81,13 +81,13 @@ public interface INavigationLayout {
     List<BackButtonMenu.PulledDialog> getPulledDialogs();
     void setPulledDialogs(List<BackButtonMenu.PulledDialog> pulledDialogs);
 
-    static INavigationLayout newLayout(Context context) {
+    static INavigationLayout newLayout(Context context, boolean main) {
         return OctoConfig.INSTANCE.alternativeNavigation.getValue()
-                ? new LNavigation(context) : new ActionBarLayout(context);
+                ? new LNavigation(context) : new ActionBarLayout(context, main);
     }
 
-    static INavigationLayout newLayout(Context context, Supplier<BottomSheet> supplier) {
-        return new ActionBarLayout(context) {
+    static INavigationLayout newLayout(Context context, boolean main, Supplier<BottomSheet> supplier) {
+        return new ActionBarLayout(context, main) {
             @Override
             public BottomSheet getBottomSheet() {
                 return supplier.get();
@@ -437,6 +437,15 @@ public interface INavigationLayout {
         }
     }
 
+    void setNavigationBarColor(int color);
+
+    default int getBottomTabsHeight(boolean animated) {
+        return 0;
+    }
+
+    default BottomSheetTabs getBottomSheetTabs() {
+        return null;
+    }
     enum BackButtonState {
         BACK,
         MENU
