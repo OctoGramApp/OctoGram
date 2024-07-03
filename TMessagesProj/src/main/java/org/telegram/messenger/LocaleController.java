@@ -84,7 +84,7 @@ public class LocaleController {
                 }
             }
         }
-        return formatterDay;
+        return OctoConfig.INSTANCE.formatTimeWithSeconds.getValue() ? getFormatterDayWithSeconds() : formatterDay;
     }
 
     private volatile FastDateFormat formatterConstDay;
@@ -353,6 +353,31 @@ public class LocaleController {
         return formatterScheduleSend[n];
     }
 
+    private volatile FastDateFormat formatterDayWithSeconds;
+    public FastDateFormat getFormatterDayWithSeconds() {
+        if (formatterDayWithSeconds == null) {
+            synchronized (this) {
+                if (formatterDayWithSeconds == null) {
+                    final Locale locale = currentLocale == null ? Locale.getDefault() : currentLocale;
+                    formatterDayWithSeconds = createFormatter(locale, is24HourFormat ? getStringInternal("FormatterDay24HSec", R.string.FormatterDay24HSec) : getStringInternal("FormatterDay12HSec", R.string.FormatterDay12HSec), is24HourFormat ? "HH:mm:ss" : "h:mm:ss a");
+                }
+            }
+        }
+        return formatterDayWithSeconds;
+    }
+
+    private volatile FastDateFormat formatterFull;
+    public FastDateFormat getFormatterFull() {
+        if (formatterFull == null) {
+            synchronized (this) {
+                if (formatterFull == null) {
+                    final Locale locale = currentLocale == null ? Locale.getDefault() : currentLocale;
+                    formatterFull = createFormatter(locale, "MMM dd yyyy, HH:mm:ss", "MMM dd yyyy, HH:mm:ss");
+                }
+            }
+        }
+        return formatterFull;
+    }
 
     private static HashMap<Integer, String> resourcesCacheMap = new HashMap<>();
 
@@ -2378,6 +2403,8 @@ public class LocaleController {
         formatterStats = null;
         formatterBannedUntil = null;
         formatterBannedUntilThisYear = null;
+        formatterFull = null;
+        formatterDayWithSeconds = null;
         for (int i = 0; i < formatterScheduleSend.length; ++i) {
             formatterScheduleSend[i] = null;
         }

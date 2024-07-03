@@ -1178,6 +1178,10 @@ public class LNavigation extends FrameLayout implements INavigationLayout, Float
     }
 
     @Override
+    public void setNavigationBarColor(int color) {
+    }
+
+    @Override
     public void showLastFragment() {
         rebuildFragments(REBUILD_FLAG_REBUILD_LAST);
     }

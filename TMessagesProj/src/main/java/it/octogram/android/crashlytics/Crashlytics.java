@@ -112,7 +112,7 @@ public class Crashlytics {
     }
 
     public static String getSystemInfo(boolean includeConfiguration) throws IllegalAccessException {
-        String baseInfo = LocaleController.getInstance().formatterFull.format(System.currentTimeMillis()) + "\n\n" +
+        String baseInfo = LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()) + "\n\n" +
                 "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildConfig.BUILD_VERSION + ")\n" +
                 "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
                 "Commit: " + BuildConfig.GIT_COMMIT_HASH + "\n" +

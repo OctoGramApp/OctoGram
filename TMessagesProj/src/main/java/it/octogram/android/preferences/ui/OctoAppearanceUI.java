@@ -48,7 +48,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 .sticker(context, R.raw.utyan_appearance, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
                 .category(LocaleController.getString("StickersSizeHeader", R.string.StickersSizeHeader), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(new StickerSize(context, INavigationLayout.newLayout(context)))
+                            .layout(new StickerSize(context, INavigationLayout.newLayout(context, false)))
                             .build()
                     );
                 })

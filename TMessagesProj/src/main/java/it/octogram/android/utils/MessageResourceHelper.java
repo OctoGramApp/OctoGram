@@ -62,7 +62,7 @@ public class MessageResourceHelper {
         }
 
         builder.append(' ');
-        builder.append(LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000));
+        builder.append(LocaleController.getInstance().getFormatterDay().format((long) (messageObject.messageOwner.date) * 1000));
 
         return builder;
     }
