@@ -10,16 +10,11 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.AlertDialog;
-import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.ReactionsDoubleTapManageActivity;
 
 import java.util.List;
@@ -35,11 +30,9 @@ import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
@@ -49,7 +42,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         ConfigProperty<Boolean> canShowSelectReaction = new ConfigProperty<>(null, OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue());
 
-        var featureLocked = true;
         return OctoPreferences.builder(LocaleController.formatString("OctoGeneralSettings", R.string.OctoGeneralSettings))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, LocaleController.formatString("OctoGeneralSettingsHeader", R.string.OctoGeneralSettingsHeader))
                 .category(LocaleController.formatString("PrivacyHeader", R.string.PrivacyHeader), category -> {
@@ -162,15 +154,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .description(LocaleController.formatString(R.string.JumpToNextChannelOrTopic_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .setLocked(featureLocked)
-                            .onLockedAction(() -> {
-                                if (featureLocked) {
-                                    String errorMessage = AndroidUtilities.replaceTags(LocaleController.formatString(R.string.FeatureCurrentlyUnavailable)).toString();
-                                    BulletinFactory.of(fragment)
-                                            .createErrorBulletin(errorMessage, fragment.getResourceProvider())
-                                            .show();
-                                }
-                            })
                             .preferenceValue(OctoConfig.INSTANCE.hideGreetingSticker)
                             .title(LocaleController.formatString("HideGreetingSticker", R.string.HideGreetingSticker))
                             .description(LocaleController.formatString("HideGreetingSticker_Desc", R.string.HideGreetingSticker_Desc))

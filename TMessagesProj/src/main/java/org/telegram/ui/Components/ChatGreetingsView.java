@@ -49,6 +49,8 @@ import org.telegram.ui.Stories.recorder.HintView2;
 
 import java.util.Locale;
 
+import it.octogram.android.OctoConfig;
+
 public class ChatGreetingsView extends LinearLayout {
 
     private TLRPC.Document preloadedGreetingsSticker;
@@ -63,6 +65,7 @@ public class ChatGreetingsView extends LinearLayout {
     public BackupImageView nextStickerToSendView;
     private final Theme.ResourcesProvider resourcesProvider;
     boolean wasDraw;
+    boolean showGreetings = !OctoConfig.INSTANCE.hideGreetingSticker.getValue();
 
     public ChatGreetingsView(Context context, TLRPC.User user, int distance, int currentAccount, TLRPC.Document sticker, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -236,7 +239,7 @@ public class ChatGreetingsView extends LinearLayout {
                 addView(premiumButtonView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 30, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 20, 2, 20, 13));
             }
         } else {
-            addView(titleView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 20, 6, 20, 6));
+            addView(titleView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 20, showGreetings || preview ? 6 : -2, 20, 6));
             addView(descriptionView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 20, 6, 20, 6));
             addView(stickerContainer, LayoutHelper.createLinear(112, 112, Gravity.CENTER_HORIZONTAL, 16, 10, 16, 16));
         }
@@ -423,19 +426,19 @@ public class ChatGreetingsView extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         ignoreLayot = true;
-        if (!preview) {
+        //if (!preview) {
             descriptionView.setVisibility(View.VISIBLE);
-        }
-        stickerToSendView.setVisibility(View.VISIBLE);
+        //}
+        stickerContainer.setVisibility(View.VISIBLE);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (getMeasuredHeight() > MeasureSpec.getSize(heightMeasureSpec) && !preview) {
+        if ((!showGreetings || getMeasuredHeight() > MeasureSpec.getSize(heightMeasureSpec)) && !preview) {
             descriptionView.setVisibility(View.GONE);
-            stickerToSendView.setVisibility(View.GONE);
+            stickerContainer.setVisibility(View.GONE);
         } else {
-            if (!preview) {
+            //if (!preview) {
                 descriptionView.setVisibility(View.VISIBLE);
-            }
-            stickerToSendView.setVisibility(View.VISIBLE);
+            //}
+            stickerContainer.setVisibility(View.VISIBLE);
         }
         ignoreLayot = false;
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -451,6 +454,7 @@ public class ChatGreetingsView extends LinearLayout {
                 Math.min((int) (AndroidUtilities.displaySize.x * .5f), HintView2.cutInFancyHalf(descriptionView.getText(), descriptionView.getPaint())) :
                 (int) (AndroidUtilities.displaySize.x * .5f)
         );
+        updateLayout();
     }
 
     private float viewTop;

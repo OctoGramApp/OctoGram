@@ -10,6 +10,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextCell;
 
 import it.octogram.android.ConfigProperty;
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
@@ -21,6 +22,8 @@ public class TextIconRow extends BaseRow implements Clickable {
     private final Runnable onClick;
     private final ConfigProperty<Boolean> preference;
     private final String value;
+    private final String newID;
+    private boolean wasNewBadgeVisible = false;
 
     private TextIconRow(String title,
                         ConfigProperty<Boolean> showIf,
@@ -30,30 +33,32 @@ public class TextIconRow extends BaseRow implements Clickable {
                         @Nullable String value,
                         boolean requiresRestart,
                         ConfigProperty<Boolean> preferenceValue,
-                        Runnable onClick) {
+                        Runnable onClick,
+                        String newID) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_ICON);
         this.icon = icon;
         this.onClick = onClick;
         this.preference = preferenceValue;
         this.value = value;
+        this.newID = newID;
     }
 
     public void bindCell(TextCell cell) {
         if (preference != null) {
             if (icon != -1) {
-                cell.setTextAndCheckAndIcon(getTitle(), preference.getValue(), icon, hasDivider());
+                cell.setTextAndCheckAndIcon(rebindTitle(), preference.getValue(), icon, hasDivider());
             } else {
-                cell.setTextAndCheck(getTitle(), preference.getValue(), hasDivider());
+                cell.setTextAndCheck(rebindTitle(), preference.getValue(), hasDivider());
             }
         } else {
             if (icon != -1 && value != null) {
-                cell.setTextAndValueAndIcon(getTitle(), value, icon, hasDivider());
+                cell.setTextAndValueAndIcon(rebindTitle(), value, icon, hasDivider());
             } else if (value != null) {
-                cell.setTextAndValue(getTitle(), value, hasDivider());
+                cell.setTextAndValue(rebindTitle(), value, hasDivider());
             } else if (icon != -1) {
-                cell.setTextAndIcon(getTitle(), icon, hasDivider());
+                cell.setTextAndIcon(rebindTitle(), icon, hasDivider());
             } else {
-                cell.setText(getTitle(), hasDivider());
+                cell.setText(rebindTitle(), hasDivider());
             }
         }
     }
@@ -64,11 +69,23 @@ public class TextIconRow extends BaseRow implements Clickable {
 
     @Override
     public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
-        if (onClick != null)
+        if (onClick != null) {
             onClick.run();
+        }
 
-        if (preference == null)
+        if (newID != null && OctoConfig.INSTANCE.isNewIdVisible(newID)) {
+            OctoConfig.INSTANCE.hideNewId(newID);
+
+            if (wasNewBadgeVisible && view instanceof TextCell vt) {
+                bindCell(vt);
+            }
+
+            wasNewBadgeVisible = false;
+        }
+
+        if (preference == null) {
             return false;
+        }
 
         preference.updateValue(!preference.getValue());
         FrameLayout cell = (FrameLayout) view;
@@ -77,10 +94,23 @@ public class TextIconRow extends BaseRow implements Clickable {
         return true;
     }
 
+    private CharSequence rebindTitle() {
+        String title = getTitle();
+        wasNewBadgeVisible = false;
+
+        if (newID != null && OctoConfig.INSTANCE.isNewIdVisible(newID)) {
+            wasNewBadgeVisible = true;
+            return TextCell.applyNewSpan(title);
+        }
+
+        return title;
+    }
+
     public static class TextIconRowBuilder extends ToggleableBaseRowBuilder<TextIconRow, Boolean> {
         private Runnable onClick;
         private int icon = -1;
         private String value;
+        private String newID = null;
 
         public TextIconRowBuilder onClick(Runnable onClick) {
             this.onClick = onClick;
@@ -97,8 +127,13 @@ public class TextIconRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public TextIconRowBuilder isNew(String newID) {
+            this.newID = newID;
+            return this;
+        }
+
         public TextIconRow build() {
-            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, onClick);
+            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, onClick, newID);
         }
     }
 

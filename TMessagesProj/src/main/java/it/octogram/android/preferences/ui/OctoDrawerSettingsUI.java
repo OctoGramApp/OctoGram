@@ -38,6 +38,7 @@ import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.preferences.ui.custom.DrawerOrderSettings;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
+import it.octogram.android.utils.IconsUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoDrawerSettingsUI implements PreferencesEntry {
@@ -98,7 +99,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                                 LaunchActivity.instance.reloadDrawerMiniIcon();
                                 MenuOrderController.onDrawerFavoriteOptionChanged();
                             })
-                            .options(List.of(
+                            .supplierOptions(() -> List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.NONE.getValue())
                                             .setItemIcon(R.drawable.msg_cancel)
@@ -109,27 +110,27 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                                             .setItemTitle(LocaleController.getString("DrawerFavoriteOptionDefault", R.string.DrawerFavoriteOptionDefault)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.SAVED_MESSAGES.getValue())
-                                            .setItemIcon(R.drawable.msg_saved)
+                                            .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.SAVED_MESSAGES.getValue()))
                                             .setItemTitle(LocaleController.getString("SavedMessages", R.string.SavedMessages)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.SETTINGS.getValue())
-                                            .setItemIcon(R.drawable.msg_settings)
+                                            .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.SETTINGS.getValue()))
                                             .setItemTitle(LocaleController.getString("Settings", R.string.Settings)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.CONTACTS.getValue())
-                                            .setItemIcon(R.drawable.msg_contacts)
+                                            .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.CONTACTS.getValue()))
                                             .setItemTitle(LocaleController.getString("Contacts", R.string.Contacts)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.CALLS.getValue())
-                                            .setItemIcon(R.drawable.msg_calls)
+                                            .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.CALLS.getValue()))
                                             .setItemTitle(LocaleController.getString("Calls", R.string.Calls)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.DOWNLOADS.getValue())
-                                            .setItemIcon(R.drawable.msg_download)
+                                            .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.DOWNLOADS.getValue()))
                                             .setItemTitle(LocaleController.getString("DownloadsTabs", R.string.DownloadsTabs)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.ARCHIVED_CHATS.getValue())
-                                            .setItemIcon(R.drawable.msg_archive)
+                                            .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.ARCHIVED_CHATS.getValue()))
                                             .setItemTitle(LocaleController.getString("ArchivedChats", R.string.ArchivedChats))
                             ))
                             .title(LocaleController.getString("DrawerFavoriteOption", R.string.DrawerFavoriteOption))
@@ -179,6 +180,9 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
 
                                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.mainUserInfoChanged);
                                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
+
+                                drawerPreviewCell.updateMiniIcon();
+                                LaunchActivity.instance.reloadDrawerMiniIcon();
                             }
                         })
                         .build()))

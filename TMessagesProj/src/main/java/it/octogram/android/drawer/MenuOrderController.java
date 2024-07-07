@@ -7,6 +7,8 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.MenuItemId;
@@ -62,7 +64,7 @@ public class MenuOrderController {
             } catch (JSONException e) {
                 FileLog.e(e);
             }
-            if (data.length() == 0) {
+            if (data.length() == 0 && OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()){
                 loadDefaultItems();
             }
             configLoaded = true;
@@ -376,28 +378,28 @@ public class MenuOrderController {
         list.add(
                 new EditableMenuItem(
                         list_items[17],
-                        "Download",
+                        LocaleController.getString(R.string.DownloadMenuItem),
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[18],
-                        "Power Usage",
+                        LocaleController.getString(R.string.PowerUsage),
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[19],
-                        "Proxy Settings",
+                        LocaleController.getString(R.string.ProxySettings),
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[20],
-                        "Attach Menu Bot",
+                        LocaleController.getString(R.string.AttachedMenuBot),
                         false
                 )
         );
@@ -440,17 +442,20 @@ public class MenuOrderController {
     }
 
     public static void removeItem(int position) {
+        HashSet<String> seenItems = new HashSet<>();
         JSONArray result = new JSONArray();
+
         for (int i = 0; i < data.length(); i++) {
             try {
                 String idTmp = data.getString(i);
-                if (i != position) {
+                if (i != position && (idTmp.equals(MenuItemId.DIVIDER.getId()) || seenItems.add(idTmp))) {
                     result.put(idTmp);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+
         data = result;
         OctoConfig.INSTANCE.setDrawerItems(data.toString());
     }
@@ -506,13 +511,8 @@ public class MenuOrderController {
         onDrawerFavoriteOptionChanged();
     }
 
-    private static boolean isMenuItemValid(String menuItem) {
-        for (String item : list_items) {
-            if (item.equals(menuItem)) {
-                return true;
-            }
-        }
-        return false;
+    public static boolean isMenuItemValid(String menuItem) {
+        return Arrays.asList(list_items).contains(menuItem);
     }
 
     public static class EditableMenuItem {

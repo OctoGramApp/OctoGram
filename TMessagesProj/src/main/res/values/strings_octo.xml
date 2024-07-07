@@ -253,8 +253,6 @@
     <string name="ShowSnowflakes">Show snowflakes</string>
     <string name="ForcePacmanAnimation">Force pacman animation</string>
     <string name="ForcePacmanAnimation_Desc">Force pacman animation when archiving a chat</string>
-    <string name="DrawerElements">Drawer Elements</string>
-    <string name="DrawerElements_Desc">Customize the elements in the drawer</string>
     <string name="ContextElements">Context menu Elements</string>
     <string name="ContextElements_Desc">Customize the elements in the context menu</string>
 
@@ -299,7 +297,7 @@
     <string name="AppIconConfetti">Confetti</string>
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
     <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
-    <string name="UnlockedHiddenConfettiIcon">You have unlocked the confections! Activate the new secret icon from settings.</string>
+    <string name="UnlockedHiddenConfettiIcon">You have unlocked confetti! Activate the new secret icon from settings.</string>
     <string name="OctoExperimentsSettingsHeader">Try out new and shiny features</string>
     <string name="OctoExperimentsDialogMessage">These features are experimental and may not work as expected. You may experience crashes and other issues. Please report any issues you encounter to the developers</string>
     <string name="OctoExperimentsDialogButton">Enable experimental settings</string>
@@ -526,6 +524,18 @@
     <string name="DatacenterStatusSheetIP">IP Address</string>
     <string name="DatacenterStatusSheetLastLag">Last lag time</string>
     <string name="DatacenterStatusSheetLastDowntime">Last down time</string>
+    <string name="DownloadMenuItem">Downloads</string>
+    <string name="AttachedMenuBot">Attach Menu Bot</string>
+
+    <!-- Drawer Reorder -->
+    <string name="DrawerElements">Drawer Elements</string>
+    <string name="DrawerElements_Desc">Customize the elements in the drawer</string>
+
+    <string name="MenuItems">Menu Items</string>
+    <string name="MenuItemsOrderDesc">Customize side menu items to better meet your needs.</string>
+    <string name="RecommendedItems">Recommended Menu Items</string>
+    <string name="ResetItemsOrder">Reset Items Order</string>
+    <string name="AddDivider">Add Divider</string>
     <string name="Divider">Divider</string>
 
     <!-- OLD STRINGS -->

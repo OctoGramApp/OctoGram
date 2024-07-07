@@ -3,6 +3,7 @@ package it.octogram.android.preferences.ui.custom;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.text.TextUtils;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +25,7 @@ import org.telegram.ui.Cells.HeaderCell;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.ViewType;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.preferences.BaseCustomActivity;
@@ -32,6 +34,13 @@ import it.octogram.android.preferences.ui.components.HintHeader;
 import it.octogram.android.preferences.ui.components.SwapOrder;
 
 public class DrawerOrderSettings extends BaseCustomActivity {
+    
+    enum SubItem {
+        TREE_DOTS, 
+        ADD_DIVIDER, 
+        RESET_ORDER, 
+    }
+    
     private ItemTouchHelper itemTouchHelper;
 
     private int headerHintRow;
@@ -44,37 +53,40 @@ public class DrawerOrderSettings extends BaseCustomActivity {
     private int menuItemsEndRow;
     private int menuItemsDividerRow;
 
-
     @SuppressLint("NotifyDataSetChanged")
     @Override
     protected void onMenuItemClick(int id) {
         super.onMenuItemClick(id);
-        if (id == 1) {
-            updateListAnimated(() -> MenuOrderController.addItem(MenuOrderController.DIVIDER_ITEM));
-            if (MenuOrderController.IsDefaultPosition()) {
-                menuItem.hideSubItem(2);
+        if (menuItem == null) {
+            menuItem = createMenuItem();
+        }
+
+        if (id == SubItem.ADD_DIVIDER.ordinal()) {
+            if (!MenuOrderController.IsDefaultPosition()) {
+                menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
             } else {
-                menuItem.showSubItem(2);
+                menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
             }
-            reloadMainInfo();
+            updateListAnimated(() -> MenuOrderController.addItem(MenuOrderController.DIVIDER_ITEM));
         } else if (id == 2) {
             updateListAnimated(MenuOrderController::resetToDefaultPosition);
-            menuItem.hideSubItem(2);
-            reloadMainInfo();
+            menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
         }
+        reloadMainInfo();
     }
 
     @Override
     protected ActionBarMenuItem createMenuItem() {
         ActionBarMenu menu = actionBar.createMenu();
-        ActionBarMenuItem menuItem = menu.addItem(0, R.drawable.ic_ab_other);
-        menuItem.setContentDescription(LocaleController.getString("AccDescrMoreOptions", R.string.AccDescrMoreOptions));
-        menuItem.addSubItem(1, R.drawable.msg_new_filter, "Add Divider");
-        menuItem.addSubItem(2, R.drawable.msg_reset, "Reset to Default");
-        if (MenuOrderController.IsDefaultPosition()) {
-            menuItem.hideSubItem(2);
+        ActionBarMenuItem menuItem = menu.addItem(SubItem.TREE_DOTS.ordinal(), R.drawable.ic_ab_other);
+        menuItem.setContentDescription(LocaleController.getString(R.string.AccDescrMoreOptions));
+        menuItem.addSubItem(SubItem.ADD_DIVIDER.ordinal(), R.drawable.msg_new_filter, LocaleController.getString(R.string.AddDivider));
+        menuItem.addSubItem(SubItem.RESET_ORDER.ordinal(), R.drawable.msg_reset, LocaleController.getString(R.string.ResetItemsOrder));
+
+        if (!MenuOrderController.IsDefaultPosition()) {
+            menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
         } else {
-            menuItem.showSubItem(2);
+            menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
         }
         return menuItem;
     }
@@ -89,7 +101,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
 
     @Override
     protected String getActionBarTitle() {
-        return "MenuItems";
+        return LocaleController.getString(R.string.MenuItems);
     }
 
     protected void updateRowsId() {
@@ -108,7 +120,9 @@ public class DrawerOrderSettings extends BaseCustomActivity {
             hintsDividerRow = rowCount++;
         }
 
-        headerMenuRow = rowCount++;
+        if (!TextUtils.isEmpty(OctoConfig.INSTANCE.drawerItems.getValue())) {
+            headerMenuRow = rowCount++;
+        }
         menuItemsStartRow = rowCount;
         rowCount += MenuOrderController.sizeAvailable();
         menuItemsEndRow = rowCount;
@@ -129,9 +143,9 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                 case HEADER -> {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == headerSuggestedOptionsRow) {
-                        headerCell.setText("Suggested Options");
+                        headerCell.setText(LocaleController.getString(R.string.RecommendedItems));
                     } else if (position == headerMenuRow) {
-                        headerCell.setText("Menu Items");
+                        headerCell.setText(LocaleController.getString(R.string.MenuItems));
                     }
                 }
                 case MENU_ITEM -> {
@@ -164,7 +178,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
             View view = new View(context);
             switch (viewType) {
                 case HINT_HEADER -> {
-                    view = new HintHeader(context, "You can reorder the items in the menu by dragging them up or down.");
+                    view = new HintHeader(context, LocaleController.getString(R.string.MenuItemsOrderDesc));
                     view.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                 }
                 case MENU_ITEM -> {
@@ -182,9 +196,9 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                         if (MenuOrderController.isAvailable(swapOrderCell.menuId, position)) {
                             updateListAnimated(() -> MenuOrderController.removeItem(position));
                             if (MenuOrderController.IsDefaultPosition()) {
-                                menuItem.hideSubItem(2);
+                                menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
                             } else {
-                                menuItem.showSubItem(2);
+                                menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
                             }
                             reloadMainInfo();
                         }
@@ -203,9 +217,9 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                                 }
                             });
                             if (MenuOrderController.IsDefaultPosition()) {
-                                menuItem.hideSubItem(2);
+                                menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
                             } else {
-                                menuItem.showSubItem(2);
+                                menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
                             }
                             reloadMainInfo();
                         }
@@ -242,9 +256,9 @@ public class DrawerOrderSettings extends BaseCustomActivity {
             MenuOrderController.changePosition(idx1, idx2);
             notifyItemMoved(fromIndex, toIndex);
             if (MenuOrderController.IsDefaultPosition()) {
-                menuItem.hideSubItem(2);
+                menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
             } else {
-                menuItem.showSubItem(2);
+                menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
             }
             reloadMainInfo();
         }

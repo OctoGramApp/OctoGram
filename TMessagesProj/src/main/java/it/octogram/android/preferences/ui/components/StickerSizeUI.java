@@ -181,18 +181,21 @@ public class StickerSizeUI extends BaseFragment {
             }
 
             message.date = date + 1270;
-            message.dialog_id = -1;
-            message.flags = 259;
+            message.dialog_id = 1;
+            message.flags = 257 + 8;
+            message.from_id = new TLRPC.TL_peerUser();
             message.id = 2;
+            message.reply_to = new TLRPC.TL_messageReplyHeader();
+            message.reply_to.flags |= 16;
+            message.reply_to.reply_to_msg_id = 1;
             message.media = new TLRPC.TL_messageMediaEmpty();
             message.out = false;
             message.peer_id = new TLRPC.TL_peerUser();
-            message.peer_id.user_id = 1;
-            message.post_author = "OctoGram Dev";
+            message.peer_id.user_id = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
             message.flags |= TLRPC.MESSAGE_FLAG_EDITED | TLRPC.MESSAGE_FLAG_HAS_VIEWS | TLRPC.MESSAGE_FLAG_HAS_ENTITIES;
             message.edit_date = date + 1950;
             message.edit_hide = false;
-            message.views = 150;
+            message.views = 250;
             messageObjects[1] = new MessageObject(UserConfig.selectedAccount, message, true, false);
             //String[] strings = {"Nick", "OctoGram Dev"};
             messageObjects[1].overrideLinkEmoji = 5258073068852485953L;

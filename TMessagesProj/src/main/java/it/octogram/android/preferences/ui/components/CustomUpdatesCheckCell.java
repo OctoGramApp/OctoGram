@@ -3,14 +3,11 @@ package it.octogram.android.preferences.ui.components;
 import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
@@ -24,8 +21,6 @@ import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.LayoutHelper;
 
 import java.io.File;
-
-import it.octogram.android.OctoConfig;
 
 @SuppressLint("ViewConstructor")
 public class CustomUpdatesCheckCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {

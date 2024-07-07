@@ -22,6 +22,7 @@ import java.util.List;
 
 import it.octogram.android.AudioType;
 import it.octogram.android.DeviceIdentifyState;
+import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhotoResolution;
 import it.octogram.android.StickerUi;
@@ -129,6 +130,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                     fragment.presentFragment(new NavigationSettingsUI());
                                 }
                             })
+                            .isNew(NewFeaturesBadgeId.ALTERNATIVE_NAVIGATION_BADGE.getId())
                             .value(LocaleController.getString(OctoConfig.INSTANCE.alternativeNavigation.getValue() ? R.string.NotificationsOn : R.string.NotificationsOff))
                             .title(LocaleController.getString("AlternativeNavigation", R.string.AlternativeNavigation))
                             .build()

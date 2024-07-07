@@ -23,7 +23,8 @@ import it.octogram.android.utils.PopupChoiceDialogUtils;
 
 public class ListRow extends BaseRow implements Clickable {
 
-    private final List<PopupChoiceDialogOption> options;
+    private List<PopupChoiceDialogOption> options;
+    private final Supplier<List<PopupChoiceDialogOption>> supplierOptions;
     private final ConfigProperty<Integer> currentValue;
 
     private final Supplier<Boolean> supplierClickable;
@@ -35,12 +36,14 @@ public class ListRow extends BaseRow implements Clickable {
                    ConfigProperty<Boolean> showIf,
                    boolean showIfReverse,
                    List<PopupChoiceDialogOption> options,
+                   Supplier<List<PopupChoiceDialogOption>> supplierOptions,
                    ConfigProperty<Integer> currentValue,
                    Supplier<Boolean> supplierClickable,
                    Runnable supplierClickableSelected
                ) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.LIST);
         this.options = options;
+        this.supplierOptions = supplierOptions;
         this.currentValue = currentValue;
         this.supplierClickable = supplierClickable;
         this.supplierClickableSelected = supplierClickableSelected;
@@ -55,6 +58,10 @@ public class ListRow extends BaseRow implements Clickable {
     public boolean onCustomClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y, Runnable reloadPreferencesUI) {
         if (supplierClickable != null && !supplierClickable.get()) {
             return false;
+        }
+
+        if (supplierOptions != null) {
+            options = supplierOptions.get();
         }
 
         Dialog dialog = PopupChoiceDialogUtils.createChoiceDialog(
@@ -123,12 +130,23 @@ public class ListRow extends BaseRow implements Clickable {
     public static class ListRowBuilder extends BaseRowBuilder<ListRow> {
 
         private final List<PopupChoiceDialogOption> options = new ArrayList<>();
+        private Supplier<List<PopupChoiceDialogOption>> supplierOptions = null;
         private Supplier<Boolean> supplierClickable;
         private Runnable supplierClickableSelected;
         private ConfigProperty<Integer> currentValue;
 
         public ListRowBuilder options(List<PopupChoiceDialogOption> opt) {
             options.addAll(opt);
+            return this;
+        }
+
+        public ListRowBuilder supplierOptions(Supplier<List<PopupChoiceDialogOption>> supplierOptions) {
+            this.supplierOptions = supplierOptions;
+
+            if (supplierOptions != null) {
+                options.addAll(supplierOptions.get());
+            }
+
             return this;
         }
 
@@ -149,7 +167,7 @@ public class ListRow extends BaseRow implements Clickable {
 
         @Override
         public ListRow build() {
-            return new ListRow(title, divider, requiresRestart, showIf, showIfReverse, options, currentValue, supplierClickable, supplierClickableSelected);
+            return new ListRow(title, divider, requiresRestart, showIf, showIfReverse, options, supplierOptions, currentValue, supplierClickable, supplierClickableSelected);
         }
     }
 }

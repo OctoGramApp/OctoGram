@@ -1443,9 +1443,11 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         containerView.setAlpha(1.0f);
         containerView.setScaleX(1.0f);
         containerView.setScaleY(1.0f);
+        containerView.setTranslationX(0);
         containerViewBack.setAlpha(1.0f);
         containerViewBack.setScaleX(1.0f);
         containerViewBack.setScaleY(1.0f);
+        containerViewBack.setTranslationX(0);
         if (canUseCrossfadeEffect()) {
             invalidateActionBars();
         }
@@ -1910,7 +1912,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                 oldFragment = currentFragment;
                 newFragment = fragment;
                 AnimatorSet animation = null;
-                if (!preview && !USE_ALTERNATIVE_NAVIGATION) {
+                if (!preview) {
                     animation = fragment.onCustomTransitionAnimation(true, () -> onAnimationEndCheck(false));
                 }
                 if (animation == null) {
@@ -3198,10 +3200,6 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     @Override
     public void updateUseAlternativeNavigation(boolean status) {
         USE_ALTERNATIVE_NAVIGATION = status;
-        if (!status) {
-            containerViewBack.setTranslationX(0);
-            // fix ui glitch after disable
-        }
     }
 
     @Override

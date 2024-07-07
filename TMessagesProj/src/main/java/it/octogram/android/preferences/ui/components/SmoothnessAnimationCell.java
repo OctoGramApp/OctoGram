@@ -124,6 +124,7 @@ public class SmoothnessAnimationCell extends FrameLayout {
             });
 
             FrameLayout contentView = new FrameLayout(context);
+            contentView.setClickable(true);
             contentView.setLayoutParams(LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
             LinkSpanDrawable.LinksTextView textView = new LinkSpanDrawable.LinksTextView(context, null, null);

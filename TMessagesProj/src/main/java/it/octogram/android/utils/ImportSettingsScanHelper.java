@@ -93,6 +93,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.syncPowerSaver.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.experimentsEnabled.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.newBadgeIds.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {

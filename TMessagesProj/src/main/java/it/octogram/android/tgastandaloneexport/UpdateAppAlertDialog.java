@@ -43,7 +43,6 @@ import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
 
-import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.components.CustomUpdatesCheckCell;
 import it.octogram.android.utils.UpdatesManager;
 

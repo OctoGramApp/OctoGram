@@ -104,7 +104,7 @@ public class TextDetailSettingsCell extends FrameLayout {
         setWillNotDraw(!divider);
     }
 
-    public void setTextAndValueAndIcon(String text, CharSequence value, int resId, boolean divider) {
+    public void setTextAndValueAndIcon(CharSequence text, CharSequence value, int resId, boolean divider) {
         textView.setText(text);
         valueTextView.setText(value);
         imageView.setImageResource(resId);

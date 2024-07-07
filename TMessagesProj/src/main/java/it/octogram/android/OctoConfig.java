@@ -173,6 +173,9 @@ public class OctoConfig {
     /* Drawer Reorder */
     public final ConfigProperty<String> drawerItems = newConfigProperty("drawerItems", "[]");
 
+    /* Settings: NEW badge */
+    public final ConfigProperty<String> newBadgeIds = newConfigProperty("newBadgeIds", "[]");
+
     /**
      * Creates a new config property and adds it to the list of properties.
      *
@@ -541,4 +544,42 @@ public class OctoConfig {
         drawerItems.updateValue(drawerItemsList);
     }
 
+    public boolean isNewIdVisible(String newID) {
+        String value = newBadgeIds.getValue();
+        JSONArray data;
+
+        try {
+            data = new JSONArray(value);
+        } catch (Exception ignored) {
+            newBadgeIds.setValue("[]");
+            data = new JSONArray();
+        }
+
+        for (int i = 0; i < data.length(); i++) {
+            try {
+                if (data.getString(i).equals(newID)) {
+                    return false;
+                }
+            } catch (Exception ignored) {
+
+            }
+        }
+
+        return true;
+    }
+
+    public void hideNewId(String newID) {
+        String value = newBadgeIds.getValue();
+        JSONArray data;
+
+        try {
+            data = new JSONArray(value);
+        } catch (Exception ignored) {
+            newBadgeIds.setValue("[]");
+            data = new JSONArray();
+        }
+
+        data.put(newID);
+        newBadgeIds.updateValue(data.toString());
+    }
 }

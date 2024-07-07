@@ -23,6 +23,7 @@ import org.telegram.ui.LaunchActivity;
 
 import java.util.Locale;
 
+import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
@@ -62,9 +63,9 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
+                            .isNew(NewFeaturesBadgeId.GENERAL_BADGE.getId())
                             .title(LocaleController.formatString("General", R.string.General))
                             .build());
-
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoTranslatorUI())))
                             .icon(R.drawable.msg_translate)
@@ -73,6 +74,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
+                            .isNew(NewFeaturesBadgeId.APPEARANCE_BADGE.getId())
                             .title(LocaleController.formatString("Appearance", R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -83,11 +85,13 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI())))
                             .icon(R.drawable.outline_science_white)
+                            .isNew(NewFeaturesBadgeId.EXPERIMENTAL_BADGE.getId())
                             .title(LocaleController.formatString("Experiments", R.string.Experiments))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoUpdatesUI())))
                             .icon(R.drawable.round_update_white_28)
+                            .isNew(NewFeaturesBadgeId.UPDATES_BADGE.getId())
                             .title(LocaleController.formatString("Updates", R.string.Updates))
                             .build());
                 })

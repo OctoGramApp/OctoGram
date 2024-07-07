@@ -23,6 +23,7 @@ import java.util.List;
 import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.CustomEmojiController;
+import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
@@ -47,12 +48,14 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI())))
                         .icon(R.drawable.msg_groups)
+                        .isNew(NewFeaturesBadgeId.CHATS_BADGE.getId())
                         .title(LocaleController.getString("ChatTitle", R.string.ChatTitle))
                         .description(LocaleController.getString("Chat_Desc", R.string.Chat_Desc))
                         .build())
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI())))
                         .icon(R.drawable.msg_map_type)
+                        .isNew(NewFeaturesBadgeId.DRAWER_BADGE.getId())
                         .title(LocaleController.getString("DrawerTitle", R.string.DrawerTitle))
                         .description(LocaleController.getString("Drawer_Desc", R.string.Drawer_Desc))
                         .build())

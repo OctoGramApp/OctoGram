@@ -39,7 +39,6 @@ import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.components.SmoothnessAnimationCell;
-import it.octogram.android.utils.AppRestartHelper;
 
 public class NavigationSettingsUI extends BaseFragment {
 

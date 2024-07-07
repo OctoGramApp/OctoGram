@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -66,6 +67,7 @@ import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.Components.Premium.StarParticlesView;
 import org.telegram.ui.Components.RLottieDrawable;
@@ -88,6 +90,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
+import it.octogram.android.utils.IconsUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class DrawerProfileCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
@@ -135,6 +138,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     private boolean lastStateGradientBackground = true;
     private boolean lastStateDarkenBackground = true;
     private int lastStateFavoriteIcon = -1;
+    private ViewPropertyAnimator favoriteIconAnimator;
 
     public DrawerProfileCell(Context context, DrawerLayoutContainer drawerLayoutContainer) {
         super(context);
@@ -389,59 +393,67 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         boolean hasAnimatedDisappear = false;
         boolean animateAppearWithoutWaiting = false;
 
-        if (lastStateFavoriteIcon == OctoConfig.INSTANCE.drawerFavoriteOption.getValue()) {
-            removeView(currentView);
-            customMiniIcon = null;
-            darkThemeView = null;
-        } else {
-            lastStateFavoriteIcon = OctoConfig.INSTANCE.drawerFavoriteOption.getValue();
-            if (currentView != null) {
-                if (isPreviewMode && !isPreviewModeFirstDraw) {
-                    hasAnimatedDisappear = true;
-                    currentView.setScaleX(1f);
-                    currentView.setScaleY(1f);
-                    currentView.setAlpha(1f);
-                    currentView.animate().scaleY(0.5f).scaleX(0.5f).alpha(0).setDuration(200).setListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(@NonNull Animator animation) {
+        if (favoriteIconAnimator != null) {
+            favoriteIconAnimator.cancel();
+        }
 
-                        }
+        if (lastStateFavoriteIcon != preGetNewIcon()) {
+            lastStateFavoriteIcon = preGetNewIcon();
 
-                        @Override
-                        public void onAnimationEnd(@NonNull Animator animation) {
-                            removeView(currentView);
-                            customMiniIcon = null;
-                            darkThemeView = null;
-
-                            if (onAnimationEndRunnable[0] != null) {
-                                onAnimationEndRunnable[0].run();
-                            }
-                        }
-
-                        @Override
-                        public void onAnimationCancel(@NonNull Animator animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(@NonNull Animator animation) {
-
-                        }
-                    }).start();
-                } else {
-                    removeView(currentView);
-                    customMiniIcon = null;
-                    darkThemeView = null;
-                }
-            } else if (isPreviewMode && !isPreviewModeFirstDraw) {
+            if (isPreviewMode && !isPreviewModeFirstDraw) {
                 hasAnimatedDisappear = true;
-                animateAppearWithoutWaiting = true;
+                animateAppearWithoutWaiting = currentView == null;
             }
         }
 
+        if (hasAnimatedDisappear && !animateAppearWithoutWaiting) {
+            currentView.setScaleX(1f);
+            currentView.setScaleY(1f);
+            currentView.setAlpha(1f);
+
+            final Boolean[] canceled = {false};
+            favoriteIconAnimator = currentView.animate().scaleY(1.2f).scaleX(1.2f).alpha(0).setDuration(200).setListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(@NonNull Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(@NonNull Animator animation) {
+                    if (canceled[0]) {
+                        return;
+                    }
+
+                    removeView(currentView);
+                    customMiniIcon = null;
+                    darkThemeView = null;
+
+                    if (onAnimationEndRunnable[0] != null) {
+                        onAnimationEndRunnable[0].run();
+                    }
+                }
+
+                @Override
+                public void onAnimationCancel(@NonNull Animator animation) {
+                    canceled[0] = true;
+                    removeView(currentView);
+                }
+
+                @Override
+                public void onAnimationRepeat(@NonNull Animator animation) {
+
+                }
+            });
+            favoriteIconAnimator.start();
+        } else if (currentView != null) {
+            removeView(currentView);
+            customMiniIcon = null;
+            darkThemeView = null;
+        }
+
         if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.DEFAULT.getValue()) {
-            boolean playDrawable;
-            if (playDrawable = sunDrawable == null) {
+            boolean playDrawable = sunDrawable == null;
+            if (playDrawable) {
                 sunDrawable = new RLottieDrawable(R.raw.sun, "" + R.raw.sun, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
                 sunDrawable.setPlayInDirectionOfCustomEndFrame(true);
                 if (Theme.isCurrentThemeDay()) {
@@ -504,8 +516,8 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                     }
                 }
 
-                boolean toDark;
-                if (toDark = dayThemeName.equals(themeInfo.getKey())) {
+                boolean toDark = dayThemeName.equals(themeInfo.getKey());
+                if (toDark) {
                     themeInfo = Theme.getTheme(nightThemeName);
                     sunDrawable.setCustomEndFrame(36);
                 } else {
@@ -540,12 +552,41 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             if (hasAnimatedDisappear) {
                 onAnimationEndRunnable[0] = () -> {
                     addView(currentDarkThemeView, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
-
                     darkThemeView = currentDarkThemeView;
-                    darkThemeView.setScaleX(0.5f);
-                    darkThemeView.setScaleY(0.5f);
-                    darkThemeView.setAlpha(0f);
-                    darkThemeView.animate().scaleY(1f).scaleX(1f).alpha(1).setDuration(200).start();
+
+                    currentDarkThemeView.setScaleX(0.7f);
+                    currentDarkThemeView.setScaleY(0.7f);
+                    currentDarkThemeView.setAlpha(0f);
+
+                    final Boolean[] canceled = {false};
+
+                    favoriteIconAnimator = currentDarkThemeView.animate().scaleY(1f).scaleX(1f).alpha(1).setDuration(200).setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(@NonNull Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(@NonNull Animator animation) {
+                            if (canceled[0]) {
+                                return;
+                            }
+
+                            favoriteIconAnimator = null;
+                        }
+
+                        @Override
+                        public void onAnimationCancel(@NonNull Animator animation) {
+                            canceled[0] = true;
+                            removeView(currentDarkThemeView);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(@NonNull Animator animation) {
+
+                        }
+                    });
+                    favoriteIconAnimator.start();
                 };
 
                 if (animateAppearWithoutWaiting) {
@@ -562,20 +603,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             currentMiniIcon.setColorFilter(Theme.getColor(Theme.key_chats_menuName));
             currentMiniIcon.setBackground(Theme.createCircleSelectorDrawable(Theme.getColor(Theme.key_dialogButtonSelector), 0, 0));
 
-            if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.SAVED_MESSAGES.getValue()) {
-                currentMiniIcon.setImageResource(R.drawable.msg_saved);
-            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.SETTINGS.getValue()) {
-                currentMiniIcon.setImageResource(R.drawable.msg_settings);
-            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.CONTACTS.getValue()) {
-                currentMiniIcon.setImageResource(R.drawable.msg_contacts);
-            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.CALLS.getValue()) {
-                currentMiniIcon.setImageResource(R.drawable.msg_calls);
-            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.DOWNLOADS.getValue()) {
-                currentMiniIcon.setImageResource(R.drawable.msg_download);
-            } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.ARCHIVED_CHATS.getValue()) {
-                currentMiniIcon.setImageResource(R.drawable.msg_archive);
-            }
-
+            currentMiniIcon.setImageResource(lastStateFavoriteIcon);
             currentMiniIcon.setOnClickListener(v -> {
                 drawerLayoutContainer.closeDrawer(true);
 
@@ -614,12 +642,34 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             if (hasAnimatedDisappear) {
                 onAnimationEndRunnable[0] = () -> {
                     addView(currentMiniIcon, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
-
                     customMiniIcon = currentMiniIcon;
-                    customMiniIcon.setScaleX(0.5f);
-                    customMiniIcon.setScaleY(0.5f);
-                    customMiniIcon.setAlpha(0f);
-                    customMiniIcon.animate().scaleY(1f).scaleX(1f).alpha(1).setDuration(200).start();
+
+                    currentMiniIcon.setScaleX(0.7f);
+                    currentMiniIcon.setScaleY(0.7f);
+                    currentMiniIcon.setAlpha(0f);
+                    favoriteIconAnimator = currentMiniIcon.animate().scaleY(1f).scaleX(1f).alpha(1).setDuration(200).setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(@NonNull Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(@NonNull Animator animation) {
+                            favoriteIconAnimator = null;
+                        }
+
+                        @Override
+                        public void onAnimationCancel(@NonNull Animator animation) {
+                            removeView(currentMiniIcon);
+                            favoriteIconAnimator = null;
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(@NonNull Animator animation) {
+
+                        }
+                    });
+                    favoriteIconAnimator.start();
                 };
 
                 if (animateAppearWithoutWaiting) {
@@ -630,6 +680,20 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 addView(customMiniIcon, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 90));
             }
         }
+    }
+
+    private int preGetNewIcon() {
+        int drawerFavoriteOptionState = OctoConfig.INSTANCE.drawerFavoriteOption.getValue();
+
+        if (drawerFavoriteOptionState == DrawerFavoriteOption.NONE.getValue()) {
+            return 0;
+        }
+
+        if (drawerFavoriteOptionState == DrawerFavoriteOption.DEFAULT.getValue()) {
+            return 1;
+        }
+
+        return IconsUtils.getIconWithEventType(drawerFavoriteOptionState);
     }
 
     public void updateDarkerBackgroundLevel(int level) {
@@ -936,7 +1000,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 imageReceiver.setImageCoords(0, 0, getMeasuredWidth(), getMeasuredHeight());
                 imageReceiver.draw(canvas);
                 darkBackColor = Theme.getColor(Theme.key_listSelector);
-            } else if (backgroundDrawable instanceof ColorDrawable || backgroundDrawable instanceof GradientDrawable) {
+            } else if (backgroundDrawable instanceof ColorDrawable || backgroundDrawable instanceof GradientDrawable || backgroundDrawable instanceof MotionBackgroundDrawable) {
                 backgroundDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
                 backgroundDrawable.draw(canvas);
                 darkBackColor = Theme.getColor(Theme.key_listSelector);
@@ -1195,7 +1259,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.TRANSPARENT.getValue()) {
             backgroundKey = Theme.key_chats_menuBackground;
         } else if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.COLOR.getValue()) {
-            backgroundKey = Theme.key_switchTrackBlue;
+            backgroundKey = Theme.key_switchTrackChecked;
         }
 
         if (force || currentTag == null || backgroundKey != currentTag) {

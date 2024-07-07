@@ -179,6 +179,19 @@ enum class MenuItemId(val id: String, val itemId: Int) {
     }
 }
 
+enum class NewFeaturesBadgeId(val id: String) {
+    UPDATES_BADGE("ub"),
+
+    GENERAL_BADGE("gb"),
+
+    APPEARANCE_BADGE("ab"),
+    CHATS_BADGE("cb"),
+    DRAWER_BADGE("db"),
+
+    EXPERIMENTAL_BADGE("eb"),
+    ALTERNATIVE_NAVIGATION_BADGE("anb")
+}
+
 enum class StickerUi(val value: Int) {
     TRANSLATOR(0),
     MAIN(1),

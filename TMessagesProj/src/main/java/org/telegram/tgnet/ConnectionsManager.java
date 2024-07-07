@@ -1469,7 +1469,7 @@ public class ConnectionsManager extends BaseController {
 
     public static long lastPremiumFloodWaitShown = 0;
     public static void onPremiumFloodWait(final int currentAccount, final int requestToken, boolean isUpload) {
-        AndroidUtilities.runOnUIThread(() -> {
+        Utilities.stageQueue.postRunnable(() -> {
             if (UserConfig.selectedAccount != currentAccount) {
                 return;
             }
@@ -1490,7 +1490,7 @@ public class ConnectionsManager extends BaseController {
             }
 
             if (updated) {
-                NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.premiumFloodWaitReceived);
+                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.premiumFloodWaitReceived));
             }
         });
     }

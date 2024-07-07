@@ -229,7 +229,7 @@ public abstract class BaseFragment {
 
     public boolean isActionBarCrossfadeEnabled() {
         //return actionBar != null;
-        return actionBar != null && actionBar.getVisibility() == View.VISIBLE && actionBar.getAlpha() != 0.0f && actionBar.getY() >= 0.0f;
+        return actionBar != null && actionBar.getVisibility() == View.VISIBLE && actionBar.getAlpha() != 0.0f && actionBar.getY() >= 0.0f && actionBar.getHeight() > 0.0f && !actionBar.isActionModeShowed();
     }
 
     public INavigationLayout.BackButtonState getBackButtonState() {
