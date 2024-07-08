@@ -309,13 +309,13 @@ public class MenuOrderController {
                         false
                 )
         );
-        list.add(
-                new EditableMenuItem(
-                        list_items[8],
-                        LocaleController.getString("NewSecretChat", R.string.NewSecretChat),
-                        false
-                )
-        );
+//        list.add(
+//                new EditableMenuItem(
+//                        list_items[8],
+//                        LocaleController.getString("NewSecretChat", R.string.NewSecretChat),
+//                        false
+//                )
+//        );
         list.add(
                 new EditableMenuItem(
                         list_items[9],
