@@ -131,7 +131,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         textView.setOnClickListener(view -> {
             dismiss();
             if (originalActivity != null) {
-                AndroidUtilities.openForView(message, originalActivity, null);
+                AndroidUtilities.openForView(message, originalActivity, null, false);
             }
         });
         buttonContainer.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));

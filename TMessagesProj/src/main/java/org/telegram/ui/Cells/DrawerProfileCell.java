@@ -1159,15 +1159,23 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         animatedStatus.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         status.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         if (OctoConfig.INSTANCE.hidePhoneNumber.getValue()) {
-            int phoneNumberAlternative = OctoConfig.INSTANCE.phoneNumberAlternative.getValue();
-            if (phoneNumberAlternative == PhoneNumberAlternative.SHOW_USERNAME.getValue() && user.username != null && !user.username.isEmpty()) {
-                phoneTextView.setText(String.format("@%s", user.username));
-            } else if (phoneNumberAlternative == PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER.getValue()) {
-                String phoneNumber = user.phone;
-                String phoneCountry = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber).callingCode;
-                phoneTextView.setText(String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phoneNumber, phoneCountry)));
-            } else {
-                phoneTextView.setText(LocaleController.getString("MobileHidden", R.string.MobileHidden));
+            var phoneNumberAlternative = OctoConfig.INSTANCE.phoneNumberAlternative.getValue();
+            switch (PhoneNumberAlternative.Companion.fromInt(phoneNumberAlternative)) {
+                case SHOW_USERNAME:
+                    phoneTextView.setText((user.username != null && !user.username.isEmpty()) ?
+                            String.format("@%s", user.username) :
+                            LocaleController.getString("MobileHidden", R.string.MobileHidden));
+                    break;
+                case SHOW_FAKE_PHONE_NUMBER:
+                    var phoneNumber = user.phone;
+                    var callingCodeInfo = PhoneFormat.getInstance().findCallingCodeInfo(phoneNumber);
+                    phoneTextView.setText((callingCodeInfo != null) ?
+                            String.format("+%s %s", callingCodeInfo.callingCode, OctoUtils.phoneNumberReplacer(phoneNumber, callingCodeInfo.callingCode)) :
+                            LocaleController.getString("MobileHidden", R.string.MobileHidden));
+                    break;
+                default:
+                    phoneTextView.setText(LocaleController.getString("MobileHidden", R.string.MobileHidden));
+                    break;
             }
         } else {
             phoneTextView.setText(PhoneFormat.getInstance().format("+" + user.phone));

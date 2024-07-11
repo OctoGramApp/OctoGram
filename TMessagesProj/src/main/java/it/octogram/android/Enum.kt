@@ -45,7 +45,13 @@ enum class DoubleTapAction(val value: Int) {
 enum class PhoneNumberAlternative(val value: Int) {
     SHOW_HIDDEN_NUMBER_STRING(0),
     SHOW_FAKE_PHONE_NUMBER(1),
-    SHOW_USERNAME(2)
+    SHOW_USERNAME(2);
+
+    companion object {
+        fun fromInt(value: Int): PhoneNumberAlternative {
+            return entries.find { it.value == value } ?: SHOW_HIDDEN_NUMBER_STRING
+        }
+    }
 }
 
 enum class DeviceIdentifyState(val value: Int) {

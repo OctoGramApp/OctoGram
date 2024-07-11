@@ -298,7 +298,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
     private boolean openLog(File file) {
         try {
             File cacheFile = Crashlytics.shareLog(file.getAbsoluteFile());
-            AndroidUtilities.openForView(cacheFile, cacheFile.getName(), "text/plain", getParentActivity(), getResourceProvider());
+            AndroidUtilities.openForView(cacheFile, cacheFile.getName(), "text/plain", getParentActivity(), getResourceProvider(), false);
             return true;
         } catch (IOException e) {
             Log.e(getClass().getName(), "Error opening crash content", e);
