@@ -3180,7 +3180,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
 
                             if (!handled) {
                                 try {
-                                    AndroidUtilities.openForView(message, getParentActivity(), null);
+                                    AndroidUtilities.openForView(message, getParentActivity(), null, false);
                                 } catch (Exception e) {
                                     alertUserOpenError(message);
                                 }
