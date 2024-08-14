@@ -113,7 +113,10 @@
         android:preserveLegacyExternalStorage="true"
         android:allowAudioPlaybackCapture="true"
         tools:replace="android:supportsRtl"
-        tools:targetApi="r">
+        android:usesCleartextTraffic="true"
+        tools:targetApi="r"
+    >
+        <!-- usesCleartextTraffic for browser supporting opening http:// links -->
 
         <activity-alias
             android:enabled="true"
@@ -331,7 +334,13 @@
                 <data android:host="t.me" android:scheme="http" />
                 <data android:host="t.me" android:scheme="https" />
             </intent-filter>
-            <intent-filter android:priority="1">
+            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:priority="1">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tonsite" />
+            </intent-filter>
+            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:priority="1">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />

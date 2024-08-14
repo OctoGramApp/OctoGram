@@ -59,7 +59,7 @@ import org.telegram.ui.Stories.StoriesUtilities;
 
 import java.util.Locale;
 
-public class ProfileSearchCell extends BaseCell implements NotificationCenter.NotificationCenterDelegate {
+public class ProfileSearchCell extends BaseCell implements NotificationCenter.NotificationCenterDelegate, Theme.Colorable {
 
     private CharSequence currentName;
     public ImageReceiver avatarImage;
@@ -492,9 +492,11 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             } else if (user != null) {
                 if (MessagesController.isSupportUser(user)) {
                     statusString = LocaleController.getString("SupportStatus", R.string.SupportStatus);
+                } else if (user.bot && user.bot_active_users != 0) {
+                    statusString = LocaleController.formatPluralStringComma("BotUsers", user.bot_active_users, ' ');
                 } else if (user.bot) {
                     statusString = LocaleController.getString("Bot", R.string.Bot);
-                } else if (user.id == 333000 || user.id == 777000) {
+                } else if (UserObject.isService(user.id)) {
                     statusString = LocaleController.getString("ServiceNotifications", R.string.ServiceNotifications);
                 } else {
                     if (isOnline == null) {
@@ -913,5 +915,12 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void updateColors() {
+        if (nameLayout != null && getMeasuredWidth() > 0) {
+            buildLayout();
+        }
     }
 }
