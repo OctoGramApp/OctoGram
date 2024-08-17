@@ -102,9 +102,6 @@ android {
     }
 
     dependenciesInfo.includeInApk false
-    buildFeatures {
-        buildConfig true
-    }
 }
 
 tasks.register('buildRelease') {

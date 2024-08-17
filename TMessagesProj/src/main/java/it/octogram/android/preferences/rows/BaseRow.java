@@ -2,11 +2,17 @@ package it.octogram.android.preferences.rows;
 
 import androidx.annotation.Nullable;
 
+import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
+
+import java.util.Objects;
+
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
+import it.octogram.android.preferences.rows.impl.SwitchRow;
 
-public abstract class BaseRow {
+public abstract class BaseRow extends AdapterWithDiffUtils.Item {
 
     @Nullable
     private final String title;
@@ -21,7 +27,6 @@ public abstract class BaseRow {
     private final boolean premium;
     private final boolean autoShowPremiumAlert;
 
-    private boolean currentlyHidden;
     private int row;
 
 
@@ -58,6 +63,8 @@ public abstract class BaseRow {
     }
 
     public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, boolean autoShowPremiumAlert, @Nullable int... postNotificationName) {
+        super(type.getAdapterType(), false);
+
         this.title = title;
         this.summary = summary;
         this.requiresRestart = requiresRestart;
@@ -68,8 +75,6 @@ public abstract class BaseRow {
         this.postNotificationName = postNotificationName;
         this.premium = premium;
         this.autoShowPremiumAlert = autoShowPremiumAlert;
-
-        this.currentlyHidden = showIfPreferenceValue != null && showIfReverse == showIfPreferenceValue.getValue();
     }
 
     @Nullable
@@ -114,14 +119,6 @@ public abstract class BaseRow {
         this.divider = divider;
     }
 
-    public boolean isCurrentlyHidden() {
-        return currentlyHidden;
-    }
-
-    public void setCurrentlyHidden(boolean currentlyHidden) {
-        this.currentlyHidden = currentlyHidden;
-    }
-
     public int getRow() {
         return row;
     }
@@ -132,5 +129,22 @@ public abstract class BaseRow {
 
     public boolean isPremium() {
         return premium;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BaseRow item)) {
+            return false;
+        }
+        if (getType() != item.getType()) {
+            return false;
+        }
+        if (item instanceof HeaderRow || item instanceof SwitchRow) {
+            return Objects.equals(item.getTitle(), getTitle());
+        }
+        return true;
     }
 }

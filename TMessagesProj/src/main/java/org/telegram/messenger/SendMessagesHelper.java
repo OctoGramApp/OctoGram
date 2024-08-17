@@ -7187,13 +7187,11 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     private static int getPhotoResolution(int photoResolution) {
-        if (photoResolution == PhotoResolution.LOW.getValue()) {
-            return 800;
-        } else if (photoResolution == PhotoResolution.HIGH.getValue()) {
-            return 2560;
-        } else {
-            return 1280;
-        }
+        return switch (PhotoResolution.Companion.fromInt(photoResolution)) {
+            case LOW -> 800;
+            case HIGH -> 2560;
+            default -> 1280;
+        };
     }
 
     public TLRPC.TL_photo generatePhotoSizes(TLRPC.TL_photo photo, String path, Uri imageUri) {

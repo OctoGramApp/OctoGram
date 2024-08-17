@@ -72,8 +72,10 @@ public class HTMLKeeper {
                 }
             }
             if ((((TextStyleSpan) mSpan).getStyleFlags() & TextStyleSpan.FLAG_STYLE_MENTION) > 0) {
-                long id = ((TLRPC.TL_messageEntityMentionName) ((TextStyleSpan) mSpan).getTextStyleRun().urlEntity).user_id;
-                messSpan.setSpan(new URLSpan("tg://user?id=" + id), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                if (((TextStyleSpan) mSpan).getTextStyleRun().urlEntity instanceof TLRPC.TL_messageEntityMentionName) {
+                    long id = ((TLRPC.TL_messageEntityMentionName) ((TextStyleSpan) mSpan).getTextStyleRun().urlEntity).user_id;
+                    messSpan.setSpan(new URLSpan("tg://user?id=" + id), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
         String html_result = Html.toHtml(messSpan);

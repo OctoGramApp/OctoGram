@@ -15,7 +15,8 @@ enum class PreferenceType(val adapterType: Int, val isEnabled: Boolean) {
     FOOTER(14, false),
     STICKER_HEADER(15, false),
     CHECKBOX(16, true),
-    SWITCH_COLLAPSIBLE(17, true);
+    EXPANDABLE_ROWS(17, true),
+    EXPANDABLE_ROWS_CHILD(18, true);
 
     companion object {
         fun fromAdapterType(adapterType: Int): PreferenceType? {

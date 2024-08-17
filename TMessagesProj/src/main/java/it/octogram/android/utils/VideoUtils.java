@@ -8,15 +8,17 @@
 package it.octogram.android.utils;
 
 
+import it.octogram.android.VideoQuality;
+
 public class VideoUtils {
     public static float getMaxSize(int w, int h, int selectedCompression) {
         float ratio = (float) w / (float) h;
-        return switch (Quality.fromInt(selectedCompression)) {
+        return switch (VideoQuality.Companion.fromInt(selectedCompression)) {
             case SD -> getNewSide(480, ratio);
             case HD -> getNewSide(720, ratio);
-            case FULL_HD -> getNewSide(1080, ratio);
-            case QUAD_HD -> getNewSide(1440, ratio);
-            case ULTRA_HD -> getNewSide(2160, ratio);
+            case FHD -> getNewSide(1080, ratio);
+            case QHD -> getNewSide(1440, ratio);
+            case UHD -> getNewSide(2160, ratio);
             default -> getNewSide(270, ratio);
         };
     }
@@ -28,7 +30,7 @@ public class VideoUtils {
         if (newSize > oldSize) {
             count++;
         }
-        return Math.min(count, Quality.MAX.ordinal());
+        return Math.min(count, VideoQuality.MAX.getValue());
     }
 
     private static int determineSize(int originalWidth, int originalHeight, int selectedCompression, int compressionsCount) {
@@ -41,19 +43,19 @@ public class VideoUtils {
         }
     }
 
-    private static Quality getCompressionsCount(int area) {
+    private static VideoQuality getCompressionsCount(int area) {
         if (area >= 3840 * 2160) {
-            return Quality.ULTRA_HD;
+            return VideoQuality.UHD;
         } else if (area >= 2560 * 1440) {
-            return Quality.QUAD_HD;
+            return VideoQuality.QHD;
         } else if (area >= 1920 * 1080) {
-            return Quality.FULL_HD;
+            return VideoQuality.FHD;
         } else if (area >= 1280 * 720) {
-            return Quality.HD;
+            return VideoQuality.HD;
         } else if (area >= 854 * 480) {
-            return Quality.SD;
+            return VideoQuality.SD;
         } else {
-            return Quality.UNKNOWN;
+            return VideoQuality.UNKNOWN;
         }
     }
 
@@ -62,20 +64,6 @@ public class VideoUtils {
             return side * ratio;
         } else {
             return side / ratio;
-        }
-    }
-
-    enum Quality {
-        UNKNOWN,
-        SD,
-        HD,
-        FULL_HD,
-        QUAD_HD,
-        ULTRA_HD,
-        MAX;
-
-        static Quality fromInt(int i) {
-            return values()[i];
         }
     }
 }

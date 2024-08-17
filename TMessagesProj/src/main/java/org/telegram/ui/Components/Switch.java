@@ -28,6 +28,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.util.StateSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -35,8 +36,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.Keep;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.BaseCell;
+
+import it.octogram.android.InterfaceSwitchUI;
+import it.octogram.android.OctoConfig;
 
 public class Switch extends View {
 
@@ -85,12 +90,20 @@ public class Switch extends View {
 
     private int overrideColorProgress;
 
+    private Paint googleBorderPaint;
+    private int forcedUIState = -1;
+
     public interface OnCheckedChangeListener {
         void onCheckedChanged(Switch view, boolean isChecked);
     }
 
     public Switch(Context context) {
         this(context, null);
+    }
+
+    public Switch(Context context, int forcedUIState) {
+        this(context, null);
+        this.forcedUIState = forcedUIState;
     }
 
     public Switch(Context context, Theme.ResourcesProvider resourcesProvider) {
@@ -103,6 +116,11 @@ public class Switch extends View {
         paint2.setStyle(Paint.Style.STROKE);
         paint2.setStrokeCap(Paint.Cap.ROUND);
         paint2.setStrokeWidth(AndroidUtilities.dp(2));
+
+        googleBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        googleBorderPaint.setStyle(Paint.Style.STROKE);
+        googleBorderPaint.setStrokeCap(Paint.Cap.ROUND);
+        googleBorderPaint.setStrokeWidth(AndroidUtilities.dp(1));
 
         setHapticFeedbackEnabled(true);
     }
@@ -374,9 +392,16 @@ public class Switch extends View {
 
         int width = AndroidUtilities.dp(31);
         int thumb = AndroidUtilities.dp(20);
+
+        boolean useHardFixTx  = false;
+        if (isUsingSeparateView()) {
+            width = AndroidUtilities.dp(36);
+            useHardFixTx = true;
+        }
+
         int x = (getMeasuredWidth() - width) / 2;
         float y = (getMeasuredHeight() - AndroidUtilities.dpf2(14)) / 2;
-        int tx = x + AndroidUtilities.dp(7) + (int) (AndroidUtilities.dp(17) * progress);
+        int tx = x + AndroidUtilities.dp(7) + (int) (AndroidUtilities.dp(useHardFixTx ? 18 : 17) * progress);
         int ty = getMeasuredHeight() / 2;
 
 
@@ -417,8 +442,14 @@ public class Switch extends View {
                 colorProgress = progress;
             }
 
-            color1 = processColor(Theme.getColor(trackColorKey, resourcesProvider));
+            int originalColor1;
+            color1 = originalColor1 = processColor(Theme.getColor(trackColorKey, resourcesProvider));
             color2 = processColor(Theme.getColor(trackCheckedColorKey, resourcesProvider));
+
+            if (hasTransparentBg()) {
+                color1 = Color.TRANSPARENT;
+            }
+
             if (a == 0 && iconDrawable != null && lastIconColor != (isChecked ? color2 : color1)) {
                 iconDrawable.setColorFilter(new PorterDuffColorFilter(lastIconColor = (isChecked ? color2 : color1), PorterDuff.Mode.MULTIPLY));
             }
@@ -441,8 +472,40 @@ public class Switch extends View {
             paint2.setColor(color);
 
             rectF.set(x, y, x + width, y + AndroidUtilities.dpf2(14));
-            canvasToDraw.drawRoundRect(rectF, AndroidUtilities.dpf2(7), AndroidUtilities.dpf2(7), paint);
-            canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dpf2(10), paint);
+
+            int r = 7;
+            if (getUIState() == InterfaceSwitchUI.ONEUIOLD.getValue()) {
+                rectF.set(x, y - AndroidUtilities.dpf2(1), x + width, y + AndroidUtilities.dpf2(15));
+            } else if (isUsingSeparateView()) {
+                rectF.set(x, y - AndroidUtilities.dpf2(3), x + width, y + AndroidUtilities.dpf2(17));
+                r = 15;
+            }
+
+            canvasToDraw.drawRoundRect(rectF, AndroidUtilities.dpf2(r), AndroidUtilities.dpf2(r), paint);
+
+            if (hasTransparentBg()) {
+                color1 = originalColor1;
+                r1 = Color.red(color1);
+                r2 = Color.red(color2);
+                g1 = Color.green(color1);
+                g2 = Color.green(color2);
+                b1 = Color.blue(color1);
+                b2 = Color.blue(color2);
+                a1 = Color.alpha(color1);
+                a2 = Color.alpha(color2);
+
+                red = (int) (r1 + (r2 - r1) * colorProgress);
+                green = (int) (g1 + (g2 - g1) * colorProgress);
+                blue = (int) (b1 + (b2 - b1) * colorProgress);
+                alpha = (int) (a1 + (a2 - a1) * colorProgress);
+                googleBorderPaint.setColor(((alpha & 0xff) << 24) | ((red & 0xff) << 16) | ((green & 0xff) << 8) | (blue & 0xff));
+
+                canvasToDraw.drawRoundRect(rectF, AndroidUtilities.dpf2(r), AndroidUtilities.dpf2(r), googleBorderPaint);
+            }
+
+            if (getUIState() == InterfaceSwitchUI.DEFAULT.getValue()) {
+                canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dpf2(10), paint);
+            }
 
             if (a == 0 && rippleDrawable != null) {
                 rippleDrawable.setBounds(tx - AndroidUtilities.dp(18), ty - AndroidUtilities.dp(18), tx + AndroidUtilities.dp(18), ty + AndroidUtilities.dp(18));
@@ -472,7 +535,7 @@ public class Switch extends View {
                 colorProgress = progress;
             }
 
-            color1 = Theme.getColor(thumbColorKey, resourcesProvider);
+            color1 = Theme.getColor(hasTransparentBg() ? trackColorKey : thumbColorKey, resourcesProvider);
             color2 = processColor(Theme.getColor(thumbCheckedColorKey, resourcesProvider));
             r1 = Color.red(color1);
             r2 = Color.red(color2);
@@ -489,11 +552,24 @@ public class Switch extends View {
             alpha = (int) (a1 + (a2 - a1) * colorProgress);
             paint.setColor(((alpha & 0xff) << 24) | ((red & 0xff) << 16) | ((green & 0xff) << 8) | (blue & 0xff));
 
-            canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dp(8), paint);
+            float circleSize = getCircleSize();
 
-            if (a == 0) {
+            if (isUsingOneUI()) {
+                paint.setColor(Color.WHITE);
+                paint2.setColor(Color.WHITE);
+            }
+
+            if (isUsingSeparateView()) {
+                canvasToDraw.drawCircle(Utilities.clamp(tx, x + width + AndroidUtilities.dp(2), x + AndroidUtilities.dp(10)), ty, AndroidUtilities.dp(circleSize), paint);
+            } else {
+                canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dp(circleSize), paint);
+            }
+
+            if (a == 0 && getUIState() == InterfaceSwitchUI.DEFAULT.getValue()) {
                 if (iconDrawable != null) {
-                    iconDrawable.setBounds(tx - iconDrawable.getIntrinsicWidth() / 2, ty - iconDrawable.getIntrinsicHeight() / 2, tx + iconDrawable.getIntrinsicWidth() / 2, ty + iconDrawable.getIntrinsicHeight() / 2);
+                    int iconWidth = iconDrawable.getIntrinsicWidth();
+                    int iconHeight = iconDrawable.getIntrinsicHeight();
+                    iconDrawable.setBounds(tx - iconWidth / 2, ty - iconHeight / 2, tx + iconWidth / 2, ty + iconHeight / 2);
                     iconDrawable.draw(canvasToDraw);
                 } else if (drawIconType == 1) {
                     tx -= AndroidUtilities.dp(10.8f) - AndroidUtilities.dp(1.3f) * progress;
@@ -508,17 +584,23 @@ public class Switch extends View {
                     int endX = startX + AndroidUtilities.dp(7);
                     int endY = startY + AndroidUtilities.dp(7);
 
+                    canvasToDraw.save();
+
                     startX = (int) (startX + (startX2 - startX) * progress);
                     startY = (int) (startY + (startY2 - startY) * progress);
                     endX = (int) (endX + (endX2 - endX) * progress);
                     endY = (int) (endY + (endY2 - endY) * progress);
+
                     canvasToDraw.drawLine(startX, startY, endX, endY, paint2);
 
                     startX = (int) AndroidUtilities.dpf2(7.5f) + tx;
                     startY = (int) AndroidUtilities.dpf2(12.5f) + ty;
                     endX = startX + AndroidUtilities.dp(7);
                     endY = startY - AndroidUtilities.dp(7);
+
                     canvasToDraw.drawLine(startX, startY, endX, endY, paint2);
+
+                    canvasToDraw.restore();
                 } else if (drawIconType == 2 || iconAnimator != null) {
                     paint2.setAlpha((int) (255 * (1.0f - iconProgress)));
                     canvasToDraw.drawLine(tx, ty, tx, ty - AndroidUtilities.dp(5), paint2);
@@ -535,6 +617,38 @@ public class Switch extends View {
         if (overrideColorProgress != 0) {
             canvas.drawBitmap(overlayBitmap[1], 0, 0, null);
         }
+    }
+
+    private float getCircleSize() {
+        if (getUIState() == InterfaceSwitchUI.ONEUINEW.getValue()) {
+            return 9;
+        } else if (getUIState() == InterfaceSwitchUI.GOOGLE.getValue()) {
+            return 6 + 2 * progress;
+        } else if (getUIState() == InterfaceSwitchUI.ONEUIOLD.getValue()) {
+            return 10;
+        } else {
+            return 8;
+        }
+    }
+
+    private boolean isUsingSeparateView() {
+        return getUIState() == InterfaceSwitchUI.ONEUINEW.getValue() || getUIState() == InterfaceSwitchUI.GOOGLE.getValue();
+    }
+
+    private boolean isUsingOneUI() {
+        return getUIState() == InterfaceSwitchUI.ONEUINEW.getValue() || getUIState() == InterfaceSwitchUI.ONEUIOLD.getValue();
+    }
+
+    private boolean hasTransparentBg() {
+        return getUIState() == InterfaceSwitchUI.GOOGLE.getValue();
+    }
+
+    private int getUIState() {
+        if (forcedUIState != -1) {
+            return forcedUIState;
+        }
+
+        return OctoConfig.INSTANCE.interfaceSwitchUI.getValue();
     }
 
     @Override

@@ -55,6 +55,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
@@ -90,6 +91,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
+import it.octogram.android.utils.BrowserUtils;
 import it.octogram.android.utils.IconsUtils;
 import it.octogram.android.utils.OctoUtils;
 
@@ -605,7 +607,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
 
             currentMiniIcon.setImageResource(lastStateFavoriteIcon);
             currentMiniIcon.setOnClickListener(v -> {
-                drawerLayoutContainer.closeDrawer(true);
+
+                if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.TELEGRAM_BROWSER.getValue()) {
+                    drawerLayoutContainer.closeDrawer(true);
+                }
 
                 Bundle args = new Bundle();
                 args.putLong("user_id", UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId());
@@ -630,6 +635,8 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                     args = new Bundle();
                     args.putInt("folderId", 1);
                     LaunchActivity.instance.presentFragment(new DialogsActivity(args));
+                } else if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.TELEGRAM_BROWSER.getValue()) {
+                    BrowserUtils.openBrowserHome(() -> drawerLayoutContainer.closeDrawer(true));
                 }
             });
 

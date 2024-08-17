@@ -203,6 +203,8 @@ public class StarParticlesView extends View {
 
         public final static int TYPE_SETTINGS = 101;
 
+        private boolean forcePassWithoutTheme = false;
+
         public Drawable(int count) {
             this.count = count;
             distributionAlgorithm = count < 50;
@@ -224,8 +226,17 @@ public class StarParticlesView extends View {
 
         public void updateColors() {
             int c = Theme.getColor(colorKey, resourcesProvider);
+            forcePassWithoutTheme = false;
             if (lastColor != c) {
                 lastColor = c;
+                generateBitmaps();
+            }
+        }
+
+        public void updateColorsWithoutTheme() {
+            forcePassWithoutTheme = true;
+            if (lastColor != colorKey) {
+                lastColor = colorKey;
                 generateBitmaps();
             }
         }
@@ -405,9 +416,9 @@ public class StarParticlesView extends View {
 
         protected int getPathColor(int i) {
             if (type == 100) {
-                return ColorUtils.setAlphaComponent(Theme.getColor(colorKey, resourcesProvider), 200);
+                return ColorUtils.setAlphaComponent(forcePassWithoutTheme ? colorKey : Theme.getColor(colorKey, resourcesProvider), 200);
             } else {
-                return Theme.getColor(colorKey, resourcesProvider);
+                return forcePassWithoutTheme ? colorKey : Theme.getColor(colorKey, resourcesProvider);
             }
         }
 

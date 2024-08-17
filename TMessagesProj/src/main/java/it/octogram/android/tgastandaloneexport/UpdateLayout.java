@@ -32,6 +32,8 @@ import org.telegram.ui.IUpdateLayout;
 
 import java.io.File;
 
+import it.octogram.android.utils.UpdatesManager;
+
 public class UpdateLayout extends IUpdateLayout {
 
     private FrameLayout updateLayout;
@@ -116,7 +118,7 @@ public class UpdateLayout extends IUpdateLayout {
                 FileLoader.getInstance(currentAccount).cancelLoadFile(SharedConfig.pendingAppUpdate.document);
                 updateAppUpdateViews(currentAccount, true);
             } else {
-                AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, activity);
+                UpdatesManager.installUpdate();
             }
         });
         updateLayoutIcon = new RadialProgress2(updateLayout);

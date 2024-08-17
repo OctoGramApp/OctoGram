@@ -41,7 +41,8 @@ public class MenuOrderController {
             MenuItemId.DOWNLOADS.getId(),
             MenuItemId.POWER_USAGE.getId(),
             MenuItemId.PROXY_SETTINGS.getId(),
-            MenuItemId.ATTACH_MENU_BOT.getId()
+            MenuItemId.ATTACH_MENU_BOT.getId(),
+            MenuItemId.TELEGRAM_BROWSER.getId()
     };
 
     static {
@@ -400,6 +401,13 @@ public class MenuOrderController {
                 new EditableMenuItem(
                         list_items[20],
                         LocaleController.getString(R.string.AttachedMenuBot),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[21],
+                        "Telegram Browser",
                         false
                 )
         );

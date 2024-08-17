@@ -9,7 +9,6 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 
 import org.json.JSONObject;
@@ -21,6 +20,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.Components.BulletinFactory;
@@ -117,10 +117,7 @@ public class OctoUpdatesUI implements PreferencesEntry {
                             .title(LocaleController.formatString("OfficialChannel", R.string.OfficialChannel))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH)));
-                                fragment.getParentActivity().startActivity(browserIntent);
-                            })
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH))))
                             .value(BuildConfig.GIT_COMMIT_HASH)
                             .icon(R.drawable.outline_source_white_28)
                             .title(LocaleController.formatString("SourceCode", R.string.SourceCode))
@@ -169,7 +166,7 @@ public class OctoUpdatesUI implements PreferencesEntry {
                     LaunchActivity.instance.handleNewUpdate(SharedConfig.pendingAppUpdate, true);
                 break;
                 case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY:
-                    AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, fragment.getParentActivity());
+                    UpdatesManager.installUpdate();
             }
 
             return;

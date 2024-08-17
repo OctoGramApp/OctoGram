@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,8 +32,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.UpdatesManager;
 
 @SuppressWarnings("unchecked")
 public class OctoConfig {
@@ -106,6 +110,10 @@ public class OctoConfig {
     public final ConfigProperty<Integer> drawerFavoriteOption = newConfigProperty("drawerFavoriteOption", DrawerFavoriteOption.DEFAULT.getValue());
     public final ConfigProperty<Boolean> repliesLinksShowColors = newConfigProperty("repliesLinksShowColors", true);
     public final ConfigProperty<Boolean> repliesLinksShowEmojis = newConfigProperty("repliesLinksShowEmojis", true);
+    public final ConfigProperty<Boolean> promptBeforeSendingStickers = newConfigProperty("promptBeforeSendingStickers", false);
+    public final ConfigProperty<Boolean> promptBeforeSendingGIFs = newConfigProperty("promptBeforeSendingGIFs", false);
+    public final ConfigProperty<Boolean> promptBeforeSendingVoiceMessages = newConfigProperty("promptBeforeSendingVoiceMessages", false);
+    public final ConfigProperty<Boolean> promptBeforeSendingVideoMessages = newConfigProperty("promptBeforeSendingVideoMessages", false);
 
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
@@ -124,10 +132,10 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> unlockedConfetti = newConfigProperty("unlockedConfetti", false);
 
     /*CameraX*/
-    public final ConfigProperty<Boolean> cameraXEnabled = newConfigProperty("cameraXEnabled", true);
     public final ConfigProperty<Boolean> cameraXPerformanceMode = newConfigProperty("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = newConfigProperty("cameraXZeroShutter", false);
-    public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", -1);
+    public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
+    public ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.TELEGRAM.getValue());
 
     /*Experiments*/
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
@@ -144,12 +152,20 @@ public class OctoConfig {
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
     public final ConfigProperty<Boolean> showRPCErrors = newConfigProperty("showRPCErrors", false);
     public final ConfigProperty<Boolean> useTranslationsArgsFix = newConfigProperty("useTranslationsArgsFix", true);
+    public final ConfigProperty<Integer> uiTitleCenteredState = newConfigProperty("uiTitleCenteredState", ActionBarCenteredTitle.NEVER.getValue());
+    public final ConfigProperty<Boolean> uiImmersivePopups = newConfigProperty("uiImmersivePopups", false);
+    public final ConfigProperty<Integer> interfaceSwitchUI = newConfigProperty("interfaceSwitchUI", InterfaceSwitchUI.DEFAULT.getValue());
+    public final ConfigProperty<Integer> interfaceCheckboxUI = newConfigProperty("interfaceCheckboxUI", InterfaceCheckboxUI.DEFAULT.getValue());
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
     public final ConfigProperty<Boolean> preferBetaVersion = newConfigProperty("preferBetaVersion", false);
     public final ConfigProperty<Boolean> receivePBetaUpdates = newConfigProperty("receivePBetaUpdates", false);
     public final ConfigProperty<Integer> autoDownloadUpdatesStatus = newConfigProperty("autoDownloadUpdatesStatus", AutoDownloadUpdate.NEVER.getValue());
+
+    /* Updates: Signaling */
+    public final ConfigProperty<Integer> updateSignalingLastBuildID = newConfigProperty("updateSignalingLastBuildID", 0);
+    public final ConfigProperty<String> updateSignalingChangelog = newConfigProperty("updateSignalingChangelog", null);
 
     /*Translator*/
     public final ConfigProperty<Integer> translatorMode = newConfigProperty("translatorMode", TranslatorMode.DEFAULT.getValue());
@@ -239,6 +255,8 @@ public class OctoConfig {
                     integerProperty.setValue(PREFS.getInt(integerProperty.getKey(), integerProperty.getValue()));
                 }
             }
+
+            UpdatesManager.handleUpdateSignaling();
         }
     }
 
@@ -301,18 +319,7 @@ public class OctoConfig {
             JSONArray newDrawerItems = new JSONArray();
             boolean hasAppliedEdits = false;
 
-            Map<String, String> associations = new HashMap<>();
-            associations.put("drawerChangeStatus", "set_status");
-            associations.put("drawerNewGroup", "new_group");
-            associations.put("drawerNewChannel", "new_channel");
-            associations.put("drawerContacts", "contacts");
-            associations.put("drawerCalls", "calls");
-            associations.put("drawerPeopleNearby", "nearby_people");
-            associations.put("drawerSavedMessages", "saved_message");
-            associations.put("drawerOctogramSettings", "octogram_settings");
-            associations.put("drawerDatacenterInfo", "datacenter_status");
-            associations.put("drawerInviteFriends", "invite_friends");
-            associations.put("drawerTelegramFeatures", "telegram_features");
+            Map<String, String> associations = getStringMap();
 
             for (Map.Entry<String, String> e : associations.entrySet()) {
                 if (PREFS.contains(e.getKey())) {
@@ -344,6 +351,22 @@ public class OctoConfig {
         }
 
         return false;
+    }
+
+    private static @NonNull Map<String, String> getStringMap() {
+        Map<String, String> associations = new HashMap<>();
+        associations.put("drawerChangeStatus", "set_status");
+        associations.put("drawerNewGroup", "new_group");
+        associations.put("drawerNewChannel", "new_channel");
+        associations.put("drawerContacts", "contacts");
+        associations.put("drawerCalls", "calls");
+        associations.put("drawerPeopleNearby", "nearby_people");
+        associations.put("drawerSavedMessages", "saved_message");
+        associations.put("drawerOctogramSettings", "octogram_settings");
+        associations.put("drawerDatacenterInfo", "datacenter_status");
+        associations.put("drawerInviteFriends", "invite_friends");
+        associations.put("drawerTelegramFeatures", "telegram_features");
+        return associations;
     }
 
     public void resetConfig() {
@@ -581,5 +604,14 @@ public class OctoConfig {
 
         data.put(newID);
         newBadgeIds.updateValue(data.toString());
+    }
+
+    public CameraType getCameraType() {
+        return switch (cameraType.getValue()) {
+            case 1 -> CameraType.CAMERA_X;
+            case 2 -> CameraType.CAMERA_2;
+            case 3 -> CameraType.SYSTEM_CAMERA;
+            default -> CameraType.TELEGRAM;
+        };
     }
 }

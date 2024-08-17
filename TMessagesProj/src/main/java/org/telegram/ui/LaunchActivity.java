@@ -245,8 +245,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.BrowserUtils;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.LanguageController;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UpdatesManager;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
@@ -353,8 +355,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     private Runnable lockRunnable;
 
     private List<Runnable> onUserLeaveHintListeners = new ArrayList<>();
-
-    private Timer autoUpdateTimerSchedule;
 
     private static final int PLAY_SERVICES_REQUEST_CHECK_SETTINGS = 140;
     public static final int SCREEN_CAPTURE_REQUEST_CODE = 520;
@@ -774,6 +774,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 } else if (id == 207) {
                     presentFragment(new ProxyListActivity());
                     drawerLayoutContainer.closeDrawer(false);
+                } else if (id == 914) {
+                    BrowserUtils.openBrowserHome(() -> drawerLayoutContainer.closeDrawer(false));
                 }
             }
         });
@@ -4991,7 +4993,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             });
             presentFragment(fragment, false, true);
         } else if (auth != null) {
-            final long bot_id = Utilities.parseLong(auth.get("bot_id"));
+            final var bot_id = Utilities.parseLong(auth.get("bot_id"));
             if (bot_id == 0) {
                 return;
             }
@@ -6589,10 +6591,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     @Override
     protected void onDestroy() {
-        isActive = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MonetThemeController.unregisterReceiver(this);
         }
+        isActive = false;
         if (PhotoViewer.getPipInstance() != null) {
             PhotoViewer.getPipInstance().destroyPhotoViewer();
         }
@@ -6645,7 +6647,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         } catch (Exception e) {
             FileLog.e(e);
         }
-        clearFragments();
         super.onDestroy();
         onFinish();
         FloatingDebugController.onDestroy();

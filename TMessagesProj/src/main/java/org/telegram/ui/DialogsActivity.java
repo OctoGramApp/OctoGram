@@ -247,6 +247,7 @@ import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.SendMessageOptions;
+import it.octogram.android.utils.UpdatesManager;
 
 public class DialogsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, FloatingDebugProvider {
 
@@ -5175,7 +5176,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 if (!SharedConfig.isAppUpdateAvailable()) {
                     return;
                 }
-                AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, getParentActivity());
+                UpdatesManager.installUpdate();
+                //AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, getParentActivity());
             });
 
             updateLayoutIcon = new RadialProgress2(updateLayout);

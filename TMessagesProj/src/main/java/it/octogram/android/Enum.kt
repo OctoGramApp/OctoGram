@@ -39,7 +39,13 @@ enum class DoubleTapAction(val value: Int) {
     REPLY(4),
     DELETE(5),
     SAVE(6),
-    EDIT(7)
+    EDIT(7);
+
+    companion object {
+        fun fromInt(value: Int): DoubleTapAction {
+            return entries.find { it.value == value } ?: DISABLED
+        }
+    }
 }
 
 enum class PhoneNumberAlternative(val value: Int) {
@@ -91,7 +97,12 @@ enum class CameraXResolution(val value: Int) {
 enum class PhotoResolution(val value: Int) {
     LOW(0),
     DEFAULT(1),
-    HIGH(2)
+    HIGH(2);
+    companion object {
+        fun fromInt(value: Int): PhotoResolution {
+            return entries.find { it.value == value } ?: DEFAULT
+        }
+    }
 }
 
 enum class TranslatorMode(val value: Int) {
@@ -149,9 +160,16 @@ enum class MediaFilter(val value: Int) {
 }
 
 enum class CameraType(val value: Int) {
-    CAMERA_X(0),
-    CAMERA_2(1),
-    SYSTEM(2)
+    TELEGRAM(0),
+    CAMERA_X(1),
+    CAMERA_2(2),
+    SYSTEM_CAMERA(3);
+
+    companion object {
+        fun fromInt(value: Int): CameraType {
+            return entries.find { it.value == value } ?: TELEGRAM
+        }
+    }
 }
 
 enum class MenuItemId(val id: String, val itemId: Int) {
@@ -176,7 +194,8 @@ enum class MenuItemId(val id: String, val itemId: Int) {
     PROXY_SETTINGS("proxy_settings", 207),
     DIVIDER("divider", 0),
     ATTACH_MENU_BOT("attach_menu_bot", 205),
-    DOWNLOADS("downloads", 912);
+    DOWNLOADS("downloads", 912),
+    TELEGRAM_BROWSER("tg_browser", 914);
 
     companion object {
         fun getById(id: String): MenuItemId? {
@@ -239,7 +258,15 @@ enum class DrawerFavoriteOption(val value: Int) {
     CONTACTS(4),
     CALLS(5),
     DOWNLOADS(6),
-    ARCHIVED_CHATS(7)
+    ARCHIVED_CHATS(7),
+    TELEGRAM_BROWSER(8)
+}
+
+enum class ActionBarCenteredTitle(val value: Int) {
+    ALWAYS(0),
+    JUST_IN_CHATS(1),
+    JUST_IN_SETTINGS(2),
+    NEVER(3)
 }
 
 enum class ActionBarTitleOption(val value: Int) {
@@ -254,6 +281,26 @@ enum class AutoDownloadUpdate(val value: Int) {
     ALWAYS(0),
     ONLY_ON_WIFI(1),
     NEVER(2)
+}
+
+enum class ExpandableRowsIds(val id: Int) {
+    REPLIES_AND_LINKS(1),
+    PROMPT_BEFORE_SENDING(2),
+    CONTEXT_MENU_ELEMENTS(3),
+}
+
+enum class InterfaceSwitchUI(val value: Int) {
+    DEFAULT(0),
+    ONEUIOLD(1),
+    ONEUINEW(2),
+    GOOGLE(3)
+}
+
+enum class InterfaceCheckboxUI(val value: Int) {
+    DEFAULT(0),
+    ROUNDED(1),
+    TRANSPARENT_UNCHECKED(2),
+    ALWAYS_TRANSPARENT(3)
 }
 
 enum class ViewType {
@@ -300,10 +347,8 @@ enum class ViewType {
     }
 
     companion object {
-        fun fromInt(value: Int): ViewType {
-            return entries[value]
-        }
-    }
+        fun fromInt(value: Int): ViewType = entries[value] }
+
 }
 
 enum class Datacenter(
@@ -325,4 +370,38 @@ enum class Datacenter(
             return entries.find { it.dcId == dcId } ?: UNKNOWN
         }
     }
+}
+
+
+enum class FontType(val path: String) {
+    ROBOTO_MEDIUM("fonts/rmedium.ttf"),
+    ROBOTO_MEDIUM_ITALIC("fonts/rmediumitalic.ttf"),
+    ROBOTO_MONO("fonts/rmono.ttf"),
+    MERRIWEATHER_BOLD("fonts/mw_bold.ttf"),
+    COURIER_NEW_BOLD("fonts/courier_new_bold.ttf");
+
+    companion object {
+        fun fromPath(path: String): FontType? = entries.find { it.path == path }
+    }
+}
+
+enum class VideoQuality(val value: Int) {
+    UNKNOWN(0),
+    SD(1),
+    HD(2),
+    FHD(3),
+    QHD(4),
+    UHD(5),
+    MAX(6);
+
+    companion object {
+        fun fromInt(value: Int): VideoQuality {
+            return entries.find { it.value == value } ?: UNKNOWN
+        }
+    }
+}
+
+enum class PromptBeforeSendMedia(val id: Int) {
+    STICKERS(0),
+    GIFS(1)
 }

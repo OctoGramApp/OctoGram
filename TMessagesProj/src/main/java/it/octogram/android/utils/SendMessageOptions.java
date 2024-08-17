@@ -347,11 +347,11 @@ public class SendMessageOptions extends LinearLayout {
         }
 
         if (commentTextView instanceof ChatActivityEnterView) {
-            return ((ChatActivityEnterView) commentTextView).getFieldText().toString().trim();
+            return OctoUtils.safeToString(((ChatActivityEnterView) commentTextView).getFieldText()).trim();
         }
 
         if (commentTextView instanceof EditTextEmoji) {
-            return ((EditTextEmoji) commentTextView).getText().toString().trim();
+            return OctoUtils.safeToString(((EditTextEmoji) commentTextView).getText()).trim();
         }
 
         return "";

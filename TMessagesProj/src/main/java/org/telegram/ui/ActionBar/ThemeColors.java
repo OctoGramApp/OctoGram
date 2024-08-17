@@ -676,7 +676,6 @@ public class ThemeColors {
         defaultColors[key_color_orange] = 0xffF28C39;
         defaultColors[key_color_purple] = 0xff9F79E8;
         defaultColors[key_color_cyan] = 0xff40D0CA;
-        defaultColors[key_color_dark_violet] = 0xff3D358B;
 
         defaultColors[key_voipgroup_checkMenu] = 0xff6BB6F9;
         defaultColors[key_voipgroup_muteButton] = 0xff77E55C;
@@ -1502,7 +1501,6 @@ public class ThemeColors {
         colorKeysMap.put(key_color_yellow, "color_yellow");
         colorKeysMap.put(key_color_purple, "color_purple");
         colorKeysMap.put(key_color_cyan, "color_cyan");
-        colorKeysMap.put(key_color_dark_violet, "color_dark_violet");
         colorKeysMap.put(key_chat_outReactionButtonBackground, "chat_outReactionButtonBackground");
         colorKeysMap.put(key_chat_inReactionButtonBackground, "chat_inReactionButtonBackground");
         colorKeysMap.put(key_chat_outReactionButtonText, "chat_outReactionButtonText");

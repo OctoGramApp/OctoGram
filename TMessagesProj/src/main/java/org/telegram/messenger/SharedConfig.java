@@ -27,6 +27,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.pm.ShortcutManagerCompat;
 
+import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
 import org.json.JSONObject;
 import org.telegram.tgnet.ConnectionsManager;
@@ -1792,7 +1793,8 @@ public class SharedConfig {
     }
 
     public static boolean isUsingCamera2(int currentAccount) {
-        return useCamera2Force == null ? !MessagesController.getInstance(currentAccount).androidDisableRoundCamera2 : useCamera2Force;
+        return OctoConfig.INSTANCE.getCameraType() == CameraType.CAMERA_2;
+        //return useCamera2Force == null ? !MessagesController.getInstance(currentAccount).androidDisableRoundCamera2 : useCamera2Force;
     }
 
     public static void toggleUseCamera2(int currentAccount) {

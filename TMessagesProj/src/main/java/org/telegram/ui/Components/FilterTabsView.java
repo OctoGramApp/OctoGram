@@ -1460,12 +1460,11 @@ public class FilterTabsView extends FrameLayout {
         return result;
     }
 
-    @Override
+    /*@Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (!tabs.isEmpty()) {
             int width = MeasureSpec.getSize(widthMeasureSpec) - AndroidUtilities.dp(7) - AndroidUtilities.dp(7);
             Tab firstTab = findDefaultTab();
-            // TODO: Reimplement OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()
             if (firstTab != null) {
                 firstTab.setTitle(LocaleController.getString(R.string.FilterAllChats));
                 int tabWidth = firstTab.getWidth(false);
@@ -1486,6 +1485,48 @@ public class FilterTabsView extends FrameLayout {
                 invalidated = false;
             }
         }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }*/
+
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (tabs.isEmpty()) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+
+        int width = MeasureSpec.getSize(widthMeasureSpec) - AndroidUtilities.dp(7) * 2;
+        int trueTabsWidth = allTabsWidth;
+
+        Tab firstTab = findDefaultTab();
+        if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue() && firstTab != null) {
+            firstTab.setTitle(LocaleController.getString(R.string.FilterAllChats));
+            int originalTabWidth = firstTab.getWidth(false);
+
+            String newTitle = (allTabsWidth > width) ?
+                    LocaleController.getString("FilterAllChatsShort", R.string.FilterAllChatsShort) :
+                    LocaleController.getString("FilterAllChats", R.string.FilterAllChats);
+            firstTab.setTitle(newTitle);
+
+            trueTabsWidth = allTabsWidth - originalTabWidth + firstTab.getWidth(false);
+        }
+
+        int prevWidth = additionalTabWidth;
+        additionalTabWidth = (trueTabsWidth < width) ? (width - trueTabsWidth) / tabs.size() : 0;
+
+        if (prevWidth != additionalTabWidth) {
+            ignoreLayout = true;
+            RecyclerView.ItemAnimator animator = listView.getItemAnimator();
+            listView.setItemAnimator(null);
+            adapter.notifyDataSetChanged();
+            listView.setItemAnimator(animator);
+            ignoreLayout = false;
+        }
+
+        updateTabsWidths();
+        invalidated = false;
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 

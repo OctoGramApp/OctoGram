@@ -263,14 +263,9 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         }
 
         int datacenterIcon = OctoUtils.getDcIcon();
-        /*var eventType = Theme.getEventType();
-        if (OctoConfig.INSTANCE.eventType.getValue() > 0) {
-            eventType = OctoConfig.INSTANCE.eventType.getValue() - 1;
-        }
-
-        int newGroupIcon;
-        int newSecretIcon = R.drawable.msg_secret_14;
-        int newChannelIcon = R.drawable.msg_channel;
+        /*int newGroupIcon;
+        int newSecretIcon;
+        int newChannelIcon;
         int contactsIcon;
         int callsIcon;
         int savedIcon;
@@ -278,12 +273,10 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         int inviteIcon;
         int helpIcon;
         int peopleNearbyIcon;
-        int octogramIcon = R.drawable.intro_octo;
-        int datacenterIcon = OctoUtils.getDcIcon();
         if (eventType == 0) {
             newGroupIcon = R.drawable.msg_groups_ny;
             //newSecretIcon = R.drawable.msg_secret_ny;
-            //newChannelIcon = R.drawable.msg_channel;
+            //newChannelIcon = R.drawable.msg_channel_ny;
             contactsIcon = R.drawable.msg_contacts_ny;
             callsIcon = R.drawable.msg_calls_ny;
             savedIcon = R.drawable.msg_saved_ny;
@@ -313,17 +306,6 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             inviteIcon = R.drawable.msg_invite_hw;
             helpIcon = R.drawable.msg_help_hw;
             peopleNearbyIcon = R.drawable.msg_secret_hw;
-        } else if (eventType == 3) {
-            newGroupIcon = R.drawable.menu_groups_cn;
-            newSecretIcon = R.drawable.menu_secret_cn;
-            newChannelIcon = R.drawable.menu_broadcast_cn;
-            contactsIcon = R.drawable.menu_contacts_cn;
-            callsIcon = R.drawable.menu_calls_cn;
-            savedIcon = R.drawable.menu_bookmarks_cn;
-            settingsIcon = R.drawable.menu_settings_cn;
-            inviteIcon = R.drawable.menu_invite_cn;
-            helpIcon = R.drawable.msg_help_hw;
-            peopleNearbyIcon = R.drawable.menu_nearby_cn;
         } else {
             newGroupIcon = R.drawable.msg_groups;
             //newSecretIcon = R.drawable.msg_secret;
@@ -398,6 +380,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                         case DOWNLOADS -> icon = R.drawable.msg_download;
                         case MY_PROFILE -> icon = R.drawable.left_status_profile;
                         case OCTOGRAM_SETTINGS -> icon = R.drawable.intro_octo;
+                        case TELEGRAM_BROWSER -> icon = R.drawable.msg_link2;
                         case NEARBY_PEOPLE -> {
                             if (hasGps) {
                                 items.add(new Item(menuItemId.getItemId(), data.text, icon));

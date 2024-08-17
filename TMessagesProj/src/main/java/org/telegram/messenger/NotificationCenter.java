@@ -8,7 +8,6 @@
 
 package org.telegram.messenger;
 
-import android.app.Activity;
 import android.os.SystemClock;
 import android.util.SparseArray;
 import android.view.View;
@@ -702,22 +701,6 @@ public class NotificationCenter {
             return new UniqArrayList<>();
         }
         return new ArrayList<>();
-    }
-
-    // hacky, but ¯\_(ツ)_/¯
-    public void clearViewObservers(Activity activity) {
-        for (int a = 0; a < observers.size(); a++) {
-            ArrayList<NotificationCenterDelegate> objects = observers.valueAt(a);
-            if (objects != null) {
-                for (int b = 0; b < objects.size(); b++) {
-                    NotificationCenterDelegate obj = objects.get(b);
-                    if (obj instanceof View && activity.equals(((View) obj).getContext())) {
-                        objects.remove(b);
-                        b--;
-                    }
-                }
-            }
-        }
     }
 
     public void removeObserver(NotificationCenterDelegate observer, int id) {

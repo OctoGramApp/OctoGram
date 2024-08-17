@@ -15,6 +15,9 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.GenericProvider;
 import org.telegram.ui.ActionBar.Theme;
 
+import it.octogram.android.InterfaceCheckboxUI;
+import it.octogram.android.OctoConfig;
+
 public class CheckBox2 extends View {
 
     private CheckBoxBase checkBoxBase;
@@ -25,9 +28,18 @@ public class CheckBox2 extends View {
         this(context, sz, null);
     }
 
+    public CheckBox2(Context context, int sz, int forcedUIState) {
+        this(context, sz, null, forcedUIState);
+    }
+
     public CheckBox2(Context context, int sz, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         checkBoxBase = new CheckBoxBase(this, sz, resourcesProvider);
+    }
+
+    public CheckBox2(Context context, int sz, Theme.ResourcesProvider resourcesProvider, int forcedUIState) {
+        super(context);
+        checkBoxBase = new CheckBoxBase(this, sz, resourcesProvider, forcedUIState);
     }
 
     public void setCirclePaintProvider(GenericProvider<Void, Paint> circlePaintProvider) {

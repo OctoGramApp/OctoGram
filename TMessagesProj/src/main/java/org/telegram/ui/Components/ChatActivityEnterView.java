@@ -195,7 +195,9 @@ import java.util.Locale;
 
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PromptBeforeSendMedia;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
+import it.octogram.android.utils.PopupPromptUtils;
 import it.octogram.android.utils.translator.SingleTranslationManager;
 import it.octogram.android.utils.translator.TranslationsWrapper;
 
@@ -10372,6 +10374,15 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
             @Override
             public void onGifSelected(View view, Object gif, String query, Object parent, boolean notify, int scheduleDate) {
+                if (OctoConfig.INSTANCE.promptBeforeSendingGIFs.getValue()) {
+                    PopupPromptUtils.createAlertDialog(parentActivity, PromptBeforeSendMedia.GIFS, () -> onGifSelectedFinal(view, gif, query, parent, notify, scheduleDate));
+                    return;
+                }
+
+                onGifSelectedFinal(view, gif, query, parent, notify, scheduleDate);
+            }
+
+            public void onGifSelectedFinal(View view, Object gif, String query, Object parent, boolean notify, int scheduleDate) {
                 if (replyingQuote != null && parentFragment != null && replyingQuote.outdated) {
                     parentFragment.showQuoteMessageUpdate();
                     return;
@@ -10664,12 +10675,21 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
     @Override
     public void onStickerSelected(TLRPC.Document sticker, String query, Object parent, MessageObject.SendAnimationData sendAnimationData, boolean clearsInputField, boolean notify, int scheduleDate) {
+        if (OctoConfig.INSTANCE.promptBeforeSendingStickers.getValue()) {
+            PopupPromptUtils.createAlertDialog(parentActivity, PromptBeforeSendMedia.STICKERS, () -> onStickerSelectedFinal(sticker, query, parent, sendAnimationData, clearsInputField, notify, scheduleDate));
+            return;
+        }
+
+        onStickerSelectedFinal(sticker, query, parent, sendAnimationData, clearsInputField, notify, scheduleDate);
+    }
+
+    public void onStickerSelectedFinal(TLRPC.Document sticker, String query, Object parent, MessageObject.SendAnimationData sendAnimationData, boolean clearsInputField, boolean notify, int scheduleDate) {
         if (replyingQuote != null && parentFragment != null && replyingQuote.outdated) {
             parentFragment.showQuoteMessageUpdate();
             return;
         }
         if (isInScheduleMode() && scheduleDate == 0) {
-            AlertsCreator.createScheduleDatePickerDialog(parentActivity, parentFragment.getDialogId(), (n, s) -> onStickerSelected(sticker, query, parent, sendAnimationData, clearsInputField, n, s), resourcesProvider);
+            AlertsCreator.createScheduleDatePickerDialog(parentActivity, parentFragment.getDialogId(), (n, s) -> onStickerSelectedFinal(sticker, query, parent, sendAnimationData, clearsInputField, n, s), resourcesProvider);
         } else {
             Runnable runnable = () -> {
                 if (slowModeTimer > 0 && !isInScheduleMode()) {

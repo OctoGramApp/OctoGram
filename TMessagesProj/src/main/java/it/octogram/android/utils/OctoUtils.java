@@ -27,6 +27,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 
 import java.io.File;
@@ -34,8 +35,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.Datacenter;
 import it.octogram.android.MediaFilter;
+import it.octogram.android.OctoConfig;
 
 
 public class OctoUtils {
@@ -321,6 +324,31 @@ public class OctoUtils {
 
     public static int getDcIcon(){
         return Datacenter.Companion.getDcInfo(AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId()).getIcon();
+    }
+
+    public static String safeToString(Object obj) {
+        return obj == null ? "" : obj.toString();
+    }
+
+    public static boolean canShowCenteredTitle(ChatActivity parentFragment) {
+        if (OctoConfig.INSTANCE.uiTitleCenteredState.getValue() != ActionBarCenteredTitle.ALWAYS.getValue() && OctoConfig.INSTANCE.uiTitleCenteredState.getValue() != ActionBarCenteredTitle.JUST_IN_CHATS.getValue()) {
+            return false;
+        }
+
+        if (parentFragment == null) {
+            // it's probably related to the settings preview
+            return false;
+        }
+
+        if (parentFragment.isReplyChatComment() || parentFragment.isReport()) {
+            return false;
+        }
+
+        return parentFragment.getChatMode() != ChatActivity.MODE_SEARCH && parentFragment.getChatMode() != ChatActivity.MODE_SAVED;
+    }
+
+    public static boolean canShowCenteredTitle(ChatActivity.ChatActivityFragmentView parentFragment) {
+        return canShowCenteredTitle(parentFragment.getChatActivity());
     }
 }
 

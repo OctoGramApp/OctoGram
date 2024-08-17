@@ -192,10 +192,6 @@
     <string name="UnmuteWithVolumeDown">Unmute videos with volume down</string>
     <string name="UnmuteWithVolumeDown_Desc">Unmute a video by pressing the volume down button</string>
     <string name="DisableProximitySensor">Disable proximity sensor</string>
-    <string name="StartWithRearCamera">Start with rear camera</string>
-    <string name="StartWithRearCamera_Desc">Start recording video messages with the rear camera instead of the front camera</string>
-    <string name="DisableCameraPreview">Disable camera preview</string>
-    <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
     <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
     <string name="HideAllChatFolder">Hide \"All Chats\" tab</string>
     <string name="HideAllChatFolders">Totally hide folders</string>
@@ -216,6 +212,7 @@
 
     <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
     <string name="BlurHeader">Blur</string>
+    <string name="BehaviorsHeader">Behaviors</string>
     <string name="ForceChatBlurEffect">Force chat blur effect</string>
     <string name="ForceChatBlurEffectName">Alpha</string>
     <string name="InterfaceHeader">Interface</string>
@@ -230,6 +227,11 @@
     <string name="RepliesLinksHeader">Replies and Links</string>
     <string name="RepliesLinksShowColors">Show custom colors</string>
     <string name="RepliesLinksShowEmojis">Show emojis</string>
+    <string name="PromptBeforeSending">Prompt before sending</string>
+    <string name="PromptBeforeSendingStickers">Stickers</string>
+    <string name="PromptBeforeSendingGIFs">GIFs</string>
+    <string name="PromptBeforeSendingVoiceMessages">Voice Messages</string>
+    <string name="PromptBeforeSendingVideoMessages">Video Messages</string>
     <string name="HeaderHeader">Header</string>
     <string name="ActionBarTitle">Title shown in header</string>
     <string name="ActionBarTitleAccountName">Account name</string>
@@ -282,15 +284,6 @@
     <string name="RestrictionReason">Restriction Reason</string>
     <string name="RegistrationDate">Registration Date</string>
     <string name="OctoGramVersion">OctoGram %1$s\nBased on Telegram %2$s</string>
-    <string name="OctoCameraSettings">Camera Settings</string>
-    <string name="OctoCameraSettingsHeader">Here you can customize your camera experience with the app</string>
-    <string name="UseCameraX">Use CameraX</string>
-    <string name="UseCameraX_Desc">Use CameraX instead of the legacy API</string>
-    <string name="ZeroShutter">Zero shutter lag (experimental)</string>
-    <string name="ZeroShutter_Desc">Enable zero shutter lag for CameraX</string>
-    <string name="PerformanceMode">Performance mode</string>
-    <string name="PerformanceMode_Desc">Enable performance mode for CameraX. This will reduce the quality of the photos taken</string>
-    <string name="CurrentCameraXResolution">Current CameraX resolution</string>
     <string name="MonetIcon">Force Monet Icon</string>
     <string name="AppIconChupa">Chupa Icon</string>
     <string name="AppIconYuki">Yuki Icon</string>
@@ -336,6 +329,20 @@
     <string name="SmartNotificationsPvtDialogMessage">This option is, by default, disabled on the official Telegram clients and therefore in private chats all notifications were sent with sound or vibration.\n\nBy enabling it, the behavior of notifications will vary in all chats: as well as in groups, all private chats will default to 2 notifications every 3 minutes.</string>
     <string name="SmartNotificationsPvtDialogMessagePlus">You can manage this option from OctoGram settings.</string>
     <string name="SmartNotificationsPvtDialogButton">Enable smart notifications</string>
+    <string name="ImproveInterface">Manage Interface</string>
+    <string name="ImproveInterfaceSwitch">Select switch style</string>
+    <string name="ImproveInterfaceCheckbox">Select checkbox style</string>
+    <string name="ImproveInterfaceImmersivePopups">Use immersive popups</string>
+    <string name="ImproveInterfaceTitleCentered">Use centered title</string>
+    <string name="ImproveInterfaceTitleCenteredAlways">Always</string>
+    <string name="ImproveInterfaceTitleCenteredChats">Just in chats</string>
+    <string name="ImproveInterfaceTitleCenteredSettings">Just in settings</string>
+    <string name="ImproveInterfaceTitleCenteredNever">Never</string>
+
+    <!-- PROMPT BEFORE SENDING -->
+    <string name="PromptBeforeSendingSticker">Are you sure you want to send this sticker?</string>
+    <string name="PromptBeforeSendingGIF">Are you sure you want to send this GIF?</string>
+    <string name="PromptBeforeSendingConfirm">Send</string>
 
     <!-- RESOLUTION STRING SECTION -->
     <string name="PhotoResolution">Photo Resolution</string>
@@ -356,6 +363,11 @@
     <string name="AudioTypeMono">Mono (Default)</string>
     <string name="MaxRecentStickers">Max Recent Stickers</string>
     <string name="MaxStickerSizeDefault">20 (Default)</string>
+
+    <!-- Telegram Browser -->
+    <string name="OctoTgBrowser">Telegram Browser</string>
+    <string name="OctoTgBrowserOpenFail">Telegram Browser is unavailable</string>
+    <string name="OctoTgBrowserOpenFail_Desc">The selected operation is not available because the in-app browser has been disabled.</string>
 
     <!-- Privacy Policy -->
     <string name="PrivacyPolicyLogin">By continuing,\nyou agree to the *Privacy Policy*.</string>
@@ -537,6 +549,41 @@
     <string name="ResetItemsOrder">Reset Items Order</string>
     <string name="AddDivider">Add Divider</string>
     <string name="Divider">Divider</string>
+
+    <!-- Camera Selector -->
+    <string name="CameraType">Camera Type</string>
+    <string name="CameraTypeDefault">Default</string>
+    <string name="DefaultCameraDesc">Use Telegram\'s built-in camera.</string>
+
+    <string name="CameraTypeSystem">System</string>
+    <string name="CameraTypeX">CameraX</string>
+    <string name="CameraType2">Camera 2</string>
+    <string name="CameraXDesc">CameraX is only supported on <![CDATA[<a href="https://developer.android.com/training/camerax/devices">selected devices</a>]]>, effects and lenses support depends on your manufacturer.</string>
+    <string name="SystemCameraDesc">Access directly the system camera (not applicable for video messages).</string>
+    <string name="Camera2Desc">Camera 2 API provides advanced camera features and better control over image capture. It is supported on most modern devices.</string>
+
+    <string name="CameraQuality">Camera Quality</string>
+
+    <string name="StartWithRearCamera">Start with rear camera</string>
+    <string name="StartWithRearCamera_Desc">Start recording video messages with the rear camera instead of the front camera</string>
+
+    <string name="DisableCameraPreview">Disable camera preview</string>
+    <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
+
+    <string name="OctoCameraSettings">Camera Settings</string>
+    <string name="OctoCameraSettingsHeader">Here you can customize your camera experience with the app</string>
+
+    <string name="UseCameraX">Use CameraX</string>
+    <string name="UseCameraX_Desc">Use CameraX instead of the legacy API</string>
+
+    <string name="ZeroShutter">Zero shutter lag (experimental)</string>
+    <string name="ZeroShutter_Desc">Enable zero shutter lag for CameraX</string>
+
+    <string name="PerformanceMode">Performance mode</string>
+    <string name="PerformanceMode_Desc">Enable performance mode for CameraX. This will reduce the quality of the photos taken</string>
+    <string name="PerformanceModeDesc">CameraX\'s quality will be reduced in favor of performance</string>
+
+    <string name="CurrentCameraXResolution">Current CameraX resolution</string>
 
     <!-- OLD STRINGS -->
     <!--<string name="TestBackendNumber">Test Number</string>

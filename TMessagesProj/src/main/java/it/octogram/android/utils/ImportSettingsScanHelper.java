@@ -94,6 +94,8 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.experimentsEnabled.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.newBadgeIds.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.updateSignalingLastBuildID.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.updateSignalingChangelog.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {
@@ -175,7 +177,7 @@ public class ImportSettingsScanHelper {
     }
 
     private void fillChatCameraOptions(SettingsScanCategory category) {
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXEnabled.getKey(), R.string.UseCameraX));
+        //category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXEnabled.getKey(), R.string.UseCameraX));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXZeroShutter.getKey(), R.string.ZeroShutter));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXPerformanceMode.getKey(), R.string.PerformanceMode));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXResolution.getKey(), R.string.CurrentCameraXResolution));

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.android.exoplayer2.util.Consumer;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.StickerImageView;
@@ -41,6 +42,13 @@ public record OctoPreferences(String title, List<BaseRow> preferences) {
             return this;
         }
 
+        public OctoPreferencesBuilder category(int title, Consumer<OctoPreferencesBuilder> consumer) {
+            preferences.add(new HeaderRow(LocaleController.getString(title)));
+            consumer.accept(this);
+            preferences.add(new ShadowRow());
+            return this;
+        }
+
         public OctoPreferencesBuilder category(String title, ConfigProperty<Boolean> showIfHeader, ConfigProperty<Boolean> showIfShadow, Consumer<OctoPreferencesBuilder> consumer) {
             preferences.add(new HeaderRow(title, showIfHeader));
             consumer.accept(this);
@@ -68,6 +76,16 @@ public record OctoPreferences(String title, List<BaseRow> preferences) {
                     .build()
             );
             preferences.add(new EmptyCellRow());
+            preferences.add(new ShadowRow());
+            return this;
+        }
+
+        public OctoPreferencesBuilder octoAnimation(String description) {
+            preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
+                    .useOctoAnimation(true)
+                    .description(description)
+                    .build()
+            );
             preferences.add(new ShadowRow());
             return this;
         }

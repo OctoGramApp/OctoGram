@@ -297,6 +297,7 @@ import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.translator.TranslationsWrapper;
 
 @SuppressWarnings("unchecked")
@@ -1709,8 +1710,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             ChatMessageCell cell = (ChatMessageCell) view;
             boolean isOutOwner = ((ChatMessageCell) view).getMessageObject().isOutOwner();
 
-            int doubleTapAction = !isOutOwner ? OctoConfig.INSTANCE.doubleTapAction.getValue() :
-                    OctoConfig.INSTANCE.doubleTapActionOut.getValue();
+            int doubleTapAction = !isOutOwner ? OctoConfig.INSTANCE.doubleTapAction.getValue() : OctoConfig.INSTANCE.doubleTapActionOut.getValue();
 
             if (doubleTapAction == DoubleTapAction.REACTION.getValue()) {
                 reactionStringSetting = getMediaDataController().getDoubleTapReaction();
@@ -1757,21 +1757,15 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                     allowEdit = captionsCount < 2;
                 }
-                if (doubleTapAction == DoubleTapAction.REPLY.getValue()) {
-                    return message.getId() > 0 && allowChatActions;
-                } else if (doubleTapAction == DoubleTapAction.DELETE.getValue()){
-                    return allowDelete;
-                } else if (doubleTapAction == DoubleTapAction.FORWARD.getValue()) {
-                    return allowForward;
-                } else if (doubleTapAction == DoubleTapAction.COPY.getValue()) {
-                    return allowCopy;
-                } else if (doubleTapAction == DoubleTapAction.SAVE.getValue()) {
-                    return allowSave;
-                } else if (doubleTapAction == DoubleTapAction.EDIT.getValue()) {
-                    return allowEdit;
-                } else {
-                    return false;
-                }
+                return switch (DoubleTapAction.Companion.fromInt(doubleTapAction)) {
+                    case REPLY -> message.getId() > 0 && allowChatActions;
+                    case DELETE -> allowDelete;
+                    case FORWARD -> allowForward;
+                    case COPY -> allowCopy;
+                    case SAVE -> allowSave;
+                    case EDIT -> allowEdit;
+                    default -> false;
+                };
             }
         }
 
@@ -1821,18 +1815,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 selectedObject = message;
                 selectedObjectGroup = getValidGroupedMessage(message);
 
-                if (doubleTapAction == DoubleTapAction.COPY.getValue()) {
-                    processSelectedOption(OPTION_COPY);
-                } else if (doubleTapAction == DoubleTapAction.REPLY.getValue()) {
-                    processSelectedOption(OPTION_REPLY);
-                } else if (doubleTapAction == DoubleTapAction.DELETE.getValue()) {
-                    processSelectedOption(OPTION_DELETE);
-                } else if (doubleTapAction == DoubleTapAction.FORWARD.getValue()) {
-                    processSelectedOption(OPTION_FORWARD);
-                } else if (doubleTapAction == DoubleTapAction.SAVE.getValue()) {
-                    processSelectedOption(OPTION_SAVE_TO_SAVED_MESSAGES);
-                } else if (doubleTapAction == DoubleTapAction.EDIT.getValue()) {
-                    processSelectedOption(OPTION_EDIT);
+                switch (DoubleTapAction.Companion.fromInt(doubleTapAction)) {
+                    case COPY -> processSelectedOption(OPTION_COPY);
+                    case REPLY -> processSelectedOption(OPTION_REPLY);
+                    case DELETE -> processSelectedOption(OPTION_DELETE);
+                    case FORWARD -> processSelectedOption(OPTION_FORWARD);
+                    case SAVE -> processSelectedOption(OPTION_SAVE_TO_SAVED_MESSAGES);
+                    case EDIT -> processSelectedOption(OPTION_EDIT);
                 }
             }
         }
@@ -2489,7 +2478,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         }
 
-        ForwardContext.setForwardParams(
+        setForwardParams(
                 arguments.getBoolean("forward_noQuote", false),
                 arguments.getBoolean("forward_noCaption", false)
         );
@@ -3841,6 +3830,26 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 resetSearch();
                 openSearchWithText(isSupportedTags() ? "" : null);
             }
+
+            @Override
+            protected boolean onAvatarClick() {
+                if (isTitleCentered()) {
+                    if (editTextItem != null && editTextItem.getView() != null && editTextItem.getView().getVisibility() == VISIBLE) {
+                        editTextItem.getView().performClick();
+                        return true;
+                    }
+
+                    getHeaderItem().performClick();
+                    return true;
+                }
+
+                return super.onAvatarClick();
+            }
+
+            @Override
+            protected boolean isCentered() {
+                return isTitleCentered();
+            }
         };
         avatarContainer.allowShorterStatus = true;
         avatarContainer.premiumIconHiddable = true;
@@ -3932,6 +3941,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
 
         ActionBarMenu menu = actionBar.createMenu();
+        menu.setCenteredTitle(isTitleCentered());
 
         if (chatMode == MODE_QUICK_REPLIES && !QuickRepliesController.isSpecial(quickReplyShortcut)) {
             menu.addItem(edit_quick_reply, R.drawable.group_edit).setContentDescription(LocaleController.getString(R.string.Edit));
@@ -3952,7 +3962,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             searchItemVisible = false;
         }
 
-        if (chatMode == 0 && (threadMessageId == 0 || isTopic) && !UserObject.isReplyUser(currentUser) && reportType < 0) {
+        if (chatMode == 0 && (threadMessageId == 0 || isTopic) && !UserObject.isReplyUser(currentUser) && reportType < 0 && !isTitleCentered()) {
             TLRPC.UserFull userFull = null;
             if (currentUser != null) {
                 audioCallIconItem = menu.lazilyAddItem(call, R.drawable.ic_call, themeDelegate);
@@ -10388,7 +10398,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (!forward) {
                         ignoreDraft = true;
                     }
-                    ForwardContext.setForwardParams(
+                    setForwardParams(
                             messagePreviewParams.hideForwardSendersName,
                             messagePreviewParams.hideCaption
                     );
@@ -16991,11 +17001,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         && !isComments && !isThreadChat() && !UserObject.isReplyUser(currentUser);
                 if (showSearchAsIcon || showAudioCallAsIcon) {
                     if (avatarContainer != null && avatarContainer.getLayoutParams() != null) {
-                        ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = AndroidUtilities.dp(chatMode == MODE_SAVED ? 40 : 96);
+                        ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = isTitleCentered() ? 0 : AndroidUtilities.dp(chatMode == MODE_SAVED ? 40 : 96);
                     }
                 } else {
                     if (avatarContainer != null && avatarContainer.getLayoutParams() != null) {
-                        ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = AndroidUtilities.dp(40);
+                        ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = isTitleCentered() ? 0 : AndroidUtilities.dp(40);
                     }
                 }
                 if (showSearchAsIcon) {
@@ -27198,7 +27208,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         if (avatarContainer != null) {
             avatarContainer.setOccupyStatusBar(!value);
             avatarContainer.setTitleExpand(showAudioCallAsIcon);
-            avatarContainer.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT, !value ? 56 : (chatMode == MODE_PINNED ? 10 : 0), 0, 40, 0));
+            avatarContainer.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT, !value ? 56 : (chatMode == MODE_PINNED ? 10 : 0), 0, isTitleCentered() ? 0 : 40, 0));
         }
         if (chatActivityEnterView != null) {
             chatActivityEnterView.setVisibility(!value ? View.VISIBLE : View.INVISIBLE);
@@ -28794,7 +28804,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 options.add(OPTION_SAVE_TO_SAVED_MESSAGES);
                                 icons.add(R.drawable.msg_saved);
                             }
-                            if (message.messageOwner.forwards > 0 && ChatObject.hasAdminRights(getCurrentChat()) && ChatObject.isChannel(currentChat) && !currentChat.megagroup) {
+                            if (message.messageOwner.forwards > 0 && ChatObject.hasAdminRights(currentChat) && !message.isForwarded()) {
                                 items.add(LocaleController.getString("ViewStats", R.string.ViewStats));
                                 options.add(OPTION_STATISTICS);
                                 icons.add(R.drawable.msg_stats);
@@ -40583,5 +40593,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     public float getClipBottom() {
         return fragmentView.getBottom() - chatListView.getBottom() + ((fragmentTransition == null || (fromPullingDownTransition && !toPullingDownTransition)) && !isInsideContainer ? blurredViewBottomOffset : 0);
+    }
+
+    private boolean isTitleCentered() {
+        return OctoUtils.canShowCenteredTitle(this);
     }
 }

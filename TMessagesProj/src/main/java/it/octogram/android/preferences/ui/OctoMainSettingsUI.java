@@ -18,6 +18,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.LaunchActivity;
 
@@ -25,7 +26,6 @@ import java.util.Locale;
 
 import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -42,22 +42,25 @@ public class OctoMainSettingsUI implements PreferencesEntry {
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         String footer = AndroidUtilities.replaceTags(LocaleController.formatString("OctoMainSettingsFooter", R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING)).toString();
-        String comingSoon = AndroidUtilities.replaceTags(LocaleController.formatString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable)).toString();
+        // String comingSoon = AndroidUtilities.replaceTags(LocaleController.formatString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable)).toString();
         return OctoPreferences.builder(LocaleController.getString("OctoGramSettings", R.string.OctoGramSettings))
-                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.MAIN, true, LocaleController.formatString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
+                .octoAnimation(LocaleController.getString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
                 .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
 
 
-                    /*if (BuildConfig.DEBUG_PRIVATE_VERSION) {
-                        category.row(new TextDetailRow.TextDetailRowBuilder()
-                                .onClick(() -> {
-                                    throw new RuntimeException("Test crash");
-                                })
-                                .icon(R.drawable.msg_cancel)
-                                .title("Crash the app")
-                                .description("Yup, this is literally a crash button")
-                                .build());
-                    }*/
+                    /*
+                     INFO: This is a test crash button
+                     if (BuildConfig.DEBUG_PRIVATE_VERSION) {
+                         category.row(new TextDetailRow.TextDetailRowBuilder()
+                                 .onClick(() -> {
+                                     throw new RuntimeException("Test crash");
+                                 })
+                                 .icon(R.drawable.msg_cancel)
+                                 .title("Crash the app")
+                                 .description("Yup, this is literally a crash button")
+                                 .build());
+                     }
+                    */
 
 
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -124,18 +127,12 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .description(LocaleController.getString("CrashHistory_Desc", R.string.CrashHistory_Desc))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://%s/privacy", OctoUtils.getDomain())));
-                                fragment.getParentActivity().startActivity(browserIntent);
-                            })
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://%s/privacy", OctoUtils.getDomain()))))
                             .icon(R.drawable.msg2_policy)
                             .title(LocaleController.formatString("OctoPrivacyPolicy", R.string.OctoPrivacyPolicy))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://translations.%s", OctoUtils.getDomain())));
-                                fragment.getParentActivity().startActivity(browserIntent);
-                            })
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://translations.%s", OctoUtils.getDomain()))))
                             .icon(R.drawable.msg_translate)
                             .title(LocaleController.formatString("TranslateOcto", R.string.TranslateOcto))
                             .description(LocaleController.formatString("TranslateOcto_Desc", R.string.TranslateOcto_Desc))

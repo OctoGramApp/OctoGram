@@ -162,6 +162,11 @@ public class BackupImageView extends View {
         onNewImageSet();
     }
 
+    public void setForUserOrChat(TLObject object, AvatarDrawable avatarDrawable, boolean big) {
+        imageReceiver.setForUserOrChat(object, avatarDrawable, big);
+        onNewImageSet();
+    }
+
     public void setImageMedia(ImageLocation mediaLocation, String mediaFilter, ImageLocation imageLocation, String imageFilter, Bitmap thumbBitmap, int size, int cacheType, Object parentObject) {
         Drawable thumb = null;
         if (thumbBitmap != null) {

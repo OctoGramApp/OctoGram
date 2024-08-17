@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -20,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -39,7 +41,6 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
 
@@ -66,9 +67,9 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
 
     private final BottomSheetCell doneButton;
     private final BottomSheetCell scheduleButton;
-    private int state;
 
 
+    @SuppressLint("ViewConstructor")
     public static class BottomSheetCell extends FrameLayout {
 
         private final View background;
@@ -219,8 +220,11 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         setApplyTopPadding(false);
         setApplyBottomPadding(false);
 
-        shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
-        shadowDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_dialogBackground), PorterDuff.Mode.MULTIPLY));
+        shadowDrawable = ContextCompat.getDrawable(context, R.drawable.sheet_shadow_round);
+        if (shadowDrawable != null) {
+            shadowDrawable.mutate();
+            shadowDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_dialogBackground), PorterDuff.Mode.MULTIPLY));
+        }
 
         FrameLayout container = getFrameLayout(context);
         containerView = container;
@@ -265,8 +269,8 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
             }
 
             @Override
-            protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-                super.onScrollChanged(l, t, oldl, oldt);
+            protected void onScrollChanged(int l, int t, int oldL, int oldT) {
+                super.onScrollChanged(l, t, oldL, oldT);
                 updateLayout();
             }
         };
@@ -338,7 +342,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         doneButton = new BottomSheetCell(context, false, false);
         doneButton.background.setOnClickListener(v -> {
             if (doneButton.getState() == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY) {
-                AndroidUtilities.openForView(appUpdate.document, true, LaunchActivity.instance);
+                UpdatesManager.installUpdate();
             } else if (doneButton.getState() == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
                 FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
             }
@@ -373,7 +377,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                 return super.onInterceptTouchEvent(ev);
             }
 
-            @Override
+            @Override @SuppressLint("ClickableViewAccessibility")
             public boolean onTouchEvent(MotionEvent e) {
                 return !isDismissed() && super.onTouchEvent(e);
             }
@@ -381,8 +385,10 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
             @Override
             protected void onDraw(@NonNull Canvas canvas) {
                 int top = (int) (scrollOffsetY - backgroundPaddingTop - getTranslationY());
-                shadowDrawable.setBounds(0, top, getMeasuredWidth(), getMeasuredHeight());
-                shadowDrawable.draw(canvas);
+                if (shadowDrawable != null) {
+                    shadowDrawable.setBounds(0, top, getMeasuredWidth(), getMeasuredHeight());
+                    shadowDrawable.draw(canvas);
+                }
             }
         };
         container.setWillNotDraw(false);
@@ -446,8 +452,6 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
     private void updateState(int state, float loadProgress) {
         doneButton.updateState(state, loadProgress);
         scheduleButton.updateState(state, 0);
-
-        this.state = state;
     }
 
     private void updateState(int state) {

@@ -29,6 +29,8 @@ public class ActionBarMenu extends LinearLayout {
     protected ActionBar parentActionBar;
     protected boolean isActionMode;
 
+    private boolean isCenteredTitle = false;
+
     private ArrayList<Integer> ids;
 
     public ActionBarMenu(Context context, ActionBar layer) {
@@ -59,6 +61,10 @@ public class ActionBarMenu extends LinearLayout {
                 ((ActionBarMenuItem) view).setIconColor(isActionMode ? parentActionBar.itemsActionModeColor : parentActionBar.itemsColor);
             }
         }
+    }
+
+    public void setCenteredTitle(boolean centeredTitle) {
+        isCenteredTitle = centeredTitle;
     }
 
     public ActionBarMenuItem addItem(int id, Drawable drawable) {
@@ -116,7 +122,11 @@ public class ActionBarMenu extends LinearLayout {
             menuItem.textView.setText(text);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width != 0 ? width : ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
             layoutParams.leftMargin = layoutParams.rightMargin = AndroidUtilities.dp(14);
-            addView(menuItem, index, layoutParams);
+
+            //addView(menuItem, index, layoutParams);
+            if (!isCenteredTitle) {
+                addView(menuItem, index, layoutParams);
+            }
         } else {
             if (drawable != null) {
                 if (drawable instanceof RLottieDrawable) {
@@ -127,7 +137,11 @@ public class ActionBarMenu extends LinearLayout {
             } else if (icon != 0) {
                 menuItem.iconView.setImageResource(icon);
             }
-            addView(menuItem, index, new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
+
+            //addView(menuItem, index, new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
+            if (!isCenteredTitle) {
+                addView(menuItem, index, new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
         }
         menuItem.setOnClickListener(view -> {
             ActionBarMenuItem item = (ActionBarMenuItem) view;

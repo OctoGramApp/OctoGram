@@ -27,6 +27,9 @@ import org.telegram.messenger.GenericProvider;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 
+import it.octogram.android.InterfaceCheckboxUI;
+import it.octogram.android.OctoConfig;
+
 public class CheckBoxBase {
 
     private View parentView;
@@ -82,8 +85,15 @@ public class CheckBoxBase {
 
     private GenericProvider<Void, Paint> circlePaintProvider = obj -> paint;
 
+    private int forcedUIState = -1;
+
     public interface ProgressDelegate {
         void setProgress(float progress);
+    }
+
+    public CheckBoxBase(View parent, int sz, Theme.ResourcesProvider resourcesProvider, int forcedUIState) {
+        this(parent, sz, resourcesProvider);
+        this.forcedUIState = forcedUIState;
     }
 
     public CheckBoxBase(View parent, int sz, Theme.ResourcesProvider resourcesProvider) {
@@ -323,19 +333,28 @@ public class CheckBoxBase {
             }
         }
 
+        if (getUIState() == InterfaceCheckboxUI.TRANSPARENT_UNCHECKED.getValue() || getUIState() == InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue()) {
+            backgroundPaint.setColor(Color.TRANSPARENT);
+        }
+
         if (drawUnchecked && backgroundType >= 0) {
             if (backgroundType == 12 || backgroundType == 13) {
                 //draw nothing
             } else if (backgroundType == 8 || backgroundType == 10 || backgroundType == 14) {
-                canvas.drawCircle(cx, cy, rad - AndroidUtilities.dp(1.5f), backgroundPaint);
+                superDrawCircle(canvas, cx, cy, rad - AndroidUtilities.dp(1.5f), backgroundPaint);
             } else if (backgroundType == 6 || backgroundType == 7) {
-                canvas.drawCircle(cx, cy, rad - AndroidUtilities.dp(1), paint);
-                canvas.drawCircle(cx, cy, rad - AndroidUtilities.dp(1.5f), backgroundPaint);
+                superDrawCircle(canvas, cx, cy, rad - AndroidUtilities.dp(1), paint);
+                superDrawCircle(canvas, cx, cy, rad - AndroidUtilities.dp(1.5f), backgroundPaint);
             } else {
-                canvas.drawCircle(cx, cy, rad, paint);
+                superDrawCircle(canvas, cx, cy, rad, paint);
             }
         }
         paint.setColor(getThemedColor(checkColorKey));
+
+        if (getUIState() == InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue()) {
+            paint.setColor(Color.TRANSPARENT);
+        }
+
         if (backgroundType != -1 && backgroundType != 7 && backgroundType != 8 && backgroundType != 9 && backgroundType != 10 && backgroundType != 14) {
             if (backgroundType == 12 || backgroundType == 13) {
                 backgroundPaint.setStyle(Paint.Style.FILL);
@@ -350,10 +369,10 @@ public class CheckBoxBase {
                 } else {
                     backgroundPaint.setShader(null);
                 }
-                canvas.drawCircle(cx, cy, (rad - AndroidUtilities.dp(1)) * backgroundAlpha, backgroundPaint);
+                superDrawCircle(canvas, cx, cy, (rad - AndroidUtilities.dp(1)) * backgroundAlpha, backgroundPaint);
                 backgroundPaint.setStyle(Paint.Style.STROKE);
             } else if (backgroundType == 0 || backgroundType == 11) {
-                canvas.drawCircle(cx, cy, rad, backgroundPaint);
+                superDrawCircle(canvas, cx, cy, rad, backgroundPaint);
             } else {
                 rect.set(cx - outerRad, cy - outerRad, cx + outerRad, cy + outerRad);
                 int startAngle;
@@ -413,6 +432,11 @@ public class CheckBoxBase {
                 checkPaint.setColor(ColorUtils.blendARGB(paint.getColor(), checkPaint.getColor(), alpha));
             }
 
+            if (getUIState() == InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue()) {
+                checkPaint.setColor(paint.getColor());
+                paint.setColor(Color.TRANSPARENT);
+            }
+
             if (backgroundType != -1) {
                 float sizeHalf = AndroidUtilities.dp(size) / 2f;
                 int restoreCount = canvas.save();
@@ -422,14 +446,20 @@ public class CheckBoxBase {
                 if (backgroundType == 12 || backgroundType == 13) {
                     int a = circlePaint.getAlpha();
                     circlePaint.setAlpha((int) (255 * roundProgress));
-                    canvas.drawCircle(sizeHalf, sizeHalf, rad * roundProgress, circlePaint);
+
+                    if (getUIState() == InterfaceCheckboxUI.ROUNDED.getValue()) {
+                        canvas.drawRoundRect(0, 0, AndroidUtilities.dp(size), AndroidUtilities.dp(size), 10, 10, circlePaint);
+                    } else {
+                        superDrawCircle(canvas, sizeHalf, sizeHalf, rad * roundProgress, circlePaint);
+                    }
+
                     if (circlePaint != paint) {
                         circlePaint.setAlpha(a);
                     }
                 } else {
                     rad -= AndroidUtilities.dp(0.5f);
-                    canvas.drawCircle(sizeHalf, sizeHalf, rad, circlePaint);
-                    canvas.drawCircle(sizeHalf, sizeHalf, rad * (1.0f - roundProgress), eraser);
+                    superDrawCircle(canvas, sizeHalf, sizeHalf, rad, circlePaint);
+                    superDrawCircle(canvas, sizeHalf, sizeHalf, rad * (1.0f - roundProgress), eraser);
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -444,7 +474,7 @@ public class CheckBoxBase {
                 }
                 forbidPaint.setStrokeWidth(AndroidUtilities.dp(1.66f));
                 forbidPaint.setColor(getThemedColor(Theme.key_switchTrack));
-                canvas.drawCircle(cx, cy, AndroidUtilities.dp(9), forbidPaint);
+                superDrawCircle(canvas, cx, cy, AndroidUtilities.dp(9), forbidPaint);
             } else if (checkProgress != 0) {
                 if (checkedText != null) {
                     if (textPaint == null) {
@@ -494,6 +524,23 @@ public class CheckBoxBase {
                 }
             }
         }
+    }
+
+    private void superDrawCircle(Canvas canvas, float centerX, float centerY, float radius, Paint paint) {
+        if (getUIState() == InterfaceCheckboxUI.ROUNDED.getValue()) {
+            canvas.drawRoundRect(centerX - radius, centerY - radius, centerX + radius, centerY + radius, 10, 10, paint);
+            return;
+        }
+        
+        canvas.drawCircle(centerX, centerY, radius, paint);
+    }
+
+    private int getUIState() {
+        if (forcedUIState != -1) {
+            return forcedUIState;
+        }
+
+        return OctoConfig.INSTANCE.interfaceCheckboxUI.getValue();
     }
 
     public void setCirclePaintProvider(GenericProvider<Void, Paint> circlePaintProvider) {

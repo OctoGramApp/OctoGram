@@ -8,7 +8,6 @@ import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
 import android.util.Size;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.camera.camera2.interop.Camera2CameraInfo;
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
@@ -108,7 +107,7 @@ public class CameraXUtils {
         }, ContextCompat.getMainExecutor(context));
     }
 
-    private static Map<Quality, Size> getAvailableVideoSizes(@NonNull CameraSelector cameraSelector, @NonNull ProcessCameraProvider provider) {
+    private static Map<Quality, Size> getAvailableVideoSizes(CameraSelector cameraSelector, ProcessCameraProvider provider) {
         return cameraSelector.filter(provider.getAvailableCameraInfos()).stream()
                 .findFirst()
                 .map(camInfo ->
@@ -199,22 +198,14 @@ public class CameraXUtils {
                 .orElse(Quality.HIGHEST);
     }
 
-    /** @noinspection EnhancedSwitchMigration*/
     private static int getSuggestedResolution(boolean isPreview) {
-        int suggestedRes;
-        switch (SharedConfig.getDevicePerformanceClass()) {
-            case SharedConfig.PERFORMANCE_CLASS_LOW:
-                suggestedRes = 720;
-                break;
-            case SharedConfig.PERFORMANCE_CLASS_AVERAGE:
-                suggestedRes = 1080;
-                break;
-            case SharedConfig.PERFORMANCE_CLASS_HIGH:
-            default:
-                suggestedRes = OctoConfig.INSTANCE.cameraXPerformanceMode.getValue() && isPreview ? 1080 : 2160;
-                break;
-        }
-        return suggestedRes;
+        return switch (SharedConfig.getDevicePerformanceClass()) {
+            case SharedConfig.PERFORMANCE_CLASS_LOW -> 720;
+            case SharedConfig.PERFORMANCE_CLASS_AVERAGE -> 1080;
+            case SharedConfig.PERFORMANCE_CLASS_HIGH -> 2160;
+            default ->
+                    OctoConfig.INSTANCE.cameraXPerformanceMode.getValue() && isPreview ? 1080 : 2160;
+        };
     }
 
     @OptIn(markerClass = ExperimentalCamera2Interop.class)
@@ -231,7 +222,7 @@ public class CameraXUtils {
                 @SuppressLint("RestrictedApi")
                 CameraCharacteristics cameraCharacteristics = Camera2CameraInfo.from(cameraInfo).getCameraCharacteristicsMap().get(id);
                 if (cameraCharacteristics != null) {
-                    Integer lensFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
+                    var lensFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
                     if (lensFacing != null && lensFacing == LENS_FACING_BACK) {
                         availableBackCamera++;
                         ZoomState zoomState = cameraInfo.getZoomState().getValue();

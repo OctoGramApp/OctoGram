@@ -131,7 +131,11 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.ARCHIVED_CHATS.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.ARCHIVED_CHATS.getValue()))
-                                            .setItemTitle(LocaleController.getString("ArchivedChats", R.string.ArchivedChats))
+                                            .setItemTitle(LocaleController.getString("ArchivedChats", R.string.ArchivedChats)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DrawerFavoriteOption.TELEGRAM_BROWSER.getValue())
+                                            .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.TELEGRAM_BROWSER.getValue()))
+                                            .setItemTitle("Telegram Browser")
                             ))
                             .title(LocaleController.getString("DrawerFavoriteOption", R.string.DrawerFavoriteOption))
                             .build());

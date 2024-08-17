@@ -41,6 +41,8 @@ public class IconsUtils {
             return R.drawable.media_download;
         } else if (id == DrawerFavoriteOption.ARCHIVED_CHATS.getValue()) {
             return R.drawable.msg_archive;
+        } else if (id == DrawerFavoriteOption.TELEGRAM_BROWSER.getValue()) {
+            return R.drawable.msg_link2;
         } else {
             return 0;
         }

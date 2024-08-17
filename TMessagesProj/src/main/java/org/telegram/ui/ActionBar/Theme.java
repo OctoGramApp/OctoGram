@@ -4121,7 +4121,6 @@ public class Theme {
     public static final int key_color_yellow = colorsCount++;
     public static final int key_color_purple = colorsCount++;
     public static final int key_color_cyan = colorsCount++;
-    public static final int key_color_dark_violet = colorsCount++;
     public static final int[] keys_colors = {key_color_lightblue, key_color_blue, key_color_green, key_color_lightgreen, key_color_red, key_color_orange, key_color_yellow, key_color_purple, key_color_cyan};
 
     public static final int key_chat_inReactionButtonBackground = colorsCount++;
@@ -4429,7 +4428,6 @@ public class Theme {
         fallbackKeys.put(key_statisticChartLine_purple, key_color_purple);
         fallbackKeys.put(key_statisticChartLine_indigo, key_color_purple);
         fallbackKeys.put(key_statisticChartLine_cyan, key_color_cyan);
-        fallbackKeys.put(key_statisticChartLine_purple, key_color_dark_violet);
 
         fallbackKeys.put(key_actionBarActionModeReaction, key_windowBackgroundGray);
         fallbackKeys.put(key_actionBarActionModeReactionText, key_chat_inReactionButtonText);

@@ -17,7 +17,7 @@ public interface ForwardContext {
         return forwardParams;
     }
 
-    static void setForwardParams(boolean noQuote, boolean noCaption) {
+    default void setForwardParams(boolean noQuote, boolean noCaption) {
         forwardParams.noQuote = noQuote;
         forwardParams.noCaption = noCaption;
         forwardParams.notify = true;

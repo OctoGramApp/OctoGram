@@ -413,8 +413,13 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     public void setForUserOrChat(TLObject object, Drawable avatarDrawable) {
         setForUserOrChat(object, avatarDrawable, null);
     }
+
     public void setForUserOrChat(TLObject object, Drawable avatarDrawable, Object parentObject) {
         setForUserOrChat(object, avatarDrawable, parentObject, false, 0, false);
+    }
+
+    public void setForUserOrChat(TLObject object, Drawable avatarDrawable, boolean big) {
+        setForUserOrChat(object, avatarDrawable, null, false, 0, big);
     }
 
     public void setForUserOrChat(TLObject object, Drawable avatarDrawable, Object parentObject, boolean animationEnabled, int vectorType, boolean big) {

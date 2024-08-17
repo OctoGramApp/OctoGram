@@ -3,12 +3,14 @@ package it.octogram.android.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.text.TextUtils;
 
 import com.google.android.exoplayer2.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.FileLog;
@@ -16,6 +18,8 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.LaunchActivity;
@@ -271,14 +275,10 @@ public class UpdatesManager {
                 if (filesObject.getInt("arm64-v8a") <= 1) {
                     return true;
                 }
-                if (filesObject.getInt("arm-v7a") <= 1) {
-                    return true;
-                }
+                return filesObject.getInt("arm-v7a") <= 1;
             } else {
                 return true;
             }
-
-            return false;
         } catch (JSONException e) {
             return true;
         }
@@ -503,11 +503,10 @@ public class UpdatesManager {
             TLRPC.TL_contacts_resolveUsername resolve = new TLRPC.TL_contacts_resolveUsername();
             resolve.username = currentChannelUsername;
             getConnectionsManager().sendRequest(resolve, (response, error) -> {
-                if (!(response instanceof TLRPC.TL_contacts_resolvedPeer)) {
+                if (!(response instanceof TLRPC.TL_contacts_resolvedPeer peer)) {
                     return;
                 }
 
-                TLRPC.TL_contacts_resolvedPeer peer = (TLRPC.TL_contacts_resolvedPeer) response;
                 if (peer.chats == null || peer.chats.isEmpty()) {
                     return;
                 }
@@ -623,6 +622,46 @@ public class UpdatesManager {
         }
 
         return false;
+    }
+
+    public static void installUpdate() {
+        if (SharedConfig.pendingAppUpdate != null) {
+            TLRPC.TL_help_appUpdate update = SharedConfig.pendingAppUpdate;
+
+            if (!TextUtils.isEmpty(update.text)) {
+                OctoConfig.INSTANCE.updateSignalingLastBuildID.updateValue(BuildConfig.BUILD_VERSION);
+                OctoConfig.INSTANCE.updateSignalingChangelog.updateValue(update.text);
+            }
+
+            AndroidUtilities.runOnUIThread(() -> AndroidUtilities.openForView(update.document, true, LaunchActivity.instance));
+        }
+    }
+
+    public static void handleUpdateSignaling() {
+        if (OctoConfig.INSTANCE != null && OctoConfig.INSTANCE.updateSignalingLastBuildID != null && OctoConfig.INSTANCE.updateSignalingChangelog != null) {
+
+            boolean isValidUpdate = OctoConfig.INSTANCE.updateSignalingLastBuildID.getValue() != 0;
+            isValidUpdate &= OctoConfig.INSTANCE.updateSignalingLastBuildID.getValue() < BuildConfig.BUILD_VERSION;
+            isValidUpdate &= !TextUtils.isEmpty(OctoConfig.INSTANCE.updateSignalingChangelog.getValue());
+
+            if (isValidUpdate) {
+                TLRPC.TL_updateServiceNotification update = new TLRPC.TL_updateServiceNotification();
+                update.message = OctoConfig.INSTANCE.updateSignalingChangelog.getValue();
+                update.media = new TLRPC.TL_messageMediaEmpty();
+                update.popup = false;
+                update.type = "update";
+                update.flags |= 2;
+                update.inbox_date = (int) System.currentTimeMillis();
+                ArrayList<TLRPC.Update> updates = new ArrayList<>();
+                updates.add(update);
+                MessagesController.getInstance(UserConfig.selectedAccount).processUpdateArray(updates, null, null, false, 0);
+            }
+
+            OctoConfig.INSTANCE.updateSignalingLastBuildID.updateValue(0);
+            OctoConfig.INSTANCE.updateSignalingChangelog.updateValue(null);
+        } else {
+            Log.e("OctoConfig", "OctoConfig INSTANCE or properties are not initialized");
+        }
     }
 
     public interface UpdatesManagerPrepareInterface {

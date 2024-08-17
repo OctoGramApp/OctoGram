@@ -16,17 +16,20 @@ import org.telegram.messenger.R;
 
 import java.util.List;
 
+import it.octogram.android.ExpandableRowsIds;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerShape;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.ExpandableRows;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.components.StickerSizeCell;
+import it.octogram.android.utils.ExpandableRowsOption;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 /** @noinspection deprecation*/
@@ -58,17 +61,45 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                             .title(LocaleController.formatString(R.string.StickerShape))
                             .build());
                 })
-                .category(LocaleController.formatString("RepliesLinksHeader", R.string.RepliesLinksHeader), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> stickerSizeCell.invalidatePreviewMessages())
-                            .preferenceValue(OctoConfig.INSTANCE.repliesLinksShowColors)
-                            .title(LocaleController.formatString("RepliesLinksShowColors", R.string.RepliesLinksShowColors))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> stickerSizeCell.invalidatePreviewMessages())
-                            .preferenceValue(OctoConfig.INSTANCE.repliesLinksShowEmojis)
-                            .title(LocaleController.formatString("RepliesLinksShowEmojis", R.string.RepliesLinksShowEmojis))
-                            .build());
+                .category(LocaleController.getString(R.string.BehaviorsHeader), category -> {
+                    category.row(new ExpandableRows.ExpandableRowsBuilder()
+                            .setId(ExpandableRowsIds.REPLIES_AND_LINKS.getId())
+                            .setIcon(R.drawable.menu_reply)
+                            .setMainTitle(LocaleController.formatString("RepliesLinksHeader", R.string.RepliesLinksHeader))
+                            .addRow(new ExpandableRowsOption()
+                                    .setOptionTitle(LocaleController.getString("RepliesLinksShowColors", R.string.RepliesLinksShowColors))
+                                    .setProperty(OctoConfig.INSTANCE.repliesLinksShowColors)
+                                    .setOnClick(() -> stickerSizeCell.invalidatePreviewMessages())
+                            )
+                            .addRow(new ExpandableRowsOption()
+                                    .setOptionTitle(LocaleController.getString("RepliesLinksShowEmojis", R.string.RepliesLinksShowEmojis))
+                                    .setProperty(OctoConfig.INSTANCE.repliesLinksShowEmojis)
+                                    .setOnClick(() -> stickerSizeCell.invalidatePreviewMessages())
+                            )
+                            .build()
+                    );
+                    category.row(new ExpandableRows.ExpandableRowsBuilder()
+                            .setId(ExpandableRowsIds.PROMPT_BEFORE_SENDING.getId())
+                            .setIcon(R.drawable.msg_send)
+                            .setMainTitle(LocaleController.formatString("PromptBeforeSending", R.string.PromptBeforeSending))
+                            .addRow(new ExpandableRowsOption()
+                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingStickers", R.string.PromptBeforeSendingStickers))
+                                    .setProperty(OctoConfig.INSTANCE.promptBeforeSendingStickers)
+                            )
+                            .addRow(new ExpandableRowsOption()
+                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingGIFs", R.string.PromptBeforeSendingGIFs))
+                                    .setProperty(OctoConfig.INSTANCE.promptBeforeSendingGIFs)
+                            )
+                            .addRow(new ExpandableRowsOption()
+                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingVoiceMessages", R.string.PromptBeforeSendingVoiceMessages))
+                                    .setProperty(OctoConfig.INSTANCE.promptBeforeSendingVoiceMessages)
+                            )
+                            .addRow(new ExpandableRowsOption()
+                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingVideoMessages", R.string.PromptBeforeSendingVideoMessages))
+                                    .setProperty(OctoConfig.INSTANCE.promptBeforeSendingVideoMessages)
+                            )
+                            .build()
+                    );
                 })
                 .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()

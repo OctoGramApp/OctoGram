@@ -131,6 +131,7 @@ import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
 import it.octogram.android.DeviceIdentifyState;
+import it.octogram.android.FontType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 
@@ -2148,28 +2149,22 @@ public class AndroidUtilities {
             if (!typefaceCache.containsKey(assetPath)) {
                 try {
                     if (OctoConfig.INSTANCE.useSystemFont.getValue()) {
-                        Typeface t = null;
-                        switch (assetPath) {
-                            case "fonts/rmedium.ttf":
-                                t = Typeface.create("sans-serif-medium", Typeface.NORMAL);
-                                break;
-                            case "fonts/ritalic.ttf":
-                                t = Typeface.create("sans-serif", Typeface.ITALIC);
-                                break;
-                            case "fonts/rmediumitalic.ttf":
-                                t = Typeface.create("sans-serif-medium", Typeface.ITALIC);
-                                break;
-                            case "fonts/rmono.ttf":
-                                t = Typeface.MONOSPACE;
-                                break;
-                            case "fonts/mw_bold.ttf":
-                                t = Typeface.create("serif", Typeface.BOLD);
-                                break;
-                            case "fonts/rcondensedbold.ttf":
-                                t = Typeface.create("sans-serif-condensed", Typeface.BOLD);
-                                break;
+                        var typefaceEnum = FontType.Companion.fromPath(assetPath);
+                        if (typefaceEnum != null) {
+                            var t = switch (typefaceEnum) {
+                                case ROBOTO_MEDIUM ->
+                                        Typeface.create("sans-serif-medium", Typeface.NORMAL);
+                                case ROBOTO_MEDIUM_ITALIC ->
+                                        Typeface.create("sans-serif-medium", Typeface.ITALIC);
+                                case ROBOTO_MONO ->
+                                        Typeface.MONOSPACE;
+                                case MERRIWEATHER_BOLD ->
+                                        Typeface.create("serif", Typeface.BOLD);
+                                case COURIER_NEW_BOLD ->
+                                        Typeface.create("monospace", Typeface.BOLD);
+                            };
+                            typefaceCache.put(assetPath, t);
                         }
-                        typefaceCache.put(assetPath, t);
                     } else {
                         Typeface t;
                         if (Build.VERSION.SDK_INT >= 26) {

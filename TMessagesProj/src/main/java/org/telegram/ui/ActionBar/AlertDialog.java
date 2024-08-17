@@ -8,6 +8,8 @@
 
 package org.telegram.ui.ActionBar;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -19,6 +21,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -74,6 +77,8 @@ import org.telegram.ui.Components.spoilers.SpoilersTextView;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import it.octogram.android.OctoConfig;
 
 public class AlertDialog extends Dialog implements Drawable.Callback, NotificationCenter.NotificationCenterDelegate {
 
@@ -183,7 +188,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
     private ArrayList<AlertDialogCell> itemViews = new ArrayList<>();
     private float aspectRatio;
     private boolean dimEnabled = true;
-    private float dimAlpha = 0.5f;
+    private float dimAlpha = OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 0.4f : 0.5f;
     private boolean dimCustom = false;
     private final Theme.ResourcesProvider resourcesProvider;
     private boolean topAnimationAutoRepeat = true;
@@ -608,7 +613,18 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
             } else {
                 containerView.setBackgroundDrawable(null);
                 containerView.setPadding(0, 0, 0, 0);
-                containerView.setBackgroundDrawable(shadowDrawable);
+                //containerView.setBackgroundDrawable(shadowDrawable);
+
+                if (OctoConfig.INSTANCE.uiImmersivePopups.getValue()) {
+                    GradientDrawable border = new GradientDrawable();
+                    border.setShape(GradientDrawable.RECTANGLE);
+                    border.setColor(backgroundColor);
+                    border.setCornerRadius(dp(25));
+                    containerView.setBackground(border);
+                } else {
+                    containerView.setBackground(shadowDrawable);
+                }
+
                 drawBackground = false;
             }
         }
@@ -1078,6 +1094,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
         }
 
         Window window = getWindow();
+
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.copyFrom(window.getAttributes());
         if (progressViewStyle == ALERT_TYPE_SPINNER) {
