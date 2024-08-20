@@ -25,7 +25,7 @@ public class TextIconRow extends BaseRow implements Clickable {
     private final String newID;
     private boolean wasNewBadgeVisible = false;
 
-    private TextIconRow(String title,
+    private TextIconRow(CharSequence title,
                         ConfigProperty<Boolean> showIf,
                         boolean showIfReverse,
                         boolean divider,
@@ -95,7 +95,7 @@ public class TextIconRow extends BaseRow implements Clickable {
     }
 
     private CharSequence rebindTitle() {
-        String title = getTitle();
+        CharSequence title = getTitle();
         wasNewBadgeVisible = false;
 
         if (newID != null && OctoConfig.INSTANCE.isNewIdVisible(newID)) {

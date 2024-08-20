@@ -27,6 +27,7 @@ public class RestrictedDomainsList {
     public final HashMap<String, Integer> openedDomains = new HashMap<>();
     public final HashSet<String> restrictedDomainsSet = new HashSet<>();
     public final ArrayList<ArrayList<String>> restrictedDomains = new ArrayList<>();
+    public final HashSet<String> openWithoutPromptDomainsSet = new HashSet<>();
 
     private boolean loaded;
     public void load() {
@@ -59,6 +60,20 @@ public class RestrictedDomainsList {
         } catch (Exception e) {
             FileLog.e(e);
         }
+        try {
+            JSONArray o = new JSONArray(prefs.getString("web_open_without_prompt_doms", "[]"));
+            for (int i = 0; i < o.length(); ++i) {
+                final JSONArray array = o.getJSONArray(i);
+                final ArrayList<String> domains = new ArrayList<>();
+                for (int j = 0; j < array.length(); ++j) {
+                    final String domain = array.getString(j);
+                    openWithoutPromptDomainsSet.add(domain);
+                    domains.add(domain);
+                }
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
         loaded = true;
     }
 
@@ -84,6 +99,26 @@ public class RestrictedDomainsList {
     public boolean isRestricted(String domain) {
         load();
         return restrictedDomainsSet.contains(domain);
+    }
+
+    public boolean openWithoutPrompt(String domain) {
+        load();
+        return openWithoutPromptDomainsSet.contains(domain);
+    }
+
+    public void setOpenWithoutPrompt(boolean state, String domain) {
+        load();
+        if (openWithoutPrompt(domain)) {
+            if (!state) {
+                openWithoutPromptDomainsSet.remove(domain);
+                scheduleSave();
+            }
+        } else {
+            if (state) {
+                openWithoutPromptDomainsSet.add(domain);
+                scheduleSave();
+            }
+        }
     }
 
     public void setRestricted(boolean restricted, String ...domains) {
@@ -145,6 +180,15 @@ public class RestrictedDomainsList {
                 o.put(array);
             }
             edit.putString("web_restricted_domains2", o.toString());
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+        try {
+            JSONArray o = new JSONArray();
+            for (String domain : openWithoutPromptDomainsSet) {
+                o.put(domain);
+            }
+            edit.putString("web_open_without_prompt_doms", o.toString());
         } catch (Exception e) {
             FileLog.e(e);
         }

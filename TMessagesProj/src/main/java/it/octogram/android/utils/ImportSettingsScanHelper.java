@@ -96,6 +96,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.newBadgeIds.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.updateSignalingLastBuildID.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.updateSignalingChangelog.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.uiRandomMemeIcons.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {

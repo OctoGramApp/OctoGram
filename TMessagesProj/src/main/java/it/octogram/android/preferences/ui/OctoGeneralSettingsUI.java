@@ -10,7 +10,6 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -42,8 +41,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         ConfigProperty<Boolean> canShowSelectReaction = new ConfigProperty<>(null, OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue());
-        OctoConfig.INSTANCE.updateSignalingLastBuildID.updateValue(BuildConfig.BUILD_VERSION - 1);
-        OctoConfig.INSTANCE.updateSignalingChangelog.updateValue("Test update");
         return OctoPreferences.builder(LocaleController.formatString("OctoGeneralSettings", R.string.OctoGeneralSettings))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, LocaleController.formatString("OctoGeneralSettingsHeader", R.string.OctoGeneralSettingsHeader))
                 .category(LocaleController.formatString("PrivacyHeader", R.string.PrivacyHeader), category -> {

@@ -30,7 +30,7 @@ public class ListRow extends BaseRow implements Clickable {
     private final Supplier<Boolean> supplierClickable;
     private final Runnable supplierClickableSelected;
 
-    public ListRow(@Nullable String title,
+    public ListRow(@Nullable CharSequence title,
                    boolean divider,
                    boolean requiresRestart,
                    ConfigProperty<Boolean> showIf,

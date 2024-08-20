@@ -67,6 +67,7 @@ import android.text.style.ImageSpan;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.ActionMode;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
@@ -4934,6 +4935,22 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
 
         @Override
+        public boolean onDragEvent(DragEvent event) {
+            if (event.getAction() == DragEvent.ACTION_DROP && !isEditingBusinessLink() && !isEditingCaption() && !isEditingMessage()) {
+                ClipData d = event.getClipData();
+                if (d != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    LaunchActivity.instance.requestDragAndDropPermissions(event);
+                    if (d.getItemCount() == 1 && (d.getDescription().hasMimeType("image/*") || d.getDescription().hasMimeType("video/mp4"))) {
+                        editPhoto(d.getItemAt(0).getUri(), d.getDescription().getMimeType(0), d.getDescription().hasMimeType("video/mp4"));
+                        return true;
+                    }
+                }
+            }
+
+            return super.onDragEvent(event);
+        }
+
+        @Override
         public boolean onTextContextMenuItem(int id) {
             if (id == android.R.id.paste) {
                 isPaste = true;
@@ -4950,6 +4967,10 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
 
         private void editPhoto(Uri uri, String mime) {
+            editPhoto(uri, mime, false);
+        }
+
+        private void editPhoto(Uri uri, String mime, boolean isVideo) {
             final File file = AndroidUtilities.generatePicturePath(parentFragment != null && parentFragment.isSecretChat(), MimeTypeMap.getSingleton().getExtensionFromMimeType(mime));
             Utilities.globalQueue.postRunnable(() -> {
                 try {
@@ -4963,7 +4984,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                     }
                     in.close();
                     fos.close();
-                    MediaController.PhotoEntry photoEntry = new MediaController.PhotoEntry(0, -1, 0, file.getAbsolutePath(), 0, false, 0, 0, 0);
+                    MediaController.PhotoEntry photoEntry = new MediaController.PhotoEntry(0, -1, 0, file.getAbsolutePath(), 0, isVideo, 0, 0, 0);
                     ArrayList<Object> entries = new ArrayList<>();
                     entries.add(photoEntry);
                     AndroidUtilities.runOnUIThread(() -> {

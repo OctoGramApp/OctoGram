@@ -24,7 +24,7 @@ public class FooterRow extends BaseRow implements Clickable {
 
     private final Runnable onClick;
 
-    private FooterRow(@Nullable String title, Runnable onClick) {
+    private FooterRow(@Nullable CharSequence title, Runnable onClick) {
         super(title, PreferenceType.FOOTER);
         this.onClick = onClick;
     }

@@ -82,7 +82,7 @@ public class BuildVars {
     private static Boolean betaApp;
     public static boolean isBetaApp() {
         if (betaApp == null) {
-            betaApp = ApplicationLoader.applicationContext != null && "it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName());
+            betaApp = (ApplicationLoader.applicationContext != null && "it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName())) || BuildConfig.BUILD_VERSION_STRING.toLowerCase().contains("beta");
         }
         return betaApp;
     }

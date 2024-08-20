@@ -118,15 +118,20 @@ public class ActionBarMenu extends LinearLayout {
     protected ActionBarMenuItem addItemAt(int index, int id, int icon, CharSequence text, int backgroundColor, Drawable drawable, int width, CharSequence title, Theme.ResourcesProvider resourcesProvider) {
         ActionBarMenuItem menuItem = new ActionBarMenuItem(getContext(), this, backgroundColor, isActionMode ? parentActionBar.itemsActionModeColor : parentActionBar.itemsColor, text != null, resourcesProvider);
         menuItem.setTag(id);
+
+        if (isCenteredTitle) {
+            menuItem.setAlpha(0f);
+            menuItem.setVisibility(GONE);
+            menuItem.setClickable(false);
+            menuItem.setEnabled(false);
+        }
+
         if (text != null) {
             menuItem.textView.setText(text);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width != 0 ? width : ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
             layoutParams.leftMargin = layoutParams.rightMargin = AndroidUtilities.dp(14);
 
-            //addView(menuItem, index, layoutParams);
-            if (!isCenteredTitle) {
-                addView(menuItem, index, layoutParams);
-            }
+            addView(menuItem, index, layoutParams);
         } else {
             if (drawable != null) {
                 if (drawable instanceof RLottieDrawable) {
@@ -138,10 +143,7 @@ public class ActionBarMenu extends LinearLayout {
                 menuItem.iconView.setImageResource(icon);
             }
 
-            //addView(menuItem, index, new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
-            if (!isCenteredTitle) {
-                addView(menuItem, index, new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
-            }
+            addView(menuItem, index, new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
         }
         menuItem.setOnClickListener(view -> {
             ActionBarMenuItem item = (ActionBarMenuItem) view;

@@ -94,6 +94,22 @@ enum class CameraXResolution(val value: Int) {
     None(4)
 }
 
+enum class CameraResolution(val value: Int, val id: Int) {
+    LOW(360, 0),
+    SD(480, 1),
+    HD(720, 2),
+    FULL_HD(1080, 3),
+    QHD(1440, 4),
+    UHD_4K(2160, 5),
+    UHD_8K(4320, 6);
+
+    companion object {
+        fun fromHeight(height: Int): CameraResolution {
+            return entries.find { it.value == height } ?: LOW
+        }
+    }
+}
+
 enum class PhotoResolution(val value: Int) {
     LOW(0),
     DEFAULT(1),

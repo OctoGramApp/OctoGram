@@ -12,12 +12,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.os.Parcelable;
+import android.text.SpannableString;
 import android.util.Pair;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
@@ -40,19 +42,23 @@ import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
+import it.octogram.android.preferences.ui.custom.IconsSelector;
+import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoExperimentsUI implements PreferencesEntry {
+    private IconsSelector iconsSelector;
     private boolean wasCentered = false;
     private boolean wasCenteredAtBeginning = false;
     private float _centeredMeasure = -1;
-    private final int[] pos2 = new int[2];
 
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
@@ -201,14 +207,27 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.uiImmersivePopups)
                             .title(LocaleController.getString("ImproveInterfaceImmersivePopups", R.string.ImproveInterfaceImmersivePopups))
+                            .description(LocaleController.getString("ImproveInterfaceImmersivePopups_Desc", R.string.ImproveInterfaceImmersivePopups_Desc))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(InterfaceSwitchUI.DEFAULT.getValue()).setItemSwitchIconUI(InterfaceSwitchUI.DEFAULT).setItemTitle("Default"),
-                                    new PopupChoiceDialogOption().setId(InterfaceSwitchUI.ONEUIOLD.getValue()).setItemSwitchIconUI(InterfaceSwitchUI.ONEUIOLD).setItemTitle("One UI (old)"),
-                                    new PopupChoiceDialogOption().setId(InterfaceSwitchUI.ONEUINEW.getValue()).setItemSwitchIconUI(InterfaceSwitchUI.ONEUINEW).setItemTitle("One UI (new)"),
-                                    new PopupChoiceDialogOption().setId(InterfaceSwitchUI.GOOGLE.getValue()).setItemSwitchIconUI(InterfaceSwitchUI.GOOGLE).setItemTitle("Google")
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.DEFAULT.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.DEFAULT)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceSwitchDefault", R.string.ImproveInterfaceSwitchDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.ONEUIOLD.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.ONEUIOLD)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceSwitchOneUIOld", R.string.ImproveInterfaceSwitchOneUIOld)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.ONEUINEW.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.ONEUINEW)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceSwitchOneUINew", R.string.ImproveInterfaceSwitchOneUINew)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.GOOGLE.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.GOOGLE)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceSwitchGoogle", R.string.ImproveInterfaceSwitchGoogle))
                             ))
                             .onSelected(() -> reloadUI(fragment))
                             .currentValue(OctoConfig.INSTANCE.interfaceSwitchUI)
@@ -217,18 +236,65 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(InterfaceCheckboxUI.DEFAULT.getValue()).setItemCheckboxIconUI(InterfaceCheckboxUI.DEFAULT).setItemTitle("Default"),
-                                    new PopupChoiceDialogOption().setId(InterfaceCheckboxUI.ROUNDED.getValue()).setItemCheckboxIconUI(InterfaceCheckboxUI.ROUNDED).setItemTitle("Rounded"),
-                                    new PopupChoiceDialogOption().setId(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED.getValue()).setItemCheckboxIconUI(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED).setItemTitle("Transparent if unchecked"),
-                                    new PopupChoiceDialogOption().setId(InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue()).setItemCheckboxIconUI(InterfaceCheckboxUI.ALWAYS_TRANSPARENT).setItemTitle("Always transparent")
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.DEFAULT.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.DEFAULT)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceCheckboxDefault", R.string.ImproveInterfaceCheckboxDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.ROUNDED.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.ROUNDED)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceCheckboxRounded", R.string.ImproveInterfaceCheckboxRounded)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceCheckboxSemiTransparent", R.string.ImproveInterfaceCheckboxSemiTransparent)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.ALWAYS_TRANSPARENT)
+                                            .setItemTitle(LocaleController.getString("ImproveInterfaceCheckboxAlwaysTransparent1", R.string.ImproveInterfaceCheckboxAlwaysTransparent1))
                             ))
                             .currentValue(OctoConfig.INSTANCE.interfaceCheckboxUI)
                             .title(LocaleController.getString("ImproveInterfaceCheckbox", R.string.ImproveInterfaceCheckbox))
                             .build());
                 })
+                .category(LocaleController.getString(R.string.ImproveIcons), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(iconsSelector = new IconsSelector(context) {
+                                @Override
+                                protected void onSelectedIcons() {
+                                    reloadUI(fragment);
+                                    fragment.reloadUIAfterValueUpdate();
+                                }
+                            })
+                            .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
+                            .build());
+                })
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(composeSolarIconsDescription())
+                        .showIf(OctoConfig.INSTANCE.uiRandomMemeIcons, true)
+                        .build())
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(LocaleController.getString(R.string.ImproveIconsMeme_Desc))
+                        .showIf(OctoConfig.INSTANCE.uiRandomMemeIcons)
+                        .build())
                 .build();
     }
 
+    private CharSequence composeSolarIconsDescription() {
+        return MessageStringHelper.getUrlNoUnderlineText(
+                new SpannableString(
+                        MessageStringHelper.fromHtml(
+                                LocaleController.formatString(
+                                        R.string.ImproveIconsSolar_Desc,
+                                        "<a href='tg://resolve?domain=TierOhneNation'>@TierOhneNation</a>",
+                                        "<a href='tg://resolve?domain=design480'>@Design480</a>"
+                                )
+                        )
+                )
+        );
+    }
+
+    /** @noinspection deprecation*/
     private void reloadUI(PreferencesFragment fragment, boolean reloadLast) {
         Parcelable recyclerViewState = null;
         RecyclerView.LayoutManager layoutManager = fragment.getListView().getLayoutManager();
@@ -265,12 +331,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     wasCentered = centered;
 
                     reloadUI(fragment);
-
-                    if (pos2.length == 0) {
-                        titleTextView.getLocationInWindow(pos2);
-                    }
-
-                    LaunchActivity.makeRipple(centered ? (actionBar.getMeasuredWidth() / 2f) : 0, pos2[1], centered ? 0.9f : 0.1f);
+                    LaunchActivity.makeRipple(centered ? (actionBar.getMeasuredWidth() / 2f) : 0, 0, centered ? 0.9f : 0.1f);
                 }
             }).start();
         } else {

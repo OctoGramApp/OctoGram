@@ -163,7 +163,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
             String defaultText = (String) positiveButton.getText();
             positiveButton.setEnabled(false);
 
-            new CountDownTimer(10000, 100) {
+            new CountDownTimer(10000, 1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     int currentSeconds = (int) millisUntilFinished / 1000 + 1;

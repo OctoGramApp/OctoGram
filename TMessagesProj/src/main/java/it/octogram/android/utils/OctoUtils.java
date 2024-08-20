@@ -5,12 +5,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.URLSpan;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,7 +24,6 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ChatActivity;
-import org.telegram.ui.Components.URLSpanNoUnderline;
 
 import java.io.File;
 import java.io.IOException;
@@ -253,25 +248,6 @@ public class OctoUtils {
     }
     public static Spanned fromHtml(@NonNull String source, Html.TagHandler tagHandler) {
         return HtmlCompat.fromHtml(source, HtmlCompat.FROM_HTML_MODE_LEGACY,null, tagHandler);
-    }
-
-    public static CharSequence getUrlNoUnderlineText(CharSequence charSequence) {
-        Spannable spannable = new SpannableString(charSequence);
-        URLSpan[] spans = spannable.getSpans(0, charSequence.length(), URLSpan.class);
-        for (URLSpan urlSpan : spans) {
-            URLSpan span = urlSpan;
-            int start = spannable.getSpanStart(span);
-            int end = spannable.getSpanEnd(span);
-            spannable.removeSpan(span);
-            span = new URLSpanNoUnderline(span.getURL()) {
-                @Override
-                public void onClick(View widget) {
-                    super.onClick(widget);
-                }
-            };
-            spannable.setSpan(span, start, end, 0);
-        }
-        return spannable;
     }
 
     public static ArrayList<String> getStringParts(String query, int maxBlockSize) throws IOException {

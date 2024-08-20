@@ -545,7 +545,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                             (getHeight() + h) / 2f
                     );
                 } else {
-                    r = AndroidUtilities.dp(10);
+                    r = AndroidUtilities.dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 25 : 12);
                     AndroidUtilities.rectTmp.set(getPaddingLeft(), getPaddingTop(), getMeasuredWidth() - getPaddingRight(), getMeasuredHeight() - getPaddingBottom());
                 }
 
@@ -616,11 +616,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 //containerView.setBackgroundDrawable(shadowDrawable);
 
                 if (OctoConfig.INSTANCE.uiImmersivePopups.getValue()) {
-                    GradientDrawable border = new GradientDrawable();
-                    border.setShape(GradientDrawable.RECTANGLE);
-                    border.setColor(backgroundColor);
-                    border.setCornerRadius(dp(25));
-                    containerView.setBackground(border);
+                    containerView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(25), backgroundColor));
                 } else {
                     containerView.setBackground(shadowDrawable);
                 }
@@ -955,11 +951,13 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                     }
                 };
             }
+
+            boolean immersive = OctoConfig.INSTANCE.uiImmersivePopups.getValue();
             if(bottomView != null) {
-                buttonsLayout.setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(16), AndroidUtilities.dp(4));
+                buttonsLayout.setPadding(AndroidUtilities.dp(immersive ? 30 : 16), 0, AndroidUtilities.dp(immersive ? 30 : 16), AndroidUtilities.dp(4));
                 buttonsLayout.setTranslationY(-AndroidUtilities.dp(6));
             } else {
-                buttonsLayout.setPadding(AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8));
+                buttonsLayout.setPadding(AndroidUtilities.dp(immersive ? 20 : 8), AndroidUtilities.dp(8), AndroidUtilities.dp(immersive ? 20 : 8), AndroidUtilities.dp(8));
             }
             containerView.addView(buttonsLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52));
             if (topAnimationIsNew) {
@@ -1137,7 +1135,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 if (progressViewStyle == ALERT_TYPE_MESSAGE) {
                     blurredNativeBackground = true;
                     window.setBackgroundBlurRadius(50);
-                    float rad = AndroidUtilities.dp(12);
+                    float rad = AndroidUtilities.dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 25 : 12);
                     ShapeDrawable shapeDrawable = new ShapeDrawable(new RoundRectShape(new float[]{rad, rad, rad, rad, rad, rad, rad, rad}, null, null));
                     shapeDrawable.getPaint().setColor(ColorUtils.setAlphaComponent(backgroundColor, (int) (blurAlpha * 255)));
                     window.setBackgroundDrawable(shapeDrawable);

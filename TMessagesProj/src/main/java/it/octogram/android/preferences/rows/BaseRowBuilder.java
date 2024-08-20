@@ -12,7 +12,7 @@ import it.octogram.android.ConfigProperty;
 
 public abstract class BaseRowBuilder<T> {
 
-    protected String title;
+    protected CharSequence title;
     protected String description;
     protected boolean requiresRestart = false;
     protected ConfigProperty<Boolean> showIf;
@@ -21,6 +21,11 @@ public abstract class BaseRowBuilder<T> {
     protected int[] postNotificationName;
 
     public BaseRowBuilder<T> title(String val) {
+        title = val;
+        return this;
+    }
+
+    public BaseRowBuilder<T> title(CharSequence val) {
         title = val;
         return this;
     }

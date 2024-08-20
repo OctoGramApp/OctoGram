@@ -216,6 +216,9 @@ public class NavigationSettingsUI extends BaseFragment {
             useAlternativeNavigation = !cell.isChecked();
 
             reloadUIElements();
+
+            smoothnessAnimationCell.navigationLayout.updateSpringStiffness(navigationSmoothness);
+            smoothnessAnimationCell.navigationLayout.updateUseActionbarCrossfade(animatedActionBar);
         });
         linearLayout.addView(alternativeNavigationCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 56));
 

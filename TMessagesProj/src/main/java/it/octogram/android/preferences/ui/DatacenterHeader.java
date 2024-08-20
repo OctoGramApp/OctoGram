@@ -27,6 +27,7 @@ import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
+import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.OctoUtils;
 
 
@@ -51,7 +52,7 @@ public class DatacenterHeader extends LinearLayout {
         textView.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection));
         String text = LocaleController.getString(R.string.DatacenterStatusSection_Desc);
         Spannable htmlParsed = new SpannableString(OctoUtils.fromHtml(text));
-        textView.setText(OctoUtils.getUrlNoUnderlineText(htmlParsed));
+        textView.setText(MessageStringHelper.getUrlNoUnderlineText(htmlParsed));
         textView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
 
         AppCompatTextView buttonTextView = new AppCompatTextView(context);

@@ -9,6 +9,7 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
+import android.text.SpannableString;
 import android.util.Size;
 
 import org.telegram.messenger.LocaleController;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import it.octogram.android.CameraResolution;
 import it.octogram.android.CameraType;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
@@ -29,29 +31,18 @@ import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.CustomCellRow;
+import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.custom.CameraTypeSelector;
+import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoCameraSettingsUI implements PreferencesEntry {
-
-//    public static String getCameraInfo(boolean isSettingsTitle) {
-//        return switch (CameraType.Companion.fromInt(OctoConfig.INSTANCE.cameraType.getValue())) {
-//            case SYSTEM_CAMERA -> isSettingsTitle ?
-//                    LocaleController.getString(R.string.SystemCameraDesc) :
-//                    LocaleController.getString(R.string.CameraTypeSystem);
-//            case CAMERA_X -> isSettingsTitle ?
-//                    LocaleController.getString(R.string.CameraXDesc) :
-//                    LocaleController.getString(R.string.CameraTypeX);
-//            case CAMERA_2 -> isSettingsTitle ?
-//                    LocaleController.getString(R.string.Camera2Desc) :
-//                    LocaleController.getString(R.string.CameraType2);
-//            case TELEGRAM -> isSettingsTitle ?
-//                    LocaleController.getString(R.string.DefaultCameraDesc) :
-//                    LocaleController.getString(R.string.CameraTypeDefault);
-//        };
-//    }
+    private final ConfigProperty<Boolean> usingSystemCamera = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> usingCameraX = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> usingCamera2 = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> usingTelegramCamera = new ConfigProperty<>(null, false);
 
     public static List<PopupChoiceDialogOption> getCameraResOptions() {
         var availableSizes = CameraXUtils.getAvailableVideoSizes();
@@ -62,52 +53,76 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
         return sortedHeights
                 .distinct()
                 .map(height -> new PopupChoiceDialogOption()
-                        .setId(height)
+                        .setId(CameraResolution.Companion.fromHeight(height).getId())
                         .setItemTitle(height + "p")
                 )
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    public static CharSequence getCameraDesc(CameraType cameraType) {
+        String advise;
+        switch (cameraType) {
+            case SYSTEM_CAMERA ->
+                    advise = LocaleController.getString(R.string.SystemCameraDesc);
+            case CAMERA_X ->
+                    advise = LocaleController.getString(R.string.CameraXDesc);
+            case CAMERA_2 ->
+                    advise = LocaleController.getString(R.string.Camera2Desc);
+            default ->
+                    advise = LocaleController.getString(R.string.DefaultCameraDesc);
+        }
+        var htmlParsed = new SpannableString(MessageStringHelper.fromHtml(advise));
+        return MessageStringHelper.getUrlNoUnderlineText(htmlParsed);
+    }
+
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
-        ConfigProperty<Boolean> cameraXEnabled = new ConfigProperty<>(null, OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue());
-
+        updateConfigs();
         return OctoPreferences.builder(LocaleController.formatString("OctoCameraSettings", R.string.OctoCameraSettings))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.CAMERA, true, LocaleController.formatString("OctoCameraSettingsHeader", R.string.OctoCameraSettingsHeader))
-                .category("Camera Type", category -> {
-                    category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(new CameraTypeSelector(context) {
-                                @Override
-                                protected void onSelectedCamera(int cameraSelected) {
-                                    if (cameraSelected == OctoConfig.INSTANCE.cameraType.getValue()) {
-                                        return;
-                                    }
-
-                                    OctoConfig.INSTANCE.cameraType.updateValue(cameraSelected);
-                                    cameraXEnabled.updateValue(cameraSelected == CameraType.CAMERA_X.getValue());
-                                    fragment.reloadUIAfterValueUpdate();
+                .category(R.string.CameraType, category -> category.row(new CustomCellRow.CustomCellRowBuilder()
+                        .layout(new CameraTypeSelector(context) {
+                            @Override
+                            protected void onSelectedCamera(int cameraSelected) {
+                                if (cameraSelected == OctoConfig.INSTANCE.cameraType.getValue()) {
+                                    return;
                                 }
-                            })
-                            .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
-                            .build());
-//                    category.row(new FooterRow.FooterRowBuilder()
-//                            .onClick(fragment::reloadUIAfterValueUpdate)
-//                            .title(String.format("%s", OctoUtils.getUrlNoUnderlineText(new SpannableString(OctoUtils.fromHtml((getCameraInfo(true)))))))
-//                            .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
-//                            .build());
-                })
-                .category("Camera Option", cameraXEnabled, category -> {
+
+                                OctoConfig.INSTANCE.cameraType.updateValue(cameraSelected);
+                                updateConfigs();
+                                fragment.reloadUIAfterValueUpdate();
+                            }
+                        })
+                        .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
+                        .build()))
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(getCameraDesc(CameraType.TELEGRAM))
+                        .showIf(usingTelegramCamera)
+                        .build())
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(getCameraDesc(CameraType.CAMERA_2))
+                        .showIf(usingCamera2)
+                        .build())
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(getCameraDesc(CameraType.CAMERA_X))
+                        .showIf(usingCameraX)
+                        .build())
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(getCameraDesc(CameraType.SYSTEM_CAMERA))
+                        .showIf(usingSystemCamera)
+                        .build())
+                .category(LocaleController.getString(R.string.CameraOption), usingCameraX, category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.cameraXZeroShutter)
                             .title(LocaleController.getString("ZeroShutter", R.string.ZeroShutter))
                             .description(LocaleController.getString("ZeroShutter_Desc", R.string.ZeroShutter_Desc))
-                            .showIf(cameraXEnabled)
+                            .showIf(usingCameraX)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.cameraXPerformanceMode)
                             .title(LocaleController.getString("PerformanceMode", R.string.PerformanceMode))
                             .description(LocaleController.getString("PerformanceMode_Desc", R.string.PerformanceMode_Desc))
-                            .showIf(cameraXEnabled)
+                            .showIf(usingCameraX)
                             .build());
 
                     var resolutionOptions = getCameraResOptions();
@@ -115,7 +130,7 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                         category.row(new ListRow.ListRowBuilder()
                                 .options(resolutionOptions)
                                 .currentValue(OctoConfig.INSTANCE.cameraXResolution)
-                                .showIf(cameraXEnabled)
+                                .showIf(usingCameraX)
                                 .title(LocaleController.getString("CurrentCameraXResolution", R.string.CurrentCameraXResolution))
                                 .build());
                     }
@@ -133,5 +148,13 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .build();
+    }
+
+    private void updateConfigs() {
+        int cameraType = OctoConfig.INSTANCE.cameraType.getValue();
+        usingSystemCamera.setValue(cameraType == CameraType.SYSTEM_CAMERA.getValue());
+        usingCameraX.setValue(cameraType == CameraType.CAMERA_X.getValue());
+        usingCamera2.setValue(cameraType == CameraType.CAMERA_2.getValue());
+        usingTelegramCamera.setValue(cameraType == CameraType.TELEGRAM.getValue());
     }
 }

@@ -12,12 +12,12 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -27,19 +27,10 @@ import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Switch;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class PopupChoiceDialogUtils {
-    private static final ArrayList<Switch> dialogSwitches = new ArrayList<>();
-    private static final ArrayList<CheckBox2> dialogCheckBoxes = new ArrayList<>();
-    private static Timer timer;
-
-    public static Dialog createChoiceDialog(Activity parentActivity, List<PopupChoiceDialogOption> options, final String title, final int selected, final DialogInterface.OnClickListener listener) {
-        clearState();
-
+    public static Dialog createChoiceDialog(Activity parentActivity, List<PopupChoiceDialogOption> options, final CharSequence title, final int selected, final DialogInterface.OnClickListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
         builder.setTitle(title);
 
@@ -68,20 +59,26 @@ public class PopupChoiceDialogUtils {
                 });
 
                 if (option.itemIcon == 0) {
+                    LinearLayout tempLayout = new LinearLayout(builder.getContext());
+                    tempLayout.setOrientation(LinearLayout.HORIZONTAL);
+
                     if (option.itemSwitchIconUI != null) {
-                        Switch switchView = new Switch(builder.getContext(), option.itemSwitchIconUI.getValue());
-                        switchView.setColors(Theme.key_switchTrack, Theme.key_switchTrackChecked, Theme.key_windowBackgroundWhite, Theme.key_windowBackgroundWhite);
-                        switchView.setEnabled(false);
-                        cell.addView(switchView, LayoutHelper.createFrame(37, 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT)));
-                        dialogSwitches.add(switchView);
+                        Switch switchView = getSwitch(builder.getContext(), option.itemSwitchIconUI.getValue());
+                        Switch checkedView = getSwitch(builder.getContext(), option.itemSwitchIconUI.getValue());
+                        checkedView.setChecked(true, false);
+
+                        tempLayout.addView(switchView, LayoutHelper.createFrame(37, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.LEFT, 0, 0, 10, 0));
+                        tempLayout.addView(checkedView, LayoutHelper.createFrame(37, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
                     } else if (option.itemCheckboxIconUI != null) {
-                        CheckBox2 checkBoxView = new CheckBox2(builder.getContext(), 21, option.itemCheckboxIconUI.getValue());
-                        checkBoxView.setColor(Theme.key_radioBackgroundChecked, Theme.key_checkboxDisabled, Theme.key_checkboxCheck);
-                        checkBoxView.setDrawUnchecked(true);
-                        checkBoxView.setDrawBackgroundAsArc(10);
-                        cell.addView(checkBoxView, LayoutHelper.createFrame(37, 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT)));
-                        dialogCheckBoxes.add(checkBoxView);
+                        CheckBox2 checkBoxView = getCheckbox(builder.getContext(), option.itemCheckboxIconUI.getValue());
+                        CheckBox2 checkedView = getCheckbox(builder.getContext(), option.itemCheckboxIconUI.getValue());
+                        checkedView.setChecked(true, false);
+
+                        tempLayout.addView(checkBoxView, LayoutHelper.createFrame(23, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.LEFT, 0, 0, 10, 0));
+                        tempLayout.addView(checkedView, LayoutHelper.createFrame(23, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
                     }
+
+                    cell.addView(tempLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT)));
                 }
 
                 if (!option.clickable) {
@@ -119,37 +116,22 @@ public class PopupChoiceDialogUtils {
 
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
 
-        if (!dialogSwitches.isEmpty() || !dialogCheckBoxes.isEmpty()) {
-            builder.setOnDismissListener((e) -> clearState());
-
-            timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    AndroidUtilities.runOnUIThread(() -> {
-                        for (Switch switchView : dialogSwitches) {
-                            switchView.setChecked(true, true);
-                        }
-                        for (CheckBox2 checkBoxView : dialogCheckBoxes) {
-                            checkBoxView.setChecked(true, true);
-                        }
-                        clearState();
-                    });
-                }
-            }, 500);
-        }
-
         return builder.create();
     }
 
-    private static void clearState() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
+    private static Switch getSwitch(Context context, int switchIconUI) {
+        Switch switchView = new Switch(context, switchIconUI);
+        switchView.setColors(Theme.key_switchTrack, Theme.key_switchTrackChecked, Theme.key_windowBackgroundWhite, Theme.key_windowBackgroundWhite);
+        switchView.setEnabled(false);
+        return switchView;
+    }
 
-        dialogSwitches.clear();
-        dialogCheckBoxes.clear();
+    private static CheckBox2 getCheckbox(Context context, int checkBoxIconUI) {
+        CheckBox2 checkBoxView = new CheckBox2(context, 21, checkBoxIconUI);
+        checkBoxView.setColor(Theme.key_radioBackgroundChecked, Theme.key_checkboxDisabled, Theme.key_checkboxCheck);
+        checkBoxView.setDrawUnchecked(true);
+        checkBoxView.setDrawBackgroundAsArc(10);
+        return checkBoxView;
     }
 
     private static boolean hasEveryOptionIcon(List<PopupChoiceDialogOption> options) {

@@ -68,6 +68,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -90,6 +91,7 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.utils.ExpandableRowsOption;
+import it.octogram.android.utils.OctoUtils;
 
 public class PreferencesFragment extends BaseFragment {
 
@@ -107,6 +109,16 @@ public class PreferencesFragment extends BaseFragment {
     private final ArrayList<BaseRow> oldItems = new ArrayList<>();
     private final ArrayList<BaseRow> currentShownItems = new ArrayList<>();
     private final List<BaseRow> reorderedPreferences = new ArrayList<>();
+
+    private final HashSet<PreferenceType> typesWithDividerSupport = new HashSet<>();
+    {
+        typesWithDividerSupport.add(PreferenceType.SWITCH);
+        typesWithDividerSupport.add(PreferenceType.CHECKBOX);
+        typesWithDividerSupport.add(PreferenceType.LIST);
+        typesWithDividerSupport.add(PreferenceType.TEXT_DETAIL);
+        typesWithDividerSupport.add(PreferenceType.TEXT_ICON);
+        typesWithDividerSupport.add(PreferenceType.EXPANDABLE_ROWS);
+    }
 
     public PreferencesFragment(PreferencesEntry entry) {
         this.entry = entry;
@@ -287,7 +299,11 @@ public class PreferencesFragment extends BaseFragment {
 
             BaseRow nextElement = getNextVisibleElement(i, category);
 
-            if (nextElement == null || !supportsDivider(nextElement)) {
+            if (category.getType() == PreferenceType.SHADOW && nextElement != null && (nextElement.getType() == PreferenceType.FOOTER || nextElement.getType() == PreferenceType.FOOTER_INFORMATIVE)) {
+                continue;
+            }
+
+            if (nextElement == null || !typesWithDividerSupport.contains(nextElement.getType())) {
                 category.setDivider(false);
             }
 
@@ -312,10 +328,6 @@ public class PreferencesFragment extends BaseFragment {
         }
 
         return null;
-    }
-
-    private boolean supportsDivider(BaseRow element) {
-        return element.getType() == PreferenceType.SWITCH || element.getType() == PreferenceType.CHECKBOX || element.getType() == PreferenceType.LIST || element.getType() == PreferenceType.TEXT_DETAIL || element.getType() == PreferenceType.TEXT_ICON;
     }
 
     private void animateFireworksOverlay() {
@@ -467,7 +479,7 @@ public class PreferencesFragment extends BaseFragment {
 
             switch (type) {
                 case CUSTOM:
-                    FrameLayout frameLayout = ((FrameLayout) holder.itemView);
+                    FrameLayout frameLayout = (FrameLayout) holder.itemView;
                     // remove the current view if it exists
                     if (frameLayout.getChildCount() > 0) {
                         frameLayout.removeAllViews();
@@ -476,7 +488,12 @@ public class PreferencesFragment extends BaseFragment {
                     // add custom view
                     CustomCellRow row = (CustomCellRow) currentShownItems.get(position);
                     if (row.getLayout() != null) {
-                        frameLayout.addView(row.getLayout());
+                        View customView = row.getLayout();
+                        ViewGroup parent = (ViewGroup) customView.getParent();
+                        if (parent != null) {
+                            parent.removeView(customView);
+                        }
+                        frameLayout.addView(customView);
                     }
 
                     break;
@@ -491,7 +508,7 @@ public class PreferencesFragment extends BaseFragment {
                     TextCheckCell checkCell = (TextCheckCell) holder.itemView;
                     SwitchRow switchRow = (SwitchRow) currentShownItems.get(position);
                     if (switchRow.getSummary() != null) {
-                        checkCell.setTextAndValueAndCheck(switchRow.getTitle(), switchRow.getSummary(), switchRow.getPreferenceValue(), true, switchRow.hasDivider());
+                        checkCell.setTextAndValueAndCheck(OctoUtils.safeToString(switchRow.getTitle()), switchRow.getSummary(), switchRow.getPreferenceValue(), true, switchRow.hasDivider());
                     } else {
                         checkCell.setTextAndCheck(switchRow.getTitle(), switchRow.getPreferenceValue(), switchRow.hasDivider());
                     }

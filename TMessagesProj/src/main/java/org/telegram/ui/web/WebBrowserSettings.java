@@ -61,6 +61,7 @@ import org.telegram.ui.Components.UniversalFragment;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class WebBrowserSettings extends UniversalFragment implements NotificationCenter.NotificationCenterDelegate {
@@ -201,6 +202,9 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
     public static final int BUTTON_CUSTOMTABS_ON = 10;
     public static final int BUTTON_CUSTOMTABS_OFF = 11;
 
+    public static final int BUTTON_ADD_NOPROMPT_DOMAINS = 14;
+    public static final int BUTTON_CLEAR_NOPROMPT_DOMAINS = 15;
+
     @Override
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
         items.add(UItem.asRippleCheck(BUTTON_TOGGLE, getString(R.string.BrowserSettingsEnable)).setChecked(SharedConfig.inappBrowser));
@@ -223,12 +227,28 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
                 meta = WebMetadataCache.getInstance().get(domain);
                 if (meta != null) break;
             }
-            items.add(WebsiteView.Factory.as(domains, meta == null ? "" : (TextUtils.isEmpty(meta.sitename) ? (TextUtils.isEmpty(meta.title) ? "" : meta.title) : meta.sitename), meta == null ? null : meta.favicon));
+            items.add(WebsiteView.Factory.as(domains, meta == null ? "" : (TextUtils.isEmpty(meta.sitename) ? (TextUtils.isEmpty(meta.title) ? "" : meta.title) : meta.sitename), meta == null ? null : meta.favicon, false));
+            //items.add(WebsiteView.Factory.as(domains, meta == null ? "" : (TextUtils.isEmpty(meta.sitename) ? (TextUtils.isEmpty(meta.title) ? "" : meta.title) : meta.sitename), meta == null ? null : meta.favicon));
         }
         if (!allDomains.isEmpty()) {
             items.add(UItem.asButton(BUTTON_CLEAR_LIST, R.drawable.msg_clearcache, LocaleController.getString(R.string.BrowserSettingsNeverOpenInClearList)).red());
         }
         items.add(UItem.asShadow(LocaleController.getString(R.string.BrowserSettingsNeverOpenInInfo)));
+        items.add(UItem.asHeader(LocaleController.getString(R.string.OctoTgBrowserNoPromptTitle)));
+        items.add(UItem.asButton(BUTTON_ADD_NOPROMPT_DOMAINS, addIcon, LocaleController.getString(R.string.BrowserSettingsNeverOpenInAdd)).accent());
+        HashSet<String> domainsNoPrompt = RestrictedDomainsList.getInstance().openWithoutPromptDomainsSet;
+        ArrayList<String> tempDomainsNoPrompt = new ArrayList<>();
+        for (String domain : domainsNoPrompt) {
+            WebMetadataCache.WebMetadata meta = WebMetadataCache.getInstance().get(domain);
+            tempDomainsNoPrompt.clear();
+            tempDomainsNoPrompt.add(domain);
+            items.add(WebsiteView.Factory.as(tempDomainsNoPrompt, meta == null ? "" : (TextUtils.isEmpty(meta.sitename) ? (TextUtils.isEmpty(meta.title) ? "" : meta.title) : meta.sitename), meta == null ? null : meta.favicon, true));
+            //items.add(WebsiteView.Factory.as(tempDomainsNoPrompt, meta == null ? "" : (TextUtils.isEmpty(meta.sitename) ? (TextUtils.isEmpty(meta.title) ? "" : meta.title) : meta.sitename), meta == null ? null : meta.favicon));
+        }
+        if (!domainsNoPrompt.isEmpty()) {
+            items.add(UItem.asButton(BUTTON_CLEAR_NOPROMPT_DOMAINS, R.drawable.msg_clearcache, LocaleController.getString(R.string.BrowserSettingsNeverOpenInClearList)).red());
+        }
+        items.add(UItem.asShadow(LocaleController.getString(R.string.OctoTgBrowserNoPromptDesc)));
         items.add(UItem.asButton(BUTTON_SEARCH_ENGINE, R.drawable.msg_search, LocaleController.getString(R.string.SearchEngine), SearchEngine.getCurrent().name));
         items.add(UItem.asShadow(LocaleController.getString(R.string.BrowserSettingsSearchEngineInfo)));
         if (!SharedConfig.inappBrowser) {
@@ -350,12 +370,21 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
             RestrictedDomainsList.getInstance().restrictedDomains.clear();
             RestrictedDomainsList.getInstance().scheduleSave();
             listView.adapter.update(true);
+        } else if (item.id == BUTTON_CLEAR_NOPROMPT_DOMAINS) {
+            RestrictedDomainsList.getInstance().openWithoutPromptDomainsSet.clear();
+            RestrictedDomainsList.getInstance().scheduleSave();
+            listView.adapter.update(true);
         } else if (item.instanceOf(WebsiteView.Factory.class)) {
             final WebsiteView websiteView = (WebsiteView) view;
             final ArrayList<String> domains = websiteView.domains;
             ItemOptions.makeOptions((ViewGroup) fragmentView, websiteView)
                 .add(R.drawable.menu_delete_old, LocaleController.getString(R.string.Remove), () -> {
-                    RestrictedDomainsList.getInstance().setRestricted(false, domains.toArray(new String[0]));
+                    if (websiteView.relatedToNoPromptDomainsUI) {
+                        RestrictedDomainsList.getInstance().setOpenWithoutPrompt(false, domains.get(0));
+                    } else {
+                        RestrictedDomainsList.getInstance().setRestricted(false, domains.toArray(new String[0]));
+                    }
+                    //RestrictedDomainsList.getInstance().setRestricted(false, domains.toArray(new String[0]));
                     listView.adapter.update(true);
                 })
                 .show();
@@ -396,7 +425,7 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
                     .create();
             dialogRef.set(dialog);
             showDialog(dialog);
-        } else if (item.id == BUTTON_ADD) {
+        } else if (item.id == BUTTON_ADD || item.id == BUTTON_ADD_NOPROMPT_DOMAINS) {
             final AlertDialog[] dialog = new AlertDialog[1];
             final AlertDialog.Builder b = new AlertDialog.Builder(getContext(), getResourceProvider());
             b.setTitle(getString(R.string.BrowserSettingsAddTitle));
@@ -407,7 +436,8 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
             TextView textView = new TextView(getContext());
             textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, getResourceProvider()));
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-            textView.setText(getString(R.string.BrowserSettingsAddText));
+            //textView.setText(getString(R.string.BrowserSettingsAddText));
+            textView.setText(getString(item.id == BUTTON_ADD ? R.string.BrowserSettingsAddText : R.string.OctoTgBrowserNoPrompt));
             container.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 24, 5, 24, 12));
 
             EditTextBoldCursor editText = new EditTextBoldCursor(getContext()) {
@@ -429,7 +459,14 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
                 String _domain = uri.getHost().toLowerCase();
                 if (_domain.startsWith("www.")) _domain = _domain.substring(4);
                 final String domain = _domain;
-                RestrictedDomainsList.getInstance().setRestricted(true, domain);
+                //RestrictedDomainsList.getInstance().setRestricted(true, domain);
+
+                if (item.id == BUTTON_ADD) {
+                    RestrictedDomainsList.getInstance().setRestricted(true, domain);
+                } else {
+                    RestrictedDomainsList.getInstance().setOpenWithoutPrompt(true, domain);
+                }
+
                 final WebMetadataCache.WebMetadata cached_meta = WebMetadataCache.getInstance().get(domain);
                 if (cached_meta != null && !TextUtils.isEmpty(cached_meta.sitename) && cached_meta.favicon != null) {
                     if (dialog[0] != null) {
@@ -512,6 +549,7 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
         public final TextView titleView;
         public final TextView subtitleView;
         public final ImageView optionsView;
+        public boolean relatedToNoPromptDomainsUI = false;
 
         public WebsiteView(Context context) {
             super(context);
@@ -618,24 +656,40 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
             );
         }
 
-        public static class Factory extends UItem.UItemFactory<WebsiteView> {
+        public static class Factory extends CustomUItem.UItemFactory<WebsiteView> {
             @Override
             public WebsiteView createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 return new WebsiteView(context);
             }
 
-            @Override
             public void bindView(View view, UItem item, boolean divider) {
                 ((WebsiteView) view).set(item.text, (ArrayList<String>) item.object2, item.object instanceof Bitmap ? ((Bitmap) item.object) : null, divider);
+
+                if (item instanceof CustomUItem custom) {
+                    ((WebsiteView) view).relatedToNoPromptDomainsUI = custom.relatedToNoPromptDomainsUI;
+                }
             }
 
-            public static UItem as(ArrayList<String> domains, String sitename, Bitmap favicon) {
-                UItem i = UItem.ofFactory(WebsiteView.Factory.class);
+            public static UItem as(ArrayList<String> domains, String sitename, Bitmap favicon, boolean relatedToNoPromptDomainsUI) {
+                CustomUItem i = CustomUItem.ofFactory(WebsiteView.Factory.class);
                 i.text = sitename;
                 i.object = favicon;
                 i.object2 = domains;
+                i.relatedToNoPromptDomainsUI = relatedToNoPromptDomainsUI;
                 return i;
             }
+        }
+    }
+
+    public static class CustomUItem extends UItem {
+        public boolean relatedToNoPromptDomainsUI = false;
+
+        public CustomUItem(int viewType, boolean selectable) {
+            super(viewType, selectable);
+        }
+
+        public static <F extends CustomUItem.UItemFactory<?>> CustomUItem ofFactory(Class<F> factoryClass) {
+            return new CustomUItem(getFactory(factoryClass).viewType, false);
         }
     }
 

@@ -23,7 +23,7 @@ public class TextDetailRow extends BaseRow implements Clickable {
     private final String newID;
     private boolean wasNewBadgeVisible = false;
 
-    private TextDetailRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, int icon, Runnable onClick, String newID) {
+    private TextDetailRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, int icon, Runnable onClick, String newID) {
         super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_DETAIL);
         this.icon = icon;
         this.onClick = onClick;
@@ -58,7 +58,7 @@ public class TextDetailRow extends BaseRow implements Clickable {
     }
 
     private CharSequence rebindTitle() {
-        String title = getTitle();
+        CharSequence title = getTitle();
         wasNewBadgeVisible = false;
 
         if (newID != null && OctoConfig.INSTANCE.isNewIdVisible(newID)) {

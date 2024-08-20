@@ -9,13 +9,14 @@ import java.util.Objects;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
+import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 
 public abstract class BaseRow extends AdapterWithDiffUtils.Item {
 
     @Nullable
-    private final String title;
+    private final CharSequence title;
     @Nullable
     private final String summary;
     private final boolean requiresRestart;
@@ -38,31 +39,31 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
         this(null, null, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
-    public BaseRow(@Nullable String title, PreferenceType type) {
+    public BaseRow(@Nullable CharSequence title, PreferenceType type) {
         this(title, null, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, PreferenceType type) {
+    public BaseRow(@Nullable CharSequence title, @Nullable String summary, PreferenceType type) {
         this(title, summary, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, PreferenceType type) {
+    public BaseRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, PreferenceType type) {
         this(title, summary, requiresRestart, showIf, showIfReverse, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type) {
+    public BaseRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type) {
         this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, false);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium) {
+    public BaseRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium) {
         this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, premium, true);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, boolean autoShowPremiumAlert) {
+    public BaseRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, boolean autoShowPremiumAlert) {
         this(title, summary, requiresRestart, showIf, showIfReverse, divider, type, premium, autoShowPremiumAlert, (int[]) null);
     }
 
-    public BaseRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, boolean autoShowPremiumAlert, @Nullable int... postNotificationName) {
+    public BaseRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, PreferenceType type, boolean premium, boolean autoShowPremiumAlert, @Nullable int... postNotificationName) {
         super(type.getAdapterType(), false);
 
         this.title = title;
@@ -78,7 +79,7 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
     }
 
     @Nullable
-    public String getTitle() {
+    public CharSequence getTitle() {
         return title;
     }
 
@@ -142,7 +143,7 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
         if (getType() != item.getType()) {
             return false;
         }
-        if (item instanceof HeaderRow || item instanceof SwitchRow) {
+        if (item instanceof HeaderRow || item instanceof SwitchRow || item instanceof FooterInformativeRow) {
             return Objects.equals(item.getTitle(), getTitle());
         }
         return true;

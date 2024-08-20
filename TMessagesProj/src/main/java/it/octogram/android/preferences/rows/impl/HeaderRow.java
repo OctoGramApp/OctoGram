@@ -6,11 +6,11 @@ import it.octogram.android.preferences.rows.BaseRow;
 
 public class HeaderRow extends BaseRow {
 
-    public HeaderRow(String title) {
+    public HeaderRow(CharSequence title) {
         super(title, PreferenceType.HEADER);
     }
 
-    public HeaderRow(String title, ConfigProperty<Boolean> showIf) {
+    public HeaderRow(CharSequence title, ConfigProperty<Boolean> showIf) {
         super(title, null, false, showIf, false, PreferenceType.HEADER);
     }
 

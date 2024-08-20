@@ -21,7 +21,7 @@ import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 
-public record OctoPreferences(String title, List<BaseRow> preferences) {
+public record OctoPreferences(CharSequence title, List<BaseRow> preferences) {
 
     public static OctoPreferencesBuilder builder(String name) {
         return new OctoPreferencesBuilder(name);
@@ -35,7 +35,7 @@ public record OctoPreferences(String title, List<BaseRow> preferences) {
             this.name = name;
         }
 
-        public OctoPreferencesBuilder category(String title, Consumer<OctoPreferencesBuilder> consumer) {
+        public OctoPreferencesBuilder category(CharSequence title, Consumer<OctoPreferencesBuilder> consumer) {
             preferences.add(new HeaderRow(title));
             consumer.accept(this);
             preferences.add(new ShadowRow());
@@ -43,20 +43,17 @@ public record OctoPreferences(String title, List<BaseRow> preferences) {
         }
 
         public OctoPreferencesBuilder category(int title, Consumer<OctoPreferencesBuilder> consumer) {
-            preferences.add(new HeaderRow(LocaleController.getString(title)));
-            consumer.accept(this);
-            preferences.add(new ShadowRow());
-            return this;
+            return category(LocaleController.getString(title), consumer);
         }
 
-        public OctoPreferencesBuilder category(String title, ConfigProperty<Boolean> showIfHeader, ConfigProperty<Boolean> showIfShadow, Consumer<OctoPreferencesBuilder> consumer) {
+        public OctoPreferencesBuilder category(CharSequence title, ConfigProperty<Boolean> showIfHeader, ConfigProperty<Boolean> showIfShadow, Consumer<OctoPreferencesBuilder> consumer) {
             preferences.add(new HeaderRow(title, showIfHeader));
             consumer.accept(this);
             preferences.add(new ShadowRow(showIfShadow));
             return this;
         }
 
-        public OctoPreferencesBuilder category(String title, ConfigProperty<Boolean> showIf, Consumer<OctoPreferencesBuilder> consumer) {
+        public OctoPreferencesBuilder category(CharSequence title, ConfigProperty<Boolean> showIf, Consumer<OctoPreferencesBuilder> consumer) {
             preferences.add(new HeaderRow(title, showIf));
             consumer.accept(this);
             preferences.add(new ShadowRow(showIf));

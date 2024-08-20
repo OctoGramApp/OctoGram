@@ -26,7 +26,7 @@ public class CustomCellRow extends BaseRow implements Clickable {
     private final Runnable onClick;
     private final View layout;
 
-    private CustomCellRow(@Nullable String title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, Runnable onClick, View layout) {
+    private CustomCellRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, Runnable onClick, View layout) {
         super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.CUSTOM);
         this.onClick = onClick;
         this.layout = layout;

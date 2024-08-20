@@ -134,7 +134,7 @@ public class OctoConfig {
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXPerformanceMode = newConfigProperty("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = newConfigProperty("cameraXZeroShutter", false);
-    public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
+    public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraResolution.Companion.fromHeight(CameraXUtils.getCameraResolution()).getId());
     public ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.TELEGRAM.getValue());
 
     /*Experiments*/
@@ -156,6 +156,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> uiImmersivePopups = newConfigProperty("uiImmersivePopups", false);
     public final ConfigProperty<Integer> interfaceSwitchUI = newConfigProperty("interfaceSwitchUI", InterfaceSwitchUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> interfaceCheckboxUI = newConfigProperty("interfaceCheckboxUI", InterfaceCheckboxUI.DEFAULT.getValue());
+    public final ConfigProperty<Boolean> uiSolarIcons = newConfigProperty("uiSolarIcons", false);
+    public final ConfigProperty<Boolean> uiRandomMemeIcons = newConfigProperty("uiRandomMemeIcons", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -220,11 +222,9 @@ public class OctoConfig {
     }
 
     public static int getAudioType() {
-        if (OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO.getValue()) {
-            return AudioFormat.CHANNEL_OUT_MONO;
-        } else {
-            return AudioFormat.CHANNEL_OUT_STEREO;
-        }
+        return OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO.getValue()
+                ? AudioFormat.CHANNEL_OUT_MONO
+                : AudioFormat.CHANNEL_OUT_STEREO;
     }
 
     /**

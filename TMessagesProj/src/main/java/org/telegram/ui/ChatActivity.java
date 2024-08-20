@@ -16997,7 +16997,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else {
                     showSearchAsIcon = false;
                 }
-                showSearchAsIcon |= OctoConfig.INSTANCE.searchIconInHeader.getValue() && !inPreviewMode
+                showSearchAsIcon |= OctoConfig.INSTANCE.searchIconInHeader.getValue() && !inPreviewMode && !isTitleCentered()
                         && !isComments && !isThreadChat() && !UserObject.isReplyUser(currentUser);
                 if (showSearchAsIcon || showAudioCallAsIcon) {
                     if (avatarContainer != null && avatarContainer.getLayoutParams() != null) {

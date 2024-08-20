@@ -10,6 +10,7 @@ package it.octogram.android.utils;
 
 import android.graphics.Typeface;
 import android.text.Editable;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -24,6 +25,9 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
 
 import org.telegram.messenger.MediaDataController;
 import org.telegram.tgnet.TLRPC;
@@ -151,5 +155,18 @@ public class MessageStringHelper {
             spannable.setSpan(span, start, end, 0);
         }
         return spannable;
+    }
+
+    public static String getUrlNoUnderlineText(String stringSequence) {
+        CharSequence result = getUrlNoUnderlineText((CharSequence) stringSequence);
+        return result.toString();
+    }
+
+    public static Spanned fromHtml(@NonNull String source) {
+        return fromHtml(source, null);
+    }
+
+    public static Spanned fromHtml(@NonNull String source, Html.TagHandler tagHandler) {
+        return HtmlCompat.fromHtml(source, HtmlCompat.FROM_HTML_MODE_LEGACY,null, tagHandler);
     }
 }

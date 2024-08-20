@@ -121,6 +121,7 @@ import org.telegram.ui.ProfileNotificationsActivity;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 import org.telegram.ui.ThemePreviewActivity;
 import org.telegram.ui.TooManyCommunitiesActivity;
+import org.telegram.ui.web.RestrictedDomainsList;
 
 import java.net.IDN;
 import java.time.YearMonth;
@@ -130,6 +131,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1200,6 +1202,14 @@ public class AlertsCreator {
         if (fragment == null || fragment.getParentActivity() == null) {
             return;
         }
+
+        if (ask) {
+            HashSet<String> openWithoutPromptList = RestrictedDomainsList.getInstance().openWithoutPromptDomainsSet;
+            if (!openWithoutPromptList.isEmpty() && openWithoutPromptList.contains(AndroidUtilities.getHostAuthority(url))) {
+                ask = false;
+            }
+        }
+
         long inlineReturn = (fragment instanceof ChatActivity) ? ((ChatActivity) fragment).getInlineReturn() : 0;
         if (Browser.isInternalUrl(url, null) || !ask) {
             Browser.openUrl(fragment.getParentActivity(), Uri.parse(url), inlineReturn == 0, tryTelegraph, forceNotInternalForApps && checkInternalBotApp(url), progress, null, false);

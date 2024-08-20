@@ -25,7 +25,7 @@ public class FooterInformativeRow extends BaseRow implements Clickable {
 
     private final Runnable onClick;
 
-    private FooterInformativeRow(@Nullable String title, Runnable onClick, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+    private FooterInformativeRow(@Nullable CharSequence title, Runnable onClick, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
         super(title, null, false, showIf, showIfReverse, PreferenceType.FOOTER_INFORMATIVE);
         this.onClick = onClick;
     }

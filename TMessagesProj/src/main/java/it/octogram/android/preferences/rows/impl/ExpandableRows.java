@@ -26,10 +26,10 @@ import it.octogram.android.utils.ExpandableRowsOption;
 public class ExpandableRows extends BaseRow implements Clickable {
     private final int id;
     private final int icon;
-    private final String mainItemTitle;
+    private final CharSequence mainItemTitle;
     private final ArrayList<ExpandableRowsOption> itemsList;
 
-    private ExpandableRows(int id, int icon, @Nullable String title, ArrayList<ExpandableRowsOption> itemsList) {
+    private ExpandableRows(int id, int icon, @Nullable CharSequence title, ArrayList<ExpandableRowsOption> itemsList) {
         super(PreferenceType.EXPANDABLE_ROWS);
         this.id = id;
         this.icon = icon;
@@ -45,7 +45,7 @@ public class ExpandableRows extends BaseRow implements Clickable {
         return icon;
     }
 
-    public String getMainItemTitle() {
+    public CharSequence getMainItemTitle() {
         return mainItemTitle;
     }
 
@@ -61,7 +61,7 @@ public class ExpandableRows extends BaseRow implements Clickable {
     public static class ExpandableRowsBuilder extends BaseRowBuilder<ExpandableRows> {
         private int id;
         private int icon;
-        private String mainItemTitle;
+        private CharSequence mainItemTitle;
         private final ArrayList<ExpandableRowsOption> itemsList = new ArrayList<>();
 
         public ExpandableRowsBuilder setId(int id) {
@@ -74,7 +74,7 @@ public class ExpandableRows extends BaseRow implements Clickable {
             return this;
         }
 
-        public ExpandableRowsBuilder setMainTitle(String title) {
+        public ExpandableRowsBuilder setMainTitle(CharSequence title) {
             mainItemTitle = title;
             return this;
         }

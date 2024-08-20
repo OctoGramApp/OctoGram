@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -90,6 +91,7 @@ import com.google.firebase.appindexing.builders.AssistActionBuilder;
 import it.octogram.android.MonetThemeController;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.CustomEmojiController;
+import it.octogram.android.icons.IconsResources;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.DatacenterActivity;
 import it.octogram.android.preferences.ui.OctoAppearanceUI;
@@ -375,6 +377,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     public static LaunchActivity instance;
     private View customNavigationBar;
+
+    private IconsResources customResources;
+
+    @Override
+    public Resources getResources() {
+        if (customResources == null) {
+            customResources = new IconsResources(super.getResources());
+        }
+        return customResources;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
