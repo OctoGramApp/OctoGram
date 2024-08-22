@@ -55,7 +55,6 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
@@ -92,7 +91,7 @@ import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.utils.BrowserUtils;
-import it.octogram.android.utils.IconsUtils;
+import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class DrawerProfileCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {

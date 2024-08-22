@@ -156,7 +156,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> uiImmersivePopups = newConfigProperty("uiImmersivePopups", false);
     public final ConfigProperty<Integer> interfaceSwitchUI = newConfigProperty("interfaceSwitchUI", InterfaceSwitchUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> interfaceCheckboxUI = newConfigProperty("interfaceCheckboxUI", InterfaceCheckboxUI.DEFAULT.getValue());
-    public final ConfigProperty<Boolean> uiSolarIcons = newConfigProperty("uiSolarIcons", false);
+    public final ConfigProperty<Integer> uiIconsType = newConfigProperty("uiIconsType", IconsUIType.DEFAULT.getValue());
     public final ConfigProperty<Boolean> uiRandomMemeIcons = newConfigProperty("uiRandomMemeIcons", false);
 
     /*Updates*/

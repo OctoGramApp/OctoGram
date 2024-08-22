@@ -1,16 +1,17 @@
 package it.octogram.android.preferences.ui.custom;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -19,9 +20,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.core.content.ContextCompat;
+
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -30,23 +32,22 @@ import org.telegram.ui.Components.Premium.StarParticlesView;
 
 import java.util.ArrayList;
 
+import it.octogram.android.IconsUIType;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.icons.IconsResources;
 
+@SuppressLint("UseCompatLoadingForDrawables")
 public abstract class IconsSelector extends LinearLayout {
     private final Paint pickerDividersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final NumberPicker picker1;
-    private final IconsPreviewCell iconsPreviewCell;
+    public final IconsPreviewCell iconsPreviewCell;
 
     private final ArrayList<String> strings = new ArrayList<>();
-    {
-        strings.add(LocaleController.getString(R.string.ImproveIconsDefault));
-        strings.add(LocaleController.getString(R.string.ImproveIconsSolar));
 
-        if (canUseMemeMode()) {
-            strings.add("Meme");
-        }
+    {
+        strings.add(getString(R.string.ImproveIconsDefault));
+        strings.add(getString(R.string.ImproveIconsSolar));
+        strings.add(getString(R.string.ImproveIconsMaterialDesign3));
     }
 
     public IconsSelector(Context context) {
@@ -82,8 +83,7 @@ public abstract class IconsSelector extends LinearLayout {
         picker1.setOnValueChangedListener((picker, oldVal, newVal) -> {
             invalidate();
             _newVal[0] = newVal;
-            OctoConfig.INSTANCE.uiSolarIcons.updateValue(newVal >= 1);
-            OctoConfig.INSTANCE.uiRandomMemeIcons.updateValue(newVal == 2);
+            OctoConfig.INSTANCE.uiIconsType.updateValue(newVal);
             iconsPreviewCell.animateUpdate();
             picker.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         });
@@ -92,7 +92,7 @@ public abstract class IconsSelector extends LinearLayout {
                 onSelectedIcons();
             }
         });
-        picker1.setValue(OctoConfig.INSTANCE.uiSolarIcons.getValue() ? ((OctoConfig.INSTANCE.uiRandomMemeIcons.getValue() && canUseMemeMode()) ? 2 : 1) : 0);
+        picker1.setValue(OctoConfig.INSTANCE.uiIconsType.getValue());
         addView(picker1, LayoutHelper.createFrame(132, LayoutHelper.MATCH_PARENT, Gravity.RIGHT, 0, 0, 21, 0));
     }
 
@@ -114,14 +114,15 @@ public abstract class IconsSelector extends LinearLayout {
 
     protected abstract void onSelectedIcons();
 
-    private static class IconsPreviewCell extends FrameLayout {
+    public static class IconsPreviewCell extends FrameLayout {
         private final ArrayList<ViewPropertyAnimator> animators = new ArrayList<>();
         private final ArrayList<ImageView> icons = new ArrayList<>();
-        private boolean wasLastCompletedAnimationSolar = false;
+        private int lastCompletedAnimationIconsType = -1;
         private boolean wasLastCompletedAnimationMemeIcons = false;
         private final StarParticlesView particlesView;
 
         private final ArrayList<Integer> previewIcons = new ArrayList<>();
+
         {
             previewIcons.add(R.drawable.msg_voice_phone);
             previewIcons.add(R.drawable.msg_permissions);
@@ -197,20 +198,17 @@ public abstract class IconsSelector extends LinearLayout {
         }
 
         private void setIcon(ImageView imageView, int icon) {
-            IconsResources resources = (IconsResources) getResources();
-            Drawable drawable = resources.getDefaultDrawable(icon);
+            var drawable = ContextCompat.getDrawable(getContext(), icon);
 
-            if (OctoConfig.INSTANCE.uiSolarIcons.getValue()) {
-                drawable = resources.getSolarDrawable(icon);
+            lastCompletedAnimationIconsType = OctoConfig.INSTANCE.uiIconsType.getValue();
+            wasLastCompletedAnimationMemeIcons = areMemeIconsEnabled();
+
+            if (drawable != null) {
+                imageView.setImageDrawable(drawable);
             }
-
-            wasLastCompletedAnimationSolar = OctoConfig.INSTANCE.uiSolarIcons.getValue();
-            wasLastCompletedAnimationMemeIcons = OctoConfig.INSTANCE.uiRandomMemeIcons.getValue();
-
-            imageView.setImageDrawable(drawable);
         }
 
-        private void animateUpdate() {
+        public void animateUpdate() {
             for (ViewPropertyAnimator animator : animators) {
                 if (animator != null) {
                     animator.cancel();
@@ -218,7 +216,7 @@ public abstract class IconsSelector extends LinearLayout {
             }
             animators.clear();
 
-            if (wasLastCompletedAnimationSolar == OctoConfig.INSTANCE.uiSolarIcons.getValue() && wasLastCompletedAnimationMemeIcons == OctoConfig.INSTANCE.uiRandomMemeIcons.getValue()) {
+            if (lastCompletedAnimationIconsType == OctoConfig.INSTANCE.uiIconsType.getValue() && wasLastCompletedAnimationMemeIcons == areMemeIconsEnabled()) {
                 return;
             }
 
@@ -234,7 +232,7 @@ public abstract class IconsSelector extends LinearLayout {
         }
 
         private boolean areMemeIconsEnabled() {
-            return OctoConfig.INSTANCE.uiSolarIcons.getValue() && OctoConfig.INSTANCE.uiRandomMemeIcons.getValue() && canUseMemeMode();
+            return OctoConfig.INSTANCE.uiIconsType.getValue() != IconsUIType.DEFAULT.getValue() && OctoConfig.INSTANCE.uiRandomMemeIcons.getValue() && canUseMemeMode();
         }
 
         private void animateDisappear(ImageView icon, Runnable onPostAnimationEnd) {

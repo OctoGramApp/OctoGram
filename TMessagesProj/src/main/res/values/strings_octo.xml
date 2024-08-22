@@ -350,8 +350,12 @@
     <string name="ImproveInterfaceTitleCenteredNever">Never</string>
     <string name="ImproveIcons">Manage Icons</string>
     <string name="ImproveIconsDefault">Default</string>
+    <string name="ImproveIconsDefault_Desc">OctoGram will use the default Telegram icons without any changes.</string>
     <string name="ImproveIconsSolar">Solar</string>
-    <string name="ImproveIconsSolar_Desc">Solar icons were made by %s (%s).</string>
+    <string name="ImproveIconsSolar_Desc">OctoGram will use the Solar Icons created by  %s (%s).</string>
+    <string name="ImproveIconsMaterialDesign3">Material Design 3</string>
+    <string name="ImproveIconsMaterialDesign3_Desc">OctoGram will use the Material Design 3 Icons created by Google (more details %s).</string>
+    <string name="ImproveIconsMaterialDesign3_DescHere">here</string>
     <string name="ImproveIconsMeme_Desc">Random icons will be used to create the “Meme” effect. The interface may have errors and inconsistencies. This feature is available just in the BETA version of OctoGram!</string>
 
     <!-- PROMPT BEFORE SENDING -->

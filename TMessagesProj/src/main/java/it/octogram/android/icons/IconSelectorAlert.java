@@ -5,7 +5,7 @@
  *
  * Copyright Laky64, 2021-2022.
  */
-package it.octogram.android.utils;
+package it.octogram.android.icons;
 
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -25,12 +25,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,7 +43,10 @@ import org.telegram.ui.Components.ExtendedGridLayoutManager;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 
+import it.octogram.android.utils.FolderIconController;
+import it.octogram.android.utils.OctoUtils;
 
+@SuppressLint("ClickableViewAccessibility")
 public class IconSelectorAlert extends BottomSheet {
 
     private final LinearLayout linearLayout;
@@ -62,39 +65,13 @@ public class IconSelectorAlert extends BottomSheet {
 
         int colorBackground = Theme.getColor(Theme.key_dialogBackground);
 
-        shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
-        shadowDrawable.setColorFilter(new PorterDuffColorFilter(colorBackground, PorterDuff.Mode.MULTIPLY));
+        shadowDrawable = ContextCompat.getDrawable(context, R.drawable.sheet_shadow_round);
+        if (shadowDrawable != null) {
+            shadowDrawable.mutate();
+            shadowDrawable.setColorFilter(new PorterDuffColorFilter(colorBackground, PorterDuff.Mode.MULTIPLY));
+        }
 
-        FrameLayout container = new FrameLayout(context) {
-            @Override
-            public void setTranslationY(float translationY) {
-                super.setTranslationY(translationY);
-                updateLayout();
-            }
-
-            @Override
-            public boolean onInterceptTouchEvent(MotionEvent ev) {
-                if (ev.getAction() == MotionEvent.ACTION_DOWN && scrollOffsetY != 0 && ev.getY() < scrollOffsetY) {
-                    dismiss();
-                    return true;
-                }
-                return super.onInterceptTouchEvent(ev);
-            }
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouchEvent(MotionEvent e) {
-                return !isDismissed() && super.onTouchEvent(e);
-            }
-
-            @Override
-            protected void onDraw(@NonNull Canvas canvas) {
-                int top = (int) (scrollOffsetY - backgroundPaddingTop - getTranslationY());
-                shadowDrawable.setBounds(0, top, getMeasuredWidth(), getMeasuredHeight());
-                shadowDrawable.draw(canvas);
-            }
-        };
-        container.setWillNotDraw(false);
+        var container = getLayoutContainer(context);
         containerView = container;
 
         scrollView = new NestedScrollView(context) {
@@ -153,14 +130,14 @@ public class IconSelectorAlert extends BottomSheet {
         scrollView.addView(linearLayout, LayoutHelper.createScroll(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
 
 
-        LinearLayout header = new LinearLayout(context);
+        var header = new LinearLayout(context);
         header.setOrientation(LinearLayout.VERTICAL);
 
         TextView titleView = new TextView(context);
         titleView.setPivotX(LocaleController.isRTL ? titleView.getWidth() : 0);
         titleView.setPivotY(0);
         titleView.setLines(1);
-        titleView.setText(LocaleController.getString("ChooseFolderIcon", R.string.ChooseFolderIcon));
+        titleView.setText(LocaleController.getString(R.string.ChooseFolderIcon));
         titleView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         titleView.setTypeface(AndroidUtilities.bold());
         titleView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
@@ -172,8 +149,8 @@ public class IconSelectorAlert extends BottomSheet {
                 22, 22, 22, 0
         ));
 
-        GridAdapter gridAdapter = new GridAdapter();
-        RecyclerListView recyclerListView = new RecyclerListView(context) {
+        var gridAdapter = new GridAdapter();
+        var recyclerListView = new RecyclerListView(context) {
             @Override
             protected void onMeasure(int widthSpec, int heightSpec) {
                 super.onMeasure(widthSpec, heightSpec);
@@ -183,23 +160,59 @@ public class IconSelectorAlert extends BottomSheet {
         recyclerListView.setLayoutParams(new LinearLayout.LayoutParams(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         recyclerListView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         recyclerListView.setLayoutManager(new ExtendedGridLayoutManager(recyclerListView.getContext(), 6));
-        recyclerListView.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
+        var padding = AndroidUtilities.dp(10);
+        recyclerListView.setPadding(padding, padding, padding, padding);
         recyclerListView.setAdapter(gridAdapter);
         recyclerListView.setSelectorType(3);
         recyclerListView.setSelectorDrawableColor(Theme.getColor(Theme.key_listSelector));
         recyclerListView.setOnItemClickListener((view, position) -> {
-            this.onItemClick((String) view.getTag());
+            this.onItemClick(OctoUtils.safeToString(view.getTag()));
             dismiss();
         });
         header.addView(recyclerListView);
 
         linearLayout.addView(header);
-        FrameLayout.LayoutParams frameLayoutParams = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, AndroidUtilities.getShadowHeight(), Gravity.BOTTOM | Gravity.LEFT);
+        var frameLayoutParams = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, 70, Gravity.BOTTOM | Gravity.LEFT);
         shadow = new View(context);
         shadow.setBackgroundColor(Theme.getColor(Theme.key_dialogShadowLine));
         shadow.setAlpha(0.0f);
         shadow.setTag(1);
         container.addView(shadow, frameLayoutParams);
+    }
+
+    private @NonNull FrameLayout getLayoutContainer(Context context) {
+        FrameLayout container = new FrameLayout(context) {
+            @Override
+            public void setTranslationY(float translationY) {
+                super.setTranslationY(translationY);
+                updateLayout();
+            }
+
+            @Override
+            public boolean onInterceptTouchEvent(MotionEvent ev) {
+                if (ev.getAction() == MotionEvent.ACTION_DOWN && scrollOffsetY != 0 && ev.getY() < scrollOffsetY) {
+                    dismiss();
+                    return true;
+                }
+                return super.onInterceptTouchEvent(ev);
+            }
+
+            @Override
+            public boolean onTouchEvent(MotionEvent e) {
+                return !isDismissed() && super.onTouchEvent(e);
+            }
+
+            @Override
+            protected void onDraw(@NonNull Canvas canvas) {
+                int top = (int) (scrollOffsetY - backgroundPaddingTop - getTranslationY());
+                if (shadowDrawable != null) {
+                    shadowDrawable.setBounds(0, top, getMeasuredWidth(), getMeasuredHeight());
+                    shadowDrawable.draw(canvas);
+                }
+            }
+        };
+        container.setWillNotDraw(false);
+        return container;
     }
 
     protected void onItemClick(String emoticon) {
@@ -276,7 +289,7 @@ public class IconSelectorAlert extends BottomSheet {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            ImageView imageView = (ImageView) holder.itemView;
+            var imageView = (AppCompatImageView) holder.itemView;
             imageView.setTag(icons[position]);
             imageView.setImageResource(FolderIconController.getTabIcon(icons[position]));
         }

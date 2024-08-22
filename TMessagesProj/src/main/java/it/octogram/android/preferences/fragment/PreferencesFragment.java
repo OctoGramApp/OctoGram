@@ -285,6 +285,10 @@ public class PreferencesFragment extends BaseFragment {
         restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
     }
 
+    public void smoothScrollToEnd() {
+        listView.smoothScrollToPosition(currentShownItems.size() - 1);
+    }
+
     public void reloadUIAfterValueUpdate() {
         oldItems.clear();
         oldItems.addAll(currentShownItems);

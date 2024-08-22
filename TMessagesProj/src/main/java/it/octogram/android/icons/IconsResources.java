@@ -6,12 +6,12 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.Nullable;
 
+import it.octogram.android.IconsUIType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.IconsSelector;
 
 @SuppressLint("UseCompatLoadingForDrawables")
 public class IconsResources extends Resources {
-    private SolarIcons _solarIcons;
 
     public IconsResources(Resources resources) {
         super(resources.getAssets(), resources.getDisplayMetrics(), resources.getConfiguration());
@@ -39,25 +39,27 @@ public class IconsResources extends Resources {
         return super.getDrawableForDensity(getConversion(id), density);
     }
 
-    public Drawable getSolarDrawable(int id) throws NotFoundException {
-        return super.getDrawable(getConversion(id));
-    }
-
-    public Drawable getDefaultDrawable(int id) throws NotFoundException {
-        return super.getDrawable(id);
-    }
-
     private int getConversion(int icon) {
-        if (OctoConfig.INSTANCE.uiSolarIcons.getValue()) {
-            if (_solarIcons == null) {
-                _solarIcons = new SolarIcons();
-            }
+        int iconsType = OctoConfig.INSTANCE.uiIconsType.getValue();
 
-            if (OctoConfig.INSTANCE.uiRandomMemeIcons.getValue() && IconsSelector.canUseMemeMode()) {
-                return _solarIcons.getRandom(icon);
+        if (iconsType == IconsUIType.SOLAR.getValue()) {
+            if (OctoConfig.INSTANCE.uiRandomMemeIcons.getValue()) {
+                if (IconsSelector.canUseMemeMode()) {
+                    return SolarIcons.Companion.getRandom(icon);
+                } else {
+                    OctoConfig.INSTANCE.uiRandomMemeIcons.updateValue(false);
+                }
             }
-
-            return _solarIcons.getConversion(icon);
+            return SolarIcons.Companion.getConversion(icon);
+        } else if (iconsType == IconsUIType.MATERIAL_DESIGN_3.getValue()) {
+            if (OctoConfig.INSTANCE.uiRandomMemeIcons.getValue()) {
+                if (IconsSelector.canUseMemeMode()) {
+                    return MaterialDesign3Icons.Companion.getRandom(icon);
+                } else {
+                    OctoConfig.INSTANCE.uiRandomMemeIcons.updateValue(false);
+                }
+            }
+            return MaterialDesign3Icons.Companion.getConversion(icon);
         }
         return icon;
     }

@@ -27,6 +27,7 @@ import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.MenuItemId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.drawer.MenuOrderController;
+import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -38,7 +39,6 @@ import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.preferences.ui.custom.DrawerOrderSettings;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
-import it.octogram.android.utils.IconsUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoDrawerSettingsUI implements PreferencesEntry {

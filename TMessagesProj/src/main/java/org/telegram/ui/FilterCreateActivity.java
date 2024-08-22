@@ -97,8 +97,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.icons.IconSelectorAlert;
 import it.octogram.android.utils.FolderIconController;
-import it.octogram.android.utils.IconSelectorAlert;
 
 public class FilterCreateActivity extends BaseFragment {
 

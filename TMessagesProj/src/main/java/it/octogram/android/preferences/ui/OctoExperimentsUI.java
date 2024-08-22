@@ -32,7 +32,9 @@ import java.util.List;
 
 import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.AudioType;
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.DeviceIdentifyState;
+import it.octogram.android.IconsUIType;
 import it.octogram.android.InterfaceCheckboxUI;
 import it.octogram.android.InterfaceSwitchUI;
 import it.octogram.android.NewFeaturesBadgeId;
@@ -60,10 +62,16 @@ public class OctoExperimentsUI implements PreferencesEntry {
     private boolean wasCenteredAtBeginning = false;
     private float _centeredMeasure = -1;
 
+    private final ConfigProperty<Boolean> isUsingDefault = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> isUsingSolar = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> isUsingM3 = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> canShowMemeModeRow = new ConfigProperty<>(null, false);
+
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         wasCentered = isTitleCentered();
         wasCenteredAtBeginning = wasCentered;
+        updateConfig();
 
         return OctoPreferences.builder(LocaleController.getString("Experiments", R.string.Experiments))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, LocaleController.formatString("OctoExperimentsSettingsHeader", R.string.OctoExperimentsSettingsHeader))
@@ -263,32 +271,62 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                 @Override
                                 protected void onSelectedIcons() {
                                     reloadUI(fragment);
+
+                                    updateConfig();
                                     fragment.reloadUIAfterValueUpdate();
+                                    fragment.smoothScrollToEnd();
                                 }
                             })
                             .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .onPostUpdate(() -> iconsSelector.iconsPreviewCell.animateUpdate())
+                            .preferenceValue(OctoConfig.INSTANCE.uiRandomMemeIcons)
+                            .showIf(canShowMemeModeRow)
+                            .title("Meme Mode")
+                            .description(LocaleController.getString(R.string.ImproveIconsMeme_Desc))
+                            .build());
                 })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(composeSolarIconsDescription())
-                        .showIf(OctoConfig.INSTANCE.uiRandomMemeIcons, true)
+                        .title(LocaleController.getString(R.string.ImproveIconsDefault_Desc))
+                        .showIf(isUsingDefault)
                         .build())
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.getString(R.string.ImproveIconsMeme_Desc))
-                        .showIf(OctoConfig.INSTANCE.uiRandomMemeIcons)
+                        .title(composeIconsDescription(true))
+                        .showIf(isUsingSolar)
+                        .build())
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(composeIconsDescription(false))
+                        .showIf(isUsingM3)
                         .build())
                 .build();
     }
 
-    private CharSequence composeSolarIconsDescription() {
+    private void updateConfig() {
+        int currentState = OctoConfig.INSTANCE.uiIconsType.getValue();
+        boolean canUseMemeMode = currentState != IconsUIType.DEFAULT.getValue() && IconsSelector.canUseMemeMode();
+
+        isUsingDefault.setValue(currentState == IconsUIType.DEFAULT.getValue());
+        isUsingSolar.setValue(currentState == IconsUIType.SOLAR.getValue());
+        isUsingM3.setValue(currentState == IconsUIType.MATERIAL_DESIGN_3.getValue());
+        canShowMemeModeRow.setValue(canUseMemeMode);
+    }
+
+    private CharSequence composeIconsDescription(boolean isSolar) {
         return MessageStringHelper.getUrlNoUnderlineText(
                 new SpannableString(
                         MessageStringHelper.fromHtml(
-                                LocaleController.formatString(
-                                        R.string.ImproveIconsSolar_Desc,
-                                        "<a href='tg://resolve?domain=TierOhneNation'>@TierOhneNation</a>",
-                                        "<a href='tg://resolve?domain=design480'>@Design480</a>"
-                                )
+                                isSolar ?
+                                        LocaleController.formatString(
+                                                R.string.ImproveIconsSolar_Desc,
+                                                "<a href='tg://resolve?domain=TierOhneNation'>@TierOhneNation</a>",
+                                                "<a href='tg://resolve?domain=design480'>@Design480</a>"
+                                        ) :
+                                        LocaleController.formatString(
+                                                R.string.ImproveIconsMaterialDesign3_Desc,
+                                                "<a href='https://m3.material.io/styles/icons'>" + LocaleController.getString(R.string.ImproveIconsMaterialDesign3_DescHere) + "</a>"
+                                        )
                         )
                 )
         );

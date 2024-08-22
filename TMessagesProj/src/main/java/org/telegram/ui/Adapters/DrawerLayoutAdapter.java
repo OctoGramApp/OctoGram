@@ -38,10 +38,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import it.octogram.android.MenuItemId;
-import it.octogram.android.OctoConfig;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
-import it.octogram.android.utils.IconsUtils;
+import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {

@@ -188,6 +188,12 @@ enum class CameraType(val value: Int) {
     }
 }
 
+enum class IconsUIType(val value: Int) {
+    DEFAULT(0),
+    SOLAR(1),
+    MATERIAL_DESIGN_3(2)
+}
+
 enum class MenuItemId(val id: String, val itemId: Int) {
     MY_PROFILE("my_profile", 16),
     NEW_GROUP("new_group", 2),

@@ -1,4 +1,4 @@
-package it.octogram.android.utils;
+package it.octogram.android.icons;
 
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
