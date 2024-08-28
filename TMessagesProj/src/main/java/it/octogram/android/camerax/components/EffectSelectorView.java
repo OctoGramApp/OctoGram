@@ -67,7 +67,7 @@ public class EffectSelectorView extends LinearLayout {
             for (int i = 0; i < list_effect.size(); i++) {
                 int effect = list_effect.get(i);
                 LinearLayout linearLayout = new LinearLayout(getContext());
-                linearLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
+                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
                 linearLayout.setGravity(Gravity.CENTER);
                 ButtonEffectView buttonEffect = getButtonEffect(effect);
                 if (effect == CameraXController.CAMERA_NONE) {

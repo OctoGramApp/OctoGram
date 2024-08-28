@@ -23,7 +23,9 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
+import org.telegram.ui.Components.BulletinFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -325,6 +327,10 @@ public class OctoUtils {
 
     public static boolean canShowCenteredTitle(ChatActivity.ChatActivityFragmentView parentFragment) {
         return canShowCenteredTitle(parentFragment.getChatActivity());
+    }
+
+    public static void featureNotAvailable(Theme.ResourcesProvider resourceProvider) {
+        BulletinFactory.global().createErrorBulletin("This feature is currently not available", resourceProvider).show();
     }
 }
 

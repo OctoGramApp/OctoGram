@@ -1429,10 +1429,12 @@ public class LocaleController {
         return getString(key, res);
     }
 
+    @Deprecated
     public static String getString(String key, int res) {
         return getInstance().getStringInternal(key, res);
     }
 
+    @Deprecated
     public static String getString(String key, String fallback, int fallbackRes, int res) {
         return getInstance().getStringInternal(key, fallback, fallbackRes, res);
     }
@@ -1441,6 +1443,7 @@ public class LocaleController {
         return getInstance().getStringInternal(key, fallback, 0, res);
     }
 
+    @Deprecated
     public static String getString(String key) {
         if (TextUtils.isEmpty(key)) {
             return "LOC_ERR:" + key;

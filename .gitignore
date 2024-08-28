@@ -29,3 +29,4 @@ TMessagesProj_AppStandalone/afat/
 TMessagesProj_AppHuawei/afat/
 .run/
 *.jks
+move_icon.sh

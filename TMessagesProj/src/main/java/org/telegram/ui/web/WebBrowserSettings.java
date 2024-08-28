@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -63,6 +64,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
+
+import it.octogram.android.utils.OctoUtils;
 
 public class WebBrowserSettings extends UniversalFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -268,10 +271,11 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
             SharedConfig.toggleBrowserAdaptableColors();
             ((TextCheckCell) view).setChecked(SharedConfig.adaptableColorInBrowser);
         } else if (item.id == BUTTON_TOGGLE) {
-            SharedConfig.toggleInappBrowser();
+            OctoUtils.featureNotAvailable(getResourceProvider());
+            /*SharedConfig.toggleInappBrowser();
             ((TextCheckCell) view).setChecked(SharedConfig.inappBrowser);
             ((TextCheckCell) view).setBackgroundColorAnimated(SharedConfig.inappBrowser, Theme.getColor(SharedConfig.inappBrowser ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked));
-            listView.adapter.update(true);
+            listView.adapter.update(true);*/
         } else if (item.id == BUTTON_CUSTOMTABS_ON) {
             SharedConfig.toggleCustomTabs(true);
             listView.adapter.update(true);
@@ -291,13 +295,14 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
                         webView.clearCache(true);
                         webView.clearHistory();
                         webView.destroy();
-                    } catch (Exception e) {}
+                    } catch (Exception ignored) {}
                     try {
                         File dir = new File(ApplicationLoader.applicationContext.getApplicationInfo().dataDir, "app_webview");
                         if (dir.exists()) {
                             deleteDirectory(dir, false);
                         }
                     } catch (Exception e) {
+                        Log.e("tmessages", String.format("Error deleting cache: %s", e.getMessage()));
                         FileLog.e(e);
                     }
                     try {
@@ -306,6 +311,7 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
                             deleteDirectory(dir, null);
                         }
                     } catch (Exception e) {
+                        Log.e("tmessages", String.format("Error deleting cache: %s", e.getMessage()));
                         FileLog.e(e);
                     }
                     WebMetadataCache.getInstance().clear();
@@ -330,6 +336,7 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
                             deleteDirectory(dir, true);
                         }
                     } catch (Exception e) {
+                        Log.e("tmessages", String.format("Error deleting cookies: %s", e.getMessage()));
                         FileLog.e(e);
                     }
                     loadSizes();

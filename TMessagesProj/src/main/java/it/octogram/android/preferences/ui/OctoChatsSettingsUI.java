@@ -96,14 +96,14 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                                     .setOptionTitle(LocaleController.getString("PromptBeforeSendingGIFs", R.string.PromptBeforeSendingGIFs))
                                     .setProperty(OctoConfig.INSTANCE.promptBeforeSendingGIFs)
                             )
-                            /*.addRow(new ExpandableRowsOption()
+                            .addRow(new ExpandableRowsOption()
                                     .setOptionTitle(LocaleController.getString("PromptBeforeSendingVoiceMessages", R.string.PromptBeforeSendingVoiceMessages))
                                     .setProperty(OctoConfig.INSTANCE.promptBeforeSendingVoiceMessages)
                             )
                             .addRow(new ExpandableRowsOption()
                                     .setOptionTitle(LocaleController.getString("PromptBeforeSendingVideoMessages", R.string.PromptBeforeSendingVideoMessages))
                                     .setProperty(OctoConfig.INSTANCE.promptBeforeSendingVideoMessages)
-                            )*/
+                            )
                             .build()
                     );
                 })

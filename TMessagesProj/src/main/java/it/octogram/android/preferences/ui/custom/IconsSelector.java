@@ -116,6 +116,7 @@ public abstract class IconsSelector extends LinearLayout {
 
     public static class IconsPreviewCell extends FrameLayout {
         private final ArrayList<ViewPropertyAnimator> animators = new ArrayList<>();
+        private ViewPropertyAnimator particlesAnimator;
         private final ArrayList<ImageView> icons = new ArrayList<>();
         private int lastCompletedAnimationIconsType = -1;
         private boolean wasLastCompletedAnimationMemeIcons = false;
@@ -214,13 +215,20 @@ public abstract class IconsSelector extends LinearLayout {
                     animator.cancel();
                 }
             }
+
+            if (particlesAnimator != null) {
+                particlesAnimator.cancel();
+            }
+
             animators.clear();
 
             if (lastCompletedAnimationIconsType == OctoConfig.INSTANCE.uiIconsType.getValue() && wasLastCompletedAnimationMemeIcons == areMemeIconsEnabled()) {
                 return;
             }
 
-            particlesView.animate().alpha(areMemeIconsEnabled() ? 0.3f : 0f).setDuration(200).start();
+            particlesView.setAlpha(useParticlesAnimation() ? 0f : 0.3f);
+            particlesAnimator = particlesView.animate().alpha(useParticlesAnimation() ? 0.3f : 0f).setDuration(200);
+            particlesAnimator.start();
             particlesView.setPaused(!areMemeIconsEnabled());
 
             for (int i = 0; i < icons.size(); i++) {
@@ -233,6 +241,10 @@ public abstract class IconsSelector extends LinearLayout {
 
         private boolean areMemeIconsEnabled() {
             return OctoConfig.INSTANCE.uiIconsType.getValue() != IconsUIType.DEFAULT.getValue() && OctoConfig.INSTANCE.uiRandomMemeIcons.getValue() && canUseMemeMode();
+        }
+
+        private boolean useParticlesAnimation() {
+            return (canUseMemeMode() && areMemeIconsEnabled()) || (!canUseMemeMode() && OctoConfig.INSTANCE.uiIconsType.getValue() != IconsUIType.DEFAULT.getValue());
         }
 
         private void animateDisappear(ImageView icon, Runnable onPostAnimationEnd) {

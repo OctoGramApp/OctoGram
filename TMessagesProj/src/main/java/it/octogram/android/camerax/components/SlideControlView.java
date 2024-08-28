@@ -20,8 +20,9 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.Components.AnimationProperties;
@@ -88,23 +89,21 @@ public class SlideControlView extends View {
         this.mode = mode;
 
         if (mode == SLIDER_MODE_ZOOM) {
-            minusDrawable = context.getResources().getDrawable(R.drawable.zoom_minus);
-            plusDrawable = context.getResources().getDrawable(R.drawable.zoom_plus);
+            minusDrawable = ContextCompat.getDrawable(context, R.drawable.zoom_minus);
+            plusDrawable = ContextCompat.getDrawable(context, R.drawable.zoom_plus);
         } else if (mode == SLIDER_MODE_EV) {
-            // TODO PLACEHOLDER
-            // ev_minus - ev_plus
-            minusDrawable = context.getResources().getDrawable(R.drawable.zoom_minus);
-            plusDrawable = context.getResources().getDrawable(R.drawable.zoom_plus);
+            minusDrawable = ContextCompat.getDrawable(context, R.drawable.ev_minus);
+            plusDrawable = ContextCompat.getDrawable(context, R.drawable.ev_plus);
         }
 
-        progressDrawable = context.getResources().getDrawable(R.drawable.zoom_slide);
+        progressDrawable = ContextCompat.getDrawable(context, R.drawable.zoom_slide);
         if (mode == SLIDER_MODE_ZOOM) {
-            filledProgressDrawable = context.getResources().getDrawable(R.drawable.zoom_slide_a);
+            filledProgressDrawable = ContextCompat.getDrawable(context, R.drawable.zoom_slide_a);
         } else if (mode == SLIDER_MODE_EV) {
-            filledProgressDrawable = context.getResources().getDrawable(R.drawable.zoom_slide);
+            filledProgressDrawable = ContextCompat.getDrawable(context, R.drawable.zoom_slide);
         }
-        knobDrawable = context.getResources().getDrawable(R.drawable.zoom_round);
-        pressedKnobDrawable = context.getResources().getDrawable(R.drawable.zoom_round_b);
+        knobDrawable = ContextCompat.getDrawable(context, R.drawable.zoom_round);
+        pressedKnobDrawable = ContextCompat.getDrawable(context, R.drawable.zoom_round_b);
     }
 
     public float getSliderValue() {
@@ -274,17 +273,18 @@ public class SlideControlView extends View {
             progressEndY = plusCy - AndroidUtilities.dp(18);
         }
 
-        if (mode == SLIDER_MODE_ZOOM) {
-            minusDrawable.setBounds(minusCx - AndroidUtilities.dp(7), minusCy - AndroidUtilities.dp(7), minusCx + AndroidUtilities.dp(7), minusCy + AndroidUtilities.dp(7));
-            minusDrawable.draw(canvas);
-            plusDrawable.setBounds(plusCx - AndroidUtilities.dp(7), plusCy - AndroidUtilities.dp(7), plusCx + AndroidUtilities.dp(7), plusCy + AndroidUtilities.dp(7));
-            plusDrawable.draw(canvas);
-        } else if (mode == SLIDER_MODE_EV) {
-            //minusDrawable;
-            minusDrawable.setBounds(minusCx - AndroidUtilities.dp(7), minusCy - AndroidUtilities.dp(7), minusCx + AndroidUtilities.dp(7), minusCy + AndroidUtilities.dp(7));
-            minusDrawable.draw(canvas);
-            plusDrawable.setBounds(plusCx - AndroidUtilities.dp(8), plusCy - AndroidUtilities.dp(8), plusCx + AndroidUtilities.dp(8), plusCy + AndroidUtilities.dp(8));
-            plusDrawable.draw(canvas);
+        if (minusDrawable != null && plusDrawable != null) {
+            if (mode == SLIDER_MODE_ZOOM) {
+                minusDrawable.setBounds(minusCx - AndroidUtilities.dp(7), minusCy - AndroidUtilities.dp(7), minusCx + AndroidUtilities.dp(7), minusCy + AndroidUtilities.dp(7));
+                minusDrawable.draw(canvas);
+                plusDrawable.setBounds(plusCx - AndroidUtilities.dp(7), plusCy - AndroidUtilities.dp(7), plusCx + AndroidUtilities.dp(7), plusCy + AndroidUtilities.dp(7));
+                plusDrawable.draw(canvas);
+            } else if (mode == SLIDER_MODE_EV) {
+                minusDrawable.setBounds(minusCx - AndroidUtilities.dp(7), minusCy - AndroidUtilities.dp(7), minusCx + AndroidUtilities.dp(7), minusCy + AndroidUtilities.dp(7));
+                minusDrawable.draw(canvas);
+                plusDrawable.setBounds(plusCx - AndroidUtilities.dp(8), plusCy - AndroidUtilities.dp(8), plusCx + AndroidUtilities.dp(8), plusCy + AndroidUtilities.dp(8));
+                plusDrawable.draw(canvas);
+            }
         }
 
 
@@ -293,25 +293,29 @@ public class SlideControlView extends View {
         int knobX = (int) (progressStartX + totalX * sliderValue);
         int knobY = (int) (progressStartY + totalY * sliderValue);
 
-        if (isPortrait) {
-            progressDrawable.setBounds(progressStartX, progressStartY - AndroidUtilities.dp(3), progressEndX, progressStartY + AndroidUtilities.dp(3));
-            filledProgressDrawable.setBounds(progressStartX, progressStartY - AndroidUtilities.dp(3), knobX, progressStartY + AndroidUtilities.dp(3));
-        } else {
-            progressDrawable.setBounds(progressStartY, 0, progressEndY, AndroidUtilities.dp(6));
-            filledProgressDrawable.setBounds(progressStartY, 0, knobY, AndroidUtilities.dp(6));
-            canvas.save();
-            canvas.rotate(90);
-            canvas.translate(0, -progressStartX - AndroidUtilities.dp(3));
+        if (progressDrawable != null && filledProgressDrawable != null) {
+            if (isPortrait) {
+                progressDrawable.setBounds(progressStartX, progressStartY - AndroidUtilities.dp(3), progressEndX, progressStartY + AndroidUtilities.dp(3));
+                filledProgressDrawable.setBounds(progressStartX, progressStartY - AndroidUtilities.dp(3), knobX, progressStartY + AndroidUtilities.dp(3));
+            } else {
+                progressDrawable.setBounds(progressStartY, 0, progressEndY, AndroidUtilities.dp(6));
+                filledProgressDrawable.setBounds(progressStartY, 0, knobY, AndroidUtilities.dp(6));
+                canvas.save();
+                canvas.rotate(90);
+                canvas.translate(0, -progressStartX - AndroidUtilities.dp(3));
+            }
+            progressDrawable.draw(canvas);
+            filledProgressDrawable.draw(canvas);
         }
-        progressDrawable.draw(canvas);
-        filledProgressDrawable.draw(canvas);
         if (!isPortrait) {
             canvas.restore();
         }
 
-        Drawable drawable = knobPressed ? pressedKnobDrawable : knobDrawable;
-        int size = drawable.getIntrinsicWidth();
-        drawable.setBounds(knobX - size / 2, knobY - size / 2, knobX + size / 2, knobY + size / 2);
-        drawable.draw(canvas);
+        var drawable = knobPressed ? pressedKnobDrawable : knobDrawable;
+        if (drawable != null) {
+            int size = drawable.getIntrinsicWidth();
+            drawable.setBounds(knobX - size / 2, knobY - size / 2, knobX + size / 2, knobY + size / 2);
+            drawable.draw(canvas);
+        }
     }
 }

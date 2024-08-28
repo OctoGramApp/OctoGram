@@ -289,6 +289,7 @@
     <string name="AppIconChupa">Chupa Icon</string>
     <string name="AppIconYuki">Yuki Icon</string>
     <string name="AppIconConfetti">Confetti</string>
+    <string name="AppIconDev">Dev Icon</string>
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
     <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
     <string name="UnlockedHiddenConfettiIcon">You have unlocked confetti! Activate the new secret icon from settings.</string>

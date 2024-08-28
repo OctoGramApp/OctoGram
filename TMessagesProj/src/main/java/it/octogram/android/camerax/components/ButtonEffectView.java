@@ -54,7 +54,7 @@ public class ButtonEffectView extends RelativeLayout {
         });
         imageView.setImageBitmap(getIcon());
 
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         imageView.setLayoutParams(layoutParams);
         addView(imageView);

@@ -52,6 +52,7 @@ import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
+import it.octogram.android.preferences.ui.custom.FolderTypeSelector;
 import it.octogram.android.preferences.ui.custom.IconsSelector;
 import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.PopupChoiceDialogOption;
@@ -300,6 +301,19 @@ public class OctoExperimentsUI implements PreferencesEntry {
                         .title(composeIconsDescription(false))
                         .showIf(isUsingM3)
                         .build())
+                /*.row(new CustomCellRow.CustomCellRowBuilder()
+                        .layout(new FolderTypeSelector(context) {
+                            @Override
+                            protected void onSelectedIcons() {
+                                reloadUI(fragment);
+
+                                updateConfig();
+                                fragment.reloadUIAfterValueUpdate();
+                                fragment.smoothScrollToEnd();
+                            }
+                        })
+                        .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
+                        .build())*/
                 .build();
     }
 
@@ -332,7 +346,9 @@ public class OctoExperimentsUI implements PreferencesEntry {
         );
     }
 
-    /** @noinspection deprecation*/
+    /**
+     * @noinspection deprecation
+     */
     private void reloadUI(PreferencesFragment fragment, boolean reloadLast) {
         Parcelable recyclerViewState = null;
         RecyclerView.LayoutManager layoutManager = fragment.getListView().getLayoutManager();

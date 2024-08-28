@@ -55,7 +55,7 @@ public class BuildVars {
     }
 
     private static boolean hasDirectCurrency() {
-        if (!BillingController.getInstance().isReady() || BillingController.PREMIUM_PRODUCT_DETAILS == null) {
+        if (!BillingController.getInstance().isReady() || (BillingController.PREMIUM_PRODUCT_DETAILS == null || BillingController.PREMIUM_PRODUCT_DETAILS.getSubscriptionOfferDetails() == null)) {
             return false;
         }
         for (ProductDetails.SubscriptionOfferDetails offerDetails : BillingController.PREMIUM_PRODUCT_DETAILS.getSubscriptionOfferDetails()) {

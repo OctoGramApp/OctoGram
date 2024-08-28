@@ -3850,6 +3850,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             protected boolean isCentered() {
                 return isTitleCentered();
             }
+
+            @Override
+            protected boolean isPreviewMode() {
+                return isInPreviewMode();
+            }
         };
         avatarContainer.allowShorterStatus = true;
         avatarContainer.premiumIconHiddable = true;

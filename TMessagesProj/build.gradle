@@ -76,16 +76,21 @@ dependencies {
     implementation 'androidx.palette:palette:1.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.3.7'
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
-    implementation 'androidx.sharetarget:sharetarget:1.2.0'
+    implementation "androidx.sharetarget:sharetarget:1.2.0"
+    implementation 'androidx.interpolator:interpolator:1.0.0'
+    implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.browser:browser:1.8.0'
+
+    // GooglePlay Integrity
+    implementation 'com.google.android.play:integrity:1.4.0'
 
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
-    compileOnly 'org.checkerframework:checker-qual:3.37.0'
+    compileOnly 'org.checkerframework:checker-qual:2.5.2'
     compileOnly 'org.checkerframework:checker-compat-qual:2.5.0'
 
     // Firebase dependencies
-    //noinspection GradleDependency
-    implementation 'com.google.firebase:firebase-messaging:23.4.1' // NOT YET SUPPORTED BY LOCAL VERSION OF EXOPLAYER
+    implementation 'com.google.firebase:firebase-messaging:24.0.0'
     implementation 'com.google.firebase:firebase-config:22.0.0'
     implementation 'com.google.firebase:firebase-datatransport:19.0.0'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
@@ -95,21 +100,18 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:21.2.0'
     implementation 'com.google.android.gms:play-services-vision:20.1.3'
     implementation 'com.google.android.gms:play-services-wearable:18.2.0'
-    //noinspection GradleDependency
-    implementation 'com.google.android.gms:play-services-location:21.0.1' // NOT YET SUPPORTED BY TELEGRAM
+    implementation 'com.google.android.gms:play-services-location:21.3.0' // NOT YET SUPPORTED BY TELEGRAM
     implementation 'com.google.android.gms:play-services-wallet:19.4.0'
     implementation 'com.google.android.gms:play-services-safetynet:18.1.0'
 
-    //noinspection GradleDependency
     implementation 'com.googlecode.mp4parser:isoparser:1.0.6' // NOT YET SUPPORTED BY TELEGRAM
-    //noinspection GradleDependency
     implementation 'com.stripe:stripe-android:2.0.2' // NOT YET SUPPORTED BY TELEGRAM
     implementation 'com.google.mlkit:language-id:17.0.6'
-    implementation 'com.android.billingclient:billing:7.0.0'
+    implementation 'com.android.billingclient:billing:6.2.1'
     implementation 'org.apache.commons:commons-text:1.10.0'
     implementation 'org.codeberg.qwerty287:prism4j:003cb5e380'
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation ('com.google.guava:guava:32.0.1-jre') {
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation ('com.google.guava:guava:33.2.1-android') {
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
         exclude group: 'org.checkerframework', module: 'checker-compat-qual'
         exclude group: 'org.checkerframework', module: 'checker-qual'
@@ -138,30 +140,19 @@ dependencies {
     implementation 'com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1'
     implementation 'com.google.android.gms:play-services-mlkit-image-labeling:16.0.8'
     constraints {
-        //noinspection ForeignDelegate
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
         }
-        //noinspection ForeignDelegate
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
             because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
         }
     }
-
-    implementation 'com.google.guava:guava:32.1.3-android'
-    implementation 'com.google.android.play:integrity:1.4.0'
-
 }
 
 android {
     namespace 'org.telegram.messenger'
 
     sourceSets.main.jniLibs.srcDirs = ['./jni/']
-
-    buildFeatures {
-        prefab true
-        buildConfig true
-    }
 
     externalNativeBuild {
         cmake {

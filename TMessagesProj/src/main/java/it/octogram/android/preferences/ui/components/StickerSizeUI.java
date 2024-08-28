@@ -38,6 +38,7 @@ import org.telegram.ui.Components.MotionBackgroundDrawable;
 import java.util.Locale;
 import java.util.Random;
 
+import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.OctoConfig;
 
 public class StickerSizeUI extends BaseFragment {
@@ -51,14 +52,24 @@ public class StickerSizeUI extends BaseFragment {
         actionBar.setAllowOverlayTitle(false);
 
         ActionBarMenu menu = actionBar.createMenu();
+        menu.setCenteredTitle(isCenteredTitle());
 
-        searchIconItem = menu.addItem(0, R.drawable.ic_ab_search);
+        if (!isCenteredTitle()) {
+            searchIconItem = menu.addItem(0, R.drawable.ic_ab_search);
+        }
+
         menu.addItem(1, R.drawable.ic_ab_other);
 
-        avatarContainer = new ChatAvatarContainer(context, this, true);
-        avatarContainer.getAvatarImageView().setVisibility(View.VISIBLE);
+        avatarContainer = new ChatAvatarContainer(context, this, false, getResourceProvider()) {
+            @Override
+            protected boolean isCentered() {
+                return isCenteredTitle();
+            }
+        };
+        avatarContainer.allowDrawStories = false;
+        avatarContainer.setClipChildren(false);
 
-        actionBar.addView(avatarContainer, 0, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT, 10, 0, 40, 0));
+        actionBar.addView(avatarContainer, 0, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER_VERTICAL | Gravity.RIGHT, 40, 0, 0, 0));
         reloadActionBar();
 
         FrameLayout layout = new FrameLayout(context);
@@ -68,8 +79,15 @@ public class StickerSizeUI extends BaseFragment {
         return layout;
     }
 
+    private boolean isCenteredTitle() {
+        int centeredTitle = OctoConfig.INSTANCE.uiTitleCenteredState.getValue();
+        return centeredTitle == ActionBarCenteredTitle.ALWAYS.getValue() || centeredTitle == ActionBarCenteredTitle.JUST_IN_CHATS.getValue();
+    }
+
     public void reloadActionBar() {
-        searchIconItem.setVisibility(OctoConfig.INSTANCE.searchIconInHeader.getValue() ? View.VISIBLE : View.GONE);
+        if (searchIconItem != null) {
+            searchIconItem.setVisibility(OctoConfig.INSTANCE.searchIconInHeader.getValue() ? View.VISIBLE : View.GONE);
+        }
 
         boolean slidingTitle = OctoConfig.INSTANCE.slidingTitle.getValue();
 
@@ -80,9 +98,10 @@ public class StickerSizeUI extends BaseFragment {
             avatarContainer.getTitleTextView().resetScrolling();
         }
 
+        avatarContainer.getAvatarImageView().setImageResource(R.drawable.ic_unsized_octo);
         avatarContainer.setTitle(LocaleController.getString("StickersSizeChannelTitle", R.string.StickersSizeChannelTitle), false, false, true, false, null, false, slidingTitle);
         avatarContainer.setSubtitle(LocaleController.formatPluralString("Members", result[0]).replace(String.format(Locale.getDefault(), "%d", result[0]), shortNumber));
-        ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = dp(OctoConfig.INSTANCE.searchIconInHeader.getValue() ? 96 : 40);
+        ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = isCenteredTitle() ? 0 : dp(OctoConfig.INSTANCE.searchIconInHeader.getValue() ? 96 : 40);
     }
 
     @SuppressLint("ViewConstructor")

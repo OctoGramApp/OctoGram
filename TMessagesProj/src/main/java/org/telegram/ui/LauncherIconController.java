@@ -38,12 +38,13 @@ public class LauncherIconController {
         VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.mipmap.icon_6_foreground_sa, R.string.AppIconVintage),
         MONET("MonetIcon", -1, -1, R.string.MonetIcon, false, true),
         AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconAqua),
+        DEV("DevIcon", R.mipmap.ic_dev_icon_background, R.mipmap.ic_dev_icon_foreground, R.string.AppIconDev, false, false),
         CHUPA("ChupaIcon", R.drawable.icon_9_background_sa, R.mipmap.icon_9_launcher_foreground_sa, R.string.AppIconChupa, false, true),
+        YUKI("YukiIcon", R.drawable.icon_yuki_background_sa, R.mipmap.icon_yuki_foreground_sa, R.string.AppIconYuki, false, true),
+        CONFETTI("ConfettiIcon", R.mipmap.ic_octo_confetti_background, R.mipmap.icon_foreground_sa, R.string.AppIconConfetti, false, true),
         PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground_sa, R.string.AppIconPremium, true),
         TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.mipmap.icon_5_foreground_sa, R.string.AppIconTurbo, true),
-        NOX("NoxIcon", R.mipmap.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox, true),
-        YUKI("YukiIcon", R.drawable.icon_yuki_background_sa, R.mipmap.icon_yuki_foreground_sa, R.string.AppIconYuki, false, true),
-        CONFETTI("ConfettiIcon", R.mipmap.ic_octo_confetti_background, R.mipmap.icon_foreground_sa, R.string.AppIconConfetti, false, true);
+        NOX("NoxIcon", R.mipmap.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox, true);
 
         public final String key;
         public final int background;
