@@ -19,7 +19,7 @@ public class IconsResources extends Resources {
 
     @Override
     public Drawable getDrawable(int id) throws NotFoundException {
-        return super.getDrawable(getConversion(id));
+        return super.getDrawable(getConversion(id), null);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class IconsResources extends Resources {
     @Nullable
     @Override
     public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
-        return super.getDrawableForDensity(getConversion(id), density);
+        return super.getDrawableForDensity(getConversion(id), density, null);
     }
 
     private int getConversion(int icon) {

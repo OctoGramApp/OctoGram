@@ -2149,22 +2149,16 @@ public class AndroidUtilities {
             if (!typefaceCache.containsKey(assetPath)) {
                 try {
                     if (OctoConfig.INSTANCE.useSystemFont.getValue()) {
-                        var typefaceEnum = FontType.Companion.fromPath(assetPath);
-                        if (typefaceEnum != null) {
-                            var t = switch (typefaceEnum) {
-                                case ROBOTO_MEDIUM ->
-                                        Typeface.create("sans-serif-medium", Typeface.NORMAL);
-                                case ROBOTO_MEDIUM_ITALIC ->
-                                        Typeface.create("sans-serif-medium", Typeface.ITALIC);
-                                case ROBOTO_MONO ->
-                                        Typeface.MONOSPACE;
-                                case MERRIWEATHER_BOLD ->
-                                        Typeface.create("serif", Typeface.BOLD);
-                                case COURIER_NEW_BOLD ->
-                                        Typeface.create("monospace", Typeface.BOLD);
-                            };
-                            typefaceCache.put(assetPath, t);
-                        }
+                        Typeface t = switch (assetPath) {
+                            case "fonts/rmedium.ttf" -> Typeface.create("sans-serif-medium", Typeface.NORMAL);
+                            case "fonts/ritalic.ttf" -> Typeface.create("sans-serif", Typeface.ITALIC);
+                            case "fonts/rmediumitalic.ttf" -> Typeface.create("sans-serif-medium", Typeface.ITALIC);
+                            case "fonts/rmono.ttf" -> Typeface.MONOSPACE;
+                            case "fonts/mw_bold.ttf" -> Typeface.create("serif", Typeface.BOLD);
+                            case "fonts/rcondensedbold.ttf" -> Typeface.create("sans-serif-condensed", Typeface.BOLD);
+                            default -> null;
+                        };
+                        typefaceCache.put(assetPath, t);
                     } else {
                         Typeface t;
                         if (Build.VERSION.SDK_INT >= 26) {
