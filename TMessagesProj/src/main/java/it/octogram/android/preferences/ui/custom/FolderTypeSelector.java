@@ -22,17 +22,13 @@ import android.widget.LinearLayout;
 
 import androidx.core.content.ContextCompat;
 
-import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.NumberPicker;
-import org.telegram.ui.Components.Premium.StarParticlesView;
 
 import java.util.ArrayList;
 
-import it.octogram.android.IconsUIType;
 import it.octogram.android.OctoConfig;
 
 @SuppressLint("UseCompatLoadingForDrawables")

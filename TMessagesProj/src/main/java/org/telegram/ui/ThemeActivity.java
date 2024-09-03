@@ -1343,11 +1343,10 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 }
             } else if (position == browserRow) {
                 if (LocaleController.isRTL && x <= dp(76) || !LocaleController.isRTL && x >= view.getMeasuredWidth() - dp(76)) {
-                    /*NotificationsCheckCell checkCell = (NotificationsCheckCell) view;
+                    NotificationsCheckCell checkCell = (NotificationsCheckCell) view;
                     SharedConfig.toggleInappBrowser();
                     checkCell.setChecked(SharedConfig.inappBrowser);
-                    checkCell.setClickable(false);*/
-                    OctoUtils.featureNotAvailable(getResourceProvider());
+                    checkCell.setClickable(false);
                 } else {
                     presentFragment(new WebBrowserSettings(null));
                 }

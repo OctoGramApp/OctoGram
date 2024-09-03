@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -378,12 +379,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     public static LaunchActivity instance;
     private View customNavigationBar;
 
+    private AssetManager iconsAsset;
     private IconsResources customResources;
 
     @Override
     public Resources getResources() {
-        if (customResources == null) {
+        if (iconsAsset != super.getResources().getAssets()) {
             customResources = new IconsResources(super.getResources());
+            iconsAsset = super.getResources().getAssets();
         }
         return customResources;
     }

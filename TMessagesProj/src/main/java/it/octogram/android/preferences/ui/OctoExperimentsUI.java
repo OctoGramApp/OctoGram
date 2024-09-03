@@ -52,7 +52,6 @@ import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
-import it.octogram.android.preferences.ui.custom.FolderTypeSelector;
 import it.octogram.android.preferences.ui.custom.IconsSelector;
 import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.PopupChoiceDialogOption;
@@ -271,11 +270,10 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .layout(iconsSelector = new IconsSelector(context) {
                                 @Override
                                 protected void onSelectedIcons() {
-                                    reloadUI(fragment);
-
                                     updateConfig();
                                     fragment.reloadUIAfterValueUpdate();
                                     fragment.smoothScrollToEnd();
+                                    fragment.showRestartTooltip();
                                 }
                             })
                             .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
@@ -286,6 +284,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.uiRandomMemeIcons)
                             .showIf(canShowMemeModeRow)
                             .title("Meme Mode")
+                            .requiresRestart(true)
                             .description(LocaleController.getString(R.string.ImproveIconsMeme_Desc))
                             .build());
                 })

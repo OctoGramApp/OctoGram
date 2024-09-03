@@ -12,6 +12,8 @@ import it.octogram.android.preferences.ui.custom.IconsSelector;
 
 @SuppressLint("UseCompatLoadingForDrawables")
 public class IconsResources extends Resources {
+    private int _iconsType = -1;
+    private boolean _useMemeMode = false;
 
     public IconsResources(Resources resources) {
         super(resources.getAssets(), resources.getDisplayMetrics(), resources.getConfiguration());
@@ -39,28 +41,37 @@ public class IconsResources extends Resources {
         return super.getDrawableForDensity(getConversion(id), density, null);
     }
 
-    private int getConversion(int icon) {
-        int iconsType = OctoConfig.INSTANCE.uiIconsType.getValue();
+    public Drawable getForcedDrawable(int id, int forcedIconsType, boolean forcedMemeModeStatus) throws NotFoundException {
+        return super.getDrawable(getConversion(id, forcedIconsType, forcedMemeModeStatus, true), null);
+    }
 
-        if (iconsType == IconsUIType.SOLAR.getValue()) {
-            if (OctoConfig.INSTANCE.uiRandomMemeIcons.getValue()) {
-                if (IconsSelector.canUseMemeMode()) {
-                    return SolarIcons.Companion.getRandom(icon);
-                } else {
-                    OctoConfig.INSTANCE.uiRandomMemeIcons.updateValue(false);
-                }
+    private int getConversion(int icon) {
+        return getConversion(icon, -1, false, false);
+    }
+
+    private int getConversion(int icon, int forcedIconsType, boolean forcedMemeModeStatus, boolean hasForcedMemeModeStatus) {
+        if (_iconsType == -1) {
+            _iconsType = OctoConfig.INSTANCE.uiIconsType.getValue();
+            _useMemeMode = OctoConfig.INSTANCE.uiRandomMemeIcons.getValue();
+        }
+
+        int consideredIconsType = forcedIconsType == -1 ? _iconsType : forcedIconsType;
+        boolean consideredMemeMode = hasForcedMemeModeStatus ? forcedMemeModeStatus : _useMemeMode;
+
+        if (consideredIconsType == IconsUIType.SOLAR.getValue()) {
+            if (consideredMemeMode && IconsSelector.canUseMemeMode()) {
+                return SolarIcons.Companion.getRandom(icon);
             }
+
             return SolarIcons.Companion.getConversion(icon);
-        } else if (iconsType == IconsUIType.MATERIAL_DESIGN_3.getValue()) {
-            if (OctoConfig.INSTANCE.uiRandomMemeIcons.getValue()) {
-                if (IconsSelector.canUseMemeMode()) {
-                    return MaterialDesign3Icons.Companion.getRandom(icon);
-                } else {
-                    OctoConfig.INSTANCE.uiRandomMemeIcons.updateValue(false);
-                }
+        } else if (consideredIconsType == IconsUIType.MATERIAL_DESIGN_3.getValue()) {
+            if (consideredMemeMode && IconsSelector.canUseMemeMode()) {
+                return MaterialDesign3Icons.Companion.getRandom(icon);
             }
+
             return MaterialDesign3Icons.Companion.getConversion(icon);
         }
+
         return icon;
     }
 }

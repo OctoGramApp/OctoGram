@@ -271,11 +271,10 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
             SharedConfig.toggleBrowserAdaptableColors();
             ((TextCheckCell) view).setChecked(SharedConfig.adaptableColorInBrowser);
         } else if (item.id == BUTTON_TOGGLE) {
-            OctoUtils.featureNotAvailable(getResourceProvider());
-            /*SharedConfig.toggleInappBrowser();
+            SharedConfig.toggleInappBrowser();
             ((TextCheckCell) view).setChecked(SharedConfig.inappBrowser);
             ((TextCheckCell) view).setBackgroundColorAnimated(SharedConfig.inappBrowser, Theme.getColor(SharedConfig.inappBrowser ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked));
-            listView.adapter.update(true);*/
+            listView.adapter.update(true);
         } else if (item.id == BUTTON_CUSTOMTABS_ON) {
             SharedConfig.toggleCustomTabs(true);
             listView.adapter.update(true);

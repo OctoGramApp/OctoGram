@@ -72,7 +72,6 @@ import java.util.concurrent.ExecutionException;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.JpegImageUtils;
 
-/** @noinspection deprecation*/
 public class CameraXController {
 
     private boolean isFrontface;
@@ -239,7 +238,12 @@ public class CameraXController {
 
     public boolean isAvailableHdrMode() {
         if (extensionsManager != null) {
-            return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.HDR);
+            try {
+                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.HDR);
+            } catch (Exception e) {
+                FileLog.e(e);
+                return false;
+            }
         } else {
             return false;
         }
@@ -247,7 +251,12 @@ public class CameraXController {
 
     public boolean isAvailableNightMode() {
         if (extensionsManager != null) {
-            return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.NIGHT);
+            try {
+                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.NIGHT);
+            } catch (Exception e) {
+                FileLog.e(e);
+                return false;
+            }
         } else {
             return false;
         }
@@ -263,7 +272,12 @@ public class CameraXController {
 
     public boolean isAvailableAutoMode() {
         if (extensionsManager != null) {
-            return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.AUTO);
+            try {
+                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.AUTO);
+            } catch (Exception e) {
+                FileLog.e(e);
+                return false;
+            }
         } else {
             return false;
         }
@@ -284,9 +298,9 @@ public class CameraXController {
     @SuppressLint({"RestrictedApi", "UnsafeExperimentalUsageError", "UnsafeOptInUsageError"})
     public void bindUseCases() {
         if (provider == null) return;
-        android.util.Size targetSize = getVideoBestSize();
+        var targetSize = getVideoBestSize();
         Preview.Builder previewBuilder = new Preview.Builder();
-        previewBuilder.setTargetResolution(targetSize);
+        previewBuilder.setTargetResolution(targetSize); // Need to migrate to ResolutionSelector
         if (!isFrontface && selectedEffect == CAMERA_WIDE) {
             cameraSelector = CameraXUtils.getDefaultWideAngleCamera(provider);
         } else {
@@ -320,7 +334,7 @@ public class CameraXController {
 
         ImageCapture.Builder iCaptureBuilder = new ImageCapture.Builder()
                 .setCaptureMode(OctoConfig.INSTANCE.cameraXZeroShutter.getValue() ?
-                        ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG:
+                        ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG :
                         (OctoConfig.INSTANCE.cameraXPerformanceMode.getValue() ? ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY : ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 )
                 .setTargetAspectRatio(AspectRatio.RATIO_16_9);
@@ -376,6 +390,7 @@ public class CameraXController {
 
     @SuppressLint("UnsafeExperimentalUsageError")
     public void setExposureCompensation(float value) {
+        if (camera == null) return;
         if (!camera.getCameraInfo().getExposureState().isExposureCompensationSupported()) return;
         Range<Integer> evRange = camera.getCameraInfo().getExposureState().getExposureCompensationRange();
         int index = (int) (mix(evRange.getLower().floatValue(), evRange.getUpper().floatValue(), value) + 0.5f);
@@ -414,7 +429,7 @@ public class CameraXController {
                 //.disableAutoCancel()
                 .build();
 
-        camera.getCameraControl().startFocusAndMetering(action);
+        if (camera.getCameraControl() != null) camera.getCameraControl().startFocusAndMetering(action);
     }
 
 
@@ -602,6 +617,7 @@ public class CameraXController {
             case Surface.ROTATION_90 -> 90;
             case Surface.ROTATION_180 -> 180;
             case Surface.ROTATION_270 -> 270;
+            case Surface.ROTATION_0 -> 0;
             default -> 0;
         };
     }

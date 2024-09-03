@@ -42,7 +42,7 @@ public class MenuOrderController {
             MenuItemId.POWER_USAGE.getId(),
             MenuItemId.PROXY_SETTINGS.getId(),
             MenuItemId.ATTACH_MENU_BOT.getId(),
-            // MenuItemId.TELEGRAM_BROWSER.getId()
+            MenuItemId.TELEGRAM_BROWSER.getId()
     };
 
     static {
@@ -310,13 +310,13 @@ public class MenuOrderController {
                         false
                 )
         );
-//        list.add(
-//                new EditableMenuItem(
-//                        list_items[8],
-//                        LocaleController.getString("NewSecretChat", R.string.NewSecretChat),
-//                        false
-//                )
-//        );
+        /*list.add(
+                new EditableMenuItem(
+                        list_items[8],
+                        LocaleController.getString("NewSecretChat", R.string.NewSecretChat),
+                        false
+                )
+        );*/
         list.add(
                 new EditableMenuItem(
                         list_items[9],
@@ -404,13 +404,13 @@ public class MenuOrderController {
                         false
                 )
         );
-        /*list.add(
+        list.add(
                 new EditableMenuItem(
                         list_items[21],
-                        "Telegram Browser",
+                        LocaleController.getString(R.string.OctoTgBrowser),
                         false
                 )
-        );*/
+        );
 
         for (int i = 0; i < data.length(); i++) {
             try {

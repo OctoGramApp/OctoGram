@@ -7,6 +7,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -20,8 +21,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import androidx.core.content.ContextCompat;
-
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.R;
@@ -34,6 +33,7 @@ import java.util.ArrayList;
 
 import it.octogram.android.IconsUIType;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.icons.IconsResources;
 
 @SuppressLint("UseCompatLoadingForDrawables")
 public abstract class IconsSelector extends LinearLayout {
@@ -199,13 +199,16 @@ public abstract class IconsSelector extends LinearLayout {
         }
 
         private void setIcon(ImageView imageView, int icon) {
-            var drawable = ContextCompat.getDrawable(getContext(), icon);
+            Resources res = getResources();
+            if (res instanceof IconsResources iconsRes) {
+                var drawable = iconsRes.getForcedDrawable(icon, OctoConfig.INSTANCE.uiIconsType.getValue(), areMemeIconsEnabled());
 
-            lastCompletedAnimationIconsType = OctoConfig.INSTANCE.uiIconsType.getValue();
-            wasLastCompletedAnimationMemeIcons = areMemeIconsEnabled();
+                lastCompletedAnimationIconsType = OctoConfig.INSTANCE.uiIconsType.getValue();
+                wasLastCompletedAnimationMemeIcons = areMemeIconsEnabled();
 
-            if (drawable != null) {
-                imageView.setImageDrawable(drawable);
+                if (drawable != null) {
+                    imageView.setImageDrawable(drawable);
+                }
             }
         }
 
@@ -226,9 +229,12 @@ public abstract class IconsSelector extends LinearLayout {
                 return;
             }
 
-            particlesView.setAlpha(useParticlesAnimation() ? 0f : 0.3f);
-            particlesAnimator = particlesView.animate().alpha(useParticlesAnimation() ? 0.3f : 0f).setDuration(200);
-            particlesAnimator.start();
+            if (wasLastCompletedAnimationMemeIcons != areMemeIconsEnabled()) {
+                particlesView.setAlpha(useParticlesAnimation() ? 0f : 0.3f);
+                particlesAnimator = particlesView.animate().alpha(useParticlesAnimation() ? 0.3f : 0f).setDuration(400);
+                particlesAnimator.start();
+            }
+
             particlesView.setPaused(!areMemeIconsEnabled());
 
             for (int i = 0; i < icons.size(); i++) {

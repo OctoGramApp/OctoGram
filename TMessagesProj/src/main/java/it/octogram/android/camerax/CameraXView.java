@@ -150,6 +150,19 @@ public class CameraXView extends BaseCameraView {
     }
 
     @Override
+    public CameraSessionWrapper getCameraSession() {
+        return getCameraSession(0);
+    }
+    @Override
+    public Object getCameraSessionObject() {
+        if (cameraSession[0] == null) return null;
+        return cameraSession[0].getObject();
+    }
+
+    public CameraSessionWrapper getCameraSession(int i) {
+        return cameraSession[i];
+    }
+
     public boolean isInited() {
         return isStreaming;
     }
