@@ -608,4 +608,6 @@
 
     <string name="CurrentCameraXResolution">Current CameraX resolution</string>
     <string name="CameraOption">Camera Option</string>
+    <string name="VoipAnsweringAsAccount">answering as %s</string>
+    <string name="ViewStats">View Stats</string>
 </resources>
