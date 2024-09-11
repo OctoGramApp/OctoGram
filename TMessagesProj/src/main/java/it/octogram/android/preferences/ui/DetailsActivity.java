@@ -491,7 +491,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == messageHeaderRow) {
                         headerCell.setText(LocaleController.getString("Message", R.string.Message));
                     } else if (position == forwardMessageHeaderRow) {
-                        headerCell.setText(LocaleController.getString("ForwardedMessage", R.string.ForwardedMessage));
+                        headerCell.setText(LocaleController.getString(R.string.ForwardedMessage));
                     } else if (position == forwardUserHeaderRow) {
                         headerCell.setText(LocaleController.getString("ForwardedFrom", R.string.ForwardedFrom));
                     } else if (position == repliedMessageHeaderRow) {

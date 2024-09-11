@@ -21,7 +21,6 @@ public class IconsUtils {
             case SETTINGS -> getSettingsIcon(eventType);
             case INVITE_FRIENDS -> getInviteIcon(eventType);
             case TELEGRAM_FEATURES -> getHelpIcon(eventType);
-            case NEARBY_PEOPLE -> getPeopleNearbyIcon(eventType);
             default -> 0;
         };
     }
@@ -59,8 +58,6 @@ public class IconsUtils {
     private static int getNewSecretChatIcon(int eventType) {
         return switch(eventType) {
             case 0 -> R.drawable.msg_secret_ny;
-            case 1 -> R.drawable.msg_secret_14;
-            case 2 -> R.drawable.msg_secret_hw;
             case 3 -> R.drawable.menu_secret_cn;
             default -> R.drawable.msg_secret;
         };
@@ -135,16 +132,6 @@ public class IconsUtils {
             case 0 -> R.drawable.msg_help_ny;
             case 2, 3 -> R.drawable.msg_help_hw;
             default -> R.drawable.msg_help;
-        };
-    }
-
-    private static int getPeopleNearbyIcon(int eventType) {
-        return switch(eventType) {
-            case 0 -> R.drawable.msg_nearby_ny;
-            case 1 -> R.drawable.msg_secret_14;
-            case 2 -> R.drawable.msg_secret_hw;
-            case 3 -> R.drawable.menu_nearby_cn;
-            default -> R.drawable.msg_nearby;
         };
     }
 }

@@ -199,7 +199,6 @@ enum class MenuItemId(val id: String, val itemId: Int) {
     NEW_GROUP("new_group", 2),
     CONTACTS("contacts", 6),
     CALLS("calls", 10),
-    NEARBY_PEOPLE("nearby_people", 12),
     SAVED_MESSAGE("saved_message", 11),
     SETTINGS("settings", 8),
     OCTOGRAM_SETTINGS("octogram_settings", 100),
@@ -385,7 +384,7 @@ enum class Datacenter(
     AMSTERDAM_1(2, "AMS, Amsterdam, NL", R.drawable.ic_venus_datacenter, Color.parseColor("#8B31FD"), "149.154.167.50"),
     AMSTERDAM_2(4, "AMS, Amsterdam, NL", R.drawable.ic_vesta_datacenter, Color.parseColor("#F7B139"), "149.154.167.91"),
     SINGAPORE(5, "SIN, Singapore, SG", R.drawable.ic_flora_datacenter, Color.parseColor("#4BD199"), "91.108.56.100"),
-    UNKNOWN(-1, LocaleController.getString("NumberUnknown", R.string.NumberUnknown), R.drawable.msg_secret_hw, Color.TRANSPARENT, "");
+    UNKNOWN(-1, LocaleController.getString(R.string.NumberUnknown), R.drawable.msg_secret_hw, Color.TRANSPARENT, "");
 
     companion object {
         fun getDcInfo(dcId: Int): Datacenter {

@@ -610,4 +610,8 @@
     <string name="CameraOption">Camera Option</string>
     <string name="VoipAnsweringAsAccount">answering as %s</string>
     <string name="ViewStats">View Stats</string>
+    <string name="Appearance">Appearance</string>
+    <string name="ChatCamera">Camera</string>
+    <string name="Style">Style</string>
+    <string name="ForwardedMessage">Forwarded Message</string>
 </resources>
