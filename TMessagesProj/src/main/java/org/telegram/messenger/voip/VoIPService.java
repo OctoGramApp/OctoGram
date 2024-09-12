@@ -152,6 +152,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.CustomNotificationStyle;
 import it.octogram.android.utils.OctoUtils;
 
 @SuppressLint("NewApi")
@@ -3512,7 +3513,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 		dispatchStateChanged(STATE_WAITING_INCOMING);
 		if (!notificationsDisabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			showIncomingNotification(ContactsController.formatName(user.first_name, user.last_name), null, user, privateCall.video, 0);
+			showIncomingNotification(ContactsController.formatName(user.first_name, user.last_name), user, privateCall.video, 0);
 			if (BuildVars.LOGS_ENABLED) {
 				FileLog.d("Showing incoming call notification");
 			}
@@ -3763,19 +3764,12 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 	}
 
-	private int currentStreamType;
 	private void loadResources() {
-		if (chat != null && OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
-			currentStreamType = AudioManager.STREAM_MUSIC;
-			if (Build.VERSION.SDK_INT >= 21) {
-				WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_MEDIA);
-			}
-		} else {
-			currentStreamType = AudioManager.STREAM_VOICE_CALL;
-			if (Build.VERSION.SDK_INT >= 21) {
-				WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
-			}
-		}
+		/*if (Build.VERSION.SDK_INT >= 21) {
+			WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+		}*/
+		int currentStreamType;
+		currentStreamType = OctoUtils.getCustomStreamType(chat);
 		WebRtcAudioTrack.setAudioStreamType(currentStreamType);
 		Utilities.globalQueue.postRunnable(() -> {
 			soundPool = new SoundPool(1, currentStreamType, 0);
@@ -4186,16 +4180,14 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		return bitmap;
 	}
 
-	private void showIncomingNotification(String name, CharSequence subText, TLObject userOrChat, boolean video, int additionalMemberCount) {
-		Intent intent = new Intent(this, LaunchActivity.class);
+	private void showIncomingNotification(String name, TLObject userOrChat, boolean video, int additionalMemberCount) {
+		var incomingNotification = new CustomNotificationStyle().showIncomingNotification(name, null, userOrChat, video, currentAccount);
+		/*Intent intent = new Intent(this, LaunchActivity.class);
 		intent.setAction("voip");
 
 		Notification.Builder builder = new Notification.Builder(this)
 				.setContentTitle(video ? LocaleController.getString(R.string.VoipInVideoCallBranding) : LocaleController.getString(R.string.VoipInCallBranding))
-				.setContentText(name)
-				.setSmallIcon(OctoUtils.getNotificationIcon())
-				// .setSmallIcon(R.drawable.ic_call)
-				.setSubText(subText)
+				.setSmallIcon(R.drawable.ic_call)
 				.setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE));
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			SharedPreferences nprefs = MessagesController.getGlobalNotificationsSettings();
@@ -4254,23 +4246,21 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		Intent endIntent = new Intent(this, VoIPActionsReceiver.class);
 		endIntent.setAction(getPackageName() + ".DECLINE_CALL");
 		endIntent.putExtra("call_id", getCallID());
-		CharSequence endTitle = LocaleController.getString("VoipDeclineCall", R.string.VoipDeclineCall);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+		CharSequence endTitle = LocaleController.getString(R.string.VoipDeclineCall);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
 			endTitle = new SpannableString(endTitle);
 			((SpannableString) endTitle).setSpan(new ForegroundColorSpan(0xFFF44336), 0, endTitle.length(), 0);
 		}
 		PendingIntent endPendingIntent = PendingIntent.getBroadcast(this, 0, endIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
 		Intent answerIntent = new Intent(this, VoIPActionsReceiver.class);
 		answerIntent.setAction(getPackageName() + ".ANSWER_CALL");
 		answerIntent.putExtra("call_id", getCallID());
-		CharSequence answerTitle = LocaleController.getString("VoipAnswerCall", R.string.VoipAnswerCall);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+		CharSequence answerTitle = LocaleController.getString(R.string.VoipAnswerCall);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
 			answerTitle = new SpannableString(answerTitle);
 			((SpannableString) answerTitle).setSpan(new ForegroundColorSpan(0xFF00AA00), 0, answerTitle.length(), 0);
 		}
 		PendingIntent answerPendingIntent = PendingIntent.getBroadcast(this, 0, answerIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
 		builder.setPriority(Notification.PRIORITY_MAX);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
 			builder.setShowWhen(false);
@@ -4287,43 +4277,36 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				}
 			}
 		}
-		Bitmap avatar = getRoundAvatarBitmap(this, currentAccount, userOrChat);
+		Notification incomingNotification;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-			builder.setColor(0xff282e31);
-			builder.setColorized(true);
-			// String personName = ContactsController.formatName(userOrChat);  ????
-			Person caller = new Person.Builder()
-					.setIcon(Icon.createWithBitmap(avatar))
-					.setName(name)
-					.build();
-			Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, endPendingIntent, answerPendingIntent);
-			callStyle.setIsVideo(videoCall);
-			builder.setStyle(callStyle);
-			builder.setContentText(video ? LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding) : LocaleController.getString("VoipInCallBranding", R.string.VoipInCallBranding));
-		}
-		builder.setLargeIcon(avatar);
-		Notification notification;
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+			Bitmap avatar = getRoundAvatarBitmap(this, currentAccount, userOrChat);
+			String personName = ContactsController.formatName(userOrChat);
+			if (TextUtils.isEmpty(personName)) {
+				//java.lang.IllegalArgumentException: person must have a non-empty a name
+				personName = "___";
+			}
+			Person person = new Person.Builder()
+					.setName(personName)
+					.setIcon(Icon.createWithAdaptiveBitmap(avatar)).build();
+			Notification.CallStyle notificationStyle = Notification.CallStyle.forIncomingCall(person, endPendingIntent, answerPendingIntent);
+
+			builder.setStyle(notificationStyle);
+			incomingNotification = builder.build();
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
+			builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
+			builder.setContentText(name);
+
 			RemoteViews customView = new RemoteViews(getPackageName(), LocaleController.isRTL ? R.layout.call_notification_rtl : R.layout.call_notification);
 			customView.setTextViewText(R.id.name, name);
-			boolean subtitleVisible = true;
-			if (TextUtils.isEmpty(subText)) {
-				customView.setViewVisibility(R.id.subtitle, View.GONE);
-				if (UserConfig.getActivatedAccountsCount() > 1) {
-					TLRPC.User self = UserConfig.getInstance(currentAccount).getCurrentUser();
-					customView.setTextViewText(R.id.title, video ? LocaleController.formatString("VoipInVideoCallBrandingWithName", R.string.VoipInVideoCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)) : LocaleController.formatString("VoipInCallBrandingWithName", R.string.VoipInCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)));
-				} else {
-					customView.setTextViewText(R.id.title, video ? LocaleController.getString(R.string.VoipInVideoCallBranding) : LocaleController.getString(R.string.VoipInCallBranding));
-				}
+			customView.setViewVisibility(R.id.subtitle, View.GONE);
+			if (UserConfig.getActivatedAccountsCount() > 1) {
+				TLRPC.User self = UserConfig.getInstance(currentAccount).getCurrentUser();
+				customView.setTextViewText(R.id.title, video ? LocaleController.formatString("VoipInVideoCallBrandingWithName", R.string.VoipInVideoCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)) : LocaleController.formatString("VoipInCallBrandingWithName", R.string.VoipInCallBrandingWithName, ContactsController.formatName(self.first_name, self.last_name)));
 			} else {
-				if (UserConfig.getActivatedAccountsCount() > 1) {
-					TLRPC.User self = UserConfig.getInstance(currentAccount).getCurrentUser();
-					customView.setTextViewText(R.id.subtitle, LocaleController.formatString(R.string.VoipAnsweringAsAccount, ContactsController.formatName(self.first_name, self.last_name)));
-				} else {
-					customView.setViewVisibility(R.id.subtitle, View.GONE);
-				}
-				customView.setTextViewText(R.id.title, subText);
+				customView.setTextViewText(R.id.title, video ? LocaleController.getString(R.string.VoipInVideoCallBranding) : LocaleController.getString(R.string.VoipInCallBranding));
 			}
+			Bitmap avatar = getRoundAvatarBitmap(this, currentAccount, userOrChat);
 			customView.setTextViewText(R.id.answer_text, LocaleController.getString(R.string.VoipAnswerCall));
 			customView.setTextViewText(R.id.decline_text, LocaleController.getString(R.string.VoipDeclineCall));
 			customView.setImageViewBitmap(R.id.photo, avatar);
@@ -4331,23 +4314,19 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			customView.setOnClickPendingIntent(R.id.decline_btn, endPendingIntent);
 			builder.setLargeIcon(avatar);
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-				builder.setCustomHeadsUpContentView(customView);
-				builder.setCustomBigContentView(customView);
-				notification = builder.build();
-			} else {
-				notification = builder.build();
-				notification.headsUpContentView = customView;
-				notification.bigContentView = customView;
-			}
+			incomingNotification = builder.getNotification();
+			incomingNotification.headsUpContentView = incomingNotification.bigContentView = customView;
 		} else {
-			notification = builder.build();
-		}
+			builder.setContentText(name);
+			builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
+			builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
+			incomingNotification = builder.getNotification();
+		}*/
 		foregroundStarted = true;
 		if (Build.VERSION.SDK_INT >= 33) {
-			startForeground(foregroundId = ID_INCOMING_CALL_NOTIFICATION, foregroundNotification = notification, lastForegroundType = getCurrentForegroundType());
+			startForeground(foregroundId = ID_INCOMING_CALL_NOTIFICATION, foregroundNotification = incomingNotification, lastForegroundType = getCurrentForegroundType());
 		} else {
-			startForeground(foregroundId = ID_INCOMING_CALL_NOTIFICATION, foregroundNotification = notification);
+			startForeground(foregroundId = ID_INCOMING_CALL_NOTIFICATION, foregroundNotification = incomingNotification);
 		}
 		startRingtoneAndVibration();
 	}
@@ -4630,7 +4609,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 
 	private void acceptIncomingCallFromNotification() {
 		showNotification();
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED || privateCall.video && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED || privateCall.video && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
 			try {
 				//intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
 				PendingIntent.getActivity(VoIPService.this, 0, new Intent(VoIPService.this, VoIPPermissionActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ONE_SHOT).send();

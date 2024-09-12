@@ -62,7 +62,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
         }
 
         if (id == SubItem.ADD_DIVIDER.ordinal()) {
-            if (!MenuOrderController.IsDefaultPosition()) {
+            if (!MenuOrderController.isDefaultPosition()) {
                 menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
             } else {
                 menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
@@ -83,7 +83,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
         menuItem.addSubItem(SubItem.ADD_DIVIDER.ordinal(), R.drawable.msg_new_filter, LocaleController.getString(R.string.AddDivider));
         menuItem.addSubItem(SubItem.RESET_ORDER.ordinal(), R.drawable.msg_reset, LocaleController.getString(R.string.ResetItemsOrder));
 
-        if (!MenuOrderController.IsDefaultPosition()) {
+        if (!MenuOrderController.isDefaultPosition()) {
             menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
         } else {
             menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
@@ -195,7 +195,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                         int position = index - menuItemsStartRow;
                         if (MenuOrderController.isAvailable(swapOrderCell.menuId, position)) {
                             updateListAnimated(() -> MenuOrderController.removeItem(position));
-                            if (MenuOrderController.IsDefaultPosition()) {
+                            if (MenuOrderController.isDefaultPosition()) {
                                 menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
                             } else {
                                 menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
@@ -216,7 +216,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                                     MenuOrderController.addItem(addItemCell.menuId);
                                 }
                             });
-                            if (MenuOrderController.IsDefaultPosition()) {
+                            if (MenuOrderController.isDefaultPosition()) {
                                 menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
                             } else {
                                 menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
@@ -255,7 +255,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
             }
             MenuOrderController.changePosition(idx1, idx2);
             notifyItemMoved(fromIndex, toIndex);
-            if (MenuOrderController.IsDefaultPosition()) {
+            if (MenuOrderController.isDefaultPosition()) {
                 menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
             } else {
                 menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());

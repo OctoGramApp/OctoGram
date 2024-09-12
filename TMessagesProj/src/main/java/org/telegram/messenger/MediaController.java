@@ -112,7 +112,6 @@ import java.util.concurrent.CountDownLatch;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.media.AudioEnhance;
-import it.octogram.android.utils.PermissionsUtils;
 
 public class MediaController implements AudioManager.OnAudioFocusChangeListener, NotificationCenter.NotificationCenterDelegate, SensorEventListener {
 

@@ -9,7 +9,6 @@ import org.telegram.messenger.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.MenuItemId;
@@ -29,7 +28,6 @@ public class MenuOrderController {
             MenuItemId.SETTINGS.getId(),
             MenuItemId.OCTOGRAM_SETTINGS.getId(),
             MenuItemId.NEW_CHANNEL.getId(),
-            MenuItemId.NEW_SECRET_CHAT.getId(),
             MenuItemId.INVITE_FRIENDS.getId(),
             MenuItemId.TELEGRAM_FEATURES.getId(),
             MenuItemId.ARCHIVED_MESSAGES.getId(),
@@ -65,7 +63,7 @@ public class MenuOrderController {
             } catch (JSONException e) {
                 FileLog.e(e);
             }
-            if (data.length() == 0 && OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()){
+            if (data.length() == 0 && OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()) {
                 loadDefaultItems();
             }
             configLoaded = true;
@@ -73,33 +71,20 @@ public class MenuOrderController {
     }
 
     private static String[] getDefaultItems() {
-        List<String> defaultItems = new ArrayList<>();
-
-        addSafeItem(defaultItems, 19);
-        addSafeItem(defaultItems, 14);
-        addSafeItem(defaultItems, 13);
-
-        defaultItems.add(DIVIDER_ITEM);
-
-        addSafeItem(defaultItems, 0);
-        addSafeItem(defaultItems, 1);
-        addSafeItem(defaultItems, 2);
-        addSafeItem(defaultItems, 3);
-        addSafeItem(defaultItems, 4);
-        addSafeItem(defaultItems, 5);
-
-        defaultItems.add(DIVIDER_ITEM);
-
-        addSafeItem(defaultItems, 8);
-        addSafeItem(defaultItems, 9);
-
-        return defaultItems.toArray(new String[0]);
-    }
-
-    private static void addSafeItem(List<String> items, int index) {
-        if (list_items.length > index) {
-            items.add(list_items[index]);
-        }
+        return new String[]{
+                list_items[18],
+                list_items[13],
+                DIVIDER_ITEM,
+                list_items[0],
+                list_items[1],
+                list_items[2],
+                list_items[3],
+                list_items[4],
+                list_items[5],
+                DIVIDER_ITEM,
+                list_items[8],
+                list_items[7],
+        };
     }
 
     public static void resetToDefaultPosition() {
@@ -107,13 +92,13 @@ public class MenuOrderController {
         loadDefaultItems();
     }
 
-    public static boolean IsDefaultPosition() {
+    public static boolean isDefaultPosition() {
         String[] defaultItems = getDefaultItems();
         int sizeAvailable = sizeAvailable();
         int foundSameItems = 0;
         if (defaultItems.length == sizeAvailable) {
             for (int i = 0; i < sizeAvailable; i++) {
-                EditableMenuItem editableMenuItem = MenuOrderController.getSingleAvailableMenuItem(i);
+                EditableMenuItem editableMenuItem = getSingleAvailableMenuItem(i);
                 if (editableMenuItem != null && defaultItems[i].equals(editableMenuItem.id)) {
                     foundSameItems++;
                 }
@@ -265,39 +250,147 @@ public class MenuOrderController {
 
     public static ArrayList<EditableMenuItem> getMenuItemsEditable() {
         ArrayList<EditableMenuItem> list = new ArrayList<>();
-        String[] titles = new String[] {
-                LocaleController.getString(R.string.NewGroup),
-                LocaleController.getString(R.string.Contacts),
-                LocaleController.getString(R.string.Calls),
-                LocaleController.getString(R.string.SavedMessages),
-                LocaleController.getString(R.string.Settings),
-                LocaleController.getString(R.string.OctoGramSettings),
-                LocaleController.getString(R.string.NewChannel),
-                LocaleController.getString(R.string.InviteFriends),
-                LocaleController.getString(R.string.TelegramFeatures),
-                LocaleController.getString(R.string.ArchivedChats),
-                LocaleController.getString(R.string.DatacenterStatus),
-                LocaleController.getString(R.string.AuthAnotherClient),
-                LocaleController.getString(R.string.SetEmojiStatus),
-                LocaleController.getString(R.string.MyProfile),
-                LocaleController.getString(R.string.Devices),
-                LocaleController.getString(R.string.DownloadMenuItem),
-                LocaleController.getString(R.string.PowerUsage),
-                LocaleController.getString(R.string.ProxySettings),
-                LocaleController.getString(R.string.AttachedMenuBot),
-                LocaleController.getString(R.string.OctoTgBrowser)
-        };
-
-        for (int i = 0; i < titles.length; i++) {
-            list.add(
-                    new EditableMenuItem(
-                            list_items[i],
-                            titles[i],
-                            (i == 4 || i == 5) && OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()
-                    )
-            );
-        }
-
+        list.add(
+                new EditableMenuItem(
+                        list_items[0],
+                        LocaleController.getString(R.string.NewGroup),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[1],
+                        LocaleController.getString(R.string.Contacts),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[2],
+                        LocaleController.getString(R.string.Calls),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[3],
+                        LocaleController.getString(R.string.SavedMessages),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[4],
+                        LocaleController.getString(R.string.Settings),
+                        OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[5],
+                        LocaleController.getString(R.string.OctoGramSettings),
+                        OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[6],
+                        LocaleController.getString(R.string.NewChannel),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[7],
+                        LocaleController.getString(R.string.InviteFriends),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[8],
+                        LocaleController.getString(R.string.TelegramFeatures),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[9],
+                        LocaleController.getString(R.string.ArchivedChats),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[10],
+                        LocaleController.getString(R.string.DatacenterStatus),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[11],
+                        LocaleController.getString(R.string.AuthAnotherClient),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[12],
+                        LocaleController.getString(R.string.SetEmojiStatus),
+                        false,
+                        true
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[13],
+                        LocaleController.getString(R.string.MyProfile),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[14],
+                        LocaleController.getString(R.string.Devices),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[15],
+                        LocaleController.getString(R.string.DownloadMenuItem),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[16],
+                        LocaleController.getString(R.string.PowerUsage),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[17],
+                        LocaleController.getString(R.string.ProxySettings),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[18],
+                        LocaleController.getString(R.string.AttachedMenuBot),
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[19],
+                        LocaleController.getString(R.string.OctoTgBrowser),
+                        false
+                )
+        );
 
         for (int i = 0; i < data.length(); i++) {
             try {
@@ -310,7 +403,8 @@ public class MenuOrderController {
                             )
                     );
                 }
-            } catch (JSONException ignored) {}
+            } catch (JSONException ignored) {
+            }
         }
         return list;
     }

@@ -2,6 +2,8 @@ package it.octogram.android.utils;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Environment;
 import android.text.Html;
@@ -26,6 +28,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.BulletinFactory;
+import org.webrtc.voiceengine.WebRtcAudioTrack;
 
 import java.io.File;
 import java.io.IOException;
@@ -331,6 +334,16 @@ public class OctoUtils {
 
     public static void featureNotAvailable(Theme.ResourcesProvider resourceProvider) {
         BulletinFactory.global().createErrorBulletin("This feature is currently not available", resourceProvider).show();
+    }
+
+    public static int getCustomStreamType(TLRPC.Chat chat) {
+        if (chat != null && OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
+            WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_MEDIA);
+            return AudioManager.STREAM_MUSIC;
+        } else {
+            WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
+            return AudioManager.STREAM_VOICE_CALL;
+        }
     }
 }
 
