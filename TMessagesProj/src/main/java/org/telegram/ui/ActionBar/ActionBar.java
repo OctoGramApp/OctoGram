@@ -653,6 +653,23 @@ public class ActionBar extends FrameLayout {
         return actionMode;
     }
 
+    public void onDrawCrossfadeBackground(Canvas canvas) {
+        var width = getMeasuredWidth();
+        var height = getMeasuredHeight();
+    
+        if (blurredBackground && actionBarColor != Color.TRANSPARENT) {
+            rectTmp.set(0, 0, width, height);
+            blurScrimPaint.setColor(actionBarColor);
+            contentView.drawBlurRect(canvas, getY(), rectTmp, blurScrimPaint, true);
+        } else {
+            Drawable backgroundDrawable = getBackground();
+            if (backgroundDrawable != null) {
+                backgroundDrawable.setBounds(0, 0, getWidth(), getHeight());
+                backgroundDrawable.draw(canvas);
+            }
+        }
+    }
+
     public void onDrawCrossfadeContent(Canvas canvas, boolean front, boolean hideBackDrawable, float progress) {
         for (int i = 0; i < getChildCount(); i++) {
             View ch = getChildAt(i);

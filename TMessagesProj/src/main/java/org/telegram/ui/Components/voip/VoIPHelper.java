@@ -161,6 +161,23 @@ public class VoIPHelper {
 			}
 			return;
 		}
+		/*if (Build.VERSION.SDK_INT >= 23) {
+			ArrayList<String> permissions = new ArrayList<>();
+			ChatObject.Call call = accountInstance.getMessagesController().getGroupCall(chat.id, false);
+			if (activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && !(call != null && call.call.rtmp_stream)) {
+				permissions.add(Manifest.permission.RECORD_AUDIO);
+			}
+			if (Build.VERSION.SDK_INT >= 31 && activity.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+				permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
+			}
+			if (permissions.isEmpty()) {
+				initiateCall(null, chat, hash, false, false, createCall, checkJoiner, activity, fragment, accountInstance);
+			} else {
+				activity.requestPermissions(permissions.toArray(new String[0]), 103);
+			}
+		} else {
+			initiateCall(null, chat, hash, false, false, createCall, checkJoiner, activity, fragment, accountInstance);
+		}*/
 		initiateCall(null, chat, hash, false, false, createCall, checkJoiner, activity, fragment, accountInstance);
 	}
 
