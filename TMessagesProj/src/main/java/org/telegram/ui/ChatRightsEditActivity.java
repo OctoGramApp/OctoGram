@@ -1873,6 +1873,7 @@ public class ChatRightsEditActivity extends BaseFragment {
                         int sentMediaCount = getSendMediaSelectedCount();
                         checkCell.setTextAndCheck(LocaleController.getString(R.string.UserRestrictionsSendMedia), sentMediaCount > 0, true, true);
                         checkCell.setCollapseArrow(String.format(Locale.US, "%d/12", sentMediaCount), !sendMediaExpanded, () -> {
+                            if (!checkCell.isEnabled()) return;
                             if (allDefaultMediaBanned()) {
                                 new AlertDialog.Builder(getParentActivity())
                                         .setTitle(LocaleController.getString(R.string.UserRestrictionsCantModify))
@@ -1891,6 +1892,7 @@ public class ChatRightsEditActivity extends BaseFragment {
                         int count = getChannelMessagesSelectedCount();
                         checkCell.setTextAndCheck(LocaleController.getString(R.string.ChannelManageMessages), count > 0, true, true);
                         checkCell.setCollapseArrow(String.format(Locale.US, "%d/3", count), !channelMessagesExpanded, () -> {
+                            if (!checkCell.isEnabled()) return;
                             boolean checked = checkCell.isChecked();
                             checkCell.setChecked(checked);
                             setChannelMessagesEnabled(checked);
@@ -1899,6 +1901,7 @@ public class ChatRightsEditActivity extends BaseFragment {
                         int count = getChannelStoriesSelectedCount();
                         checkCell.setTextAndCheck(LocaleController.getString(R.string.ChannelManageStories), count > 0, true, true);
                         checkCell.setCollapseArrow(String.format(Locale.US, "%d/3", count), !channelStoriesExpanded, () -> {
+                            if (!checkCell.isEnabled()) return;
                             boolean checked = checkCell.isChecked();
                             checkCell.setChecked(checked);
                             setChannelStoriesEnabled(checked);
