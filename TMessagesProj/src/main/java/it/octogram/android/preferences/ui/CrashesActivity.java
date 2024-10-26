@@ -8,6 +8,9 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -37,7 +39,6 @@ import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
-import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BackDrawable;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -65,14 +66,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.crashlytics.CrashOption;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.preferences.ui.custom.CrashLogCell;
 
+@SuppressWarnings("rawtypes")
 public class CrashesActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private final Object PARTIAL = new Object();
-
     private final String REPORT_URL = "https://github.com/OctoGramApp/OctoGram/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+%3Ctitle-here%3E";
+    private final String TAG = "CrashesActivity";
 
     private int settingsHeaderRow;
     private int copyInfoRow;
@@ -91,7 +94,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
     private String sharingFullLocation;
     private String sharingFileName;
-    private LongSparseArray<TLRPC.Dialog> sharingDids;
+    private LongSparseArray<TLRPC.Dialog> sharingDialogs;
 
     private final int MENU_DELETE = 1;
     private final int MENU_DELETE_ALL = 2;
@@ -107,7 +110,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
     public View createView(Context context) {
         this.context = context;
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setTitle(LocaleController.getString(R.string.CrashHistory));
+        actionBar.setTitle(getString(R.string.CrashHistory));
         actionBar.setAllowOverlayTitle(true);
         if (AndroidUtilities.isTablet()) {
             actionBar.setOccupyStatusBar(false);
@@ -139,11 +142,11 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
         actionBar.setBackButtonDrawable(new BackDrawable(false));
 
         if (Crashlytics.getArchivedCrashFiles().length > 0) {
-            ActionBarMenu actionNoSelectMenu = actionBar.createMenu();
+            var actionNoSelectMenu = actionBar.createMenu();
             actionNoSelectMenu.addItem(MENU_DELETE_ALL, R.drawable.msg_delete);
         }
 
-        ActionBarMenu actionMode = actionBar.createActionMode();
+        var actionMode = actionBar.createActionMode();
         selectedCountTextView = new NumberTextView(actionMode.getContext());
         selectedCountTextView.setTextSize(18);
         selectedCountTextView.setTypeface(AndroidUtilities.bold());
@@ -169,8 +172,8 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
     private void showWarningDialog(String text) {
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
-        warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-        warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> dialog1.dismiss());
+        warningBuilder.setTitle(getString(R.string.Warning));
+        warningBuilder.setPositiveButton(getString(R.string.OK), (dialog1, which1) -> dialog1.dismiss());
         warningBuilder.setMessage(text);
         showDialog(warningBuilder.create());
 
@@ -178,7 +181,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
     private void copyShowBulletin (CharSequence text) {
         if (AndroidUtilities.addToClipboard(text)) {
-            BulletinFactory.of(CrashesActivity.this).createCopyBulletin(LocaleController.getString("CrashLogCopied", R.string.CrashLogCopied)).show();
+            BulletinFactory.of(CrashesActivity.this).createCopyBulletin(getString(R.string.CrashLogCopied)).show();
         }
     }
 
@@ -196,7 +199,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             if (file != null) {
                 copyCrashLine(file);
             } else {
-                BulletinFactory.of(CrashesActivity.this).createErrorBulletin(LocaleController.getString(R.string.NoCrashLogFound)).show();
+                BulletinFactory.of(CrashesActivity.this).createErrorBulletin(getString(R.string.NoCrashLogFound)).show();
             }
         } else if (position >= crashesStartRow && position < crashesEndRow) {
             if (listAdapter.hasSelected()) {
@@ -204,37 +207,40 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), getResourceProvider());
                 builder.setTitle("Crash settings");
-                CharSequence[] items = new CharSequence[]{
-                        LocaleController.getString("OpenCrashLog", R.string.OpenCrashLog),
-                        LocaleController.getString("SendCrashLog", R.string.SendCrashLog),
-                        LocaleController.getString("CopyCrashLog", R.string.CopyCrashLog),
-                        LocaleController.getString("ReportCrash", R.string.ReportCrash),
+                var items = new CharSequence[]{
+                        getString(R.string.OpenCrashLog),
+                        getString(R.string.SendCrashLog),
+                        getString(R.string.CopyCrashLog),
+                        getString(R.string.ReportCrash),
                 };
-                int[] icons = new int[]{
+                var icons = new int[]{
                         R.drawable.msg_openin,
                         R.drawable.msg_send,
                         R.drawable.msg_copy,
                         R.drawable.msg_report,
                 };
                 builder.setItems(items, icons, (dialog, which) -> {
-                    if (which == 0) {
-                        File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
-                        if (!openLog(file)) {
-                            showWarningDialog(LocaleController.getString(R.string.ErrorSendingCrashContent));
+                    var file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
+                    switch (CrashOption.Companion.fromValue(which)) {
+                        case CrashOption.OPEN_LOG -> {
+                            if (!openLog(file)) {
+                                showWarningDialog(getString(R.string.ErrorSendingCrashContent));
+                            }
                         }
-                    } else if (which == 1) {
-                        File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
-                        if (!sendLog(file)) {
-                            showWarningDialog(LocaleController.getString(R.string.ErrorSendingCrashContent));
+                        case CrashOption.SEND_LOG -> {
+                            if (!sendLog(file)) {
+                                showWarningDialog(getString(R.string.ErrorSendingCrashContent));
+                            }
                         }
-                    } else if (which == 2) {
-                        copyCrashLine(position);
-                    } else if (which == 3) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(REPORT_URL));
-                        context.startActivity(browserIntent);
+                        case CrashOption.COPY_CRASH_LINE ->
+                                copyCrashLine(position);
+                        case CrashOption.OPEN_REPORT_URL -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(REPORT_URL));
+                            context.startActivity(browserIntent);
+                        }
                     }
                 });
-                builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                builder.setNegativeButton(getString(R.string.Cancel), null);
                 showDialog(builder.create());
             }
         }
@@ -255,7 +261,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             }
         } catch (IOException e) {
             FileLog.e(e);
-            BulletinFactory.of(CrashesActivity.this).createErrorBulletin(LocaleController.getString(R.string.CouldNotCopyFile)).show();
+            BulletinFactory.of(CrashesActivity.this).createErrorBulletin(getString(R.string.CouldNotCopyFile)).show();
         }
 
         copyShowBulletin(String.join("\n", lines));
@@ -298,10 +304,10 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
     private boolean openLog(File file) {
         try {
             File cacheFile = Crashlytics.shareLog(file.getAbsoluteFile());
-            AndroidUtilities.openForView(cacheFile, cacheFile.getName(), "text/plain", getParentActivity(), getResourceProvider(), false);
+            AndroidUtilities.openForView(cacheFile, cacheFile.getName(), OctoConfig.CRASH_MIME_TYPE, getParentActivity(), getResourceProvider(), false);
             return true;
         } catch (IOException e) {
-            Log.e(getClass().getName(), "Error opening crash content", e);
+            Log.e(TAG, "Error opening crash content", e);
             return false;
         }
     }
@@ -313,12 +319,12 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             ShareAlert shAlert = new ShareAlert(getParentActivity(), null, null, false, null, false) {
 
                 @Override
-                protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                protected void onSend(LongSparseArray<TLRPC.Dialog> didS, int count, TLRPC.TL_forumTopic topic) {
                     sharingFileName = cacheFile.getName();
                     sharingFullLocation = cacheFile.getAbsolutePath();
-                    sharingDids = dids;
+                    sharingDialogs = didS;
 
-                    FileLoader instance = FileLoader.getInstance(getCurrentAccount());
+                    var instance = FileLoader.getInstance(getCurrentAccount());
 
                     initUpdateReceiver();
                     instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
@@ -328,7 +334,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
             return true;
         } catch (IOException e) {
-            Log.e(getClass().getName(), "Error sending crash content", e);
+            Log.e(TAG, "Error sending crash content", e);
             return false;
         }
     }
@@ -391,34 +397,34 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 case TYPE_SETTINGS_HEADER:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == settingsHeaderRow) {
-                        headerCell.setText(LocaleController.getString("Settings", R.string.Settings));
+                        headerCell.setText(getString(R.string.Settings));
                     } else if (position == crashesHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.CrashHistory));
+                        headerCell.setText(getString(R.string.CrashHistory));
                     }
                     break;
                 case TYPE_BUTTON:
                     TextCell textCell = (TextCell) holder.itemView;
                     if (position == copyInfoRow) {
-                        textCell.setTextAndIcon(LocaleController.getString(R.string.CopyOctogramConfiguration), R.drawable.msg_copy, !OctoConfig.INSTANCE.disableDividers.getValue());
+                        textCell.setTextAndIcon(getString(R.string.CopyOctogramConfiguration), R.drawable.msg_copy, !OctoConfig.INSTANCE.disableDividers.getValue());
                     } else if (position == copyLatestCrashRow) {
-                        textCell.setTextAndIcon(LocaleController.getString(R.string.CopyLatestCrashLog), R.drawable.msg_copy, false);
+                        textCell.setTextAndIcon(getString(R.string.CopyLatestCrashLog), R.drawable.msg_copy, false);
                     }
                     break;
                 case TEXT_HINT_WITH_PADDING:
                     TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) holder.itemView;
                     if (position == crashesInfoRow) {
-                        textInfoPrivacyCell.setText(LocaleController.getString(R.string.CrashLogInfo));
+                        textInfoPrivacyCell.setText(getString(R.string.CrashLogInfo));
                     }
                     break;
                 case TYPE_CRASH_FILE:
                     if (position >= crashesStartRow && position < crashesEndRow) {
                         CrashLogCell crashLogCell = (CrashLogCell) holder.itemView;
 
-                        List<File> sorted = Arrays.stream(Crashlytics.getArchivedCrashFiles())
+                        var sorted = Arrays.stream(Crashlytics.getArchivedCrashFiles())
                                 .sorted(Comparator.comparingLong(File::lastModified))
                                 .collect(Collectors.toList());
                         for (int i = 0; i < sorted.size(); i++) {
-                            File file = sorted.get(i);
+                            var file = sorted.get(i);
                             if (crashesEndRow - position - 1 == i) {
                                 crashLogCell.setData(file, true);
                                 crashLogCell.setSelected(selectedItems.get(position, false), partial);
@@ -486,6 +492,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             }
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         private void processSelectionMenu(int id) {
             switch (id) {
                 case MENU_DELETE:
@@ -500,8 +507,8 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                         }
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle(LocaleController.getString(R.string.BuildAppName));
-                    builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog, which) -> {
+                    builder.setTitle(getString(R.string.BuildAppName));
+                    builder.setPositiveButton(getString(R.string.OK), (dialog, which) -> {
                         int unableToDeleteCount = 0;
                         for (File file : toDelete) {
                             if (!file.delete()) {
@@ -516,55 +523,55 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
                         String message;
                         if (toDelete.size() > 1) {
-                            message = LocaleController.formatString("CrashesDeleted", R.string.CrashesDeleted, toDelete.size());
+                            message = formatString("CrashesDeleted", R.string.CrashesDeleted, toDelete.size());
                         } else {
-                            message = LocaleController.formatString("CrashDeleted", R.string.CrashDeleted);
+                            message = formatString("CrashDeleted", R.string.CrashDeleted);
                         }
                         if (unableToDeleteCount > 0) {
-                            message = LocaleController.formatString("CrashesUnableToDelete", R.string.CrashesUnableToDelete, unableToDeleteCount);
+                            message = formatString("CrashesUnableToDelete", R.string.CrashesUnableToDelete, unableToDeleteCount);
                             AlertDialog.Builder unableToDeleteBuilder = new AlertDialog.Builder(context);
-                            unableToDeleteBuilder.setTitle(LocaleController.getString(R.string.BuildAppName));
+                            unableToDeleteBuilder.setTitle(getString(R.string.BuildAppName));
                             unableToDeleteBuilder.setMessage(message);
-                            unableToDeleteBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> dialog1.dismiss());
+                            unableToDeleteBuilder.setPositiveButton(getString(R.string.OK), (dialog1, which1) -> dialog1.dismiss());
                         }
                         BulletinFactory.of(CrashesActivity.this).createErrorBulletin(message).show();
                     });
-                    builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> dialog.dismiss());
+                    builder.setNegativeButton(getString(R.string.Cancel), (dialog, which) -> dialog.dismiss());
 
                     String message;
                     if (toDelete.size() > 1) {
-                        message = LocaleController.formatString("CrashesDeleted", R.string.CrashesDeleteConfirmation, toDelete.size());
+                        message = formatString(R.string.CrashesDeleteConfirmation, toDelete.size());
                     } else {
-                        message = LocaleController.formatString("CrashDeleted", R.string.CrashDeleteConfirmation);
+                        message = getString(R.string.CrashDeleteConfirmation);
                     }
                     builder.setMessage(message);
                     showDialog(builder.create());
                     break;
                 case MENU_DELETE_ALL:
                     AlertDialog.Builder allBuilder = new AlertDialog.Builder(context);
-                    allBuilder.setTitle(LocaleController.getString(R.string.BuildAppName));
-                    allBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog, which) -> {
+                    allBuilder.setTitle(getString(R.string.BuildAppName));
+                    allBuilder.setPositiveButton(getString(R.string.OK), (dialog, which) -> {
                         Crashlytics.deleteCrashLogs();
                         updateRowsId();
                         notifyDataSetChanged();
 
-                        File[] filesToDelete = Crashlytics.getArchivedCrashFiles();
+                        var filesToDelete = Crashlytics.getArchivedCrashFiles();
                         String message1;
                         if (filesToDelete.length > 1) {
-                            message1 = LocaleController.formatString("CrashesDeleted", R.string.CrashesDeleted, filesToDelete.length);
+                            message1 = formatString(R.string.CrashesDeleted, filesToDelete.length);
                         } else {
-                            message1 = LocaleController.formatString("CrashDeleted", R.string.CrashDeleted);
+                            message1 = getString(R.string.CrashDeleted);
                         }
                         BulletinFactory.of(CrashesActivity.this).createErrorBulletin(message1).show();
                     });
-                    allBuilder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> dialog.dismiss());
+                    allBuilder.setNegativeButton(getString(R.string.Cancel), (dialog, which) -> dialog.dismiss());
 
                     File[] filesToDelete = Crashlytics.getArchivedCrashFiles();
                     String allMessage;
                     if (filesToDelete.length > 1) {
-                        allMessage = LocaleController.formatString("CrashesDeleted", R.string.CrashesDeleteConfirmation, filesToDelete.length);
+                        allMessage = formatString(R.string.CrashesDeleteConfirmation, filesToDelete.length);
                     } else {
-                        allMessage = LocaleController.formatString("CrashDeleted", R.string.CrashDeleteConfirmation);
+                        allMessage = getString(R.string.CrashDeleteConfirmation);
                     }
                     allBuilder.setMessage(allMessage);
                     showDialog(allBuilder.create());
@@ -675,7 +682,6 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
     }
 
 
-
     private void initUpdateReceiver() {
         NotificationCenter.getInstance(getCurrentAccount()).addObserver(this, NotificationCenter.fileUploaded);
         NotificationCenter.getInstance(getCurrentAccount()).addObserver(this, NotificationCenter.fileUploadFailed);
@@ -702,7 +708,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
             stopUpdateReceiver();
 
-            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(CrashesActivity.this).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.SendCrashLogDone)).show());
+            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(CrashesActivity.this).createSimpleBulletin(R.raw.forward, getString(R.string.SendCrashLogDone)).show());
 
             TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
             attr.file_name = sharingFileName;
@@ -710,13 +716,17 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
             inputMediaDocument.file = inputFile;
             inputMediaDocument.attributes.add(attr);
-            inputMediaDocument.mime_type = "text/json";
+            inputMediaDocument.mime_type = OctoConfig.CRASH_MIME_TYPE;
 
-            for (int i = 0; i < sharingDids.size(); i++) {
+            for (int i = 0; i < sharingDialogs.size(); i++) {
                 TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
-                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDids.keyAt(i));
+                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDialogs.keyAt(i));
                 req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
-                req.message = "";
+                try {
+                    req.message = Crashlytics.getSystemInfo(false);
+                } catch (IllegalAccessException ignore) {
+                    req.message = "";
+                }
                 req.silent = true;
                 req.media = inputMediaDocument;
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);

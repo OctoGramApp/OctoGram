@@ -11,39 +11,37 @@ package it.octogram.android.utils;
 import it.octogram.android.VideoQuality;
 
 public class VideoUtils {
-    public static float getMaxSize(int w, int h, int selectedCompression) {
+    public static float getMaxSize(int w, int h, @VideoQuality.Quality int selectedCompression) {
         float ratio = (float) w / (float) h;
-        return switch (VideoQuality.Companion.fromInt(selectedCompression)) {
-            case SD -> getNewSide(480, ratio);
-            case HD -> getNewSide(720, ratio);
-            case FHD -> getNewSide(1080, ratio);
-            case QHD -> getNewSide(1440, ratio);
-            case UHD -> getNewSide(2160, ratio);
-            default -> getNewSide(270, ratio);
+        return switch (selectedCompression) {
+            case VideoQuality.SD -> getNewSide(480, ratio);
+            case VideoQuality.HD -> getNewSide(720, ratio);
+            case VideoQuality.FHD -> getNewSide(1080, ratio);
+            case VideoQuality.QHD -> getNewSide(1440, ratio);
+            case VideoQuality.UHD -> getNewSide(2160, ratio);
+            case VideoQuality.MAX -> getNewSide(4096, ratio);
+            case VideoQuality.UNKNOWN -> getNewSide(270, ratio);
+            default -> throw new IllegalStateException("Unexpected value: " + selectedCompression);
         };
     }
 
     public static int getCompressionsCount(int width, int height) {
-        int count = getCompressionsCount(width * height).ordinal() + 1;
-        int oldSize = determineSize(width, height, count - 1, count);
-        int newSize = determineSize(width, height, count, count + 1);
+        var count = getCompressionsCount(width * height) + 1;
+        var oldSize = determineSize(width, height, count - 1, count);
+        var newSize = determineSize(width, height, count, count + 1);
         if (newSize > oldSize) {
             count++;
         }
-        return Math.min(count, VideoQuality.MAX.getValue());
+        return Math.min(count, VideoQuality.MAX);
     }
 
     private static int determineSize(int originalWidth, int originalHeight, int selectedCompression, int compressionsCount) {
         float maxSize = getMaxSize(originalWidth, originalHeight, selectedCompression);
         float scale = originalWidth > originalHeight ? maxSize / originalWidth : maxSize / originalHeight;
-        if (selectedCompression == compressionsCount - 1 && scale >= 1f) {
-            return originalWidth;
-        } else {
-            return Math.round(originalWidth * scale / 2) * 2;
-        }
+        return (selectedCompression == compressionsCount - 1 && scale >= 1f) ? originalWidth : Math.round(originalWidth * scale / 2) * 2;
     }
 
-    private static VideoQuality getCompressionsCount(int area) {
+    private static @VideoQuality.Quality int getCompressionsCount(int area) {
         if (area >= 3840 * 2160) {
             return VideoQuality.UHD;
         } else if (area >= 2560 * 1440) {
@@ -60,10 +58,6 @@ public class VideoUtils {
     }
 
     private static float getNewSide(int side, float ratio) {
-        if (ratio > 1) {
-            return side * ratio;
-        } else {
-            return side / ratio;
-        }
+        return (ratio > 1) ? side * ratio : side / ratio;
     }
 }

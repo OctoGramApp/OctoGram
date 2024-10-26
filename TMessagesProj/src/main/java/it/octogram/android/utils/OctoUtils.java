@@ -345,5 +345,9 @@ public class OctoUtils {
             return AudioManager.STREAM_VOICE_CALL;
         }
     }
+
+    public static float clamp(float x, float min, float max) {
+        return Math.max(min, Math.min(max, x));
+    }
 }
 

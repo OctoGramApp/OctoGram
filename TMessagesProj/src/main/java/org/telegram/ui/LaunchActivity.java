@@ -9,7 +9,6 @@
 package org.telegram.ui;
 
 import static org.telegram.messenger.LocaleController.formatPluralString;
-import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.ui.Components.Premium.LimitReachedBottomSheet.TYPE_ACCOUNTS;
 import static org.telegram.ui.Components.Premium.LimitReachedBottomSheet.TYPE_BOOSTS_FOR_USERS;
 
@@ -51,11 +50,11 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.util.Base64;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.ActionMode;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -86,18 +85,6 @@ import com.google.common.primitives.Longs;
 import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
-
-import it.octogram.android.MonetThemeController;
-import it.octogram.android.crashlytics.Crashlytics;
-import it.octogram.android.CustomEmojiController;
-import it.octogram.android.icons.IconsResources;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.DatacenterActivity;
-import it.octogram.android.preferences.ui.OctoAppearanceUI;
-import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
-import it.octogram.android.preferences.ui.OctoExperimentsUI;
-import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
-import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 
 import org.json.JSONObject;
 import org.telegram.PhoneFormat.PhoneFormat;
@@ -195,7 +182,6 @@ import org.telegram.ui.Components.Premium.boosts.UserSelectorBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.Components.SearchDownloadsContainer;
 import org.telegram.ui.Components.SearchTagsList;
 import org.telegram.ui.Components.SharingLocationsAlert;
 import org.telegram.ui.Components.SideMenultItemAnimator;
@@ -225,6 +211,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -233,7 +220,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -242,13 +228,17 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.BrowserUtils;
+import it.octogram.android.crashlytics.Crashlytics;
+import it.octogram.android.deeplink.DeepLinkManager;
+import it.octogram.android.icons.IconsResources;
+import it.octogram.android.theme.MonetThemeController;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.LanguageController;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UpdatesManager;
 
+@SuppressLint({"RestrictedApi", "MissingSuperCall"})
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
     public final static String EXTRA_FORCE_NOT_INTERNAL_APPS = "force_not_internal_apps";
     public final static Pattern PREFIX_T_ME_PATTERN = Pattern.compile("^(?:http(?:s|)://|)([A-z0-9-]+?)\\.t\\.me");
@@ -273,7 +263,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     private ArrayList<TLRPC.User> contactsToSend;
     private Uri contactsToSendUri;
     private int currentConnectionState;
-    private final static ArrayList<BaseFragment> mainFragmentsStack = new ArrayList<>();
+    public final static ArrayList<BaseFragment> mainFragmentsStack = new ArrayList<>();
     private final static ArrayList<BaseFragment> layerFragmentsStack = new ArrayList<>();
     private final static ArrayList<BaseFragment> rightFragmentsStack = new ArrayList<>();
     private ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener;
@@ -638,7 +628,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     }
                     return;
                 }
-                if (id == 2) {
+                if (DeepLinkManager.handleMenuAction(id, currentAccount, LaunchActivity.this)) {
+                    Log.d("tg", MessageFormat.format("handleMenuId: {0}", id));
+                } else if (id == 2) {
                     Bundle args = new Bundle();
                     presentFragment(new GroupCreateActivity(args));
                     drawerLayoutContainer.closeDrawer(false);
@@ -700,66 +692,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     args.putLong("dialog_id", UserConfig.getInstance(currentAccount).getClientUserId());
                     args.putInt("type", MediaActivity.TYPE_STORIES);
                     presentFragment(new MediaActivity(args, null));
-                } else if (id == 100) {
-                    presentFragment(new PreferencesFragment(new OctoMainSettingsUI()));
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 912) {
-                    BaseFragment lastFragment = LaunchActivity.instance.getActionBarLayout().getLastFragment();
-                    if (lastFragment instanceof DialogsActivity dialogsActivity) {
-                        dialogsActivity.showSearch(true, true, true);
-                        dialogsActivity.getActionBar().openSearchField(true);
-                        drawerLayoutContainer.closeDrawer(false);
-                    }
-                } else if (id == 913) {
-                    presentFragment(new SessionsActivity(0));
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 202) {
-                    Bundle args = new Bundle();
-                    args.putInt("folderId", 1);
-                    presentFragment(new DialogsActivity(args));
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 101) {
-                    presentFragment(new DatacenterActivity());
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 204) {
-                    ActionIntroActivity fragment = new ActionIntroActivity(ActionIntroActivity.ACTION_TYPE_QR_LOGIN);
-                    fragment.setQrLoginDelegate(code -> {
-                        AlertDialog progressDialog = new AlertDialog(LaunchActivity.this, 3);
-                        progressDialog.setCanCancel(false);
-                        progressDialog.show();
-                        byte[] token = Base64.decode(code.substring("tg://login?token=".length()), Base64.URL_SAFE);
-                        TLRPC.TL_auth_acceptLoginToken req = new TLRPC.TL_auth_acceptLoginToken();
-                        req.token = token;
-                        ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
-                            try {
-                                progressDialog.dismiss();
-                            } catch (Exception ignore) {
-                            }
-                            if (!(response instanceof TLRPC.TL_authorization)) {
-                                AndroidUtilities.runOnUIThread(() -> AlertsCreator.showSimpleAlert(fragment, LocaleController.getString("AuthAnotherClient", R.string.AuthAnotherClient), LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + error.text));
-                            }
-                        }));
-                    });
-                    actionBarLayout.presentFragment(fragment, false, true, true, false);
-                    if (AndroidUtilities.isTablet()) {
-                        actionBarLayout.showLastFragment();
-                        rightActionBarLayout.showLastFragment();
-                        drawerLayoutContainer.setAllowOpenDrawer(false, false);
-                    } else {
-                        drawerLayoutContainer.setAllowOpenDrawer(true, false);
-                    }
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 205) {
-                    presentFragment(new SessionsActivity(0));
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 206) {
-                    presentFragment(new LiteModeSettingsActivity());
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 207) {
-                    presentFragment(new ProxyListActivity());
-                    drawerLayoutContainer.closeDrawer(false);
-                } else if (id == 914) {
-                    BrowserUtils.openBrowserHome(() -> drawerLayoutContainer.closeDrawer(false));
                 }
             }
         });
@@ -1072,7 +1004,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     });
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            MonetThemeController.registerReceiver(this);
+            MonetThemeController.INSTANCE.registerReceiver(this);
         }
         CustomEmojiController.checkEmojiPacks();
         BackupAgent.requestBackup(this);
@@ -1886,7 +1818,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         long push_chat_id = 0;
         long[] push_story_dids = null;
 
-        long profile_user_id = 0;
         int push_story_id = -1;
         long push_topic_id = 0;
         int push_enc_id = 0;
@@ -2522,7 +2453,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                 }
                                 case "tg": {
                                     String url = data.toString();
-                                    if (url.startsWith("tg:premium_offer") || url.startsWith("tg://premium_offer")) {
+                                    if (DeepLinkManager.handleDeepLink(url)) {
+                                        if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                                            Log.d("tg", "handleIntent: " + url);
+                                        }
+                                        break;
+                                    } else if (url.startsWith("tg:premium_offer") || url.startsWith("tg://premium_offer")) {
                                         String finalUrl = url;
                                         AndroidUtilities.runOnUIThread(() -> {
                                         if (!actionBarLayout.getFragmentStack().isEmpty()) {
@@ -2750,16 +2686,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                         if (intCode != 0) {
                                             code = "" + intCode;
                                         }
-                                    } else if (url.startsWith("tg:user") || url.startsWith("tg://user")) {
-                                        url = url.replace("tg:user", "tg://telegram.org").replace("tg://user", "tg://telegram.org");
-                                        data = Uri.parse(url);
-                                        String userID = data.getQueryParameter("id");
-                                        if (userID != null) {
-                                            try {
-                                                profile_user_id = Long.parseLong(userID);
-                                            } catch (NumberFormatException ignore) {
-                                            }
-                                        }
                                     } else if (url.startsWith("tg:openmessage") || url.startsWith("tg://openmessage")) {
                                         url = url.replace("tg:openmessage", "tg://telegram.org").replace("tg://openmessage", "tg://telegram.org");
                                         data = Uri.parse(url);
@@ -2831,83 +2757,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             open_settings = 13;
                                         } else {
                                             open_settings = 1;
-                                        }
-                                    } else if (url.startsWith("tg:update") || url.startsWith("tg://update")) {
-                                        checkAppUpdate(true, null);
-                                    } else if (url.startsWith("tg:francesco") || url.startsWith("tg://francesco")) {
-                                        BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
-
-                                        if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
-                                            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Broken name fix has been disabled.").show();
-                                        } else {
-                                            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Broken name fix has been enabled.").show();
-                                        }
-
-                                        OctoConfig.INSTANCE.useTranslationsArgsFix.updateValue(!OctoConfig.INSTANCE.useTranslationsArgsFix.getValue());
-                                    } else if (url.startsWith("tg:chupagram") || url.startsWith("tg://chupagram")) {
-                                        if (!OctoConfig.INSTANCE.unlockedChupa.getValue()) {
-                                            BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
-                                            AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.CHUPA, null);
-                                            layout.textView.setText(LocaleController.getString("UnlockedHiddenChupaIcon", R.string.UnlockedHiddenChupaIcon));
-                                            fireworksOverlay.start();
-                                            layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                                            Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
-                                            OctoConfig.INSTANCE.unlockedChupa.updateValue(true);
-                                        }
-                                    } else if (url.startsWith("tg:yukigram") || url.startsWith("tg://yukigram")) {
-                                        if (!OctoConfig.INSTANCE.unlockedYuki.getValue()) {
-                                            BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
-                                            AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), LauncherIconController.LauncherIcon.YUKI, null);
-                                            layout.textView.setText(LocaleController.getString("UnlockedHiddenYukiIcon", R.string.UnlockedHiddenYukiIcon));
-                                            fireworksOverlay.start();
-                                            layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                                            Bulletin.make(fragment, layout, Bulletin.DURATION_SHORT).show();
-                                            OctoConfig.INSTANCE.unlockedYuki.updateValue(true);
-                                        }
-                                    } else if (url.startsWith("tg:experimental") || url.startsWith("tg://experimental")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoExperimentsUI())));
-                                        if (AndroidUtilities.isTablet()) {
-                                            actionBarLayout.showLastFragment();
-                                            rightActionBarLayout.showLastFragment();
-                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
-                                        } else {
-                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
-                                        }
-                                    } else if (url.startsWith("tg:camera") || url.startsWith("tg://camera")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoCameraSettingsUI())));
-                                        if (AndroidUtilities.isTablet()) {
-                                            actionBarLayout.showLastFragment();
-                                            rightActionBarLayout.showLastFragment();
-                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
-                                        } else {
-                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
-                                        }
-                                    } else if (url.startsWith("tg:general") || url.startsWith("tg://general")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())));
-                                        if (AndroidUtilities.isTablet()) {
-                                            actionBarLayout.showLastFragment();
-                                            rightActionBarLayout.showLastFragment();
-                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
-                                        } else {
-                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
-                                        }
-                                    } else if (url.startsWith("tg:octosettings") || url.startsWith("tg://octosettings")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoMainSettingsUI())));
-                                        if (AndroidUtilities.isTablet()) {
-                                            actionBarLayout.showLastFragment();
-                                            rightActionBarLayout.showLastFragment();
-                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
-                                        } else {
-                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
-                                        }
-                                    } else if (url.startsWith("tg:appearance") || url.startsWith("tg://appearance")) {
-                                        AndroidUtilities.runOnUIThread(() -> presentFragment(new PreferencesFragment(new OctoAppearanceUI())));
-                                        if (AndroidUtilities.isTablet()) {
-                                            actionBarLayout.showLastFragment();
-                                            rightActionBarLayout.showLastFragment();
-                                            drawerLayoutContainer.setAllowOpenDrawer(false, false);
-                                        } else {
-                                            drawerLayoutContainer.setAllowOpenDrawer(true, false);
                                         }
                                     } else if ((url.startsWith("tg:search") || url.startsWith("tg://search"))) {
                                         url = url.replace("tg:search", "tg://telegram.org").replace("tg://search", "tg://telegram.org");
@@ -3225,18 +3074,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     LaunchActivity.dismissAllWeb();
                     drawerLayoutContainer.closeDrawer();
                 }
-            } else if (profile_user_id != 0) {
-                Bundle args = new Bundle();
-                args.putLong("user_id", profile_user_id);
-                ProfileActivity fragment = new ProfileActivity(args);
-                AndroidUtilities.runOnUIThread(() -> presentFragment(fragment, false, false));
-                if (AndroidUtilities.isTablet()) {
-                    actionBarLayout.showLastFragment();
-                    rightActionBarLayout.showLastFragment();
-                    drawerLayoutContainer.setAllowOpenDrawer(false, false);
-                } else {
-                    drawerLayoutContainer.setAllowOpenDrawer(true, false);
-                }
             } else if (showDialogsList) {
                 if (!AndroidUtilities.isTablet()) {
                     actionBarLayout.removeAllFragments();
@@ -3490,6 +3327,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             } else if (openBot) {
                 processAttachedMenuBotFromShortcut(botId);
                 pushOpened = false;
+            } else {
+                DeepLinkManager.handleOpenProfileById(LaunchActivity.this);
             }
         }
         if (!pushOpened && !isNew) {
@@ -5997,7 +5836,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     public void resetUpdateInstance() {
         SharedConfig.setNewAppVersionAvailable(null);
-        drawerLayoutAdapter.notifyDataSetChanged();
+        if (drawerLayoutAdapter != null) {
+            drawerLayoutAdapter.notifyDataSetChanged();
+        }
     }
 
     public Dialog showAlertDialog(AlertDialog.Builder builder) {
@@ -6621,7 +6462,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     protected void onDestroy() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            MonetThemeController.unregisterReceiver(this);
+            MonetThemeController.INSTANCE.unregisterReceiver(this);
         }
         isActive = false;
         if (PhotoViewer.getPipInstance() != null) {
@@ -6772,6 +6613,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
             checkAppUpdate(false, null);
         }
+        UpdatesManager.handleUpdateSignaling();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ApplicationLoader.canDrawOverlays = Settings.canDrawOverlays(this);

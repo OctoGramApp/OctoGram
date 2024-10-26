@@ -286,11 +286,14 @@
     <string name="RegistrationDate">Registration Date</string>
     <string name="OctoGramVersion">OctoGram %1$s\nBased on Telegram %2$s</string>
     <string name="MonetIcon">Force Monet Icon</string>
+    <string name="MonetIconDesc">Use Material You\'s dynamic icon on Android 12</string>
     <string name="AppIconChupa">Chupa Icon</string>
     <string name="AppIconYuki">Yuki Icon</string>
     <string name="AppIconConfetti">Confetti</string>
     <string name="AppIconDev">Dev Icon</string>
+    <string name="AppIconFoxgram">Shy Fox</string>
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
+    <string name="UnlockedHiddenFoxIcon">You have unlocked the shy fox icon! Activate it from settings.</string>
     <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
     <string name="UnlockedHiddenConfettiIcon">You have unlocked confetti! Activate the new secret icon from settings.</string>
     <string name="OctoExperimentsSettingsHeader">Try out new and shiny features</string>
@@ -608,6 +611,11 @@
 
     <string name="CurrentCameraXResolution">Current CameraX resolution</string>
     <string name="CameraOption">Camera Option</string>
+
+    <!-- Monet Dialog Fix -->
+    <string name="ChangeIcon">Change App Icon</string>
+    <string name="ChangeIconDesc">Since on Android 12 the monet icon was forced and you upgraded to Android 13, you need to change the app icon to the default one for a better support.</string>
+    
     <string name="VoipAnsweringAsAccount">answering as %s</string>
     <string name="ViewStats">View Stats</string>
     <string name="Appearance">Appearance</string>

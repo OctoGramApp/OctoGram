@@ -71,56 +71,56 @@ public class OctoUpdatesUI implements PreferencesEntry {
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(AutoDownloadUpdate.ALWAYS.getValue())
-                                            .setItemTitle(LocaleController.getString("UpdatesSettingsAutoDownloadAlways", R.string.UpdatesSettingsAutoDownloadAlways))
-                                            .setItemDescription(LocaleController.formatString("UpdatesSettingsAutoDownloadAlwaysDesc", R.string.UpdatesSettingsAutoDownloadAlwaysDesc)),
+                                            .setItemTitle(LocaleController.getString(R.string.UpdatesSettingsAutoDownloadAlways))
+                                            .setItemDescription(LocaleController.formatString(R.string.UpdatesSettingsAutoDownloadAlwaysDesc)),
                                     new PopupChoiceDialogOption()
                                             .setId(AutoDownloadUpdate.ONLY_ON_WIFI.getValue())
-                                            .setItemTitle(LocaleController.getString("UpdatesSettingsAutoDownloadWifi", R.string.UpdatesSettingsAutoDownloadWifi)),
+                                            .setItemTitle(LocaleController.getString(R.string.UpdatesSettingsAutoDownloadWifi)),
                                     new PopupChoiceDialogOption()
                                             .setId(AutoDownloadUpdate.NEVER.getValue())
-                                            .setItemTitle(LocaleController.getString("UpdatesSettingsAutoDownloadNever", R.string.UpdatesSettingsAutoDownloadNever))
+                                            .setItemTitle(LocaleController.getString(R.string.UpdatesSettingsAutoDownloadNever))
                             ))
-                            .title(LocaleController.getString("UpdatesSettingsAutoDownload", R.string.UpdatesSettingsAutoDownload))
+                            .title(LocaleController.getString(R.string.UpdatesSettingsAutoDownload))
                             .build()
                     );
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.autoCheckUpdateStatus)
-                            .title(LocaleController.formatString("UpdatesSettingsAuto", R.string.UpdatesSettingsAuto))
+                            .title(LocaleController.formatString(R.string.UpdatesSettingsAuto))
                             .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> checkForUpdates(fragment, context, true))
                             .preferenceValue(OctoConfig.INSTANCE.preferBetaVersion)
-                            .title(LocaleController.formatString("UpdatesSettingsBeta", R.string.UpdatesSettingsBeta))
+                            .title(LocaleController.formatString(R.string.UpdatesSettingsBeta))
                             .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> checkForUpdates(fragment, context, true))
                             .preferenceValue(OctoConfig.INSTANCE.receivePBetaUpdates)
-                            .title(LocaleController.formatString("UpdatesSettingsPBeta", R.string.UpdatesSettingsPBeta))
+                            .title(LocaleController.formatString(R.string.UpdatesSettingsPBeta))
                             .showIf(isPbetaUser)
                             .build());
                 })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.formatString("UpdatesSettingsAutoDescription", R.string.UpdatesSettingsAutoDescription))
+                        .title(LocaleController.formatString(R.string.UpdatesSettingsAutoDescription))
                         .showIf(isPbetaUser, true)
                         .build())
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.formatString("UpdatesSettingsPbetaDescription", R.string.UpdatesSettingsPbetaDescription, LocaleController.getString(R.string.UpdatesSettingsAuto)))
+                        .title(LocaleController.formatString(R.string.UpdatesSettingsPbetaDescription, LocaleController.getString(R.string.UpdatesSettingsAuto)))
                         .showIf(isPbetaUser)
                         .build())
-                .category(LocaleController.formatString("UpdatesSettingsLinks", R.string.UpdatesSettingsLinks), category -> {
+                .category(LocaleController.formatString(R.string.UpdatesSettingsLinks), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
                             .value("@OctoGramApp")
                             .icon(R.drawable.msg_channel)
-                            .title(LocaleController.formatString("OfficialChannel", R.string.OfficialChannel))
+                            .title(LocaleController.formatString(R.string.OfficialChannel))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH))))
                             .value(BuildConfig.GIT_COMMIT_HASH)
                             .icon(R.drawable.outline_source_white_28)
-                            .title(LocaleController.formatString("SourceCode", R.string.SourceCode))
+                            .title(LocaleController.formatString(R.string.SourceCode))
                             .build());
                 })
                 .build();
@@ -209,8 +209,8 @@ public class OctoUpdatesUI implements PreferencesEntry {
                 AndroidUtilities.runOnUIThread(() -> {
                     checkCell.updateState(CustomUpdatesCheckCell.CheckCellState.NO_UPDATE_AVAILABLE);
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-                    alertDialogBuilder.setTitle(LocaleController.getString("AppName", R.string.AppName));
-                    alertDialogBuilder.setMessage(LocaleController.getString("UpdatesSettingsCheckFailed", R.string.UpdatesSettingsCheckFailed));
+                    alertDialogBuilder.setTitle(LocaleController.getString(R.string.AppName));
+                    alertDialogBuilder.setMessage(LocaleController.getString(R.string.UpdatesSettingsCheckFailed));
                     alertDialogBuilder.setPositiveButton("OK", null);
                     AlertDialog alertDialog = alertDialogBuilder.create();
                     alertDialog.show();

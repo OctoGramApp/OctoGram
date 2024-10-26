@@ -230,15 +230,15 @@ public class AccountProtectionIntro extends BaseFragment {
         switch (currentType) {
             case CONFIRM_DOUBLE_BOTTOM:
                 imageView.setAnimation(R.raw.utyan_private, 200, 200);
-                titleTextView.setText(LocaleController.getString("AccountProtection", R.string.AccountProtection));
-                descriptionText.setText(LocaleController.getString("AccountProtectionDesc", R.string.AccountProtectionDesc));
-                buttonTextView.setText(LocaleController.getString("EnableAccountProtection", R.string.EnableAccountProtection));
+                titleTextView.setText(LocaleController.getString(R.string.AccountProtection));
+                descriptionText.setText(LocaleController.getString(R.string.AccountProtectionDesc));
+                buttonTextView.setText(LocaleController.getString(R.string.EnableAccountProtection));
                 flickerButton = true;
                 break;
             case SELECT_ACCOUNT:
                 imageView.setAnimation(R.raw.duck_counting, 200, 200);
-                titleTextView.setText(LocaleController.getString("SelectAccount", R.string.SelectAccount));
-                descriptionText.setText(LocaleController.getString("SelectAccountDesc", R.string.SelectAccountDesc));
+                titleTextView.setText(LocaleController.getString(R.string.SelectAccount));
+                descriptionText.setText(LocaleController.getString(R.string.SelectAccountDesc));
         }
         imageView.getAnimatedDrawable().setAutoRepeat(1);
         imageView.playAnimation();

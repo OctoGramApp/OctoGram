@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -66,6 +67,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -173,12 +175,12 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             String currentDownloading = getCurrentDownloading();
             String currentUnzipping = getCurrentUnzipping();
             boolean isDownloading = FileDownloader.isRunningDownload(cell.packId);
-            boolean isUnzipping = FileUnzip.isRunningUnzip(cell.packId);
+            boolean isUnzipping = FileUnzip.INSTANCE.isRunningUnzip(cell.packId);
             if (!isDownloading && currentDownloading != null) {
                 FileDownloader.cancel(currentDownloading);
             }
             if (!isUnzipping && currentUnzipping != null) {
-                FileUnzip.cancel(currentUnzipping);
+                FileUnzip.INSTANCE.cancel(currentUnzipping);
             }
             if (isDownloading || isUnzipping) return;
             if (CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5).exists() || cell.packId.equals("default")) {
@@ -205,7 +207,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
             if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) {
                 FileDownloader.cancel(getCurrentDownloading());
-                FileUnzip.cancel(getCurrentUnzipping());
+                FileUnzip.INSTANCE.cancel(getCurrentUnzipping());
             }
             listAdapter.notifyEmojiSetsChanged();
         } else if (position == customEmojiAddRow) {
@@ -223,7 +225,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 listAdapter.notifyEmojiSetsChanged();
                 OctoConfig.INSTANCE.selectedEmojiPack.updateValue(cell.packId);
                 FileDownloader.cancel(getCurrentDownloading());
-                FileUnzip.cancel(getCurrentUnzipping());
+                FileUnzip.INSTANCE.cancel(getCurrentUnzipping());
                 Emoji.reloadEmoji();
                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
                 if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) {
@@ -238,7 +240,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         return emojiPacks
                 .stream()
                 .map(CustomEmojiController.EmojiPackBase::getPackId)
-                .filter(FileUnzip::isRunningUnzip)
+                .filter(FileUnzip.INSTANCE::isRunningUnzip)
                 .findFirst()
                 .orElse(null);
     }
@@ -273,18 +275,18 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             public void onFinished(String id, boolean isFailed) {
                 if (cell.packId.equals(id)) {
                     if (CustomEmojiController.emojiTmpDownloaded(cell.packId)) {
-                        FileUnzip.unzipFile(ApplicationLoader.applicationContext, cell.packId, CustomEmojiController.emojiTmp(cell.packId), CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5));
+                        FileUnzip.INSTANCE.unzipFile(ApplicationLoader.applicationContext, cell.packId, CustomEmojiController.emojiTmp(cell.packId), CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5));
                     } else {
                         CustomEmojiController.emojiTmp(cell.packId).delete();
                         listAdapter.notifyEmojiSetsChanged();
                         if (isFailed)
-                            BulletinFactory.of(EmojiPackSettings.this).createErrorBulletin(LocaleController.getString("EmojiSetErrorDownloading", R.string.EmojiSetErrorDownloading)).show();
+                            BulletinFactory.of(EmojiPackSettings.this).createErrorBulletin(LocaleController.getString(R.string.EmojiSetErrorDownloading)).show();
                     }
                 }
                 cell.checkDownloaded(true);
             }
         });
-        FileUnzip.addListener(cell.packId, "emojiCellSettings", (id) -> {
+        FileUnzip.INSTANCE.addListener(cell.packId, "emojiCellSettings", (id) -> {
             if (cell.packId.equals(id)) {
                 CustomEmojiController.emojiTmp(cell.packId).delete();
                 if (CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5).exists()) {
@@ -317,7 +319,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
     }
 
     protected String getActionBarTitle() {
-        return LocaleController.getString("EmojiSets", R.string.EmojiSets);
+        return LocaleController.getString(R.string.EmojiSets);
     }
 
     protected void updateRowsId() {
@@ -394,21 +396,24 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         private final int PLACEHOLDER = 5;
         private final int SHADOW = 6;
 
+        /** @noinspection rawtypes*/
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List payloads) {
             Object payload = payloads.isEmpty() ? null : payloads.get(0);
             boolean partial = PARTIAL.equals(payload);
+
             switch (holder.getItemViewType()) {
                 case HEADER:
                     HeaderCell headerViewHolder = (HeaderCell) holder.itemView;
                     if (position == emojiPackHeaderRow) {
-                        headerViewHolder.setText(LocaleController.getString("EmojiSets", R.string.EmojiSets));
+                        headerViewHolder.setText(LocaleController.getString(R.string.EmojiSets));
                     } else if (position == generalHeaderRow) {
-                        headerViewHolder.setText(LocaleController.getString("General", R.string.General));
+                        headerViewHolder.setText(LocaleController.getString(R.string.General));
                     } else if (position == useCustomEmojiHeaderRow) {
-                        headerViewHolder.setText(LocaleController.getString("MyEmojiSets", R.string.MyEmojiSets));
+                        headerViewHolder.setText(LocaleController.getString(R.string.MyEmojiSets));
                     }
                     break;
+
                 case EMOJI_PACK_SET_CELL:
                     EmojiSet emojiPackSetCell = (EmojiSet) holder.itemView;
                     CustomEmojiController.EmojiPackBase emojiPackInfo = null;
@@ -419,46 +424,58 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                     }
                     emojiPackSetCell.setSelected(selectedItems.get(position, false), partial);
                     NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
+
                     if (emojiPackInfo != null) {
-                        emojiPackSetCell.setChecked(!hasSelected() && emojiPackInfo.getPackId().equals(CustomEmojiController.getSelectedEmojiPackId()) && getCurrentDownloading() == null && getCurrentUnzipping() == null && !OctoConfig.INSTANCE.useSystemEmoji.getValue(), partial);
-                        emojiPackSetCell.setData(
-                                emojiPackInfo,
-                                partial,
-                                true
-                        );
+                        emojiPackSetCell.setChecked(!hasSelected() && emojiPackInfo.getPackId().equals(CustomEmojiController.getSelectedEmojiPackId())
+                                && getCurrentDownloading() == null && getCurrentUnzipping() == null && !OctoConfig.INSTANCE.useSystemEmoji.getValue(), partial);
+                        emojiPackSetCell.setData(emojiPackInfo, partial, true);
+
                         if (emojiPackInfo instanceof CustomEmojiController.EmojiPackInfo) {
                             attachListeners(emojiPackSetCell);
                         }
                     }
                     break;
+
                 case TEXT_HINT_WITH_PADDING:
                     TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) holder.itemView;
                     if (position == emojiHintRow) {
-                        textInfoPrivacyCell.setText(LocaleController.getString("EmojiSetHint", R.string.EmojiSetHint));
+                        textInfoPrivacyCell.setText(LocaleController.getString(R.string.EmojiSetHint));
                     } else if (position == customEmojiHintRow) {
-                        textInfoPrivacyCell.setText(LocaleController.getString("CustomEmojiSetHint", R.string.CustomEmojiSetHint));
+                        textInfoPrivacyCell.setText(LocaleController.getString(R.string.CustomEmojiSetHint));
                     }
                     break;
+
                 case SWITCH:
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     if (position == useSystemEmojiRow) {
-                        if (!partial)
-                            textCheckCell.setTextAndValueAndCheck(LocaleController.getString("UseSystemEmojis", R.string.UseSystemEmojis), LocaleController.getString("UseSystemEmojisDesc", R.string.UseSystemEmojisDesc), OctoConfig.INSTANCE.useSystemEmoji.getValue(), true, false);
-                        if (partial)
+                        if (!partial) {
+                            textCheckCell.setTextAndValueAndCheck(LocaleController.getString(R.string.UseSystemEmojis), LocaleController.getString(R.string.UseSystemEmojisDesc),
+                                    OctoConfig.INSTANCE.useSystemEmoji.getValue(), true, false);
+                        }
+                        if (partial) {
                             textCheckCell.setChecked(OctoConfig.INSTANCE.useSystemEmoji.getValue());
+                        }
                     }
                     break;
+
                 case CREATION_TEXT_CELL:
                     CreationTextCell creationTextCell = (CreationTextCell) holder.itemView;
                     if (position == customEmojiAddRow) {
-                        Drawable drawable1 = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_circle, context.getTheme());
-                        Drawable drawable2 = creationTextCell.getContext().getResources().getDrawable(R.drawable.poll_add_plus, context.getTheme());
-                        drawable1.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked), PorterDuff.Mode.MULTIPLY));
-                        drawable2.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_checkboxCheck), PorterDuff.Mode.MULTIPLY));
+                        Drawable drawable1 = ResourcesCompat.getDrawable(creationTextCell.getContext().getResources(), R.drawable.poll_add_circle, creationTextCell.getContext().getTheme());
+                        Drawable drawable2 = ResourcesCompat.getDrawable(creationTextCell.getContext().getResources(), R.drawable.poll_add_plus, creationTextCell.getContext().getTheme());
+
+                        if (drawable1 != null) {
+                            drawable1.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked), PorterDuff.Mode.MULTIPLY));
+                        }
+                        if (drawable2 != null) {
+                            drawable2.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_checkboxCheck), PorterDuff.Mode.MULTIPLY));
+                        }
+
                         CombinedDrawable combinedDrawable = new CombinedDrawable(drawable1, drawable2);
-                        creationTextCell.setTextAndIcon(LocaleController.getString("AddEmojiSet", R.string.AddEmojiSet), combinedDrawable, false);
+                        creationTextCell.setTextAndIcon(LocaleController.getString(R.string.AddEmojiSet), combinedDrawable, false);
                     }
                     break;
+
                 case PLACEHOLDER:
                     FlickerLoadingView flickerLoadingView = (FlickerLoadingView) holder.itemView;
                     flickerLoadingView.setViewType(FlickerLoadingView.STICKERS_TYPE);
@@ -484,7 +501,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             } else if (position == placeHolderRow) {
                 return PLACEHOLDER;
             }
-            throw new IllegalArgumentException("Invalid position " + position);
+            throw new IllegalArgumentException(MessageFormat.format("Invalid position {0}", position));
         }
 
         public void toggleSelected(int position) {
@@ -588,9 +605,9 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                             }
                         } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                            builder.setTitle(LocaleController.formatString("DeleteStickerSetsAlertTitle", R.string.DeleteStickerSetsAlertTitle, LocaleController.formatString("DeleteEmojiSets", R.string.DeleteEmojiSets, count)));
-                            builder.setMessage(LocaleController.getString("DeleteEmojiSetsMessage", R.string.DeleteEmojiSetsMessage));
-                            builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), (dialog, which1) -> {
+                            builder.setTitle(LocaleController.formatString(R.string.DeleteStickerSetsAlertTitle, LocaleController.formatString("DeleteEmojiSets", R.string.DeleteEmojiSets, count)));
+                            builder.setMessage(LocaleController.getString(R.string.DeleteEmojiSetsMessage));
+                            builder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialog, which1) -> {
                                 AlertDialog progressDialog = new AlertDialog(getParentActivity(), 3);
                                 new Thread() {
                                     @Override
@@ -610,7 +627,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                                 progressDialog.setCanCancel(false);
                                 progressDialog.showDelayed(300);
                             });
-                            builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+                            builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
                             AlertDialog dialog = builder.create();
                             showDialog(dialog);
                             TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);
@@ -853,7 +870,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
 
     @Override
     public boolean onBackPressed() {
-        ListAdapter adapter = (ListAdapter) listAdapter;
+        var adapter = listAdapter;
         if (adapter.hasSelected()) {
             adapter.clearSelected();
             return false;

@@ -99,7 +99,7 @@ public class StickerSizeUI extends BaseFragment {
         }
 
         avatarContainer.getAvatarImageView().setImageResource(R.drawable.ic_unsized_octo);
-        avatarContainer.setTitle(LocaleController.getString("StickersSizeChannelTitle", R.string.StickersSizeChannelTitle), false, false, true, false, null, false, slidingTitle);
+        avatarContainer.setTitle(LocaleController.getString(R.string.StickersSizeChannelTitle), false, false, true, false, null, false, slidingTitle);
         avatarContainer.setSubtitle(LocaleController.formatPluralString("Members", result[0]).replace(String.format(Locale.getDefault(), "%d", result[0]), shortNumber));
         ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = isCenteredTitle() ? 0 : dp(OctoConfig.INSTANCE.searchIconInHeader.getValue() ? 96 : 40);
     }
@@ -219,7 +219,7 @@ public class StickerSizeUI extends BaseFragment {
             //String[] strings = {"Nick", "OctoGram Dev"};
             messageObjects[1].overrideLinkEmoji = 5258073068852485953L;
             messageObjects[1].overrideLinkColor = 9;
-            messageObjects[1].customReplyName = LocaleController.getString("StickersSizeChannelTitleMini", R.string.StickersSizeChannelTitleMini);
+            messageObjects[1].customReplyName = LocaleController.getString(R.string.StickersSizeChannelTitleMini);
             messageObjects[1].replyMessageObject = messageObjects[0];
 
             for (int a = 0; a < cells.length; a++) {

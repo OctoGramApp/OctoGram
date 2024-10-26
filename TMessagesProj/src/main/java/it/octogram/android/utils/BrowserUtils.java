@@ -20,9 +20,9 @@ public class BrowserUtils {
         }
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(LaunchActivity.instance);
-        alertBuilder.setTitle(LocaleController.getString("OctoTgBrowserOpenFail", R.string.OctoTgBrowserOpenFail));
-        alertBuilder.setMessage(LocaleController.getString("OctoTgBrowserOpenFail_Desc", R.string.OctoTgBrowserOpenFail_Desc));
-        alertBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
+        alertBuilder.setTitle(LocaleController.getString(R.string.OctoTgBrowserOpenFail));
+        alertBuilder.setMessage(LocaleController.getString(R.string.OctoTgBrowserOpenFail_Desc));
+        alertBuilder.setPositiveButton(LocaleController.getString(R.string.OK), null);
         alertBuilder.show();
     }
 

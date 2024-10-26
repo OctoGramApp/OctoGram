@@ -30,3 +30,4 @@ TMessagesProj_AppHuawei/afat/
 .run/
 *.jks
 move_icon.sh
+clear_env.sh

@@ -42,7 +42,7 @@ public class MessageResourceHelper {
         //builder.append(' ');
 
         if (edited) {
-            builder.append(OctoConfig.INSTANCE.pencilIconForEditedMessages.getValue() ? editedSpan : LocaleController.getString("EditedMessage", R.string.EditedMessage));
+            builder.append(OctoConfig.INSTANCE.pencilIconForEditedMessages.getValue() ? editedSpan : LocaleController.getString(R.string.EditedMessage));
         }
 
         if (canShowTranslatedItem(messageObject)) {
@@ -57,7 +57,7 @@ public class MessageResourceHelper {
                 builder.append(' ');
                 builder.append(Locale.forLanguageTag(messageObject.messageOwner.translatedToLanguage).getDisplayName());
             } else {
-                builder.append(LocaleController.getString("TranslatorInMessageBadge", R.string.TranslatorInMessageBadge));
+                builder.append(LocaleController.getString(R.string.TranslatorInMessageBadge));
             }
         }
 

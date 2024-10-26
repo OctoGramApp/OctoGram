@@ -126,7 +126,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         TextView textView = new TextView(context);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(LocaleController.getString("ImportReadyOpenFile", R.string.ImportReadyOpenFile));
+        textView.setText(LocaleController.getString(R.string.ImportReadyOpenFile));
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setOnClickListener(view -> {
             dismiss();
@@ -198,8 +198,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private void executeFileImport(MessageObject message) {
         if (dataToImport.isEmpty()) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-            alertDialogBuilder.setTitle(LocaleController.getString("ImportReadyImportFailedZeroTitle", R.string.ImportReadyImportFailedZeroTitle));
-            alertDialogBuilder.setMessage(LocaleController.getString("ImportReadyImportFailedZeroCaption", R.string.ImportReadyImportFailedZeroCaption));
+            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
+            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
             alertDialogBuilder.setPositiveButton("OK", null);
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
@@ -221,22 +221,22 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
             if (isReloadRequested) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-                alertDialogBuilder.setTitle(LocaleController.getString("ImportReadyImportDonePopup", R.string.ImportReadyImportDonePopup));
-                alertDialogBuilder.setMessage(LocaleController.getString("ImportReadyImportDonePopupDescription", R.string.ImportReadyImportDonePopupDescription));
+                alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportDonePopup));
+                alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportDonePopupDescription));
                 alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.setCanceledOnTouchOutside(false);
                 alertDialog.show();
             } else {
                 dismiss();
-                BulletinFactory.of(getBaseFragment()).createSimpleBulletin(R.raw.info, LocaleController.formatString("ImportReadyImportDone", R.string.ImportReadyImportDone, changedOptions)).show();
+                BulletinFactory.of(getBaseFragment()).createSimpleBulletin(R.raw.info, LocaleController.formatString(R.string.ImportReadyImportDone, changedOptions)).show();
             }
         }
     }
 
     @Override
     protected CharSequence getTitle() {
-        return LocaleController.getString("ImportReady", R.string.ImportReady);
+        return LocaleController.getString(R.string.ImportReady);
     }
 
     @Override
@@ -738,7 +738,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
             if (LocaleController.isRTL) {
                 rtlTextView = new TextView(context);
-                rtlTextView.setText(LocaleController.getString("ImportReadyImport", R.string.ImportReadyImport));
+                rtlTextView.setText(LocaleController.getString(R.string.ImportReadyImport));
                 rtlTextView.setGravity(Gravity.CENTER);
                 rtlTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
                 rtlTextView.setTypeface(AndroidUtilities.bold());
@@ -750,7 +750,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             textView.setAnimationProperties(.25f, 0, 300, CubicBezierInterpolator.EASE_OUT_QUINT);
             textView.setCallback(button);
             textView.setTextSize(dp(14));
-            textView.setText(LocaleController.getString("ImportReadyImport", R.string.ImportReadyImport));
+            textView.setText(LocaleController.getString(R.string.ImportReadyImport));
             textView.setGravity(Gravity.RIGHT);
             textView.setTypeface(AndroidUtilities.bold());
             textView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
@@ -785,8 +785,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         public void setSize(boolean allSelected, long size, long total) {
             textView.setText((
                     allSelected ?
-                            LocaleController.getString("ImportReadyImport", R.string.ImportReadyImport) :
-                            LocaleController.getString("ImportReadyImportSelected", R.string.ImportReadyImportSelected)
+                            LocaleController.getString(R.string.ImportReadyImport) :
+                            LocaleController.getString(R.string.ImportReadyImportSelected)
             ));
             valueTextView.setText(size <= 0 || allSelected ? "" : (size + "/" + total));
             setDisabled(size <= 0);

@@ -76,6 +76,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.clear();
         excludedOptions.add(OctoConfig.INSTANCE.unlockedYuki.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.unlockedChupa.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.unlockedFoxIcon.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.unlockedConfetti.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.selectedEmojiPack.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.languagePackVersioning.getKey());

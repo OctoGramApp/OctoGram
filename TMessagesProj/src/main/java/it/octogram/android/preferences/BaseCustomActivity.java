@@ -111,7 +111,7 @@ public class BaseCustomActivity extends BaseFragment {
 
         if (haveEmptyView()) {
             emptyView = new EmptyTextProgressView(context);
-            emptyView.setText(LocaleController.getString("NoResult", R.string.NoResult));
+            emptyView.setText(LocaleController.getString(R.string.NoResult));
             emptyView.showTextView();
             emptyView.setShowAtCenter(true);
             frameLayout.addView(emptyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));

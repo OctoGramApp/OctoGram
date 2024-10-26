@@ -43,7 +43,7 @@ public class AllowExperimentalBottomSheet extends BottomSheet {
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString("Warning", R.string.Warning));
+        textView.setText(LocaleController.getString(R.string.Warning));
         textView.setPadding(dp(30), 0, dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -52,7 +52,7 @@ public class AllowExperimentalBottomSheet extends BottomSheet {
         //textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MONO));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString("OctoExperimentsDialogMessage", R.string.OctoExperimentsDialogMessage));
+        textView.setText(LocaleController.getString(R.string.OctoExperimentsDialogMessage));
         textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -61,7 +61,7 @@ public class AllowExperimentalBottomSheet extends BottomSheet {
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(LocaleController.getString("Cancel", R.string.Cancel));
+        buttonTextView.setText(LocaleController.getString(R.string.Cancel));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> dismiss());
@@ -70,7 +70,7 @@ public class AllowExperimentalBottomSheet extends BottomSheet {
         textView = new AppCompatTextView(context);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(LocaleController.getString("OctoExperimentsDialogButton", R.string.OctoExperimentsDialogButton));
+        textView.setText(LocaleController.getString(R.string.OctoExperimentsDialogButton));
         textView.setTextColor(Theme.getColor(Theme.key_color_red));
         textView.setOnClickListener(view -> {
             OctoConfig.INSTANCE.experimentsEnabled.updateValue(!OctoConfig.INSTANCE.experimentsEnabled.getValue());

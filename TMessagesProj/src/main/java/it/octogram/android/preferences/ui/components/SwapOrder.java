@@ -36,7 +36,7 @@ public class SwapOrder extends FrameLayout {
         moveImageView.setScaleType(ImageView.ScaleType.CENTER);
         moveImageView.setImageResource(R.drawable.list_reorder);
         moveImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_stickers_menu), PorterDuff.Mode.MULTIPLY));
-        moveImageView.setContentDescription(LocaleController.getString("FilterReorder", R.string.FilterReorder));
+        moveImageView.setContentDescription(LocaleController.getString(R.string.FilterReorder));
         moveImageView.setClickable(true);
         addView(moveImageView, LayoutHelper.createFrame(48, 48, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, 6, 0, 6, 0));
 
@@ -53,7 +53,7 @@ public class SwapOrder extends FrameLayout {
         optionsImageView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_stickers_menuSelector)));
         optionsImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_color_red), PorterDuff.Mode.MULTIPLY));
         optionsImageView.setImageResource(R.drawable.msg_delete);
-        optionsImageView.setContentDescription(LocaleController.getString("Delete", R.string.Delete));
+        optionsImageView.setContentDescription(LocaleController.getString(R.string.Delete));
         addView(optionsImageView, LayoutHelper.createFrame(40, 40, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, 6, 0, 6, 0));
     }
 

@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android v.2.0.x
+ * It is licensed under GNU GPL v. 2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.camerax;
 
 import android.annotation.SuppressLint;
@@ -10,17 +18,20 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.util.Range;
 import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
 import androidx.annotation.RestrictTo;
 import androidx.camera.core.AspectRatio;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalZeroShutterLag;
 import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
@@ -36,7 +47,6 @@ import androidx.camera.extensions.ExtensionsManager;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.video.FallbackStrategy;
 import androidx.camera.video.FileOutputOptions;
-import androidx.camera.video.Quality;
 import androidx.camera.video.QualitySelector;
 import androidx.camera.video.Recorder;
 import androidx.camera.video.Recording;
@@ -67,18 +77,20 @@ import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
+import java.text.MessageFormat;
 import java.util.concurrent.ExecutionException;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.JpegImageUtils;
 
+/** @noinspection deprecation*/
 public class CameraXController {
 
     private boolean isFrontface;
     private boolean isInitiated = false;
     private final CameraLifecycle lifecycle;
     private ProcessCameraProvider provider;
-    private Camera camera;
+    private static Camera camera;
     private CameraSelector cameraSelector;
     private CameraXView.VideoSavedCallback videoSavedCallback;
     private boolean abandonCurrentVideo = false;
@@ -96,8 +108,19 @@ public class CameraXController {
     public static final int CAMERA_HDR = 2;
     public static final int CAMERA_AUTO = 3;
     public static final int CAMERA_WIDE = 4;
+    public static final int CAMERA_BOKEH = 5;
+    public static final int CAMERA_FACE_RETOUCH = 6;
     public float oldZoomSelection = 0F;
     private int selectedEffect = CAMERA_NONE;
+    protected static final String TAG = "CameraXController";
+
+    public static void setTorchEnabled(boolean b) {
+        if (camera != null) {
+            camera.getCameraControl().enableTorch(b);
+        } else {
+            FileLog.e("Camera is not initialized.");
+        }
+    }
 
     public static class CameraLifecycle implements LifecycleOwner {
 
@@ -148,13 +171,23 @@ public class CameraXController {
         return isFrontface;
     }
 
+    /**
+     * Enables or disables stable FPS mode for preview only.
+     * <p>
+     * When enabled, the library will attempt to maintain a stable frame rate during preview,
+     * but may allow the frame rate to fluctuate during recording or other operations.
+     * This can be useful for improving the preview experience, especially on devices
+     * with limited processing power.
+     *
+     * @param isEnabled true to enable stable FPS mode for preview only, false to disable.
+     */
     public void setStableFPSPreviewOnly(boolean isEnabled) {
         stableFPSPreviewOnly = isEnabled;
     }
 
     public void initCamera(Context context, boolean isInitialFrontface, Runnable onPreInit) {
         this.isFrontface = isInitialFrontface;
-        ListenableFuture<ProcessCameraProvider> providerFtr = ProcessCameraProvider.getInstance(context);
+        var providerFtr = ProcessCameraProvider.getInstance(context);
         providerFtr.addListener(
                 () -> {
                     try {
@@ -168,11 +201,11 @@ public class CameraXController {
                                 onPreInit.run();
                                 isInitiated = true;
                             } catch (ExecutionException | InterruptedException e) {
-                                e.printStackTrace();
+                                FileLog.e("Error initializing ExtensionsManager: " + e.getMessage(), e);
                             }
                         }, ContextCompat.getMainExecutor(context));
                     } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
+                        FileLog.e("Error retrieving provider: " + e.getMessage(), e);
                     }
                 }, ContextCompat.getMainExecutor(context)
         );
@@ -196,20 +229,17 @@ public class CameraXController {
         lifecycle.stop();
     }
 
-    @SuppressLint("RestrictedApi")
     public boolean hasFrontFaceCamera() {
         if (provider == null) {
             return false;
         }
         try {
-            return provider.hasCamera(
-                    new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build());
+            return provider.hasCamera(new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build());
         } catch (CameraInfoUnavailableException e) {
             return false;
         }
     }
 
-    @SuppressLint("RestrictedApi")
     public static boolean hasGoodCamera(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
     }
@@ -232,60 +262,50 @@ public class CameraXController {
         return iCapture.getFlashMode();
     }
 
-    public boolean isFlashAvailable() {
+    public static boolean isFlashAvailable() {
         return camera.getCameraInfo().hasFlashUnit();
     }
 
-    public boolean isAvailableHdrMode() {
-        if (extensionsManager != null) {
-            try {
-                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.HDR);
-            } catch (Exception e) {
-                FileLog.e(e);
-                return false;
-            }
-        } else {
-            return false;
-        }
+    @OptIn(markerClass = ExperimentalZeroShutterLag.class)
+    public static boolean isZSLSupported() {
+        if (camera == null) return false;
+        return camera.getCameraInfo().isZslSupported();
     }
 
-    public boolean isAvailableNightMode() {
-        if (extensionsManager != null) {
-            try {
-                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.NIGHT);
-            } catch (Exception e) {
-                FileLog.e(e);
-                return false;
-            }
-        } else {
-            return false;
+    public boolean isModeSupported(@ExtensionMode.Mode int mode) {
+        if (mode == ExtensionMode.NONE) {
+            return true;
         }
+
+        var validModes = new int[]{
+                ExtensionMode.HDR,
+                ExtensionMode.NIGHT,
+                ExtensionMode.AUTO,
+                ExtensionMode.BOKEH,
+                ExtensionMode.FACE_RETOUCH
+        };
+
+        for (int validMode : validModes) {
+            if (extensionsManager != null && mode == validMode) {
+                try {
+                    return extensionsManager.isExtensionAvailable(cameraSelector, mode);
+                } catch (Exception e) {
+                    Log.d("CameraX-Extensions", String.format("Error: %s", e.getMessage()), e);
+                    FileLog.e(MessageFormat.format("CameraX-Extensions: {0}", e.getMessage()), e);
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Unexpected mode: " + mode);
     }
 
     public boolean isAvailableWideMode() {
-        if (provider != null) {
-            return CameraXUtils.isWideAngleAvailable(provider);
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isAvailableAutoMode() {
-        if (extensionsManager != null) {
-            try {
-                return extensionsManager.isExtensionAvailable(cameraSelector, ExtensionMode.AUTO);
-            } catch (Exception e) {
-                FileLog.e(e);
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return CameraXUtils.isWideAngleAvailable(provider);
     }
 
     public android.util.Size getVideoBestSize() {
         int w, h;
-        android.util.Size size = CameraXUtils.getPreviewBestSize();
+        var size = CameraXUtils.getPreviewBestSize();
         w = size.getWidth();
         h = size.getHeight();
         if ((getDisplayOrientation() == 0 || getDisplayOrientation() == 180) && getDeviceDefaultOrientation() == Configuration.ORIENTATION_PORTRAIT) {
@@ -295,7 +315,18 @@ public class CameraXController {
         }
     }
 
-    @SuppressLint({"RestrictedApi", "UnsafeExperimentalUsageError", "UnsafeOptInUsageError"})
+    public CameraSelector getCameraSelectorForEffect(CameraSelector cameraSelector, int selectedEffect) {
+        var mode = switch (selectedEffect) {
+            case CAMERA_NIGHT -> ExtensionMode.NIGHT;
+            case CAMERA_HDR -> ExtensionMode.HDR;
+            case CAMERA_AUTO -> ExtensionMode.AUTO;
+            case CAMERA_BOKEH -> ExtensionMode.BOKEH;
+            case CAMERA_FACE_RETOUCH -> ExtensionMode.FACE_RETOUCH;
+            default -> ExtensionMode.NONE;
+        };
+        return extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, mode);
+    }
+
     public void bindUseCases() {
         if (provider == null) return;
         var targetSize = getVideoBestSize();
@@ -308,36 +339,17 @@ public class CameraXController {
         }
 
         if (!isFrontface) {
-            switch (selectedEffect) {
-                case CAMERA_NIGHT:
-                    cameraSelector = extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, ExtensionMode.NIGHT);
-                    break;
-                case CAMERA_HDR:
-                    cameraSelector = extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, ExtensionMode.HDR);
-                    break;
-                case CAMERA_AUTO:
-                    cameraSelector = extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, ExtensionMode.AUTO);
-                    break;
-                case CAMERA_NONE:
-                default:
-                    cameraSelector = extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, ExtensionMode.NONE);
-                    break;
-            }
+            cameraSelector = getCameraSelectorForEffect(cameraSelector, selectedEffect);
         }
 
-        Quality quality = CameraXUtils.getVideoQuality();
-        QualitySelector selector = QualitySelector.from(quality, FallbackStrategy.higherQualityOrLowerThan(quality));
-        Recorder recorder = new Recorder.Builder()
+        var quality = CameraXUtils.getVideoQuality();
+        var selector = QualitySelector.from(quality, FallbackStrategy.higherQualityOrLowerThan(quality));
+        var recorder = new Recorder.Builder()
                 .setQualitySelector(selector)
                 .build();
         vCapture = VideoCapture.withOutput(recorder);
 
-        ImageCapture.Builder iCaptureBuilder = new ImageCapture.Builder()
-                .setCaptureMode(OctoConfig.INSTANCE.cameraXZeroShutter.getValue() ?
-                        ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG :
-                        (OctoConfig.INSTANCE.cameraXPerformanceMode.getValue() ? ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY : ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                )
-                .setTargetAspectRatio(AspectRatio.RATIO_16_9);
+        ImageCapture.Builder iCaptureBuilder = getCaptureModeBuilder();
 
         provider.unbindAll();
         previewUseCase = previewBuilder.build();
@@ -364,6 +376,26 @@ public class CameraXController {
         }
     }
 
+    @OptIn(markerClass = ExperimentalZeroShutterLag.class)
+    private static ImageCapture.Builder getCaptureModeBuilder() {
+        var iCaptureBuilder = new ImageCapture.Builder();
+
+        int captureMode;
+        if (OctoConfig.INSTANCE.cameraXZeroShutter.getValue()) {
+            captureMode = ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG;
+        } else if (OctoConfig.INSTANCE.cameraXPerformanceMode.getValue()) {
+            captureMode = ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY;
+        } else {
+            captureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY;
+        }
+
+        iCaptureBuilder.setCaptureMode(captureMode);
+        iCaptureBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
+
+        return iCaptureBuilder;
+    }
+
+
 
     public void setZoom(float value) {
         oldZoomSelection = value;
@@ -382,13 +414,11 @@ public class CameraXController {
         return 0.0f;
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
     public boolean isExposureCompensationSupported() {
         if (camera == null) return false;
         return camera.getCameraInfo().getExposureState().isExposureCompensationSupported();
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
     public void setExposureCompensation(float value) {
         if (camera == null) return;
         if (!camera.getCameraInfo().getExposureState().isExposureCompensationSupported()) return;
@@ -429,7 +459,7 @@ public class CameraXController {
                 //.disableAutoCancel()
                 .build();
 
-        if (camera.getCameraControl() != null) camera.getCameraControl().startFocusAndMetering(action);
+        camera.getCameraControl().startFocusAndMetering(action);
     }
 
 
@@ -484,10 +514,8 @@ public class CameraXController {
     }
 
     private void finishRecordingVideo(final File path, boolean mirror) {
-        MediaMetadataRetriever mediaMetadataRetriever = null;
         long duration = 0;
-        try {
-            mediaMetadataRetriever = new MediaMetadataRetriever();
+        try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
             mediaMetadataRetriever.setDataSource(path.getAbsolutePath());
             String d = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
             if (d != null) {
@@ -495,15 +523,8 @@ public class CameraXController {
             }
         } catch (Exception e) {
             FileLog.e(e);
-        } finally {
-            try {
-                if (mediaMetadataRetriever != null) {
-                    mediaMetadataRetriever.release();
-                }
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
         }
+
         Bitmap bitmap = SendMessagesHelper.createVideoThumbnail(path.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
         if (mirror) {
             Bitmap b = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -582,9 +603,9 @@ public class CameraXController {
                         exif.rotate(orientation);
                     }
                     exif.save();
-                } catch (JpegImageUtils.CodecFailedException | IOException | IllegalStateException e) {
-                    e.printStackTrace();
-                    FileLog.e(e);
+                } catch (JpegImageUtils.CodecFailedException | IOException |
+                         IllegalStateException e) {
+                    FileLog.e("Error occurred: " + e.getMessage(), e);
                 }
                 image.close();
                 AndroidUtilities.runOnUIThread(onTake);
@@ -609,7 +630,6 @@ public class CameraXController {
         return size;
     }
 
-    @SuppressLint("SwitchIntDef")
     public int getDisplayOrientation() {
         WindowManager mgr = (WindowManager) ApplicationLoader.applicationContext.getSystemService(Context.WINDOW_SERVICE);
         int rotation = mgr.getDefaultDisplay().getRotation();
@@ -618,7 +638,7 @@ public class CameraXController {
             case Surface.ROTATION_180 -> 180;
             case Surface.ROTATION_270 -> 270;
             case Surface.ROTATION_0 -> 0;
-            default -> 0;
+            default -> throw new IllegalStateException("Unexpected value: " + rotation);
         };
     }
 

@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android v.2.0.x
+ * It is licensed under GNU GPL v. 2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.camerax;
 
 import android.animation.Animator;
@@ -27,13 +35,13 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.extensions.ExtensionMode;
 import androidx.camera.view.PreviewView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.camera.CameraSessionWrapper;
 import org.telegram.messenger.camera.CameraView;
 import org.telegram.messenger.camera.Size;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -58,8 +66,6 @@ public class CameraXView extends BaseCameraView {
     private float outerAlpha;
     private final DecelerateInterpolator interpolator = new DecelerateInterpolator();
     private long lastDrawTime;
-    private final CameraSessionWrapper[] cameraSession = new CameraSessionWrapper[2];
-
     private int cx;
     private int cy;
     private CameraXController controller;
@@ -150,19 +156,6 @@ public class CameraXView extends BaseCameraView {
     }
 
     @Override
-    public CameraSessionWrapper getCameraSession() {
-        return getCameraSession(0);
-    }
-    @Override
-    public Object getCameraSessionObject() {
-        if (cameraSession[0] == null) return null;
-        return cameraSession[0].getObject();
-    }
-
-    public CameraSessionWrapper getCameraSession(int i) {
-        return cameraSession[i];
-    }
-
     public boolean isInited() {
         return isStreaming;
     }
@@ -327,14 +320,12 @@ public class CameraXView extends BaseCameraView {
     }
 
     @Override
-    public void setThumbDrawable(Drawable drawable) {
+    public void setThumbDrawable(@NonNull Drawable drawable) {
         if (thumbDrawable != null) {
             thumbDrawable.setCallback(null);
         }
         thumbDrawable = drawable;
-        if (thumbDrawable != null) {
-            thumbDrawable.setCallback(this);
-        }
+        thumbDrawable.setCallback(this);
     }
 
     private ValueAnimator textureViewAnimator;
@@ -366,7 +357,6 @@ public class CameraXView extends BaseCameraView {
 
     private boolean textureInited = false;
     private final boolean frontface;
-
     @Override
     public void initTexture() {
         if (textureInited) {
@@ -388,17 +378,16 @@ public class CameraXView extends BaseCameraView {
         super.dispatchDraw(canvas);
     }
 
-    @SuppressLint("RestrictedApi")
     @Override
     public boolean hasFrontFaceCamera() {
         return controller.hasFrontFaceCamera();
     }
 
-    @SuppressLint("RestrictedApi")
     public static boolean hasGoodCamera(Context context) {
         return CameraXController.hasGoodCamera(context);
     }
 
+    @NonNull
     @Override
     public TextureView getTextureView() {
         return (TextureView) (previewView.getChildAt(0));
@@ -425,7 +414,7 @@ public class CameraXView extends BaseCameraView {
     }
 
     public boolean isFlashAvailable() {
-        return controller.isFlashAvailable();
+        return CameraXController.isFlashAvailable();
     }
 
     @Override
@@ -438,7 +427,7 @@ public class CameraXView extends BaseCameraView {
         worldOrientationListener.disable();
     }
 
-    public void setDelegate(CameraView.CameraViewDelegate cameraViewDelegate) {
+    public void setDelegate(@NonNull CameraView.CameraViewDelegate cameraViewDelegate) {
         delegate = cameraViewDelegate;
     }
 
@@ -452,7 +441,7 @@ public class CameraXView extends BaseCameraView {
     }
 
     public boolean isHdrModeSupported() {
-        return controller.isAvailableHdrMode();
+        return controller.isModeSupported(ExtensionMode.HDR);
     }
 
     public boolean isWideModeSupported() {
@@ -460,11 +449,19 @@ public class CameraXView extends BaseCameraView {
     }
 
     public boolean isNightModeSupported() {
-        return controller.isAvailableNightMode();
+        return controller.isModeSupported(ExtensionMode.NIGHT);
     }
 
     public boolean isAutoModeSupported() {
-        return controller.isAvailableAutoMode();
+        return controller.isModeSupported(ExtensionMode.AUTO);
+    }
+
+    public boolean isBokehModeSupported() {
+        return controller.isModeSupported(ExtensionMode.BOKEH);
+    }
+
+    public boolean isFaceRetouchModeSupported() {
+        return controller.isModeSupported(ExtensionMode.FACE_RETOUCH);
     }
 
     public boolean isExposureCompensationSupported() {
@@ -601,7 +598,7 @@ public class CameraXView extends BaseCameraView {
                 frameWidth = previewSize.getHeight();
                 frameHeight = previewSize.getWidth();
             }
-            float s = Math.max(View.MeasureSpec.getSize(widthMeasureSpec) / (float) frameWidth, View.MeasureSpec.getSize(heightMeasureSpec) / (float) frameHeight);
+            float s = Math.max(MeasureSpec.getSize(widthMeasureSpec) / (float) frameWidth, MeasureSpec.getSize(heightMeasureSpec) / (float) frameHeight);
             blurredStubView.getLayoutParams().width = (int) (s * frameWidth);
             blurredStubView.getLayoutParams().height = (int) (s * frameHeight);
         }
@@ -609,7 +606,7 @@ public class CameraXView extends BaseCameraView {
     }
 
     @Override
-    public void setRecordFile(File generateVideoPath) {
+    public void setRecordFile(@NonNull File generateVideoPath) {
     }
 
     Rect bounds = new Rect();

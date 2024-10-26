@@ -5,6 +5,7 @@
  *
  * Copyright OctoGram, 2023-2024.
  */
+
 package it.octogram.android.camerax.components;
 
 import android.content.Context;
@@ -22,8 +23,9 @@ import androidx.annotation.NonNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.LayoutHelper;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import it.octogram.android.camerax.CameraXController;
 import it.octogram.android.camerax.CameraXView;
@@ -60,7 +62,7 @@ public class EffectSelectorView extends LinearLayout {
 
     public void loadEffects(CameraXView cameraXView) {
         if (getChildCount() == 0) {
-            ArrayList<Integer> list_effect = getListEffect(cameraXView);
+            var list_effect = getListEffect(cameraXView);
             if (list_effect.size() == 1) {
                 return;
             }
@@ -69,7 +71,7 @@ public class EffectSelectorView extends LinearLayout {
                 LinearLayout linearLayout = new LinearLayout(getContext());
                 linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
                 linearLayout.setGravity(Gravity.CENTER);
-                ButtonEffectView buttonEffect = getButtonEffect(effect);
+                ButtonEffectView buttonEffect = getButtonEffectView(effect);
                 if (effect == CameraXController.CAMERA_NONE) {
                     oldSelection = buttonEffect;
                 }
@@ -79,7 +81,8 @@ public class EffectSelectorView extends LinearLayout {
         }
     }
 
-    private @NonNull ButtonEffectView getButtonEffect(int effect) {
+    @NonNull
+    private ButtonEffectView getButtonEffectView(int effect) {
         ButtonEffectView buttonEffect = new ButtonEffectView(getContext(), effect) {
             @Override
             protected void onItemClick(ButtonEffectView buttonEffect, int camera_type) {
@@ -98,22 +101,31 @@ public class EffectSelectorView extends LinearLayout {
         return buttonEffect;
     }
 
-    private static @NonNull ArrayList<Integer> getListEffect(CameraXView cameraXView) {
-        ArrayList<Integer> list_effect = new ArrayList<>();
+    @NonNull
+    private static List<Integer> getListEffect(CameraXView cameraXView) {
+        Set<Integer> effectSet = new HashSet<>();
+
         if (cameraXView.isNightModeSupported()) {
-            list_effect.add(CameraXController.CAMERA_NIGHT);
+            effectSet.add(CameraXController.CAMERA_NIGHT);
         }
         if (cameraXView.isAutoModeSupported()) {
-            list_effect.add(CameraXController.CAMERA_AUTO);
+            effectSet.add(CameraXController.CAMERA_AUTO);
         }
-        list_effect.add(CameraXController.CAMERA_NONE);
+        effectSet.add(CameraXController.CAMERA_NONE);
         if (cameraXView.isWideModeSupported()) {
-            list_effect.add(CameraXController.CAMERA_WIDE);
+            effectSet.add(CameraXController.CAMERA_WIDE);
         }
         if (cameraXView.isHdrModeSupported()) {
-            list_effect.add(CameraXController.CAMERA_HDR);
+            effectSet.add(CameraXController.CAMERA_HDR);
         }
-        return list_effect;
+        if (cameraXView.isBokehModeSupported()) {
+            effectSet.add(CameraXController.CAMERA_BOKEH);
+        }
+        if (cameraXView.isFaceRetouchModeSupported()) {
+            effectSet.add(CameraXController.CAMERA_FACE_RETOUCH);
+        }
+
+        return List.copyOf(effectSet);
     }
 
     protected void onEffectSelected(int cameraEffect) {

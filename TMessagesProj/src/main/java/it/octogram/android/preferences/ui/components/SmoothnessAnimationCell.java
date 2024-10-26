@@ -111,7 +111,7 @@ public class SmoothnessAnimationCell extends FrameLayout {
 
                             if (clicksCount[0] > 10 && !OctoConfig.INSTANCE.unlockedConfetti.getValue()) {
                                 AppIconBulletinLayout layout = new AppIconBulletinLayout(getParentActivity(), LauncherIconController.LauncherIcon.CONFETTI, null);
-                                layout.textView.setText(LocaleController.getString("UnlockedHiddenConfettiIcon", R.string.UnlockedHiddenConfettiIcon));
+                                layout.textView.setText(LocaleController.getString(R.string.UnlockedHiddenConfettiIcon));
                                 layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                 Bulletin.make(Objects.requireNonNull(LaunchActivity.getLastFragment()), layout, Bulletin.DURATION_SHORT).show();
                                 OctoConfig.INSTANCE.unlockedConfetti.updateValue(true);

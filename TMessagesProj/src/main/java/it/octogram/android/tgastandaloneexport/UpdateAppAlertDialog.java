@@ -47,6 +47,7 @@ import java.io.File;
 import it.octogram.android.preferences.ui.components.CustomUpdatesCheckCell;
 import it.octogram.android.utils.UpdatesManager;
 
+@SuppressLint("ViewConstructor")
 public class UpdateAppAlertDialog extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
     private final TLRPC.TL_help_appUpdate appUpdate;
@@ -68,8 +69,6 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
     private final BottomSheetCell doneButton;
     private final BottomSheetCell scheduleButton;
 
-
-    @SuppressLint("ViewConstructor")
     public static class BottomSheetCell extends FrameLayout {
 
         private final View background;
@@ -132,7 +131,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                     }
-                    setText(LocaleController.getString("AppUpdateRemindMeLater", R.string.AppUpdateRemindMeLater), !isFirstUpdate);
+                    setText(LocaleController.getString(R.string.AppUpdateRemindMeLater), !isFirstUpdate);
                 } else if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
@@ -147,13 +146,13 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
             } else {
                 switch (state) {
                     case CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
-                        setText(LocaleController.formatString("AppUpdateDownloadNow", R.string.AppUpdateDownloadNow), !isFirstUpdate);
+                        setText(LocaleController.formatString(R.string.AppUpdateDownloadNow), !isFirstUpdate);
                         break;
                     case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING:
-                        setText(LocaleController.formatString("AppUpdateDownloading", R.string.AppUpdateDownloading, (int) (loadProgress * 100)), !isFirstUpdate);
+                        setText(LocaleController.formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)), !isFirstUpdate);
                         break;
                     case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY:
-                        setText(LocaleController.getString("UpdatesSettingsCheckButtonInstall", R.string.UpdatesSettingsCheckButtonInstall), !isFirstUpdate);
+                        setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonInstall), !isFirstUpdate);
                         break;
                 }
 
@@ -299,12 +298,12 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         }
 
         TextView textView = new TextView(context);
-        textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
         textView.setSingleLine(true);
         textView.setEllipsize(TextUtils.TruncateAt.END);
-        textView.setText(LocaleController.getString("AppUpdateCustomTitle", R.string.AppUpdateCustomTitle));
+        textView.setText(LocaleController.getString(R.string.AppUpdateCustomTitle));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 23, 16, 23, 0));
 
         TextView messageTextView = new TextView(getContext());
@@ -322,7 +321,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         changelogTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
         changelogTextView.setLinkTextColor(Theme.getColor(Theme.key_dialogTextLink));
         if (TextUtils.isEmpty(appUpdate.text)) {
-            changelogTextView.setText(AndroidUtilities.replaceTags(LocaleController.getString("AppUpdateChangelogEmpty", R.string.AppUpdateChangelogEmpty)));
+            changelogTextView.setText(AndroidUtilities.replaceTags(LocaleController.getString(R.string.AppUpdateChangelogEmpty)));
         } else {
             SpannableStringBuilder builder = new SpannableStringBuilder(appUpdate.text);
             MessageObject.addEntitiesToText(builder, update.entities, false, false, false, false);

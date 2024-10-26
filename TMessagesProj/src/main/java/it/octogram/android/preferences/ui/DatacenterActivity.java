@@ -69,7 +69,7 @@ public class DatacenterActivity extends BaseFragment {
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setTitle(LocaleController.getString("DatacenterStatus", R.string.DatacenterStatus));
+        actionBar.setTitle(LocaleController.getString(R.string.DatacenterStatus));
         actionBar.setAllowOverlayTitle(false);
         if (AndroidUtilities.isTablet()) {
             actionBar.setOccupyStatusBar(false);
@@ -182,7 +182,7 @@ public class DatacenterActivity extends BaseFragment {
                 case 3:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == headerDcListRow) {
-                        headerCell.setText(LocaleController.getString("DatacenterStatus", R.string.DatacenterStatus));
+                        headerCell.setText(LocaleController.getString(R.string.DatacenterStatus));
                     }
                     break;
             }

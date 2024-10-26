@@ -3,6 +3,7 @@ package org.telegram.ui.Components;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -26,6 +27,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.LongSparseArray;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressLint("ViewConstructor")
 public class EmojiTabsStrip extends ScrollableHorizontalScrollView {
 
     private int recentDrawableId = R.drawable.msg_emoji_recent;
@@ -486,9 +489,12 @@ public class EmojiTabsStrip extends ScrollableHorizontalScrollView {
                     onTabCreate(currentPackButton);
                     contentView.addView(currentPackButton, packsIndexStart + i);
                 } else {
-                    currentPackButton.setDrawable(getResources().getDrawable(newPack.resId).mutate());
-                    currentPackButton.updateColor();
-                    currentPackButton.setLock(null, false);
+                    var drawable = ContextCompat.getDrawable(getContext(),newPack.resId);
+                    if (drawable != null) {
+                        currentPackButton.setDrawable(drawable.mutate());
+                        currentPackButton.updateColor();
+                        currentPackButton.setLock(null, false);
+                    }
                 }
             } else {
                 final boolean free = newPack.free;
@@ -712,8 +718,11 @@ public class EmojiTabsStrip extends ScrollableHorizontalScrollView {
                 lottieDrawable.start();
             } else {
                 imageView = new ImageView(context);
-                imageView.setImageDrawable(context.getResources().getDrawable(drawableId).mutate());
-                addView(imageView);
+                var drawable = ContextCompat.getDrawable(context,drawableId);
+                if (drawable != null){
+                    imageView.setImageDrawable(drawable.mutate());
+                    addView(imageView);
+                }
             }
             setColor(Theme.getColor(Theme.key_chat_emojiPanelIcon, resourcesProvider));
         }
@@ -729,7 +738,10 @@ public class EmojiTabsStrip extends ScrollableHorizontalScrollView {
             }
 
             imageView = new ImageView(context);
-            imageView.setImageDrawable(context.getResources().getDrawable(drawableId).mutate());
+            var drawable = ContextCompat.getDrawable(context, drawableId);
+            if (drawable != null){
+                imageView.setImageDrawable(drawable.mutate());
+            }
             setColor(Theme.getColor(Theme.key_chat_emojiPanelIcon, resourcesProvider));
 
             addView(imageView);
@@ -1385,6 +1397,7 @@ class ScrollableHorizontalScrollView extends HorizontalScrollView {
 
     private boolean touch;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {

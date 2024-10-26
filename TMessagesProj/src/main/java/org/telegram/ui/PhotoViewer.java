@@ -5625,7 +5625,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 menuItem.toggleSubMenu();
             }
         });
-        menuItem.addSubItem(gallery_menu_save, R.drawable.msg_gallery, getString("SaveToGallery", R.string.SaveToGallery)).setColors(0xfffafafa, 0xfffafafa);
+        //menuItem.addSubItem(gallery_menu_save, R.drawable.msg_gallery, getString("SaveToGallery", R.string.SaveToGallery)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_copy, R.drawable.msg_copy, getString("CopyPhoto", R.string.CopyPhoto)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_reply, R.drawable.menu_reply, getString(R.string.Reply)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_share, R.drawable.msg_shareout, getString(R.string.ShareFile)).setColors(0xfffafafa, 0xfffafafa);
@@ -12793,6 +12793,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         setMenuItemIcon(false, true);
 
         boolean noforwards = messageObject != null && (MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId()) || (messageObject.messageOwner != null && messageObject.messageOwner.noforwards) || messageObject.hasRevealedExtendedMedia());
+        if (BuildVars.DEBUG_VERSION) {
+            android.util.Log.d("NoForward", String.format("NoForward Value: %s", noforwards));
+        }
         if (messageObject != null && messages == null) {
             if (messageObject.messageOwner != null && MessageObject.getMedia(messageObject.messageOwner) instanceof TLRPC.TL_messageMediaWebPage && MessageObject.getMedia(messageObject.messageOwner).webpage != null) {
                 TLRPC.WebPage webPage = MessageObject.getMedia(messageObject.messageOwner).webpage;
@@ -13201,6 +13204,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
 
             boolean isInvoice = newMessageObject.isInvoice();
             boolean noforwards = MessagesController.getInstance(currentAccount).isChatNoForwards(newMessageObject.getChatId()) || (newMessageObject.messageOwner != null && newMessageObject.messageOwner.noforwards) || newMessageObject.hasRevealedExtendedMedia();
+            if (BuildVars.DEBUG_VERSION) {
+                android.util.Log.d("NoForward", String.format("13206: NoForward Value: %s", noforwards));
+            }
             if (isVideo) {
                 bottomLayout.setVisibility(View.VISIBLE);
                 bottomLayout.setTag(1);
@@ -13525,6 +13531,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 title = getString("AttachPhoto", R.string.AttachPhoto);
             }
             boolean noforwards = avatarsDialogId != 0 && MessagesController.getInstance(currentAccount).isChatNoForwards(-avatarsDialogId);
+            if (BuildVars.DEBUG_VERSION) {
+                android.util.Log.d("NoForward", String.format("13530: NoForward Value: %s", noforwards));
+            }
             if (noforwards) {
                 menuItem.hideSubItem(gallery_menu_save);
             } else {
@@ -14538,6 +14547,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
         }
         detectFaces();
+        // TODO: QR Detection
     }
 
     private void resetIndexForDeferredImageLoading() {
@@ -18776,8 +18786,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     if (SharedConfig.streamMedia && !DialogObject.isEncryptedDialog(currentMessageObject.getDialogId()) && currentMessageObject.isVideo() && currentMessageObject.canStreamVideo()) {
                         final int reference = FileLoader.getInstance(currentMessageObject.currentAccount).getFileReference(currentMessageObject);
 
-                        videoUrises = new ArrayList<>();
-                        videoUrises.addAll(VideoPlayer.getQualities(currentAccount, original, alt_documents, reference, false));
+                        videoUrises = new ArrayList<>(VideoPlayer.getQualities(currentAccount, original, alt_documents, reference, false));
                         isStreaming = true;
                         checkProgress(0, false, false);
                     }

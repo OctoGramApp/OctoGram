@@ -66,31 +66,31 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.ShowFakePhoneNumber))
-                                            .setItemDescription(LocaleController.formatString(R.string.ShowFakePhoneNumber_Desc, "+39 123 456 7890")),
+                                            .setItemDescription(LocaleController.formatString(R.string.ShowFakePhoneNumber_Desc, "+39 123 456 7890")), // TODO: Improve
                                     new PopupChoiceDialogOption()
                                             .setId(PhoneNumberAlternative.SHOW_USERNAME.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.ShowUsernameAsPhoneNumber))
                                             .setItemDescription(LocaleController.getString(R.string.ShowUsernameAsPhoneNumber_Desc))
                             ))
-                            .title(LocaleController.getString("InsteadPhoneNumber", R.string.InsteadPhoneNumber))
+                            .title(LocaleController.getString(R.string.InsteadPhoneNumber))
                             .build());
                 })
                 .category("Warnings", category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.promptBeforeCalling)
-                            .title(LocaleController.formatString("PromptBeforeCalling", R.string.PromptBeforeCalling))
-                            .description(LocaleController.formatString("PromptBeforeCalling_Desc", R.string.PromptBeforeCalling_Desc))
+                            .title(LocaleController.getString(R.string.PromptBeforeCalling))
+                            .description(LocaleController.getString(R.string.PromptBeforeCalling_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory)
-                            .title(LocaleController.formatString("PromptBeforeDeletingChatHistory", R.string.PromptBeforeDeletingChatHistory))
-                            .description(LocaleController.formatString("PromptBeforeDeletingChatHistory_Desc", R.string.PromptBeforeDeletingChatHistory_Desc))
+                            .title(LocaleController.getString(R.string.PromptBeforeDeletingChatHistory))
+                            .description(LocaleController.getString(R.string.PromptBeforeDeletingChatHistory_Desc))
                             .build());
                 })
-                .category(LocaleController.formatString("DcIdHeader", R.string.DcIdHeader), category -> {
+                .category(LocaleController.getString(R.string.DcIdHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
-                            .title(LocaleController.formatString("ShowRegistrationDate", R.string.ShowRegistrationDate))
+                            .title(LocaleController.getString(R.string.ShowRegistrationDate))
                             .description(LocaleController.formatString("ShowRegistrationDate_Desc", R.string.ShowRegistrationDate_Desc))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
@@ -101,7 +101,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             })
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(DcIdStyle.NONE.getValue()).setItemTitle(LocaleController.getString("Nothing", R.string.Nothing)),
+                                    new PopupChoiceDialogOption().setId(DcIdStyle.NONE.getValue()).setItemTitle(LocaleController.getString(R.string.Nothing)),
                                     new PopupChoiceDialogOption().setId(DcIdStyle.OWLGRAM.getValue()).setItemTitle("OwlGram"),
                                     new PopupChoiceDialogOption().setId(DcIdStyle.TELEGRAM.getValue()).setItemTitle("Telegram"),
                                     new PopupChoiceDialogOption().setId(DcIdStyle.MINIMAL.getValue()).setItemTitle("Minimal")
@@ -306,10 +306,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.CustomEmojiReaction))
                             .build());
                 })
-                .category(LocaleController.getString("Notifications", R.string.Notifications), category -> {
+                .category(LocaleController.getString(R.string.Notifications), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
-                            .title(LocaleController.getString("AccentColorAsNotificationColor", R.string.AccentColorAsNotificationColor))
+                            .title(LocaleController.getString(R.string.AccentColorAsNotificationColor))
                             .build());
                     category.row(enableSmartNotificationsSwitchRow = new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> {
@@ -317,7 +317,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                 return true;
                             })
                             .preferenceValue(OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats)
-                            .title(LocaleController.getString("EnableSmartNotificationsForPrivateChats", R.string.EnableSmartNotificationsForPrivateChats))
+                            .title(LocaleController.getString(R.string.EnableSmartNotificationsForPrivateChats))
                             .build());
                 })
                 .build();
@@ -340,8 +340,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
 
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(fragment.getContext());
         warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-        warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialog1, which1) -> dialog1.dismiss());
-        warningBuilder.setMessage(LocaleController.getString("SmartNotificationsPvtDialogMessage", R.string.SmartNotificationsPvtDialogMessage));
+        warningBuilder.setPositiveButton(LocaleController.getString(R.string.OK), (dialog1, which1) -> dialog1.dismiss());
+        warningBuilder.setMessage(LocaleController.getString(R.string.SmartNotificationsPvtDialogMessage));
         AlertDialog alertDialog = warningBuilder.create();
         alertDialog.show();
     }

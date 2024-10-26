@@ -144,17 +144,17 @@ public class DatacenterStatus extends LinearLayout {
             String statusText;
             int colorKey;
             if (status == 0) {
-                statusText = LocaleController.getString("Unavailable", R.string.Unavailable);
+                statusText = LocaleController.getString(R.string.Unavailable);
                 colorKey = Theme.key_windowBackgroundWhiteGrayText;
             } else if (status == 1) {
-                statusText = LocaleController.getString("Available", R.string.Available);
+                statusText = LocaleController.getString(R.string.Available);
                 colorKey = Theme.key_windowBackgroundWhiteGreenText;
             } else {
-                statusText = LocaleController.getString("SpeedSlow", R.string.SpeedSlow);
+                statusText = LocaleController.getString(R.string.SpeedSlow);
                 colorKey = Theme.key_statisticChartLine_orange;
             }
             if (status != 0) {
-                statusText += ", " + LocaleController.formatString("Ping", R.string.Ping, ping);
+                statusText += ", " + LocaleController.formatString(R.string.Ping, ping);
             }
             statusTextView.setText(statusText);
             statusTextView.setTextColor(Theme.getColor(colorKey));

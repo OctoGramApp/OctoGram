@@ -106,7 +106,7 @@ public class AccountSelector extends FrameLayout {
         int currentAccount = UserConfig.selectedAccount;
         if (user.id == UserConfig.getInstance(currentAccount).getClientUserId() || user.status != null && user.status.expires > ConnectionsManager.getInstance(currentAccount).getCurrentTime() || MessagesController.getInstance(currentAccount).onlinePrivacy.containsKey(user.id)) {
             detailTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));
-            detailTextView.setText(LocaleController.getString("Online", R.string.Online));
+            detailTextView.setText(LocaleController.getString(R.string.Online));
         } else {
             detailTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
             detailTextView.setText(LocaleController.formatUserStatus(currentAccount, user));

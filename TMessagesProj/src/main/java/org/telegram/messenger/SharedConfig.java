@@ -29,6 +29,8 @@ import androidx.core.content.pm.ShortcutManagerCompat;
 
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.CustomDevicePerformanceManager;
+
 import org.json.JSONObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
@@ -1622,7 +1624,8 @@ public class SharedConfig {
             return overrideDevicePerformanceClass;
         }
         if (devicePerformanceClass == -1) {
-            devicePerformanceClass = measureDevicePerformanceClass();
+            // devicePerformanceClass = measureDevicePerformanceClass();
+            devicePerformanceClass = CustomDevicePerformanceManager.measureDevicePerformanceClass();
         }
         return devicePerformanceClass;
     }

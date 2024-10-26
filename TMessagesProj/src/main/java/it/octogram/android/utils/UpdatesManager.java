@@ -54,17 +54,18 @@ public class UpdatesManager {
 
     private static boolean isLoadingTLRPCAppUpdate;
     private static TLRPC.TL_help_appUpdate currentUpdateData;
+    private static final int FIRST_ACCOUNT_ID = 0;
 
     protected static MessagesController getMessagesController() {
-        return MessagesController.getInstance(0);
+        return MessagesController.getInstance(FIRST_ACCOUNT_ID);
     }
 
     protected static ConnectionsManager getConnectionsManager() {
-        return ConnectionsManager.getInstance(0);
+        return ConnectionsManager.getInstance(FIRST_ACCOUNT_ID);
     }
 
     protected static MessagesStorage getMessagesStorage() {
-        return MessagesStorage.getInstance(0);
+        return MessagesStorage.getInstance(FIRST_ACCOUNT_ID);
     }
 
     public static boolean canReceivePrivateBetaUpdates() {
@@ -375,7 +376,7 @@ public class UpdatesManager {
                             break;
                         }
 
-                        StringBuilder finalUpdate = new StringBuilder(String.format("%s\n\n%s", LocaleController.getString("UpdatesPbetaWarning", R.string.UpdatesPbetaWarning), commitText));
+                        StringBuilder finalUpdate = new StringBuilder(String.format("%s\n\n%s", LocaleController.getString(R.string.UpdatesPbetaWarning), commitText));
 
                         TLRPC.Document currentMediaDocument = message.media.document;
                         String currentAbiRelease = OctoUtils.getCurrentAbi(false);

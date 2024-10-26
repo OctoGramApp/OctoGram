@@ -60,21 +60,21 @@ public class OctoTranslatorUI implements PreferencesEntry {
         List<PopupChoiceDialogOption> translatorModeOptions = new ArrayList<>();
         translatorModeOptions.add(new PopupChoiceDialogOption()
                 .setId(TranslatorMode.DEFAULT.getValue())
-                .setItemTitle(LocaleController.getString("TranslatorModeDefault", R.string.TranslatorModeDefault)));
+                .setItemTitle(LocaleController.getString(R.string.TranslatorModeDefault)));
         translatorModeOptions.add(new PopupChoiceDialogOption()
                 .setId(TranslatorMode.INLINE.getValue())
-                .setItemTitle(LocaleController.getString("TranslatorModeInline", R.string.TranslatorModeInline)));
+                .setItemTitle(LocaleController.getString(R.string.TranslatorModeInline)));
 
         if (TranslationsWrapper.canUseExternalApp()) {
             translatorModeOptions.add(new PopupChoiceDialogOption()
                     .setId(TranslatorMode.EXTERNAL.getValue())
-                    .setItemTitle(LocaleController.getString("TranslatorModeExternal", R.string.TranslatorModeExternal)));
+                    .setItemTitle(LocaleController.getString(R.string.TranslatorModeExternal)));
         } else if (OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.EXTERNAL.getValue()) {
             OctoConfig.INSTANCE.translatorMode.updateValue(TranslatorMode.DEFAULT.getValue());
             canSelectProvider.setValue(showButtonBool.getValue());
         }
 
-        return OctoPreferences.builder(LocaleController.formatString("Translator", R.string.Translator))
+        return OctoPreferences.builder(LocaleController.formatString(R.string.Translator))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.TRANSLATOR, true, LocaleController.formatString("TranslatorHeader", R.string.TranslatorHeader))
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onClick(() -> {
@@ -84,7 +84,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             return true;
                         })
                         .preferenceValue(showButtonBool)
-                        .title(LocaleController.getString("ShowTranslateButton", R.string.ShowTranslateButton))
+                        .title(LocaleController.getString(R.string.ShowTranslateButton))
                         .build()
                 )
                 .row(new SwitchRow.SwitchRowBuilder()
@@ -103,14 +103,14 @@ public class OctoTranslatorUI implements PreferencesEntry {
                         .premium(OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium())
                         .autoShowPremiumAlert(false)
                         .preferenceValue(translateEntireChat)
-                        .title(LocaleController.getString("ShowTranslateChatButton", R.string.ShowTranslateChatButton))
+                        .title(LocaleController.getString(R.string.ShowTranslateChatButton))
                         .build()
                 )
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.getString("TranslateMessagesInfo1", R.string.TranslateMessagesInfo1))
+                        .title(LocaleController.getString(R.string.TranslateMessagesInfo1))
                         .build()
                 )
-                .category(LocaleController.getString("TranslatorCategoryOptions", R.string.TranslatorCategoryOptions), canSelectDoNotTranslate, category -> {
+                .category(LocaleController.getString(R.string.TranslatorCategoryOptions), canSelectDoNotTranslate, category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.translatorMode)
                             .options(translatorModeOptions)
@@ -119,21 +119,21 @@ public class OctoTranslatorUI implements PreferencesEntry {
                                 resetManualSavedMessages();
                             })
                             .showIf(showButtonBool)
-                            .title(LocaleController.getString("TranslatorMode", R.string.TranslatorMode))
+                            .title(LocaleController.getString(R.string.TranslatorMode))
                             .build()
                     );
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DestinationLanguageSettings()))
                             .value(getTranslateDestinationStatus())
                             .showIf(canSelectProvider)
-                            .title(LocaleController.getString("TranslatorDestination", R.string.TranslatorDestination))
+                            .title(LocaleController.getString(R.string.TranslatorDestination))
                             .build()
                     );
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new RestrictedLanguagesSelectActivity()))
                             .value(getDoNotTranslateStatus())
                             .showIf(canSelectDoNotTranslate)
-                            .title(LocaleController.getString("DoNotTranslate", R.string.DoNotTranslate))
+                            .title(LocaleController.getString(R.string.DoNotTranslate))
                             .build()
                     );
                     category.row(new ListRow.ListRowBuilder()
@@ -157,7 +157,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                                 }
                             })
                             .showIf(canSelectProvider)
-                            .title(LocaleController.getString("TranslatorProvider", R.string.TranslatorProvider))
+                            .title(LocaleController.getString(R.string.TranslatorProvider))
                             .build()
                     );
                     category.row(new ListRow.ListRowBuilder()
@@ -165,22 +165,22 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(TranslatorFormality.DEFAULT.getValue())
-                                            .setItemTitle(LocaleController.getString("TranslatorFormalityDefault", R.string.TranslatorFormalityDefault)),
+                                            .setItemTitle(LocaleController.getString(R.string.TranslatorFormalityDefault)),
                                     new PopupChoiceDialogOption()
                                             .setId(TranslatorFormality.LOW.getValue())
-                                            .setItemTitle(LocaleController.getString("TranslatorFormalityLow", R.string.TranslatorFormalityLow)),
+                                            .setItemTitle(LocaleController.getString(R.string.TranslatorFormalityLow)),
                                     new PopupChoiceDialogOption()
                                             .setId(TranslatorFormality.HIGH.getValue())
-                                            .setItemTitle(LocaleController.getString("TranslatorFormalityHigh", R.string.TranslatorFormalityHigh))
+                                            .setItemTitle(LocaleController.getString(R.string.TranslatorFormalityHigh))
                             ))
                             .showIf(canSelectFormality)
-                            .title(LocaleController.getString("TranslatorFormality", R.string.TranslatorFormality))
+                            .title(LocaleController.getString(R.string.TranslatorFormality))
                             .build()
                     );
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.translatorKeepMarkdown)
                             .showIf(canSelectKeepMarkdown)
-                            .title(LocaleController.getString("TranslatorKeepMarkdown", R.string.TranslatorKeepMarkdown))
+                            .title(LocaleController.getString(R.string.TranslatorKeepMarkdown))
                             .build()
                     );
                 }).build();
@@ -191,15 +191,15 @@ public class OctoTranslatorUI implements PreferencesEntry {
                 updateProviderAvailability(new PopupChoiceDialogOption()
                         .setId(TranslatorProvider.DEFAULT.getValue())
                         .setItemTitle("Telegram")
-                        .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedPremium", R.string.TranslatorProviderSuggestedPremium))),
+                        .setItemDescription(LocaleController.getString(R.string.TranslatorProviderSuggestedPremium))),
                 updateProviderAvailability(new PopupChoiceDialogOption()
                         .setId(TranslatorProvider.GOOGLE.getValue())
                         .setItemTitle("Google")
-                        .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedGeneral", R.string.TranslatorProviderSuggestedGeneral))),
+                        .setItemDescription(LocaleController.getString(R.string.TranslatorProviderSuggestedGeneral))),
                 updateProviderAvailability(new PopupChoiceDialogOption()
                         .setId(TranslatorProvider.DEEPL.getValue())
                         .setItemTitle("DeepL")
-                        .setItemDescription(LocaleController.getString("TranslatorProviderSuggestedAccurate", R.string.TranslatorProviderSuggestedAccurate))),
+                        .setItemDescription(LocaleController.getString(R.string.TranslatorProviderSuggestedAccurate))),
                 updateProviderAvailability(new PopupChoiceDialogOption().setId(TranslatorProvider.YANDEX.getValue()).setItemTitle("Yandex"))
         );
     }
@@ -262,7 +262,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
     private String getTranslateDestinationStatus() {
         String currentDestination = MessagesController.getGlobalMainSettings().getString("translate_to_language", null);
         if (currentDestination == null || currentDestination.isEmpty()) {
-            return LocaleController.getString("TranslatorDestinationFollow", R.string.TranslatorDestinationFollow);
+            return LocaleController.getString(R.string.TranslatorDestinationFollow);
         } else {
             return TranslateAlert2.capitalFirst(TranslateAlert2.languageName(currentDestination, null));
         }
@@ -282,15 +282,15 @@ public class OctoTranslatorUI implements PreferencesEntry {
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
         warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
         if (MessagesController.getInstance(UserConfig.selectedAccount).premiumFeaturesBlocked()) {
-            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
+            warningBuilder.setPositiveButton(LocaleController.getString(R.string.OK), null);
         } else {
-            warningBuilder.setPositiveButton(LocaleController.getString("MoreInfo", R.string.MoreInfo), (dialog1, which1) -> {
+            warningBuilder.setPositiveButton(LocaleController.getString(R.string.MoreInfo), (dialog1, which1) -> {
                 dialog1.dismiss();
                 fragment.showDialog(new PremiumFeatureBottomSheet(fragment, PremiumPreviewFragment.PREMIUM_FEATURE_TRANSLATIONS, false));
             });
-            warningBuilder.setNeutralButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+            warningBuilder.setNeutralButton(LocaleController.getString(R.string.Cancel), null);
         }
-        warningBuilder.setMessage(LocaleController.getString("TranslatorEntireUnavailable", R.string.TranslatorEntireUnavailable));
+        warningBuilder.setMessage(LocaleController.getString(R.string.TranslatorEntireUnavailable));
         AlertDialog alertDialog = warningBuilder.create();
         alertDialog.show();
     }
@@ -317,8 +317,8 @@ public class OctoTranslatorUI implements PreferencesEntry {
         if (dialogsWithUnavailableLanguage > 0) {
             AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
             warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-            warningBuilder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
-            warningBuilder.setMessage(LocaleController.getString("TranslatorProviderUnsupportedDialogs", R.string.TranslatorProviderUnsupportedDialogs));
+            warningBuilder.setPositiveButton(LocaleController.getString(R.string.OK), null);
+            warningBuilder.setMessage(LocaleController.getString(R.string.TranslatorProviderUnsupportedDialogs));
             AlertDialog alertDialog = warningBuilder.create();
             alertDialog.show();
         }

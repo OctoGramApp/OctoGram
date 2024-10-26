@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android v.2.0.x
+ * It is licensed under GNU GPL v. 2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.camerax;
 
 import static android.hardware.camera2.CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS;
@@ -6,9 +14,9 @@ import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
+import android.util.Log;
 import android.util.Size;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.camera.camera2.interop.Camera2CameraInfo;
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
@@ -23,6 +31,7 @@ import androidx.core.content.ContextCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.SharedConfig;
 
@@ -30,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -56,7 +66,7 @@ public class CameraXUtils {
         return getWideCameraId(provider) != null;
     }
 
-    @SuppressLint("UnsafeOptInUsageError")
+    @OptIn(markerClass = ExperimentalCamera2Interop.class)
     public static CameraSelector getDefaultWideAngleCamera(ProcessCameraProvider provider) {
         String wideCamera = getWideCameraId(provider);
         if (wideCamera != null) {
@@ -108,12 +118,12 @@ public class CameraXUtils {
         }, ContextCompat.getMainExecutor(context));
     }
 
-    /** @noinspection deprecation*/
-    private static Map<Quality, Size> getAvailableVideoSizes(@NonNull CameraSelector cameraSelector, @NonNull ProcessCameraProvider provider) {
+    private static Map<Quality, Size> getAvailableVideoSizes(CameraSelector cameraSelector, ProcessCameraProvider provider) {
+        //noinspection deprecation
         return cameraSelector.filter(provider.getAvailableCameraInfos()).stream()
                 .findFirst()
                 .map(camInfo ->
-                        QualitySelector.getSupportedQualities(camInfo).stream().collect(
+                                QualitySelector.getSupportedQualities(camInfo).stream().collect(
                                 Collectors.toMap(
                                         Function.identity(),
                                         quality -> Optional.ofNullable(QualitySelector.getResolution(camInfo, quality))
@@ -144,46 +154,32 @@ public class CameraXUtils {
                     cameraResolution = height;
                     int current = getResolutionFromConfig();
                     if (current == -1 || current > max || current < min) {
-                        OctoConfig.INSTANCE.cameraXResolution.updateValue(getConfigFromResolution(height).getValue());
+                        OctoConfig.INSTANCE.cameraXResolution.updateValue(height);
                     }
                 });
-    }
-
-    private static int getResolutionFromConfig() {
-        int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
-        if (current == CameraXResolution.SD.getValue()) {
-            return 480;
-        } else if (current == CameraXResolution.HD.getValue()) {
-            return 720;
-        } else if (current == CameraXResolution.FHD.getValue()) {
-            return 1080;
-        } else if (current == CameraXResolution.UHD.getValue()) {
-            return 2160;
-        } else {
-            return -1;
-        }
-    }
-
-    private static CameraXResolution getConfigFromResolution(int resolution) {
-        switch (resolution) {
-            case 480:
-                return CameraXResolution.SD;
-            case 720:
-                return CameraXResolution.HD;
-            case 1080:
-                return CameraXResolution.FHD;
-            case 2160:
-                return CameraXResolution.UHD;
-            default:
-                loadSuggestedResolution();
-        }
-        return CameraXResolution.None;
     }
 
     public static int getCameraResolution() {
         return cameraResolution;
     }
 
+    private static int getResolutionFromConfig() {
+        int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
+        if (BuildVars.DEBUG_PRIVATE_VERSION) {
+            Log.d("CameraXUtils", String.format(Locale.ROOT,"getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
+        }
+        if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD)) {
+            return 480;
+        } else if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)) {
+            return 720;
+        } else if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.FHD)) {
+            return 1080;
+        } else if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.UHD)) {
+            return 2160;
+        } else {
+            return -1;
+        }
+    }
     public static Size getPreviewBestSize() {
         int suggestedRes = getSuggestedResolution(true);
         return getAvailableVideoSizes().values().stream()
@@ -194,31 +190,23 @@ public class CameraXUtils {
 
     public static Quality getVideoQuality() {
         return getAvailableVideoSizes().entrySet().stream()
-                .filter(entry -> entry.getValue().getHeight() == getResolutionFromConfig())
+                .filter(entry -> entry.getValue().getHeight() == OctoConfig.INSTANCE.cameraXResolution.getValue())
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .orElse(Quality.HIGHEST);
     }
 
-    /** @noinspection EnhancedSwitchMigration*/
     private static int getSuggestedResolution(boolean isPreview) {
-        int suggestedRes;
-        switch (SharedConfig.getDevicePerformanceClass()) {
-            case SharedConfig.PERFORMANCE_CLASS_LOW:
-                suggestedRes = 720;
-                break;
-            case SharedConfig.PERFORMANCE_CLASS_AVERAGE:
-                suggestedRes = 1080;
-                break;
-            case SharedConfig.PERFORMANCE_CLASS_HIGH:
-            default:
-                suggestedRes = OctoConfig.INSTANCE.cameraXPerformanceMode.getValue() && isPreview ? 1080 : 2160;
-                break;
-        }
-        return suggestedRes;
+        return switch (SharedConfig.getDevicePerformanceClass()) {
+            case SharedConfig.PERFORMANCE_CLASS_LOW -> 720;
+            case SharedConfig.PERFORMANCE_CLASS_AVERAGE -> 1080;
+            case SharedConfig.PERFORMANCE_CLASS_HIGH -> 2160;
+            default -> OctoConfig.INSTANCE.cameraXZeroShutter.getValue() && isPreview ? 1080 : 2160;
+        };
     }
 
     @OptIn(markerClass = ExperimentalCamera2Interop.class)
+    @SuppressLint("RestrictedApi")
     public static String getWideCameraId(ProcessCameraProvider provider) {
         float lowestAngledCamera = Integer.MAX_VALUE;
         List<CameraInfo> cameraInfoList = provider.getAvailableCameraInfos();
@@ -229,10 +217,9 @@ public class CameraXUtils {
             CameraInfo cameraInfo = cameraInfoList.get(i);
             String id = Camera2CameraInfo.from(cameraInfo).getCameraId();
             try {
-                @SuppressLint("RestrictedApi")
                 CameraCharacteristics cameraCharacteristics = Camera2CameraInfo.from(cameraInfo).getCameraCharacteristicsMap().get(id);
                 if (cameraCharacteristics != null) {
-                    Integer lensFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
+                    var lensFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
                     if (lensFacing != null && lensFacing == LENS_FACING_BACK) {
                         availableBackCamera++;
                         ZoomState zoomState = cameraInfo.getZoomState().getValue();

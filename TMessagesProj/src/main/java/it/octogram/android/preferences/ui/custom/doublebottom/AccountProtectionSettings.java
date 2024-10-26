@@ -65,7 +65,7 @@ public class AccountProtectionSettings extends BaseFragment {
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setTitle(LocaleController.getString("AccountProtection", R.string.AccountProtection));
+        actionBar.setTitle(LocaleController.getString(R.string.AccountProtection));
         actionBar.setAllowOverlayTitle(false);
         if (AndroidUtilities.isTablet()) {
             actionBar.setOccupyStatusBar(false);
@@ -90,8 +90,8 @@ public class AccountProtectionSettings extends BaseFragment {
         listView.setOnItemClickListener((view, position) -> {
             if (position == disableAccountProtectionRow) {
                 AlertDialog alertDialog = new AlertDialog.Builder(getParentActivity())
-                        .setTitle(LocaleController.getString("DisableAccountProtection", R.string.DisableAccountProtection))
-                        .setMessage(LocaleController.getString("DisableAccountProtectionAlert", R.string.DisableAccountProtectionAlert))
+                        .setTitle(LocaleController.getString(R.string.DisableAccountProtection))
+                        .setMessage(LocaleController.getString(R.string.DisableAccountProtectionAlert))
                         .setNegativeButton(LocaleController.getString(R.string.Cancel), null)
                         .setPositiveButton(LocaleController.getString(R.string.DisablePasscodeTurnOff), (dialog, which) -> {
                             PasscodeController.disableAccountProtection();
@@ -108,10 +108,10 @@ public class AccountProtectionSettings extends BaseFragment {
                     final ArrayList<Integer> icons = new ArrayList<>();
                     final ArrayList<Integer> actions = new ArrayList<>();
 
-                    items.add(LocaleController.getString("ChangePasscode", R.string.ChangePasscode));
+                    items.add(LocaleController.getString(R.string.ChangePasscode));
                     icons.add(R.drawable.edit_passcode);
                     actions.add(0);
-                    items.add(LocaleController.getString("DisablePasscode", R.string.DisablePasscode));
+                    items.add(LocaleController.getString(R.string.DisablePasscode));
                     icons.add(R.drawable.msg_disable);
                     actions.add(1);
 
@@ -121,8 +121,8 @@ public class AccountProtectionSettings extends BaseFragment {
                             presentFragment(new PasscodeActivity(PasscodeActivity.TYPE_SETUP_CODE, user.id));
                         } else if (actions.get(i) == 1) {
                             AlertDialog alertDialog = new AlertDialog.Builder(getParentActivity())
-                                    .setTitle(LocaleController.getString("DisablePasscode", R.string.DisablePasscode))
-                                    .setMessage(LocaleController.getString("DisablePasscodeConfirmMessage", R.string.DisablePasscodeConfirmMessage))
+                                    .setTitle(LocaleController.getString(R.string.DisablePasscode))
+                                    .setMessage(LocaleController.getString(R.string.DisablePasscodeConfirmMessage))
                                     .setNegativeButton(LocaleController.getString(R.string.Cancel), null)
                                     .setPositiveButton(LocaleController.getString(R.string.DisablePasscodeTurnOff), (dialog, which) -> {
                                         PasscodeController.removePasscodeForAccount(user.id);
@@ -230,11 +230,11 @@ public class AccountProtectionSettings extends BaseFragment {
                 case TEXT_HINT:
                     TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
                     if (position == hintRow) {
-                        cell.setText(LocaleController.getString("AccountProtectionHint1", R.string.AccountProtectionHint1));
+                        cell.setText(LocaleController.getString(R.string.AccountProtectionHint1));
                         cell.setBackground(null);
                         cell.getTextView().setGravity(Gravity.CENTER_HORIZONTAL);
                     } else if (position == accountsDetailsRow) {
-                        cell.setText(LocaleController.getString("AccountProtectionHint2", R.string.AccountProtectionHint2));
+                        cell.setText(LocaleController.getString(R.string.AccountProtectionHint2));
                         cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                         cell.getTextView().setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
                     }
@@ -248,7 +248,7 @@ public class AccountProtectionSettings extends BaseFragment {
                 case HEADER:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == accountsHeaderRow) {
-                        headerCell.setText(LocaleController.getString("AllAccounts", R.string.AllAccounts));
+                        headerCell.setText(LocaleController.getString(R.string.AllAccounts));
                     }
                     break;
                 case ACCOUNT:
@@ -261,7 +261,7 @@ public class AccountProtectionSettings extends BaseFragment {
                 case SETTINGS:
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     if (position == disableAccountProtectionRow) {
-                        textCell.setText(LocaleController.getString("DisableAccountProtection", R.string.DisableAccountProtection), false);
+                        textCell.setText(LocaleController.getString(R.string.DisableAccountProtection), false);
                         textCell.setTag(Theme.key_text_RedRegular);
                         textCell.setTextColor(Theme.getColor(Theme.key_text_RedRegular));
                     }

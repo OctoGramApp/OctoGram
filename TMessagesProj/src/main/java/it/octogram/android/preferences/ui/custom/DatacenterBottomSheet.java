@@ -85,13 +85,13 @@ public class DatacenterBottomSheet extends BottomSheet {
         String statusText;
         int colorKey;
         if (datacenterInfo.status == 0) {
-            statusText = LocaleController.getString("Unavailable", R.string.Unavailable);
+            statusText = LocaleController.getString(R.string.Unavailable);
             colorKey = Theme.key_windowBackgroundWhiteGrayText;
         } else if (datacenterInfo.status == 1) {
-            statusText = LocaleController.getString("Available", R.string.Available);
+            statusText = LocaleController.getString(R.string.Available);
             colorKey = Theme.key_windowBackgroundWhiteGreenText;
         } else {
-            statusText = LocaleController.getString("SpeedSlow", R.string.SpeedSlow);
+            statusText = LocaleController.getString(R.string.SpeedSlow);
             colorKey = Theme.key_statisticChartLine_orange;
         }
         statusView.setText(statusText);
@@ -106,7 +106,7 @@ public class DatacenterBottomSheet extends BottomSheet {
         pingItemView.needDivider = true;
         pingItemView.iconView.setImageDrawable(drawable);
         pingItemView.valueText.setText(stringBuilder);
-        pingItemView.descriptionText.setText(LocaleController.getString("DatacenterStatusSheetPing", R.string.DatacenterStatusSheetPing));
+        pingItemView.descriptionText.setText(LocaleController.getString(R.string.DatacenterStatusSheetPing));
         linearLayout.addView(pingItemView);
 
         drawable = Objects.requireNonNull(ContextCompat.getDrawable(context, R.drawable.menu_feature_links)).mutate();
@@ -114,7 +114,7 @@ public class DatacenterBottomSheet extends BottomSheet {
         ItemView ipItemView = new ItemView(context, false);
         ipItemView.iconView.setImageDrawable(drawable);
         ipItemView.valueText.setText(generalInfo.getIp());
-        ipItemView.descriptionText.setText(LocaleController.getString("DatacenterStatusSheetIP", R.string.DatacenterStatusSheetIP));
+        ipItemView.descriptionText.setText(LocaleController.getString(R.string.DatacenterStatusSheetIP));
         applyCopyItem(ipItemView, generalInfo.getIp());
         linearLayout.addView(ipItemView);
 
@@ -126,7 +126,7 @@ public class DatacenterBottomSheet extends BottomSheet {
             ItemView lastLag = new ItemView(context, false);
             lastLag.iconView.setImageDrawable(drawable);
             lastLag.valueText.setText(lastLagString);
-            lastLag.descriptionText.setText(LocaleController.getString("DatacenterStatusSheetLastLag", R.string.DatacenterStatusSheetLastLag));
+            lastLag.descriptionText.setText(LocaleController.getString(R.string.DatacenterStatusSheetLastLag));
             applyCopyItem(lastLag, lastLagString);
             linearLayout.addView(lastLag);
 
@@ -141,7 +141,7 @@ public class DatacenterBottomSheet extends BottomSheet {
             ItemView lastDown = new ItemView(context, false);
             lastDown.iconView.setImageDrawable(drawable);
             lastDown.valueText.setText(lastDownString);
-            lastDown.descriptionText.setText(LocaleController.getString("DatacenterStatusSheetLastDowntime", R.string.DatacenterStatusSheetLastDowntime));
+            lastDown.descriptionText.setText(LocaleController.getString(R.string.DatacenterStatusSheetLastDowntime));
             applyCopyItem(lastDown, lastDownString);
             linearLayout.addView(lastDown);
 
@@ -171,11 +171,11 @@ public class DatacenterBottomSheet extends BottomSheet {
 
     private void copyText(String text) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setItems(new CharSequence[]{LocaleController.getString("Copy", R.string.Copy)}, (dialogInterface, i) -> {
+        builder.setItems(new CharSequence[]{LocaleController.getString(R.string.Copy)}, (dialogInterface, i) -> {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
             android.content.ClipData clip = android.content.ClipData.newPlainText("label", text);
             clipboard.setPrimaryClip(clip);
-            BulletinFactory.of(getContainer(), null).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
+            BulletinFactory.of(getContainer(), null).createCopyBulletin(LocaleController.getString(R.string.TextCopied)).show();
         });
         builder.show();
     }

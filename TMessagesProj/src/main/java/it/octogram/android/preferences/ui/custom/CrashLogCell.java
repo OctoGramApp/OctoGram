@@ -5,19 +5,18 @@
  *
  * Copyright OctoGram, 2023-2024.
  */
-
 package it.octogram.android.preferences.ui.custom;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -43,6 +42,12 @@ public class CrashLogCell extends LinearLayout {
     private boolean needDivider = false;
     private File crashLog;
 
+    private static final float RELATIVE_LAYOUT_SIZE_DP = 65;
+    private static final float IMAGEVIEW_SIZE_DP = 16;
+    private static final float CHECKBOX_SIZE_DP = 16;
+    private static final float PADDING_DP = 13;
+    private static final float MARGIN_DP = 40;
+
     public CrashLogCell(@NonNull Context context) {
         super(context);
         setWillNotDraw(false);
@@ -50,7 +55,7 @@ public class CrashLogCell extends LinearLayout {
         setPadding(AndroidUtilities.dp(13), AndroidUtilities.dp(5), AndroidUtilities.dp(13), AndroidUtilities.dp(5));
         RelativeLayout relativeLayout = new RelativeLayout(context);
 
-        ImageView imageView = new ImageView(context);
+        var imageView = new AppCompatImageView(context);
         imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.bot_file));
 
         checkBox = new CheckBox2(context, 21);

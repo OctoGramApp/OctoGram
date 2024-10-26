@@ -207,19 +207,19 @@ public class Crashlytics {
         }
     }
 
-    public static File shareLog(File file) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        StringBuilder builder = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line).append("\n");
+    public static File shareLog(File logFile) throws IOException {
+        BufferedReader logFileReader = new BufferedReader(new FileReader(logFile));
+        StringBuilder logContent = new StringBuilder();
+        String logLine;
+        while ((logLine = logFileReader.readLine()) != null) {
+            logContent.append(logLine).append("\n");
         }
-        reader.close();
-        File shareLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), file.getAbsoluteFile().getName());
-        BufferedWriter writer = new BufferedWriter(new FileWriter(shareLogFile));
-        writer.write(builder.toString());
-        writer.flush();
-        writer.close();
-        return shareLogFile;
+        logFileReader.close();
+        File sharedLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), logFile.getAbsoluteFile().getName());
+        BufferedWriter sharedLogFileWriter = new BufferedWriter(new FileWriter(sharedLogFile));
+        sharedLogFileWriter.write(logContent.toString());
+        sharedLogFileWriter.flush();
+        sharedLogFileWriter.close();
+        return sharedLogFile;
     }
 }

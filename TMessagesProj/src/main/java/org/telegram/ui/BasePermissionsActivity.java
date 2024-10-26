@@ -23,6 +23,8 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AlertsCreator;
 
+import it.octogram.android.OctoConfig;
+
 public class BasePermissionsActivity extends FragmentActivity {
     public final static int REQUEST_CODE_GEOLOCATION = 2,
             REQUEST_CODE_EXTERNAL_STORAGE = 4,
@@ -86,7 +88,7 @@ public class BasePermissionsActivity extends FragmentActivity {
             } else if (!cameraGranted) {
                 showPermissionErrorAlert(R.raw.permission_request_camera, LocaleController.getString(R.string.PermissionNoCameraWithHint));
             } else {
-                if (SharedConfig.inappCamera) {
+                if (/*SharedConfig.inappCamera || */OctoConfig.INSTANCE.disableCameraPreview.getValue()) {
                     CameraController.getInstance().initCamera(null);
                 }
                 return false;

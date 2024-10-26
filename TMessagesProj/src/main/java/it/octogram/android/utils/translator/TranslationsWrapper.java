@@ -88,18 +88,18 @@ public class TranslationsWrapper {
 
     public static void suggestProviderUpdate(Context context, BaseFragment fragment, Runnable providerChanged) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        alertDialogBuilder.setTitle(LocaleController.getString("Warning", R.string.Warning));
-        alertDialogBuilder.setMessage(LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage));
-        alertDialogBuilder.setPositiveButton(LocaleController.getString("TranslatorUnsupportedLanguageChange", R.string.TranslatorUnsupportedLanguageChange), (dialog, which1) -> {
+        alertDialogBuilder.setTitle(LocaleController.getString(R.string.Warning));
+        alertDialogBuilder.setMessage(LocaleController.getString(R.string.TranslatorUnsupportedLanguage));
+        alertDialogBuilder.setPositiveButton(LocaleController.getString(R.string.TranslatorUnsupportedLanguageChange), (dialog, which1) -> {
             dialog.dismiss();
             Dialog selectNewProviderDialog = PopupChoiceDialogUtils.createChoiceDialog(
                     fragment.getParentActivity(),
                     OctoTranslatorUI.getProvidersPopupOptions(),
-                    LocaleController.getString("TranslatorProvider", R.string.TranslatorProvider),
+                    LocaleController.getString(R.string.TranslatorProvider),
                     OctoConfig.INSTANCE.translatorProvider.getValue(),
                     (dialogInterface, sel) -> {
                         OctoConfig.INSTANCE.translatorProvider.updateValue(sel);
-                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_SUCCESS, LocaleController.getString("TranslatorUnsupportedLanguageChangeDone", R.string.TranslatorUnsupportedLanguageChangeDone));
+                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_SUCCESS, LocaleController.getString(R.string.TranslatorUnsupportedLanguageChangeDone));
 
                         if (providerChanged != null) {
                             providerChanged.run();
@@ -110,7 +110,7 @@ public class TranslationsWrapper {
             fragment.setVisibleDialog(selectNewProviderDialog);
             selectNewProviderDialog.show();
         });
-        alertDialogBuilder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        alertDialogBuilder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }

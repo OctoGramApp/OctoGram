@@ -35,15 +35,17 @@ import java.util.Map;
 import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.UpdatesManager;
 
 @SuppressWarnings("unchecked")
 public class OctoConfig {
     public static final OctoConfig INSTANCE = new OctoConfig();
     public static final String TAG = "OctoConfig";
+    public static final int ROUND_MESSAGE_BITRATE = 512;
     private final List<ConfigProperty<?>> properties = new ArrayList<>();
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
     public static final String STICKERS_PLACEHOLDER_PACK_NAME = "octo_placeholders_android";
+    public static final String CRASH_MIME_TYPE = "message/rfc822";
+    public static final String EXPORT_BACKUP_MIME_TYPE = "text/json";
 
     /*General*/
     public final ConfigProperty<Boolean> hidePhoneNumber = newConfigProperty("hidePhoneNumber", true);
@@ -64,7 +66,6 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> unmuteVideosWithVolumeDown = newConfigProperty("unmuteVideosWithVolumeDown", true);
     public final ConfigProperty<Boolean> disableProximityEvents = newConfigProperty("disableProximityEvents", false);
     public final ConfigProperty<Boolean> startWithRearCamera = newConfigProperty("startWithRearCamera", false);
-    public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
     public final ConfigProperty<Boolean> hideSentTimeOnStickers = newConfigProperty("hideSentTimeOnStickers", false);
     public final ConfigProperty<Boolean> hideOnlyAllChatsFolder = newConfigProperty("hideOnlyAllChatsFolder", false);
     public final ConfigProperty<Boolean> hideChatFolders = newConfigProperty("hideChatFolders", false);
@@ -130,12 +131,14 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);
     public final ConfigProperty<Boolean> unlockedChupa = newConfigProperty("unlockedChupa", false);
     public final ConfigProperty<Boolean> unlockedConfetti = newConfigProperty("unlockedConfetti", false);
+    public final ConfigProperty<Boolean> unlockedFoxIcon = newConfigProperty("unlockedFoxIcon", false);
 
     /*CameraX*/
     public final ConfigProperty<Boolean> cameraXPerformanceMode = newConfigProperty("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = newConfigProperty("cameraXZeroShutter", false);
-    public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraResolution.Companion.fromHeight(CameraXUtils.getCameraResolution()).getId());
-    public ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.TELEGRAM.getValue());
+    public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
+    public ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.CAMERA_X.getValue());
+    public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
 
     /*Experiments*/
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
@@ -195,12 +198,14 @@ public class OctoConfig {
     public final ConfigProperty<String> newBadgeIds = newConfigProperty("newBadgeIds", "[]");
 
     /**
-     * Creates a new config property and adds it to the list of properties.
+     * Creates a new {@link ConfigProperty} with the specified key and default value.
+     * <p>
+     * The newly created property is added to the internal list of properties.
      *
-     * @param key          The key of the property.
-     * @param defaultValue The default value of the property.
-     * @param <T>          The type of the property.
-     * @return The newly created property.
+     * @param <T>          The type of the config property value.
+     * @param key          The key of the config property.
+     * @param defaultValue The default value of the config property.
+     * @return The newly created {@link ConfigProperty} instance.
      */
     private <T> ConfigProperty<T> newConfigProperty(String key, T defaultValue) {
         ConfigProperty<T> property = new ConfigProperty<>(key, defaultValue);
@@ -228,8 +233,12 @@ public class OctoConfig {
     }
 
     /**
-     * It is safe to suppress this warning because the method loadConfig() is only called once in the static block above.
-     * Also the semantics of the data structure is pretty solid, so there is no need to worry about it.
+     * Loads the configuration values from the SharedPreferences and applies them to the corresponding properties.
+     * This method handles loading Boolean, String, and Integer properties. It also executes any necessary data migrations.
+     * <p>
+     * This method is synchronized to ensure thread safety, as it accesses and modifies shared resources.
+     * <p>
+     * <b>Note:</b> This method is intended to be called only once during initialization and relies on the assumption that the data structure is well-defined.
      */
     private void loadConfig() {
         synchronized (this) {
@@ -255,11 +264,18 @@ public class OctoConfig {
                     integerProperty.setValue(PREFS.getInt(integerProperty.getKey(), integerProperty.getValue()));
                 }
             }
-
-            UpdatesManager.handleUpdateSignaling();
         }
     }
 
+    /**
+     * Executes migration for integer-type config properties from deprecated boolean preferences.
+     * This method checks if a deprecated preference exists for the given property and, if so,
+     * updates the property's value based on the deprecated preference's value.
+     * The deprecated preference is then removed from the shared preferences.
+     *
+     * @param property The config property to migrate.
+     * @return True if a migration was performed, false otherwise.
+     */
     private boolean executeIntegerMigration(ConfigProperty<Integer> property) {
         if (property.getKey() != null) {
             if (property.getKey().equals(actionBarTitleOption.getKey())) {
@@ -369,6 +385,17 @@ public class OctoConfig {
         return associations;
     }
 
+    /**
+     * Resets the configuration to its default values.
+     * <p>
+     * This method iterates through all registered configuration properties
+     * and removes their corresponding keys from the shared preferences.
+     * This effectively reverts the configuration to its initial state,
+     * as if the application was freshly installed.
+     * <p>
+     * The method is synchronized to ensure thread safety when accessing
+     * and modifying the shared preferences.
+     */
     public void resetConfig() {
         synchronized (this) {
             SharedPreferences.Editor editor = PREFS.edit();
@@ -514,8 +541,7 @@ public class OctoConfig {
     private boolean isValueValid(String fieldName, int value) {
         return switch (fieldName) {
             case "blurEffectStrength" -> value >= 0 && value <= 255;
-            case "cameraXResolution" ->
-                    value >= CameraXResolution.SD.getValue() && value <= CameraXResolution.UHD.getValue();
+            case "cameraXResolution" -> value >= CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD) && value <= CameraXResolution.INSTANCE.enumToValue(CameraXResolution.UHD);
             case "dcIdStyle" -> value >= DcIdStyle.NONE.getValue() && value <= DcIdStyle.MINIMAL.getValue();
             case "dcIdType" -> value == DcIdType.BOT_API.getValue() || value == DcIdType.TELEGRAM.getValue();
             case "doubleTapAction", "doubleTapActionOut" ->

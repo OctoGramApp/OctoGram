@@ -27,9 +27,9 @@ public class PermissionsUtils {
 
     public static boolean isImagesAndVideoPermissionGranted() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return isImagesPermissionGranted() && isVideoPermissionGranted();
+            return !isImagesPermissionGranted() || !isVideoPermissionGranted();
         } else {
-            return isStoragePermissionGranted();
+            return !isStoragePermissionGranted();
         }
     }
 
@@ -113,5 +113,10 @@ public class PermissionsUtils {
         } else {
             return true;
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public static boolean isCameraPermissionGranted() {
+        return isPermissionGranted(Manifest.permission.CAMERA);
     }
 }

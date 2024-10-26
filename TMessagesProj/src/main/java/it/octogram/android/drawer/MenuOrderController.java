@@ -440,7 +440,7 @@ public class MenuOrderController {
                     result.put(idTmp);
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+                FileLog.e(e);
             }
         }
 
@@ -495,6 +495,13 @@ public class MenuOrderController {
         ensureMinimumItems();
     }
 
+    /**
+     * Handles the change of the favorite option in the drawer.
+     * <p>
+     * This method triggers the execution of {@link #onDrawerFavoriteOptionChanged()}.
+     * This is typically called when the user interacts with a favorite option control
+     * within the drawer, such as a toggle or checkbox.
+     */
     public static void handleDrawerFavoriteOptionChange() {
         onDrawerFavoriteOptionChanged();
     }

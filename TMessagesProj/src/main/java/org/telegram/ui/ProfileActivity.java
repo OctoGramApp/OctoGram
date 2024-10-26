@@ -308,6 +308,7 @@ import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import it.octogram.android.preferences.ui.custom.DatacenterCell;
+import it.octogram.android.utils.CustomDevicePerformanceManager;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.RegistrationDateController;
@@ -4155,7 +4156,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 getString("DebugMenuResetContacts", R.string.DebugMenuResetContacts),
                                 getString("DebugMenuResetDialogs", R.string.DebugMenuResetDialogs),
                                 BuildVars.DEBUG_VERSION ? null : (BuildVars.LOGS_ENABLED ? getString("DebugMenuDisableLogs", R.string.DebugMenuDisableLogs) : getString("DebugMenuEnableLogs", R.string.DebugMenuEnableLogs)),
-                                SharedConfig.inappCamera ? getString("DebugMenuDisableCamera", R.string.DebugMenuDisableCamera) : getString("DebugMenuEnableCamera", R.string.DebugMenuEnableCamera),
+                                /*SharedConfig.inappCamera*/ OctoConfig.INSTANCE.disableCameraPreview.getValue() ? getString("DebugMenuDisableCamera", R.string.DebugMenuDisableCamera) : getString("DebugMenuEnableCamera", R.string.DebugMenuEnableCamera),
                                 getString("DebugMenuClearMediaCache", R.string.DebugMenuClearMediaCache),
                                 getString("DebugMenuCallSettings", R.string.DebugMenuCallSettings),
                                 null,
@@ -4388,7 +4389,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 info.append(", low?=").append(memoryInfo.lowMemory);
                                 info.append(" (threshold=").append(AndroidUtilities.formatFileSize(memoryInfo.threshold)).append(")");
                                 info.append("\n");
-                                info.append("Current class: ").append(SharedConfig.performanceClassName(SharedConfig.getDevicePerformanceClass())).append(", measured: ").append(SharedConfig.performanceClassName(SharedConfig.measureDevicePerformanceClass()));
+                                info.append("Current class: ").append(SharedConfig.performanceClassName(SharedConfig.getDevicePerformanceClass())).append(", measured: ").append(SharedConfig.performanceClassName(CustomDevicePerformanceManager.measureDevicePerformanceClass())); //(SharedConfig.measureDevicePerformanceClass()));
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                     info.append(", suggest=").append(Build.VERSION.MEDIA_PERFORMANCE_CLASS);
                                 }
@@ -4425,7 +4426,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 AlertDialog.Builder builder2 = new AlertDialog.Builder(getParentActivity(), resourcesProvider);
                                 builder2.setTitle("Force performance class");
                                 int currentClass = SharedConfig.getDevicePerformanceClass();
-                                int trueClass = SharedConfig.measureDevicePerformanceClass();
+                                int trueClass = CustomDevicePerformanceManager.measureDevicePerformanceClass(); // SharedConfig.measureDevicePerformanceClass();
                                 builder2.setItems(new CharSequence[] {
                                     AndroidUtilities.replaceTags((currentClass == SharedConfig.PERFORMANCE_CLASS_HIGH ? "**HIGH**" : "HIGH") + (trueClass == SharedConfig.PERFORMANCE_CLASS_HIGH ? " (measured)" : "")),
                                     AndroidUtilities.replaceTags((currentClass == SharedConfig.PERFORMANCE_CLASS_AVERAGE ? "**AVERAGE**" : "AVERAGE") + (trueClass == SharedConfig.PERFORMANCE_CLASS_AVERAGE ? " (measured)" : "")),
@@ -11251,9 +11252,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         String abi = "";
                         if (BuildVars.DEBUG_PRIVATE_VERSION) {
                             abi = "pbeta ";
-                        } else if (!StoreUtils.isDownloadedFromAnyStore()) {
+                        } else if (!StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                             abi = "direct ";
-                        } else if (StoreUtils.isFromHuaweiStore()) {
+                        } else if (StoreUtils.INSTANCE.isFromHuaweiStore()) {
                             abi = "huawei ";
                         }
                         abi += OctoUtils.getCurrentAbi();

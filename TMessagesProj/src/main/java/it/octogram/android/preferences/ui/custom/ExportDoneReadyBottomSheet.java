@@ -84,7 +84,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString("ExportDataReady", R.string.ExportDataReady));
+        textView.setText(LocaleController.getString(R.string.ExportDataReady));
         textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -92,7 +92,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString("ExportDataDescription", R.string.ExportDataDescription));
+        textView.setText(LocaleController.getString(R.string.ExportDataDescription));
         textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -109,7 +109,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         editText.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        editText.setHint(LocaleController.getString("ExportDataFilename", R.string.ExportDataFilename));
+        editText.setHint(LocaleController.getString(R.string.ExportDataFilename));
         editText.setCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
         editText.setCursorSize(AndroidUtilities.dp(20));
         editText.setCursorWidth(1.5f);
@@ -147,7 +147,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         buttonTextView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(LocaleController.getString("ExportDataShare", R.string.ExportDataShare));
+        buttonTextView.setText(LocaleController.getString(R.string.ExportDataShare));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> shareExport(editText.getText().toString().trim()));
@@ -159,8 +159,8 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
     private void shareExport(String fileNameText) {
         if (fileNameText.contains("/") || fileNameText.length() > 40) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-            alertDialogBuilder.setTitle(LocaleController.getString("ExportDataShareFailedTitle", R.string.ImportReadyImportFailedZeroTitle));
-            alertDialogBuilder.setMessage(LocaleController.getString("ExportDataShareFailedCustomFileName", R.string.ImportReadyImportFailedZeroCaption));
+            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
+            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
             alertDialogBuilder.setPositiveButton("OK", null);
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
@@ -272,7 +272,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
             inputMediaDocument.file = inputFile;
             inputMediaDocument.attributes.add(attr);
-            inputMediaDocument.mime_type = "text/json";
+            inputMediaDocument.mime_type = OctoConfig.EXPORT_BACKUP_MIME_TYPE;
 
             for (int i = 0; i < sharingDids.size(); i++) {
                 TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();

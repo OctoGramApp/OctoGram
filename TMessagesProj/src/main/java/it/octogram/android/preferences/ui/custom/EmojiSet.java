@@ -125,13 +125,13 @@ public class EmojiSet extends FrameLayout {
         }
         packFileLink = emojiPackInfo.getFileLocation();
         if (Objects.equals(packId, "default")) {
-            valueTextView.setText(LocaleController.getString("Default", R.string.Default), animated);
+            valueTextView.setText(LocaleController.getString(R.string.Default), animated);
         } else if (CustomEmojiController.emojiDir(packId, versionWithMD5).exists() || TextUtils.isEmpty(versionWithMD5)) {
-            valueTextView.setText(LocaleController.getString("InstalledEmojiSet", R.string.InstalledEmojiSet), animated);
+            valueTextView.setText(LocaleController.getString(R.string.InstalledEmojiSet), animated);
         } else {
-            String status = LocaleController.getString("DownloadUpdate", R.string.DownloadUpdate);
+            String status = LocaleController.getString(R.string.DownloadUpdate);
             if (CustomEmojiController.isInstalledOldVersion(packId, versionWithMD5)) {
-                status = LocaleController.getString("UpdateEmojiSet", R.string.UpdateEmojiSet);
+                status = LocaleController.getString(R.string.UpdateEmojiSet);
             }
             valueTextView.setText(String.format(
                     "%s %s",
@@ -227,10 +227,10 @@ public class EmojiSet extends FrameLayout {
         if (Objects.equals(packId, "default")) return;
         if (CustomEmojiController.emojiTmpDownloaded(packId) || CustomEmojiController.emojiDir(packId, versionWithMD5).exists() || TextUtils.isEmpty(versionWithMD5)) {
             setProgress(false, animated);
-            if (FileUnzip.isRunningUnzip(packId)) {
-                valueTextView.setText(LocaleController.getString("InstallingEmojiSet", R.string.InstallingEmojiSet), animated);
+            if (FileUnzip.INSTANCE.isRunningUnzip(packId)) {
+                valueTextView.setText(LocaleController.getString(R.string.InstallingEmojiSet), animated);
             } else {
-                valueTextView.setText(LocaleController.getString("InstalledEmojiSet", R.string.InstalledEmojiSet), animated);
+                valueTextView.setText(LocaleController.getString(R.string.InstalledEmojiSet), animated);
             }
         } else if (FileDownloader.isRunningDownload(packId)) {
             setProgress(true, animated);
@@ -239,9 +239,9 @@ public class EmojiSet extends FrameLayout {
         } else {
             setProgress(false, animated);
             setChecked(false, animated);
-            String status = LocaleController.getString("DownloadUpdate", R.string.DownloadUpdate);
+            String status = LocaleController.getString(R.string.DownloadUpdate);
             if (CustomEmojiController.isInstalledOldVersion(packId, versionWithMD5)) {
-                status = LocaleController.getString("UpdateEmojiSet", R.string.UpdateEmojiSet);
+                status = LocaleController.getString(R.string.UpdateEmojiSet);
             }
             valueTextView.setText(String.format(
                     "%s %s",

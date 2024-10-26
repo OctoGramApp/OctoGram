@@ -9,6 +9,7 @@
 package it.octogram.android
 
 import android.graphics.Color
+import androidx.annotation.IntDef
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 
@@ -86,27 +87,42 @@ enum class AudioType(val value: Int) {
     STEREO(1)
 }
 
-enum class CameraXResolution(val value: Int) {
-    SD(0),
-    HD(1),
-    FHD(2),
-    UHD(3),
-    None(4)
-}
+object CameraXResolution {
+    @IntDef(SD, HD, FHD, UHD, NONE)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class CameraXResolution
 
-enum class CameraResolution(val value: Int, val id: Int) {
-    LOW(360, 0),
-    SD(480, 1),
-    HD(720, 2),
-    FULL_HD(1080, 3),
-    QHD(1440, 4),
-    UHD_4K(2160, 5),
-    UHD_8K(4320, 6);
+    const val SD = 0
+    const val HD = 1
+    const val FHD = 2
+    const val UHD = 3
+    const val NONE = 4
 
-    companion object {
-        fun fromHeight(height: Int): CameraResolution {
-            return entries.find { it.value == height } ?: LOW
+    private val resolutionMap = mapOf(
+        SD to 480,
+        HD to 720,
+        FHD to 1080,
+        UHD to 2160,
+        NONE to -1
+    )
+
+    fun getCameraXResolution(@CameraXResolution resolution: Int): Int {
+        return if (resolutionMap.containsValue(resolution)) {
+            resolutionMap.entries.find { it.value == resolution }?.value ?: NONE
+        } else {
+            NONE
         }
+    }
+
+    fun enumToValue(enum: Int): Int {
+        when (enum) {
+            SD -> return 480
+            HD -> return 720
+            FHD -> return 1080
+            UHD -> return 2160
+            NONE -> return -1
+        }
+        return -1
     }
 }
 
@@ -261,7 +277,8 @@ enum class StickerUi(val value: Int) {
     HOLIDAY(19),
     LUNAR_NEW_YEAR(20),
     DRAWER(21),
-    HEADER_CUSTOM_TITLE(22)
+    HEADER_CUSTOM_TITLE(22),
+    MONET_DIALOG(23),
 }
 
 enum class DrawerBackgroundState(val value: Int) {
@@ -406,18 +423,33 @@ enum class FontType(val path: String) {
     }
 }
 
-enum class VideoQuality(val value: Int) {
-    UNKNOWN(0),
-    SD(1),
-    HD(2),
-    FHD(3),
-    QHD(4),
-    UHD(5),
-    MAX(6);
+object VideoQuality {
+    const val value = 0
+    fun getValue(@Quality quality: Int): Int {
+        return quality
+    }
+    const val UNKNOWN = 0
+    const val SD = 1
+    const val HD = 2
+    const val FHD = 3
+    const val QHD = 4
+    const val UHD = 5
+    const val MAX = 6
 
-    companion object {
-        fun fromInt(value: Int): VideoQuality {
-            return entries.find { it.value == value } ?: UNKNOWN
+    @IntDef(UNKNOWN, SD, HD, FHD, QHD, UHD, MAX)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class Quality
+
+    @Quality
+    fun fromInt(value: Int): Int {
+        return when (value) {
+            SD -> SD
+            HD -> HD
+            FHD -> FHD
+            QHD -> QHD
+            UHD -> UHD
+            MAX -> MAX
+            else -> UNKNOWN
         }
     }
 }
@@ -425,4 +457,10 @@ enum class VideoQuality(val value: Int) {
 enum class PromptBeforeSendMedia(val id: Int) {
     STICKERS(0),
     GIFS(1)
+}
+
+enum class MonetTheme(val monetThemeName: String, val monetThemeFileName: String) {
+    MONET_AMOLED("Monet Amoled", "monet_amoled.attheme"),
+    MONET_DARK("Monet Dark", "monet_dark.attheme"),
+    MONET_LIGHT("Monet Light", "monet_light.attheme");
 }

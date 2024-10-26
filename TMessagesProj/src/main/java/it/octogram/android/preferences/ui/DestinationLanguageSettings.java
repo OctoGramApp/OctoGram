@@ -74,7 +74,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle(LocaleController.getString("TranslatorDestination", R.string.TranslatorDestination));
+        actionBar.setTitle(LocaleController.getString(R.string.TranslatorDestination));
 
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
@@ -112,7 +112,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
                 }
             }
         });
-        item.setSearchFieldHint(LocaleController.getString("Search", R.string.Search));
+        item.setSearchFieldHint(LocaleController.getString(R.string.Search));
 
         listAdapter = new ListAdapter(context, false);
         searchListViewAdapter = new ListAdapter(context, true);
@@ -122,7 +122,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
         FrameLayout frameLayout = (FrameLayout) fragmentView;
 
         emptyView = new EmptyTextProgressView(context);
-        emptyView.setText(LocaleController.getString("NoResult", R.string.NoResult));
+        emptyView.setText(LocaleController.getString(R.string.NoResult));
         emptyView.showTextView();
         emptyView.setShowAtCenter(true);
         frameLayout.addView(emptyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
@@ -213,11 +213,11 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
 
         TranslateController.Language followAppL = new TranslateController.Language();
         followAppL.code = "app";
-        followAppL.displayName = followAppL.ownDisplayName = LocaleController.getString("TranslatorDestinationFollow", R.string.TranslatorDestinationFollow);
+        followAppL.displayName = followAppL.ownDisplayName = LocaleController.getString(R.string.TranslatorDestinationFollow);
         followAppL.q = "";
 
         if (callback != null) {
-            followAppL.displayName = followAppL.ownDisplayName = LocaleController.getString("TranslatorDestinationFollowDestination", R.string.TranslatorDestinationFollowDestination);
+            followAppL.displayName = followAppL.ownDisplayName = LocaleController.getString(R.string.TranslatorDestinationFollowDestination);
         }
 
         separatorRow = 0;
@@ -309,7 +309,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
                 case 2:
                     HeaderCell header = new HeaderCell(mContext);
                     header.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    header.setText(LocaleController.getString("ChooseLanguages", R.string.ChooseLanguages));
+                    header.setText(LocaleController.getString(R.string.ChooseLanguages));
                     view = header;
                     break;
                 case 1:

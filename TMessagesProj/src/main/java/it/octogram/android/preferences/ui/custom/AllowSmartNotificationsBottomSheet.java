@@ -42,7 +42,7 @@ public class AllowSmartNotificationsBottomSheet extends BottomSheet {
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString("Warning", R.string.Warning));
+        textView.setText(LocaleController.getString(R.string.Warning));
         textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -51,7 +51,7 @@ public class AllowSmartNotificationsBottomSheet extends BottomSheet {
         //textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MONO));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(String.format("%s\n\n%s", LocaleController.getString("SmartNotificationsPvtDialogMessage", R.string.SmartNotificationsPvtDialogMessage), LocaleController.getString("SmartNotificationsPvtDialogMessagePlus", R.string.SmartNotificationsPvtDialogMessagePlus)));
+        textView.setText(String.format("%s\n\n%s", LocaleController.getString(R.string.SmartNotificationsPvtDialogMessage), LocaleController.getString(R.string.SmartNotificationsPvtDialogMessagePlus)));
         textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -60,7 +60,7 @@ public class AllowSmartNotificationsBottomSheet extends BottomSheet {
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(LocaleController.getString("Cancel", R.string.Cancel));
+        buttonTextView.setText(LocaleController.getString(R.string.Cancel));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> dismiss());
@@ -69,7 +69,7 @@ public class AllowSmartNotificationsBottomSheet extends BottomSheet {
         textView = new TextView(context);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(LocaleController.getString("SmartNotificationsPvtDialogButton", R.string.SmartNotificationsPvtDialogButton));
+        textView.setText(LocaleController.getString(R.string.SmartNotificationsPvtDialogButton));
         textView.setTextColor(Theme.getColor(Theme.key_color_red));
         textView.setOnClickListener(view -> {
             OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.updateValue(!OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue());

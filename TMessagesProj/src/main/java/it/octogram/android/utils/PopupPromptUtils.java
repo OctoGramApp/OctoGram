@@ -22,8 +22,8 @@ public class PopupPromptUtils {
         AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
         builder.setTitle(LocaleController.getString(R.string.Warning));
         builder.setMessage(LocaleController.getString(getString(media)));
-        builder.setPositiveButton(LocaleController.getString("PromptBeforeSendingConfirm", R.string.PromptBeforeSendingConfirm), (dialog1, which1) -> callback.onPromptConfirmed());
-        builder.setNeutralButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        builder.setPositiveButton(LocaleController.getString(R.string.PromptBeforeSendingConfirm), (dialog1, which1) -> callback.onPromptConfirmed());
+        builder.setNeutralButton(LocaleController.getString(R.string.Cancel), null);
 
         AlertDialog dialog = builder.create();
         dialog.show();

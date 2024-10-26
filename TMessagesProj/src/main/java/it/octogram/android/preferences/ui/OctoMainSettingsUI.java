@@ -8,6 +8,9 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,8 +18,8 @@ import android.os.CountDownTimer;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -41,81 +44,73 @@ public class OctoMainSettingsUI implements PreferencesEntry {
 
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
-        String footer = AndroidUtilities.replaceTags(LocaleController.formatString("OctoMainSettingsFooter", R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING)).toString();
-        // String comingSoon = AndroidUtilities.replaceTags(LocaleController.formatString("FeatureCurrentlyUnavailable", R.string.FeatureCurrentlyUnavailable)).toString();
-        return OctoPreferences.builder(LocaleController.getString("OctoGramSettings", R.string.OctoGramSettings))
-                .octoAnimation(LocaleController.getString("OctoMainSettingsHeader", R.string.OctoMainSettingsHeader))
-                .category(LocaleController.formatString("Settings", R.string.Settings), category -> {
-
-
-                    /*
-                     INFO: This is a test crash button
-                     if (BuildConfig.DEBUG_PRIVATE_VERSION) {
-                         category.row(new TextDetailRow.TextDetailRowBuilder()
-                                 .onClick(() -> {
-                                     throw new RuntimeException("Test crash");
-                                 })
-                                 .icon(R.drawable.msg_cancel)
-                                 .title("Crash the app")
-                                 .description("Yup, this is literally a crash button")
-                                 .build());
-                     }
-                    */
-
-
+        var footer = AndroidUtilities.replaceTags(formatString(R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING)).toString();
+        return OctoPreferences.builder(getString(R.string.OctoGramSettings))
+                .octoAnimation(getString(R.string.OctoMainSettingsHeader))
+                .category(getString(R.string.Settings), category -> {
+                    if ("it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName())) {
+                        category.row(new TextDetailRow.TextDetailRowBuilder()
+                                .onClick(() -> {
+                                    throw new RuntimeException("Test crash");
+                                })
+                                .icon(R.drawable.msg_cancel)
+                                .title("Crash the app")
+                                .description("Yup, this is literally a crash button")
+                                .build());
+                    }
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
                             .isNew(NewFeaturesBadgeId.GENERAL_BADGE.getId())
-                            .title(LocaleController.formatString("General", R.string.General))
+                            .title(getString(R.string.General))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoTranslatorUI())))
                             .icon(R.drawable.msg_translate)
-                            .title(LocaleController.formatString("Translator", R.string.Translator))
+                            .title(getString(R.string.Translator))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
                             .isNew(NewFeaturesBadgeId.APPEARANCE_BADGE.getId())
-                            .title(LocaleController.formatString("Appearance", R.string.Appearance))
+                            .title(getString(R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoCameraSettingsUI())))
                             .icon(R.drawable.msg_camera)
-                            .title(LocaleController.formatString("ChatCamera", R.string.ChatCamera))
+                            .title(getString(R.string.ChatCamera))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI())))
                             .icon(R.drawable.outline_science_white)
                             .isNew(NewFeaturesBadgeId.EXPERIMENTAL_BADGE.getId())
-                            .title(LocaleController.formatString("Experiments", R.string.Experiments))
+                            .title(getString(R.string.Experiments))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoUpdatesUI())))
                             .icon(R.drawable.round_update_white_28)
                             .isNew(NewFeaturesBadgeId.UPDATES_BADGE.getId())
-                            .title(LocaleController.formatString("Updates", R.string.Updates))
+                            .title(getString(R.string.Updates))
                             .build());
                 })
-                .category(LocaleController.formatString("OctoMainSettingsManageCategory", R.string.OctoMainSettingsManageCategory), category -> {
+                .category(getString(R.string.OctoMainSettingsManageCategory), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> openExportSettingsProcedure(fragment, context))
                             .icon(R.drawable.msg_customize)
-                            .title(LocaleController.formatString("Export", R.string.Export))
+                            .title(getString(R.string.Export))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> openResetSettingsProcedure(context))
                             .icon(R.drawable.msg_reset)
-                            .title(LocaleController.formatString("ResetSettings", R.string.ResetSettings))
+                            .title(getString(R.string.ResetSettings))
                             .build());
                 })
-                .category(LocaleController.formatString("OctoMainSettingsInfoCategory", R.string.OctoMainSettingsInfoCategory), category -> {
+                .category(getString(R.string.OctoMainSettingsInfoCategory), category -> {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
                             .icon(R.drawable.datacenter_status)
-                            .title(LocaleController.formatString("DatacenterStatus", R.string.DatacenterStatus))
-                            .description(LocaleController.formatString("DatacenterStatus_Desc", R.string.DatacenterStatus_Desc))
+                            .title(getString(R.string.DatacenterStatus))
+                            .description(getString(R.string.DatacenterStatus_Desc))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> {
@@ -123,19 +118,19 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                                 fragment.presentFragment(new CrashesActivity());
                             })
                             .icon(R.drawable.msg_secret_hw)
-                            .title(LocaleController.getString("CrashHistory", R.string.CrashHistory))
-                            .description(LocaleController.getString("CrashHistory_Desc", R.string.CrashHistory_Desc))
+                            .title(getString(R.string.CrashHistory))
+                            .description(getString(R.string.CrashHistory_Desc))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://%s/privacy", OctoUtils.getDomain()))))
                             .icon(R.drawable.msg2_policy)
-                            .title(LocaleController.formatString("OctoPrivacyPolicy", R.string.OctoPrivacyPolicy))
+                            .title(getString(R.string.OctoPrivacyPolicy))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://translations.%s", OctoUtils.getDomain()))))
                             .icon(R.drawable.msg_translate)
-                            .title(LocaleController.formatString("TranslateOcto", R.string.TranslateOcto))
-                            .description(LocaleController.formatString("TranslateOcto_Desc", R.string.TranslateOcto_Desc))
+                            .title(getString(R.string.TranslateOcto))
+                            .description(getString(R.string.TranslateOcto_Desc))
                             .build());
                 })
                 .row(new FooterRow.FooterRowBuilder().title(footer).build())
@@ -149,13 +144,13 @@ public class OctoMainSettingsUI implements PreferencesEntry {
 
     private void openResetSettingsProcedure(Context context) {
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
-        warningBuilder.setTitle(LocaleController.getString(R.string.ResetSettingsTitle));
-        warningBuilder.setMessage(LocaleController.getString(R.string.ResetSettingsDescription));
-        warningBuilder.setPositiveButton(LocaleController.getString("ResetButton", R.string.ResetSettingsButton), (dialog1, which1) -> {
+        warningBuilder.setTitle(getString(R.string.ResetSettingsTitle));
+        warningBuilder.setMessage(getString(R.string.ResetSettingsDescription));
+        warningBuilder.setPositiveButton(getString(R.string.ResetSettingsButton), (dialog1, which1) -> {
             OctoConfig.INSTANCE.resetConfig();
             AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
         });
-        warningBuilder.setNeutralButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        warningBuilder.setNeutralButton(getString(R.string.Cancel), null);
         AlertDialog dialog = warningBuilder.create();
 
         dialog.setOnShowListener(dialog1 -> {

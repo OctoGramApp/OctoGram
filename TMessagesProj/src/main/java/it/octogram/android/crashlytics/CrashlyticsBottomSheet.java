@@ -8,12 +8,11 @@
 
 package it.octogram.android.crashlytics;
 
-import android.app.Activity;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -21,32 +20,29 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.StickerImageView;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
+import it.octogram.android.preferences.ui.components.CustomBottomSheet;
 
-public class CrashlyticsBottomSheet extends BottomSheet {
-
-    private static boolean shown = false;
-
+public class CrashlyticsBottomSheet extends CustomBottomSheet {
     private CrashlyticsBottomSheet(BaseFragment fragment) {
         super(fragment.getParentActivity(), false);
 
-        Activity activity = fragment.getParentActivity();
-        LinearLayout linearLayout = new LinearLayout(activity);
+        var activity = fragment.getParentActivity();
+        var linearLayout = new LinearLayout(activity);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        StickerImageView imageView = new StickerImageView(getContext(), UserConfig.selectedAccount);
+        var imageView = new StickerImageView(getContext(), UserConfig.selectedAccount);
         imageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
         imageView.setStickerNum(StickerUi.CRASHED.getValue());
         imageView.getImageReceiver().setAutoRepeat(1);
         linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 16));
 
-        TextView textView = new TextView(activity);
+        var textView = new AppCompatTextView(activity);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
@@ -55,7 +51,7 @@ public class CrashlyticsBottomSheet extends BottomSheet {
         textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        textView = new TextView(activity);
+        textView = new AppCompatTextView(activity);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -63,7 +59,7 @@ public class CrashlyticsBottomSheet extends BottomSheet {
         textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        TextView buttonTextView = new TextView(activity);
+        var buttonTextView = new AppCompatTextView(activity);
         buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -82,20 +78,18 @@ public class CrashlyticsBottomSheet extends BottomSheet {
     }
 
     public static void showCrash(BaseFragment fragment) {
-        if (shown) {
-            return;
-        }
-        CrashlyticsBottomSheet bottomSheet = new CrashlyticsBottomSheet(fragment);
-        bottomSheet.show();
-        shown = true;
+        try {
+            new CrashlyticsBottomSheet(fragment).show();
+        } catch (Exception ignored) {}
     }
 
     @Override
-    public void show() {
-        if (shown) {
-            return;
-        }
-        shown = true;
-        super.show();
+    protected boolean canDismissWithSwipe() {
+        return false;
+    }
+
+    @Override
+    protected boolean canDismissWithTouchOutside() {
+        return false;
     }
 }

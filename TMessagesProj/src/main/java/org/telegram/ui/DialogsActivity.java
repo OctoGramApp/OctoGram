@@ -252,7 +252,9 @@ import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
+import it.octogram.android.preferences.ui.custom.MonetAndroidFixDialog;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+import it.octogram.android.theme.MonetIconController;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.SendMessageOptions;
 import it.octogram.android.utils.UpdatesManager;
@@ -5290,6 +5292,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
         if (Crashlytics.getLatestCrashFile().exists()) {
             CrashlyticsBottomSheet.showCrash(this);
+        } else if (MonetIconController.INSTANCE.needMonetMigration()) {
+            MonetAndroidFixDialog.showDialog(this);
         }
         updateMenuButton(false);
         actionBar.setDrawBlurBackground(contentView);

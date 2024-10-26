@@ -150,7 +150,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-import it.octogram.android.MonetThemeController;
+import it.octogram.android.MonetTheme;
+import it.octogram.android.theme.MonetThemeController;
 public class Theme {
 
     public static final String DEFAULT_BACKGROUND_SLUG = "d";
@@ -2520,7 +2521,8 @@ public class Theme {
         }
 
         public boolean isLight() {
-            return pathToFile == null && !isDark();
+            //return pathToFile == null && !isDark();
+            return !isDark();
         }
 
         public String getKey() {
@@ -4707,41 +4709,33 @@ public class Theme {
         themesDict.put("Amoled", themeInfo);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // MONET LIGHT
-            themeInfo = new ThemeInfo();
-            themeInfo.isDark = ThemeInfo.LIGHT;
-            themeInfo.name = "Monet Light";
-            themeInfo.assetName = "monet_light.attheme";
-            themeInfo.previewBackgroundColor = MonetThemeController.getColor("n1_50");
-            themeInfo.previewInColor = MonetThemeController.getColor("a1_100");
-            themeInfo.previewOutColor = MonetThemeController.getColor("a1_600");
-            themeInfo.sortIndex = 6;
-            themes.add(themeInfo);
-            themesDict.put("Monet Light", themeInfo);
+            int[] sortIndices = {6, 7, 8};
+            int[] isDarkArray = {ThemeInfo.LIGHT, ThemeInfo.DARK, ThemeInfo.DARK};
 
-            // MONET DARK
-            themeInfo = new ThemeInfo();
-            themeInfo.isDark = ThemeInfo.DARK;
-            themeInfo.name = "Monet Dark";
-            themeInfo.assetName = "monet_dark.attheme";
-            themeInfo.previewBackgroundColor = MonetThemeController.getColor("n1_900");
-            themeInfo.previewInColor = MonetThemeController.getColor("n2_800");
-            themeInfo.previewOutColor = MonetThemeController.getColor("a1_100");
-            themeInfo.sortIndex = 7;
-            themes.add(themeInfo);
-            themesDict.put("Monet Dark", themeInfo);
+            MonetTheme[] monetThemes = {
+                    MonetTheme.MONET_LIGHT,
+                    MonetTheme.MONET_DARK,
+                    MonetTheme.MONET_AMOLED
+            };
 
-            // MONET AMOLED
-            themeInfo = new ThemeInfo();
-            themeInfo.isDark = ThemeInfo.DARK;
-            themeInfo.name = "Monet Amoled";
-            themeInfo.assetName = "monet_amoled.attheme";
-            themeInfo.previewBackgroundColor = MonetThemeController.getColor("n1_1000");
-            themeInfo.previewInColor = MonetThemeController.getColor("n2_800");
-            themeInfo.previewOutColor = MonetThemeController.getColor("a1_100");
-            themeInfo.sortIndex = 8;
-            themes.add(themeInfo);
-            themesDict.put("Monet Amoled", themeInfo);
+            String[][] previewColors = {
+                    {"n1_50", "a1_100", "a1_600"},
+                    {"n1_900", "n2_800", "a1_100"},
+                    {"n1_1000", "n2_800", "a1_100"}
+            };
+
+            for (int i = 0; i < monetThemes.length; i++) {
+                themeInfo = new ThemeInfo();
+                themeInfo.isDark = isDarkArray[i];
+                themeInfo.name = monetThemes[i].getMonetThemeName();
+                themeInfo.assetName = monetThemes[i].getMonetThemeFileName();
+                themeInfo.previewBackgroundColor = MonetThemeController.INSTANCE.getColor(previewColors[i][0]);
+                themeInfo.previewInColor = MonetThemeController.INSTANCE.getColor(previewColors[i][1]);
+                themeInfo.previewOutColor = MonetThemeController.INSTANCE.getColor(previewColors[i][2]);
+                themeInfo.sortIndex = sortIndices[i];
+                themes.add(themeInfo);
+                themesDict.put(monetThemes[i].getMonetThemeName(), themeInfo);
+            }
         }
 
         String themesString = themeConfig.getString("themes2", null);
@@ -8217,7 +8211,7 @@ public class Theme {
                                         value = Utilities.parseInt(param);
                                     }
                                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (param.startsWith("a") || param.startsWith("n") || param.startsWith("monet"))) {
-                                    value = MonetThemeController.getColor(param.trim());
+                                    value = MonetThemeController.INSTANCE.getColor(param.trim());
                                 } else {
                                     value = Utilities.parseInt(param);
                                 }

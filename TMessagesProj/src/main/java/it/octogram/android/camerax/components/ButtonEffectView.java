@@ -5,6 +5,7 @@
  *
  * Copyright OctoGram, 2023-2024.
  */
+
 package it.octogram.android.camerax.components;
 
 import android.animation.Animator;
@@ -18,12 +19,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.content.res.ResourcesCompat;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
@@ -31,20 +33,21 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 
 import it.octogram.android.camerax.CameraXController;
 
+
 @SuppressLint("ViewConstructor")
 public class ButtonEffectView extends RelativeLayout {
-    final public int cameraType;
-    final private ImageView imageView;
+    final private AppCompatImageView imageView;
     private ValueAnimator toggleAnimation;
     private boolean isSelected = false;
     private boolean reachedHalf = false;
     private float currAn = 0f;
+    final public int cameraType;
 
     @SuppressLint("ClickableViewAccessibility")
     public ButtonEffectView(Context context, int camera_type) {
         super(context);
         cameraType = camera_type;
-        imageView = new ImageView(context);
+        imageView = new AppCompatImageView(context);
         imageView.setClickable(true);
         imageView.setOnTouchListener((View view, MotionEvent motionEvent) -> {
             if (motionEvent.getAction() == MotionEvent.ACTION_UP && !isSelected) {
@@ -54,7 +57,7 @@ public class ButtonEffectView extends RelativeLayout {
         });
         imageView.setImageBitmap(getIcon());
 
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         imageView.setLayoutParams(layoutParams);
         addView(imageView);
@@ -64,25 +67,27 @@ public class ButtonEffectView extends RelativeLayout {
         int w = AndroidUtilities.dp(50);
         Bitmap bmp = Bitmap.createBitmap(w, w, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp);
-        var d = ContextCompat.getDrawable(getContext(), getIconRes(cameraType));
+
+        Drawable d = ResourcesCompat.getDrawable(getResources(), getIconRes(cameraType), null);
         if (d != null) {
             d.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-
             int s = (w * 60) / 100;
             int x = (w >> 1) - (s >> 1);
             int y = (w >> 1) - (s >> 1);
             d.setBounds(x, y, x + s, y + s);
             d.draw(canvas);
-            if (isSelected) {
-                Paint level_paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                level_paint.setColor(Color.WHITE);
-                level_paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
-                int s2 = ((w * 80) / 100) >> 1;
-                int x2 = (w >> 1);
-                int y2 = (w >> 1);
-                canvas.drawCircle(x2, y2, s2, level_paint);
-            }
         }
+
+        if (isSelected) {
+            Paint level_paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            level_paint.setColor(Color.WHITE);
+            level_paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+            int s2 = ((w * 80) / 100) >> 1;
+            int x2 = (w >> 1);
+            int y2 = (w >> 1);
+            canvas.drawCircle(x2, y2, s2, level_paint);
+        }
+
         return bmp;
     }
 
@@ -92,6 +97,8 @@ public class ButtonEffectView extends RelativeLayout {
             case CameraXController.CAMERA_NIGHT -> R.drawable.round_bedtime_black;
             case CameraXController.CAMERA_AUTO -> R.drawable.round_auto_fix_high_black;
             case CameraXController.CAMERA_WIDE -> R.drawable.round_landscape_black;
+            case CameraXController.CAMERA_BOKEH -> R.drawable.bokeh_mode;
+            case CameraXController.CAMERA_FACE_RETOUCH -> R.drawable.face_retouch;
             default -> R.drawable.round_photo_camera_black;
         };
     }

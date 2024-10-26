@@ -45,7 +45,7 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
 
         return OctoPreferences.builder(LocaleController.formatString(R.string.ChatTitle))
                 //.sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
-                .category(LocaleController.getString("Chats", R.string.Chats), category -> category.row(new CustomCellRow.CustomCellRowBuilder()
+                .category(LocaleController.getString(R.string.Chats), category -> category.row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(stickerSizeCell = new StickerSizeCell(context))
                         .build()
                 ))
@@ -59,9 +59,9 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.stickerShape)
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(StickerShape.DEFAULT.getValue()).setItemTitle(LocaleController.getString("StyleTypeDefault", R.string.StyleTypeDefault)),
-                                    new PopupChoiceDialogOption().setId(StickerShape.ROUND.getValue()).setItemTitle(LocaleController.getString("StickerShapeRounded", R.string.StickerShapeRounded)),
-                                    new PopupChoiceDialogOption().setId(StickerShape.MESSAGE.getValue()).setItemTitle(LocaleController.getString("StyleTypeMessage", R.string.StyleTypeMessage))
+                                    new PopupChoiceDialogOption().setId(StickerShape.DEFAULT.getValue()).setItemTitle(LocaleController.getString(R.string.StyleTypeDefault)),
+                                    new PopupChoiceDialogOption().setId(StickerShape.ROUND.getValue()).setItemTitle(LocaleController.getString(R.string.StickerShapeRounded)),
+                                    new PopupChoiceDialogOption().setId(StickerShape.MESSAGE.getValue()).setItemTitle(LocaleController.getString(R.string.StyleTypeMessage))
                             ))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .title(LocaleController.formatString(R.string.StickerShape))
@@ -71,14 +71,14 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                     category.row(new ExpandableRows.ExpandableRowsBuilder()
                             .setId(ExpandableRowsIds.REPLIES_AND_LINKS.getId())
                             .setIcon(R.drawable.menu_reply)
-                            .setMainTitle(LocaleController.formatString("RepliesLinksHeader", R.string.RepliesLinksHeader))
+                            .setMainTitle(LocaleController.formatString(R.string.RepliesLinksHeader))
                             .addRow(new ExpandableRowsOption()
-                                    .setOptionTitle(LocaleController.getString("RepliesLinksShowColors", R.string.RepliesLinksShowColors))
+                                    .setOptionTitle(LocaleController.getString(R.string.RepliesLinksShowColors))
                                     .setProperty(OctoConfig.INSTANCE.repliesLinksShowColors)
                                     .setOnClick(() -> stickerSizeCell.invalidatePreviewMessages())
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .setOptionTitle(LocaleController.getString("RepliesLinksShowEmojis", R.string.RepliesLinksShowEmojis))
+                                    .setOptionTitle(LocaleController.getString(R.string.RepliesLinksShowEmojis))
                                     .setProperty(OctoConfig.INSTANCE.repliesLinksShowEmojis)
                                     .setOnClick(() -> stickerSizeCell.invalidatePreviewMessages())
                             )
@@ -87,31 +87,31 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                     category.row(new ExpandableRows.ExpandableRowsBuilder()
                             .setId(ExpandableRowsIds.PROMPT_BEFORE_SENDING.getId())
                             .setIcon(R.drawable.msg_send)
-                            .setMainTitle(LocaleController.formatString("PromptBeforeSending", R.string.PromptBeforeSending))
+                            .setMainTitle(LocaleController.formatString(R.string.PromptBeforeSending))
                             .addRow(new ExpandableRowsOption()
-                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingStickers", R.string.PromptBeforeSendingStickers))
+                                    .setOptionTitle(LocaleController.getString(R.string.PromptBeforeSendingStickers))
                                     .setProperty(OctoConfig.INSTANCE.promptBeforeSendingStickers)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingGIFs", R.string.PromptBeforeSendingGIFs))
+                                    .setOptionTitle(LocaleController.getString(R.string.PromptBeforeSendingGIFs))
                                     .setProperty(OctoConfig.INSTANCE.promptBeforeSendingGIFs)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingVoiceMessages", R.string.PromptBeforeSendingVoiceMessages))
+                                    .setOptionTitle(LocaleController.getString(R.string.PromptBeforeSendingVoiceMessages))
                                     .setProperty(OctoConfig.INSTANCE.promptBeforeSendingVoiceMessages)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .setOptionTitle(LocaleController.getString("PromptBeforeSendingVideoMessages", R.string.PromptBeforeSendingVideoMessages))
+                                    .setOptionTitle(LocaleController.getString(R.string.PromptBeforeSendingVideoMessages))
                                     .setProperty(OctoConfig.INSTANCE.promptBeforeSendingVideoMessages)
                             )
                             .build()
                     );
                 })
-                .category(LocaleController.formatString("FormattingHeader", R.string.FormattingHeader), category -> {
+                .category(LocaleController.formatString(R.string.FormattingHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> stickerSizeCell.invalidatePreviewMessages())
                             .preferenceValue(OctoConfig.INSTANCE.hideSentTimeOnStickers)
-                            .title(LocaleController.formatString("RemoveTimeOnStickers", R.string.RemoveTimeOnStickers))
+                            .title(LocaleController.formatString(R.string.RemoveTimeOnStickers))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> {
@@ -119,43 +119,43 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                                 stickerSizeCell.invalidatePreviewMessages();
                             })
                             .preferenceValue(OctoConfig.INSTANCE.formatTimeWithSeconds)
-                            .title(LocaleController.formatString("FormatTimeWithSeconds", R.string.FormatTimeWithSeconds))
-                            .description(LocaleController.formatString("FormatTimeWithSeconds_Desc", R.string.FormatTimeWithSeconds_Desc))
+                            .title(LocaleController.formatString(R.string.FormatTimeWithSeconds))
+                            .description(LocaleController.formatString(R.string.FormatTimeWithSeconds_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> stickerSizeCell.reloadActionBar())
                             .preferenceValue(OctoConfig.INSTANCE.numberRounding)
-                            .title(LocaleController.formatString("NumberRounding", R.string.NumberRounding))
-                            .description(LocaleController.formatString("NumberRounding_Desc", R.string.NumberRounding_Desc))
+                            .title(LocaleController.formatString(R.string.NumberRounding))
+                            .description(LocaleController.formatString(R.string.NumberRounding_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> stickerSizeCell.invalidatePreviewMessages())
                             .preferenceValue(OctoConfig.INSTANCE.pencilIconForEditedMessages)
-                            .title(LocaleController.formatString("PencilIconForEdited", R.string.PencilIconForEdited))
-                            .description(LocaleController.formatString("PencilIconForEdited_Desc", R.string.PencilIconForEdited_Desc))
+                            .title(LocaleController.formatString(R.string.PencilIconForEdited))
+                            .description(LocaleController.formatString(R.string.PencilIconForEdited_Desc))
                             .build());
                 })
-                .category(LocaleController.getString("HeaderHeader", R.string.HeaderHeader), isTitleUncentered, category -> {
+                .category(LocaleController.getString(R.string.HeaderHeader), isTitleUncentered, category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> stickerSizeCell.reloadActionBar())
                             .preferenceValue(OctoConfig.INSTANCE.searchIconInHeader)
-                            .title(LocaleController.getString("SearchIconInHeader", R.string.SearchIconInHeader))
+                            .title(LocaleController.getString(R.string.SearchIconInHeader))
                             .showIf(isTitleUncentered)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> stickerSizeCell.reloadActionBar())
                             .preferenceValue(OctoConfig.INSTANCE.slidingTitle)
-                            .title(LocaleController.getString("SlidingTitle", R.string.SlidingTitle))
-                            .description(LocaleController.getString("SlidingTitle_Desc", R.string.SlidingTitle_Desc))
+                            .title(LocaleController.getString(R.string.SlidingTitle))
+                            .description(LocaleController.getString(R.string.SlidingTitle_Desc))
                             .showIf(isTitleUncentered)
                             .build());
                 })
-                .category(LocaleController.formatString("BlurHeader", R.string.BlurHeader), category -> {
+                .category(LocaleController.formatString(R.string.BlurHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forceChatBlurEffect)
-                            .title(LocaleController.getString("ForceChatBlurEffect", R.string.ForceChatBlurEffect))
+                            .title(LocaleController.getString(R.string.ForceChatBlurEffect))
                             .build());
-                    category.row(new HeaderRow(LocaleController.getString("ForceChatBlurEffectName", R.string.ForceChatBlurEffectName), OctoConfig.INSTANCE.forceChatBlurEffect));
+                    category.row(new HeaderRow(LocaleController.getString(R.string.ForceChatBlurEffectName), OctoConfig.INSTANCE.forceChatBlurEffect));
                     category.row(new SliderRow.SliderRowBuilder()
                             .min(0)
                             .max(255)
@@ -164,7 +164,7 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.formatString("AppearanceHiddenOptions", R.string.AppearanceHiddenOptions))
+                        .title(LocaleController.formatString(R.string.AppearanceHiddenOptions))
                         .showIf(isTitleUncentered, true)
                         .build())
                 .build();

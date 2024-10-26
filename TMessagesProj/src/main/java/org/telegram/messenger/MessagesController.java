@@ -504,7 +504,7 @@ public class MessagesController extends BaseController implements NotificationCe
     public String mapKey;
     public int maxMessageLength;
     public int maxCaptionLength;
-    public int roundVideoSize;
+    public int roundVideoSize = OctoConfig.ROUND_MESSAGE_BITRATE;
     public int roundVideoBitrate;
     public int roundAudioBitrate;
     public boolean blockedCountry;
@@ -1471,7 +1471,7 @@ public class MessagesController extends BaseController implements NotificationCe
         ringtoneSizeMax = mainPreferences.getInt("ringtoneSizeMax", 1024_00);
         pmReadDateExpirePeriod = mainPreferences.getInt("pmReadDateExpirePeriod", 7 * 86400);
         suggestStickersApiOnly = mainPreferences.getBoolean("suggestStickersApiOnly", false);
-        roundVideoSize = mainPreferences.getInt("roundVideoSize", 512); // TGA VALUE: 384
+        //roundVideoSize = mainPreferences.getInt("roundVideoSize", 384);
         roundVideoBitrate = mainPreferences.getInt("roundVideoBitrate", 1000);
         roundAudioBitrate = mainPreferences.getInt("roundAudioBitrate", 64);
         pendingSuggestions = mainPreferences.getStringSet("pendingSuggestions", null);
@@ -20104,7 +20104,7 @@ public class MessagesController extends BaseController implements NotificationCe
             TLRPC.RestrictionReason reason = reasons.get(a);
             if (ignoreRestrictionReasons != null && ignoreRestrictionReasons.contains(reason.reason)) continue;
             if ("sensitive".equals(reason.reason)) continue;
-            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform) && StoreUtils.isDownloadedFromAnyStore()) {
+            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                 return reason.text;
             }
         }
@@ -20240,7 +20240,7 @@ public class MessagesController extends BaseController implements NotificationCe
         } else {
             reason = getRestrictionReason(user.restriction_reason);
         }
-        if (reason != null && StoreUtils.isDownloadedFromAnyStore()) {
+        if (reason != null && StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
             showCantOpenAlert(fragment, reason);
             return false;
         }

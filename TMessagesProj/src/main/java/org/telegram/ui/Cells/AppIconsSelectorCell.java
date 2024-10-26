@@ -171,6 +171,8 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
                     continue;
                 } else if (icon == LauncherIconController.LauncherIcon.CONFETTI && OctoConfig.INSTANCE.unlockedConfetti.getValue()) {
                     continue;
+                } else if (icon == LauncherIconController.LauncherIcon.FOXGRAM && OctoConfig.INSTANCE.unlockedFoxIcon.getValue()) {
+                    continue;
                 }
                 availableIcons.remove(i);
                 i--;

@@ -1,12 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 plugins {
-    id 'com.android.application' version '8.5.1' apply false
+    id 'com.android.application' version '8.6.1' apply false
     id 'com.google.gms.google-services' version '4.4.2' apply false
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin' version '2.0.1' apply false
     id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
@@ -19,7 +13,7 @@ subprojects {
             android {
                 compileSdkVersion 34
                 buildToolsVersion "34.0.0"
-                ndkVersion "26.3.11579264"
+                ndkVersion "27.1.12297006"
 
                 lint {
                     checkReleaseBuilds false
@@ -35,8 +29,7 @@ subprojects {
 
                 defaultConfig {
                     minSdkVersion 21
-                    //noinspection OldTargetApi
-                    targetSdkVersion 33
+                    targetSdkVersion 34
                 }
 
                 buildTypes {

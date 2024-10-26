@@ -55,7 +55,7 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
         leftTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         leftTextView.setTextSize(AndroidUtilities.dp(16));
         leftTextView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
-        leftTextView.setText(LocaleController.getString("UpdatesSettingsCheck", R.string.UpdatesSettingsCheck));
+        leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheck));
         leftTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         addView(leftTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 70 : padding, 0, LocaleController.isRTL ? padding : 70, 0));
 
@@ -68,7 +68,7 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
         layoutRight.setGravity(LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT);
 
         checkAvailableUpdatesView = new TextView(context);
-        checkAvailableUpdatesView.setText(LocaleController.getString("UpdatesSettingsCheckButton", R.string.UpdatesSettingsCheckButton));
+        checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButton));
         checkAvailableUpdatesView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         checkAvailableUpdatesView.setTextSize(16);
         checkAvailableUpdatesView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(16), Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed)));
@@ -93,27 +93,27 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
     public void updateState(int state, float loadProgress) {
         switch (state) {
             case CheckCellState.NO_UPDATE_AVAILABLE:
-                leftTextView.setText(LocaleController.getString("UpdatesSettingsCheck", R.string.UpdatesSettingsCheck));
-                checkAvailableUpdatesView.setText(LocaleController.getString("UpdatesSettingsCheckButton", R.string.UpdatesSettingsCheckButton));
+                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheck));
+                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButton));
                 resetButtonState();
             break;
             case CheckCellState.CHECKING_UPDATES:
-                leftTextView.setText(LocaleController.getString("UpdatesSettingsCheck", R.string.UpdatesSettingsCheck));
-                checkAvailableUpdatesView.setText(LocaleController.getString("UpdatesSettingsCheckButtonChecking", R.string.UpdatesSettingsCheckButtonChecking));
+                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheck));
+                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonChecking));
                 disableButtonClick();
             break;
             case CheckCellState.UPDATE_NEED_DOWNLOAD:
-                leftTextView.setText(LocaleController.getString("UpdatesSettingsCheckAvailable", R.string.UpdatesSettingsCheckAvailable));
-                checkAvailableUpdatesView.setText(LocaleController.getString("UpdatesSettingsCheckButtonDownload", R.string.UpdatesSettingsCheckButtonDownload));
+                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckAvailable));
+                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonDownload));
                 resetButtonState();
             break;
             case CheckCellState.UPDATE_IS_DOWNLOADING:
-                leftTextView.setText(LocaleController.formatString("AppUpdateDownloading", R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
+                leftTextView.setText(LocaleController.formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
                 hideButton();
             break;
             case CheckCellState.UPDATE_IS_READY:
-                leftTextView.setText(LocaleController.getString("UpdatesSettingsCheckReady", R.string.UpdatesSettingsCheckReady));
-                checkAvailableUpdatesView.setText(LocaleController.getString("UpdatesSettingsCheckButtonInstall", R.string.UpdatesSettingsCheckButtonInstall));
+                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckReady));
+                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonInstall));
                 resetButtonState();
         }
 

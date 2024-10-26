@@ -60,7 +60,7 @@ public class SendMessageOptions extends LinearLayout {
         sendPopupLayout2.setupRadialSelectors(getThemedColor(Theme.key_dialogButtonSelector));
 
         ActionBarMenuSubItem sendWithoutSound = new ActionBarMenuSubItem(parentActivity, true, true, resourcesProvider);
-        sendWithoutSound.setTextAndIcon(LocaleController.getString("SendWithoutSound", R.string.SendWithoutSound), R.drawable.input_notify_off);
+        sendWithoutSound.setTextAndIcon(LocaleController.getString(R.string.SendWithoutSound), R.drawable.input_notify_off);
         sendWithoutSound.setMinimumWidth(dp(196));
         sendPopupLayout2.addView(sendWithoutSound, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
         sendWithoutSound.setOnClickListener(v -> {
@@ -425,14 +425,14 @@ public class SendMessageOptions extends LinearLayout {
             @Override
             public void onError() {
                 if (finalFactory != null) {
-                    finalFactory.createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorFailed", R.string.TranslatorFailed)).show();
+                    finalFactory.createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorFailed)).show();
                 }
             }
 
             @Override
             public void onUnavailableLanguage() {
                 if (finalFactory != null) {
-                    finalFactory.createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage)).show();
+                    finalFactory.createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)).show();
                 }
             }
         });
