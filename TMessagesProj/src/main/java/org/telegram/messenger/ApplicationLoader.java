@@ -44,6 +44,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Adapters.DrawerLayoutAdapter;
 import org.telegram.ui.Components.ForegroundDetector;
 import org.telegram.ui.Components.Premium.boosts.BoostRepository;
+import org.telegram.ui.IUpdateButton;
 import org.telegram.ui.IUpdateLayout;
 import org.telegram.ui.LauncherIconController;
 
@@ -292,6 +293,7 @@ public class ApplicationLoader extends Application {
             } catch (Exception e) {
                 FileLog.e(e);
             }
+            FileLog.d("device = manufacturer=" + Build.MANUFACTURER + ", device=" + Build.DEVICE + ", model=" + Build.MODEL + ", product=" + Build.PRODUCT);
         }
         if (applicationContext == null) {
             applicationContext = getApplicationContext();
@@ -627,6 +629,10 @@ public class ApplicationLoader extends Application {
         // UpdateLayout IS PART OF TGA STANDALONE BUILD
         // THE OCTOGRAM BEHAVIOR IS MUCH DIFFERENT THAN TGA ONE
         return new UpdateLayout(activity, sideMenu, sideMenuContainer);
+    }
+
+    public IUpdateButton takeUpdateButton(Context context) {
+        return null;
     }
 
     public TLRPC.Update parseTLUpdate(int constructor) {
