@@ -430,7 +430,7 @@ public class CustomEmojiController {
         getAllEmojis().stream()
                 .filter(file -> !file.getName().startsWith(OctoConfig.INSTANCE.selectedEmojiPack.getValue()))
                 .filter(file -> !isValidCustomPack(file))
-                .forEach(FileUnzip.INSTANCE::deleteFolder);
+                .forEach(FileUnzip::deleteFolder);
     }
 
     public static boolean isValidCustomPack(File file) {
@@ -445,7 +445,7 @@ public class CustomEmojiController {
 
     public static void deleteOldVersions(String emojiID, String versionWithMd5) {
         for (File oldVersion : getAllVersions(emojiID, versionWithMd5)) {
-            FileUnzip.INSTANCE.deleteFolder(oldVersion);
+            FileUnzip.deleteFolder(oldVersion);
         }
     }
 
@@ -521,8 +521,8 @@ public class CustomEmojiController {
                                     @Override
                                     public void onFinished(String id, boolean isFailed) {
                                         if (CustomEmojiController.emojiTmpDownloaded(id)) {
-                                            FileUnzip.INSTANCE.unzipFile(ApplicationLoader.applicationContext, id, CustomEmojiController.emojiTmp(id), CustomEmojiController.emojiDir(id, emojiPackInfo.versionWithMd5));
-                                            FileUnzip.INSTANCE.addListener(id, "checkListener", id1 -> {
+                                            FileUnzip.unzipFile(ApplicationLoader.applicationContext, id, CustomEmojiController.emojiTmp(id), CustomEmojiController.emojiDir(id, emojiPackInfo.versionWithMd5));
+                                            FileUnzip.addListener(id, "checkListener", id1 -> {
                                                 CustomEmojiController.emojiTmp(id).delete();
                                                 if (CustomEmojiController.emojiDir(id, emojiPackInfo.versionWithMd5).exists()) {
                                                     deleteOldVersions(emojiPackInfo.packId, emojiPackInfo.versionWithMd5);
@@ -759,7 +759,7 @@ public class CustomEmojiController {
     public static ArrayList<File> getFilesFromActivityResult(Intent intentResult) {
         File dir = new File(EMOJI_PACKS_TMP_DIR);
         if (dir.exists()) {
-            FileUnzip.INSTANCE.deleteFolder(dir);
+            FileUnzip.deleteFolder(dir);
         }
         dir.mkdirs();
         ArrayList<File> files = new ArrayList<>();

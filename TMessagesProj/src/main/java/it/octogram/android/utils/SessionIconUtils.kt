@@ -19,6 +19,7 @@ class SessionIconUtils {
 
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             Log.e(tag, "appName: $appName")
+            Log.e(tag, "apiId: $apiId")
             Log.e(tag, "deviceModel: $deviceModel")
             Log.e(tag, "platform: $platform")
             Log.e(tag, "systemVersion: $systemVersion")
@@ -56,8 +57,11 @@ class SessionIconUtils {
                 deviceModel.contains("mac") || platform.contains("macos") -> SessionType.MAC
                 else -> SessionType.UNKNOWN
             }
-            platform.contains("fragment") -> SessionType.FRAGMENT
-            platform.contains("premiumbot") -> SessionType.PREMIUMBOT
+            platform == "fragment" -> SessionType.FRAGMENT
+            platform == "premiumbot" -> SessionType.PREMIUMBOT
+            platform == "api" -> SessionType.API
+            platform == "anonymous" -> SessionType.ANONYMOUS
+            platform == "ads" -> SessionType.ADS
             platform == "?" -> SessionType.QUESTION
             else -> SessionType.UNKNOWN
         }
@@ -65,7 +69,6 @@ class SessionIconUtils {
 
     fun setDeviceAttributes(session: TLRPC.TL_authorization): DeviceAttributes {
         val sessionType = getSessionTypeObject(session)
-        val octoColor = Color.parseColor("#3D358B")
         return when (sessionType) {
             SessionType.SAFARI -> DeviceAttributes(R.drawable.device_web_safari, Theme.key_avatar_backgroundPink, Theme.key_avatar_background2Pink, R.raw.safari_30)
             SessionType.EDGE -> DeviceAttributes(R.drawable.device_web_edge, Theme.key_avatar_backgroundPink, Theme.key_avatar_background2Pink, R.raw.edge_30)
@@ -84,7 +87,10 @@ class SessionIconUtils {
             SessionType.PREMIUMBOT -> DeviceAttributes(R.drawable.filled_star_plus, Theme.key_color_yellow, Theme.key_color_orange, -1)
             SessionType.QUESTION -> DeviceAttributes(R.drawable.msg_emoji_question, -1, -1, -1)
             SessionType.TELEGRAMX -> DeviceAttributes(R.drawable.baseline_device_android_x_24, Theme.key_avatar_backgroundBlue, Theme.key_avatar_background2Blue, -1)
-            SessionType.OCTOGRAM -> DeviceAttributes(R.drawable.baseline_octo_24, -1, -1, -1, octoColor)
+            SessionType.OCTOGRAM -> DeviceAttributes(R.drawable.baseline_octo_24, -1, -1, -1, Color.parseColor("#3D358B"))
+            SessionType.API -> DeviceAttributes(R.drawable.filled_paid_broadcast, Theme.key_avatar_backgroundGreen, Theme.key_avatar_background2Green, -1)
+            SessionType.ANONYMOUS -> DeviceAttributes(R.drawable.large_hidden, Theme.key_avatar_backgroundBlue, Theme.key_avatar_background2Blue, -1)
+            SessionType.ADS -> DeviceAttributes(R.drawable.msg_channel, Theme.key_avatar_backgroundPink, Theme.key_avatar_background2Pink, -1)
             else -> DeviceAttributes(R.drawable.device_web_other, Theme.key_avatar_backgroundPink, Theme.key_avatar_background2Pink, R.raw.chrome_30)
         }
     }
@@ -92,7 +98,8 @@ class SessionIconUtils {
     enum class SessionType {
         UNKNOWN, BRAVE, VIVALDI, OPERA, EDGE, CHROME, FIREFOX, SAFARI,
         ANDROID, ANDROID_TABLET, WINDOWS, UBUNTU, LINUX, IPHONE, IPAD, MAC,
-        PREMIUMBOT, FRAGMENT, QUESTION, TELEGRAMX, OCTOGRAM
+        PREMIUMBOT, FRAGMENT, QUESTION, TELEGRAMX, OCTOGRAM, API, ANONYMOUS,
+        ADS
     }
 
     data class DeviceAttributes(

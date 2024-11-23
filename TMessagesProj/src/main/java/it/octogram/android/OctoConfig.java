@@ -218,7 +218,7 @@ public class OctoConfig {
     }
 
     public static int getMaxRecentSticker() {
-        int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200};
+        int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200, 10000};
         Integer value = OctoConfig.INSTANCE.maxRecentStickers.getValue();
         if (value >= 0 && value < sizes.length) {
             return sizes[value];

@@ -88,7 +88,7 @@ public class BasePermissionsActivity extends FragmentActivity {
             } else if (!cameraGranted) {
                 showPermissionErrorAlert(R.raw.permission_request_camera, LocaleController.getString(R.string.PermissionNoCameraWithHint));
             } else {
-                if (/*SharedConfig.inappCamera || */OctoConfig.INSTANCE.disableCameraPreview.getValue()) {
+                if (SharedConfig.inappCamera) {
                     CameraController.getInstance().initCamera(null);
                 }
                 return false;

@@ -30,6 +30,7 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -239,7 +240,7 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
         }
         Person person = new Person.Builder()
                 .setName(personName)
-                .setIcon(Icon.createWithAdaptiveBitmap(avatar)).build();
+                .setIcon(Icon.createWithAdaptiveBitmap(MediaDataController.convertBitmapToAdaptive(avatar))).build();
         Notification.CallStyle notificationStyle = Notification.CallStyle.forIncomingCall(person, endPendingIntent, answerPendingIntent);
 
         builder.setStyle(notificationStyle);

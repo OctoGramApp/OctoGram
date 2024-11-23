@@ -1682,7 +1682,10 @@ public class FilterTabsView extends FrameLayout {
                 invalidated = true;
                 requestLayout();
                 allTabsWidth = 0;
-                if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) findDefaultTab().setTitle(LocaleController.getString(R.string.FilterAllChats));
+                if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
+                    var defaultTab = findDefaultTab();
+                    if(defaultTab != null) defaultTab.setTitle(LocaleController.getString(R.string.FilterAllChats));
+                }
                 for (int b = 0; b < N; b++) {
                     allTabsWidth += tabs.get(b).getWidth(true) + FolderIconController.getPaddingTab();
                 }

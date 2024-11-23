@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Person;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -19,10 +18,16 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.graphics.drawable.IconCompat;
+
 import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.NotificationsController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.voip.VoIPActionsReceiver;
 import org.telegram.messenger.voip.VoIPService;
@@ -30,13 +35,85 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.LaunchActivity;
 
+/**
+ * @noinspection unused
+ */
 public class CustomNotificationStyle extends VoIPService {
+    private static void showNotification(VoIPService voIPService, String name, Bitmap photo) {
+        Intent intent = new Intent(voIPService, LaunchActivity.class).setAction(voIPService.groupCall != null ? "voip_chat" : "voip");
+        if (voIPService.groupCall != null) {
+            intent.putExtra("currentAccount", voIPService.getCurrentAccount());
+        }
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(voIPService, NotificationsController.OTHER_NOTIFICATIONS_CHANNEL)
+                .setContentText(name)
+                .setContentIntent(PendingIntent.getActivity(voIPService, 50, intent, PendingIntent.FLAG_MUTABLE));
+        if (voIPService.groupCall != null) {
+            builder.setContentTitle(ChatObject.isChannelOrGiga(voIPService.getChat()) ? LocaleController.getString(R.string.VoipLiveStream) : LocaleController.getString(R.string.VoipVoiceChat));
+            builder.setSmallIcon(voIPService.isMicMute() ? R.drawable.voicechat_muted : R.drawable.voicechat_active);
+        } else {
+            builder.setContentTitle(LocaleController.getString(R.string.VoipOutgoingCall));
+            builder.setSmallIcon(R.drawable.ic_call);
+            builder.setOngoing(true);
+        }
+        builder.setPriority(Notification.PRIORITY_MAX);
+        builder.setShowWhen(false);
+        builder.setColor(0xff282e31);
+        builder.setColorized(true);
+        Intent endIntent = new Intent(voIPService, VoIPActionsReceiver.class);
+        endIntent.setAction(voIPService.getPackageName() + ".END_CALL");
+        var caller = new androidx.core.app.Person.Builder()
+                .setIcon(IconCompat.createWithAdaptiveBitmap(MediaDataController.convertBitmapToAdaptive(photo)))
+                .setName(name)
+                .build();
+        NotificationCompat.CallStyle callStyle = NotificationCompat.CallStyle.forOngoingCall(caller, PendingIntent.getBroadcast(voIPService, 0, endIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        callStyle.setIsVideo(voIPService.videoCall);
+        builder.setStyle(callStyle);
+        if (voIPService.groupCall != null) {
+            builder.setContentText(ChatObject.isChannelOrGiga(voIPService.getChat()) ? LocaleController.getString(R.string.VoipLiveStream) : LocaleController.getString(R.string.VoipVoiceChat));
+        } else {
+            builder.setContentText(LocaleController.getString(R.string.VoipOutgoingCall));
+        }
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationsController.checkOtherNotificationsChannel();
+            builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
+        }
+        if (photo != null) {
+            builder.setLargeIcon(photo);
+        }
+        // return builder.build();
+    }
+
+    public static void customShowNotificationBuild(VoIPService voIPService, NotificationCompat.Builder builder, String name, Bitmap photo) {
+        builder.setPriority(Notification.PRIORITY_MAX);
+        builder.setShowWhen(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setColor(0xff282e31);
+            builder.setColorized(true);
+        } else {
+            builder.setColor(0xff2ca5e0);
+        }
+        Intent endIntent = new Intent(voIPService, VoIPActionsReceiver.class);
+        endIntent.setAction(voIPService.getPackageName() + ".END_CALL");
+        androidx.core.app.Person caller = new androidx.core.app.Person.Builder()
+                .setIcon(IconCompat.createWithAdaptiveBitmap(MediaDataController.convertBitmapToAdaptive(photo)))
+                .setName(name)
+                .build();
+        NotificationCompat.CallStyle callStyle = NotificationCompat.CallStyle.forOngoingCall(caller, PendingIntent.getBroadcast(voIPService, 0, endIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        callStyle.setIsVideo(voIPService.videoCall);
+        builder.setStyle(callStyle);
+        if (voIPService.groupCall != null) {
+            builder.setContentText(ChatObject.isChannelOrGiga(voIPService.getChat()) ? LocaleController.getString(R.string.VoipLiveStream) : LocaleController.getString(R.string.VoipVoiceChat));
+        } else {
+            builder.setContentText(LocaleController.getString(R.string.VoipOutgoingCall));
+        }
+    }
+
     public Notification showIncomingNotification(String name, CharSequence subText, TLObject userOrChat, boolean video, int currentAccount) {
         var activity = LaunchActivity.class;
         Intent intent = new Intent(this, activity);
         intent.setAction("voip");
 
-        Notification.Builder builder = new Notification.Builder(this)
+        var builder = new Notification.Builder(this)
                 .setContentTitle(video ? LocaleController.getString(R.string.VoipInVideoCallBranding) : LocaleController.getString(R.string.VoipInCallBranding))
                 .setContentText(name)
                 .setSmallIcon(OctoUtils.getNotificationIcon())
@@ -122,8 +199,8 @@ public class CustomNotificationStyle extends VoIPService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API level 31+
             builder.setColor(Color.parseColor("#282E31"));
             builder.setColorized(true);
-            Person caller = new Person.Builder()
-                    .setIcon(Icon.createWithBitmap(avatar))
+            var caller = new android.app.Person.Builder()
+                    .setIcon(Icon.createWithAdaptiveBitmap(MediaDataController.convertBitmapToAdaptive(avatar)))
                     .setName(name)
                     .build();
             Notification.CallStyle callStyle = Notification.CallStyle.forIncomingCall(caller, endPendingIntent, answerPendingIntent);

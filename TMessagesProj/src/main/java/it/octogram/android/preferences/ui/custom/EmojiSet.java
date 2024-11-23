@@ -227,7 +227,7 @@ public class EmojiSet extends FrameLayout {
         if (Objects.equals(packId, "default")) return;
         if (CustomEmojiController.emojiTmpDownloaded(packId) || CustomEmojiController.emojiDir(packId, versionWithMD5).exists() || TextUtils.isEmpty(versionWithMD5)) {
             setProgress(false, animated);
-            if (FileUnzip.INSTANCE.isRunningUnzip(packId)) {
+            if (FileUnzip.isRunningUnzip(packId)) {
                 valueTextView.setText(LocaleController.getString(R.string.InstallingEmojiSet), animated);
             } else {
                 valueTextView.setText(LocaleController.getString(R.string.InstalledEmojiSet), animated);

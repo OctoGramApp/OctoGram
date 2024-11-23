@@ -125,7 +125,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption().setId(6).setItemTitle("120"),
                                     new PopupChoiceDialogOption().setId(7).setItemTitle("150"),
                                     new PopupChoiceDialogOption().setId(8).setItemTitle("180"),
-                                    new PopupChoiceDialogOption().setId(9).setItemTitle("200")
+                                    new PopupChoiceDialogOption().setId(9).setItemTitle("200"),
+                                    new PopupChoiceDialogOption().setId(10).setItemTitle("Unlimited")
                             ))
                             .title(LocaleController.getString(R.string.MaxRecentStickers))
                             .build());

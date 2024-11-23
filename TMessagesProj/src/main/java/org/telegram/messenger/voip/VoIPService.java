@@ -89,6 +89,7 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import org.json.JSONObject;
 import org.telegram.messenger.AccountInstance;
@@ -899,6 +900,10 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 
 	public TLRPC.Chat getChat() {
 		return chat;
+	}
+
+	public int getCurrentAccount() {
+		return currentAccount;
 	}
 
 	public void setNoiseSupressionEnabled(boolean enabled) {
@@ -3012,11 +3017,12 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void showNotification(String name, Bitmap photo) {
+		//var builder = CustomNotificationStyle.showNotification(this, name, photo);
 		Intent intent = new Intent(this, LaunchActivity.class).setAction(groupCall != null ? "voip_chat" : "voip");
 		if (groupCall != null) {
 			intent.putExtra("currentAccount", currentAccount);
 		}
-		Notification.Builder builder = new Notification.Builder(this)
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NotificationsController.OTHER_NOTIFICATIONS_CHANNEL)
 				.setContentText(name)
 				.setContentIntent(PendingIntent.getActivity(this, 50, intent, PendingIntent.FLAG_MUTABLE));
 		if (groupCall != null) {
@@ -3027,7 +3033,8 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			builder.setSmallIcon(R.drawable.ic_call);
             builder.setOngoing(true);
 		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        CustomNotificationStyle.customShowNotificationBuild(this, builder, name, photo);
+		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			Intent endIntent = new Intent(this, VoIPActionsReceiver.class);
 			endIntent.setAction(getPackageName() + ".END_CALL");
 			if (groupCall != null) {
@@ -3045,7 +3052,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			builder.setColorized(true);
 		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			builder.setColor(0xff2ca5e0);
-		}
+		}*/
 		if (Build.VERSION.SDK_INT >= 26) {
 			NotificationsController.checkOtherNotificationsChannel();
 			builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
@@ -3070,6 +3077,8 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		} catch (Exception e) {
 			if (photo != null && e instanceof IllegalArgumentException) {
 				showNotification(name, null);
+			} else if (e instanceof NullPointerException) {
+				FileLog.e(e);
 			}
 		}
 	}
@@ -3836,16 +3845,18 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 
 		if (Build.VERSION.SDK_INT >= 21) {
-			WebRtcAudioTrack.setAudioTrackUsageAttribute(hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue() ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_VOICE_COMMUNICATION);
-			WebRtcAudioTrack.setAudioStreamType(hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue() ? AudioManager.USE_DEFAULT_STREAM_TYPE : AudioManager.STREAM_VOICE_CALL);
+			var mediaGroupCall = OctoConfig.INSTANCE.mediaInGroupCall.getValue();
+			WebRtcAudioTrack.setAudioTrackUsageAttribute(hasRtmpStream() || mediaGroupCall ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_VOICE_COMMUNICATION);
+			WebRtcAudioTrack.setAudioStreamType(hasRtmpStream() || mediaGroupCall ? AudioManager.USE_DEFAULT_STREAM_TYPE : AudioManager.STREAM_VOICE_CALL);
 		}
 
 		needPlayEndSound = true;
+		var mediaGroupCall = OctoConfig.INSTANCE.mediaInGroupCall.getValue();
 		AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
 		if (!USE_CONNECTION_SERVICE) {
 			Utilities.globalQueue.postRunnable(() -> {
 				try {
-					if (hasRtmpStream() || OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
+					if (hasRtmpStream() || mediaGroupCall) {
 						am.setMode(AudioManager.MODE_NORMAL);
 						am.setBluetoothScoOn(false);
 						AndroidUtilities.runOnUIThread(() -> {
@@ -4171,18 +4182,11 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			} else {
 				placeholder = new AvatarDrawable((TLRPC.Chat) userOrChat);
 			}
+			placeholder.setRoundRadius(0);
 			bitmap = Bitmap.createBitmap(AndroidUtilities.dp(42), AndroidUtilities.dp(42), Bitmap.Config.ARGB_8888);
 			placeholder.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
 			placeholder.draw(new Canvas(bitmap));
 		}
-
-		Canvas canvas = new Canvas(bitmap);
-		Path circlePath = new Path();
-		circlePath.addCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, Path.Direction.CW);
-		circlePath.toggleInverseFillType();
-		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-		canvas.drawPath(circlePath, paint);
 		return bitmap;
 	}
 

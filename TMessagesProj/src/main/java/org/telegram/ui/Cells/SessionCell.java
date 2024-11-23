@@ -387,15 +387,15 @@ public class SessionCell extends FrameLayout {
         return combinedDrawable;
         */
 
-        SessionIconUtils sessionType = new SessionIconUtils();
-        SessionIconUtils.DeviceAttributes drawableInfo = sessionType.setDeviceAttributes(session);
+        var sessionType = new SessionIconUtils();
+        var drawableInfo = sessionType.setDeviceAttributes(session);
 
-        int iconId = drawableInfo.getIconId();
-        int colorKey = drawableInfo.getColorKey();
-        int colorKey2 = drawableInfo.getColorKey2();
-        int customColor = drawableInfo.getCustomColor();
+        var iconId = drawableInfo.getIconId();
+        var colorKey = drawableInfo.getColorKey();
+        var colorKey2 = drawableInfo.getColorKey2();
+        var customColor = drawableInfo.getCustomColor();
 
-        Drawable iconDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, iconId);
+        var iconDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, iconId);
         if (iconDrawable != null) {
             iconDrawable.mutate();
             iconDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_avatar_text), PorterDuff.Mode.SRC_IN));

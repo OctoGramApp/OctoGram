@@ -175,12 +175,12 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             String currentDownloading = getCurrentDownloading();
             String currentUnzipping = getCurrentUnzipping();
             boolean isDownloading = FileDownloader.isRunningDownload(cell.packId);
-            boolean isUnzipping = FileUnzip.INSTANCE.isRunningUnzip(cell.packId);
+            boolean isUnzipping = FileUnzip.isRunningUnzip(cell.packId);
             if (!isDownloading && currentDownloading != null) {
                 FileDownloader.cancel(currentDownloading);
             }
             if (!isUnzipping && currentUnzipping != null) {
-                FileUnzip.INSTANCE.cancel(currentUnzipping);
+                FileUnzip.cancel(currentUnzipping);
             }
             if (isDownloading || isUnzipping) return;
             if (CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5).exists() || cell.packId.equals("default")) {
@@ -207,7 +207,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
             if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) {
                 FileDownloader.cancel(getCurrentDownloading());
-                FileUnzip.INSTANCE.cancel(getCurrentUnzipping());
+                FileUnzip.cancel(getCurrentUnzipping());
             }
             listAdapter.notifyEmojiSetsChanged();
         } else if (position == customEmojiAddRow) {
@@ -225,7 +225,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 listAdapter.notifyEmojiSetsChanged();
                 OctoConfig.INSTANCE.selectedEmojiPack.updateValue(cell.packId);
                 FileDownloader.cancel(getCurrentDownloading());
-                FileUnzip.INSTANCE.cancel(getCurrentUnzipping());
+                FileUnzip.cancel(getCurrentUnzipping());
                 Emoji.reloadEmoji();
                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
                 if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) {
@@ -240,7 +240,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         return emojiPacks
                 .stream()
                 .map(CustomEmojiController.EmojiPackBase::getPackId)
-                .filter(FileUnzip.INSTANCE::isRunningUnzip)
+                .filter(FileUnzip::isRunningUnzip)
                 .findFirst()
                 .orElse(null);
     }
@@ -275,7 +275,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             public void onFinished(String id, boolean isFailed) {
                 if (cell.packId.equals(id)) {
                     if (CustomEmojiController.emojiTmpDownloaded(cell.packId)) {
-                        FileUnzip.INSTANCE.unzipFile(ApplicationLoader.applicationContext, cell.packId, CustomEmojiController.emojiTmp(cell.packId), CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5));
+                        FileUnzip.unzipFile(ApplicationLoader.applicationContext, cell.packId, CustomEmojiController.emojiTmp(cell.packId), CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5));
                     } else {
                         CustomEmojiController.emojiTmp(cell.packId).delete();
                         listAdapter.notifyEmojiSetsChanged();
@@ -286,7 +286,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 cell.checkDownloaded(true);
             }
         });
-        FileUnzip.INSTANCE.addListener(cell.packId, "emojiCellSettings", (id) -> {
+        FileUnzip.addListener(cell.packId, "emojiCellSettings", (id) -> {
             if (cell.packId.equals(id)) {
                 CustomEmojiController.emojiTmp(cell.packId).delete();
                 if (CustomEmojiController.emojiDir(cell.packId, cell.versionWithMD5).exists()) {
