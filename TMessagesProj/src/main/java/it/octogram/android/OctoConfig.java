@@ -576,6 +576,15 @@ public class OctoConfig {
             case "phoneNavigationAlternative" -> value >= PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue() && value <= PhoneNumberAlternative.SHOW_USERNAME.getValue();
             case "navigationSmoothness" -> value == 200 || value == 400 || value == 500 || value == 600 || value == 800 || value == 1000;
             case "autoDownloadUpdatesStatus" -> value >= AutoDownloadUpdate.ALWAYS.getValue() && value <= AutoDownloadUpdate.NEVER.getValue();
+            case "cameraPreview" -> value >= CameraPreview.DEFAULT && value <= CameraPreview.BOTTOM_BAR;
+            case "cameraType" -> value >= CameraType.TELEGRAM.getValue() && value <= CameraType.SYSTEM_CAMERA.getValue();
+            case "interfaceCheckboxUI" -> value >= InterfaceCheckboxUI.DEFAULT.getValue() && value <= InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue();
+            case "interfaceSliderUI" -> value >= InterfaceSliderUI.DEFAULT.getValue() && value <= InterfaceSliderUI.ANDROID.getValue();
+            case "interfaceSwitchUI" -> value >= InterfaceSwitchUI.DEFAULT.getValue() && value <= InterfaceSwitchUI.GOOGLE.getValue();
+            case "phoneNumberAlternative" -> value >= PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue() && value <= PhoneNumberAlternative.SHOW_USERNAME.getValue();
+            case "tabStyle" -> value >= TabStyle.DEFAULT.getValue() && value <= TabStyle.FULL.getValue();
+            case "uiIconsType" -> value >= IconsUIType.DEFAULT.getValue() && value <= IconsUIType.MATERIAL_DESIGN_3.getValue();
+            case "uiTitleCenteredState" -> value >= ActionBarCenteredTitle.ALWAYS.getValue() && value <= ActionBarCenteredTitle.NEVER.getValue();
             default -> false;
         };
     }

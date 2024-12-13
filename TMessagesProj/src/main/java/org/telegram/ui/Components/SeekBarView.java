@@ -541,14 +541,22 @@ public class SeekBarView extends FrameLayout {
 
             rect.set(left, top, thumbX + selectorWidth / 2f - padding, bottom);
             if (rect.left < rect.right) {
-                updatePath(path, rect, radius, radius2);
-                canvas.drawPath(path, outerPaint1);
+                if (rect.right - rect.left < AndroidUtilities.dp(7)) {
+                    canvas.drawRoundRect(rect, radius2, radius2, outerPaint1);
+                } else {
+                    updatePath(path, rect, radius, radius2);
+                    canvas.drawPath(path, outerPaint1);
+                }
             }
 
             rect.set(thumbX + selectorWidth / 2f + thumbSize + padding, top, right, bottom);
             if (rect.left < rect.right) {
-                updatePath(path, rect, radius2, radius);
-                canvas.drawPath(path, innerPaint1);
+                if (rect.right - rect.left < AndroidUtilities.dp(7)) {
+                    canvas.drawRoundRect(rect, radius2, radius2, innerPaint1);
+                } else {
+                    updatePath(path, rect, radius2, radius);
+                    canvas.drawPath(path, innerPaint1);
+                }
             }
 
             // left, top, right, bottom, rx, ry

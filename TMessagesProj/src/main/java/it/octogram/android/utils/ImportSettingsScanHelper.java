@@ -29,6 +29,7 @@ import it.octogram.android.preferences.ui.OctoChatsSettingsUI;
 import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
+import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
 import it.octogram.android.preferences.ui.OctoTranslatorUI;
 import it.octogram.android.preferences.ui.OctoUpdatesUI;
 
@@ -44,6 +45,7 @@ public class ImportSettingsScanHelper {
         SettingsScanCategory appearanceCategory = new SettingsScanCategory("appearance", R.string.Appearance, R.drawable.settings_appearance, () -> new PreferencesFragment(new OctoAppearanceUI()));
         SettingsScanCategory appearanceChatsCategory = new SettingsScanCategory("appearanceChats", composeName(R.string.Appearance, R.string.ChatTitle, true), R.drawable.msg_groups, () -> new PreferencesFragment(new OctoChatsSettingsUI()));
         SettingsScanCategory appearanceDrawerCategory = new SettingsScanCategory("appearanceDrawer", composeName(R.string.Appearance, R.string.DrawerTitle, true), R.drawable.msg_map_type, () -> new PreferencesFragment(new OctoDrawerSettingsUI()));
+        SettingsScanCategory appearanceAppCategory = new SettingsScanCategory("appearanceApp", composeName(R.string.Appearance, R.string.AppTitleSettings, true), R.drawable.media_draw, () -> new PreferencesFragment(new OctoInterfaceSettingsUI()));
         SettingsScanCategory chatCameraCategory = new SettingsScanCategory("chatcamera", R.string.ChatCamera, R.drawable.msg_camera, () -> new PreferencesFragment(new OctoCameraSettingsUI()));
         SettingsScanCategory experimentsCategory = new SettingsScanCategory("experiments", R.string.Experiments, R.drawable.outline_science_white, () -> new PreferencesFragment(new OctoExperimentsUI()));
         SettingsScanCategory updatesCategory = new SettingsScanCategory("updates", R.string.Updates, R.drawable.round_update_white_28, () -> new PreferencesFragment(new OctoUpdatesUI()));
@@ -53,6 +55,7 @@ public class ImportSettingsScanHelper {
         fillAppearanceOptions(appearanceCategory);
         fillAppearanceChatsOptions(appearanceChatsCategory);
         fillAppearanceDrawerOptions(appearanceDrawerCategory);
+        fillAppearanceAppOptions(appearanceAppCategory);
         fillChatCameraOptions(chatCameraCategory);
         fillExperimentsCategory(experimentsCategory);
         fillUpdatesCategory(updatesCategory);
@@ -62,6 +65,7 @@ public class ImportSettingsScanHelper {
         categories.add(appearanceCategory);
         categories.add(appearanceChatsCategory);
         categories.add(appearanceDrawerCategory);
+        categories.add(appearanceAppCategory);
         categories.add(chatCameraCategory);
         categories.add(experimentsCategory);
         categories.add(updatesCategory);
@@ -119,6 +123,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.dcIdType.getKey(), composeName(R.string.DcIdHeader, R.string.Type)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.defaultEmojiButtonAction.getKey(), R.string.DefaultEmojiButtonType));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.jumpToNextChannelOrTopic.getKey(), R.string.JumpToNextChannelOrTopic));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.swipeToPip.getKey(), R.string.SwipeToPIP));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideGreetingSticker.getKey(), R.string.HideGreetingSticker));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideKeyboardOnScroll.getKey(), R.string.HideKeyboardOnScroll));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideSendAsChannel.getKey(), R.string.HideSendAsChannel));
@@ -129,11 +134,12 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.playGifAsVideo.getKey(), R.string.PlayGifsAsVideo));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.unmuteVideosWithVolumeDown.getKey(), R.string.UnmuteWithVolumeDown));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableProximityEvents.getKey(), R.string.DisableProximitySensor));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideChatFolders.getKey(), R.string.HideAllChatFolders, true));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getKey(), R.string.HideAllChatFolder, true));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideChatFolders.getKey(), R.string.HideAllChatFolders));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getKey(), R.string.HideAllChatFolder));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideFoldersWhenForwarding.getKey(), R.string.HideChatFoldersWhenForwarding));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.doubleTapActionOut.getKey(), R.string.PreferredActionOutgoing));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.doubleTapAction.getKey(), R.string.PreferredActionIncoming));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.rememberAllRepliesMessage.getKey(), R.string.ReplyTracking));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.accentColorAsNotificationColor.getKey(), R.string.AccentColorAsNotificationColor));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getKey(), R.string.EnableSmartNotificationsForPrivateChats));
     }
@@ -146,16 +152,15 @@ public class ImportSettingsScanHelper {
     }
 
     private void fillAppearanceOptions(SettingsScanCategory category) {
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabMode.getKey(), R.string.FoldersType));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSystemEmoji.getKey(), R.string.UseSystemEmojis, true));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSystemFont.getKey(), R.string.UseSystemFont, true));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSystemEmoji.getKey(), R.string.UseSystemEmojis));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSystemFont.getKey(), R.string.UseSystemFont));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showUserIconsInChatsList.getKey(), R.string.ShowUserIconsInChatsList));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideStories.getKey(), R.string.HideStories, true));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarTitleOption.getKey(), R.string.ActionBarTitle, true));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarCustomTitle.getKey(), R.string.ActionBarTitleCustom, true));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideStories.getKey(), R.string.HideStories));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarTitleOption.getKey(), R.string.ActionBarTitle));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarCustomTitle.getKey(), R.string.ActionBarTitleCustom));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableDividers.getKey(), R.string.HideDividers));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.forcePacmanAnimation.getKey(), R.string.ForcePacmanAnimation));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showSnowflakes.getKey(), R.string.ShowSnowflakes, true));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showSnowflakes.getKey(), R.string.ShowSnowflakes));
     }
 
     private void fillAppearanceChatsOptions(SettingsScanCategory category) {
@@ -163,6 +168,10 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.stickerShape.getKey(), R.string.StickerShape));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.repliesLinksShowColors.getKey(), composeName(R.string.RepliesLinksHeader, R.string.RepliesLinksShowColors)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.repliesLinksShowEmojis.getKey(), composeName(R.string.RepliesLinksHeader, R.string.RepliesLinksShowEmojis)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingStickers.getKey(), composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingStickers)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingGIFs.getKey(), composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingGIFs)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingVoiceMessages.getKey(), composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingVoiceMessages)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingVideoMessages.getKey(), composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingVideoMessages)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideSentTimeOnStickers.getKey(), R.string.RemoveTimeOnStickers));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.formatTimeWithSeconds.getKey(), R.string.FormatTimeWithSeconds));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.numberRounding.getKey(), R.string.NumberRounding));
@@ -183,16 +192,33 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.drawerBlurBackground.getKey(), R.string.DrawerBlurBackground));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.drawerBlurBackgroundLevel.getKey(), R.string.DrawerBlurBackgroundLevel));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.drawerItems.getKey(), R.string.DrawerElements));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.eventType.getKey(), R.string.EventType, true));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.eventType.getKey(), R.string.EventType));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.drawerProfileAsBubble.getKey(), R.string.DrawerHeaderAsBubble));
+
+    }
+
+    private void fillAppearanceAppOptions(SettingsScanCategory category) {
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uiTitleCenteredState.getKey(), R.string.ImproveInterfaceTitleCentered));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uiImmersivePopups.getKey(), R.string.ImproveInterfaceImmersivePopups));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceSwitchUI.getKey(), R.string.ImproveInterfaceSwitch));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceCheckboxUI.getKey(), R.string.ImproveInterfaceCheckbox));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceSliderUI.getKey(), R.string.ImproveInterfaceSlider));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSquaredFab.getKey(), R.string.SquaredFab));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabMode.getKey(), composeName(R.string.ManageFolders, R.string.FolderType)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabStyle.getKey(), composeName(R.string.ManageFolders, R.string.FolderStyle)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideUnreadCounterOnFolder.getKey(), composeName(R.string.ManageFolders, R.string.HideUnreadCounter)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uiIconsType.getKey(), R.string.ImproveIconsShort));
+
+
     }
 
     private void fillChatCameraOptions(SettingsScanCategory category) {
-        //category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXEnabled.getKey(), R.string.UseCameraX));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraType.getKey(), R.string.CameraType));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXZeroShutter.getKey(), R.string.ZeroShutter));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXPerformanceMode.getKey(), R.string.PerformanceMode));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXResolution.getKey(), R.string.CurrentCameraXResolution));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.startWithRearCamera.getKey(), R.string.StartWithRearCamera));
-        // category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableCameraPreview.getKey(), R.string.DisableCameraPreview));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraPreview.getKey(), R.string.CameraButtonPosition));
     }
 
     private void fillExperimentsCategory(SettingsScanCategory category) {
@@ -203,9 +229,9 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.maxRecentStickers.getKey(), R.string.MaxRecentStickers));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.forceUseIpV6.getKey(), R.string.TryConnectWithIPV6));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.deviceIdentifyState.getKey(), R.string.DeviceIdentifyStatus));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alternativeNavigation.getKey(), R.string.AlternativeNavigation, true));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.navigationSmoothness.getKey(), composeName(R.string.AlternativeNavigation, R.string.SmootherNavigation), true));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.animatedActionBar.getKey(), composeName(R.string.AlternativeNavigation, R.string.AnimatedActionBar), true));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alternativeNavigation.getKey(), R.string.AlternativeNavigation));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.navigationSmoothness.getKey(), composeName(R.string.AlternativeNavigation, R.string.SmootherNavigation)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.animatedActionBar.getKey(), composeName(R.string.AlternativeNavigation, R.string.AnimatedActionBar)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost.getKey(), R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost.getKey(), R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue.getKey(), R.string.DownloadBoostType));
@@ -300,28 +326,15 @@ public class ImportSettingsScanHelper {
         public String optionName;
         public int optionResourceName;
         public String optionKey;
-        public boolean optionRequiresRestart;
 
         public SettingsScanOption(String optionKey, String optionName) {
             this.optionKey = optionKey;
             this.optionName = optionName;
         }
 
-        public SettingsScanOption(String optionKey, String optionName, boolean optionRequiresRestart) {
-            this.optionKey = optionKey;
-            this.optionName = optionName;
-            this.optionRequiresRestart = optionRequiresRestart;
-        }
-
         public SettingsScanOption(String optionKey, int optionResourceName) {
             this.optionKey = optionKey;
             this.optionResourceName = optionResourceName;
-        }
-
-        public SettingsScanOption(String optionKey, int optionResourceName, boolean optionRequiresRestart) {
-            this.optionKey = optionKey;
-            this.optionResourceName = optionResourceName;
-            this.optionRequiresRestart = optionRequiresRestart;
         }
 
         public String getName() {

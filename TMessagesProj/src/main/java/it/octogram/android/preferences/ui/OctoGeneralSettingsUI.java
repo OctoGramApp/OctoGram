@@ -42,21 +42,23 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
 
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
+        ConfigProperty<Boolean> canShowPhoneNumberAlternative = new ConfigProperty<>(null, OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue());
         ConfigProperty<Boolean> canShowSelectReaction = new ConfigProperty<>(null, OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue());
         return OctoPreferences.builder(LocaleController.getString(R.string.OctoGeneralSettings))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, LocaleController.getString(R.string.OctoGeneralSettingsHeader))
                 .category(LocaleController.getString(R.string.PrivacyHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> canShowPhoneNumberAlternative.setValue(OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()))
                             .preferenceValue(OctoConfig.INSTANCE.hidePhoneNumber)
                             .title(LocaleController.getString(R.string.HidePhoneNumber))
                             .description(LocaleController.getString(R.string.HidePhoneNumber_Desc))
                             .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> canShowPhoneNumberAlternative.setValue(OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()))
                             .preferenceValue(OctoConfig.INSTANCE.hideOtherPhoneNumber)
                             .title(LocaleController.getString(R.string.HideOtherPhoneNumber))
                             .description(LocaleController.getString(R.string.HideOtherPhoneNumber_Desc))
-                            .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
                             .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
                     category.row(new ListRow.ListRowBuilder()
@@ -68,12 +70,13 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.ShowFakePhoneNumber))
-                                            .setItemDescription(LocaleController.formatString(R.string.ShowFakePhoneNumber_Desc, "+39 123 456 7890")), // TODO: Improve
+                                            .setItemDescription(LocaleController.formatString(R.string.ShowFakePhoneNumber_Desc, "+39 123 456 7890")),
                                     new PopupChoiceDialogOption()
                                             .setId(PhoneNumberAlternative.SHOW_USERNAME.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.ShowUsernameAsPhoneNumber))
                                             .setItemDescription(LocaleController.getString(R.string.ShowUsernameAsPhoneNumber_Desc))
                             ))
+                            .showIf(canShowPhoneNumberAlternative)
                             .title(LocaleController.getString(R.string.InsteadPhoneNumber))
                             .build());
                 })
@@ -156,8 +159,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.swipeToPip)
-                            .title("Swipe to PIP")
-                            .description("Swipe up on a video to enter Picture-in-Picture mode.")
+                            .title(LocaleController.getString(R.string.SwipeToPIP))
+                            .description(LocaleController.getString(R.string.SwipeToPIP_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideGreetingSticker)
@@ -219,7 +222,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideOnlyAllChatsFolder)
-                            .premium(!hasPremiumAccount())
                             .title(LocaleController.getString(R.string.HideAllChatFolder))
                             .showIf(OctoConfig.INSTANCE.hideChatFolders, true)
                             .requiresRestart(true)
@@ -316,8 +318,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .category("Replies", category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.rememberAllRepliesMessage)
-                            .title("Enable Reply Tracking")
-                            .description("Keep track of replies to specific messages for easier reference.")
+                            .title(LocaleController.getString(R.string.ReplyTracking))
+                            .description(LocaleController.getString(R.string.ReplyTracking_Desc))
                             .build());
                 })
 

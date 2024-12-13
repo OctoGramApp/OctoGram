@@ -6695,7 +6695,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         filterTabsView.addTab(a, filters.get(a).localId, filters.get(a).name, false, filters.get(a).locked, filters.get(a).emoticon);
                     }
                 }
-                if (stableId >= 0) {
+                if (OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
+                    id = filterTabsView.getFirstTabId();
+                    updateCurrentTab = true;
+                    viewPages[0].selectedType = id;
+                    filterTabsView.selectTabWithStableId(filterTabsView.getStableId(0));
+                } else if (stableId >= 0) {
                     if (selectWithStableId) {
                         if (!filterTabsView.selectTabWithStableId(stableId)) {
                             while (id >= 0 && !filterTabsView.selectTabWithStableId(filterTabsView.getStableId(id))) {
@@ -6725,24 +6730,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 updateDrawerSwipeEnabled();
                 if (filterTabsView.isLocked(filterTabsView.getCurrentTabId())) {
                     filterTabsView.selectFirstTab();
-                }
-                if (OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
-                    int newPage = -1, defaultPage = -1;
-                    for (int a = 0, N = filters.size(); a < N; a++) {
-                        if (filters.get(a).isDefault()) {
-                            defaultPage = a;
-                        } else if (newPage == -1 && !filters.get(a).locked) {
-                            newPage = a;
-                        }
-                    }
-                    newPage = filterTabsView.getCurrentTabId() == defaultPage ? newPage : filterTabsView.getCurrentTabId();
-                    filterTabsView.selectTabWithId(newPage, 1.0f);
-                    if (parentLayout != null) {
-                        parentLayout.getDrawerLayoutContainer().setAllowOpenDrawerBySwipe(newPage == filterTabsView.getFirstTabId());
-                    }
-                    ViewPage[] viewPageArr4 = viewPages;
-                    viewPageArr4[1].selectedType = viewPageArr4[0].selectedType;
-                    viewPages[0].selectedType = newPage;
                 }
 //                switchToCurrentSelectedMode(false);
 //                updateCounters(false);

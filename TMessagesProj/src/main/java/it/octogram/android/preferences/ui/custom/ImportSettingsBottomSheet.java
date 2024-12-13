@@ -217,28 +217,13 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         int changedOptions = OctoConfig.INSTANCE.importMessageExport(message, dataToImport, settingsScan.excludedOptions);
 
         if (changedOptions > 0) {
-            boolean isReloadRequested = false;
-            for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
-                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                    if (dataToImport.contains(option.optionKey) && option.optionRequiresRestart) {
-                        isReloadRequested = true;
-                        break;
-                    }
-                }
-            }
-
-            if (isReloadRequested) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-                alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportDonePopup));
-                alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportDonePopupDescription));
-                alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.setCanceledOnTouchOutside(false);
-                alertDialog.show();
-            } else {
-                dismiss();
-                BulletinFactory.of(getBaseFragment()).createSimpleBulletin(R.raw.info, LocaleController.formatString(R.string.ImportReadyImportDone, changedOptions)).show();
-            }
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
+            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportDonePopup));
+            alertDialogBuilder.setMessage(LocaleController.formatString(R.string.ImportReadyImportDone, changedOptions));
+            alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.show();
         }
     }
 

@@ -175,6 +175,8 @@
     <string name="ShowRegistrationDate_Desc">Show user\'s registration date in profiles. Note that this is achieved through guessing, so it may show inaccurate results</string>
     <string name="JumpToNextChannelOrTopic">Jump to next channel / topic</string>
     <string name="JumpToNextChannelOrTopic_Desc">Allows to swipe up from a channel / topic to jump to next one</string>
+    <string name="SwipeToPIP">Swipe to PIP</string>
+    <string name="SwipeToPIP_Desc">Swipe up on a video to enter Picture-in-Picture mode.</string>
     <string name="HideGreetingSticker">Hide greeting sticker</string>
     <string name="HideGreetingSticker_Desc">Hides the greeting sticker when messaging a new contact</string>
     <string name="PlayGifsAsVideo">Play GIFs as Videos</string>
@@ -196,6 +198,8 @@
     <string name="HideAllChatFolder">Hide \"All Chats\" tab</string>
     <string name="HideAllChatFolders">Totally hide folders</string>
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
+    <string name="ReplyTracking">Enable Reply Tracking</string>
+    <string name="ReplyTracking_Desc">Keep track of replies to specific messages for easier reference.</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="EnableSmartNotificationsForPrivateChats">Enable smart notifications for private chats</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
@@ -363,6 +367,7 @@
     <string name="ImproveInterfaceTitleCenteredSettings">Just in settings</string>
     <string name="ImproveInterfaceTitleCenteredNever">Never</string>
     <string name="ImproveIcons">Manage Icons</string>
+    <string name="ImproveIconsShort">Custom Icon Pack</string>
     <string name="ImproveIconsDefault">Default</string>
     <string name="ImproveIconsDefault_Desc">OctoGram will use the default Telegram icons without any changes.</string>
     <string name="ImproveIconsSolar">Solar</string>
@@ -498,9 +503,8 @@
     <string name="ImportReadyImport">Proceed with import</string>
     <string name="ImportReadyImportSelected">Import selected</string>
     <string name="ImportReadyOtherOptions">Another %d unspecified options will be imported automatically.</string>
-    <string name="ImportReadyImportDone">%d options have been imported successfully.</string>
+    <string name="ImportReadyImportDone">%d options have been imported successfully. Restart the app to complete the transfer.</string>
     <string name="ImportReadyImportDonePopup">To complete…</string>
-    <string name="ImportReadyImportDonePopupDescription">Some of the imported options require a restart of the app for proper operation.</string>
     <string name="ImportReadyImportFailedZeroTitle">Error</string>
     <string name="ImportReadyImportFailedZeroCaption">You must select at least one option in order to proceed with the import.</string>
     <string name="ImportReadyOpenFile">Open file preview</string>
@@ -602,6 +606,9 @@
 
     <string name="StartWithRearCamera">Start with rear camera</string>
     <string name="StartWithRearCamera_Desc">Start recording video messages with the rear camera instead of the front camera</string>
+
+    <string name="CameraButtonPosition">Camera Button Position</string>
+    <string name="CameraButtonPosition_Desc">Choose the position of the camera button</string>
 
     <string name="DisableCameraPreview">Disable camera preview</string>
     <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
