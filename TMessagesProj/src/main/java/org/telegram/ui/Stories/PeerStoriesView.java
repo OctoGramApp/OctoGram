@@ -191,6 +191,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
+import it.octogram.android.StoreUtils;
+
 public class PeerStoriesView extends SizeNotifierFrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     public static boolean DISABLE_STORY_REPOSTING = false;
@@ -3580,7 +3582,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                 ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_featuredStickers_buttonText, resourcesProvider), 30))
         );
         buttonTextView.setOnClickListener(v -> {
-            if (ApplicationLoader.isStandaloneBuild()) {
+            if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                 if (LaunchActivity.instance != null) {
                     LaunchActivity.instance.checkAppUpdate(true, null);
                 }

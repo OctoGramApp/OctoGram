@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.preferences.ui.custom;
 
 import android.content.Context;
@@ -84,10 +92,10 @@ public class DatacenterBottomSheet extends BottomSheet {
 
         String statusText;
         int colorKey;
-        if (datacenterInfo.status == 0) {
+        if (datacenterInfo.status() == 0) {
             statusText = LocaleController.getString(R.string.Unavailable);
             colorKey = Theme.key_windowBackgroundWhiteGrayText;
-        } else if (datacenterInfo.status == 1) {
+        } else if (datacenterInfo.status() == 1) {
             statusText = LocaleController.getString(R.string.Available);
             colorKey = Theme.key_windowBackgroundWhiteGreenText;
         } else {
@@ -98,7 +106,7 @@ public class DatacenterBottomSheet extends BottomSheet {
         statusView.setTextColor(Theme.getColor(colorKey));
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(datacenterInfo.ping);
+        stringBuilder.append(datacenterInfo.ping());
         stringBuilder.append("ms");
         Drawable drawable = Objects.requireNonNull(ContextCompat.getDrawable(context, R.drawable.menu_hashtag)).mutate();
         drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.SRC_IN));
@@ -119,8 +127,8 @@ public class DatacenterBottomSheet extends BottomSheet {
         linearLayout.addView(ipItemView);
 
         ItemView prevItem = ipItemView;
-        if (datacenterInfo.lastLag != 0) {
-            String lastLagString = LocaleController.formatDateTime(datacenterInfo.lastLag, true);
+        if (datacenterInfo.lastLag() != 0) {
+            String lastLagString = LocaleController.formatDateTime(datacenterInfo.lastLag(), true);
             drawable = Objects.requireNonNull(ContextCompat.getDrawable(context, R.drawable.menu_views_recent)).mutate();
             drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.SRC_IN));
             ItemView lastLag = new ItemView(context, false);
@@ -134,8 +142,8 @@ public class DatacenterBottomSheet extends BottomSheet {
             prevItem = lastLag;
         }
 
-        if (datacenterInfo.lastDown != 0) {
-            String lastDownString = LocaleController.formatDateTime(datacenterInfo.lastDown, true);
+        if (datacenterInfo.lastDown() != 0) {
+            String lastDownString = LocaleController.formatDateTime(datacenterInfo.lastDown(), true);
             drawable = Objects.requireNonNull(ContextCompat.getDrawable(context, R.drawable.menu_views_recent)).mutate();
             drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.SRC_IN));
             ItemView lastDown = new ItemView(context, false);

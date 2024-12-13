@@ -191,7 +191,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
     private ArrayList<AlertDialogCell> itemViews = new ArrayList<>();
     private float aspectRatio;
     private boolean dimEnabled = true;
-    private float dimAlpha = OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 0.4f : 0.5f;
+    private float dimAlpha = OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 0.25f : 0.5f;
     private boolean dimCustom = false;
     private final Theme.ResourcesProvider resourcesProvider;
     private boolean topAnimationAutoRepeat = true;

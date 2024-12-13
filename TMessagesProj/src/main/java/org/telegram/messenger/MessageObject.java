@@ -103,6 +103,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
 
 public class MessageObject {
 
@@ -555,7 +556,7 @@ public class MessageObject {
                 TLRPC.RestrictionReason reason = messageOwner.restriction_reason.get(i);
                 if (
                     "sensitive".equals(reason.reason) &&
-                    ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform))
+                    ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore())
                 ) {
                     return isSensitiveCached = true;
                 }
@@ -568,7 +569,7 @@ public class MessageObject {
                     TLRPC.RestrictionReason reason = chat.restriction_reason.get(i);
                     if (
                         "sensitive".equals(reason.reason) &&
-                        ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform))
+                        ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore())
                     ) {
                         return isSensitiveCached = true;
                     }

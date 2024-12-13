@@ -37,6 +37,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -136,6 +137,7 @@ import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.FontType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
+import it.octogram.android.utils.TypeFaceSupportChecker;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.browser.Browser;
@@ -2266,20 +2268,27 @@ public class AndroidUtilities {
     public static Typeface getTypeface(String assetPath) {
         synchronized (typefaceCache) {
             if (!typefaceCache.containsKey(assetPath)) {
+                Typeface t = null;
                 try {
                     if (OctoConfig.INSTANCE.useSystemFont.getValue()) {
-                        Typeface t = switch (assetPath) {
-                            case "fonts/rmedium.ttf" -> Typeface.create("sans-serif-medium", Typeface.NORMAL);
-                            case "fonts/ritalic.ttf" -> Typeface.create("sans-serif", Typeface.ITALIC);
-                            case "fonts/rmediumitalic.ttf" -> Typeface.create("sans-serif-medium", Typeface.ITALIC);
+                        t = switch (assetPath) {
                             case "fonts/rmono.ttf" -> Typeface.MONOSPACE;
-                            case "fonts/mw_bold.ttf" -> Typeface.create("serif", Typeface.BOLD);
                             case "fonts/rcondensedbold.ttf" -> Typeface.create("sans-serif-condensed", Typeface.BOLD);
-                            default -> null;
+                            case "fonts/rmediumitalic.ttf" -> TypeFaceSupportChecker.isMediumWeightSupported()
+                                    ? Typeface.create("sans-serif-medium", Typeface.ITALIC)
+                                    : Typeface.create("sans-serif", Typeface.BOLD_ITALIC);
+                            case "fonts/rmedium.ttf" -> TypeFaceSupportChecker.isMediumWeightSupported()
+                                    ? Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                                    : Typeface.create("sans-serif", Typeface.BOLD);
+                            case "fonts/ritalic.ttf" -> Build.VERSION.SDK_INT >= 28
+                                    ? Typeface.create(Typeface.SANS_SERIF, 400, true)
+                                    : Typeface.create("sans-serif", Typeface.ITALIC);
+                            case "fonts/mw_bold.ttf" -> Typeface.create("serif", Typeface.BOLD);
+                            default -> Build.VERSION.SDK_INT >= 28
+                                    ? Typeface.create(Typeface.SANS_SERIF, 400, false)
+                                    : Typeface.create("sans-serif", Typeface.NORMAL);
                         };
-                        typefaceCache.put(assetPath, t);
                     } else {
-                        Typeface t;
                         if (Build.VERSION.SDK_INT >= 26) {
                             Typeface.Builder builder = new Typeface.Builder(ApplicationLoader.applicationContext.getAssets(), assetPath);
                             if (assetPath.contains("medium")) {
@@ -2292,7 +2301,6 @@ public class AndroidUtilities {
                         } else {
                             t = Typeface.createFromAsset(ApplicationLoader.applicationContext.getAssets(), assetPath);
                         }
-                        typefaceCache.put(assetPath, t);
                     }
                 } catch (Exception e) {
                     if (BuildVars.LOGS_ENABLED) {
@@ -2300,6 +2308,8 @@ public class AndroidUtilities {
                     }
                     return null;
                 }
+                typefaceCache.put(assetPath, t);
+                return t;
             }
             return typefaceCache.get(assetPath);
         }

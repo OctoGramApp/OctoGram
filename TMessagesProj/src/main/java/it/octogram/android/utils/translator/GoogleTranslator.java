@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils.translator;
 
 import android.text.TextUtils;
@@ -7,7 +15,6 @@ import androidx.core.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.telegram.messenger.FileLog;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.TranslateAlert2;
 
@@ -19,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 
 public class GoogleTranslator {
@@ -95,7 +103,7 @@ public class GoogleTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (IOException | JSONException e) {
-                    FileLog.e(e);
+                    OctoLogging.e(e);
                     callback.onResponseReceived();
                     callback.onError();
                 }

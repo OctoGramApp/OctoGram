@@ -253,6 +253,8 @@ import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.preferences.ui.custom.MonetAndroidFixDialog;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.theme.MonetIconController;
@@ -4654,13 +4656,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, dp(2), dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, dp(4), dp(2)).setDuration(200));
             floatingButtonContainer.setStateListAnimator(animator);
-            floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+            floatingButtonContainer.setOutlineProvider(new OutlineProvider());
+            /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, dp(56), dp(56));
                 }
-            });
+            });*/
         }
         Drawable drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
         if (Build.VERSION.SDK_INT < 21) {
@@ -4924,17 +4927,19 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
 
             FrameLayout writeButtonBackground = new FrameLayout(context);
-            Drawable writeButtonDrawable = Theme.createSimpleSelectorCircleDrawable(dp(56), getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_dialogFloatingButton));
+            var writeButtonDrawable = CustomFab.createFabBackground(56, getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Theme.key_dialogFloatingButtonPressed));
+            /*Drawable writeButtonDrawable = Theme.createSimpleSelectorCircleDrawable(dp(56), getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_dialogFloatingButton));
             if (Build.VERSION.SDK_INT < 21) {
                 Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow_profile).mutate();
                 shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
                 CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                 combinedDrawable.setIconSize(dp(56), dp(56));
                 writeButtonDrawable = combinedDrawable;
-            }
+            }*/
             writeButtonBackground.setBackgroundDrawable(writeButtonDrawable);
             writeButtonBackground.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            writeButtonBackground.setOutlineProvider(new OutlineProvider());
+            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 writeButtonBackground.setOutlineProvider(new ViewOutlineProvider() {
                     @SuppressLint("NewApi")
                     @Override
@@ -4942,7 +4947,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         outline.setOval(0, 0, dp(56), dp(56));
                     }
                 });
-            }
+            }*/
             writeButtonBackground.setOnClickListener(v -> {
                 if (delegate == null || selectedDialogs.isEmpty()) {
                     return;
@@ -12279,21 +12284,21 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (getParentActivity() == null) {
             return;
         }
-        Drawable drawable;
+        // Drawable drawable;
         if (floatingButtonContainer != null) {
-            drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
+            /*drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
             if (Build.VERSION.SDK_INT < 21) {
                 Drawable shadowDrawable = ContextCompat.getDrawable(getParentActivity(), R.drawable.floating_shadow).mutate();
                 shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
                 CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                 combinedDrawable.setIconSize(dp(56), dp(56));
                 drawable = combinedDrawable;
-            }
-            floatingButtonContainer.setBackground(drawable);
+            }*/
+            floatingButtonContainer.setBackground(CustomFab.createFabBackground());
         }
 
         if (floatingButton2Container != null) {
-            drawable = Theme.createSimpleSelectorCircleDrawable(
+            /*drawable = Theme.createSimpleSelectorCircleDrawable(
                     dp(36),
                     ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhite), Color.WHITE, 0.1f),
                     Theme.blendOver(Theme.getColor(Theme.key_windowBackgroundWhite), Theme.getColor(Theme.key_listSelector))
@@ -12304,8 +12309,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                 combinedDrawable.setIconSize(dp(36), dp(36));
                 drawable = combinedDrawable;
-            }
-            floatingButton2Container.setBackground(drawable);
+            }*/
+            floatingButton2Container.setBackground(CustomFab.createFabBackground(40, getThemedColor(Theme.key_chats_actionBackground), getThemedColor(Theme.key_chats_actionPressedBackground)));
         }
     }
 

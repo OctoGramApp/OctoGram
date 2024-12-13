@@ -667,7 +667,7 @@
     <string name="AuthAnotherClientUrl">يمكن استخدام هذا الرمز للسماح لشخص ما بتسجيل الدخول إلى حسابك في تيليجرام.\n\nلتأكيد عملية تسجيل الدخول؛ يرجى الذهاب إلى الإعدادات &gt; الأجهزة &gt; مسح QR وامسح الرمز.</string>
     <string name="QRCodePermissionNoCameraWithHint">يحتاج **تيليجرام** الوصول للكاميرا ليتمكن من مسح رموز QR. يرجى الذهاب إلى الإعدادات &gt; الأذونات &gt; تشغيل **الكاميرا**.</string>
     <string name="SetProfilePhoto">"تعيين صورة للملف الشخصي "</string>
-    <string name="AppUpdate">تحديث تيليجرام</string>
+    <string name="AppUpdate">تحديث OctoGram</string>
     <string name="AppUpdateVersionAndSize">الإصدار %1$s • %2$s</string>
     <string name="AppUpdateDownloading">يتم التنزيل… %1$d%%</string>
     <string name="AppUpdateNow">تحديثه الآن</string>

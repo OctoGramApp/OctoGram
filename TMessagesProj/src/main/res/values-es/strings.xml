@@ -663,7 +663,7 @@
     <string name="AuthAnotherClientUrl">Este código se puede utilizar para permitir que alguien inicie sesión en tu cuenta de Telegram.\n\nPara confirmar el inicio de sesión, ve a Ajustes &gt; Dispositivos &gt; Escanear QR y escanea el código.</string>
     <string name="QRCodePermissionNoCameraWithHint">**Telegram** necesita acceso a la cámara para que puedas escanear códigos QR. Toca Ajustes &gt; Permisos, y activa **Cámara**.</string>
     <string name="SetProfilePhoto">Poner foto de perfil</string>
-    <string name="AppUpdate">Actualizar Telegram</string>
+    <string name="AppUpdate">Actualizar OctoGram</string>
     <string name="AppUpdateVersionAndSize">Versión %1$s • %2$s</string>
     <string name="AppUpdateDownloading">Descargando… %1$d %%</string>
     <string name="AppUpdateNow">Actualizar ahora</string>

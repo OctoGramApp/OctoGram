@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -80,6 +80,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
     public final ConfigProperty<Boolean> enableSmartNotificationsForPrivateChats = newConfigProperty("enableSmartNotificationsForPrivateChats", false);
     public final ConfigProperty<Integer> defaultEmojiButtonAction = newConfigProperty("defaultEmojiButtonAction", DefaultEmojiButtonAction.DEFAULT.getValue());
+    public final ConfigProperty<Boolean> rememberAllRepliesMessage = newConfigProperty("rememberAllRepliesMessage", true);
+    public final ConfigProperty<Boolean> swipeToPip = newConfigProperty("swipeToPip", true);
 
     /*Appearance*/
     public final ConfigProperty<Integer> actionBarTitleOption = newConfigProperty("actionBarTitleOption", ActionBarTitleOption.APP_NAME.getValue());
@@ -109,6 +111,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> drawerDarkenBackground = newConfigProperty("drawerDarkenBackground", false);
     public final ConfigProperty<Integer> drawerDarkenBackgroundLevel = newConfigProperty("drawerDarkenBackgroundLevel", 100);
     public final ConfigProperty<Integer> drawerFavoriteOption = newConfigProperty("drawerFavoriteOption", DrawerFavoriteOption.DEFAULT.getValue());
+    public final ConfigProperty<Boolean> drawerProfileAsBubble = newConfigProperty("drawerProfileAsBubble", false);
     public final ConfigProperty<Boolean> repliesLinksShowColors = newConfigProperty("repliesLinksShowColors", true);
     public final ConfigProperty<Boolean> repliesLinksShowEmojis = newConfigProperty("repliesLinksShowEmojis", true);
     public final ConfigProperty<Boolean> promptBeforeSendingStickers = newConfigProperty("promptBeforeSendingStickers", false);
@@ -118,6 +121,8 @@ public class OctoConfig {
 
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
+    public final ConfigProperty<Boolean> hideUnreadCounterOnFolder = newConfigProperty("hideUnreadCounterOnFolder", false);
+    public final ConfigProperty<Integer> tabStyle = newConfigProperty("tabStyle", TabStyle.DEFAULT.getValue());
 
     /*Context menu elements*/
     public final ConfigProperty<Boolean> contextClearFromCache = newConfigProperty("context_clearFromCache", false);
@@ -133,12 +138,13 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> unlockedConfetti = newConfigProperty("unlockedConfetti", false);
     public final ConfigProperty<Boolean> unlockedFoxIcon = newConfigProperty("unlockedFoxIcon", false);
 
-    /*CameraX*/
+    /*Camera*/
     public final ConfigProperty<Boolean> cameraXPerformanceMode = newConfigProperty("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = newConfigProperty("cameraXZeroShutter", false);
     public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
     public ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.CAMERA_X.getValue());
-    public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
+    // migrate to "cameraPreview" public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
+    public ConfigProperty<Integer> cameraPreview = newConfigProperty("cameraPreview", CameraPreview.DEFAULT);
 
     /*Experiments*/
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
@@ -159,8 +165,10 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> uiImmersivePopups = newConfigProperty("uiImmersivePopups", false);
     public final ConfigProperty<Integer> interfaceSwitchUI = newConfigProperty("interfaceSwitchUI", InterfaceSwitchUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> interfaceCheckboxUI = newConfigProperty("interfaceCheckboxUI", InterfaceCheckboxUI.DEFAULT.getValue());
+    public final ConfigProperty<Integer> interfaceSliderUI = newConfigProperty("interfaceSliderUI", InterfaceSliderUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> uiIconsType = newConfigProperty("uiIconsType", IconsUIType.DEFAULT.getValue());
     public final ConfigProperty<Boolean> uiRandomMemeIcons = newConfigProperty("uiRandomMemeIcons", false);
+    public final ConfigProperty<Boolean> useSquaredFab = newConfigProperty("useSquaredFab", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -639,5 +647,9 @@ public class OctoConfig {
             case 3 -> CameraType.SYSTEM_CAMERA;
             default -> CameraType.TELEGRAM;
         };
+    }
+
+    public boolean getCameraPreviewStatus() {
+        return cameraPreview.getValue() != CameraPreview.DEFAULT;
     }
 }

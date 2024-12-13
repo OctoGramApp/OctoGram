@@ -1,9 +1,16 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils.translator;
 
 import androidx.core.util.Pair;
 
 import org.json.JSONException;
-import org.telegram.messenger.FileLog;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.TranslateAlert2;
 
@@ -12,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.octogram.android.TranslatorFormality;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.translator.raw.RawDeepLTranslator;
 
 public class DeepLTranslator {
@@ -47,7 +55,7 @@ public class DeepLTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (JSONException | IOException e) {
-                    FileLog.e(e);
+                    OctoLogging.e(e);
                     callback.onResponseReceived();
                     callback.onError();
                 } catch (Exception e) {

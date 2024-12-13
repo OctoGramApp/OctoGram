@@ -2547,7 +2547,7 @@
     <string name="AuthAnotherClientUrl">This code can be used to allow someone to log in to your Telegram account.\n\nTo confirm Telegram login, please go to Settings &gt; Devices &gt; Scan QR and scan the code.</string>
     <string name="QRCodePermissionNoCameraWithHint">**Telegram** needs camera access so that you can scan QR codes. Tap Settings -> Permissions, and turn **Camera** on.</string>
     <string name="SetProfilePhoto">Set Profile Photo</string>
-    <string name="AppUpdate">Update Telegram</string>
+    <string name="AppUpdate">Update OctoGram</string>
     <string name="AppUpdateVersionAndSize">Version %1$s • %2$s</string>
     <string name="AppUpdateDownloading">Downloading %1$d%%...</string>
     <string name="AppUpdateNow">Update Now</string>

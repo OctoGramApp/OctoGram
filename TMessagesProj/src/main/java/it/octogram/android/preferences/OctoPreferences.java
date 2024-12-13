@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.preferences;
 
 import android.content.Context;
@@ -21,18 +29,36 @@ import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 
-public record OctoPreferences(CharSequence title, List<BaseRow> preferences) {
+public record OctoPreferences(CharSequence title, List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
 
     public static OctoPreferencesBuilder builder(String name) {
         return new OctoPreferencesBuilder(name);
     }
 
+    public static class OctoContextMenuElement {
+        public int icon;
+        public String title;
+        public Runnable run;
+
+        public OctoContextMenuElement(int icon, String title, Runnable run) {
+            this.icon = icon;
+            this.title = title;
+            this.run = run;
+        }
+    }
+
     public static class OctoPreferencesBuilder {
         private final String name;
+        private final List<OctoContextMenuElement> elements = new ArrayList<>();
         private final List<BaseRow> preferences = new ArrayList<>();
 
         public OctoPreferencesBuilder(String name) {
             this.name = name;
+        }
+
+        public OctoPreferencesBuilder addContextMenuItem(OctoContextMenuElement element) {
+            elements.add(element);
+            return this;
         }
 
         public OctoPreferencesBuilder category(CharSequence title, Consumer<OctoPreferencesBuilder> consumer) {
@@ -117,7 +143,7 @@ public record OctoPreferences(CharSequence title, List<BaseRow> preferences) {
         }
 
         public OctoPreferences build() {
-            return new OctoPreferences(name, preferences);
+            return new OctoPreferences(name, preferences, elements);
         }
     }
 }

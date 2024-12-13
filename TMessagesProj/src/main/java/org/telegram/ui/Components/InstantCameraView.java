@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -70,6 +71,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.graphics.ColorUtils;
 
 import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.util.Log;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -124,9 +126,15 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
+import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.camerax.CameraXController;
+import it.octogram.android.camerax.CameraXUtils;
+import it.octogram.android.camerax.RoundVideoMessageController;
+import it.octogram.android.camerax.components.SlideControlView;
 
 @TargetApi(18)
+@SuppressLint({"ViewConstructor"})
 public class InstantCameraView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     private static int A = 0;
@@ -145,8 +153,8 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private ImageView muteImageView;
     private float progress;
     private CameraInfo selectedCamera;
-    private boolean isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
-    private volatile boolean cameraReady;
+    public boolean isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
+    public volatile boolean cameraReady;
     private AnimatorSet muteAnimation;
     private TLRPC.InputFile file;
     private TLRPC.InputEncryptedFile encryptedFile;
@@ -156,7 +164,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private boolean isSecretChat;
     private VideoEditedInfo videoEditedInfo;
     private VideoPlayer videoPlayer;
-    private Bitmap lastBitmap;
+    public Bitmap lastBitmap;
     private int recordingGuid;
 
     private volatile boolean cameraTextureAvailable;
@@ -177,18 +185,19 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private long recordedTime;
     private boolean cancelled;
 
-    private CameraGLThread cameraThread;
-    private Size[] previewSize = new Size[2];
+    public CameraGLThread cameraThread;
+    public Size[] previewSize = new Size[2];
     private Size pictureSize;
     private Size aspectRatio = SharedConfig.roundCamera16to9 ? new Size(16, 9) : new Size(4, 3);
     private TextureView textureView;
-    private BackupImageView textureOverlayView;
+    public BackupImageView textureOverlayView;
     private final boolean useCamera2 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && SharedConfig.isUsingCamera2(currentAccount);
     private CameraSession cameraSession;
     private boolean bothCameras;
     private Camera2Session[] camera2Sessions = new Camera2Session[2];
     private Camera2Session camera2SessionCurrent;
-    private boolean needDrawFlickerStub;
+    public boolean needDrawFlickerStub;
+    private SlideControlView.SliderMode sliderMode;
 
     private boolean isCameraSessionInitiated() {
         if (useCamera2) {
@@ -198,6 +207,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         }
     }
 
+    private CameraXController cameraXController;
     private float panTranslationY;
     private float animationTranslationY;
 
@@ -261,6 +271,16 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     };
     private boolean allowSendingWhileRecording;
 
+    /* CameraX */
+    private static final int ZOOM_SLIDER_WIDTH_DP = 105;
+    private static final int ZOOM_SLIDER_HEIGHT_DP = 10;
+    private static final int ZOOM_SLIDER_BOTTOM_MARGIN_DP = 20;
+    private final boolean isCameraXNotSupportedOrActive = !CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue();
+    private final boolean isCameraXSupportedAndActive = CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue();
+    private final RoundVideoMessageController roundMessageUtils = new RoundVideoMessageController();
+    public SlideControlView zoomSlider;
+    public float zoomLevel;
+    private boolean wasZoomed;
 
     @SuppressLint("ClickableViewAccessibility")
     public InstantCameraView(Context context, Delegate delegate, Theme.ResourcesProvider resourcesProvider) {
@@ -356,11 +376,19 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         switchCameraButton.setContentDescription(LocaleController.getString(R.string.AccDescrSwitchCamera));
         addView(switchCameraButton, LayoutHelper.createFrame(62, 62, Gravity.LEFT | Gravity.BOTTOM, 8, 0, 0, 0));
         switchCameraButton.setOnClickListener(v -> {
-            if (!cameraReady || !isCameraSessionInitiated() || cameraThread == null) {
-                return;
-            }
-            if (!bothCameras) {
-                switchCamera();
+            if (isCameraXNotSupportedOrActive) {
+                if (!cameraReady || !isCameraSessionInitiated() || cameraThread == null) {
+                    return;
+                }
+                if (!bothCameras) {
+                    switchCamera();
+                }
+            } else {
+                if (!cameraReady || !roundMessageUtils.cameraXController.isInitied() || cameraThread == null) {
+                    return;
+                }
+                flashing = false;
+                roundMessageUtils.toggleCamera(this);
             }
             if (switchCameraDrawable != null) {
                 switchCameraDrawable.setCurrentFrame(0);
@@ -372,7 +400,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             valueAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
             final boolean[] didSwap = new boolean[1];
             Runnable doSwap = () -> {
-                if (bothCameras) {
+                if (isCameraXNotSupportedOrActive && bothCameras) {
                     switchCamera();
                 }
             };
@@ -382,7 +410,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 @Override
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     float p = (float) valueAnimator.getAnimatedValue();
-                    if (p > 0.5f && !didSwap[0]) {
+                    if (p > 0.5f && !didSwap[0] && !isCameraXNotSupportedOrActive) {
                         didSwap[0] = true;
                         doSwap.run();
                     }
@@ -390,13 +418,16 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     rotation *= 180;
                     cameraContainer.setRotationY(rotation);
                     textureOverlayView.setRotationY(rotation);
+                    if (zoomSlider != null) {
+                        zoomSlider.setAlpha(p);
+                    }
                 }
             });
             valueAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    if (!didSwap[0]) {
+                    if (!didSwap[0] && !isCameraXNotSupportedOrActive) {
                         didSwap[0] = true;
                         doSwap.run();
                     }
@@ -413,10 +444,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         flashButton.setScaleType(ImageView.ScaleType.CENTER);
         addView(flashButton, LayoutHelper.createFrame(62, 62, Gravity.LEFT | Gravity.BOTTOM, 62 - 4, 0, 0, 0));
         flashButton.setOnClickListener(v -> {
-            flashing = !flashing;
-            updateFlash();
+            toggleFlashingState();
+            handleFlashUpdate();
         });
-        updateFlash();
 
         flashViews.add(switchCameraButton);
         flashViews.add(flashButton);
@@ -452,25 +482,65 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         setVisibilityFromPause = false;
         setVisibility(INVISIBLE);
         blurBehindDrawable = new BlurBehindDrawable(parentView, this, 0, resourcesProvider);
+
+        zoomSlider = new SlideControlView(context, sliderMode.SLIDER_MODE_ZOOM);
+
+        if (isCameraXSupportedAndActive) {
+            zoomSlider.setVisibility(View.VISIBLE);
+            zoomSlider.setAlpha(1.0f);
+            addView(
+                    zoomSlider, LayoutHelper.createFrame(
+                            AndroidUtilities.dp(ZOOM_SLIDER_WIDTH_DP),
+                            AndroidUtilities.dp(ZOOM_SLIDER_HEIGHT_DP),
+                            Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM,
+                            0, 0, 0,
+                            AndroidUtilities.dp(ZOOM_SLIDER_BOTTOM_MARGIN_DP)
+                    )
+            );
+            zoomSlider.setDelegate(zoom -> roundMessageUtils.applyZoom(zoomLevel = zoom));
+        } else {
+            zoomSlider.setVisibility(View.GONE);
+        }
+    }
+
+    private void toggleFlashingState() {
+        flashing = !flashing;
+    }
+
+    private void handleFlashUpdate() {
+        if (isCameraXNotSupportedOrActive) {
+            updateFlash();
+        } else {
+            roundMessageUtils.updateFlashStatus(this);
+        }
     }
 
     private Boolean wasFlashing;
-    private boolean flashing;
+    public boolean flashing;
     private boolean frontFlashing;
-    private void updateFlash() {
+    public void updateFlash() {
         final boolean shouldFrontFlash = flashing && recording && isFrontface;
+
         if (frontFlashing != shouldFrontFlash) {
             if (frontFlashing = shouldFrontFlash) {
                 flashViews.flashIn(null);
+                zoomSlider.setAlpha(1.0f);
+                zoomSlider.invertColors(1F);
+                Log.d("InstantCamera", String.format("Flashing: %s", flashing));
             } else {
                 flashViews.flashOut();
+                zoomSlider.invertColors(0F);
+                Log.d("InstantCamera", String.format("Flashing: %s", flashing));
             }
         }
 
+        var flashState = flashing && !isFrontface && recording;
         if (useCamera2) {
             if (camera2Sessions[1] != null) {
-                camera2Sessions[1].setFlash(flashing && !isFrontface && recording);
+                camera2Sessions[1].setFlash(flashState);
             }
+        } else if (isCameraXSupportedAndActive && roundMessageUtils.isCameraReady(this)) {
+            CameraXController.setTorchEnabled(flashState);
         } else {
             if (cameraSession != null) {
 //                final String mode = (
@@ -479,7 +549,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
 //                        Camera.Parameters.FLASH_MODE_OFF
 //                );
 //                cameraSession.setCurrentFlashMode(mode);
-                cameraSession.setTorchEnabled(flashing && !isFrontface && recording);
+                cameraSession.setTorchEnabled(flashState);
             }
         }
 
@@ -600,18 +670,22 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     }
 
     public void destroy(boolean async) {
-        if (useCamera2) {
-            for (int a = 0; a < camera2Sessions.length; ++a) {
-                if (camera2Sessions[a] != null) {
-                    camera2Sessions[a].destroy(async);
-                    camera2Sessions[a] = null;
+        if (isCameraXNotSupportedOrActive) {
+            if (useCamera2) {
+                for (int a = 0; a < camera2Sessions.length; ++a) {
+                    if (camera2Sessions[a] != null) {
+                        camera2Sessions[a].destroy(async);
+                        camera2Sessions[a] = null;
+                    }
+                }
+            } else {
+                if (cameraSession != null) {
+                    cameraSession.destroy();
+                    CameraController.getInstance().close(cameraSession, !async ? new CountDownLatch(1) : null, null);
                 }
             }
         } else {
-            if (cameraSession != null) {
-                cameraSession.destroy();
-                CameraController.getInstance().close(cameraSession, !async ? new CountDownLatch(1) : null, null);
-            }
+            roundMessageUtils.stopCamera(this);
         }
     }
 
@@ -656,6 +730,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         }
         switchCameraButton.setAlpha(0.0f);
         flashButton.setAlpha(0.0f);
+        if (zoomSlider != null) {
+            zoomSlider.setAlpha(0.0F);
+        }
         cameraContainer.setAlpha(0.0f);
         textureOverlayView.setAlpha(0.0f);
         muteImageView.setAlpha(0.0f);
@@ -686,7 +763,15 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         if (recording) {
             cancelled = recordedTime < 800;
             recording = false;
-            updateFlash();
+            if (isCameraXNotSupportedOrActive) {
+                updateFlash();
+            } else {
+                flashing = false;
+                roundMessageUtils.updateFlashStatus(this);
+            }
+            if (zoomSlider != null) {
+                zoomSlider.setSliderValue(0f, false);
+            }
             if (cameraThread != null) {
                 NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordStopped, recordingGuid, cancelled ? 4 : 2);
                 saveLastCameraBitmap();
@@ -707,11 +792,20 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 videoPlayer.releasePlayer(true);
                 videoPlayer = null;
             }
+            if (CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue()) {
+                flashing = false;
+                roundMessageUtils.updateFlashStatus(this);
+            }
             showCamera(true);
             try {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
             } catch (Exception ignore) {}
-            AndroidUtilities.lockOrientation(delegate.getParentActivity());
+            AndroidUtilities.lockOrientation(
+                    delegate.getParentActivity(),
+                    AndroidUtilities.isTablet() ?
+                            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED :
+                            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            );
             invalidate();
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordResumed);
         }
@@ -735,8 +829,8 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             try {
                 File file = new File(ApplicationLoader.getFilesDirFixed(), "icthumb.jpg");
                 lastBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            } catch (Throwable ignore) {
-
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
         }
         if (lastBitmap != null) {
@@ -746,14 +840,21 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         }
         cameraReady = false;
         selectedCamera = null;
-        if (!fromPaused) {
-            isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue(); // TODO: CHECK
-            /*if (!useCamera2) {
+        /*if (!fromPaused) {
+            if (!useCamera2) {
                 isFrontface = true;
-            }*/
+            }
             updateFlash();
             recordedTime = 0;
             progress = 0;
+        }*/
+        if (!fromPaused) {
+            if (!useCamera2) {
+                isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
+            }
+            if (isCameraXNotSupportedOrActive) {
+                updateFlash();
+            }
         }
         cancelled = false;
         file = null;
@@ -850,17 +951,21 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     cameraThread.shutdown(0, true, 0, 0, 0);
                     cameraThread = null;
                 }
-                if (useCamera2) {
-                    for (int a = 0; a < camera2Sessions.length; ++a) {
-                        if (camera2Sessions[a] != null) {
-                            camera2Sessions[a].destroy(false);
-                            camera2Sessions[a] = null;
+                if (isCameraXNotSupportedOrActive) {
+                    if (useCamera2) {
+                        for (int a = 0; a < camera2Sessions.length; ++a) {
+                            if (camera2Sessions[a] != null) {
+                                camera2Sessions[a].destroy(false);
+                                camera2Sessions[a] = null;
+                            }
+                        }
+                    } else {
+                        if (cameraSession != null) {
+                            CameraController.getInstance().close(cameraSession, null, null);
                         }
                     }
                 } else {
-                    if (cameraSession != null) {
-                        CameraController.getInstance().close(cameraSession, null, null);
-                    }
+                    roundMessageUtils.stopCamera(InstantCameraView.this);
                 }
                 return true;
             }
@@ -919,6 +1024,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 ObjectAnimator.ofFloat(switchCameraButton, View.ALPHA, open ? 1.0f : 0.0f),
                 ObjectAnimator.ofFloat(flashButton, View.ALPHA, open ? 1.0f : 0.0f),
                 ObjectAnimator.ofFloat(muteImageView, View.ALPHA, 0.0f),
+                ObjectAnimator.ofFloat(zoomSlider, View.ALPHA, open ? 1.0f : 0.0f),
                 ObjectAnimator.ofInt(paint, AnimationProperties.PAINT_ALPHA, open ? 255 : 0),
                 ObjectAnimator.ofFloat(cameraContainer, View.ALPHA, open ? 1.0f : 0.0f),
                 ObjectAnimator.ofFloat(cameraContainer, View.SCALE_X, open ? 1.0f : 0.1f),
@@ -1028,7 +1134,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             cancelled = recordedTime < 800;
             recording = false;
             flashing = false;
-            updateFlash();
+            if (isCameraXNotSupportedOrActive) {
+                updateFlash();
+            } else {
+                roundMessageUtils.updateFlashStatus(this);
+            }
             int reason;
             if (cancelled) {
                 reason = 4;
@@ -1057,7 +1167,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         }
     }
 
-    private void saveLastCameraBitmap() {
+    public void saveLastCameraBitmap() {
         Bitmap bitmap = textureView.getBitmap();
         if (bitmap != null && bitmap.getPixel(0, 0) != 0) {
             lastBitmap = Bitmap.createScaledBitmap(textureView.getBitmap(), 50, 50, true);
@@ -1068,7 +1178,8 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     FileOutputStream stream = new FileOutputStream(file);
                     lastBitmap.compress(Bitmap.CompressFormat.JPEG, 87, stream);
                     stream.close();
-                } catch (Throwable ignore) {
+                } catch (Throwable e) {
+                    e.printStackTrace();
 
                 }
             }
@@ -1087,7 +1198,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         cancelled = true;
         recording = false;
         flashing = false;
-        updateFlash();
+        if (isCameraXNotSupportedOrActive) {
+            updateFlash();
+        } else {
+            roundMessageUtils.updateFlashStatus(this);
+        }
         NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordStopped, recordingGuid, byGesture ? 0 : 6);
         if (cameraThread != null) {
             saveLastCameraBitmap();
@@ -1116,6 +1231,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
 
     public View getFlashButtonView() {
         return flashButton;
+    }
+
+    public View getZoomSlider() {
+        return zoomSlider;
     }
 
     public View getMuteImageView() {
@@ -1499,6 +1618,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private Bitmap firstFrameThumb;
     private volatile int surfaceIndex;
 
+    public void setSliderMode(SlideControlView.SliderMode sliderMode) {
+        this.sliderMode = sliderMode;
+    }
+
     public class CameraGLThread extends DispatchQueue {
 
         private final static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
@@ -1519,6 +1642,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         private final int DO_REINIT_MESSAGE = 2;
         private final int DO_SETSESSION_MESSAGE = 3;
         private final int DO_FLIP = 4;
+        private final int DO_SETORIENTATION_MESSAGE = 5;
 
         private int drawProgram;
         private int vertexMatrixHandle;
@@ -1728,7 +1852,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     cameraTextureAvailable = true;
                     requestRender(i == 0, i == 1);
                 });
-                createCamera(a, cameraSurface[a]);
+                if (isCameraXNotSupportedOrActive) {
+                    createCamera(a, cameraSurface[a]);
+                } else {
+                    roundMessageUtils.configureCameraView(InstantCameraView.this, cameraSurface[0]);
+                }
             }
 
             if (BuildVars.LOGS_ENABLED) {
@@ -1790,6 +1918,13 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             }
         }
 
+        public void setOrientation() {
+            Handler handler = getHandler();
+            if (handler != null) {
+                sendMessage(handler.obtainMessage(DO_SETORIENTATION_MESSAGE), 0);
+            }
+        }
+
         public void setCurrentSession(Camera2Session session) {
             Handler handler = getHandler();
             if (handler != null) {
@@ -1839,13 +1974,20 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     captureFirstFrameThumb = true;
                 }
                 videoEncoder.startRecording(cameraFile, EGL14.eglGetCurrentContext());
-                int orientation;
-                if (currentSession instanceof CameraSession) {
-                    orientation = ((CameraSession) currentSession).getCurrentOrientation();
-                } else if (currentSession instanceof Camera2Session) {
-                    orientation = ((Camera2Session) currentSession).getCurrentOrientation();
+                int orientation = 0;
+                if (isCameraXNotSupportedOrActive) {
+                    if (currentSession instanceof CameraSession) {
+                        orientation = ((CameraSession) currentSession).getCurrentOrientation();
+                    } else if (currentSession instanceof Camera2Session) {
+                        orientation = ((Camera2Session) currentSession).getCurrentOrientation();
+                    } else {
+                        orientation = 0;
+                    }
                 } else {
-                    orientation = 0;
+                    float temp = scaleX;
+                    //noinspection SuspiciousNameCombination
+                    scaleX = scaleY;
+                    scaleY = temp;
                 }
                 if (orientation == 90 || orientation == 270) {
                     float temp = scaleX;
@@ -1853,7 +1995,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     scaleY = temp;
                 }
                 recording = true;
-                updateFlash();
+                if (isCameraXNotSupportedOrActive) {
+                    updateFlash();
+                }
             }
 
             if (videoEncoder != null && (surfaceIndex == 0 && updateTexImage1 || surfaceIndex == 1 && updateTexImage2)) {
@@ -1952,7 +2096,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
 
                     cameraSurface[0] = new SurfaceTexture(cameraTexture[0]);
                     cameraSurface[0].setOnFrameAvailableListener(surfaceTexture -> requestRender(true, false));
-                    createCamera(0, cameraSurface[0]);
+                    if (isCameraXNotSupportedOrActive) {
+                        createCamera(0, cameraSurface[0]);
+                    } else {
+                        roundMessageUtils.configureCameraView(InstantCameraView.this, cameraSurface[0]);
+                    }
 
                     updateScale();
 
@@ -2011,6 +2159,13 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     textureBuffer = ByteBuffer.allocateDirect(texData.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
                     textureBuffer.put(texData).position(0);
                     break;
+                }
+                case DO_SETORIENTATION_MESSAGE: {
+                    int rotationAngle = roundMessageUtils.cameraXController.getDisplayOrientation();
+                    android.opengl.Matrix.setIdentityM(mMVPMatrix, 0);
+                    if (rotationAngle != 0) {
+                        android.opengl.Matrix.rotateM(mMVPMatrix, 0, rotationAngle, 0, 0, 1);
+                    }
                 }
             }
         }
@@ -2881,6 +3036,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             animatorSet.playTogether(
                     ObjectAnimator.ofFloat(switchCameraButton, View.ALPHA, 0.0f),
                     ObjectAnimator.ofFloat(flashButton, View.ALPHA, 0.0f),
+                    ObjectAnimator.ofFloat(zoomSlider, View.ALPHA, 0.0f),
                     ObjectAnimator.ofInt(paint, AnimationProperties.PAINT_ALPHA, 0),
                     ObjectAnimator.ofFloat(muteImageView, View.ALPHA, 1.0f));
             animatorSet.setDuration(180);
@@ -3148,7 +3304,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             if (am.isBluetoothScoAvailableOffCall() && SharedConfig.recordViaSco || !scoOn) {
                 BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
                 try {
-                    if (btAdapter != null && btAdapter.getProfileConnectionState(BluetoothProfile.HEADSET) == BluetoothProfile.STATE_CONNECTED || !scoOn) {
+                    if (btAdapter != null && btAdapter.getProfileConnectionState(BluetoothProfile.HEADSET) == BluetoothAdapter.STATE_CONNECTED || !scoOn) {
                         if (scoOn && !am.isBluetoothScoOn()) {
                             am.startBluetoothSco();
                         } else if (!scoOn && am.isBluetoothScoOn()) {
@@ -3288,7 +3444,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     recordPlusTime = fromPause ? recordedTime : 0;
                     recordStartTime = System.currentTimeMillis();
                     recording = true;
-                    updateFlash();
+                    if (isCameraXNotSupportedOrActive) {
+                        updateFlash();
+                    }
                     invalidate();
                     NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordStarted, recordingGuid, false);
                 });
@@ -3772,6 +3930,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 AndroidUtilities.rectTmp.set(cameraContainer.getX(), cameraContainer.getY(), cameraContainer.getX() + cameraContainer.getMeasuredWidth(), cameraContainer.getY() + cameraContainer.getMeasuredHeight());
                 maybePinchToZoomTouchMode = AndroidUtilities.rectTmp.contains(ev.getX(), ev.getY());
             }
+            wasZoomed = false;
             return true;
         } else if (ev.getActionMasked() == MotionEvent.ACTION_MOVE && isInPinchToZoomTouchMode) {
             int index1 = -1;
@@ -3791,14 +3950,30 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 return false;
             }
             pinchScale = (float) Math.hypot(ev.getX(index2) - ev.getX(index1), ev.getY(index2) - ev.getY(index1)) / pinchStartDistance;
-            if (useCamera2) {
-                if (camera2SessionCurrent != null) {
-                    float zoom = Utilities.clamp(pinchScale, camera2SessionCurrent.getMaxZoom(), camera2SessionCurrent.getMinZoom());
-                    camera2SessionCurrent.setZoom(zoom);
+            if (isCameraXNotSupportedOrActive) {
+                if (useCamera2) {
+                    if (camera2SessionCurrent != null) {
+                        float zoom = Utilities.clamp(pinchScale, camera2SessionCurrent.getMaxZoom(), camera2SessionCurrent.getMinZoom());
+                        camera2SessionCurrent.setZoom(zoom);
+                    }
+                } else {
+                    float zoom = Math.min(1f, Math.max(0, pinchScale - 1f));
+                    cameraSession.setZoom(zoom);
                 }
             } else {
-                float zoom = Math.min(1f, Math.max(0, pinchScale - 1f));
-                cameraSession.setZoom(zoom);
+                float newDistance = (float) Math.hypot(ev.getX(index2) - ev.getX(index1), ev.getY(index2) - ev.getY(index1));
+                if (!wasZoomed) {
+                    if (Math.abs(newDistance - pinchStartDistance) >= AndroidUtilities.getPixelsInCM(0.4f, false)) {
+                        pinchStartDistance = newDistance;
+                        wasZoomed = true;
+                    }
+                } else {
+                    float diff = (newDistance - pinchStartDistance) / AndroidUtilities.dp(200);
+                    pinchStartDistance = newDistance;
+                    zoomLevel = Math.max(0.0f, Math.min(1.0f, zoomLevel + diff));
+                    roundMessageUtils.cameraXController.setZoom(zoomLevel);
+                    zoomSlider.setSliderValue(zoomLevel, true);
+                }
             }
         } else if ((ev.getActionMasked() == MotionEvent.ACTION_UP || (ev.getActionMasked() == MotionEvent.ACTION_POINTER_UP && checkPointerIds(ev)) || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) && isInPinchToZoomTouchMode) {
             isInPinchToZoomTouchMode = false;
@@ -3828,6 +4003,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 if (useCamera2) {
                     if (camera2SessionCurrent != null) {
                         camera2SessionCurrent.setZoom((float) valueAnimator.getAnimatedValue());
+                    }
+                } else if (isCameraXSupportedAndActive) {
+                    if (cameraSession != null) {
+                        roundMessageUtils.cameraXController.setZoom((float) valueAnimator.getAnimatedValue());
                     }
                 } else {
                     if (cameraSession != null) {

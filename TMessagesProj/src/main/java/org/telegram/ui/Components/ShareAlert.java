@@ -119,6 +119,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.SendMessageOptions;
 
@@ -1492,14 +1494,15 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         containerView.addView(writeButtonContainer, LayoutHelper.createFrame(60, 60, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 6, 10));
 
         ImageView writeButton = new ImageView(context);
-        Drawable drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_dialogFloatingButton));
+        var drawable = CustomFab.createFabBackground(56, getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Theme.key_dialogFloatingButtonPressed));
+        /*Drawable drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_dialogFloatingButton));
         if (Build.VERSION.SDK_INT < 21) {
             Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow_profile).mutate();
             shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
             CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
             combinedDrawable.setIconSize(dp(56), dp(56));
             drawable = combinedDrawable;
-        }
+        }*/
         writeButton.setBackgroundDrawable(drawable);
         writeButton.setImageResource(R.drawable.attach_send);
         writeButton.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -1514,6 +1517,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 }
             });
         }
+        writeButton.setOutlineProvider(new OutlineProvider());
         writeButtonContainer.addView(writeButton, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 56 : 60, Build.VERSION.SDK_INT >= 21 ? 56 : 60, Gravity.LEFT | Gravity.TOP, Build.VERSION.SDK_INT >= 21 ? 2 : 0, 0, 0, 0));
         writeButton.setOnClickListener(v -> sendInternal(true));
         writeButton.setOnLongClickListener(v -> {

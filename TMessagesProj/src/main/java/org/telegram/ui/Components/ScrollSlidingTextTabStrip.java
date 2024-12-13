@@ -33,11 +33,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Keep;
+import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.ui.ActionBar.Theme;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.TabStyle;
 
 public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
 
@@ -427,11 +431,61 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         boolean result = super.drawChild(canvas, child, drawingTime);
         if (child == tabsContainer) {
             final int height = getMeasuredHeight();
-            selectorDrawable.setAlpha((int) (255 * tabsContainer.getAlpha()));
-            float x = indicatorX + indicatorXAnimationDx;
-            float w = x + indicatorWidth + indicatorWidthAnimationDx;
-            selectorDrawable.setBounds((int) x, height - AndroidUtilities.dpr(4), (int) w, height);
-            selectorDrawable.draw(canvas);
+            //selectorDrawable.setAlpha((int) (255 * tabsContainer.getAlpha()));
+            //float x = indicatorX + indicatorXAnimationDx;
+            //float w = x + indicatorWidth + indicatorWidthAnimationDx;
+
+            int tabStyle = OctoConfig.INSTANCE.tabStyle.getValue();
+
+            int inlinePadding = 0;
+            int topBound = height - AndroidUtilities.dp(4);
+            int bottomBound = height;
+            float rtpRad = 0;
+            int alpha = 255;
+
+            if (tabStyle == TabStyle.FULL.getValue()) {
+                topBound = 0;
+                inlinePadding = AndroidUtilities.dp(15);
+                alpha = 35;
+            } else if (tabStyle >= TabStyle.CHIPS.getValue()) {
+                int padding = tabStyle == TabStyle.CHIPS.getValue() ? 8 : 10;
+                inlinePadding = AndroidUtilities.dp(padding);
+                topBound = height / 2 - AndroidUtilities.dp(15);
+                bottomBound = height / 2 + AndroidUtilities.dp(15);
+                alpha = 50;
+            }
+
+            if (tabStyle == TabStyle.FLOATING.getValue()) {
+                topBound = height - AndroidUtilities.dpr(7);
+                bottomBound = height - AndroidUtilities.dpr(4);
+                inlinePadding -= AndroidUtilities.dp(3);
+            }
+
+            selectorDrawable.setAlpha((int) (alpha * tabsContainer.getAlpha()));
+
+            float rad = AndroidUtilities.dpf2(3);
+            if (tabStyle == TabStyle.PILLS.getValue()) {
+                rad = rtpRad = AndroidUtilities.dpf2(40);
+            } else if (tabStyle == TabStyle.CHIPS.getValue()) {
+                rad = rtpRad = AndroidUtilities.dpf2(5);
+            } else if (tabStyle >= TabStyle.ROUNDED.getValue()) {
+                rtpRad = rad;
+            }
+
+            selectorDrawable.setCornerRadii(new float[]{rad, rad, rad, rad, rtpRad, rtpRad, rtpRad, rtpRad});
+
+            selectorDrawable.setBounds(
+                    (int) (indicatorX + indicatorXAnimationDx) - inlinePadding,
+                    topBound,
+                    (int) (indicatorX + indicatorXAnimationDx + indicatorWidth + indicatorWidthAnimationDx) + inlinePadding,
+                    bottomBound
+            );
+
+            //selectorDrawable.setBounds((int) x, height - AndroidUtilities.dpr(4), (int) w, height);
+            //selectorDrawable.draw(canvas);
+            if (tabStyle != TabStyle.TEXT_ONLY.getValue()) {
+                selectorDrawable.draw(canvas);
+            }
         }
         return result;
     }

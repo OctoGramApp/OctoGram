@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -39,7 +39,6 @@ import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
@@ -75,6 +74,7 @@ import java.util.Objects;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.FileDownloader;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.EmojiSet;
 import it.octogram.android.utils.FileUnzip;
 
@@ -605,7 +605,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                             }
                         } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                            builder.setTitle(LocaleController.formatString(R.string.DeleteStickerSetsAlertTitle, LocaleController.formatString("DeleteEmojiSets", R.string.DeleteEmojiSets, count)));
+                            builder.setTitle(LocaleController.formatString(R.string.DeleteStickerSetsAlertTitle, LocaleController.formatString(R.string.DeleteEmojiSets, count)));
                             builder.setMessage(LocaleController.getString(R.string.DeleteEmojiSetsMessage));
                             builder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialog, which1) -> {
                                 AlertDialog progressDialog = new AlertDialog(getParentActivity(), 3);
@@ -798,7 +798,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
             photoPickerIntent.setType("font/*");
             startActivityForResult(photoPickerIntent, 21);
         } catch (Exception e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
     }
 
@@ -853,7 +853,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                         count++;
                     }
                 } catch (Exception e) {
-                    FileLog.e("Emoji Font install failed", e);
+                    OctoLogging.e("Emoji Font install failed", e);
                 } finally {
                     CustomEmojiController.deleteTempFile(file);
                 }
@@ -900,7 +900,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         try {
             DiffUtil.calculateDiff(diffCallback).dispatchUpdatesTo(listAdapter);
         } catch (Exception e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
             listAdapter.notifyDataSetChanged();
         }
         AndroidUtilities.updateVisibleRows(listView);

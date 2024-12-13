@@ -146,6 +146,8 @@ import java.util.Objects;
 
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -2681,6 +2683,15 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     }
                 });
             }
+            /*TODO
+               var drawable = CustomFab.createFabBackground(36, getThemedColor(Theme.key_chats_actionBackground), getThemedColor(Theme.key_chats_actionPressedBackground));
+               StateListAnimator animator = new StateListAnimator();
+               animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
+               animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
+               backspaceButton.setStateListAnimator(animator);
+               backspaceButton.setOutlineProvider(new OutlineProvider());
+            */
+
             backspaceButton.setPadding(0, 0, AndroidUtilities.dp(2), 0);
             backspaceButton.setBackground(drawable);
             backspaceButton.setContentDescription(LocaleController.getString(R.string.AccDescrBackspace));

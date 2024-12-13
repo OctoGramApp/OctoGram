@@ -316,6 +316,8 @@ import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.preferences.ui.custom.DatacenterCell;
 import it.octogram.android.utils.CustomDevicePerformanceManager;
 import it.octogram.android.utils.ImportSettingsScanHelper;
@@ -4231,7 +4233,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 getString("DebugMenuClearMediaCache", R.string.DebugMenuClearMediaCache),
                                 getString("DebugMenuCallSettings", R.string.DebugMenuCallSettings),
                                 null,
-                                BuildVars.DEBUG_PRIVATE_VERSION || ApplicationLoader.isStandaloneBuild() ? getString("DebugMenuCheckAppUpdate", R.string.DebugMenuCheckAppUpdate) : null,
+                                BuildVars.DEBUG_PRIVATE_VERSION || ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore() ? getString("DebugMenuCheckAppUpdate", R.string.DebugMenuCheckAppUpdate) : null,
                                 getString("DebugMenuReadAllDialogs", R.string.DebugMenuReadAllDialogs),
                                 BuildVars.DEBUG_PRIVATE_VERSION ? (SharedConfig.disableVoiceAudioEffects ? "Enable voip audio effects" : "Disable voip audio effects") : null,
                                 BuildVars.DEBUG_PRIVATE_VERSION ? "Clean app update" : null,
@@ -4330,9 +4332,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             } else if (which == 9) { // Check app update
                                 // ((LaunchActivity) getParentActivity()).checkAppUpdate(true, null);
 
-                                if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
+                                var parentActivity = getParentActivity() instanceof LaunchActivity? (LaunchActivity) getParentActivity(): null;
+
+                                if (Boolean.TRUE.equals(OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue()) || Boolean.TRUE.equals(OctoConfig.INSTANCE.receivePBetaUpdates.getValue())) {
                                     AndroidUtilities.runOnUIThread(() -> {
-                                        ((LaunchActivity) getParentActivity()).checkAppUpdate(false, null);
+                                        if (parentActivity != null) {
+                                            parentActivity.checkAppUpdate(false, null);
+                                        }
                                     }, 1000);
                                 }
                             } else if (which == 10) { // Read all chats
@@ -5516,13 +5522,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
             floatingButtonContainer.setStateListAnimator(animator);
-            floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+            floatingButtonContainer.setOutlineProvider(new OutlineProvider());
+            /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                 }
-            });
+            });*/
         }
         floatingButtonContainer.addView(floatingButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         floatingButton.setAnimation(R.raw.write_contacts_fab_icon_camera, 56, 56);
@@ -5544,7 +5551,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void updateFloatingButtonColor() {
-        if (getParentActivity() == null) {
+        updateCustomFloatingButtonColor();
+        /*if (getParentActivity() == null) {
             return;
         }
         Drawable drawable;
@@ -5558,7 +5566,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 drawable = combinedDrawable;
             }
             floatingButtonContainer.setBackground(drawable);
+        }*/
+    }
+
+    private void updateCustomFloatingButtonColor() {
+        if (getParentActivity() == null || floatingButtonContainer == null) {
+            return;
         }
+        this.floatingButtonContainer.setBackground(CustomFab.createFabBackground(56, applyPeerColor(Theme.getColor(Theme.key_chats_actionBackground), false), applyPeerColor(Theme.getColor(Theme.key_chats_actionPressedBackground), false)));
     }
 
     private void hideFloatingButton(boolean hide) {
@@ -13517,7 +13532,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 iconColor = Color.WHITE;
             }
             CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable,
-                    Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), color1, color2),
+                    CustomFab.createFabBackground(56, color1, color2),
+                    //Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), color1, color2),
                     0, 0);
             combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
             writeButton.setBackground(combinedDrawable);

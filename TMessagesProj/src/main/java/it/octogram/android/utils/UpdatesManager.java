@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils;
 
 import android.content.Context;
@@ -13,7 +21,6 @@ import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ChatObject;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
@@ -33,6 +40,7 @@ import java.util.Map;
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.logs.OctoLogging;
 
 public class UpdatesManager {
     private static final long privateChatId = -1733655252L;
@@ -86,14 +94,14 @@ public class UpdatesManager {
 
         boolean hasPrivateBetaAccessC = chat != null;
         if (!hasPrivateBetaAccessC) {
-            FileLog.d("ACCESS HAS BEEN FORBIDDEN - STATE: chat empty");
+            OctoLogging.d("ACCESS HAS BEEN FORBIDDEN - STATE: chat empty");
         }
 
         if (hasPrivateBetaAccessC) {
             hasPrivateBetaAccessC = chat.id != 0;
             hasPrivateBetaAccessC &= chat.access_hash != 0;
             if (!hasPrivateBetaAccessC) {
-                FileLog.d("ACCESS HAS BEEN FORBIDDEN - STATE:" + chat.id + " - " + chat.access_hash);
+                OctoLogging.d("ACCESS HAS BEEN FORBIDDEN - STATE:" + chat.id + " - " + chat.access_hash);
             }
         }
 
@@ -102,7 +110,7 @@ public class UpdatesManager {
             hasPrivateBetaAccessC &= ChatObject.isChannel(chat);
             hasPrivateBetaAccessC &= !ChatObject.isPublic(chat);
             if (!hasPrivateBetaAccessC) {
-                FileLog.d("ACCESS HAS BEEN FORBIDDEN - STATE:" + ChatObject.isInChat(chat) + ChatObject.isChannel(chat) + ChatObject.isPublic(chat));
+                OctoLogging.d("ACCESS HAS BEEN FORBIDDEN - STATE:" + ChatObject.isInChat(chat) + ChatObject.isChannel(chat) + ChatObject.isPublic(chat));
             }
         }
 

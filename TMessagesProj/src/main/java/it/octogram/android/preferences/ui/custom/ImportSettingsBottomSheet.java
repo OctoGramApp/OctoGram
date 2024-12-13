@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.preferences.ui.custom;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -352,7 +360,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         if (externalKeysUnavailableInScan > 0) {
-            items.add(Item.asInfo(LocaleController.formatString("ImportReadyOtherOptions", R.string.ImportReadyOtherOptions, externalKeysUnavailableInScan)));
+            items.add(Item.asInfo(LocaleController.formatString(R.string.ImportReadyOtherOptions, externalKeysUnavailableInScan)));
         }
 
         adapter.setItems(oldItems, items);

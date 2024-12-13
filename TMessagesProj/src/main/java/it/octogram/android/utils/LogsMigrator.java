@@ -1,7 +1,14 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils;
 
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.FileLog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 
 public class LogsMigrator {
     public static void migrateOldLogs() {
@@ -18,29 +26,29 @@ public class LogsMigrator {
 
         File oldLogsDir = ApplicationLoader.applicationContext.getFilesDir();
         if (oldLogsDir == null) {
-            FileLog.e("Migration: Failed to retrieve old logs directory.");
+            OctoLogging.e("Migration: Failed to retrieve old logs directory.");
             return;
         }
 
         File[] oldLogs = oldLogsDir.listFiles((dir, name) -> name.endsWith(".log"));
         if (oldLogs == null || oldLogs.length == 0) {
-            FileLog.e("Crashlytics: No old logs to migrate");
+            OctoLogging.e("Crashlytics","No old logs to migrate");
             return;
         }
 
-        FileLog.e("Crashlytics: Migrating old logs");
+        OctoLogging.e("Crashlytics","Migrating old logs");
         for (File oldLog : oldLogs) {
             File newLog = new File(OctoUtils.getLogsDir(), oldLog.getName());
             File parentFile = newLog.getParentFile();
             try {
                 if (parentFile != null && (parentFile.exists() || parentFile.mkdirs())) {
                     copyFile(oldLog, newLog);
-                    FileLog.e("Crashlytics: Copied log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath());
+                    OctoLogging.e("Crashlytics: Copied log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath());
                 } else {
-                    FileLog.e("Failed to create directories");
+                    OctoLogging.e("Failed to create directories");
                 }
             } catch (IOException e) {
-                FileLog.e("Crashlytics: Failed to migrate log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath(), e);
+                OctoLogging.e("Crashlytics: Failed to migrate log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath(), e);
             }
         }
         OctoConfig.INSTANCE.isMigrateOldLogs.updateValue(true);

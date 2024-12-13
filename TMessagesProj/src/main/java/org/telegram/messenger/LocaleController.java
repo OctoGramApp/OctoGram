@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
 public class LocaleController {
@@ -1400,6 +1401,9 @@ public class LocaleController {
     private String getStringInternal(String key, int res) {
         if (OctoUtils.isTelegramString(key, res)) {
             return OctoUtils.getCorrectAppName();
+        }
+        if (Objects.equals(key, "AppUpdate") || res == R.string.AppUpdate) {
+            return getStringInternal("AppUpdateCustomTitle", null, 0, res);
         }
         return getStringInternal(key, null, 0, res);
     }

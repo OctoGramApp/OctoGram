@@ -1,5 +1,7 @@
 package org.telegram.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
@@ -29,10 +31,14 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.SessionCell;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.Switch;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.CustomDeviceNameBottomSheet;
@@ -402,23 +408,38 @@ public class SessionBottomSheet extends BottomSheet {
             }
         }
         */
-        SessionIconUtils sessionType = new SessionIconUtils();
-        SessionIconUtils.DeviceAttributes drawableInfo = sessionType.setDeviceAttributes(session);
+        var sessionType = new SessionIconUtils();
+        var drawableInfo = sessionType.setDeviceAttributes(session);
 
-        int iconId = drawableInfo.getIconId();
-        int colorKey = drawableInfo.getColorKey();
-        int animatedIcon = drawableInfo.getAnimatedIcon();
-        int customColor = drawableInfo.getCustomColor();
+        var iconId = drawableInfo.getIconId();
+        var colorKey = drawableInfo.getColorKey();
+        var colorKey2 = drawableInfo.getColorKey2();
+        var animatedIcon = drawableInfo.getAnimatedIcon();
+        var customColor = drawableInfo.getCustomColor();
+        var customColor2 = drawableInfo.getCustomColor2();
 
-        imageView.setBackground(Theme.createCircleDrawable(AndroidUtilities.dp(42), colorKey == -1 ? customColor : Theme.getColor(colorKey)
-        ));
+        int icon = getIcon(iconId);
+
+        imageView.setBackground(new SessionCell.CircleGradientDrawable(dp(42), colorKey == -1 ? customColor : Theme.getColor(colorKey), colorKey2 == -1 ? customColor2 : Theme.getColor(colorKey2)));
 //        imageView.setBackground(new SessionCell.CircleGradientDrawable(AndroidUtilities.dp(42), Theme.getColor(colorKey), Theme.getColor(colorKey2)));
         if (animatedIcon != -1) {
             int[] colors = new int[]{0x000000, Theme.getColor(colorKey)};
             imageView.setAnimation(animatedIcon, 50, 50, colors);
         } else {
-            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), iconId == R.drawable.baseline_octo_24 ? R.drawable.device_octogram : iconId));
+            imageView.setImageDrawable(ContextCompat.getDrawable(getContext(), icon));
         }
+    }
+
+    private static int getIcon(int iconId) {
+        Map<Integer, Integer> iconMap = new HashMap<>();
+        iconMap.put(R.drawable.baseline_octo_24, R.drawable.device_octogram);
+        iconMap.put(R.drawable.materialgram, R.drawable.device_materialgram);
+        iconMap.put(R.drawable.swiftgram, R.drawable.device_swiftgram);
+        iconMap.put(R.drawable.kitsugram, R.drawable.device_kitsugram);
+        iconMap.put(R.drawable.weargram, R.drawable.device_weargram);
+
+        var mappedIcon = iconMap.get(iconId);
+        return (mappedIcon != null) ? mappedIcon : iconId;
     }
 
     private static class ItemView extends FrameLayout {

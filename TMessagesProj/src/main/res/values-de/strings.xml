@@ -645,7 +645,7 @@
     <string name="AuthAnotherClientUrl">Mit diesem Code kann man sich bei deinem Telegram Konto anmelden.\n\nUm die Anmeldung zu bestätigen, in die Einstellungen von Telegram wechseln &gt; Geräte &gt; QR-Code scannen und den Code mit der Kamera scannen.</string>
     <string name="QRCodePermissionNoCameraWithHint">**Telegram** benötigt Zugriff auf deine **Kamera**, damit du QR-Codes scannen kannst. Tippe unten auf Einstellungen &gt; Berechtigungen und aktiviere den Zugriff.</string>
     <string name="SetProfilePhoto">Profilbild festlegen</string>
-    <string name="AppUpdate">Telegram aktualisieren</string>
+    <string name="AppUpdate">OctoGram aktualisieren</string>
     <string name="AppUpdateVersionAndSize">Version %1$s • %2$s</string>
     <string name="AppUpdateDownloading">%1$d%% wird geladen...</string>
     <string name="AppUpdateNow">Jetzt aktualisieren</string>

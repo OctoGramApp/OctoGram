@@ -70,6 +70,10 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
+
 public class CallLogActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
 	private ListAdapter listViewAdapter;
@@ -540,15 +544,15 @@ public class CallLogActivity extends BaseFragment implements NotificationCenter.
 		floatingButton.setVisibility(View.VISIBLE);
 		floatingButton.setScaleType(ImageView.ScaleType.CENTER);
 
-		Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
+		/*Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
 		if (Build.VERSION.SDK_INT < 21) {
 			Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow).mutate();
 			shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
 			CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
 			combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
 			drawable = combinedDrawable;
-		}
-		floatingButton.setBackgroundDrawable(drawable);
+		}*/
+		floatingButton.setBackgroundDrawable(CustomFab.createFabBackground());
 		floatingButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_actionIcon), PorterDuff.Mode.MULTIPLY));
 		floatingButton.setImageResource(R.drawable.ic_call);
 		floatingButton.setContentDescription(LocaleController.getString(R.string.Call));
@@ -557,13 +561,14 @@ public class CallLogActivity extends BaseFragment implements NotificationCenter.
 			animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButton, "translationZ", AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
 			animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButton, "translationZ", AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
 			floatingButton.setStateListAnimator(animator);
-			floatingButton.setOutlineProvider(new ViewOutlineProvider() {
+			floatingButton.setOutlineProvider(new OutlineProvider());
+			/*floatingButton.setOutlineProvider(new ViewOutlineProvider() {
 				@SuppressLint("NewApi")
 				@Override
 				public void getOutline(View view, Outline outline) {
 					outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
 				}
-			});
+			});*/
 		}
 		frameLayout.addView(floatingButton, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 56 : 60, Build.VERSION.SDK_INT >= 21 ? 56 : 60, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.BOTTOM, LocaleController.isRTL ? 14 : 0, 0, LocaleController.isRTL ? 0 : 14, 14));
 		floatingButton.setOnClickListener(v -> {

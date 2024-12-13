@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -75,7 +75,7 @@ enum class EventType(val value: Int) {
     HALLOWEEN(3),
     LUNAR_NEW_YEAR(4);
 
-    companion object{
+    companion object {
         fun fromInt(value: Int): EventType {
             return entries.find { it.value == value } ?: DEFAULT
         }
@@ -130,6 +130,7 @@ enum class PhotoResolution(val value: Int) {
     LOW(0),
     DEFAULT(1),
     HIGH(2);
+
     companion object {
         fun fromInt(value: Int): PhotoResolution {
             return entries.find { it.value == value } ?: DEFAULT
@@ -160,6 +161,16 @@ enum class TabMode(val value: Int) {
     TEXT(0),
     MIXED(1),
     ICON(2)
+}
+
+enum class TabStyle(val value: Int) {
+    DEFAULT(0),
+    ROUNDED(1),
+    FLOATING(2),
+    TEXT_ONLY(3),
+    CHIPS(4),
+    PILLS(5),
+    FULL(6)
 }
 
 enum class DownloadBoost(val value: Int) {
@@ -341,6 +352,12 @@ enum class InterfaceCheckboxUI(val value: Int) {
     ALWAYS_TRANSPARENT(3)
 }
 
+enum class InterfaceSliderUI(val value: Int) {
+    DEFAULT(0),
+    MODERN(1),
+    ANDROID(2)
+}
+
 enum class ViewType {
     ACCOUNT,
     ADD_EXCEPTION,
@@ -385,7 +402,8 @@ enum class ViewType {
     }
 
     companion object {
-        fun fromInt(value: Int): ViewType = entries[value] }
+        fun fromInt(value: Int): ViewType = entries[value]
+    }
 
 }
 
@@ -396,12 +414,48 @@ enum class Datacenter(
     val color: Int,
     val ip: String
 ) {
-    USA_1(1, "MIA, Miami FL, USA", R.drawable.ic_pluto_datacenter, Color.parseColor("#329AFE"), "149.154.175.50"),
-    USA_2(3, "MIA, Miami FL, USA", R.drawable.ic_aurora_datacenter, Color.parseColor("#DA5653"), "149.154.175.100"),
-    AMSTERDAM_1(2, "AMS, Amsterdam, NL", R.drawable.ic_venus_datacenter, Color.parseColor("#8B31FD"), "149.154.167.50"),
-    AMSTERDAM_2(4, "AMS, Amsterdam, NL", R.drawable.ic_vesta_datacenter, Color.parseColor("#F7B139"), "149.154.167.91"),
-    SINGAPORE(5, "SIN, Singapore, SG", R.drawable.ic_flora_datacenter, Color.parseColor("#4BD199"), "91.108.56.100"),
-    UNKNOWN(-1, LocaleController.getString(R.string.NumberUnknown), R.drawable.msg_secret_hw, Color.TRANSPARENT, "");
+    USA_1(
+        1,
+        "MIA, Miami FL, USA",
+        R.drawable.ic_pluto_datacenter,
+        Color.parseColor("#329AFE"),
+        "149.154.175.50"
+    ),
+    USA_2(
+        3,
+        "MIA, Miami FL, USA",
+        R.drawable.ic_aurora_datacenter,
+        Color.parseColor("#DA5653"),
+        "149.154.175.100"
+    ),
+    AMSTERDAM_1(
+        2,
+        "AMS, Amsterdam, NL",
+        R.drawable.ic_venus_datacenter,
+        Color.parseColor("#8B31FD"),
+        "149.154.167.50"
+    ),
+    AMSTERDAM_2(
+        4,
+        "AMS, Amsterdam, NL",
+        R.drawable.ic_vesta_datacenter,
+        Color.parseColor("#F7B139"),
+        "149.154.167.91"
+    ),
+    SINGAPORE(
+        5,
+        "SIN, Singapore, SG",
+        R.drawable.ic_flora_datacenter,
+        Color.parseColor("#4BD199"),
+        "91.108.56.100"
+    ),
+    UNKNOWN(
+        -1,
+        LocaleController.getString(R.string.NumberUnknown),
+        R.drawable.msg_secret_hw,
+        Color.TRANSPARENT,
+        ""
+    );
 
     companion object {
         fun getDcInfo(dcId: Int): Datacenter {
@@ -428,6 +482,7 @@ object VideoQuality {
     fun getValue(@Quality quality: Int): Int {
         return quality
     }
+
     const val UNKNOWN = 0
     const val SD = 1
     const val HD = 2
@@ -463,4 +518,14 @@ enum class MonetTheme(val monetThemeName: String, val monetThemeFileName: String
     MONET_AMOLED("Monet Amoled", "monet_amoled.attheme"),
     MONET_DARK("Monet Dark", "monet_dark.attheme"),
     MONET_LIGHT("Monet Light", "monet_light.attheme");
+}
+
+object CameraPreview {
+    const val DEFAULT = 0
+    const val FLOATING = 1
+    const val BOTTOM_BAR = 2
+
+    @IntDef(DEFAULT, FLOATING, BOTTOM_BAR)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class PreviewType
 }

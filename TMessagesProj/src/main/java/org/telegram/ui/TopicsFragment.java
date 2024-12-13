@@ -53,6 +53,9 @@ import androidx.recyclerview.widget.LinearSmoothScrollerCustom;
 import androidx.recyclerview.widget.RecyclerView;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
+
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -1207,7 +1210,7 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
             presentFragment(TopicCreateFragment.create(chatId, 0));
         });
 
-        Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
+        /*Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
         if (Build.VERSION.SDK_INT < 21) {
             Drawable shadowDrawable = ContextCompat.getDrawable(getParentActivity(), R.drawable.floating_shadow).mutate();
             shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
@@ -1219,6 +1222,7 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
             floatingButtonContainer.setStateListAnimator(animator);
+            floatingButtonContainer.setOutlineProvider(new OutlineProvider());
             floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
@@ -1227,6 +1231,15 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                 }
             });
         }
+        */
+
+        Drawable drawable = CustomFab.createFabBackground();
+        StateListAnimator animator = new StateListAnimator();
+        animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
+        animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
+        floatingButtonContainer.setStateListAnimator(animator);
+        floatingButtonContainer.setOutlineProvider(new OutlineProvider());
+
         floatingButtonContainer.setBackground(drawable);
         floatingButton = new RLottieImageView(context);
         floatingButton.setImageResource(R.drawable.ic_chatlist_add_2);

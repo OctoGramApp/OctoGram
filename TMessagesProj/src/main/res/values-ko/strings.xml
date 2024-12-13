@@ -723,7 +723,7 @@
     <string name="AuthAnotherClientUrl">이 코드는 누군가가 회원님의 텔레그램 계정에 로그인할 수 있도록 하는 데 사용될 수 있습니다.\n\n텔레그램 로그인을 인증하려면, 설정 &gt; 기기 &gt; QR 코드 스캔으로 이동하여 코드를 스캔해 주세요.</string>
     <string name="QRCodePermissionNoCameraWithHint">**텔레그램**이 QR 코드를 스캔하려면 카메라 접근권한이 필요합니다. 설정을 탭하고 -&gt; 권한으로 이동 하신 후, **카메라**를 활성화해주세요.</string>
     <string name="SetProfilePhoto">프로필 사진 설정</string>
-    <string name="AppUpdate">텔레그램 업데이트</string>
+    <string name="AppUpdate">업데이트 OctoGram</string>
     <string name="AppUpdateVersionAndSize">버전  %1$s • %2$s</string>
     <string name="AppUpdateDownloading">%1$d%% 다운로드 중...</string>
     <string name="AppUpdateNow">지금 업데이트 하세요</string>

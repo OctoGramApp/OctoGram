@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.preferences.ui.custom;
 
 import android.annotation.SuppressLint;
@@ -14,7 +22,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBarMenu;
@@ -28,6 +35,7 @@ import java.util.Objects;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ViewType;
 import it.octogram.android.drawer.MenuOrderController;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.BaseCustomActivity;
 import it.octogram.android.preferences.ui.components.AddItem;
 import it.octogram.android.preferences.ui.components.HintHeader;
@@ -342,7 +350,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
         try {
             DiffUtil.calculateDiff(diffCallback).dispatchUpdatesTo(listAdapter);
         } catch (Exception e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
             listAdapter.notifyDataSetChanged();
         }
         AndroidUtilities.updateVisibleRows(listView);

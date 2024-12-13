@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils;
 
 import android.content.pm.PackageInfo;
@@ -20,7 +28,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -37,8 +44,10 @@ import java.util.Locale;
 
 import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.Datacenter;
+import it.octogram.android.IconsUIType;
 import it.octogram.android.MediaFilter;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 
 
 public class OctoUtils {
@@ -104,7 +113,7 @@ public class OctoUtils {
         try {
             AndroidUtilities.runOnUIThread(() -> Toast.makeText(ApplicationLoader.applicationContext, text, Toast.LENGTH_SHORT).show());
         } catch (Exception e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
     }
 
@@ -173,7 +182,7 @@ public class OctoUtils {
                     return "universal/" + Build.CPU_ABI + " " + Build.CPU_ABI2;
             }
         } catch (PackageManager.NameNotFoundException e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
 
         return "universal";
@@ -343,6 +352,14 @@ public class OctoUtils {
         } else {
             WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_VOICE_COMMUNICATION);
             return AudioManager.STREAM_VOICE_CALL;
+        }
+    }
+
+    public static int getPetIconFixed() {
+        if (OctoConfig.INSTANCE.uiIconsType.getValue() == IconsUIType.SOLAR.getValue()) {
+            return R.drawable.solar_msg_emoji_cat_ui;
+        } else {
+            return R.drawable.msg_emoji_cat;
         }
     }
 }

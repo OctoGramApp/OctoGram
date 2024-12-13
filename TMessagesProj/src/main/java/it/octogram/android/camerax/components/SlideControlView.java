@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -39,16 +39,12 @@ import java.lang.annotation.RetentionPolicy;
 @SuppressLint("ViewConstructor")
 public class SlideControlView extends View {
 
-    public static final int SLIDER_MODE_ZOOM = 0;
-    public static final int SLIDER_MODE_EV = 1;
-
     private Drawable minusDrawable;
     private Drawable plusDrawable;
     private final Drawable progressDrawable;
     private Drawable filledProgressDrawable;
     private final Drawable knobDrawable;
     private final Drawable pressedKnobDrawable;
-    private float invert = 0F;
 
     private int minusCx;
     private int minusCy;
@@ -67,14 +63,18 @@ public class SlideControlView extends View {
     private float knobStartX;
     private float knobStartY;
 
+    public boolean enabledTouch = true;
+
     private float animatingToZoom;
     private AnimatorSet animatorSet;
 
     private SliderControlViewDelegate delegate;
 
-    @IntDef({SLIDER_MODE_ZOOM, SLIDER_MODE_EV})
+    @IntDef({SliderMode.SLIDER_MODE_ZOOM, SliderMode.SLIDER_MODE_EV})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliderMode {
+        int SLIDER_MODE_ZOOM = 0;
+        int SLIDER_MODE_EV = 1;
     }
 
     private final @SliderMode int mode;
@@ -103,47 +103,24 @@ public class SlideControlView extends View {
         super(context);
         this.mode = mode;
 
-        if (mode == SLIDER_MODE_ZOOM) {
+        if (mode == SliderMode.SLIDER_MODE_ZOOM) {
             minusDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.zoom_minus, null);
             plusDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.zoom_plus, null);
-        } else if (mode == SLIDER_MODE_EV) {
+        } else if (mode == SliderMode.SLIDER_MODE_EV) {
             minusDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.ev_minus, null);
             plusDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.ev_plus, null);
         }
 
         progressDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.zoom_slide, null);
 
-        if (mode == SLIDER_MODE_ZOOM) {
+        if (mode == SliderMode.SLIDER_MODE_ZOOM) {
             filledProgressDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.zoom_slide_a, null);
-        } else if (mode == SLIDER_MODE_EV) {
+        } else if (mode == SliderMode.SLIDER_MODE_EV) {
             filledProgressDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.zoom_slide, null);
         }
 
         knobDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.zoom_round, null);
         pressedKnobDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.zoom_round_b, null);
-
-        invertDrawables();
-    }
-
-    public void invertDrawables() {
-        applyColorFilter(minusDrawable);
-        applyColorFilter(plusDrawable);
-        applyColorFilter(progressDrawable);
-        applyColorFilter(filledProgressDrawable);
-        applyColorFilter(knobDrawable);
-        applyColorFilter(pressedKnobDrawable);
-    }
-
-    private void applyColorFilter(Drawable drawable) {
-        if (drawable != null) {
-            drawable.setColorFilter(new PorterDuffColorFilter(
-                    ColorUtils.blendARGB(Color.WHITE, Color.BLACK, invert), PorterDuff.Mode.MULTIPLY));
-        }
-    }
-
-    public void setInvert(float newInvert) {
-        this.invert = newInvert;
-        invertDrawables();
     }
 
     public float getSliderValue() {
@@ -176,6 +153,9 @@ public class SlideControlView extends View {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!enabledTouch) {
+            return false;
+        }
         float x = event.getX();
         float y = event.getY();
         int action = event.getAction();
@@ -261,6 +241,10 @@ public class SlideControlView extends View {
         return handled || pressed || knobPressed || super.onTouchEvent(event);
     }
 
+    public boolean isTouch() {
+        return pressed || knobPressed;
+    }
+
     public boolean animateToValue(float zoom) {
         if (zoom < 0 || zoom > 1.0f) {
             return false;
@@ -313,18 +297,17 @@ public class SlideControlView extends View {
             progressEndY = plusCy - AndroidUtilities.dp(18);
         }
 
-        if (mode == SLIDER_MODE_ZOOM) {
+        if (mode == SliderMode.SLIDER_MODE_ZOOM) {
             minusDrawable.setBounds(minusCx - AndroidUtilities.dp(7), minusCy - AndroidUtilities.dp(7), minusCx + AndroidUtilities.dp(7), minusCy + AndroidUtilities.dp(7));
             minusDrawable.draw(canvas);
             plusDrawable.setBounds(plusCx - AndroidUtilities.dp(7), plusCy - AndroidUtilities.dp(7), plusCx + AndroidUtilities.dp(7), plusCy + AndroidUtilities.dp(7));
             plusDrawable.draw(canvas);
-        } else if (mode == SLIDER_MODE_EV) {
+        } else if (mode == SliderMode.SLIDER_MODE_EV) {
             minusDrawable.setBounds(minusCx - AndroidUtilities.dp(7), minusCy - AndroidUtilities.dp(7), minusCx + AndroidUtilities.dp(7), minusCy + AndroidUtilities.dp(7));
             minusDrawable.draw(canvas);
             plusDrawable.setBounds(plusCx - AndroidUtilities.dp(8), plusCy - AndroidUtilities.dp(8), plusCx + AndroidUtilities.dp(8), plusCy + AndroidUtilities.dp(8));
             plusDrawable.draw(canvas);
         }
-
 
         int totalX = progressEndX - progressStartX;
         int totalY = progressEndY - progressStartY;
@@ -351,5 +334,17 @@ public class SlideControlView extends View {
         int size = drawable.getIntrinsicWidth();
         drawable.setBounds(knobX - size / 2, knobY - size / 2, knobX + size / 2, knobY + size / 2);
         drawable.draw(canvas);
+    }
+
+    public void invertColors(float invert) {
+        var filter = new PorterDuffColorFilter(ColorUtils.blendARGB(Color.WHITE, Color.BLACK, invert), PorterDuff.Mode.MULTIPLY);
+        minusDrawable.setColorFilter(filter);
+        plusDrawable.setColorFilter(filter);
+        progressDrawable.setColorFilter(filter);
+        filledProgressDrawable.setColorFilter(filter);
+        knobDrawable.setColorFilter(filter);
+        pressedKnobDrawable.setColorFilter(filter);
+
+        invalidate();
     }
 }

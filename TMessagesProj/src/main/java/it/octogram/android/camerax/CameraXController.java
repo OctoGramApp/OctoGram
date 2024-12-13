@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -17,6 +17,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Range;
@@ -39,7 +40,6 @@ import androidx.camera.core.ImageProxy;
 import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.MeteringPointFactory;
 import androidx.camera.core.Preview;
-import androidx.camera.core.ZoomState;
 import androidx.camera.core.impl.utils.Exif;
 import androidx.camera.core.internal.compat.workaround.ExifRotationAvailability;
 import androidx.camera.extensions.ExtensionMode;
@@ -62,7 +62,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
@@ -78,9 +77,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.JpegImageUtils;
 
 /** @noinspection deprecation*/
@@ -103,22 +105,16 @@ public class CameraXController {
     private ExtensionsManager extensionsManager;
     private boolean stableFPSPreviewOnly = false;
     private boolean noSupportedSurfaceCombinationWorkaround = false;
-    public static final int CAMERA_NONE = 0;
-    public static final int CAMERA_NIGHT = 1;
-    public static final int CAMERA_HDR = 2;
-    public static final int CAMERA_AUTO = 3;
-    public static final int CAMERA_WIDE = 4;
-    public static final int CAMERA_BOKEH = 5;
-    public static final int CAMERA_FACE_RETOUCH = 6;
+
     public float oldZoomSelection = 0F;
-    private int selectedEffect = CAMERA_NONE;
+    private int selectedEffect = EffectFacing.CAMERA_NONE;
     protected static final String TAG = "CameraXController";
 
     public static void setTorchEnabled(boolean b) {
         if (camera != null) {
             camera.getCameraControl().enableTorch(b);
         } else {
-            FileLog.e("Camera is not initialized.");
+            OctoLogging.e("Camera is not initialized.");
         }
     }
 
@@ -201,11 +197,11 @@ public class CameraXController {
                                 onPreInit.run();
                                 isInitiated = true;
                             } catch (ExecutionException | InterruptedException e) {
-                                FileLog.e("Error initializing ExtensionsManager: " + e.getMessage(), e);
+                                OctoLogging.e("Error initializing ExtensionsManager: " + e.getMessage(), e);
                             }
                         }, ContextCompat.getMainExecutor(context));
                     } catch (ExecutionException | InterruptedException e) {
-                        FileLog.e("Error retrieving provider: " + e.getMessage(), e);
+                        OctoLogging.e("Error retrieving provider: " + e.getMessage(), e);
                     }
                 }, ContextCompat.getMainExecutor(context)
         );
@@ -268,6 +264,7 @@ public class CameraXController {
 
     @OptIn(markerClass = ExperimentalZeroShutterLag.class)
     public static boolean isZSLSupported() {
+        if (ForceZslSupport.isForcedZslDevice()) return true;
         if (camera == null) return false;
         return camera.getCameraInfo().isZslSupported();
     }
@@ -291,7 +288,7 @@ public class CameraXController {
                     return extensionsManager.isExtensionAvailable(cameraSelector, mode);
                 } catch (Exception e) {
                     Log.d("CameraX-Extensions", String.format("Error: %s", e.getMessage()), e);
-                    FileLog.e(MessageFormat.format("CameraX-Extensions: {0}", e.getMessage()), e);
+                    OctoLogging.e(MessageFormat.format("CameraX-Extensions: {0}", e.getMessage()), e);
                 }
             }
         }
@@ -317,11 +314,11 @@ public class CameraXController {
 
     public CameraSelector getCameraSelectorForEffect(CameraSelector cameraSelector, int selectedEffect) {
         var mode = switch (selectedEffect) {
-            case CAMERA_NIGHT -> ExtensionMode.NIGHT;
-            case CAMERA_HDR -> ExtensionMode.HDR;
-            case CAMERA_AUTO -> ExtensionMode.AUTO;
-            case CAMERA_BOKEH -> ExtensionMode.BOKEH;
-            case CAMERA_FACE_RETOUCH -> ExtensionMode.FACE_RETOUCH;
+            case EffectFacing.CAMERA_NIGHT -> ExtensionMode.NIGHT;
+            case EffectFacing.CAMERA_HDR -> ExtensionMode.HDR;
+            case EffectFacing.CAMERA_AUTO -> ExtensionMode.AUTO;
+            case EffectFacing.CAMERA_BOKEH -> ExtensionMode.BOKEH;
+            case EffectFacing.CAMERA_FACE_RETOUCH -> ExtensionMode.FACE_RETOUCH;
             default -> ExtensionMode.NONE;
         };
         return extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, mode);
@@ -329,14 +326,11 @@ public class CameraXController {
 
     public void bindUseCases() {
         if (provider == null) return;
+
         var targetSize = getVideoBestSize();
-        Preview.Builder previewBuilder = new Preview.Builder();
-        previewBuilder.setTargetResolution(targetSize); // Need to migrate to ResolutionSelector
-        if (!isFrontface && selectedEffect == CAMERA_WIDE) {
-            cameraSelector = CameraXUtils.getDefaultWideAngleCamera(provider);
-        } else {
-            cameraSelector = isFrontface ? CameraSelector.DEFAULT_FRONT_CAMERA : CameraSelector.DEFAULT_BACK_CAMERA;
-        }
+        var previewBuilder = new Preview.Builder().setTargetResolution(targetSize);
+
+        cameraSelector = !isFrontface && selectedEffect == EffectFacing.CAMERA_WIDE ? CameraXUtils.getDefaultWideAngleCamera(provider) : (isFrontface ? CameraSelector.DEFAULT_FRONT_CAMERA : CameraSelector.DEFAULT_BACK_CAMERA);
 
         if (!isFrontface) {
             cameraSelector = getCameraSelectorForEffect(cameraSelector, selectedEffect);
@@ -344,33 +338,33 @@ public class CameraXController {
 
         var quality = CameraXUtils.getVideoQuality();
         var selector = QualitySelector.from(quality, FallbackStrategy.higherQualityOrLowerThan(quality));
-        var recorder = new Recorder.Builder()
-                .setQualitySelector(selector)
-                .build();
-        vCapture = VideoCapture.withOutput(recorder);
+        vCapture = VideoCapture.withOutput(new Recorder.Builder().setQualitySelector(selector).build());
 
-        ImageCapture.Builder iCaptureBuilder = getCaptureModeBuilder();
+        var iCaptureBuilder = getCaptureModeBuilder();
 
         provider.unbindAll();
         previewUseCase = previewBuilder.build();
         previewUseCase.setSurfaceProvider(surfaceProvider);
 
         if (lifecycle.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) return;
-        if (stableFPSPreviewOnly) {
-            camera = provider.bindToLifecycle(lifecycle, cameraSelector, previewUseCase, vCapture);
-        } else {
-            iCapture = iCaptureBuilder.build();
-            try {
+
+        try {
+            if (stableFPSPreviewOnly) {
+                camera = provider.bindToLifecycle(lifecycle, cameraSelector, previewUseCase, vCapture);
+            } else {
+                iCapture = iCaptureBuilder.build();
                 camera = provider.bindToLifecycle(lifecycle, cameraSelector, previewUseCase, vCapture, iCapture);
                 noSupportedSurfaceCombinationWorkaround = false;
-            } catch (java.lang.IllegalArgumentException e) {
-                noSupportedSurfaceCombinationWorkaround = true;
-                try {
-                    camera = provider.bindToLifecycle(lifecycle, cameraSelector, previewUseCase, iCapture);
-                } catch (java.lang.IllegalArgumentException ignored) {
-                }
+            }
+        } catch (java.lang.IllegalArgumentException e) {
+            noSupportedSurfaceCombinationWorkaround = true;
+            try {
+                camera = provider.bindToLifecycle(lifecycle, cameraSelector, previewUseCase, iCapture);
+            } catch (java.lang.IllegalArgumentException ignored) {
+                camera = null;
             }
         }
+
         if (camera != null) {
             camera.getCameraControl().setLinearZoom(oldZoomSelection);
         }
@@ -395,24 +389,25 @@ public class CameraXController {
         return iCaptureBuilder;
     }
 
-
-
     public void setZoom(float value) {
-        oldZoomSelection = value;
-        camera.getCameraControl().setLinearZoom(value);
+        camera.getCameraControl().setLinearZoom(oldZoomSelection = value);
+    }
+
+    public float getMaxZoom() {
+        return camera.getCameraInfo().getZoomState().getValue() != null ? camera.getCameraInfo().getZoomState().getValue().getMaxZoomRatio() : 0.0f;
+    }
+
+    public float getMinZoom() {
+        return camera.getCameraInfo().getZoomState().getValue() != null ? camera.getCameraInfo().getZoomState().getValue().getMinZoomRatio() : 0.0f;
     }
 
     public float resetZoom() {
-        if (camera != null) {
-            camera.getCameraControl().setZoomRatio(1.0f);
-            ZoomState zoomStateLiveData = camera.getCameraInfo().getZoomState().getValue();
-            if (zoomStateLiveData != null) {
-                oldZoomSelection = zoomStateLiveData.getLinearZoom();
-                return oldZoomSelection;
-            }
-        }
-        return 0.0f;
+        if (camera == null) return 0.0f;
+
+        camera.getCameraControl().setZoomRatio(1.0f);
+        return (oldZoomSelection = camera.getCameraInfo().getZoomState().getValue() != null ? camera.getCameraInfo().getZoomState().getValue().getLinearZoom() : 0.0f);
     }
+
 
     public boolean isExposureCompensationSupported() {
         if (camera == null) return false;
@@ -427,7 +422,6 @@ public class CameraXController {
         camera.getCameraControl().setExposureCompensationIndex(index);
     }
 
-    @SuppressLint({"UnsafeExperimentalUsageError", "RestrictedApi"})
     public void setTargetOrientation(int rotation) {
         if (previewUseCase != null) {
             previewUseCase.setTargetRotation(rotation);
@@ -440,7 +434,6 @@ public class CameraXController {
         }
     }
 
-    @SuppressLint({"UnsafeExperimentalUsageError", "RestrictedApi"})
     public void setWorldCaptureOrientation(int rotation) {
         if (iCapture != null) {
             iCapture.setTargetRotation(rotation);
@@ -450,7 +443,6 @@ public class CameraXController {
         }
     }
 
-    @SuppressLint({"UnsafeExperimentalUsageError", "RestrictedApi"})
     public void focusToPoint(int x, int y) {
         MeteringPoint point = meteringPointFactory.createPoint(x, y);
 
@@ -463,7 +455,6 @@ public class CameraXController {
     }
 
 
-    @SuppressLint({"RestrictedApi", "MissingPermission"})
     public void recordVideo(final File path, boolean mirror, CameraXView.VideoSavedCallback onStop) {
         if (noSupportedSurfaceCombinationWorkaround) {
             provider.unbindAll();
@@ -491,7 +482,7 @@ public class CameraXController {
                                     provider.bindToLifecycle(lifecycle, cameraSelector, previewUseCase, iCapture);
                                 });
                             }
-                            FileLog.e(finalize.getCause());
+                            OctoLogging.e(finalize.getCause());
                         } else {
                             if (noSupportedSurfaceCombinationWorkaround) {
                                 AndroidUtilities.runOnUIThread(() -> {
@@ -522,7 +513,7 @@ public class CameraXController {
                 duration = (int) Math.ceil(Long.parseLong(d) / 1000.0f);
             }
         } catch (Exception e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
 
         Bitmap bitmap = SendMessagesHelper.createVideoThumbnail(path.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
@@ -540,7 +531,7 @@ public class CameraXController {
             FileOutputStream stream = new FileOutputStream(cacheFile);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 87, stream);
         } catch (Throwable e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
         SharedConfig.saveConfig();
         final long durationFinal = duration;
@@ -558,7 +549,6 @@ public class CameraXController {
     }
 
 
-    @SuppressLint("RestrictedApi")
     public void stopVideoRecording(final boolean abandon) {
         abandonCurrentVideo = abandon;
         if (recording != null) {
@@ -605,7 +595,7 @@ public class CameraXController {
                     exif.save();
                 } catch (JpegImageUtils.CodecFailedException | IOException |
                          IllegalStateException e) {
-                    FileLog.e("Error occurred: " + e.getMessage(), e);
+                    OctoLogging.e("Error occurred: " + e.getMessage(), e);
                 }
                 image.close();
                 AndroidUtilities.runOnUIThread(onTake);
@@ -613,7 +603,7 @@ public class CameraXController {
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-                FileLog.e(exception);
+                OctoLogging.e(exception);
             }
         });
     }
@@ -659,9 +649,38 @@ public class CameraXController {
         return x * (1 - f) + y * f;
     }
 
-    @IntDef({CAMERA_NONE, CAMERA_AUTO, CAMERA_HDR, CAMERA_NIGHT})
+    @IntDef({EffectFacing.CAMERA_NONE, EffectFacing.CAMERA_AUTO, EffectFacing.CAMERA_HDR, EffectFacing.CAMERA_NIGHT})
     @Retention(RetentionPolicy.SOURCE)
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public @interface EffectFacing {
+        int CAMERA_NONE = 0;
+        int CAMERA_NIGHT = 1;
+        int CAMERA_HDR = 2;
+        int CAMERA_AUTO = 3;
+        int CAMERA_WIDE = 4;
+        int CAMERA_BOKEH = 5;
+        int CAMERA_FACE_RETOUCH = 6;
+    }
+
+    static class ForceZslSupport {
+        private static final String TAG = "ForceZslSupport";
+
+        public static boolean isForcedZslDevice() {
+            var supportedDevices = new String[]{
+                    // Pixel 6 Series
+                    "oriole", "raven", "bluejay",
+                    // Pixel 7 Series
+                    "cheetah", "lynx", "panther",
+                    // Pixel 8 Series
+                    "shiba", "akita", "husky",
+                    // Pixel 9 Series
+                    "tokay", "tegu", "caiman", "komodo",
+            };
+
+            boolean isSupported = Arrays.asList(supportedDevices).contains(Build.DEVICE.toLowerCase(Locale.US).trim());
+            Log.d(TAG, String.format("Device %s ZSL support forced: %s (forced for: %s)", Build.DEVICE, isSupported, Arrays.asList(supportedDevices)));
+            OctoLogging.d(TAG, String.format("Device %s ZSL support forced: %s", Build.DEVICE, isSupported));
+            return isSupported;
+        }
     }
 }

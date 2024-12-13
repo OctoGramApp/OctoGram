@@ -143,6 +143,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import it.octogram.android.CameraPreview;
+import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.utils.translator.SingleTranslationManager;
@@ -170,6 +172,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
     private ImageUpdater.AvatarFor setAvatarFor;
     public boolean pinnedToTop;
 
+    private int itemCameraId = 5828;
     private PasscodeView passcodeView;
     private ChatAttachRestrictedLayout restrictedLayout;
     public ImageUpdater parentImageUpdater;
@@ -2462,6 +2465,13 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     }
                 } else if (num == 11) {
                     openQuickRepliesLayout();
+                } else if (num == itemCameraId) {
+                    if ((!photosEnabled && !videosEnabled && checkCanRemoveRestrictionsByBoosts()) || OctoConfig.INSTANCE.cameraType.getValue() == CameraType.SYSTEM_CAMERA.getValue()) {
+                        onCameraButtonLongPress();
+                        return;
+                    }
+                    if (currentAttachLayout != photoLayout) showLayout(photoLayout);
+                    handleCameraAction();
                 } else if (view.getTag() instanceof Integer) {
                     delegate.didPressedButton((Integer) view.getTag(), true, true, 0, 0, isCaptionAbove(), false);
                 }
@@ -2508,6 +2518,12 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     return false;
                 }
                 onLongClickBotButton(button.attachMenuBot, button.currentUser);
+                return true;
+            } else if (position == buttonsAdapter.cameraButton) {
+                if (!photosEnabled && !videosEnabled) {
+                    showLayout(restrictedLayout = new ChatAttachRestrictedLayout(1, this, getContext(), resourcesProvider));
+                }
+                onCameraButtonLongPress();
                 return true;
             }
             return false;
@@ -3909,21 +3925,29 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             int width = Math.max(nextAttachLayout.getWidth(), currentAttachLayout.getWidth());
             if (nextAttachLayout instanceof ChatAttachAlertPhotoLayoutPreview) {
                 nextAttachLayout.setTranslationX(width);
-                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout) {
+                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() != CameraPreview.DEFAULT) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) currentAttachLayout;
-                    if (photoLayout.cameraView != null) {
-                        photoLayout.cameraView.setVisibility(View.INVISIBLE);
-                        photoLayout.cameraIcon.setVisibility(View.INVISIBLE);
-                        photoLayout.cameraCell.setVisibility(View.VISIBLE);
+                    if (photoLayout != null) {
+                        if (photoLayout.cameraView != null) {
+                            photoLayout.cameraView.setVisibility(View.INVISIBLE);
+                        }
+                        if (photoLayout.cameraIcon != null) {
+                            photoLayout.cameraIcon.setVisibility(View.INVISIBLE);
+                        }
+                        if (photoLayout.cameraCell != null) {
+                            photoLayout.cameraCell.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
             } else {
                 currentAttachLayout.setTranslationX(-width);
-                if (nextAttachLayout == photoLayout) {
+                if (nextAttachLayout == photoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() != CameraPreview.DEFAULT) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) nextAttachLayout;
                     if (photoLayout.cameraView != null) {
                         photoLayout.cameraView.setVisibility(View.VISIBLE);
-                        photoLayout.cameraIcon.setVisibility(View.VISIBLE);
+                        if (photoLayout.cameraIcon != null) {
+                            photoLayout.cameraIcon.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
             }
@@ -3976,6 +4000,24 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 actionBar.setTag(showActionBar ? 1 : null);
                 onEnd.run();
             }
+        }
+    }
+    private void handleCameraAction() {
+        if (!photosEnabled && !videosEnabled) {
+            if (checkCanRemoveRestrictionsByBoosts()) return;
+            showLayout(new ChatAttachRestrictedLayout(1, this, getContext(), resourcesProvider));
+            return;
+        }
+        photoLayout.checkCamera(false);
+        photoLayout.openCamera(true);
+        if(photoLayout.cameraView != null) {
+            photoLayout.cameraView.resetZoom();
+        }
+    }
+
+    public void onCameraButtonLongPress() {
+        if ((!photosEnabled && !videosEnabled && !checkCanRemoveRestrictionsByBoosts()) && delegate != null) {
+            delegate.didPressedButton(0, false, true, 0, 0, false, false);
         }
     }
 
@@ -5305,6 +5347,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
         private Context mContext;
         private int galleryButton;
+        private int cameraButton;
 
         private int attachBotsStartRow;
         private int attachBotsEndRow;
@@ -5348,6 +5391,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     if (position == galleryButton) {
                         attachButton.setTextAndIcon(1, getString("ChatGallery", R.string.ChatGallery), Theme.chat_attachButtonDrawables[0], Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
                         attachButton.setTag(1);
+                    } else if (position == cameraButton) {
+                        attachButton.setTextAndIcon(itemCameraId, LocaleController.getString(R.string.VoipCamera), getContext().getDrawable(R.drawable.photo_camera_24px).mutate(), Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
+                        attachButton.setTag(itemCameraId);
                     } else if (position == documentButton) {
                         attachButton.setTextAndIcon(4, getString("ChatDocument", R.string.ChatDocument), Theme.chat_attachButtonDrawables[2], Theme.key_chat_attachFileBackground, Theme.key_chat_attachFileText);
                         attachButton.setTag(4);
@@ -5408,6 +5454,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         public void notifyDataSetChanged() {
             buttonsCount = 0;
             galleryButton = -1;
+            cameraButton = -1;
             documentButton = -1;
             musicButton = -1;
             pollButton = -1;
@@ -5421,6 +5468,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 documentButton = buttonsCount++;
                 if (allowEnterCaption) {
                     musicButton = buttonsCount++;
+                }
+                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                    cameraButton = buttonsCount++;
                 }
             } else if (editingMessageObject != null) {
                 if (editType == EDITMEDIA_TYPE_ANY) {
@@ -5437,9 +5487,15 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     if (editType == EDITMEDIA_TYPE_MUSIC) {
                         musicButton = buttonsCount++;
                     }
+                    if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                        cameraButton = buttonsCount++;
+                    }
                 }
             } else {
                 galleryButton = buttonsCount++;
+                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                    cameraButton = buttonsCount++;
+                }
                 if (photosEnabled || videosEnabled) {
                     if (baseFragment instanceof ChatActivity && !((ChatActivity) baseFragment).isInScheduleMode() && !((ChatActivity) baseFragment).isSecretChat() && ((ChatActivity) baseFragment).getChatMode() != ChatActivity.MODE_QUICK_REPLIES) {
                         ChatActivity chatActivity = (ChatActivity) baseFragment;

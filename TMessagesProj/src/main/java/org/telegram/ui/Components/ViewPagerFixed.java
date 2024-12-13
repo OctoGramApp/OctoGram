@@ -57,6 +57,9 @@ import org.telegram.ui.ActionBar.Theme;
 
 import java.util.ArrayList;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.TabStyle;
+
 public class ViewPagerFixed extends FrameLayout {
 
     private Theme.ResourcesProvider resourcesProvider;
@@ -1682,8 +1685,56 @@ public class ViewPagerFixed extends FrameLayout {
                             indicatorX = (int) AndroidUtilities.lerp(lastDrawnIndicatorX, indicatorX, indicatorProgress2);
                             indicatorWidth = (int) AndroidUtilities.lerp(lastDrawnIndicatorW, indicatorWidth, indicatorProgress2);
                         }
-                        selectorDrawable.setBounds(indicatorX, (int) (height - AndroidUtilities.dpr(4) + hideProgress * AndroidUtilities.dpr(4)), indicatorX + indicatorWidth, (int) (height + hideProgress * AndroidUtilities.dpr(4)));
-                        selectorDrawable.draw(canvas);
+
+                        int tabStyle = OctoConfig.INSTANCE.tabStyle.getValue();
+                        int inlinePadding = 0;
+                        int topBound = (int) (height - AndroidUtilities.dpr(4) + hideProgress * AndroidUtilities.dpr(4));
+                        int bottomBound = (int) (height + hideProgress * AndroidUtilities.dpr(4));
+                        float rtpRad = 0;
+
+                        if (tabStyle == TabStyle.FULL.getValue()) {
+                            topBound = 0;
+                            inlinePadding = AndroidUtilities.dp(15);
+                            selectorDrawable.setColor(ColorUtils.setAlphaComponent(Theme.getColor(tabLineColorKey, resourcesProvider), 35));
+                        } else if (tabStyle >= TabStyle.CHIPS.getValue()) {
+                            int padding = tabStyle == TabStyle.CHIPS.getValue() ? 8 : 10;
+                            inlinePadding = AndroidUtilities.dp(padding);
+                            topBound = (int) (height / 2f - AndroidUtilities.dp(15) * (1f - hideProgress));
+                            bottomBound = (int) (height / 2f + AndroidUtilities.dp(15) * (1f - hideProgress));
+                            selectorDrawable.setColor(ColorUtils.setAlphaComponent(Theme.getColor(tabLineColorKey, resourcesProvider), 50));
+                        } else {
+                            selectorDrawable.setColor(Theme.getColor(tabLineColorKey, resourcesProvider));
+                        }
+
+                        if (tabStyle == TabStyle.FLOATING.getValue()) {
+                            topBound = height - AndroidUtilities.dpr(7);
+                            bottomBound = height - AndroidUtilities.dpr(4);
+                            inlinePadding -= AndroidUtilities.dp(3);
+                        }
+
+                        float rad = AndroidUtilities.dpf2(3);
+                        if (tabStyle == TabStyle.PILLS.getValue()) {
+                            rad = rtpRad = AndroidUtilities.dpf2(40);
+                        } else if (tabStyle == TabStyle.CHIPS.getValue()) {
+                            rad = rtpRad = AndroidUtilities.dpf2(5);
+                        } else if (tabStyle >= TabStyle.ROUNDED.getValue()) {
+                            rtpRad = rad;
+                        }
+
+                        selectorDrawable.setCornerRadii(new float[]{rad, rad, rad, rad, rtpRad, rtpRad, rtpRad, rtpRad});
+
+                        selectorDrawable.setBounds(
+                                (int) indicatorX - inlinePadding,
+                                topBound,
+                                (int) (indicatorX + indicatorWidth) + inlinePadding,
+                                bottomBound
+                        );
+
+                        //selectorDrawable.setBounds(indicatorX, (int) (height - AndroidUtilities.dpr(4) + hideProgress * AndroidUtilities.dpr(4)), indicatorX + indicatorWidth, (int) (height + hideProgress * AndroidUtilities.dpr(4)));
+                        //selectorDrawable.draw(canvas);
+                        if (tabStyle != TabStyle.TEXT_ONLY.getValue()) {
+                            selectorDrawable.draw(canvas);
+                        }
                     }
                 }
                 if (crossfadeBitmap != null) {

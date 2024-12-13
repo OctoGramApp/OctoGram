@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils.translator.raw;
 
 import android.text.TextUtils;
@@ -7,7 +15,6 @@ import androidx.annotation.NonNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.telegram.messenger.FileLog;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,6 +35,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+
+import it.octogram.android.logs.OctoLogging;
 
 public class RawDeepLTranslator {
     private static final String internalRequest = "https://www2.deepl.com/jsonrpc";
@@ -152,7 +161,7 @@ public class RawDeepLTranslator {
                     throw var9;
                 }
             } catch (IOException var10) {
-                FileLog.e(var10);
+                OctoLogging.e(var10);
                 if (Objects.requireNonNull(var10.getMessage()).contains("429")) {
                     needToRetryFail = true;
                     if (var5-- <= 0) {
@@ -162,7 +171,7 @@ public class RawDeepLTranslator {
                     try {
                         Thread.sleep(sleepTime_429);
                     } catch (InterruptedException var8) {
-                        FileLog.e(var8);
+                        OctoLogging.e(var8);
                     }
                 }
             }

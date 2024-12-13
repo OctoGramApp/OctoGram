@@ -61,6 +61,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.Layout;
 import android.text.Spannable;
@@ -81,6 +82,7 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
+import android.transition.Visibility;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
@@ -302,6 +304,7 @@ import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
+import it.octogram.android.preferences.ui.components.CustomFab;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import it.octogram.android.utils.VideoUtils;
@@ -6786,7 +6789,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
 
         pickerViewSendButton = new ImageView(parentActivity);
         pickerViewSendButton.setScaleType(ImageView.ScaleType.CENTER);
-        pickerViewSendDrawable = Theme.createSimpleSelectorCircleDrawable(dp(48), getThemedColor(Theme.key_chat_editMediaButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_chat_editMediaButton));
+        // pickerViewSendDrawable = Theme.createSimpleSelectorCircleDrawable(dp(48), getThemedColor(Theme.key_chat_editMediaButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_chat_editMediaButton));
+        pickerViewSendDrawable = CustomFab.createFabBackground(48, getThemedColor(Theme.key_chat_editMediaButton), getThemedColor(Theme.key_dialogFloatingButtonPressed));
         pickerViewSendButton.setBackgroundDrawable(pickerViewSendDrawable);
         pickerViewSendButton.setImageResource(R.drawable.msg_input_send_mini);
         pickerViewSendButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_dialogFloatingIcon), PorterDuff.Mode.MULTIPLY));
@@ -13236,9 +13240,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         setMenuItemIcon(false, true);
 
         boolean noforwards = messageObject != null && (MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId()) || (messageObject.messageOwner != null && messageObject.messageOwner.noforwards) || messageObject.hasRevealedExtendedMedia());
-        if (BuildVars.DEBUG_VERSION) {
-            android.util.Log.d("NoForward", String.format("NoForward Value: %s", noforwards));
-        }
+        android.util.Log.d("NoForward", String.format("NoForward Value: %s", noforwards));
         if (messageObject != null && messages == null) {
             if (messageObject.messageOwner != null && MessageObject.getMedia(messageObject.messageOwner) instanceof TLRPC.TL_messageMediaWebPage && MessageObject.getMedia(messageObject.messageOwner).webpage != null) {
                 TLRPC.WebPage webPage = MessageObject.getMedia(messageObject.messageOwner).webpage;
@@ -18021,7 +18023,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 zooming = false;
                 moving = false;
             } else if (draggingDown) {
-                if (Math.abs(dragY - ev.getY()) > getContainerViewHeight() / 6.0f) {
+                /*if (Math.abs(dragY - ev.getY()) > getContainerViewHeight() / 6.0f) {
                     if (enableSwipeToPiP() && (dragY - ev.getY() > 0)) {
                         switchToPip(true);
                     } else {
@@ -18034,7 +18036,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     }
                     animateTo(1, 0, 0, false);
                 }
-                draggingDown = false;
+                draggingDown = false;*/
+                customDraggingHandle(ev);
             } else if (moving) {
                 float moveToX = translationX;
                 float moveToY = translationY;
@@ -19712,8 +19715,45 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private boolean enableSwipeToPiP() {
-        return false;
+        return (pipItem.getVisibility() == View.VISIBLE ||
+                (menuItem.getVisibility() == View.VISIBLE &&
+                        (menuItem.isSubItemVisible(5) || menuItem.isSubItemVisible(48)))) &&
+                OctoConfig.INSTANCE.swipeToPip.getValue() &&
+                pipAvailable &&
+                textureUploaded &&
+                videoPlayer != null &&
+                videoPlayer.getRepeatCount() == 0 &&
+                checkInlinePermissions() &&
+                !changingTextureView &&
+                !switchingInlineMode &&
+                !isInline;
     }
+
+    private void customDraggingHandle(MotionEvent motionEvent) {
+        if (velocityTracker == null) velocityTracker = VelocityTracker.obtain();
+        velocityTracker.computeCurrentVelocity(1000);
+
+        float yVelocity = velocityTracker.getYVelocity();
+        float dragDistance = Math.abs(dragY - motionEvent.getY());
+        float maxDragDistance = getContainerViewHeight() / 6.0f;
+        float minDragDistance = AndroidUtilities.getPixelsInCM(0.4f, false);
+        float minVelocity = AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y ? 1250 : 850;
+
+        if (dragDistance <= maxDragDistance && (dragDistance <= minDragDistance || Math.abs(yVelocity) < minVelocity)) {
+            if (pickerView.getVisibility() == View.VISIBLE) {
+                toggleActionBar(true, true);
+                toggleCheckImageView(true);
+            }
+            animateTo(1.0f, 0.0f, 0.0f, false);
+        } else if (!enableSwipeToPiP() || dragY - motionEvent.getY() <= 0.0f) {
+            closePhoto(true, false);
+        } else {
+            switchToPip(true);
+        }
+
+        draggingDown = false;
+    }
+
 
     @Override
     public boolean onDoubleTapEvent(MotionEvent e) {
@@ -20633,6 +20673,17 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private void drawCaptionBlur(Canvas canvas, BlurringShader.StoryBlurDrawer drawer, int bgColor, int overlayColor, boolean clip, boolean allowTransparent, boolean allowCrossfade) {
+        if (!LiteMode.isEnabled(LiteMode.FLAG_CHAT_BLUR)) {
+            if (!clip) {
+                canvas.drawColor(!allowTransparent
+                        ? 0xB2FFFFFF
+                        : (!allowCrossfade
+                        ? bgColor
+                        : ColorUtils.setAlphaComponent(bgColor, 153)));
+            }
+            return;
+        }
+
         if (BLUR_RENDERNODE()) {
             if (renderNode != null) {
                 if (drawer.renderNode == null) {
@@ -21857,6 +21908,16 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             if (photoViewerWebView != null) {
                 photoViewerWebView.setPlaybackSpeed(currentVideoSpeed);
+            }
+            double diff = currentVideoSpeed - Math.floor(currentVideoSpeed);
+            if ((diff == 0 || diff == 0.5) && !closeMenu) {
+                BaseFragment lastFragment = LaunchActivity.getLastFragment();
+                if (lastFragment != null && lastFragment.getContext() != null) {
+                    Vibrator v = (Vibrator) lastFragment.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                    if (v != null) {
+                        v.vibrate(100);
+                    }
+                }
             }
         }
         setMenuItemIcon(true, isFinal);

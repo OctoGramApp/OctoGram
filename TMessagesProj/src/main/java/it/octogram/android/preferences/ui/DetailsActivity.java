@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.preferences.ui;
 
 import android.annotation.SuppressLint;
@@ -528,11 +536,11 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == messageDateRow) {
                         long date = (long) messageObject.messageOwner.date * 1000;
                         CharSequence title = messageObject.scheduled ? LocaleController.getString(R.string.MessageScheduledDate) : LocaleController.getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.messageOwner.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == forwardMessageDateRow) {
                         long date = (long) messageObject.messageOwner.fwd_from.date * 1000;
                         CharSequence title = messageObject.scheduled ? LocaleController.getString(R.string.MessageScheduledDate) : LocaleController.getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.messageOwner.fwd_from.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.fwd_from.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == forwardUserNameRow) {
                         String full_name = fromForwardedUser.first_name;
                         if (fromForwardedUser.last_name != null) {
@@ -554,7 +562,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == repliedMessageDateRow) {
                         long date = (long) messageObject.replyMessageObject.messageOwner.date * 1000;
                         CharSequence title = messageObject.scheduled ? LocaleController.getString(R.string.MessageScheduledDate) : LocaleController.getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.replyMessageObject.messageOwner.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        textDetailCell.setTextAndValue(messageObject.replyMessageObject.messageOwner.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == repliedUserIdRow) {
                         textDetailCell.setTextAndValue(String.valueOf(fromRepliedUserInfo.userId), "ID", false);
                     } else if (position == repliedUserNameRow) {
@@ -594,7 +602,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                         textDetailCell.setTextAndValue(String.valueOf(messageObject.messageOwner.forwards), LocaleController.getString(R.string.ForwardsNumber), true);
                     } else if (position == messageDateEditedRow) {
                         long date = (long) messageObject.messageOwner.edit_date * 1000;
-                        textDetailCell.setTextAndValue(LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), LocaleController.getString(R.string.EditedDate), true);
+                        textDetailCell.setTextAndValue(LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), LocaleController.getString(R.string.EditedDate), true);
                     } else if (position == fileDuration) {
                         textDetailCell.setTextAndValue(durationString, LocaleController.getString(R.string.UserRestrictionsDuration), true);
                     } else if (position == fileFramerate) {

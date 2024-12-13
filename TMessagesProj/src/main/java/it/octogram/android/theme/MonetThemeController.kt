@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.theme
 
 import android.content.BroadcastReceiver
@@ -8,8 +16,8 @@ import android.os.Build
 import android.os.PatternMatcher
 import android.util.Log
 import androidx.annotation.RequiresApi
+import it.octogram.android.logs.OctoLogging
 import org.telegram.messenger.ApplicationLoader
-import org.telegram.messenger.FileLog
 import org.telegram.messenger.R
 import org.telegram.ui.ActionBar.Theme
 
@@ -131,7 +139,7 @@ object MonetThemeController {
         try {
             overlayChangeReceiver.unregister(context)
         } catch (e: IllegalArgumentException) {
-            FileLog.e(e)
+            OctoLogging.e(e)
         }
     }
 }

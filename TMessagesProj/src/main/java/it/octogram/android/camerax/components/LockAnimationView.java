@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -31,7 +31,7 @@ public class LockAnimationView extends LinearLayout {
     public LockAnimationView(Context context) {
         super(context);
         setGravity(Gravity.CENTER_HORIZONTAL);
-        var imageView = new AppCompatImageView(context) {
+        AppCompatImageView imageView = new AppCompatImageView(context) {
             float idleProgress;
             boolean incIdle;
             private final int lockColor = Theme.getColor(Theme.key_chat_messagePanelVoiceLock);

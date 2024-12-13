@@ -20205,7 +20205,7 @@ public class MessagesController extends BaseController implements NotificationCe
             TLRPC.RestrictionReason reason = reasons.get(a);
             if (ignoreRestrictionReasons != null && ignoreRestrictionReasons.contains(reason.reason)) continue;
             if ("sensitive".equals(reason.reason)) continue;
-            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
+            if ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                 return reason.text;
             }
         }
@@ -20219,7 +20219,7 @@ public class MessagesController extends BaseController implements NotificationCe
         for (int a = 0, N = reasons.size(); a < N; a++) {
             TLRPC.RestrictionReason reason = reasons.get(a);
             if (ignoreRestrictionReasons != null && ignoreRestrictionReasons.contains(reason.reason)) continue;
-            if ("all".equals(reason.platform) || !ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && "android".equals(reason.platform)) {
+            if ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                 if ("sensitive".equals(reason.reason)) return true;
             }
         }

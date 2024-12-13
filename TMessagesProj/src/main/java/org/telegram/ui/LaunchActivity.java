@@ -229,9 +229,11 @@ import java.util.zip.ZipInputStream;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.deeplink.DeepLinkManager;
 import it.octogram.android.icons.IconsResources;
+import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.theme.MonetThemeController;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.LanguageController;
@@ -573,7 +575,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 return;
             }
             if (position == 0) {
-                DrawerProfileCell profileCell = (DrawerProfileCell) view;
+                //DrawerProfileCell profileCell = (DrawerProfileCell) view;
+                DrawerProfileCell profileCell = (DrawerProfileCell) (view instanceof DrawerPreviewCell ? ((DrawerPreviewCell) view).getView() : view);
                 if (profileCell.isInAvatar(x, y)) {
                     openSettings(profileCell.hasAvatar());
                 } else {
@@ -1303,6 +1306,11 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                 ((DrawerProfileCell) child).animateStateChange(documentId);
                             }
                             ((DrawerProfileCell) child).setUser(user, drawerLayoutAdapter.isAccountsShown());
+                        } else if (child instanceof DrawerPreviewCell) {
+                            if (documentId != null) {
+                                ((DrawerPreviewCell) child).getView().animateStateChange(documentId);
+                            }
+                            ((DrawerPreviewCell) child).getView().setUser(user, drawerLayoutAdapter.isAccountsShown());
                         } else if (child instanceof DrawerActionCell && drawerLayoutAdapter.getId(sideMenu.getChildAdapterPosition(child)) == 15) {
                             boolean hasStatus = user != null && DialogObject.getEmojiStatusDocumentId(user.emoji_status) != 0;
                             ((DrawerActionCell) child).updateTextAndIcon(
@@ -5868,7 +5876,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             AndroidUtilities.runOnUIThread(() -> {
                 if (res.can_not_skip) {
                     showUpdateActivity(currentAccount, res, false);
-                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION) {
+                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                     drawerLayoutAdapter.notifyDataSetChanged();
 
                     File updateFile = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
@@ -7046,6 +7054,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         View firstChild = sideMenu.getChildAt(0);
                         if (firstChild instanceof DrawerProfileCell) {
                             ((DrawerProfileCell) firstChild).updateSunDrawable(toDark);
+                        } else if (firstChild instanceof DrawerPreviewCell) {
+                            ((DrawerPreviewCell) firstChild).getView().updateSunDrawable(toDark);
                         }
                     }
                     themeSwitchImageView.setImageBitmap(bitmap);
@@ -8709,6 +8719,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 View child = sideMenu.getChildAt(i);
                 if (child instanceof DrawerProfileCell) {
                     ((DrawerProfileCell) child).setUser(user, drawerLayoutAdapter.isAccountsShown());
+                } else if (child instanceof DrawerPreviewCell) {
+                    ((DrawerPreviewCell) child).getView().setUser(user, drawerLayoutAdapter.isAccountsShown());
                 }
             }
         }
@@ -8748,9 +8760,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             View child = sideMenu.getChildAt(i);
             if (child instanceof DrawerProfileCell) {
                 ((DrawerProfileCell) child).updateMiniIcon();
+            } else if (child instanceof DrawerPreviewCell) {
+                ((DrawerPreviewCell) child).getView().updateMiniIcon();
             }
         }
     }
+
+    public void reloadDrawerHeader() {
+        drawerLayoutAdapter.notifyItemChanged(0);
+    }
+
 
     public static void makeRipple(float x, float y, float intensity) {
         if (instance == null) return;

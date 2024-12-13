@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -93,12 +93,12 @@ public class ButtonEffectView extends RelativeLayout {
 
     private int getIconRes(int icon) {
         return switch (icon) {
-            case CameraXController.CAMERA_HDR -> R.drawable.round_hdr_on_black;
-            case CameraXController.CAMERA_NIGHT -> R.drawable.round_bedtime_black;
-            case CameraXController.CAMERA_AUTO -> R.drawable.round_auto_fix_high_black;
-            case CameraXController.CAMERA_WIDE -> R.drawable.round_landscape_black;
-            case CameraXController.CAMERA_BOKEH -> R.drawable.bokeh_mode;
-            case CameraXController.CAMERA_FACE_RETOUCH -> R.drawable.face_retouch;
+            case CameraXController.EffectFacing.CAMERA_HDR -> R.drawable.round_hdr_on_black;
+            case CameraXController.EffectFacing.CAMERA_NIGHT -> R.drawable.round_bedtime_black;
+            case CameraXController.EffectFacing.CAMERA_AUTO -> R.drawable.round_auto_fix_high_black;
+            case CameraXController.EffectFacing.CAMERA_WIDE -> R.drawable.round_landscape_black;
+            case CameraXController.EffectFacing.CAMERA_BOKEH -> R.drawable.bokeh_mode;
+            case CameraXController.EffectFacing.CAMERA_FACE_RETOUCH -> R.drawable.face_retouch;
             default -> R.drawable.round_photo_camera_black;
         };
     }

@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -18,6 +18,7 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ReactionsDoubleTapManageActivity;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.DcIdStyle;
@@ -33,6 +34,7 @@ import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
@@ -41,19 +43,19 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         ConfigProperty<Boolean> canShowSelectReaction = new ConfigProperty<>(null, OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue());
-        return OctoPreferences.builder(LocaleController.formatString("OctoGeneralSettings", R.string.OctoGeneralSettings))
-                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, LocaleController.formatString("OctoGeneralSettingsHeader", R.string.OctoGeneralSettingsHeader))
-                .category(LocaleController.formatString("PrivacyHeader", R.string.PrivacyHeader), category -> {
+        return OctoPreferences.builder(LocaleController.getString(R.string.OctoGeneralSettings))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, LocaleController.getString(R.string.OctoGeneralSettingsHeader))
+                .category(LocaleController.getString(R.string.PrivacyHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hidePhoneNumber)
-                            .title(LocaleController.formatString("HidePhoneNumber", R.string.HidePhoneNumber))
-                            .description(LocaleController.formatString("HidePhoneNumber_Desc", R.string.HidePhoneNumber_Desc))
+                            .title(LocaleController.getString(R.string.HidePhoneNumber))
+                            .description(LocaleController.getString(R.string.HidePhoneNumber_Desc))
                             .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideOtherPhoneNumber)
-                            .title(LocaleController.formatString("HideOtherPhoneNumber", R.string.HideOtherPhoneNumber))
-                            .description(LocaleController.formatString("HideOtherPhoneNumber_Desc", R.string.HideOtherPhoneNumber_Desc))
+                            .title(LocaleController.getString(R.string.HideOtherPhoneNumber))
+                            .description(LocaleController.getString(R.string.HideOtherPhoneNumber_Desc))
                             .showIf(OctoConfig.INSTANCE.hidePhoneNumber)
                             .postNotificationName(NotificationCenter.reloadInterface, NotificationCenter.mainUserInfoChanged)
                             .build());
@@ -91,7 +93,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
                             .title(LocaleController.getString(R.string.ShowRegistrationDate))
-                            .description(LocaleController.formatString("ShowRegistrationDate_Desc", R.string.ShowRegistrationDate_Desc))
+                            .description(LocaleController.getString(R.string.ShowRegistrationDate_Desc))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new ListRow.ListRowBuilder()
@@ -106,7 +108,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption().setId(DcIdStyle.TELEGRAM.getValue()).setItemTitle("Telegram"),
                                     new PopupChoiceDialogOption().setId(DcIdStyle.MINIMAL.getValue()).setItemTitle("Minimal")
                             ))
-                            .title(LocaleController.formatString("Style", R.string.Style))
+                            .title(LocaleController.getString(R.string.Style))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.dcIdType)
@@ -120,11 +122,11 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                             .setItemTitle("Telegram")
                                             .setItemDescription(LocaleController.getString(R.string.DcIdTypeDescriptionTelegram))
                             ))
-                            .title(LocaleController.formatString("Type", R.string.Type))
+                            .title(LocaleController.getString(R.string.Type))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                 })
-                .category(LocaleController.formatString("Chats", R.string.Chats), category -> {
+                .category(LocaleController.getString(R.string.Chats), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.defaultEmojiButtonAction)
                             .options(List.of(
@@ -149,77 +151,82 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.jumpToNextChannelOrTopic)
-                            .title(LocaleController.formatString(R.string.JumpToNextChannelOrTopic))
-                            .description(LocaleController.formatString(R.string.JumpToNextChannelOrTopic_Desc))
+                            .title(LocaleController.getString(R.string.JumpToNextChannelOrTopic))
+                            .description(LocaleController.getString(R.string.JumpToNextChannelOrTopic_Desc))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.swipeToPip)
+                            .title("Swipe to PIP")
+                            .description("Swipe up on a video to enter Picture-in-Picture mode.")
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideGreetingSticker)
-                            .title(LocaleController.formatString("HideGreetingSticker", R.string.HideGreetingSticker))
-                            .description(LocaleController.formatString("HideGreetingSticker_Desc", R.string.HideGreetingSticker_Desc))
+                            .title(LocaleController.getString(R.string.HideGreetingSticker))
+                            .description(LocaleController.getString(R.string.HideGreetingSticker_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideKeyboardOnScroll)
-                            .title(LocaleController.formatString("HideKeyboardOnScroll", R.string.HideKeyboardOnScroll))
-                            .description(LocaleController.formatString("HideKeyboardOnScroll_Desc", R.string.HideKeyboardOnScroll_Desc))
+                            .title(LocaleController.getString(R.string.HideKeyboardOnScroll))
+                            .description(LocaleController.getString(R.string.HideKeyboardOnScroll_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideSendAsChannel)
-                            .title(LocaleController.formatString("HideSendAsChannel", R.string.HideSendAsChannel))
-                            .description(LocaleController.formatString("HideSendAsChannel_Desc", R.string.HideSendAsChannel_Desc))
+                            .title(LocaleController.getString(R.string.HideSendAsChannel))
+                            .description(LocaleController.getString(R.string.HideSendAsChannel_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showOnlineStatus)
-                            .title(LocaleController.formatString("ShowOnlineStatus", R.string.ShowOnlineStatus))
-                            .description(LocaleController.formatString("ShowOnlineStatus_Desc", R.string.ShowOnlineStatus_Desc))
+                            .title(LocaleController.getString(R.string.ShowOnlineStatus))
+                            .description(LocaleController.getString(R.string.ShowOnlineStatus_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideCustomEmojis)
-                            .title(LocaleController.formatString("HideCustomEmojis", R.string.HideCustomEmojis))
-                            .description(LocaleController.formatString("HideCustomEmojis_Desc", R.string.HideCustomEmojis_Desc))
+                            .title(LocaleController.getString(R.string.HideCustomEmojis))
+                            .description(LocaleController.getString(R.string.HideCustomEmojis_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.openArchiveOnPull)
-                            .title(LocaleController.formatString("OpenArchiveOnPull", R.string.OpenArchiveOnPull))
-                            .description(LocaleController.formatString("OpenArchiveOnPull_Desc", R.string.OpenArchiveOnPull_Desc))
+                            .title(LocaleController.getString(R.string.OpenArchiveOnPull))
+                            .description(LocaleController.getString(R.string.OpenArchiveOnPull_Desc))
                             .build());
                 })
-                .category(LocaleController.formatString("MediaTab", R.string.MediaTab), category -> {
+                .category(LocaleController.getString(R.string.MediaTab), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.activeNoiseSuppression)
-                            .title(LocaleController.formatString("VoiceImprovements", R.string.VoiceImprovements))
-                            .description(LocaleController.formatString("VoiceImprovements_Desc", R.string.VoiceImprovements_Desc))
+                            .title(LocaleController.getString(R.string.VoiceImprovements))
+                            .description(LocaleController.getString(R.string.VoiceImprovements_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.playGifAsVideo)
-                            .title(LocaleController.formatString("PlayGifsAsVideo", R.string.PlayGifsAsVideo))
-                            .description(LocaleController.formatString("PlayGifsAsVideo_Desc", R.string.PlayGifsAsVideo_Desc))
+                            .title(LocaleController.getString(R.string.PlayGifsAsVideo))
+                            .description(LocaleController.getString(R.string.PlayGifsAsVideo_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.unmuteVideosWithVolumeDown)
-                            .title(LocaleController.formatString("UnmuteWithVolumeDown", R.string.UnmuteWithVolumeDown))
-                            .description(LocaleController.formatString("UnmuteWithVolumeDown_Desc", R.string.UnmuteWithVolumeDown_Desc))
+                            .title(LocaleController.getString(R.string.UnmuteWithVolumeDown))
+                            .description(LocaleController.getString(R.string.UnmuteWithVolumeDown_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.disableProximityEvents)
-                            .title(LocaleController.formatString("DisableProximitySensor", R.string.DisableProximitySensor))
+                            .title(LocaleController.getString(R.string.DisableProximitySensor))
                             .build());
                 })
-                .category(LocaleController.formatString("FilterAvailableTitle", R.string.FilterAvailableTitle), category -> {
+                .category(LocaleController.getString(R.string.FilterAvailableTitle), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideChatFolders)
-                            .title(LocaleController.formatString("HideAllChatFolders", R.string.HideAllChatFolders))
+                            .title(LocaleController.getString(R.string.HideAllChatFolders))
                             .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideOnlyAllChatsFolder)
                             .premium(!hasPremiumAccount())
-                            .title(LocaleController.formatString("HideAllChatFolder", R.string.HideAllChatFolder))
+                            .title(LocaleController.getString(R.string.HideAllChatFolder))
                             .showIf(OctoConfig.INSTANCE.hideChatFolders, true)
                             .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideFoldersWhenForwarding)
-                            .title(LocaleController.formatString("HideChatFoldersWhenForwarding", R.string.HideChatFoldersWhenForwarding))
+                            .title(LocaleController.getString(R.string.HideChatFoldersWhenForwarding))
                             .showIf(OctoConfig.INSTANCE.hideChatFolders, true)
                             .requiresRestart(true)
                             .build());
@@ -235,7 +242,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(DoubleTapAction.REACTION.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.Reaction))
-                                            .setItemIcon(R.drawable.msg_emoji_cat),
+                                            .setItemIcon(OctoUtils.getPetIconFixed()),
                                     new PopupChoiceDialogOption()
                                             .setId(DoubleTapAction.COPY.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.Copy))
@@ -270,7 +277,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(DoubleTapAction.REACTION.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.Reaction))
-                                            .setItemIcon(R.drawable.msg_emoji_cat),
+                                            .setItemIcon(OctoUtils.getPetIconFixed()),
                                     new PopupChoiceDialogOption()
                                             .setId(DoubleTapAction.COPY.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.Copy))
@@ -300,12 +307,20 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.PreferredActionOutgoing))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .icon(R.drawable.msg_emoji_cat)
+                            .icon(OctoUtils.getPetIconFixed())
                             .onClick(() -> fragment.presentFragment(new ReactionsDoubleTapManageActivity()))
                             .showIf(canShowSelectReaction)
                             .title(LocaleController.getString(R.string.CustomEmojiReaction))
                             .build());
                 })
+                .category("Replies", category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.rememberAllRepliesMessage)
+                            .title("Enable Reply Tracking")
+                            .description("Keep track of replies to specific messages for easier reference.")
+                            .build());
+                })
+
                 .category(LocaleController.getString(R.string.Notifications), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
@@ -324,13 +339,9 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
     }
 
     private boolean hasPremiumAccount() {
-        for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
-            UserConfig instance = UserConfig.getInstance(a);
-            if (instance.isClientActivated() && instance.isPremium()) {
-                return true;
-            }
-        }
-        return false;
+        return IntStream.range(0, UserConfig.MAX_ACCOUNT_COUNT)
+                .mapToObj(UserConfig::getInstance)
+                .anyMatch(instance -> instance.isClientActivated() && instance.isPremium());
     }
 
     private void checkSmartNotificationsEnabled(PreferencesFragment fragment) {
@@ -338,11 +349,11 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
             return;
         }
 
-        AlertDialog.Builder warningBuilder = new AlertDialog.Builder(fragment.getContext());
-        warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-        warningBuilder.setPositiveButton(LocaleController.getString(R.string.OK), (dialog1, which1) -> dialog1.dismiss());
-        warningBuilder.setMessage(LocaleController.getString(R.string.SmartNotificationsPvtDialogMessage));
-        AlertDialog alertDialog = warningBuilder.create();
-        alertDialog.show();
+        new AlertDialog.Builder(fragment.getContext())
+                .setTitle(LocaleController.getString(R.string.Warning))
+                .setMessage(LocaleController.getString(R.string.SmartNotificationsPvtDialogMessage))
+                .setPositiveButton(LocaleController.getString(R.string.OK), (dialog, which) -> dialog.dismiss())
+                .show();
     }
+
 }

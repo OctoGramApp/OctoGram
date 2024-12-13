@@ -4966,6 +4966,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             return super.onDragEvent(event);
         }
 
+        private final int MAX_DRAG_AND_DROP_FILE_COUNT = 1;
+
         @Override
         public boolean onTextContextMenuItem(int id) {
             if (id == android.R.id.paste) {
@@ -4978,6 +4980,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                         editPhoto(clipData.getItemAt(0).getUri(), clipData.getDescription().getMimeType(0));
                     }
                 }
+                BulletinFactory.of(parentFragment).createSimpleBulletin(R.raw.error, "Failed to access the clipboard.");
             }
             return super.onTextContextMenuItem(id);
         }

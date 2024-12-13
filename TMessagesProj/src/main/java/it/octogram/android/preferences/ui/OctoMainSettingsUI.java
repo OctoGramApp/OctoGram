@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -20,6 +20,7 @@ import android.widget.TextView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -27,6 +28,7 @@ import org.telegram.ui.LaunchActivity;
 
 import java.util.Locale;
 
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.OctoPreferences;
@@ -41,10 +43,14 @@ import it.octogram.android.utils.LogsMigrator;
 import it.octogram.android.utils.OctoUtils;
 
 public class OctoMainSettingsUI implements PreferencesEntry {
-
+    private final ConfigProperty<Boolean> logsOnlyPbeta = new ConfigProperty<>(null, false);
+    private void updateConfigs() {
+        logsOnlyPbeta.updateValue(BuildVars.DEBUG_PRIVATE_VERSION);
+    }
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
-        var footer = AndroidUtilities.replaceTags(formatString(R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING)).toString();
+        updateConfigs();
+        var footer = AndroidUtilities.replaceTags(formatString(R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING));
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
                 .octoAnimation(getString(R.string.OctoMainSettingsHeader))
                 .category(getString(R.string.Settings), category -> {
@@ -120,6 +126,13 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .icon(R.drawable.msg_secret_hw)
                             .title(getString(R.string.CrashHistory))
                             .description(getString(R.string.CrashHistory_Desc))
+                            .build());
+                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new OctoLogsActivity()))
+                            .icon(R.drawable.msg_log)
+                            .title("OctoGram Logs")
+                            .description("View and share OctoGram Logs")
+                            .showIf(logsOnlyPbeta)
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://%s/privacy", OctoUtils.getDomain()))))

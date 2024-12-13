@@ -1,12 +1,14 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
  */
 
 package it.octogram.android.preferences.rows;
+
+import org.telegram.messenger.LocaleController;
 
 import it.octogram.android.ConfigProperty;
 
@@ -25,6 +27,11 @@ public abstract class BaseRowBuilder<T> {
         return this;
     }
 
+    public BaseRowBuilder<T> title(int val) {
+        title = LocaleController.getString(val);
+        return this;
+    }
+
     public BaseRowBuilder<T> title(CharSequence val) {
         title = val;
         return this;
@@ -32,6 +39,11 @@ public abstract class BaseRowBuilder<T> {
 
     public BaseRowBuilder<T> description(String val) {
         description = val;
+        return this;
+    }
+
+    public BaseRowBuilder<T> description(int val) {
+        description = LocaleController.getString(val);
         return this;
     }
 

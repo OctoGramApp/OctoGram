@@ -279,6 +279,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -290,6 +291,7 @@ import it.octogram.android.CustomEmojiController;
 import it.octogram.android.DoubleTapAction;
 import it.octogram.android.MediaFilter;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
 import it.octogram.android.TranslatorMode;
 import it.octogram.android.preferences.ui.DetailsActivity;
 import it.octogram.android.preferences.ui.components.CustomMediaFilterDialog;
@@ -847,6 +849,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private int startFromVideoMessageId;
     private boolean needSelectFromMessageId;
     private int returnToMessageId;
+    private final Stack<Integer> returnToMessageIdsStack = new Stack<>();
     private int returnToLoadIndex;
     private int createUnreadMessageAfterId;
     private boolean createUnreadMessageAfterIdLoading;
@@ -6601,6 +6604,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         pagedownButton.setVisibility(View.INVISIBLE);
         contentView.addView(pagedownButton, LayoutHelper.createFrame(66, 61, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, -3, 5));
         pagedownButton.setOnClickListener(view -> onPageDownClicked());
+        if (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue()) {
+            pagedownButton.setOnLongClickListener(view -> {
+                returnToMessageId = 0;
+                returnToMessageIdsStack.clear();
+                onPageDownClicked();
+                return true;
+            });
+        }
         ScaleStateListAnimator.apply(pagedownButton, .13f, 2f);
 
         searchUpButton = new FrameLayout(context);
@@ -10043,7 +10054,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         };
         if (createUnreadMessageAfterId != 0) {
             scrollToMessageId(createUnreadMessageAfterId, 0, false, returnToLoadIndex, true, 0, inCaseLoading);
-        } else if (returnToMessageId > 0) {
+        } else if (returnToMessageId > 0 || (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue() && !returnToMessageIdsStack.empty())) {
+            if (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue() && !returnToMessageIdsStack.empty()) 
+                returnToMessageId = returnToMessageIdsStack.pop();
             scrollToMessageId(returnToMessageId, 0, true, returnToLoadIndex, true, 0, inCaseLoading);
         } else {
             scrollToLastMessage(false, true, inCaseLoading);
@@ -10206,6 +10219,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
             }
         });
+
         if (scrimView != null && scrimViewAlpha <= 0f) {
             setScrimView(null);
         }
@@ -15864,6 +15878,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         }
         returnToMessageId = fromMessageId;
+        if (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue() && fromMessageId > 0)
+            returnToMessageIdsStack.push(returnToMessageId);
         returnToLoadIndex = loadIndex;
         needSelectFromMessageId = select;
     }
@@ -38434,7 +38450,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 };
                 BoostDialogs.openGiveAwayStatusDialog(messageObject, progressDialogCurrent, getContext(), getResourceProvider());
             } else if (type == 21) {
-                if (ApplicationLoader.isStandaloneBuild()) {
+                if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                     if (LaunchActivity.instance != null) {
                         if (progressDialogCurrent != null) {
                             progressDialogCurrent.cancel(true);

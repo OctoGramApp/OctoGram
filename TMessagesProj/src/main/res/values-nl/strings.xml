@@ -700,7 +700,7 @@
     <string name="AuthAnotherClientUrl">Met deze code kun je iemand toestaan om in te loggen op je Telegram-account\n\nOm de login te bevestigen ga naar, Instellingen &gt; Apparaten &gt; Scan QR en scan de code.</string>
     <string name="QRCodePermissionNoCameraWithHint">**Telegram** heeft toegang tot je camera nodig, zodat je QR-codes kunt scannen. Tik op Instellingen &gt; Machtigingen en schakel **Camera** aan.</string>
     <string name="SetProfilePhoto">Profielfoto instellen</string>
-    <string name="AppUpdate">Update uitvoeren</string>
+    <string name="AppUpdate">Update OctoGram</string>
     <string name="AppUpdateVersionAndSize">Versie %1$s • %2$s</string>
     <string name="AppUpdateDownloading">Aan het downloaden... %1$d%%</string>
     <string name="AppUpdateNow">Update uitvoeren</string>

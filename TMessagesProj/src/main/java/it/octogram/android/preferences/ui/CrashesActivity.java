@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -31,7 +31,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -68,6 +67,7 @@ import java.util.stream.Collectors;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.CrashOption;
 import it.octogram.android.crashlytics.Crashlytics;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.CrashLogCell;
 
 @SuppressWarnings("rawtypes")
@@ -260,7 +260,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 lines.add(line);
             }
         } catch (IOException e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
             BulletinFactory.of(CrashesActivity.this).createErrorBulletin(getString(R.string.CouldNotCopyFile)).show();
         }
 
@@ -512,7 +512,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                         int unableToDeleteCount = 0;
                         for (File file : toDelete) {
                             if (!file.delete()) {
-                                FileLog.e("Could not delete file " + file);
+                                OctoLogging.e("Could not delete file " + file);
                                 unableToDeleteCount++;
                             }
                         }
@@ -523,12 +523,12 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
                         String message;
                         if (toDelete.size() > 1) {
-                            message = formatString("CrashesDeleted", R.string.CrashesDeleted, toDelete.size());
+                            message = formatString(R.string.CrashesDeleted, toDelete.size());
                         } else {
-                            message = formatString("CrashDeleted", R.string.CrashDeleted);
+                            message = getString(R.string.CrashDeleted);
                         }
                         if (unableToDeleteCount > 0) {
-                            message = formatString("CrashesUnableToDelete", R.string.CrashesUnableToDelete, unableToDeleteCount);
+                            message = formatString(R.string.CrashesUnableToDelete, unableToDeleteCount);
                             AlertDialog.Builder unableToDeleteBuilder = new AlertDialog.Builder(context);
                             unableToDeleteBuilder.setTitle(getString(R.string.BuildAppName));
                             unableToDeleteBuilder.setMessage(message);

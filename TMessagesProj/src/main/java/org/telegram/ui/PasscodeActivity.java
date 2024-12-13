@@ -94,6 +94,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.preferences.ui.custom.doublebottom.AccountProtectionIntro;
 import it.octogram.android.preferences.ui.custom.doublebottom.AccountProtectionSettings;
@@ -695,13 +696,14 @@ public class PasscodeActivity extends BaseFragment implements NotificationCenter
                     animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonIcon, "translationZ", AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
                     animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonIcon, "translationZ", AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
                     floatingButtonContainer.setStateListAnimator(animator);
-                    floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+                    floatingButtonContainer.setOutlineProvider(new OutlineProvider());
+                    /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                         @SuppressLint("NewApi")
                         @Override
                         public void getOutline(View view, Outline outline) {
                             outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                         }
-                    });
+                    });*/
                 }
                 floatingAutoAnimator = VerticalPositionAutoAnimator.attach(floatingButtonContainer);
                 frameLayout.addView(floatingButtonContainer, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 56 : 60, Build.VERSION.SDK_INT >= 21 ? 56 : 60, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 24, 16));

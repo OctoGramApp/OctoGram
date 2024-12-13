@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -53,8 +53,8 @@ public class EffectSelectorView extends LinearLayout {
         for (int i = 0; i < getChildCount(); i++) {
             LinearLayout linearLayout = (LinearLayout) getChildAt(i);
             ButtonEffectView buttonEffect = (ButtonEffectView) linearLayout.getChildAt(0);
-            buttonEffect.toggleButton(buttonEffect.cameraType == CameraXController.CAMERA_NONE, false);
-            if (buttonEffect.cameraType == CameraXController.CAMERA_NONE) {
+            buttonEffect.toggleButton(buttonEffect.cameraType == CameraXController.EffectFacing.CAMERA_NONE, false);
+            if (buttonEffect.cameraType == CameraXController.EffectFacing.CAMERA_NONE) {
                 oldSelection = buttonEffect;
             }
         }
@@ -72,7 +72,7 @@ public class EffectSelectorView extends LinearLayout {
                 linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
                 linearLayout.setGravity(Gravity.CENTER);
                 ButtonEffectView buttonEffect = getButtonEffectView(effect);
-                if (effect == CameraXController.CAMERA_NONE) {
+                if (effect == CameraXController.EffectFacing.CAMERA_NONE) {
                     oldSelection = buttonEffect;
                 }
                 linearLayout.addView(buttonEffect, LayoutHelper.createLinear(50, 50));
@@ -97,7 +97,7 @@ public class EffectSelectorView extends LinearLayout {
                 }
             }
         };
-        buttonEffect.toggleButton(effect == CameraXController.CAMERA_NONE, false);
+        buttonEffect.toggleButton(effect == CameraXController.EffectFacing.CAMERA_NONE, false);
         return buttonEffect;
     }
 
@@ -106,23 +106,23 @@ public class EffectSelectorView extends LinearLayout {
         Set<Integer> effectSet = new HashSet<>();
 
         if (cameraXView.isNightModeSupported()) {
-            effectSet.add(CameraXController.CAMERA_NIGHT);
+            effectSet.add(CameraXController.EffectFacing.CAMERA_NIGHT);
         }
         if (cameraXView.isAutoModeSupported()) {
-            effectSet.add(CameraXController.CAMERA_AUTO);
+            effectSet.add(CameraXController.EffectFacing.CAMERA_AUTO);
         }
-        effectSet.add(CameraXController.CAMERA_NONE);
+        effectSet.add(CameraXController.EffectFacing.CAMERA_NONE);
         if (cameraXView.isWideModeSupported()) {
-            effectSet.add(CameraXController.CAMERA_WIDE);
+            effectSet.add(CameraXController.EffectFacing.CAMERA_WIDE);
         }
         if (cameraXView.isHdrModeSupported()) {
-            effectSet.add(CameraXController.CAMERA_HDR);
+            effectSet.add(CameraXController.EffectFacing.CAMERA_HDR);
         }
         if (cameraXView.isBokehModeSupported()) {
-            effectSet.add(CameraXController.CAMERA_BOKEH);
+            effectSet.add(CameraXController.EffectFacing.CAMERA_BOKEH);
         }
         if (cameraXView.isFaceRetouchModeSupported()) {
-            effectSet.add(CameraXController.CAMERA_FACE_RETOUCH);
+            effectSet.add(CameraXController.EffectFacing.CAMERA_FACE_RETOUCH);
         }
 
         return List.copyOf(effectSet);

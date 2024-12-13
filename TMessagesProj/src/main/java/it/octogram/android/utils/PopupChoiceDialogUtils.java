@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -25,9 +25,12 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.RadioColorCell;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.SeekBarView;
 import org.telegram.ui.Components.Switch;
 
 import java.util.List;
+
+import it.octogram.android.preferences.ui.custom.FolderTypeSelector;
 
 public class PopupChoiceDialogUtils {
     public static Dialog createChoiceDialog(Activity parentActivity, List<PopupChoiceDialogOption> options, final CharSequence title, final int selected, final DialogInterface.OnClickListener listener) {
@@ -76,9 +79,15 @@ public class PopupChoiceDialogUtils {
 
                         tempLayout.addView(checkBoxView, LayoutHelper.createFrame(23, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.LEFT, 0, 0, 10, 0));
                         tempLayout.addView(checkedView, LayoutHelper.createFrame(23, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
+                    } else if (option.itemSliderIconUI != null) {
+                        tempLayout.addView(getSeekBar(builder.getContext(), option.itemSliderIconUI.getValue()), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
+                    } else if (option.tabStyleIconUI != null) {
+                        tempLayout.addView(new FolderTypeSelector(builder.getContext(), true, option.tabStyleIconUI), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
+                    } else if (option.tabModeIconUI != null) {
+                        tempLayout.addView(new FolderTypeSelector(builder.getContext(), true, option.tabModeIconUI), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
                     }
 
-                    cell.addView(tempLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT)));
+                    cell.addView(tempLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, option.tabStyleIconUI != null ? 44 : 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT)));
                 }
 
                 if (!option.clickable) {
@@ -134,9 +143,18 @@ public class PopupChoiceDialogUtils {
         return checkBoxView;
     }
 
+    private static SeekBarView getSeekBar(Context context, int sliderIconUI) {
+        SeekBarView sizeBar = new SeekBarView(context);
+        sizeBar.setReportChanges(false);
+        sizeBar.setPreviewingState(sliderIconUI);
+        sizeBar.setEnabled(false);
+        sizeBar.setProgress(0.5f);
+        return sizeBar;
+    }
+
     private static boolean hasEveryOptionIcon(List<PopupChoiceDialogOption> options) {
         for (PopupChoiceDialogOption option : options) {
-            if (option.itemIcon == 0 && option.itemSwitchIconUI == null && option.itemCheckboxIconUI == null) {
+            if (option.hasJustText()) {
                 return false;
             }
         }

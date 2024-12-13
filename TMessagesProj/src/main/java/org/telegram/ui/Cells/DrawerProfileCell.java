@@ -250,6 +250,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             }
         };
         nameTextView.setRightDrawableOnClick(e -> {
+            if (LaunchActivity.getLastFragment() instanceof PreferencesFragment) {
+                // ignore clicks when in octogram settings
+                return;
+            }
             if (lastUser != null && lastUser.premium) {
                 onPremiumClick();
             }
@@ -498,6 +502,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 if (switchingTheme) {
                     return;
                 }
+                if (LaunchActivity.getLastFragment() instanceof PreferencesFragment) {
+                    // ignore clicks when in octogram settings
+                    return;
+                }
                 switchingTheme = true;
                 SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("themeconfig", Activity.MODE_PRIVATE);
                 String dayThemeName = preferences.getString("lastDayTheme", "Blue");
@@ -537,6 +545,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 }
             });
             currentDarkThemeView.setOnLongClickListener(e -> {
+                if (LaunchActivity.getLastFragment() instanceof PreferencesFragment) {
+                    // ignore clicks when in octogram settings
+                    return true;
+                }
                 if (drawerLayoutContainer != null) {
                     drawerLayoutContainer.presentFragment(new ThemeActivity(ThemeActivity.THEME_TYPE_BASIC));
                     return true;
@@ -545,6 +557,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             });
 
             currentDarkThemeView.setOnLongClickListener(v -> {
+                if (LaunchActivity.getLastFragment() instanceof PreferencesFragment) {
+                    // ignore clicks when in octogram settings
+                    return true;
+                }
                 drawerLayoutContainer.closeDrawer();
                 LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
                 return true;
@@ -606,6 +622,10 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
 
             currentMiniIcon.setImageResource(lastStateFavoriteIcon);
             currentMiniIcon.setOnClickListener(v -> {
+                if (LaunchActivity.getLastFragment() instanceof PreferencesFragment) {
+                    // ignore clicks when in octogram settings
+                    return;
+                }
 
                 if (OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.TELEGRAM_BROWSER.getValue()) {
                     drawerLayoutContainer.closeDrawer(true);
@@ -640,6 +660,11 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
             });
 
             currentMiniIcon.setOnLongClickListener(v -> {
+                if (LaunchActivity.getLastFragment() instanceof PreferencesFragment) {
+                    // ignore clicks when in octogram settings
+                    return true;
+                }
+
                 drawerLayoutContainer.closeDrawer();
                 LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
                 return true;

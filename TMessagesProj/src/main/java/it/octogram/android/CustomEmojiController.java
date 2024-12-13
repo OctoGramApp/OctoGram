@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -31,9 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -60,6 +58,7 @@ import java.util.stream.Collectors;
 import it.octogram.android.fonts.FontFileReader;
 import it.octogram.android.http.FileDownloader;
 import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
 import it.octogram.android.utils.FileUnzip;
 
@@ -122,24 +121,20 @@ public class CustomEmojiController {
                     Matcher m = p.matcher(line);
                     if (m.find()) {
                         systemEmojiTypeface = Typeface.createFromFile("/system/fonts/" + m.group(1));
-                        if (BuildVars.DEBUG_VERSION) {
-                            FileLog.d("emoji font file fonts.xml = " + m.group(1));
-                        }
+                        OctoLogging.d("emoji font file fonts.xml = " + m.group(1));
                         break;
                     }
                 }
                 br.close();
             } catch (Exception e) {
-                FileLog.e(e);
+                OctoLogging.e(e);
             }
             if (systemEmojiTypeface == null) {
                 try {
                     systemEmojiTypeface = Typeface.createFromFile("/system/fonts/" + EMOJI_FONT_AOSP);
-                    if (BuildVars.DEBUG_VERSION) {
-                        FileLog.d("emoji font file = " + EMOJI_FONT_AOSP);
-                    }
+                    OctoLogging.d("emoji font file = " + EMOJI_FONT_AOSP);
                 } catch (Exception e) {
-                    FileLog.e(e);
+                    OctoLogging.e(e);
                     loadSystemEmojiFailed = true;
                 }
             }
@@ -230,7 +225,7 @@ public class CustomEmojiController {
                         } catch (JSONException ignored) {
                             statusLoading = FAILED;
                         }
-                        FileLog.e("Error loading emoji packs", e);
+                        OctoLogging.e("Error loading emoji packs", e);
                     } finally {
                         statusLoading = LOADED_REMOTE;
                         AndroidUtilities.runOnUIThread(listener::onLoaded);
@@ -801,7 +796,7 @@ public class CustomEmojiController {
                     return file;
                 }
             } catch (IOException e) {
-                FileLog.e(e);
+                OctoLogging.e(e);
             }
         } else if (path != null) {
             return new File(path);

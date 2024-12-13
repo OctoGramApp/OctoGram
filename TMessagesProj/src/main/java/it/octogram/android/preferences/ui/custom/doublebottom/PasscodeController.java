@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.preferences.ui.custom.doublebottom;
 
 import android.app.Activity;
@@ -6,13 +14,14 @@ import android.content.SharedPreferences;
 import android.util.Base64;
 
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.LaunchActivity;
 
 import java.nio.charset.StandardCharsets;
+
+import it.octogram.android.logs.OctoLogging;
 
 public class PasscodeController {
     private static final SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("OwlPasscode", Context.MODE_PRIVATE);
@@ -50,7 +59,7 @@ public class PasscodeController {
                     .putString("passcodeSalt" + accountId, Base64.encodeToString(passcodeSalt, Base64.DEFAULT))
                     .apply();
         } catch (Exception e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
     }
 
@@ -88,7 +97,7 @@ public class PasscodeController {
             String hash = Utilities.bytesToHex(Utilities.computeSHA256(bytes, 0, bytes.length));
             return passcodeHash.equals(hash);
         } catch (Exception e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
         return false;
     }

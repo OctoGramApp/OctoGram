@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.icons
 
 import org.telegram.messenger.R
@@ -69,7 +77,7 @@ class MaterialDesign3Icons {
             materialDesign3Icons.add(R.drawable.group_edit_profile to R.drawable.edit_24px)
             materialDesign3Icons.add(R.drawable.ic_ab_search to R.drawable.search_24px)
             materialDesign3Icons.add(R.drawable.ic_arrow_drop_down to R.drawable.arrow_drop_down_24px)
-            materialDesign3Icons.add(R.drawable.ic_call to R.drawable.edit_24px)
+            materialDesign3Icons.add(R.drawable.ic_call to R.drawable.m3_round_call_24)
             materialDesign3Icons.add(R.drawable.ic_chatlist_add_2 to R.drawable.chat_24px)
             materialDesign3Icons.add(R.drawable.ic_gallery_background to R.drawable.imagesmode_24px)
             materialDesign3Icons.add(R.drawable.ic_goinline to R.drawable.pip_24px)
@@ -396,12 +404,22 @@ class MaterialDesign3Icons {
             return icon
         }
 
-        fun getRandom(startingFrom: Int): Int {
-            if (getConversion(startingFrom) == startingFrom || startingFrom == R.drawable.popup_fixed_alert || startingFrom == R.drawable.popup_fixed_alert2 || startingFrom == R.drawable.popup_fixed_alert3) {
-                return startingFrom
+        fun getRandom(startingIcon: Int): Int {
+            if (shouldKeepOriginalIcon(startingIcon)) {
+                return startingIcon
             }
 
             return materialDesign3Icons.random().second
         }
+
+        private fun shouldKeepOriginalIcon(icon: Int): Boolean {
+            return (icon == getConversion(icon) || icon in fixedAlertIcons)
+        }
+
+        private val fixedAlertIcons = setOf(
+            R.drawable.popup_fixed_alert,
+            R.drawable.popup_fixed_alert2,
+            R.drawable.popup_fixed_alert3
+        )
     }
 }

@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -54,6 +54,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
         updateItemsVisibility();
 
         return OctoPreferences.builder(LocaleController.formatString(R.string.DrawerTitle))
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_openin, LocaleController.getString(R.string.Drawer_Test), () -> LaunchActivity.instance.drawerLayoutContainer.openDrawer(true)))
                 .category("Drawer", category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(drawerPreviewCell = new DrawerPreviewCell(context))
@@ -84,12 +85,12 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(this::reloadDrawerPreviewInstance)
                             .preferenceValue(OctoConfig.INSTANCE.drawerShowProfilePic)
-                            .title(LocaleController.formatString(R.string.DrawerShowProfilePic))
+                            .title(LocaleController.getString(R.string.DrawerShowProfilePic))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(this::reloadDrawerPreviewInstance)
                             .preferenceValue(OctoConfig.INSTANCE.drawerGradientBackground)
-                            .title(LocaleController.formatString(R.string.DrawerGradientBackground))
+                            .title(LocaleController.getString(R.string.DrawerGradientBackground))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.drawerFavoriteOption)
@@ -172,24 +173,32 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                         .preferenceValue(OctoConfig.INSTANCE.drawerBlurBackgroundLevel)
                         .showIf(canSelectBlurLevel)
                         .build()))
-                .category(LocaleController.getString(R.string.Style), category -> category.row(new CustomCellRow.CustomCellRowBuilder()
-                        .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
-                            @Override
-                            protected void onSelectedEvent(int eventSelected) {
-                                super.onSelectedEvent(eventSelected);
-                                OctoConfig.INSTANCE.eventType.updateValue(eventSelected);
+                .category(LocaleController.getString(R.string.Style), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
+                                @Override
+                                protected void onSelectedEvent(int eventSelected) {
+                                    super.onSelectedEvent(eventSelected);
+                                    OctoConfig.INSTANCE.eventType.updateValue(eventSelected);
 
-                                Theme.lastHolidayCheckTime = 0;
-                                Theme.dialogs_holidayDrawable = null;
+                                    Theme.lastHolidayCheckTime = 0;
+                                    Theme.dialogs_holidayDrawable = null;
 
-                                NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.mainUserInfoChanged);
-                                NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
+                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.mainUserInfoChanged);
+                                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
 
-                                drawerPreviewCell.updateMiniIcon();
-                                LaunchActivity.instance.reloadDrawerMiniIcon();
-                            }
-                        })
-                        .build()))
+                                    drawerPreviewCell.updateMiniIcon();
+                                    LaunchActivity.instance.reloadDrawerMiniIcon();
+                                }
+                            })
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> AndroidUtilities.runOnUIThread(() -> LaunchActivity.instance.reloadDrawerHeader()))
+                            .preferenceValue(OctoConfig.INSTANCE.drawerProfileAsBubble)
+                            .title(LocaleController.getString(R.string.DrawerHeaderAsBubble))
+                            .description(LocaleController.getString(R.string.DrawerHeaderAsBubble_Desc))
+                            .build());
+                })
                 .build();
     }
 

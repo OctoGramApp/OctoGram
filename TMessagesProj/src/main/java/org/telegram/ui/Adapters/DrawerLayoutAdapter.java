@@ -22,6 +22,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.DividerCell;
@@ -32,12 +33,16 @@ import org.telegram.ui.Cells.DrawerUserCell;
 import org.telegram.ui.Cells.EmptyCell;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SideMenultItemAnimator;
+import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 import it.octogram.android.MenuItemId;
+import it.octogram.android.OctoConfig;
 import it.octogram.android.drawer.MenuOrderController;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.utils.OctoUtils;
@@ -133,6 +138,10 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                         }
                     }
                 };
+
+                if (OctoConfig.INSTANCE.drawerProfileAsBubble.getValue()) {
+                    view = new DrawerPreviewCell(mContext, profileCell);
+                }
                 break;
             case 2:
                 view = new DividerCell(mContext);
@@ -159,7 +168,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
             case 0: {
-                DrawerProfileCell profileCell = (DrawerProfileCell) holder.itemView;
+                //DrawerProfileCell profileCell = (DrawerProfileCell) holder.itemView;
                 profileCell.setUser(MessagesController.getInstance(UserConfig.selectedAccount).getUser(UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId()), accountsShown);
                 break;
             }
@@ -266,8 +275,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         int helpIcon;
         if (eventType == 0) {
             newGroupIcon = R.drawable.msg_groups_ny;
-            //newSecretIcon = R.drawable.msg_secret_ny;
-            //newChannelIcon = R.drawable.msg_channel_ny;
+            newSecretIcon = R.drawable.msg_secret_ny;
+            newChannelIcon = R.drawable.msg_channel_ny;
             contactsIcon = R.drawable.msg_contacts_ny;
             callsIcon = R.drawable.msg_calls_ny;
             savedIcon = R.drawable.msg_saved_ny;
@@ -276,8 +285,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             helpIcon = R.drawable.msg_help_ny;
         } else if (eventType == 1) {
             newGroupIcon = R.drawable.msg_groups_14;
-            //newSecretIcon = R.drawable.msg_secret_14;
-            //newChannelIcon = R.drawable.msg_channel_14;
+            newSecretIcon = R.drawable.msg_secret_14;
+            newChannelIcon = R.drawable.msg_channel_14;
             contactsIcon = R.drawable.msg_contacts_14;
             callsIcon = R.drawable.msg_calls_14;
             savedIcon = R.drawable.msg_saved_14;
@@ -286,8 +295,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             helpIcon = R.drawable.msg_help;
         } else if (eventType == 2) {
             newGroupIcon = R.drawable.msg_groups_hw;
-            //newSecretIcon = R.drawable.msg_secret_hw;
-            //newChannelIcon = R.drawable.msg_channel_hw;
+            newSecretIcon = R.drawable.msg_secret_hw;
+            newChannelIcon = R.drawable.msg_channel_hw;
             contactsIcon = R.drawable.msg_contacts_hw;
             callsIcon = R.drawable.msg_calls_hw;
             savedIcon = R.drawable.msg_saved_hw;
@@ -296,8 +305,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             helpIcon = R.drawable.msg_help_hw;
         } else {
             newGroupIcon = R.drawable.msg_groups;
-            //newSecretIcon = R.drawable.msg_secret;
-            //newChannelIcon = R.drawable.msg_channel;
+            newSecretIcon = R.drawable.msg_secret;
+            newChannelIcon = R.drawable.msg_channel;
             contactsIcon = R.drawable.msg_contacts;
             callsIcon = R.drawable.msg_calls;
             savedIcon = R.drawable.msg_saved;
@@ -411,6 +420,11 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
     }
 
     public boolean click(View view, int position) {
+        if (LaunchActivity.getLastFragment() instanceof PreferencesFragment) {
+            // ignore clicks when in octogram settings
+            return true;
+        }
+
         position -= 2;
         if (accountsShown) {
             position -= getAccountRowsCount();

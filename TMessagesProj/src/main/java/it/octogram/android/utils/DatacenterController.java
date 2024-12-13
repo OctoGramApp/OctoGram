@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -9,6 +9,8 @@
 package it.octogram.android.utils;
 
 import android.os.SystemClock;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
@@ -19,10 +21,12 @@ import it.octogram.android.Datacenter;
 import it.octogram.android.http.StandardHTTPRequest;
 
 public class DatacenterController {
+    private static final String BASE_URL = "https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json";
+
     public static class DatacenterStatusChecker {
         private UpdateCallback updateCallback;
-        private boolean isRunning = false;
-        private boolean doneStopRunning = true;
+        private volatile boolean isRunning = false;
+        private volatile boolean doneStopRunning = true;
         private Thread thread;
 
         public void setOnUpdate(UpdateCallback updateCallback) {
@@ -38,7 +42,7 @@ public class DatacenterController {
                 public void run() {
                     while (isRunning) {
                         try {
-                            var url = String.format("https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json?token=%s",(int) (Math.random() * 10000));
+                            var url = String.format("%s?ms=%s", BASE_URL, (int) (Math.random() * 10000));
                             var obj = new JSONObject(new StandardHTTPRequest(url).request());
                             var listDatacenters = obj.getJSONArray("status");
                             int refreshTimeIn = obj.getInt("refresh_in_time");
@@ -91,15 +95,17 @@ public class DatacenterController {
         }
     }
 
-    public static class DCStatus {
-        public final int dcID, status, ping, lastDown, lastLag;
-
-        DCStatus(int dcID, int status, int ping, int lastDown, int lastLag) {
-            this.dcID = dcID;
-            this.status = status;
-            this.ping = ping;
-            this.lastDown = lastDown;
-            this.lastLag = lastLag;
+    public record DCStatus(int dcID, int status, int ping, int lastDown, int lastLag) {
+        @NonNull
+        @Override
+        public String toString() {
+            return "DCStatus{" +
+                    "dcID=" + dcID +
+                    ", status=" + status +
+                    ", ping=" + ping +
+                    ", lastDown=" + lastDown +
+                    ", lastLag=" + lastLag +
+                    '}';
         }
     }
 }

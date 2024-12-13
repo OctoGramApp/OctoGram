@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -40,6 +40,8 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
+import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
@@ -146,6 +148,20 @@ public class PreferencesFragment extends BaseFragment {
         this.preferences = preferences;
     }
 
+    private void loadContextMenu() {
+        if (!preferences.elements().isEmpty()) {
+            ActionBarMenu menu = actionBar.createMenu();
+
+            int i = -1;
+            ActionBarMenuItem menuItem = menu.addItem(++i, R.drawable.ic_ab_other);
+            menuItem.setContentDescription(LocaleController.getString(R.string.AccDescrMoreOptions));
+
+            for (OctoPreferences.OctoContextMenuElement element : preferences.elements()) {
+                menuItem.addSubItem(++i, element.icon, element.title);
+            }
+        }
+    }
+
     @Override
     public boolean onFragmentCreate() {
         super.onFragmentCreate();
@@ -173,9 +189,16 @@ public class PreferencesFragment extends BaseFragment {
             public void onItemClick(int id) {
                 if (id == -1) {
                     finishFragment();
+                } else if (id > 0) {
+                    OctoPreferences.OctoContextMenuElement element = preferences.elements().get(id - 1);
+                    if (element != null) {
+                        element.run.run();
+                    }
                 }
             }
         });
+
+        loadContextMenu();
 
         listAdapter = new ListAdapter();
 

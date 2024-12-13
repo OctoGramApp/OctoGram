@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.preferences.ui.custom;
 
 import android.animation.ValueAnimator;
@@ -21,7 +29,6 @@ import androidx.viewpager.widget.ViewPager;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -45,6 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 
 public class DeleteAccountBottomSheet extends BottomSheet {
@@ -88,7 +96,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                     };
                     scroller.set(this, scroller1);
                 } catch (Exception e) {
-                    FileLog.e(e);
+                    OctoLogging.e(e);
                 }
             }
         };

@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -41,38 +41,44 @@ import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.CustomActionBarTitleBottomSheet;
 import it.octogram.android.utils.ExpandableRowsOption;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
-/**
- * @noinspection deprecation
- */
 public class OctoAppearanceUI implements PreferencesEntry {
+
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         ConfigProperty<Boolean> showCustomTitleRow = new ConfigProperty<>(null, OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
-
-        return OctoPreferences.builder(LocaleController.formatString(R.string.Appearance))
-                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, LocaleController.formatString("OctoAppearanceSettingsHeader", R.string.OctoAppearanceSettingsHeader))
+        return OctoPreferences.builder(LocaleController.getString(R.string.Appearance))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, LocaleController.getString(R.string.OctoAppearanceSettingsHeader))
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI())))
                         .icon(R.drawable.msg_groups)
                         .isNew(NewFeaturesBadgeId.CHATS_BADGE.getId())
-                        .title(getString("ChatTitle", R.string.ChatTitle))
-                        .description(getString("Chat_Desc", R.string.Chat_Desc))
+                        .title(getString(R.string.ChatTitle))
+                        .description(getString(R.string.Chat_Desc))
                         .build()
                 )
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI())))
                         .icon(R.drawable.msg_map_type)
                         .isNew(NewFeaturesBadgeId.DRAWER_BADGE.getId())
-                        .title(getString("DrawerTitle", R.string.DrawerTitle))
-                        .description(getString("Drawer_Desc", R.string.Drawer_Desc))
+                        .title(getString(R.string.DrawerTitle))
+                        .description(getString(R.string.Drawer_Desc))
+                        .build()
+                )
+                .row(new TextDetailRow.TextDetailRowBuilder()
+                        .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI())))
+                        .icon(R.drawable.media_draw)
+                        .isNew(NewFeaturesBadgeId.DRAWER_BADGE.getId())
+                        .title(getString(R.string.AppTitleSettings))
+                        .description(getString(R.string.AppTitle_Desc))
                         .build()
                 )
                 .row(new ExpandableRows.ExpandableRowsBuilder()
                         .setId(ExpandableRowsIds.CONTEXT_MENU_ELEMENTS.getId())
                         .setIcon(R.drawable.msg_list)
-                        .setMainTitle(getString("ContextElements", R.string.ContextElements))
+                        .setMainTitle(getString(R.string.ContextElements))
                         .addRow(new ExpandableRowsOption()
                                 .setOptionTitle(getString(R.string.ClearFromCache))
                                 .setProperty(OctoConfig.INSTANCE.contextClearFromCache)
@@ -101,63 +107,67 @@ public class OctoAppearanceUI implements PreferencesEntry {
                         .build()
                 )
                 .row(new ShadowRow())
-                .category(getString("FontEmojisHeader", R.string.FontEmojisHeader), category -> {
+                .category(getString(R.string.FontEmojisHeader), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new EmojiPackSettings()))
                             .value(CustomEmojiController.getSelectedPackName())
-                            .icon(R.drawable.msg_emoji_cat)
-                            .title(getString("EmojiSets", R.string.EmojiSets))
+                            .icon(OctoUtils.getPetIconFixed())
+                            .title(getString(R.string.EmojiSets))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
                                 AndroidUtilities.clearTypefaceCache();
-                                fragment.rebuildAllFragmentsWithLast();
+                                Parcelable recyclerViewState = null;
+                                if (fragment.getListView().getLayoutManager() != null)
+                                    recyclerViewState = fragment.getListView().getLayoutManager().onSaveInstanceState();
+                                fragment.getParentLayout().rebuildAllFragmentViews(true, true);
+                                fragment.getListView().getLayoutManager().onRestoreInstanceState(recyclerViewState);
                             })
                             .icon(R.drawable.msg_text_outlined)
                             .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
-                            .title(getString("UseSystemFont", R.string.UseSystemFont))
+                            .title(getString(R.string.UseSystemFont))
                             .requiresRestart(true)
                             .build());
                 })
-                .category(LocaleController.formatString("InterfaceHeader", R.string.InterfaceHeader), category -> {
+                .category(LocaleController.getString(R.string.InterfaceHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showUserIconsInChatsList)
-                            .title(getString("ShowUserIconsInChatsList", R.string.ShowUserIconsInChatsList))
-                            .description(getString("ShowUserIconsInChatsList_Desc", R.string.ShowUserIconsInChatsList_Desc))
+                            .title(getString(R.string.ShowUserIconsInChatsList))
+                            .description(getString(R.string.ShowUserIconsInChatsList_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideStories)
                             .requiresRestart(true)
-                            .title(getString("HideStories", R.string.HideStories))
-                            .description(getString("HideStories_Desc", R.string.HideStories_Desc))
+                            .title(getString(R.string.HideStories))
+                            .description(getString(R.string.HideStories_Desc))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.actionBarTitleOption)
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarTitleOption.EMPTY.getValue())
-                                            .setItemTitle(getString("ActionBarTitleCustomEmpty", R.string.ActionBarTitleCustomEmpty)),
+                                            .setItemTitle(getString(R.string.ActionBarTitleCustomEmpty)),
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarTitleOption.APP_NAME.getValue())
-                                            .setItemTitle(getString("BuildAppName", R.string.BuildAppName)),
+                                            .setItemTitle(getString(R.string.BuildAppName)),
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarTitleOption.ACCOUNT_NAME.getValue())
-                                            .setItemTitle(getString("ActionBarTitleAccountName", R.string.ActionBarTitleAccountName)),
+                                            .setItemTitle(getString(R.string.ActionBarTitleAccountName)),
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarTitleOption.ACCOUNT_USERNAME.getValue())
-                                            .setItemTitle(getString("ActionBarTitleAccountUsername", R.string.ActionBarTitleAccountUsername)),
+                                            .setItemTitle(getString(R.string.ActionBarTitleAccountUsername)),
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarTitleOption.CUSTOM.getValue())
-                                            .setItemTitle(getString("ActionBarTitleCustom", R.string.ActionBarTitleCustom))
+                                            .setItemTitle(getString(R.string.ActionBarTitleCustom))
                             ))
                             .onSelected(() -> showCustomTitleRow.setValue(OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue()))
-                            .title(getString("ActionBarTitle", R.string.ActionBarTitle))
+                            .title(getString(R.string.ActionBarTitle))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> editCustomName(fragment, context))
                             .value(getCustomNameStatus())
                             .showIf(showCustomTitleRow)
-                            .title(getString("ActionBarTitleCustom", R.string.ActionBarTitleCustom))
+                            .title(getString(R.string.ActionBarTitleCustom))
                             .build()
                     );
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -171,18 +181,18 @@ public class OctoAppearanceUI implements PreferencesEntry {
                                     layoutManager.onRestoreInstanceState(recyclerViewState);
                             })
                             .preferenceValue(OctoConfig.INSTANCE.disableDividers)
-                            .title(LocaleController.formatString("HideDividers", R.string.HideDividers))
+                            .title(LocaleController.getString(R.string.HideDividers))
                             .build());
                 })
-                .category(getString("LocalOther", R.string.LocalOther), category -> {
+                .category(getString(R.string.LocalOther), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)
-                            .title(getString("ForcePacmanAnimation", R.string.ForcePacmanAnimation))
-                            .description(getString("ForcePacmanAnimation_Desc", R.string.ForcePacmanAnimation_Desc))
+                            .title(getString(R.string.ForcePacmanAnimation))
+                            .description(getString(R.string.ForcePacmanAnimation_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showSnowflakes)
-                            .title(getString("ShowSnowflakes", R.string.ShowSnowflakes))
+                            .title(getString(R.string.ShowSnowflakes))
                             .requiresRestart(true)
                             .build());
                 })
@@ -211,7 +221,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
     private String getCustomNameStatus() {
         String customName = OctoConfig.INSTANCE.actionBarCustomTitle.getValue();
         if (TextUtils.isEmpty(customName)) {
-            customName = getString("ActionBarTitleCustomEmpty", R.string.ActionBarTitleCustomEmpty);
+            customName = getString(R.string.ActionBarTitleCustomEmpty);
         }
 
         return customName;

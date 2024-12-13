@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.deeplink;
 
 import android.net.Uri;
@@ -31,12 +39,17 @@ import org.telegram.ui.SessionsActivity;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.DatacenterActivity;
+import it.octogram.android.preferences.ui.NavigationSettingsUI;
 import it.octogram.android.preferences.ui.OctoAppearanceUI;
 import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
+import it.octogram.android.preferences.ui.OctoChatsSettingsUI;
+import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
+import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import it.octogram.android.utils.BrowserUtils;
 
@@ -51,6 +64,7 @@ import it.octogram.android.utils.BrowserUtils;
  * directing the user to the appropriate fragments or activities.
  * Additionally, it manages the unlocking and display of new app icons
  * based on specific deep links.
+ * @noinspection deprecation
  */
 public class DeepLinkManager extends LaunchActivity {
     private static final String TAG = "DeepLinkManager";
@@ -67,6 +81,7 @@ public class DeepLinkManager extends LaunchActivity {
     public static boolean handleDeepLink(String deepLink) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             Log.d(TAG, "handleDeepLink: " + deepLink);
+            OctoLogging.d(TAG, "handleDeepLink: " + deepLink);
         }
         var fragment = getCurrentFragment();
         var deepLinkType = getDeepLinkType(deepLink);
@@ -92,6 +107,10 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI()));
                 return true;
             }
+            case DeepLinkDef.EXPERIMENTAL_NAVIGATION -> {
+                fragment.presentFragment(new NavigationSettingsUI());
+                return true;
+            }
             case DeepLinkDef.CAMERA -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoCameraSettingsUI()));
                 return true;
@@ -106,6 +125,18 @@ public class DeepLinkManager extends LaunchActivity {
             }
             case DeepLinkDef.APPEARANCE -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI()));
+                return true;
+            }
+            case DeepLinkDef.APPEARANCE_APP -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI()));
+                return true;
+            }
+            case DeepLinkDef.APPEARANCE_CHAT -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI()));
+                return true;
+            }
+            case DeepLinkDef.APPEARANCE_DRAWER -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
                 return true;
             }
             case DeepLinkDef.UPDATE -> {
@@ -123,6 +154,7 @@ public class DeepLinkManager extends LaunchActivity {
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             Log.d(TAG, "Deep link not recognized: " + deepLink);
+            OctoLogging.d(TAG, "Deep link not recognized: " + deepLink);
         }
         profileUserId = 0;
         return false;
@@ -215,6 +247,7 @@ public class DeepLinkManager extends LaunchActivity {
             } catch (NumberFormatException ignore) {
                 if (BuildVars.DEBUG_PRIVATE_VERSION) {
                     Log.e(TAG, "Invalid user ID in deep link: " + userId);
+                    OctoLogging.d(TAG, "Invalid user ID in deep link: " + userId);
                 }
             }
         }
@@ -242,6 +275,8 @@ public class DeepLinkManager extends LaunchActivity {
             return DeepLinkDef.YUKIGRAM;
         } else if (deepLink.equalsIgnoreCase("tg:experimental") || deepLink.equalsIgnoreCase("tg://experimental")) {
             return DeepLinkDef.EXPERIMENTAL;
+        } else if (deepLink.equalsIgnoreCase("tg:experimental/navigation") || deepLink.equalsIgnoreCase("tg://experimental/navigation")) {
+            return DeepLinkDef.EXPERIMENTAL_NAVIGATION;
         } else if (deepLink.equalsIgnoreCase("tg:camera") || deepLink.equalsIgnoreCase("tg://camera")) {
             return DeepLinkDef.CAMERA;
         } else if (deepLink.equalsIgnoreCase("tg:general") || deepLink.equalsIgnoreCase("tg://general")) {
@@ -250,6 +285,12 @@ public class DeepLinkManager extends LaunchActivity {
             return DeepLinkDef.OCTOSETTINGS;
         } else if (deepLink.equalsIgnoreCase("tg:appearance") || deepLink.equalsIgnoreCase("tg://appearance")) {
             return DeepLinkDef.APPEARANCE;
+        } else if (deepLink.equalsIgnoreCase("tg:appearance/app") || deepLink.equalsIgnoreCase("tg://appearance/app")) {
+            return DeepLinkDef.APPEARANCE_APP;
+        } else if (deepLink.equalsIgnoreCase("tg:appearance/chats") || deepLink.equalsIgnoreCase("tg://appearance/chats")) {
+            return DeepLinkDef.APPEARANCE_CHAT;
+        } else if (deepLink.equalsIgnoreCase("tg:appearance/drawer") || deepLink.equalsIgnoreCase("tg://appearance/drawer")) {
+            return DeepLinkDef.APPEARANCE_DRAWER;
         } else if (deepLink.equalsIgnoreCase("tg:update") || deepLink.equalsIgnoreCase("tg://update")) {
             return DeepLinkDef.UPDATE;
         } else if (deepLink.startsWith("tg:user") || deepLink.startsWith("tg://user")) {
@@ -284,6 +325,7 @@ public class DeepLinkManager extends LaunchActivity {
     public static void handleOpenProfileById(LaunchActivity launchActivity) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             Log.d(TAG, "handleOpenProfileById: " + profileUserId);
+            OctoLogging.d(TAG, "handleOpenProfileById: " + profileUserId);
         }
         if (profileUserId != 0) {
             Bundle args = new Bundle();
@@ -303,6 +345,7 @@ public class DeepLinkManager extends LaunchActivity {
     public static boolean handleMenuAction(@MenuAction int id, int currentAccount, LaunchActivity launchActivity) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             Log.d(TAG, "handleMenuAction: " + id);
+            OctoLogging.d(TAG, "handleMenuAction: " + id);
         }
         var fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
         var drawerLayoutContainer = launchActivity.drawerLayoutContainer;
@@ -364,6 +407,7 @@ public class DeepLinkManager extends LaunchActivity {
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             Log.d(TAG, "Menu action not recognized: " + id);
+            OctoLogging.d(TAG, "Menu action not recognized: " + id);
         }
         return false;
     }
@@ -401,5 +445,4 @@ public class DeepLinkManager extends LaunchActivity {
         });
         return fg;
     }
-
 }

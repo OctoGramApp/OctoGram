@@ -161,7 +161,7 @@
     <string name="HideOtherPhoneNumber">Hide other people\'s phone number</string>
     <string name="HideOtherPhoneNumber_Desc">Hide other people\'s phone number from their profile</string>
     <string name="InsteadPhoneNumber">Behavior</string>
-    <string name="ShowHiddenNumber">Show %s</string>
+    <string name="ShowHiddenNumber">Show \"%s\"</string>
     <string name="ShowFakePhoneNumber">Show fake phone number</string>
     <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile, like %s.</string>
     <string name="ShowUsernameAsPhoneNumber">Show username</string>
@@ -259,11 +259,15 @@
     <string name="ContextElements_Desc">Customize the elements in the context menu</string>
     <string name="AppearanceHiddenOptions">Some header-related options have been hidden because they are automatically handled by the centered title option.</string>
 
+    <string name="AppTitleSettings">App</string>
+    <string name="AppTitle_Desc">Customize the appearance of the app</string>
+
     <string name="ChatTitle">Chats</string>
     <string name="Chat_Desc">Customize the appearance of chats</string>
 
     <string name="DrawerTitle">Drawer</string>
     <string name="Drawer_Desc">Customize the appearance of the drawer</string>
+    <string name="Drawer_Test">Open</string>
     <string name="DrawerBackground">Background Type</string>
     <string name="DrawerBackgroundTransparent">Transparent</string>
     <string name="DrawerBackgroundWallpaper">Wallpaper</string>
@@ -279,6 +283,8 @@
     <string name="DrawerFavoriteOptionDefault">Default</string>
     <string name="DrawerFavoriteOptionNone">Empty</string>
     <string name="DrawerFavoriteOptionUnavailable">Since the Settings element is hidden by the drawer elements, the preferred option must necessarily be the settings one.</string>
+    <string name="DrawerHeaderAsBubble">Profile as bubble</string>
+    <string name="DrawerHeaderAsBubble_Desc">It will apply a modern touch to the drawer by showing the profile as bubble.</string>
 
     <string name="ShowUserIconsInChatsList">Show user icons in chats list</string>
     <string name="ShowUserIconsInChatsList_Desc">Show user icons in chats list near sender name in groups.</string>
@@ -345,6 +351,10 @@
     <string name="ImproveInterfaceCheckboxRounded">Rounded</string>
     <string name="ImproveInterfaceCheckboxSemiTransparent">Semi transparent</string>
     <string name="ImproveInterfaceCheckboxAlwaysTransparent1">Transparent</string>
+    <string name="ImproveInterfaceSlider">Select slider style</string>
+    <string name="ImproveInterfaceSliderDefault">Default</string>
+    <string name="ImproveInterfaceSliderModern">Modern</string>
+    <string name="ImproveInterfaceSliderAndroid">Android</string>
     <string name="ImproveInterfaceImmersivePopups">Use immersive popups</string>
     <string name="ImproveInterfaceImmersivePopups_Desc">More beveled edges and more space to display popup content.</string>
     <string name="ImproveInterfaceTitleCentered">Use centered title</string>
@@ -622,4 +632,32 @@
     <string name="ChatCamera">Camera</string>
     <string name="Style">Style</string>
     <string name="ForwardedMessage">Forwarded Message</string>
+
+    <!-- Squared Fab -->
+    <string name="SquaredFab">Squared FAB (Experimental)</string>
+    <string name="SquaredFab_Desc">Use squared FAB instead of rounded</string>
+
+    <!-- Manage Folders -->
+    <string name="ManageFolders">Manage Folders</string>
+
+    <!-- Folder Type -->
+    <string name="FolderType">Folder Type</string>
+    <string name="FolderTypeDefault">Default (Text Only)</string>
+    <string name="FolderTypeIconsOnly">Icons Only</string>
+    <string name="FolderTypeTextAndIcons">Text and Icons</string>
+
+    <!-- Folder Style -->
+    <string name="FolderStyle">Folder Style</string>
+    <string name="FolderStyleDefault">Default</string>
+    <string name="FolderStyleRounded">Rounded</string>
+    <string name="FolderStyleFloating">Floating</string>
+    <string name="FolderStyleTextOnly">Text Only</string>
+    <string name="FolderStyleChips">Chips</string>
+    <string name="FolderStylePills">Pills</string>
+    <string name="FolderStyleFull">Full</string>
+
+    <!-- Hide Unread Counter -->
+    <string name="HideUnreadCounter">Hide Unread Counter</string>
+    <string name="HideUnreadCounter_Desc">Hide the unread counter on the folder</string>
+
 </resources>

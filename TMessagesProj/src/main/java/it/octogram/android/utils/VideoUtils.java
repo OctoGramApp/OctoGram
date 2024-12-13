@@ -1,9 +1,9 @@
 /*
- * This is the source code of OwlGram for Android v. 2.8.x.
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
- * Copyright Laky64, 2021-2023.
+ * Copyright OctoGram, 2023-2024.
  */
 package it.octogram.android.utils;
 

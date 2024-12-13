@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils;
 
 import com.google.android.exoplayer2.util.Log;
@@ -184,7 +192,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXPerformanceMode.getKey(), R.string.PerformanceMode));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraXResolution.getKey(), R.string.CurrentCameraXResolution));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.startWithRearCamera.getKey(), R.string.StartWithRearCamera));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableCameraPreview.getKey(), R.string.DisableCameraPreview));
+        // category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableCameraPreview.getKey(), R.string.DisableCameraPreview));
     }
 
     private void fillExperimentsCategory(SettingsScanCategory category) {

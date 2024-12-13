@@ -52,6 +52,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import it.octogram.android.StoreUtils;
 import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.tgastandaloneexport.UpdateAppAlertDialog;
 import it.octogram.android.tgastandaloneexport.UpdateLayout;
@@ -282,7 +283,7 @@ public class ApplicationLoader extends Application {
                         break;
                     default:
                     case 9:
-                        if (ApplicationLoader.isStandaloneBuild()) {
+                        if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
                             abi = "direct " + Build.CPU_ABI + " " + Build.CPU_ABI2;
                         } else {
                             abi = "universal " + Build.CPU_ABI + " " + Build.CPU_ABI2;

@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -74,8 +74,8 @@ public class OctoTranslatorUI implements PreferencesEntry {
             canSelectProvider.setValue(showButtonBool.getValue());
         }
 
-        return OctoPreferences.builder(LocaleController.formatString(R.string.Translator))
-                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.TRANSLATOR, true, LocaleController.formatString("TranslatorHeader", R.string.TranslatorHeader))
+        return OctoPreferences.builder(LocaleController.getString(R.string.Translator))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.TRANSLATOR, true, LocaleController.getString(R.string.TranslatorHeader))
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onClick(() -> {
                             controller.setContextTranslateEnabled(!showButtonBool.getValue());

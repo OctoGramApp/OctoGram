@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import it.octogram.android.CameraPreview;
 import it.octogram.android.CameraType;
 import it.octogram.android.CameraXResolution;
 import it.octogram.android.ConfigProperty;
@@ -142,10 +143,21 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.StartWithRearCamera))
                             .description(getString(R.string.StartWithRearCamera_Desc))
                             .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.disableCameraPreview)
-                            .title(getString(R.string.DisableCameraPreview))
-                            .description(getString(R.string.DisableCameraPreview_Desc))
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.cameraPreview)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(CameraPreview.DEFAULT)
+                                            .setItemTitle("Default"),
+                                    /*TODO: new PopupChoiceDialogOption()
+                                            .setId(CameraPreview.FLOATING)
+                                            .setItemTitle("Floating"),*/
+                                    new PopupChoiceDialogOption()
+                                            .setId(CameraPreview.BOTTOM_BAR)
+                                            .setItemTitle("Bottom Bar"))
+                            )
+                            .title("Camera Button Position")
+                            .description("Choose the position of the camera button")
                             .build());
                 })
                 .build();
@@ -166,5 +178,4 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
             OctoConfig.INSTANCE.cameraXZeroShutter.updateValue(false);
         }
     }
-
 }

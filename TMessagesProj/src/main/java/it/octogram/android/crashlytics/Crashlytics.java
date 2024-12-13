@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -8,7 +8,7 @@
 
 package it.octogram.android.crashlytics;
 
-import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -23,7 +23,6 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationsController;
 import org.telegram.messenger.R;
@@ -40,15 +39,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.NotificationColorize;
 import it.octogram.android.utils.OctoUtils;
 
-/**
- * @noinspection deprecation
- */
 public class Crashlytics {
 
     private final static File filesDir = OctoUtils.getLogsDir();
@@ -68,33 +66,41 @@ public class Crashlytics {
         String stacktrace = result.toString();
         try {
             saveCrashLogs(stacktrace);
-        } catch (IOException | IllegalAccessException ignored) {
-        }
+        } catch (IOException | IllegalAccessException ignored) {}
         printWriter.close();
 
 
         Intent intent = new Intent(ApplicationLoader.applicationContext, LaunchActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.applicationContext)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            var channel = new NotificationChannel(
+                    NotificationsController.OTHER_NOTIFICATIONS_CHANNEL,
+                    "Other Notifications",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            NotificationManager notificationManager = ApplicationLoader.applicationContext.getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(
+                ApplicationLoader.applicationContext,
+                NotificationsController.OTHER_NOTIFICATIONS_CHANNEL
+        )
                 .setSmallIcon(R.drawable.notification)
                 .setContentTitle("OctoGram just crashed!")
                 .setContentText("Sorry about that!")
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(stacktrace))
                 .setAutoCancel(true)
                 .setColor(NotificationColorize.parseNotificationColor())
-                .setContentIntent(pendingIntent);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            builder.setPriority(NotificationManager.IMPORTANCE_HIGH);
-        } else {
-            builder.setPriority(Notification.PRIORITY_HIGH);
-        }
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationsController.checkOtherNotificationsChannel();
-            builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
-        }
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(ApplicationLoader.applicationContext);
-        notificationManager.notify(1278927891, builder.build());
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(ApplicationLoader.applicationContext);
+        notificationManagerCompat.notify(1278927891, builder.build());
 
         exceptionHandler.uncaughtException(t, e);
     }
@@ -112,16 +118,33 @@ public class Crashlytics {
     }
 
     public static String getSystemInfo(boolean includeConfiguration) throws IllegalAccessException {
-        String baseInfo = LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()) + "\n\n" +
-                "App Version: " + BuildVars.BUILD_VERSION_STRING + " (" + BuildConfig.BUILD_VERSION + ")\n" +
-                "Base Version: " + BuildVars.TELEGRAM_VERSION_STRING + " (" + BuildVars.TELEGRAM_BUILD_VERSION + ")\n" +
-                "Commit: " + BuildConfig.GIT_COMMIT_HASH + "\n" +
-                "Device: " + Build.MANUFACTURER + " " + Build.MODEL + "\n" +
-                "OS Version: " + Build.VERSION.RELEASE + "\n" +
-                "Google Play Services: " + ApplicationLoader.hasPlayServices + "\n" +
-                "Performance Class: " + getPerformanceClassString() + "\n" +
-                "Locale: " + LocaleController.getSystemLocaleStringIso639() + "\n" +
-                "Language CW: " + Resources.getSystem().getConfiguration().locale.getLanguage();
+        var baseInfo = MessageFormat.format(
+                """
+                        {0}
+
+                        App Version: {1} ({2})
+                        Base Version: {3} ({4})
+                        Commit: {5}
+                        Device: {6} {7}
+                        OS Version: {8}
+                        Google Play Services: {9}
+                        Performance Class: {10}
+                        Locale: {11}
+                        Language CW: {12}""",
+                LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()),
+                BuildVars.BUILD_VERSION_STRING,
+                BuildConfig.BUILD_VERSION,
+                BuildVars.TELEGRAM_VERSION_STRING,
+                BuildVars.TELEGRAM_BUILD_VERSION,
+                BuildConfig.GIT_COMMIT_HASH,
+                Build.MANUFACTURER,
+                Build.MODEL,
+                Build.VERSION.RELEASE,
+                ApplicationLoader.hasPlayServices,
+                getPerformanceClassString(),
+                LocaleController.getSystemLocaleStringIso639(),
+                Resources.getSystem().getConfiguration().locale.getLanguage()
+        );
 
         if (includeConfiguration) {
             baseInfo += "\nConfiguration: " + getOctoConfiguration() + "\n";
@@ -166,7 +189,7 @@ public class Crashlytics {
     public static void deleteCrashLogs() {
         for (File file : getArchivedCrashFiles()) {
             if (!file.delete()) {
-                FileLog.e("Failed to delete file: " + file.getAbsolutePath());
+                OctoLogging.e("Failed to delete file: " + file.getAbsolutePath());
             }
         }
     }
@@ -184,7 +207,7 @@ public class Crashlytics {
 
             return line.replace(" ", "_").replace(",", "").replace(":", "_");
         } catch (IOException e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
             return "null";
         }
     }
@@ -202,7 +225,7 @@ public class Crashlytics {
         if (file.exists()) {
             File archived = new File(filesDir, getLatestCrashDate() + ".log");
             if (!file.renameTo(archived)) {
-                FileLog.e("Failed to archive file: " + file.getAbsolutePath());
+                OctoLogging.e("Failed to archive file: " + file.getAbsolutePath());
             }
         }
     }

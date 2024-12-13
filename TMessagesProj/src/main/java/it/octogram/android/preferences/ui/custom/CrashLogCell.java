@@ -1,6 +1,6 @@
 /*
- * This is the source code of OctoGram for Android v.2.0.x
- * It is licensed under GNU GPL v. 2 or later.
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
  *
  * Copyright OctoGram, 2023-2024.
@@ -41,12 +41,6 @@ public class CrashLogCell extends LinearLayout {
 
     private boolean needDivider = false;
     private File crashLog;
-
-    private static final float RELATIVE_LAYOUT_SIZE_DP = 65;
-    private static final float IMAGEVIEW_SIZE_DP = 16;
-    private static final float CHECKBOX_SIZE_DP = 16;
-    private static final float PADDING_DP = 13;
-    private static final float MARGIN_DP = 40;
 
     public CrashLogCell(@NonNull Context context) {
         super(context);
@@ -95,7 +89,7 @@ public class CrashLogCell extends LinearLayout {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.ENGLISH);
         String date = dateFormat.format(crashLog.lastModified());
-        crashDateTextView.setText(LocaleController.formatString("CrashedOnDate", R.string.CrashedOnDate, date));
+        crashDateTextView.setText(LocaleController.formatString(R.string.CrashedOnDate, date));
 
         needDivider = divider;
         setWillNotDraw(!needDivider);

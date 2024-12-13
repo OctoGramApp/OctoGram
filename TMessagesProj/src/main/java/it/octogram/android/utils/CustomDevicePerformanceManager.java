@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils;
 
 import android.app.ActivityManager;
@@ -6,7 +14,6 @@ import android.os.Build;
 
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
@@ -15,6 +22,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.MessageFormat;
 import java.util.Locale;
+
+import it.octogram.android.logs.OctoLogging;
 
 public class CustomDevicePerformanceManager {
     /**
@@ -187,7 +196,7 @@ public class CustomDevicePerformanceManager {
      */
     private static void logPerformanceInfo(int performanceClass, int cpuCount, int maxCpuFreq, int memoryClass, int androidVersion, long ram) {
         if (BuildVars.LOGS_ENABLED) {
-            FileLog.d(MessageFormat.format("Device performance info selected_class = {0} (cpu_count = {1}, freq = {2}, memoryClass = {3}, android version {4}, RAM = {5} GB)", performanceClass, cpuCount, maxCpuFreq, memoryClass, androidVersion, ram / (1024L * 1024L * 1024L)));
+            OctoLogging.d(MessageFormat.format("Device performance info selected_class = {0} (cpu_count = {1}, freq = {2}, memoryClass = {3}, android version {4}, RAM = {5} GB)", performanceClass, cpuCount, maxCpuFreq, memoryClass, androidVersion, ram / (1024L * 1024L * 1024L)));
         }
     }
 }

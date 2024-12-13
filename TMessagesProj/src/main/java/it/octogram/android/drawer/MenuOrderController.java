@@ -1,8 +1,15 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.drawer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
@@ -13,6 +20,7 @@ import java.util.HashSet;
 import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.MenuItemId;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 
 public class MenuOrderController {
     private static final Object sync = new Object();
@@ -61,7 +69,7 @@ public class MenuOrderController {
             try {
                 data = new JSONArray(items);
             } catch (JSONException e) {
-                FileLog.e(e);
+                OctoLogging.e(e);
             }
             if (data.length() == 0 && OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()) {
                 loadDefaultItems();
@@ -152,7 +160,7 @@ public class MenuOrderController {
             data.put(oldPosition, data1);
             data.put(newPosition, data2);
         } catch (JSONException e) {
-            FileLog.e(e);
+            OctoLogging.e(e);
         }
         OctoConfig.INSTANCE.setDrawerItems(data.toString());
     }
@@ -422,7 +430,7 @@ public class MenuOrderController {
             try {
                 result.put(data.get(i));
             } catch (JSONException e) {
-                FileLog.e(e);
+                OctoLogging.e(e);
             }
         }
         data = result;
@@ -440,7 +448,7 @@ public class MenuOrderController {
                     result.put(idTmp);
                 }
             } catch (JSONException e) {
-                FileLog.e(e);
+                OctoLogging.e(e);
             }
         }
 

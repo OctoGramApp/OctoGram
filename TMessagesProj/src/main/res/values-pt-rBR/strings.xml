@@ -711,7 +711,7 @@
     <string name="AuthAnotherClientUrl">Esse código pode ser usado para permitir que alguém entre na sua conta do Telegram.\n\nPara confirmar o login no Telegram, acesse Configurações &gt; Dispositivos &gt; Ler Código QR e escaneie o código.</string>
     <string name="QRCodePermissionNoCameraWithHint">O **Telegram** precisa de acesso à câmera para você escanear Códigos QR. Toque em Configurações &gt; Permissões, e ative a **Câmera**.</string>
     <string name="SetProfilePhoto">Definir Foto do Perfil</string>
-    <string name="AppUpdate">Atualizar o Telegram</string>
+    <string name="AppUpdate">Atualizar o OctoGram</string>
     <string name="AppUpdateVersionAndSize">Versão %1$s • %2$s</string>
     <string name="AppUpdateDownloading">Baixando... %1$d%%</string>
     <string name="AppUpdateNow">Atualizar Agora</string>

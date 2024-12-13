@@ -394,13 +394,14 @@ public class SessionCell extends FrameLayout {
         var colorKey = drawableInfo.getColorKey();
         var colorKey2 = drawableInfo.getColorKey2();
         var customColor = drawableInfo.getCustomColor();
+        var customColor2 = drawableInfo.getCustomColor2();
 
         var iconDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, iconId);
         if (iconDrawable != null) {
             iconDrawable.mutate();
             iconDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_avatar_text), PorterDuff.Mode.SRC_IN));
         }
-        Drawable bgDrawable = new CircleGradientDrawable(AndroidUtilities.dp(sz), colorKey == -1 ? customColor : Theme.getColor(colorKey), colorKey2 == -1 ? customColor : Theme.getColor(colorKey2));
+        var bgDrawable = new CircleGradientDrawable(dp(sz), colorKey == -1 ? customColor : Theme.getColor(colorKey), colorKey2 == -1 ? customColor2 : Theme.getColor(colorKey2));
         // Drawable bgDrawable = new CircleGradientDrawable(dp(sz), colorKey == -1 ? 0xFF000000 : Theme.getColor(colorKey), colorKey2 == -1 ? 0xFF000000 : Theme.getColor(colorKey2));
         return new CombinedDrawable(bgDrawable, iconDrawable);
     }

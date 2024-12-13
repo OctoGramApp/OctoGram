@@ -17,6 +17,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 
+import it.octogram.android.utils.TypeFaceSupportChecker;
+
 public class TextStyleSpan extends MetricAffectingSpan {
 
     private int textSize;
@@ -68,6 +70,14 @@ public class TextStyleSpan extends MetricAffectingSpan {
                 p.setFlags(p.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
                 p.setFlags(p.getFlags() &~ Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+
+            if ((flags & FLAG_STYLE_BOLD) != 0 && !TypeFaceSupportChecker.isMediumWeightSupported()) {
+                p.setStrokeWidth(0.65f);
+                p.setStyle(Paint.Style.FILL_AND_STROKE);
+            }
+            if ((flags & FLAG_STYLE_ITALIC) != 0 && !TypeFaceSupportChecker.isItalicSupported()) {
+                p.setTextSkewX(-0.25f);
             }
 
             if ((flags & FLAG_STYLE_SPOILER_REVEALED) != 0) {

@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils;
 
 import android.app.Notification;
@@ -21,9 +29,7 @@ import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
@@ -34,6 +40,8 @@ import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.LaunchActivity;
+
+import it.octogram.android.logs.OctoLogging;
 
 /**
  * @noinspection unused
@@ -131,9 +139,7 @@ public class CustomNotificationStyle extends VoIPService {
             if (existingChannel != null) {
                 // Checking getImportance and getSound safely for API level 26+
                 if (existingChannel.getImportance() < NotificationManager.IMPORTANCE_HIGH || existingChannel.getSound() != null) {
-                    if (BuildVars.LOGS_ENABLED) {
-                        FileLog.d("User messed up the notification channel; deleting it and creating a proper one");
-                    }
+                    OctoLogging.d("User messed up the notification channel; deleting it and creating a proper one");
                     nm.deleteNotificationChannel("incoming_calls4" + chanIndex);
                     chanIndex++;
                     preferences.edit().putInt("calls_notification_channel", chanIndex).apply();

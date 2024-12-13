@@ -69,7 +69,6 @@ import org.telegram.ui.Components.UndoView;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.TabMode;
 
 public class FiltersSetupActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -549,10 +548,6 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         ArrayList<TLRPC.TL_dialogFilterSuggested> suggestedFilters = getMessagesController().suggestedFilters;
         ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
         items.add(ItemInner.asHint());
-        items.add(ItemInner.asHeader(LocaleController.getString("FoldersType", R.string.FoldersType)));
-        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeTitles", R.string.FoldersTypeTitles), TabMode.TEXT.getValue()));
-        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIcons", R.string.FoldersTypeIcons), TabMode.ICON.getValue()));
-        items.add(ItemInner.asRadio(LocaleController.getString("FoldersTypeIconsTitles", R.string.FoldersTypeIconsTitles), TabMode.MIXED.getValue()));
         items.add(ItemInner.asShadow(null));
         if (!suggestedFilters.isEmpty() && dialogFilters.size() < 10) {
             items.add(ItemInner.asHeader(LocaleController.getString(R.string.FilterRecommended)));
@@ -707,10 +702,6 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                 } else {
                     presentFragment(new FilterCreateActivity());
                 }
-            } else if (item.viewType == VIEW_TYPE_RADIO) {
-                OctoConfig.INSTANCE.tabMode.updateValue(item.folderType);
-                updateRows(true);
-                getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             }
         });
 
@@ -789,14 +780,6 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         }
         public static ItemInner asHint() {
             return new ItemInner(VIEW_TYPE_HINT);
-        }
-
-        public static ItemInner asRadio(CharSequence text, int type) {
-            ItemInner i = new ItemInner(VIEW_TYPE_RADIO);
-            i.text = text;
-            i.folderType = type;
-            i.selectedRadio = OctoConfig.INSTANCE.tabMode.getValue() == i.folderType;
-            return i;
         }
 
         public static ItemInner asShadow(CharSequence text) {
@@ -1100,11 +1083,6 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                 case VIEW_TYPE_FILTER_SUGGESTION: {
                     SuggestedFilterCell filterCell = (SuggestedFilterCell) holder.itemView;
                     filterCell.setFilter(item.suggested, divider);
-                    break;
-                }
-                case VIEW_TYPE_RADIO: {
-                    RadioCell radioCell = (RadioCell) holder.itemView;
-                    radioCell.setText(item.text.toString(), OctoConfig.INSTANCE.tabMode.getValue() == item.folderType, true);
                     break;
                 }
             }

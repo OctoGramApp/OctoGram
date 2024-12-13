@@ -722,7 +722,7 @@
     <string name="AuthAnotherClientUrl">Questo codice può essere usato per consentire a qualcuno di accedere al tuo account Telegram.\n\nPer confermare l\'accesso a Telegram, vai in Impostazioni &gt; Dispositivi &gt; Scansiona QR e scansiona il codice.</string>
     <string name="QRCodePermissionNoCameraWithHint">**Telegram** deve accedere alla tua fotocamera per poter scansionare i codici QR. Tocca Impostazioni &gt; Permessi, e attiva **Fotocamera**.</string>
     <string name="SetProfilePhoto">Imposta foto del profilo</string>
-    <string name="AppUpdate">Aggiorna Telegram</string>
+    <string name="AppUpdate">Aggiorna OctoGram</string>
     <string name="AppUpdateVersionAndSize">Versione %1$s • %2$s</string>
     <string name="AppUpdateDownloading">Download... %1$d%%</string>
     <string name="AppUpdateNow">Aggiorna ora</string>

@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2024.
+ */
+
 package it.octogram.android.utils;
 
 
@@ -52,22 +60,34 @@ public class FolderIconController {
     }
 
     public static int getPadding() {
-        if (OctoConfig.INSTANCE.tabMode.getValue() == TabMode.MIXED.getValue()) {
+        return getPadding(null);
+    }
+
+    public static int getPadding(TabMode customTabMode) {
+        if ((customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) == TabMode.MIXED.getValue()) {
             return AndroidUtilities.dp(6);
         }
         return 0;
     }
 
     public static int getTotalIconWidth() {
+        return getTotalIconWidth(null);
+    }
+
+    public static int getTotalIconWidth(TabMode customTabMode) {
         int result = 0;
-        if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.TEXT.getValue()) {
+        if ((customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) != TabMode.TEXT.getValue()) {
             result = getIconWidth() + getPadding();
         }
         return result;
     }
 
     public static int getPaddingTab() {
-        if (OctoConfig.INSTANCE.tabMode.getValue() != TabMode.ICON.getValue()) {
+        return getPaddingTab(null);
+    }
+
+    public static int getPaddingTab(TabMode customTabMode) {
+        if ((customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) != TabMode.ICON.getValue()) {
             return AndroidUtilities.dp(32);
         }
         return AndroidUtilities.dp(16);
