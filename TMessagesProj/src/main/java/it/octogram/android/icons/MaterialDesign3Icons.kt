@@ -99,7 +99,7 @@ class MaterialDesign3Icons {
             materialDesign3Icons.add(R.drawable.input_smile to R.drawable.sentiment_satisfied_24px)
             materialDesign3Icons.add(R.drawable.instant_camera to R.drawable.photo_camera_24px)
             materialDesign3Icons.add(R.drawable.left_status_profile to R.drawable.account_circle_unsolid_24px)
-            materialDesign3Icons.add(R.drawable.list_mute to R.drawable.volume_off_24px)
+            materialDesign3Icons.add(R.drawable.list_mute to R.drawable.volume_off_18px)
             materialDesign3Icons.add(R.drawable.list_pin to R.drawable.keep_24px)
             materialDesign3Icons.add(R.drawable.list_secret to R.drawable.lock_24px)
             materialDesign3Icons.add(R.drawable.media_flip to R.drawable.flip_24px)

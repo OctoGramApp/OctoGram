@@ -22,6 +22,8 @@ import org.telegram.ui.Components.RLottieDrawable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import it.octogram.android.OctoConfig;
+
 public class DownloadProgressIcon extends View implements NotificationCenter.NotificationCenterDelegate {
 
     Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -169,7 +171,7 @@ public class DownloadProgressIcon extends View implements NotificationCenter.Not
             }
         }
         if (currentListeners.size() == 0 && !wasDrawn) {
-            if (DownloadController.getInstance(currentAccount).hasUnviewedDownloads()) {
+            if (DownloadController.getInstance(currentAccount).hasUnviewedDownloads() || OctoConfig.INSTANCE.alwaysShowDownloads.getValue()) {
                 progress = 1f;
                 currentProgress = 1f;
                 showCompletedIcon = true;

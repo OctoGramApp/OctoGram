@@ -141,6 +141,12 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title(getString(R.string.HideStories))
                             .description(getString(R.string.HideStories_Desc))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.alwaysShowDownloads)
+                            .requiresRestart(true)
+                            .title(getString(R.string.AlwaysShowDownloads))
+                            .description(getString(R.string.AlwaysShowDownloads_Desc))
+                            .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.actionBarTitleOption)
                             .options(List.of(

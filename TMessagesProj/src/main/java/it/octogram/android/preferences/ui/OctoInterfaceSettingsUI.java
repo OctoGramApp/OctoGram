@@ -52,6 +52,7 @@ import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoInterfaceSettingsUI implements PreferencesEntry {
     private IconsSelector iconsSelector;
+    private FolderTypeSelector folderTypeSelector;
 
     private final ConfigProperty<Boolean> isUsingDefault = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> isUsingSolar = new ConfigProperty<>(null, false);
@@ -167,7 +168,7 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                 })
                 .category(R.string.ManageFolders, category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(new FolderTypeSelector(context))
+                            .layout(folderTypeSelector = new FolderTypeSelector(context))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.tabMode)
@@ -178,7 +179,7 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                             ))
                             .onSelected(() -> {
                                 AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
-                                fragment.rebuildAllFragmentsWithLast();
+                                folderTypeSelector.fillTabs();
                             })
                             .title(R.string.FolderType)
                             .build());
@@ -195,18 +196,32 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                             ))
                             .onSelected(() -> {
                                 AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
-                                fragment.rebuildAllFragmentsWithLast();
+                                folderTypeSelector.fillTabs();
                             })
                             .title(R.string.FolderStyle)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> {
                                 AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
-                                fragment.rebuildAllFragmentsWithLast();
+                                folderTypeSelector.fillTabs();
                             })
                             .preferenceValue(OctoConfig.INSTANCE.hideUnreadCounterOnFolder)
                             .title(R.string.HideUnreadCounter)
                             .description(R.string.HideUnreadCounter_Desc)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated))
+                            .preferenceValue(OctoConfig.INSTANCE.showFoldersMessagesCounter)
+                            .title(R.string.ShowMessagesCounter)
+                            .description(R.string.ShowMessagesCounter_Desc)
+                            .showIf(OctoConfig.INSTANCE.hideUnreadCounterOnFolder, true)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated))
+                            .preferenceValue(OctoConfig.INSTANCE.includeMutedChatsInCounter)
+                            .title(R.string.IncludeMutedChats)
+                            .description(R.string.IncludeMutedChats_Desc)
+                            .showIf(OctoConfig.INSTANCE.hideUnreadCounterOnFolder, true)
                             .build());
                 })
                 .category(LocaleController.getString(R.string.ImproveIcons), category -> {

@@ -156,6 +156,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSystemFont.getKey(), R.string.UseSystemFont));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showUserIconsInChatsList.getKey(), R.string.ShowUserIconsInChatsList));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideStories.getKey(), R.string.HideStories));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alwaysShowDownloads.getKey(), R.string.AlwaysShowDownloads));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarTitleOption.getKey(), R.string.ActionBarTitle));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarCustomTitle.getKey(), R.string.ActionBarTitleCustom));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableDividers.getKey(), R.string.HideDividers));
@@ -207,9 +208,8 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabMode.getKey(), composeName(R.string.ManageFolders, R.string.FolderType)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabStyle.getKey(), composeName(R.string.ManageFolders, R.string.FolderStyle)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideUnreadCounterOnFolder.getKey(), composeName(R.string.ManageFolders, R.string.HideUnreadCounter)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.includeMutedChatsInCounter.getKey(), composeName(R.string.ManageFolders, R.string.IncludeMutedChats)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uiIconsType.getKey(), R.string.ImproveIconsShort));
-
-
     }
 
     private void fillChatCameraOptions(SettingsScanCategory category) {

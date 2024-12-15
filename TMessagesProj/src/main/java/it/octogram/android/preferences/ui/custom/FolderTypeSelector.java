@@ -114,7 +114,7 @@ public class FolderTypeSelector extends FrameLayout {
 
             @Override
             public int getTabCounter(int tabId) {
-                return (tabId == 0 && !isSinglePreview) ? 69 : 0;
+                return (tabId == (OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue() ? 1 : 0) && !isSinglePreview) ? 100 : 0;
             }
 
             @Override
@@ -153,7 +153,7 @@ public class FolderTypeSelector extends FrameLayout {
         return navigationFrame;
     }
 
-    private void fillTabs() {
+    public void fillTabs() {
         filterTabsView.resetTabId();
         filterTabsView.removeTabs();
 

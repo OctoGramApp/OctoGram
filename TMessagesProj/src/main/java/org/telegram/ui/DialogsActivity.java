@@ -120,6 +120,7 @@ import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SavedMessagesController;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
@@ -3507,12 +3508,43 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         return 0;
                     }
                     if (tabId == filterTabsView.getDefaultTabId()) {
+                        // as default, it doesn't include muted chats
+                        if (OctoConfig.INSTANCE.showFoldersMessagesCounter.getValue() && !OctoConfig.INSTANCE.hideUnreadCounterOnFolder.getValue()) {
+                            int unreadCount = 0;
+                            MessagesController controller = getMessagesController();
+                            for (TLRPC.Dialog chat : controller.getAllDialogs()) {
+                                unreadCount += chat.unread_count;
+                            }
+                            return unreadCount;
+                        }
+
                         return getMessagesStorage().getMainUnreadCount();
                     }
                     ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
                     if (tabId < 0 || tabId >= dialogFilters.size()) {
                         return 0;
                     }
+
+                    if ((OctoConfig.INSTANCE.showFoldersMessagesCounter.getValue() || !OctoConfig.INSTANCE.includeMutedChatsInCounter.getValue()) && !OctoConfig.INSTANCE.hideUnreadCounterOnFolder.getValue()) {
+                        int unreadCount = 0;
+                        MessagesController controller = getMessagesController();
+                        for (TLRPC.Dialog chat : dialogFilters.get(tabId).dialogs) {
+                            if (chat.unread_count == 0 && chat.unread_mentions_count == 0) {
+                                continue;
+                            }
+
+                            if (!OctoConfig.INSTANCE.includeMutedChatsInCounter.getValue() && controller.isDialogMuted(chat.id, 0)) {
+                                if (chat.unread_mentions_count > 0) {
+                                    unreadCount += 1;
+                                }
+                                continue;
+                            }
+
+                            unreadCount += OctoConfig.INSTANCE.showFoldersMessagesCounter.getValue() ? chat.unread_count : 1;
+                        }
+                        return unreadCount;
+                    }
+
                     return getMessagesController().getDialogFilters().get(tabId).unreadCount;
                 }
 
@@ -4630,6 +4662,18 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         })
                         .open(StoryRecorder.SourceView.fromFloatingButton(floatingButtonContainer), true);
             }
+        });
+        floatingButtonContainer.setOnLongClickListener(v -> {
+            if (parentLayout != null && parentLayout.isInPreviewMode()) {
+                return false;
+            }
+
+            if (floatingButton.getVisibility() != View.VISIBLE || initialDialogsType == DIALOGS_TYPE_WIDGET) {
+                return false;
+            }
+
+            SavedMessagesController.openSavedMessages();
+            return true;
         });
 
         if (!isArchive() && initialDialogsType == DIALOGS_TYPE_DEFAULT) {
@@ -10094,7 +10138,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 break;
             }
         }
-        if (!searching && (getDownloadController().hasUnviewedDownloads() || showDownloads || (downloadsItem.getVisibility() == View.VISIBLE && downloadsItem.getAlpha() == 1 && !force))) {
+        if (!searching && (OctoConfig.INSTANCE.alwaysShowDownloads.getValue() || getDownloadController().hasUnviewedDownloads() || showDownloads || (downloadsItem.getVisibility() == View.VISIBLE && downloadsItem.getAlpha() == 1 && !force))) {
             downloadsItemVisible = true;
             downloadsItem.setVisibility(View.VISIBLE);
         } else {

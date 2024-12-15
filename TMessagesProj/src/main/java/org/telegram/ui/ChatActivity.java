@@ -7089,6 +7089,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             position--;
             Object object = mentionContainer.getAdapter().getItem(position);
+            int start = mentionContainer.getAdapter().getResultStartPosition();
+            int len = mentionContainer.getAdapter().getResultLength();
             if (object instanceof String) {
                 if (mentionContainer.getAdapter().isBotCommands()) {
                     if (URLSpanBotCommand.enabled) {
@@ -7106,6 +7108,17 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     showDialog(builder.create());
                     return true;
                 }
+            } else if (object instanceof TLRPC.User) {
+                if (searchingForUser && searchContainer != null && searchContainer.getVisibility() == View.VISIBLE) {
+                    return false;
+                }
+
+                TLRPC.User user = (TLRPC.User) object;
+                String name = UserObject.getFirstName(user, false);
+                Spannable spannable = new SpannableString(name + " ");
+                spannable.setSpan(new URLSpanUserMention("" + user.id, 3), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                chatActivityEnterView.replaceWithText(start, len, spannable, false);
+                return true;
             }
             return false;
         });
@@ -41237,6 +41250,17 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 undoView.showWithAction(0, UndoView.ACTION_LINK_COPIED, null);
             }
         });
+
+        if (!isHashtag && !isMail && !str.startsWith("video?") && !str.startsWith("@")) {
+            options.add(R.drawable.msg_shareout, getString(R.string.BotShareMessageShare), () -> {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, str);
+                Intent shareIntent = Intent.createChooser(intent, null);
+                getContext().startActivity(shareIntent);
+            });
+        }
 
         dialog.setItemOptions(options);
         if (str != null && str.startsWith("mailto:")) {

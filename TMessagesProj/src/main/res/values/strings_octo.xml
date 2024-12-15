@@ -249,6 +249,8 @@
     <string name="SlidingTitle_Desc">The title will slide on screen when it\'s too long</string>
     <string name="HideStories">Hide stories</string>
     <string name="HideStories_Desc">You won\'t see stories in the main header, but you can still find them on a user\'s profile.</string>
+    <string name="AlwaysShowDownloads">Don\'t hide downloads</string>
+    <string name="AlwaysShowDownloads_Desc">The downloads icon will always be shown in the header, even when there are no active items.</string>
     <!--<string name="StickerSizePreviewMessage1">New octo update just dropped!</string>
     <string name="StickerSizePreviewMessage2">Neat!</string>
     <string name="StickerSizePreviewMessage2ReplyName">Firo</string>-->
@@ -663,8 +665,12 @@
     <string name="FolderStylePills">Pills</string>
     <string name="FolderStyleFull">Full</string>
 
-    <!-- Hide Unread Counter -->
+    <!-- Folders Additions -->
     <string name="HideUnreadCounter">Hide Unread Counter</string>
     <string name="HideUnreadCounter_Desc">Hide the unread counter on the folder</string>
+    <string name="IncludeMutedChats">Include muted chats (Experimental)</string>
+    <string name="IncludeMutedChats_Desc">Include muted chats in the unread message counter.</string>
+    <string name="ShowMessagesCounter">Show messages counter (Experimental)</string>
+    <string name="ShowMessagesCounter_Desc">Show the unread message count instead of the unread chat count.</string>
 
 </resources>

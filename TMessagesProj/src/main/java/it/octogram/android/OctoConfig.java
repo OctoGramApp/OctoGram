@@ -70,6 +70,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideOnlyAllChatsFolder = newConfigProperty("hideOnlyAllChatsFolder", false);
     public final ConfigProperty<Boolean> hideChatFolders = newConfigProperty("hideChatFolders", false);
     public final ConfigProperty<Boolean> hideStories = newConfigProperty("hideStories", false);
+    public final ConfigProperty<Boolean> alwaysShowDownloads = newConfigProperty("alwaysShowDownloads", false);
     public final ConfigProperty<Integer> doubleTapAction = newConfigProperty("doubleTapAction", DoubleTapAction.REACTION.getValue());
     public final ConfigProperty<Integer> doubleTapActionOut = newConfigProperty("doubleTapActionOut", DoubleTapAction.REACTION.getValue());
     public final ConfigProperty<Boolean> hideFoldersWhenForwarding = newConfigProperty("showFoldersWhenForwarding", false);
@@ -121,8 +122,10 @@ public class OctoConfig {
 
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
-    public final ConfigProperty<Boolean> hideUnreadCounterOnFolder = newConfigProperty("hideUnreadCounterOnFolder", false);
     public final ConfigProperty<Integer> tabStyle = newConfigProperty("tabStyle", TabStyle.DEFAULT.getValue());
+    public final ConfigProperty<Boolean> hideUnreadCounterOnFolder = newConfigProperty("hideUnreadCounterOnFolder", false);
+    public final ConfigProperty<Boolean> showFoldersMessagesCounter = newConfigProperty("showFoldersMessagesCounter", false);
+    public final ConfigProperty<Boolean> includeMutedChatsInCounter = newConfigProperty("includeMutedChatsInCounter", true);
 
     /*Context menu elements*/
     public final ConfigProperty<Boolean> contextClearFromCache = newConfigProperty("context_clearFromCache", false);
