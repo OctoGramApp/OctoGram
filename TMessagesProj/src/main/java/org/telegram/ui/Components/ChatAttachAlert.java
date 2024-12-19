@@ -4010,9 +4010,6 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         }
         photoLayout.checkCamera(false);
         photoLayout.openCamera(true);
-        if(photoLayout.cameraView != null) {
-            photoLayout.cameraView.resetZoom();
-        }
     }
 
     public void onCameraButtonLongPress() {

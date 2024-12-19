@@ -4007,7 +4007,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 } else {
                     progressView.setText(LocaleController.formatString("AttachMediaRestricted", R.string.AttachMediaRestricted, LocaleController.formatDateForBan(chat.banned_rights.until_date)));
                 }
-                /*TODO: if (ExteraConfig.hideCameraTile) {
+                /*TODO: if (disableCameraPreview) {
                     parentAlert.floatingButton.setVisibility(GONE);
                 }*/
             }

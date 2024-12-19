@@ -208,6 +208,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabMode.getKey(), composeName(R.string.ManageFolders, R.string.FolderType)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabStyle.getKey(), composeName(R.string.ManageFolders, R.string.FolderStyle)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideUnreadCounterOnFolder.getKey(), composeName(R.string.ManageFolders, R.string.HideUnreadCounter)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showFoldersMessagesCounter.getKey(), composeName(R.string.ManageFolders, R.string.ShowMessagesCounter)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.includeMutedChatsInCounter.getKey(), composeName(R.string.ManageFolders, R.string.IncludeMutedChats)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uiIconsType.getKey(), R.string.ImproveIconsShort));
     }

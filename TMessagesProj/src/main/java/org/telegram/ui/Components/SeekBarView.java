@@ -420,7 +420,7 @@ public class SeekBarView extends FrameLayout {
         isModern = style == InterfaceSliderUI.MODERN.getValue() || style == InterfaceSliderUI.ANDROID.getValue();
         isModern &= (timestamps == null || timestamps.isEmpty());
 
-        if (!hasCustomLineWidthValue) {
+        if (!hasCustomLineWidthValue || style != InterfaceSliderUI.DEFAULT.getValue()) {
             lineWidthDp = style == InterfaceSliderUI.MODERN.getValue() ? 17 : (style == InterfaceSliderUI.ANDROID.getValue() ? 13 : 3);
         }
 
