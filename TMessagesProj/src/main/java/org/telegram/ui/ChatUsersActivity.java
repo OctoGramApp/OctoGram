@@ -710,6 +710,10 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
         frameLayout.addView(emptyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         emptyView.addView(progressLayout, 0);
 
+        if (!sendMediaExpanded && !ChatObject.hasAdminRights(currentChat)) {
+            sendMediaExpanded = true;
+        }
+
         listView = new RecyclerListView(context) {
             @Override
             public void invalidate() {
@@ -3521,7 +3525,7 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
                                 }
                             }
                         });
-                        checkCell.setAlpha(ChatObject.canBlockUsers(currentChat) ? 1.0f : 0.5f);
+                        checkCell.setAlpha((ChatObject.canBlockUsers(currentChat) || !ChatObject.hasAdminRights(currentChat)) ? 1.0f : 0.5f);
                         checkCell.checkBoxClickArea.setEnabled(ChatObject.canBlockUsers(currentChat));
                     } else if (position == sendStickersRow) {
                         checkCell.setTextAndCheck(getString("SendMediaPermissionStickers", R.string.SendMediaPermissionStickers), !defaultBannedRights.send_stickers, true, animated);

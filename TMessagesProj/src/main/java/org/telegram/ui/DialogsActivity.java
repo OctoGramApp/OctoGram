@@ -3678,6 +3678,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 public void onDeletePressed(int id) {
                     showDeleteAlert(getMessagesController().getDialogFilters().get(id));
                 }
+
+                @Override
+                public void onTabSelected(FilterTabsView.Tab tab, boolean forward, boolean animated) {
+                    FilterTabsView.FilterTabsViewDelegate.super.onTabSelected(tab, forward, animated);
+                    if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.FOLDER_NAME.getValue()) {
+                        actionBar.setTitleAnimated2(tab.isDefault ? LocaleController.getString(R.string.AllChats) : tab.realTitle, tab.isDefault ? statusDrawable : null, forward);
+                    }
+                }
             });
         }
 
@@ -4501,7 +4509,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
                 @Override
                 protected boolean showOpenBotButton() {
-                    return initialDialogsType == DIALOGS_TYPE_DEFAULT;
+                    return initialDialogsType == DIALOGS_TYPE_DEFAULT && !OctoConfig.INSTANCE.hideOpenButtonChatsList.getValue();
                 }
                 @Override
                 protected void onOpenBot(TLRPC.User bot) {
@@ -6815,6 +6823,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 }
 
                 filterTabsView.resetTabId();
+
+                if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.FOLDER_NAME.getValue()) {
+                    actionBar.setTitleAnimated2(LocaleController.getString(R.string.AllChats), statusDrawable, false);
+                }
             }
             updateDrawerSwipeEnabled();
         }

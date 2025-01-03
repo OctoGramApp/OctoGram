@@ -85,7 +85,6 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.JpegImageUtils;
 
-/** @noinspection deprecation*/
 public class CameraXController {
 
     private boolean isFrontface;
@@ -106,11 +105,11 @@ public class CameraXController {
     private boolean stableFPSPreviewOnly = false;
     private boolean noSupportedSurfaceCombinationWorkaround = false;
 
-    public float oldZoomSelection = 0F;
+    public float oldZoomSelection = 0F; // TODO: fix for UW Lens
     private int selectedEffect = EffectFacing.CAMERA_NONE;
     protected static final String TAG = "CameraXController";
 
-    public static void setTorchEnabled(boolean b) {
+    public void setTorchEnabled(boolean b) {
         if (camera != null) {
             camera.getCameraControl().enableTorch(b);
         } else {
@@ -145,7 +144,6 @@ public class CameraXController {
         public Lifecycle getLifecycle() {
             return lifecycleRegistry;
         }
-
     }
 
     public CameraXController(CameraLifecycle lifecycle, MeteringPointFactory factory, Preview.SurfaceProvider surfaceProvider) {
@@ -153,7 +151,6 @@ public class CameraXController {
         this.meteringPointFactory = factory;
         this.surfaceProvider = surfaceProvider;
     }
-
 
     public boolean isInitied() {
         return isInitiated;
@@ -167,16 +164,6 @@ public class CameraXController {
         return isFrontface;
     }
 
-    /**
-     * Enables or disables stable FPS mode for preview only.
-     * <p>
-     * When enabled, the library will attempt to maintain a stable frame rate during preview,
-     * but may allow the frame rate to fluctuate during recording or other operations.
-     * This can be useful for improving the preview experience, especially on devices
-     * with limited processing power.
-     *
-     * @param isEnabled true to enable stable FPS mode for preview only, false to disable.
-     */
     public void setStableFPSPreviewOnly(boolean isEnabled) {
         stableFPSPreviewOnly = isEnabled;
     }
@@ -258,7 +245,7 @@ public class CameraXController {
         return iCapture.getFlashMode();
     }
 
-    public static boolean isFlashAvailable() {
+    public boolean isFlashAvailable() {
         return camera.getCameraInfo().hasFlashUnit();
     }
 
@@ -297,7 +284,7 @@ public class CameraXController {
     }
 
     public boolean isAvailableWideMode() {
-        return CameraXUtils.isWideAngleAvailable(provider);
+        return provider != null && CameraXUtils.isWideAngleAvailable(provider);
     }
 
     public android.util.Size getVideoBestSize() {
@@ -330,7 +317,9 @@ public class CameraXController {
         var targetSize = getVideoBestSize();
         var previewBuilder = new Preview.Builder().setTargetResolution(targetSize);
 
-        cameraSelector = !isFrontface && selectedEffect == EffectFacing.CAMERA_WIDE ? CameraXUtils.getDefaultWideAngleCamera(provider) : (isFrontface ? CameraSelector.DEFAULT_FRONT_CAMERA : CameraSelector.DEFAULT_BACK_CAMERA);
+        cameraSelector = !isFrontface && selectedEffect == EffectFacing.CAMERA_WIDE
+                ? CameraXUtils.getDefaultWideAngleCamera(provider)
+                : (isFrontface ? CameraSelector.DEFAULT_FRONT_CAMERA : CameraSelector.DEFAULT_BACK_CAMERA);
 
         if (!isFrontface) {
             cameraSelector = getCameraSelectorForEffect(cameraSelector, selectedEffect);
@@ -390,7 +379,7 @@ public class CameraXController {
     }
 
     public void setZoom(float value) {
-        camera.getCameraControl().setLinearZoom(oldZoomSelection = value);
+        camera.getCameraControl().setLinearZoom(oldZoomSelection = value); // TODO: make more smooth
     }
 
     public float getMaxZoom() {
@@ -404,10 +393,10 @@ public class CameraXController {
     public float resetZoom() {
         if (camera == null) return 0.0f;
 
-        camera.getCameraControl().setZoomRatio(1.0f);
-        return (oldZoomSelection = camera.getCameraInfo().getZoomState().getValue() != null ? camera.getCameraInfo().getZoomState().getValue().getLinearZoom() : 0.0f);
+        camera.getCameraControl().setLinearZoom(0f);
+        var zoomState = camera.getCameraInfo().getZoomState().getValue();
+        return zoomState != null ? (oldZoomSelection = zoomState.getLinearZoom()) : 0.0f;
     }
-
 
     public boolean isExposureCompensationSupported() {
         if (camera == null) return false;

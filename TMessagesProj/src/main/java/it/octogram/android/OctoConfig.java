@@ -135,6 +135,15 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> contextMessageDetails = newConfigProperty("context_messageDetails", true);
     public final ConfigProperty<Boolean> contextNoQuoteForward = newConfigProperty("context_noQuoteForward", false);
 
+    /*Admin Shortcuts*/
+    public final ConfigProperty<Boolean> shortcutsAdministrators = newConfigProperty("shortcuts_administrators", false);
+    public final ConfigProperty<Boolean> shortcutsRecentActions = newConfigProperty("shortcuts_recentActions", false);
+    public final ConfigProperty<Boolean> shortcutsStatistics = newConfigProperty("shortcuts_statistics", false);
+    public final ConfigProperty<Boolean> shortcutsPermissions = newConfigProperty("shortcuts_permissions", false);
+    public final ConfigProperty<Boolean> shortcutsInviteLinks = newConfigProperty("shortcuts_inviteLinks", false);
+    public final ConfigProperty<Boolean> shortcutsMembers = newConfigProperty("shortcuts_members", false);
+    public final ConfigProperty<Integer> shortcutsPosition = newConfigProperty("shortcutsPosition", ShortcutsPosition.THREE_DOTS.getId());
+
     /*Unlock Secret Icons*/
     public final ConfigProperty<Boolean> unlockedYuki = newConfigProperty("unlockedYuki", false);
     public final ConfigProperty<Boolean> unlockedChupa = newConfigProperty("unlockedChupa", false);
@@ -145,9 +154,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> cameraXPerformanceMode = newConfigProperty("cameraXPerformanceMode", false);
     public final ConfigProperty<Boolean> cameraXZeroShutter = newConfigProperty("cameraXZeroShutter", false);
     public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
-    public ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.CAMERA_X.getValue());
-    // migrate to "cameraPreview" public final ConfigProperty<Boolean> disableCameraPreview = newConfigProperty("disableCameraPreview", false);
-    public ConfigProperty<Integer> cameraPreview = newConfigProperty("cameraPreview", CameraPreview.DEFAULT);
+    public final ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.CAMERA_X.getValue());
+    public final ConfigProperty<Integer> cameraPreview = newConfigProperty("cameraPreview", CameraPreview.DEFAULT);
 
     /*Experiments*/
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
@@ -172,6 +180,9 @@ public class OctoConfig {
     public final ConfigProperty<Integer> uiIconsType = newConfigProperty("uiIconsType", IconsUIType.DEFAULT.getValue());
     public final ConfigProperty<Boolean> uiRandomMemeIcons = newConfigProperty("uiRandomMemeIcons", false);
     public final ConfigProperty<Boolean> useSquaredFab = newConfigProperty("useSquaredFab", false);
+    public final ConfigProperty<Boolean> hideBottomBarChannels = newConfigProperty("hideBottomBarChannels", false);
+    public final ConfigProperty<Boolean> hideOpenButtonChatsList = newConfigProperty("hideOpenButtonChatsList", false);
+    public final ConfigProperty<Boolean> alwaysExpandBlockQuotes = newConfigProperty("alwaysExpandBlockQuotes", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -208,16 +219,6 @@ public class OctoConfig {
     /* Settings: NEW badge */
     public final ConfigProperty<String> newBadgeIds = newConfigProperty("newBadgeIds", "[]");
 
-    /**
-     * Creates a new {@link ConfigProperty} with the specified key and default value.
-     * <p>
-     * The newly created property is added to the internal list of properties.
-     *
-     * @param <T>          The type of the config property value.
-     * @param key          The key of the config property.
-     * @param defaultValue The default value of the config property.
-     * @return The newly created {@link ConfigProperty} instance.
-     */
     private <T> ConfigProperty<T> newConfigProperty(String key, T defaultValue) {
         ConfigProperty<T> property = new ConfigProperty<>(key, defaultValue);
         properties.add(property);
@@ -243,14 +244,6 @@ public class OctoConfig {
                 : AudioFormat.CHANNEL_OUT_STEREO;
     }
 
-    /**
-     * Loads the configuration values from the SharedPreferences and applies them to the corresponding properties.
-     * This method handles loading Boolean, String, and Integer properties. It also executes any necessary data migrations.
-     * <p>
-     * This method is synchronized to ensure thread safety, as it accesses and modifies shared resources.
-     * <p>
-     * <b>Note:</b> This method is intended to be called only once during initialization and relies on the assumption that the data structure is well-defined.
-     */
     private void loadConfig() {
         synchronized (this) {
             for (ConfigProperty<?> property : properties) {
@@ -278,15 +271,6 @@ public class OctoConfig {
         }
     }
 
-    /**
-     * Executes migration for integer-type config properties from deprecated boolean preferences.
-     * This method checks if a deprecated preference exists for the given property and, if so,
-     * updates the property's value based on the deprecated preference's value.
-     * The deprecated preference is then removed from the shared preferences.
-     *
-     * @param property The config property to migrate.
-     * @return True if a migration was performed, false otherwise.
-     */
     private boolean executeIntegerMigration(ConfigProperty<Integer> property) {
         if (property.getKey() != null) {
             if (property.getKey().equals(actionBarTitleOption.getKey())) {
@@ -396,23 +380,22 @@ public class OctoConfig {
         return associations;
     }
 
-    /**
-     * Resets the configuration to its default values.
-     * <p>
-     * This method iterates through all registered configuration properties
-     * and removes their corresponding keys from the shared preferences.
-     * This effectively reverts the configuration to its initial state,
-     * as if the application was freshly installed.
-     * <p>
-     * The method is synchronized to ensure thread safety when accessing
-     * and modifying the shared preferences.
-     */
     public void resetConfig() {
         synchronized (this) {
             SharedPreferences.Editor editor = PREFS.edit();
             for (ConfigProperty<?> property : properties) {
-                editor.remove(property.getKey());
+                if (property != newBadgeIds) {
+                    editor.remove(property.getKey());
+                }
             }
+            editor.apply();
+        }
+    }
+
+    public void resetSingleConfig(ConfigProperty<?> property) {
+        synchronized (this) {
+            SharedPreferences.Editor editor = PREFS.edit();
+            editor.remove(property.getKey());
             editor.apply();
         }
     }
@@ -574,12 +557,11 @@ public class OctoConfig {
             case "drawerFavoriteOption" -> value >= DrawerFavoriteOption.NONE.getValue() && value <= DrawerFavoriteOption.ARCHIVED_CHATS.getValue();
             case "drawerBlurBackgroundLevel" -> value >= 1 && value <= 100;
             case "drawerDarkenBackgroundLevel" -> value >= 1 && value <= 255;
-            case "actionBarTitleOption" -> value >= ActionBarTitleOption.EMPTY.getValue() && value <= ActionBarTitleOption.CUSTOM.getValue();
+            case "actionBarTitleOption" -> value >= ActionBarTitleOption.EMPTY.getValue() && value <= ActionBarTitleOption.FOLDER_NAME.getValue();
             case "deviceIdentifyState" -> value >= DeviceIdentifyState.DEFAULT.getValue() && value <= DeviceIdentifyState.FORCE_SMARTPHONE.getValue();
             case "phoneNavigationAlternative" -> value >= PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue() && value <= PhoneNumberAlternative.SHOW_USERNAME.getValue();
             case "navigationSmoothness" -> value == 200 || value == 400 || value == 500 || value == 600 || value == 800 || value == 1000;
             case "autoDownloadUpdatesStatus" -> value >= AutoDownloadUpdate.ALWAYS.getValue() && value <= AutoDownloadUpdate.NEVER.getValue();
-            case "cameraPreview" -> value >= CameraPreview.DEFAULT && value <= CameraPreview.BOTTOM_BAR;
             case "cameraType" -> value >= CameraType.TELEGRAM.getValue() && value <= CameraType.SYSTEM_CAMERA.getValue();
             case "interfaceCheckboxUI" -> value >= InterfaceCheckboxUI.DEFAULT.getValue() && value <= InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue();
             case "interfaceSliderUI" -> value >= InterfaceSliderUI.DEFAULT.getValue() && value <= InterfaceSliderUI.ANDROID.getValue();
@@ -588,6 +570,8 @@ public class OctoConfig {
             case "tabStyle" -> value >= TabStyle.DEFAULT.getValue() && value <= TabStyle.FULL.getValue();
             case "uiIconsType" -> value >= IconsUIType.DEFAULT.getValue() && value <= IconsUIType.MATERIAL_DESIGN_3.getValue();
             case "uiTitleCenteredState" -> value >= ActionBarCenteredTitle.ALWAYS.getValue() && value <= ActionBarCenteredTitle.NEVER.getValue();
+            case "shortcutsPosition" -> value >= ShortcutsPosition.THREE_DOTS.getId() && value <= ShortcutsPosition.PROFILE_DOTS.getId();
+            case "cameraPreview" -> value >= CameraPreview.DEFAULT && value <= CameraPreview.BOTTOM_BAR;
             default -> false;
         };
     }
@@ -661,7 +645,7 @@ public class OctoConfig {
         };
     }
 
-    public boolean getCameraPreviewStatus() {
-        return cameraPreview.getValue() != CameraPreview.DEFAULT;
+    public boolean isHiddenCameraPreview() {
+        return (cameraPreview.getValue() == CameraPreview.BOTTOM_BAR || cameraPreview.getValue() == CameraPreview.FLOATING);
     }
 }

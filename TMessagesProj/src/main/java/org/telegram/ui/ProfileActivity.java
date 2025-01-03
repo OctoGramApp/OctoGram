@@ -313,6 +313,7 @@ import java.util.zip.ZipOutputStream;
 import it.octogram.android.DcIdStyle;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
+import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
@@ -420,6 +421,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private ActionBarMenuItem editItem;
     private ActionBarMenuItem otherItem;
     private ActionBarMenuItem searchItem;
+    private ArrayList<ActionBarMenuItem> shortcutsItems = new ArrayList<>();
     private ActionBarMenuSubItem editColorItem;
     private ActionBarMenuSubItem linkItem;
     private ActionBarMenuSubItem setUsernameItem;
@@ -563,6 +565,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int bot_privacy = 44;
 
     private final static int copy_id = 100;
+
+    private final static int shortcuts_administrators = 1099;
+    private final static int shortcuts_recent_actions = 1100;
+    private final static int shortcuts_statistics = 1101;
+    private final static int shortcuts_permissions = 1102;
+    private final static int shortcuts_invite_links = 1103;
+    private final static int shortcuts_members = 1104;
 
     private Rect rect = new Rect();
 
@@ -1651,6 +1660,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                         if (editItemVisible) {
                             editItem.setVisibility(GONE);
+                            for (ActionBarMenuItem item : shortcutsItems) {
+                                item.setVisibility(View.GONE);
+                            }
                         }
                         if (callItemVisible) {
                             callItem.setVisibility(GONE);
@@ -1671,6 +1683,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     }
                     if (editItemVisible) {
                         editItem.setVisibility(VISIBLE);
+                        for (ActionBarMenuItem item : shortcutsItems) {
+                            item.setVisibility(View.VISIBLE);
+                        }
                     }
                     if (callItemVisible) {
                         callItem.setVisibility(VISIBLE);
@@ -2748,6 +2763,23 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         presentFragment(new QrActivity(args));
                     }
                 }
+
+                if (id == shortcuts_administrators || id == shortcuts_permissions || id == shortcuts_members) {
+                    Bundle args = new Bundle();
+                    args.putLong("chat_id", currentChat.id);
+                    args.putInt("type", id == shortcuts_permissions ? ChatUsersActivity.TYPE_KICKED : id == shortcuts_members ? ChatUsersActivity.TYPE_USERS : ChatUsersActivity.TYPE_ADMIN);
+                    ChatUsersActivity fragment = new ChatUsersActivity(args);
+                    fragment.setInfo(chatInfo);
+                    presentFragment(fragment);
+                } else if (id == shortcuts_recent_actions) {
+                    presentFragment(new ChannelAdminLogActivity(currentChat));
+                } else if (id == shortcuts_statistics) {
+                    presentFragment(StatisticActivity.create(currentChat, false));
+                } else if (id == shortcuts_invite_links) {
+                    ManageLinksActivity fragment = new ManageLinksActivity(currentChat.id, 0, 0);
+                    fragment.setInfo(chatInfo, chatInfo.exported_invite);
+                    presentFragment(fragment);
+                }
             }
         });
 
@@ -3368,6 +3400,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 callItem.setVisibility(expanded || !callItemVisible ? GONE : INVISIBLE);
                 videoCallItem.setVisibility(expanded || !videoCallItemVisible ? GONE : INVISIBLE);
                 editItem.setVisibility(expanded || !editItemVisible ? GONE : INVISIBLE);
+                for (ActionBarMenuItem item : shortcutsItems) {
+                    item.setVisibility(expanded || !editItemVisible ? GONE : INVISIBLE);
+                }
                 otherItem.setVisibility(expanded ? GONE : INVISIBLE);
                 if (qrItem != null) {
                     qrItem.setVisibility(expanded ? GONE : INVISIBLE);
@@ -3531,6 +3566,48 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         } else {
             editItem = menu.addItem(edit_channel, R.drawable.group_edit_profile);
             editItem.setContentDescription(LocaleController.getString(R.string.Edit));
+
+            shortcutsItems.clear();
+
+            if (OctoConfig.INSTANCE.shortcutsPosition.getValue() == ShortcutsPosition.CHAT_INFO.getId() && ChatObject.hasAdminRights(currentChat)) {
+                ActionBarMenuItem item;
+
+                if (OctoConfig.INSTANCE.shortcutsAdministrators.getValue()) {
+                    item = menu.addItem(shortcuts_administrators, R.drawable.msg_admins);
+                    item.setContentDescription(LocaleController.getString(R.string.ChannelAdministrators));
+                    shortcutsItems.add(item);
+                }
+
+                if (OctoConfig.INSTANCE.shortcutsRecentActions.getValue()) {
+                    item = menu.addItem(shortcuts_recent_actions, R.drawable.msg_log);
+                    item.setContentDescription(LocaleController.getString(R.string.EventLog));
+                    shortcutsItems.add(item);
+                }
+
+                if (OctoConfig.INSTANCE.shortcutsStatistics.getValue()) {
+                    item = menu.addItem(shortcuts_statistics, R.drawable.msg_stats);
+                    item.setContentDescription(LocaleController.getString(R.string.Statistics));
+                    shortcutsItems.add(item);
+                }
+
+                if (OctoConfig.INSTANCE.shortcutsPermissions.getValue()) {
+                    item = menu.addItem(shortcuts_permissions, R.drawable.msg_permissions);
+                    item.setContentDescription(LocaleController.getString(R.string.ChannelPermissions));
+                    shortcutsItems.add(item);
+                }
+
+                if (OctoConfig.INSTANCE.shortcutsInviteLinks.getValue()) {
+                    item = menu.addItem(shortcuts_invite_links, R.drawable.msg_link2);
+                    item.setContentDescription(LocaleController.getString(R.string.InviteLinks));
+                    shortcutsItems.add(item);
+                }
+
+                if (OctoConfig.INSTANCE.shortcutsMembers.getValue()) {
+                    item = menu.addItem(shortcuts_members, R.drawable.msg_groups);
+                    item.setContentDescription(LocaleController.getString(R.string.GroupMembers));
+                    shortcutsItems.add(item);
+                }
+            }
         }
         otherItem = menu.addItem(10, R.drawable.ic_ab_other, resourcesProvider);
         ttlIconView = new ImageView(context);
@@ -6944,6 +7021,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             if (editItemVisible) {
                 editItem.setVisibility(View.VISIBLE);
+                for (ActionBarMenuItem item : shortcutsItems) {
+                    item.setVisibility(View.VISIBLE);
+                }
             }
             otherItem.setVisibility(View.VISIBLE);
             if (mediaOptionsItem != null) {
@@ -7013,6 +7093,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                         if (editItemVisible) {
                             editItem.setVisibility(View.GONE);
+                            for (ActionBarMenuItem item : shortcutsItems) {
+                                item.setVisibility(View.GONE);
+                            }
                         }
                         otherItem.setVisibility(View.GONE);
                     } else {
@@ -10281,7 +10364,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (user == null) {
                 return;
             }
-            otherItem.addSubItem(copy_id, R.drawable.msg_copy, "Copy ID");
+            otherItem.addSubItem(copy_id, R.drawable.msg_copy, LocaleController.getString(R.string.CopyID));
             if (UserObject.isUserSelf(user)) {
                 editItemVisible = myProfile;
                 otherItem.addSubItem(edit_info, R.drawable.msg_edit, LocaleController.getString(R.string.EditInfo));
@@ -10369,11 +10452,45 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             TLRPC.Chat chat = getMessagesController().getChat(chatId);
             hasVoiceChatItem = false;
 
-            otherItem.addSubItem(copy_id, R.drawable.msg_copy, "Copy ID");
+            otherItem.addSubItem(copy_id, R.drawable.msg_copy, LocaleController.getString(R.string.CopyID));
 
             if (topicId == 0 && ChatObject.canChangeChatInfo(chat)) {
                 createAutoDeleteItem(context);
             }
+
+            if (ChatObject.hasAdminRights(currentChat) && OctoConfig.INSTANCE.shortcutsPosition.getValue() == ShortcutsPosition.PROFILE_DOTS.getId()) {
+                boolean hasAtLeastOneOption = false;
+
+                if (OctoConfig.INSTANCE.shortcutsAdministrators.getValue()) {
+                    hasAtLeastOneOption = true;
+                    otherItem.addSubItem(shortcuts_administrators, R.drawable.msg_admins, LocaleController.getString(R.string.ChannelAdministrators));
+                }
+                if (OctoConfig.INSTANCE.shortcutsRecentActions.getValue()) {
+                    hasAtLeastOneOption = true;
+                    otherItem.addSubItem(shortcuts_recent_actions, R.drawable.msg_log, LocaleController.getString(R.string.EventLog));
+                }
+                if (OctoConfig.INSTANCE.shortcutsStatistics.getValue()) {
+                    hasAtLeastOneOption = true;
+                    otherItem.addSubItem(shortcuts_statistics, R.drawable.msg_stats, LocaleController.getString(R.string.Statistics));
+                }
+                if (OctoConfig.INSTANCE.shortcutsPermissions.getValue()) {
+                    hasAtLeastOneOption = true;
+                    otherItem.addSubItem(shortcuts_permissions, R.drawable.msg_permissions, LocaleController.getString(R.string.ChannelPermissions));
+                }
+                if (OctoConfig.INSTANCE.shortcutsInviteLinks.getValue()) {
+                    hasAtLeastOneOption = true;
+                    otherItem.addSubItem(shortcuts_invite_links, R.drawable.msg_link2, LocaleController.getString(R.string.InviteLinks));
+                }
+                if (OctoConfig.INSTANCE.shortcutsMembers.getValue()) {
+                    hasAtLeastOneOption = true;
+                    otherItem.addSubItem(shortcuts_members, R.drawable.msg_groups, LocaleController.getString(R.string.GroupMembers));
+                }
+
+                if (hasAtLeastOneOption) {
+                    otherItem.addColoredGap();
+                }
+            }
+
             if (ChatObject.isChannel(chat)) {
                 /*if (isTopic) {
                     if (ChatObject.canManageTopic(currentAccount, chat, topicId)) {
@@ -10499,14 +10616,24 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (editItemVisible) {
                 if (editItem.getVisibility() != View.VISIBLE) {
                     editItem.setVisibility(View.VISIBLE);
+                    for (ActionBarMenuItem item : shortcutsItems) {
+                        item.setVisibility(View.VISIBLE);
+                    }
                     if (animated) {
                         editItem.setAlpha(0);
                         editItem.animate().alpha(1f).setDuration(150).start();
+                        for (ActionBarMenuItem item : shortcutsItems) {
+                            item.setAlpha(0);
+                            item.animate().alpha(1f).setDuration(150).start();
+                        }
                     }
                 }
             } else {
                 if (editItem.getVisibility() != View.GONE) {
                     editItem.setVisibility(View.GONE);
+                }
+                for (ActionBarMenuItem item : shortcutsItems) {
+                    item.setVisibility(View.GONE);
                 }
             }
         }
@@ -10514,6 +10641,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (avatarsViewPagerIndicatorView.isIndicatorFullyVisible()) {
                 if (editItemVisible) {
                     editItem.setVisibility(View.GONE);
+                    for (ActionBarMenuItem item : shortcutsItems) {
+                        item.setVisibility(View.GONE);
+                    }
                     editItem.animate().cancel();
                     editItem.setAlpha(1f);
                 }

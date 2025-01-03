@@ -39,7 +39,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
-import java.text.MessageFormat;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
@@ -118,39 +117,26 @@ public class Crashlytics {
     }
 
     public static String getSystemInfo(boolean includeConfiguration) throws IllegalAccessException {
-        var baseInfo = MessageFormat.format(
-                """
-                        {0}
+        StringBuilder baseInfo = new StringBuilder();
 
-                        App Version: {1} ({2})
-                        Base Version: {3} ({4})
-                        Commit: {5}
-                        Device: {6} {7}
-                        OS Version: {8}
-                        Google Play Services: {9}
-                        Performance Class: {10}
-                        Locale: {11}
-                        Language CW: {12}""",
-                LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()),
-                BuildVars.BUILD_VERSION_STRING,
-                BuildConfig.BUILD_VERSION,
-                BuildVars.TELEGRAM_VERSION_STRING,
-                BuildVars.TELEGRAM_BUILD_VERSION,
-                BuildConfig.GIT_COMMIT_HASH,
-                Build.MANUFACTURER,
-                Build.MODEL,
-                Build.VERSION.RELEASE,
-                ApplicationLoader.hasPlayServices,
-                getPerformanceClassString(),
-                LocaleController.getSystemLocaleStringIso639(),
-                Resources.getSystem().getConfiguration().locale.getLanguage()
-        );
+        baseInfo.append(LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()))
+                .append("\n\n")
+                .append("App Version: ").append(BuildVars.BUILD_VERSION_STRING).append(" (").append(BuildConfig.BUILD_VERSION).append(")\n")
+                .append("Base Version: ").append(BuildVars.TELEGRAM_VERSION_STRING).append(" (").append(BuildVars.TELEGRAM_BUILD_VERSION).append(")\n")
+                .append("Commit: ").append(BuildConfig.GIT_COMMIT_HASH).append("\n")
+                .append("Device: ").append(Build.MANUFACTURER != null ? Build.MANUFACTURER : "Unknown")
+                .append(" ").append(Build.MODEL != null ? Build.MODEL : "Unknown").append("\n")
+                .append("OS Version: ").append(Build.VERSION.RELEASE != null ? Build.VERSION.RELEASE : "Unknown").append("\n")
+                .append("Google Play Services: ").append(ApplicationLoader.hasPlayServices ? "Enabled" : "Disabled").append("\n")
+                .append("Performance Class: ").append(getPerformanceClassString()).append("\n")
+                .append("Locale: ").append(LocaleController.getSystemLocaleStringIso639()).append("\n")
+                .append("Language CW: ").append(Resources.getSystem().getConfiguration().locale.getLanguage()).append("\n");
 
         if (includeConfiguration) {
-            baseInfo += "\nConfiguration: " + getOctoConfiguration() + "\n";
+            baseInfo.append("Configuration: ").append(getOctoConfiguration()).append("\n");
         }
 
-        return baseInfo;
+        return baseInfo.toString();
     }
 
     // I don't even know why I did this

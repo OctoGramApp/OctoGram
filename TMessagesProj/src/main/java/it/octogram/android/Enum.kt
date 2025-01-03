@@ -17,7 +17,13 @@ enum class DcIdStyle(val value: Int) {
     NONE(0),
     OWLGRAM(1),
     TELEGRAM(2),
-    MINIMAL(3)
+    MINIMAL(3);
+
+    companion object {
+        fun fromInt(value: Int): DcIdStyle {
+            return entries.find { it.value == value } ?: NONE
+        }
+    }
 }
 
 enum class DcIdType(val value: Int) {
@@ -323,7 +329,8 @@ enum class ActionBarTitleOption(val value: Int) {
     APP_NAME(1),
     ACCOUNT_NAME(2),
     ACCOUNT_USERNAME(3),
-    CUSTOM(4)
+    CUSTOM(4),
+    FOLDER_NAME(5)
 }
 
 enum class AutoDownloadUpdate(val value: Int) {
@@ -336,6 +343,13 @@ enum class ExpandableRowsIds(val id: Int) {
     REPLIES_AND_LINKS(1),
     PROMPT_BEFORE_SENDING(2),
     CONTEXT_MENU_ELEMENTS(3),
+    ADMIN_SHORTCUTS(4)
+}
+
+enum class ShortcutsPosition(val id: Int) {
+    THREE_DOTS(0),
+    CHAT_INFO(1),
+    PROFILE_DOTS(2)
 }
 
 enum class InterfaceSwitchUI(val value: Int) {

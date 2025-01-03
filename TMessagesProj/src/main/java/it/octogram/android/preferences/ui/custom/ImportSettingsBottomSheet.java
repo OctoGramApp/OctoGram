@@ -12,6 +12,7 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -222,6 +223,9 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.setCancelDialog(false);
+            alertDialog.setCanCancel(false);
+            alertDialog.setOnCancelListener(dialog -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
             alertDialog.show();
         }
     }

@@ -28,13 +28,15 @@ public class ExpandableRows extends BaseRow implements Clickable {
     private final int icon;
     private final CharSequence mainItemTitle;
     private final ArrayList<ExpandableRowsOption> itemsList;
+    private final Runnable onSingleStateChange;
 
-    private ExpandableRows(int id, int icon, @Nullable CharSequence title, ArrayList<ExpandableRowsOption> itemsList) {
+    private ExpandableRows(int id, int icon, @Nullable CharSequence title, ArrayList<ExpandableRowsOption> itemsList, Runnable onSingleStateChange) {
         super(PreferenceType.EXPANDABLE_ROWS);
         this.id = id;
         this.icon = icon;
         this.mainItemTitle = title;
         this.itemsList = itemsList;
+        this.onSingleStateChange = onSingleStateChange;
     }
 
     public int getId() {
@@ -53,6 +55,10 @@ public class ExpandableRows extends BaseRow implements Clickable {
         return itemsList;
     }
 
+    public Runnable getOnSingleStateChange() {
+        return onSingleStateChange;
+    }
+
     @Override
     public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
         return true;
@@ -63,6 +69,7 @@ public class ExpandableRows extends BaseRow implements Clickable {
         private int icon;
         private CharSequence mainItemTitle;
         private final ArrayList<ExpandableRowsOption> itemsList = new ArrayList<>();
+        private Runnable onSingleStateChange;
 
         public ExpandableRowsBuilder setId(int id) {
             this.id = id;
@@ -84,8 +91,13 @@ public class ExpandableRows extends BaseRow implements Clickable {
             return this;
         }
 
+        public ExpandableRowsBuilder setOnSingleStateChange(Runnable run) {
+            onSingleStateChange = run;
+            return this;
+        }
+
         public ExpandableRows build() {
-            return new ExpandableRows(id, icon, mainItemTitle, itemsList);
+            return new ExpandableRows(id, icon, mainItemTitle, itemsList, onSingleStateChange);
         }
     }
 }

@@ -60,6 +60,8 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.TreeSet;
 
+import it.octogram.android.OctoConfig;
+
 public class QuoteSpan implements LeadingMarginSpan {
 
     public static int COLLAPSE_LINES = 3;
@@ -152,6 +154,9 @@ public class QuoteSpan implements LeadingMarginSpan {
     public static int putQuote(Spannable spannable, int start, int end, boolean collapse) {
         if (spannable == null) {
             return -1;
+        }
+        if (OctoConfig.INSTANCE.alwaysExpandBlockQuotes.getValue()) {
+            collapse = false;
         }
         QuoteSpan[] existingSpans = spannable.getSpans(start, end, QuoteSpan.class);
         if (existingSpans != null && existingSpans.length > 0) {

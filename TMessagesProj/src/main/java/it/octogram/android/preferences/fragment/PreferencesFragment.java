@@ -175,6 +175,8 @@ public class PreferencesFragment extends BaseFragment {
         currentShownItems.clear();
         oldItems.clear();
         reorderedPreferences.clear();
+        expandableIndexes.clear();
+        expandedRowIds.clear();
 
         updatePreferences();
 
@@ -237,6 +239,11 @@ public class PreferencesFragment extends BaseFragment {
                     for (ExpandableRowsOption item : expandableRow.getItemsList()) {
                         item.property.updateValue(newState);
                     }
+
+                    if (expandableRow.getOnSingleStateChange() != null) {
+                        expandableRow.getOnSingleStateChange().run();
+                    }
+
                     switchCell.reload();
                     reloadSecondaryCellFromMain(switchCell);
                 }
@@ -393,6 +400,11 @@ public class PreferencesFragment extends BaseFragment {
         for (ExpandableRowIndex index : expandableIndexes.values()) {
             if (index.secondaryCell.contains(secondaryCell)) {
                 index.mainCell.reload();
+
+                if (index.getOnSingleStateChange() != null) {
+                    index.getOnSingleStateChange().run();
+                }
+
                 break;
             }
         }
@@ -628,7 +640,7 @@ public class PreferencesFragment extends BaseFragment {
                     ExpandableRows expandableRows = (ExpandableRows) currentShownItems.get(position);
 
                     if (expandableIndexes.get(expandableRows.getId()) == null) {
-                        expandableIndexes.put(expandableRows.getId(), new ExpandableRowIndex(switchCell));
+                        expandableIndexes.put(expandableRows.getId(), new ExpandableRowIndex(switchCell, expandableRows.getOnSingleStateChange()));
                     }
 
                     switchCell.setAsSwitch(expandableRows);
@@ -790,7 +802,8 @@ public class PreferencesFragment extends BaseFragment {
             countTextView.setText(MessageFormat.format(" {0}/{1}", selectedOptions, expandableRows.getItemsList().size()));
 
             needLine = !expandableRows.getItemsList().isEmpty();
-            setWillNotDraw(!needLine);
+            needDivider = true;
+            setWillNotDraw(false);
         }
 
         public void setAsCheckbox(ExpandableRowsOption item, boolean divider) {
@@ -845,10 +858,16 @@ public class PreferencesFragment extends BaseFragment {
 
     private static class ExpandableRowIndex {
         private final SwitchCell mainCell;
+        private final Runnable onSingleStateChange;
         private final ArrayList<SwitchCell> secondaryCell = new ArrayList<>();
 
-        public ExpandableRowIndex(SwitchCell mainCell) {
+        public ExpandableRowIndex(SwitchCell mainCell, Runnable onSingleStateChange) {
             this.mainCell = mainCell;
+            this.onSingleStateChange = onSingleStateChange;
+        }
+
+        public Runnable getOnSingleStateChange() {
+            return onSingleStateChange;
         }
 
         public void addSecondaryCell(SwitchCell cell) {
@@ -859,6 +878,7 @@ public class PreferencesFragment extends BaseFragment {
             secondaryCell.add(cell);
         }
     }
+
     public void rebuildAllFragmentsWithLast() {
         Parcelable recyclerViewState = null;
         if (listView.getLayoutManager() != null) {

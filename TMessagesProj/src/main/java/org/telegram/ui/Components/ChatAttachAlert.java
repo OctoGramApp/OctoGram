@@ -3925,7 +3925,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             int width = Math.max(nextAttachLayout.getWidth(), currentAttachLayout.getWidth());
             if (nextAttachLayout instanceof ChatAttachAlertPhotoLayoutPreview) {
                 nextAttachLayout.setTranslationX(width);
-                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() != CameraPreview.DEFAULT) {
+                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout && OctoConfig.INSTANCE.isHiddenCameraPreview()) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) currentAttachLayout;
                     if (photoLayout != null) {
                         if (photoLayout.cameraView != null) {
@@ -3941,7 +3941,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 }
             } else {
                 currentAttachLayout.setTranslationX(-width);
-                if (nextAttachLayout == photoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() != CameraPreview.DEFAULT) {
+                if (nextAttachLayout == photoLayout && OctoConfig.INSTANCE.isHiddenCameraPreview()) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) nextAttachLayout;
                     if (photoLayout.cameraView != null) {
                         photoLayout.cameraView.setVisibility(View.VISIBLE);
@@ -5466,7 +5466,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 if (allowEnterCaption) {
                     musicButton = buttonsCount++;
                 }
-                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
                     cameraButton = buttonsCount++;
                 }
             } else if (editingMessageObject != null) {
@@ -5484,13 +5484,13 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     if (editType == EDITMEDIA_TYPE_MUSIC) {
                         musicButton = buttonsCount++;
                     }
-                    if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                    if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
                         cameraButton = buttonsCount++;
                     }
                 }
             } else {
                 galleryButton = buttonsCount++;
-                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
                     cameraButton = buttonsCount++;
                 }
                 if (photosEnabled || videosEnabled) {

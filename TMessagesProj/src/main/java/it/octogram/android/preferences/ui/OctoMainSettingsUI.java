@@ -8,6 +8,7 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
@@ -15,15 +16,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.CountDownTimer;
+import android.view.Gravity;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.CheckBoxCell;
+import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.Locale;
@@ -67,7 +74,6 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())))
                             .icon(R.drawable.msg_media)
-                            .isNew(NewFeaturesBadgeId.GENERAL_BADGE.getId())
                             .title(getString(R.string.General))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -89,13 +95,11 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI())))
                             .icon(R.drawable.outline_science_white)
-                            .isNew(NewFeaturesBadgeId.EXPERIMENTAL_BADGE.getId())
                             .title(getString(R.string.Experiments))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoUpdatesUI())))
                             .icon(R.drawable.round_update_white_28)
-                            .isNew(NewFeaturesBadgeId.UPDATES_BADGE.getId())
                             .title(getString(R.string.Updates))
                             .build());
                 })
@@ -130,8 +134,8 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new OctoLogsActivity()))
                             .icon(R.drawable.msg_log)
-                            .title("OctoGram Logs")
-                            .description("View and share OctoGram Logs")
+                            .title(LocaleController.getString(R.string.CrashHistory)+ " (PBETA)")
+                            .description(LocaleController.getString(R.string.CrashHistory_Desc))
                             .showIf(logsOnlyPbeta)
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -156,12 +160,53 @@ public class OctoMainSettingsUI implements PreferencesEntry {
     }
 
     private void openResetSettingsProcedure(Context context) {
+        openResetSettingsProcedure(context, false);
+    }
+
+    public static void openResetSettingsProcedure(Context context, boolean resetExperimentalSettings) {
+        boolean[] saveBackup = {false};
+
+        FrameLayout frameLayout = new FrameLayout(context);
+        CheckBoxCell checkbox = new CheckBoxCell(context, 1, null);
+        checkbox.setBackground(Theme.getSelectorDrawable(false));
+        checkbox.setText(getString(R.string.ResetSettingsBackup), "", false, false);
+        checkbox.setPadding(LocaleController.isRTL ? dp(16) : dp(8), 0, LocaleController.isRTL ? dp(8) : dp(16), 0);
+        frameLayout.addView(checkbox, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.TOP | Gravity.LEFT, 0, 0, 0, 0));
+        checkbox.setOnClickListener(v -> {
+            CheckBoxCell cell1 = (CheckBoxCell) v;
+            saveBackup[0] = !saveBackup[0];
+            cell1.setChecked(saveBackup[0], true);
+        });
+
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
         warningBuilder.setTitle(getString(R.string.ResetSettingsTitle));
-        warningBuilder.setMessage(getString(R.string.ResetSettingsDescription));
+        warningBuilder.setMessage(getString(resetExperimentalSettings ? R.string.ResetSettingsDescriptionExperimental : R.string.ResetSettingsDescription));
+        warningBuilder.setView(frameLayout).setCustomViewOffset(9);
         warningBuilder.setPositiveButton(getString(R.string.ResetSettingsButton), (dialog1, which1) -> {
-            OctoConfig.INSTANCE.resetConfig();
-            AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
+            AlertDialog progressDialog = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
+            progressDialog.setCanCancel(false);
+            progressDialog.show();
+
+            if (saveBackup[0]) {
+                ExportDoneReadyBottomSheet instance = new ExportDoneReadyBottomSheet(context, null, null);
+                instance.setOnCompletedRunnable(() -> completeReset(context, resetExperimentalSettings));
+                instance.setOnFailedRunnable(() -> {
+                    progressDialog.dismiss();
+                    warningBuilder.getDismissRunnable().run();
+
+                    AlertDialog.Builder errorBuilder = new AlertDialog.Builder(context);
+                    errorBuilder.setTitle(LocaleController.getString(R.string.Warning));
+                    errorBuilder.setPositiveButton(LocaleController.getString(R.string.OK), null);
+                    errorBuilder.setMessage(LocaleController.getString(R.string.ResetSettingsBackupFailed));
+                    AlertDialog alertDialog = errorBuilder.create();
+                    alertDialog.show();
+                });
+                instance.shareExport("");
+
+                return;
+            }
+
+            completeReset(context, resetExperimentalSettings);
         });
         warningBuilder.setNeutralButton(getString(R.string.Cancel), null);
         AlertDialog dialog = warningBuilder.create();
@@ -188,5 +233,15 @@ public class OctoMainSettingsUI implements PreferencesEntry {
 
         dialog.show();
         dialog.redPositive();
+    }
+
+    private static void completeReset(Context context, boolean resetExperimentalSettings) {
+        if (resetExperimentalSettings) {
+            OctoExperimentsUI.resetSettings();
+        } else {
+            OctoConfig.INSTANCE.resetConfig();
+        }
+
+        AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
     }
 }

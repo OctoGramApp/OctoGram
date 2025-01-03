@@ -10,6 +10,7 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -31,19 +32,24 @@ import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.preferences.ui.custom.DcInfoSelector;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
     SwitchRow enableSmartNotificationsSwitchRow;
+    private DcInfoSelector dcInfoSelector;
 
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         ConfigProperty<Boolean> canShowPhoneNumberAlternative = new ConfigProperty<>(null, OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue());
         ConfigProperty<Boolean> canShowSelectReaction = new ConfigProperty<>(null, OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue());
+        ConfigProperty<Boolean> isDcIdVisible = new ConfigProperty<>(null, OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.NONE.getValue());
+
         return OctoPreferences.builder(LocaleController.getString(R.string.OctoGeneralSettings))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, LocaleController.getString(R.string.OctoGeneralSettingsHeader))
                 .category(LocaleController.getString(R.string.PrivacyHeader), category -> {
@@ -80,7 +86,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.InsteadPhoneNumber))
                             .build());
                 })
-                .category("Warnings", category -> {
+                .category(LocaleController.getString(R.string.Warnings), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.promptBeforeCalling)
                             .title(LocaleController.getString(R.string.PromptBeforeCalling))
@@ -93,6 +99,10 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.getString(R.string.DcIdHeader), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(dcInfoSelector = new DcInfoSelector(context))
+                            .showIf(isDcIdVisible)
+                            .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
                             .title(LocaleController.getString(R.string.ShowRegistrationDate))
@@ -100,20 +110,33 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .onClick(() -> {
-                                fragment.rebuildAllFragmentsWithLast();
-                                return true;
+                            .onSelected(() -> {
+                                isDcIdVisible.setValue(OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.NONE.getValue());
+                                AndroidUtilities.runOnUIThread(() -> dcInfoSelector.update());
                             })
                             .currentValue(OctoConfig.INSTANCE.dcIdStyle)
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(DcIdStyle.NONE.getValue()).setItemTitle(LocaleController.getString(R.string.Nothing)),
-                                    new PopupChoiceDialogOption().setId(DcIdStyle.OWLGRAM.getValue()).setItemTitle("OwlGram"),
-                                    new PopupChoiceDialogOption().setId(DcIdStyle.TELEGRAM.getValue()).setItemTitle("Telegram"),
-                                    new PopupChoiceDialogOption().setId(DcIdStyle.MINIMAL.getValue()).setItemTitle("Minimal")
+                                    new PopupChoiceDialogOption()
+                                            .setId(DcIdStyle.NONE.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.Nothing))
+                                            .setItemDescription(LocaleController.getString(R.string.DCStyleNothing_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DcIdStyle.OWLGRAM.getValue())
+                                            .setItemTitle("OwlGram")
+                                            .setItemDescription(LocaleController.getString(R.string.DCStyleOwlGram_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DcIdStyle.TELEGRAM.getValue())
+                                            .setItemTitle("Telegram")
+                                            .setItemDescription(LocaleController.getString(R.string.DCStyleTelegram_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DcIdStyle.MINIMAL.getValue())
+                                            .setItemTitle("Minimal")
+                                            .setItemDescription(LocaleController.getString(R.string.DCStyleMinimal_Desc))
                             ))
                             .title(LocaleController.getString(R.string.Style))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
+                            .onSelected(() -> dcInfoSelector.updateChatID())
                             .currentValue(OctoConfig.INSTANCE.dcIdType)
                             .options(List.of(
                                     new PopupChoiceDialogOption()
@@ -125,8 +148,8 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                                             .setItemTitle("Telegram")
                                             .setItemDescription(LocaleController.getString(R.string.DcIdTypeDescriptionTelegram))
                             ))
+                            .showIf(isDcIdVisible)
                             .title(LocaleController.getString(R.string.Type))
-                            .postNotificationName(NotificationCenter.reloadInterface)
                             .build());
                 })
                 .category(LocaleController.getString(R.string.Chats), category -> {
@@ -315,14 +338,13 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.CustomEmojiReaction))
                             .build());
                 })
-                .category("Replies", category -> {
+                .category(LocaleController.getString(R.string.Replies), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.rememberAllRepliesMessage)
                             .title(LocaleController.getString(R.string.ReplyTracking))
                             .description(LocaleController.getString(R.string.ReplyTracking_Desc))
                             .build());
                 })
-
                 .category(LocaleController.getString(R.string.Notifications), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)

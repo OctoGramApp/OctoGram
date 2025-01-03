@@ -55,7 +55,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
 
         return OctoPreferences.builder(LocaleController.formatString(R.string.DrawerTitle))
                 .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_openin, LocaleController.getString(R.string.Drawer_Test), () -> LaunchActivity.instance.drawerLayoutContainer.openDrawer(true)))
-                .category("Drawer", category -> {
+                .category(LocaleController.formatString(R.string.DrawerTitle), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(drawerPreviewCell = new DrawerPreviewCell(context))
                             .build());

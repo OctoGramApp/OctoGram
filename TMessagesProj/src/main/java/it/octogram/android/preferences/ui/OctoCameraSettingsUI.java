@@ -14,7 +14,6 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.util.Size;
 
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 
@@ -149,16 +148,13 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(CameraPreview.DEFAULT)
-                                            .setItemTitle("Default"),
-                                    /*TODO: new PopupChoiceDialogOption()
-                                            .setId(CameraPreview.FLOATING)
-                                            .setItemTitle("Floating"),*/
+                                            .setItemTitle(R.string.CameraButtonPosition_Default),
                                     new PopupChoiceDialogOption()
                                             .setId(CameraPreview.BOTTOM_BAR)
-                                            .setItemTitle("Bottom Bar"))
+                                            .setItemTitle(R.string.CameraButtonPosition_BottomBar))
                             )
-                            .title(LocaleController.getString(R.string.CameraButtonPosition))
-                            .description(LocaleController.getString(R.string.CameraButtonPosition_Desc))
+                            .title(R.string.CameraButtonPosition)
+                            .description(R.string.CameraButtonPosition_Desc)
                             .build());
                 })
                 .build();

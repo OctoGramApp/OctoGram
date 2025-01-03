@@ -414,7 +414,7 @@ public class CameraXView extends BaseCameraView {
     }
 
     public boolean isFlashAvailable() {
-        return CameraXController.isFlashAvailable();
+        return controller.isFlashAvailable();
     }
 
     @Override

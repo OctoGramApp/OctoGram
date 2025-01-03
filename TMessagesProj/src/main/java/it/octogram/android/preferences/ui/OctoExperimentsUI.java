@@ -25,7 +25,6 @@ import java.util.List;
 import it.octogram.android.AudioType;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.DeviceIdentifyState;
-import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhotoResolution;
 import it.octogram.android.StickerUi;
@@ -49,6 +48,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         return OctoPreferences.builder(LocaleController.getString(R.string.Experiments))
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_reset, LocaleController.getString(R.string.ResetSettings), () -> OctoMainSettingsUI.openResetSettingsProcedure(context, true)))
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, LocaleController.getString(R.string.OctoExperimentsSettingsHeader))
                 .category(LocaleController.getString(R.string.ExperimentalSettings), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -138,7 +138,6 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                     fragment.presentFragment(new NavigationSettingsUI());
                                 }
                             })
-                            .isNew(NewFeaturesBadgeId.ALTERNATIVE_NAVIGATION_BADGE.getId())
                             .value(LocaleController.getString(OctoConfig.INSTANCE.alternativeNavigation.getValue() ? R.string.NotificationsOn : R.string.NotificationsOff))
                             .title(LocaleController.getString(R.string.AlternativeNavigation))
                             .build()
@@ -159,6 +158,24 @@ public class OctoExperimentsUI implements PreferencesEntry {
                         .description(LocaleController.getString(R.string.MonetIconDesc))
                         .build())
                 .row(new ShadowRow(canShowMonetIconSwitch))
+                .category(LocaleController.getString(R.string.Chats), category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.hideBottomBarChannels)
+                            .title(LocaleController.getString(R.string.HideBottomBarChannels))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .onPostUpdate(fragment::rebuildAllFragmentsWithLast)
+                            .preferenceValue(OctoConfig.INSTANCE.hideOpenButtonChatsList)
+                            .title(LocaleController.getString(R.string.HideOpenButtonChatsList))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.alwaysExpandBlockQuotes)
+                            .title(LocaleController.getString(R.string.AlwaysExpandBlockQuotes))
+                            .build());
+                })
                 .category(LocaleController.getString(R.string.DownloadAndUploadBoost), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
@@ -182,6 +199,26 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .build());
                 })
                 .build();
+    }
+
+    public static void resetSettings() {
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.experimentsEnabled);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.mediaInGroupCall);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.showRPCErrors);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.gcOutputType);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.photoResolution);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.maxRecentStickers);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.forceUseIpV6);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.deviceIdentifyState);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.alternativeNavigation);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.animatedActionBar);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.navigationSmoothness);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.hideBottomBarChannels);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.hideOpenButtonChatsList);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.alwaysExpandBlockQuotes);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.uploadBoost);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.downloadBoost);
+        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.downloadBoostValue);
     }
 
     public static boolean checkExperimentsEnabled(Context context) {

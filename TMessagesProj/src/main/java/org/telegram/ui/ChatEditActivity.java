@@ -1159,7 +1159,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
                 logCell.setOnClickListener(v -> presentFragment(new ChannelAdminLogActivity(currentChat)));
             }
 
-            if (ChatObject.isBoostSupported(currentChat)) {
+            if (ChatObject.isBoostSupported(currentChat) && ChatObject.hasAdminRights(currentChat)) {
                 statsAndBoosts = new TextCell(context);
                 statsAndBoosts.setTextAndIcon(getString(R.string.StatisticsAndBoosts), R.drawable.msg_stats, true);
                 statsAndBoosts.setBackground(Theme.getSelectorDrawable(false));
@@ -1197,7 +1197,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
                 infoContainer.addView(channelAffiliateProgramsCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
             }
 
-            if (channelAffiliateProgramsCell != null && getMessagesController().starrefConnectAllowed) {
+            if (channelAffiliateProgramsCell != null && getMessagesController().starrefConnectAllowed && ChatObject.hasAdminRights(currentChat)) {
                 channelAffiliateProgramsCell.setVisibility(View.VISIBLE);
             }
             if (logCell != null) {

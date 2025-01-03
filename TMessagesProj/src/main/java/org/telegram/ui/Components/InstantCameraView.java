@@ -540,7 +540,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 camera2Sessions[1].setFlash(flashState);
             }
         } else if (isCameraXSupportedAndActive && roundMessageUtils.isCameraReady(this)) {
-            CameraXController.setTorchEnabled(flashState);
+            roundMessageUtils.cameraXController.setTorchEnabled(flashState);
         } else {
             if (cameraSession != null) {
 //                final String mode = (

@@ -68,7 +68,10 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
 
     private String sharingFullLocation;
     private String sharingFileName;
-    private LongSparseArray<TLRPC.Dialog> sharingDids;
+    private LongSparseArray<TLRPC.Dialog> sharingDids = new LongSparseArray<>();
+
+    private Runnable onCompletedRunnable;
+    private Runnable onFailedRunnable;
 
     public ExportDoneReadyBottomSheet(Context context, Activity originalActivity, BaseFragment baseFragment) {
         super(context, true);
@@ -164,18 +167,30 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         setCustomView(linearLayout);
     }
 
-    private void shareExport(String fileNameText) {
+    public void setOnCompletedRunnable(Runnable onCompletedRunnable) {
+        this.onCompletedRunnable = onCompletedRunnable;
+    }
+
+    public void setOnFailedRunnable(Runnable onFailedRunnable) {
+        this.onFailedRunnable = onFailedRunnable;
+    }
+
+    public void shareExport(String fileNameText) {
         if (fileNameText.contains("/") || fileNameText.length() > 40) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
-            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
-            alertDialogBuilder.setPositiveButton("OK", null);
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
+            if (baseFragment != null) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
+                alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
+                alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
+                alertDialogBuilder.setPositiveButton("OK", null);
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
             return;
         }
 
-        dismiss();
+        if (baseFragment != null) {
+            dismiss();
+        }
 
         try {
             JSONObject mainObject = createOctoExport();
@@ -198,21 +213,29 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             }
             fos.close();
 
-            ShareAlert shAlert = new ShareAlert(baseFragment.getParentActivity(), null, null, false, null, false) {
+            sharingFileName = cacheFile.getName();
+            sharingFullLocation = cacheFile.getAbsolutePath();
+            FileLoader instance = FileLoader.getInstance(UserConfig.selectedAccount);
 
-                @Override
-                protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
-                    sharingFileName = cacheFile.getName();
-                    sharingFullLocation = cacheFile.getAbsolutePath();
-                    sharingDids = dids;
+            if (baseFragment == null) {
+                long userID = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
+                TLRPC.Dialog dialog = MessagesController.getInstance(UserConfig.selectedAccount).getDialog(userID);
+                sharingDids.append(userID, dialog);
+                initUpdateReceiver();
+                instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
+            } else {
+                ShareAlert shAlert = new ShareAlert(baseFragment.getParentActivity(), null, null, false, null, false) {
 
-                    FileLoader instance = FileLoader.getInstance(baseFragment.getCurrentAccount());
+                    @Override
+                    protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                        sharingDids = dids;
 
-                    initUpdateReceiver();
-                    instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
-                }
-            };
-            baseFragment.showDialog(shAlert);
+                        initUpdateReceiver();
+                        instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
+                    }
+                };
+                baseFragment.showDialog(shAlert);
+            }
         } catch (JSONException e) {
             Log.e(getClass().getName(), "Error sharing settings export", e);
         } catch (IOException e) {
@@ -247,13 +270,13 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
     }
 
     private void initUpdateReceiver() {
-        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).addObserver(this, NotificationCenter.fileUploaded);
-        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).addObserver(this, NotificationCenter.fileUploadFailed);
+        NotificationCenter.getInstance(UserConfig.selectedAccount).addObserver(this, NotificationCenter.fileUploaded);
+        NotificationCenter.getInstance(UserConfig.selectedAccount).addObserver(this, NotificationCenter.fileUploadFailed);
     }
 
     private void stopUpdateReceiver() {
-        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploaded);
-        NotificationCenter.getInstance(baseFragment.getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploadFailed);
+        NotificationCenter.getInstance(UserConfig.selectedAccount).removeObserver(this, NotificationCenter.fileUploaded);
+        NotificationCenter.getInstance(UserConfig.selectedAccount).removeObserver(this, NotificationCenter.fileUploadFailed);
     }
 
     @Override
@@ -272,7 +295,9 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
 
             stopUpdateReceiver();
 
-            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.ExportDataShareDone)).show());
+            if (baseFragment != null) {
+                AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.ExportDataShareDone)).show());
+            }
 
             TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
             attr.file_name = sharingFileName;
@@ -282,14 +307,24 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             inputMediaDocument.attributes.add(attr);
             inputMediaDocument.mime_type = OctoConfig.EXPORT_BACKUP_MIME_TYPE;
 
+            StringBuilder baseInfo = new StringBuilder();
+            baseInfo.append(LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()));
+            baseInfo.append("\n");
+            baseInfo.append(LocaleController.getString(R.string.ExportDataShareFileComment));
+
             for (int i = 0; i < sharingDids.size(); i++) {
                 TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
                 req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDids.keyAt(i));
                 req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
-                req.message = "";
-                req.silent = true;
+                req.message = baseInfo.toString();
+                req.silent = false;
+                req.invert_media = true;
                 req.media = inputMediaDocument;
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+            }
+
+            if (onCompletedRunnable != null) {
+                onCompletedRunnable.run();
             }
         } else if (id == NotificationCenter.fileUploadFailed) {
             String location = (String) args[0];
@@ -299,6 +334,10 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             }
 
             stopUpdateReceiver();
+
+            if (onFailedRunnable != null) {
+                onFailedRunnable.run();
+            }
         }
     }
 }

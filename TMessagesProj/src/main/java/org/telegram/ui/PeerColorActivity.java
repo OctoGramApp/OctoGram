@@ -76,6 +76,7 @@ import org.telegram.ui.Cells.ThemePreviewMessagesCell;
 import org.telegram.ui.Components.AnimatedColor;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedFloat;
+import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
@@ -2193,6 +2194,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
         protected final ImageReceiver imageReceiver = new ImageReceiver(this);
         protected final AvatarDrawable avatarDrawable = new AvatarDrawable();
         protected final SimpleTextView titleView, subtitleView;
+        private final AnimatedTextView customInfoView;
 
         private boolean isForum;
 
@@ -2237,6 +2239,15 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
             subtitleView.setTextColor(0x80FFFFFF);
             subtitleView.setScrollNonFitText(true);
             addView(subtitleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 97, 0, 16, 30.66f));
+
+            customInfoView = new AnimatedTextView(context);
+            customInfoView.setAnimationProperties(1f, 0, 300, CubicBezierInterpolator.EASE_OUT_QUINT);
+            customInfoView.setTextSize(dp(14));
+            customInfoView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
+            customInfoView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            customInfoView.setTextColor(0x80FFFFFF);
+            customInfoView.setVisibility(GONE);
+            addView(customInfoView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 97, 53, 16, 0));
 
             imageReceiver.setRoundRadius(dp(54));
             CharSequence title;
@@ -2287,6 +2298,14 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
             }
 
             setWillNotDraw(false);
+        }
+
+        public void setCustomInfoText(String text) {
+            if (customInfoView.getVisibility() == GONE) {
+                customInfoView.setVisibility(VISIBLE);
+            }
+
+            customInfoView.getDrawable().setText(text, true, true);
         }
 
         public void overrideAvatarColor(int colorId) {

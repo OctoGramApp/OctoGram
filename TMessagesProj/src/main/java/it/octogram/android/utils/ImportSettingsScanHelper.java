@@ -110,6 +110,12 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.updateSignalingLastBuildID.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.updateSignalingChangelog.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.uiRandomMemeIcons.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.shortcutsAdministrators.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.shortcutsMembers.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.shortcutsInviteLinks.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.shortcutsRecentActions.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.shortcutsStatistics.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.shortcutsPermissions.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {
@@ -152,6 +158,7 @@ public class ImportSettingsScanHelper {
     }
 
     private void fillAppearanceOptions(SettingsScanCategory category) {
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.shortcutsPosition.getKey(), R.string.AdminShortcutsPosition));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSystemEmoji.getKey(), R.string.UseSystemEmojis));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSystemFont.getKey(), R.string.UseSystemFont));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showUserIconsInChatsList.getKey(), R.string.ShowUserIconsInChatsList));
@@ -233,6 +240,9 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alternativeNavigation.getKey(), R.string.AlternativeNavigation));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.navigationSmoothness.getKey(), composeName(R.string.AlternativeNavigation, R.string.SmootherNavigation)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.animatedActionBar.getKey(), composeName(R.string.AlternativeNavigation, R.string.AnimatedActionBar)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideBottomBarChannels.getKey(), R.string.HideBottomBarChannels));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideOpenButtonChatsList.getKey(), R.string.HideOpenButtonChatsList));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alwaysExpandBlockQuotes.getKey(), R.string.AlwaysExpandBlockQuotes));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost.getKey(), R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost.getKey(), R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue.getKey(), R.string.DownloadBoostType));

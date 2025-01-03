@@ -93,11 +93,9 @@ public class CameraXUtils {
                 return cameraFiltered;
             }).build();
         }
-
-        String errorMessage = "This device doesn't support a wide-angle camera! "
-                + "Ensure isWideAngleAvailable is checked before calling getDefaultWideAngleCamera.";
-        OctoLogging.d(tag, errorMessage);
-        throw new IllegalArgumentException(errorMessage);
+        throw new IllegalArgumentException("This device doesn't support wide camera! "
+                + "isWideAngleAvailable should be checked first before calling "
+                + "getDefaultWideAngleCamera.");
     }
 
     public static Map<Quality, Size> getAvailableVideoSizes() throws IllegalStateException {
@@ -157,7 +155,7 @@ public class CameraXUtils {
         return cameraSelector.filter(provider.getAvailableCameraInfos()).stream()
                 .findFirst()
                 .map(camInfo ->
-                                QualitySelector.getSupportedQualities(camInfo).stream().collect(
+                        QualitySelector.getSupportedQualities(camInfo).stream().collect(
                                 Collectors.toMap(
                                         Function.identity(),
                                         quality -> Optional.ofNullable(QualitySelector.getResolution(camInfo, quality))
