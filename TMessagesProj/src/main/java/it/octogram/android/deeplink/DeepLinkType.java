@@ -28,7 +28,9 @@ import java.lang.annotation.RetentionPolicy;
         DeepLinkDef.USER,
         DeepLinkDef.APPEARANCE_APP,
         DeepLinkDef.APPEARANCE_CHAT,
-        DeepLinkDef.APPEARANCE_DRAWER
+        DeepLinkDef.APPEARANCE_DRAWER,
+        DeepLinkDef.PINNED_EMOJIS,
+        DeepLinkDef.PINNED_REACTIONS
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface DeepLinkType {

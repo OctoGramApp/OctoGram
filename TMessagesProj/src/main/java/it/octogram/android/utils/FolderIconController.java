@@ -59,10 +59,6 @@ public class FolderIconController {
         return AndroidUtilities.dp(28);
     }
 
-    public static int getPadding() {
-        return getPadding(null);
-    }
-
     public static int getPadding(TabMode customTabMode) {
         if ((customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) == TabMode.MIXED.getValue()) {
             return AndroidUtilities.dp(6);
@@ -70,20 +66,12 @@ public class FolderIconController {
         return 0;
     }
 
-    public static int getTotalIconWidth() {
-        return getTotalIconWidth(null);
-    }
-
     public static int getTotalIconWidth(TabMode customTabMode) {
         int result = 0;
         if ((customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) != TabMode.TEXT.getValue()) {
-            result = getIconWidth() + getPadding();
+            result = getIconWidth() + getPadding(customTabMode);
         }
         return result;
-    }
-
-    public static int getPaddingTab() {
-        return getPaddingTab(null);
     }
 
     public static int getPaddingTab(TabMode customTabMode) {

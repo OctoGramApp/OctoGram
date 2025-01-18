@@ -159,12 +159,6 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                             .currentValue(OctoConfig.INSTANCE.interfaceSliderUI)
                             .title(LocaleController.getString(R.string.ImproveInterfaceSlider))
                             .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.useSquaredFab)
-                            .title(R.string.SquaredFab)
-                            .requiresRestart(true)
-                            .description(R.string.SquaredFab_Desc)
-                            .build());
                 })
                 .category(R.string.ManageFolders, category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()

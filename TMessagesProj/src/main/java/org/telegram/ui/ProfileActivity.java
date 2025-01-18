@@ -317,8 +317,6 @@ import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.preferences.ui.custom.DatacenterCell;
 import it.octogram.android.utils.CustomDevicePerformanceManager;
 import it.octogram.android.utils.ImportSettingsScanHelper;
@@ -3564,7 +3562,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             editItem = menu.addItem(edit_profile, R.drawable.group_edit_profile);
             editItem.setContentDescription(LocaleController.getString(R.string.Edit));
         } else {
-            editItem = menu.addItem(edit_channel, R.drawable.group_edit_profile);
+            editItem = menu.addItem(edit_channel, (currentChat != null && !ChatObject.hasAdminRights(currentChat)) ? R.drawable.round_info_white : R.drawable.group_edit_profile);
             editItem.setContentDescription(LocaleController.getString(R.string.Edit));
 
             shortcutsItems.clear();
@@ -5599,14 +5597,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
             floatingButtonContainer.setStateListAnimator(animator);
-            floatingButtonContainer.setOutlineProvider(new OutlineProvider());
-            /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+            floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                 }
-            });*/
+            });
         }
         floatingButtonContainer.addView(floatingButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         floatingButton.setAnimation(R.raw.write_contacts_fab_icon_camera, 56, 56);
@@ -5628,8 +5625,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void updateFloatingButtonColor() {
-        updateCustomFloatingButtonColor();
-        /*if (getParentActivity() == null) {
+        if (getParentActivity() == null) {
             return;
         }
         Drawable drawable;
@@ -5643,14 +5639,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 drawable = combinedDrawable;
             }
             floatingButtonContainer.setBackground(drawable);
-        }*/
-    }
-
-    private void updateCustomFloatingButtonColor() {
-        if (getParentActivity() == null || floatingButtonContainer == null) {
-            return;
         }
-        this.floatingButtonContainer.setBackground(CustomFab.createFabBackground(56, applyPeerColor(Theme.getColor(Theme.key_chats_actionBackground), false), applyPeerColor(Theme.getColor(Theme.key_chats_actionPressedBackground), false)));
     }
 
     private void hideFloatingButton(boolean hide) {
@@ -9450,11 +9439,17 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (ChatObject.isChannel(currentChat) && !currentChat.megagroup) {
                 if (chatInfo != null && (currentChat.creator || chatInfo.can_view_participants) || BuildVars.DEBUG_PRIVATE_VERSION) {
                     membersHeaderRow = rowCount++;
-                    subscribersRow = rowCount++;
-                    if (chatInfo != null && chatInfo.requests_pending > 0) {
+                    if (ChatObject.hasAdminRights(currentChat)) {
+                        subscribersRow = rowCount++;
+                    }
+                    //subscribersRow = rowCount++;
+                    if (chatInfo != null && chatInfo.requests_pending > 0 && ChatObject.hasAdminRights(currentChat)) {
                         subscribersRequestsRow = rowCount++;
                     }
-                    administratorsRow = rowCount++;
+                    if (ChatObject.hasAdminRights(currentChat)) {
+                        administratorsRow = rowCount++;
+                    }
+                    //administratorsRow = rowCount++;
                     if (chatInfo != null && (chatInfo.banned_count != 0 || chatInfo.kicked_count != 0)) {
                         blockedUsersRow = rowCount++;
                     }
@@ -13662,8 +13657,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 iconColor = Color.WHITE;
             }
             CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable,
-                    CustomFab.createFabBackground(56, color1, color2),
-                    //Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), color1, color2),
+                    Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), color1, color2),
                     0, 0);
             combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
             writeButton.setBackground(combinedDrawable);

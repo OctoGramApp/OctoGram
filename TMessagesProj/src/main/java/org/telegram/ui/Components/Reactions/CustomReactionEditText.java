@@ -30,6 +30,8 @@ public class CustomReactionEditText extends EditTextCaption {
     private final GestureDetectorCompat gestureDetector;
     private Runnable onFocused;
 
+    private boolean isGenericEmojisUsage = false;
+
     private int maxLength;
 
     public void setMaxLength(int maxLength) {
@@ -38,6 +40,10 @@ public class CustomReactionEditText extends EditTextCaption {
             inputFilters[0] = new InputFilter.LengthFilter(this.maxLength = maxLength);
             setFilters(inputFilters);
         }
+    }
+
+    public void setIsGenericEmojisUsage(boolean isGenericEmojisUsage) {
+        this.isGenericEmojisUsage = isGenericEmojisUsage;
     }
 
     public CustomReactionEditText(Context context, Theme.ResourcesProvider resourcesProvider, int maxLength) {
@@ -124,7 +130,7 @@ public class CustomReactionEditText extends EditTextCaption {
         AddReactionsSpan[] spans = spannableText.getSpans(0, spannableText.length(), AddReactionsSpan.class);
         if (spans.length == 0) {
             SpannableStringBuilder builder = new SpannableStringBuilder("x");
-            AddReactionsSpan span = new AddReactionsSpan(15, resourcesProvider);
+            AddReactionsSpan span = new AddReactionsSpan(15, resourcesProvider, isGenericEmojisUsage);
             span.show(this);
             builder.setSpan(span, 0, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             setText(getText().append(builder));

@@ -99,6 +99,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.contextReportMessage.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.contextMessageDetails.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.contextNoQuoteForward.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.contextReplyPrivateChat.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.useTranslationsArgsFix.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.receivePBetaUpdates.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.mediaFiltering.getKey());
@@ -116,6 +117,15 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.shortcutsRecentActions.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.shortcutsStatistics.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.shortcutsPermissions.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.pinnedEmojisList.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.hideRecentEmojis.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.usePinnedEmojisFeature.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.hiddenFolderAssoc.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.forceHideLockScreenPopup.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.usePinnedReactionsChats.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.usePinnedReactionsChannels.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.pinnedReactionsChats.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.pinnedReactionsChannels.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {
@@ -202,7 +212,6 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.drawerItems.getKey(), R.string.DrawerElements));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.eventType.getKey(), R.string.EventType));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.drawerProfileAsBubble.getKey(), R.string.DrawerHeaderAsBubble));
-
     }
 
     private void fillAppearanceAppOptions(SettingsScanCategory category) {
@@ -211,7 +220,6 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceSwitchUI.getKey(), R.string.ImproveInterfaceSwitch));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceCheckboxUI.getKey(), R.string.ImproveInterfaceCheckbox));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceSliderUI.getKey(), R.string.ImproveInterfaceSlider));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useSquaredFab.getKey(), R.string.SquaredFab));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabMode.getKey(), composeName(R.string.ManageFolders, R.string.FolderType)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabStyle.getKey(), composeName(R.string.ManageFolders, R.string.FolderStyle)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideUnreadCounterOnFolder.getKey(), composeName(R.string.ManageFolders, R.string.HideUnreadCounter)));

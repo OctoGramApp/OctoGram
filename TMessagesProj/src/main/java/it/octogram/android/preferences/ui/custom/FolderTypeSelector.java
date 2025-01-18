@@ -18,6 +18,8 @@ import android.widget.FrameLayout;
 
 import androidx.core.graphics.ColorUtils;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TabMode;
 import it.octogram.android.TabStyle;
+import it.octogram.android.utils.FolderUtils;
 
 @SuppressLint("UseCompatLoadingForDrawables")
 public class FolderTypeSelector extends FrameLayout {
@@ -161,15 +164,20 @@ public class FolderTypeSelector extends FrameLayout {
             filterTabsView.addTab(1, 1, "App", false, false, "\uD83C\uDFE0");
         } else {
             ArrayList<MessagesController.DialogFilter> filters = MessagesController.getInstance(UserConfig.selectedAccount).getDialogFilters();
+            ArrayList<Integer> hiddenFolders = FolderUtils.getHiddenFolders();
 
             int addedTab = 0;
             for (int a = 0, N = filters.size(); a < N; a++) {
+                Log.e("updated", "up - "+filters.get(a).name+ " - "+filters.get(a).id);
                 if (filters.get(a).isDefault()) {
                     if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
                         addedTab++;
                         filterTabsView.addTab(a, 0, LocaleController.getString(R.string.FilterAllChats), true,  filters.get(a).locked, filters.get(a).emoticon);
                     }
                 } else {
+                    if (hiddenFolders.contains(filters.get(a).id)) {
+                        continue;
+                    }
                     addedTab++;
                     filterTabsView.addTab(a, filters.get(a).localId, filters.get(a).name, false, filters.get(a).locked, filters.get(a).emoticon);
                 }

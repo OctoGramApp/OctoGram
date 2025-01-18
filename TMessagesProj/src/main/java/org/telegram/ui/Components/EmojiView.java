@@ -10,6 +10,7 @@ package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.translitSafe;
+import static org.telegram.ui.Components.Reactions.ReactionsUtils.addReactionToEditText;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -85,6 +86,10 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
@@ -146,8 +151,6 @@ import java.util.Objects;
 
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
 
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -661,6 +664,25 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     MediaDataController.getInstance(currentAccount).replaceStickerSet((TLRPC.TL_messages_stickerSet) response);
                 }
             }));
+        }
+
+        @Override
+        public boolean canPinEmoji() {
+            return true;
+        }
+
+        @Override
+        public void pinEmoji(TLRPC.Document document) {
+            if (OctoConfig.INSTANCE.pinEmoji(document.id) && emojiAdapter != null) {
+                emojiAdapter.notifyDataSetChanged();
+            }
+        }
+
+        @Override
+        public void unpinEmoji(TLRPC.Document document) {
+            if (OctoConfig.INSTANCE.unpinEmoji(document.id) && emojiAdapter != null) {
+                emojiAdapter.notifyDataSetChanged();
+            }
         }
     };
 
@@ -2683,15 +2705,6 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     }
                 });
             }
-            /*TODO
-               var drawable = CustomFab.createFabBackground(36, getThemedColor(Theme.key_chats_actionBackground), getThemedColor(Theme.key_chats_actionPressedBackground));
-               StateListAnimator animator = new StateListAnimator();
-               animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
-               animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
-               backspaceButton.setStateListAnimator(animator);
-               backspaceButton.setOutlineProvider(new OutlineProvider());
-            */
-
             backspaceButton.setPadding(0, 0, AndroidUtilities.dp(2), 0);
             backspaceButton.setBackground(drawable);
             backspaceButton.setContentDescription(LocaleController.getString(R.string.AccDescrBackspace));
@@ -5149,6 +5162,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
 
     public void clearRecentEmoji() {
         Emoji.clearRecentEmoji();
+        Emoji.sortEmoji(); // reload pinned emojis
         emojiAdapter.notifyDataSetChanged();
     }
 
@@ -6821,6 +6835,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         private int trendingHeaderRow = -1;
         private int trendingRow = -1;
         private int firstTrendingRow = -1;
+        private int pinnedHeaderRow = -1;
         private int recentlyUsedHeaderRow = -1;
 
         private ArrayList<TLRPC.TL_messages_stickerSet> frozenEmojiPacks;
@@ -6952,6 +6967,9 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     if (needEmojiSearch) {
                         position--;
                     }
+                    if (pinnedHeaderRow >= 0) {
+                        position--;
+                    }
                     if (recentlyUsedHeaderRow >= 0) {
                         position--;
                     }
@@ -7032,6 +7050,11 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                         cell.setText(LocaleController.getString(R.string.FeaturedEmojiPacks), R.drawable.msg_close, LocaleController.getString(R.string.AccDescrCloseTrendingEmoji));
                     } else if (position == recentlyUsedHeaderRow) {
                         cell.setText(LocaleController.getString(R.string.RecentlyUsed), 0);
+                        if (OctoConfig.INSTANCE.canShowPreviewEmojis() && OctoConfig.INSTANCE.hideRecentEmojis.getValue()) {
+                            cell.setText(LocaleController.getString(R.string.PinnedEmojisList), 0);
+                        }
+                    } else if (position == pinnedHeaderRow) {
+                        cell.setText(LocaleController.getString(R.string.PinnedEmojisList), 0);
                     } else if (index >= emojiTitles.length) {
                         try {
                             cell.setText(emojipacksProcessed.get(index - emojiTitles.length).set.title, 0);
@@ -7109,7 +7132,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         public int getItemViewType(int position) {
             if (position == trendingRow) {
                 return VIEW_TYPE_TRENDING;
-            } else if (position == trendingHeaderRow || position == recentlyUsedHeaderRow) {
+            } else if (position == trendingHeaderRow || position == recentlyUsedHeaderRow || position == pinnedHeaderRow) {
                 return VIEW_TYPE_HEADER;
             } else if (positionToSection.indexOfKey(position) >= 0) {
                 return positionToSection.get(position) >= EmojiData.dataColored.length ? VIEW_TYPE_PACK_HEADER : VIEW_TYPE_HEADER;
@@ -7344,6 +7367,10 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             if (isPremium && allowAnimatedEmoji && featuredEmojiSets.size() > 0 && featuredEmojiSets.get(0).set != null && MessagesController.getEmojiSettings(currentAccount).getLong("emoji_featured_hidden", 0) != featuredEmojiSets.get(0).set.id && needEmojiSearch) {
                 trendingHeaderRow = itemCount++;
                 trendingRow = itemCount++;
+                if (OctoConfig.INSTANCE.canShowPreviewEmojis()) {
+                    //pinnedHeaderRow = itemCount++;
+                }
+
                 recentlyUsedHeaderRow = itemCount++;
                 rowHashCodes.add(324953);
                 rowHashCodes.add(123342);
@@ -7353,6 +7380,27 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                 trendingRow = -1;
                 recentlyUsedHeaderRow = -1;
             }
+            /*if (OctoConfig.INSTANCE.canShowPreviewEmojis()) {
+                pinnedHeaderRow = itemCount++;
+                try {
+                    String currentList = OctoConfig.INSTANCE.pinnedEmojisList.getValue();
+                    JSONArray object = new JSONArray(new JSONTokener(currentList));
+
+                    for (int i = 0; i < object.length(); i++) {
+                        try {
+                            JSONObject jsonObject = object.getJSONObject(i);
+                            if (jsonObject.has("emoticon")) {
+                                rowHashCodes.add(Objects.hash(-43263, jsonObject.get("emoticon")));
+                                itemCount++;
+                            } else if (jsonObject.has("document_id")) {
+                                rowHashCodes.add(Objects.hash(-43263, "animated_"+jsonObject.getLong("document_id")));
+                                itemCount++;
+                            }
+                        } catch (JSONException e) {}
+                    }
+                } catch (JSONException ignored) {}
+
+            }*/
             ArrayList<String> recent = getRecentEmoji();
             if (emojiTabs != null) {
                 emojiTabs.showRecent(!recent.isEmpty());

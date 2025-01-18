@@ -112,6 +112,10 @@ public class OctoAppearanceUI implements PreferencesEntry {
                                     .setOptionTitle(getString(R.string.NoQuoteForward))
                                     .setProperty(OctoConfig.INSTANCE.contextNoQuoteForward)
                             )
+                            .addRow(new ExpandableRowsOption()
+                                    .setOptionTitle(getString(R.string.CustomF_ReplyPvt))
+                                    .setProperty(OctoConfig.INSTANCE.contextReplyPrivateChat)
+                            )
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .build()
                     );

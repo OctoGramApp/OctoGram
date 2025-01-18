@@ -128,6 +128,7 @@ public class PreferencesFragment extends BaseFragment {
 
     private void updatePreferences() {
         OctoPreferences preferences = entry.getPreferences(this, context);
+        reorderedPreferences.clear();
 
         for (BaseRow baseRow : preferences.preferences()) {
             reorderedPreferences.add(baseRow);
@@ -319,6 +320,14 @@ public class PreferencesFragment extends BaseFragment {
         listView.smoothScrollToPosition(currentShownItems.size() - 1);
     }
 
+    public void notifyItemChanged(int type) {
+        for (int i = 0; i < listAdapter.getItemCount(); i++) {
+            if (listAdapter.getItemViewType(i) == type) {
+                listAdapter.notifyItemChanged(i);
+            }
+        }
+    }
+
     public void reloadUIAfterValueUpdate() {
         oldItems.clear();
         oldItems.addAll(currentShownItems);
@@ -326,6 +335,10 @@ public class PreferencesFragment extends BaseFragment {
 
         for (int i = 0; i < reorderedPreferences.size(); i++) {
             BaseRow category = reorderedPreferences.get(i);
+
+            if (!canShowItem(category)) {
+                continue;
+            }
 
             if (!category.hasDivider() && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 category.setDivider(true);
@@ -341,9 +354,7 @@ public class PreferencesFragment extends BaseFragment {
                 category.setDivider(false);
             }
 
-            if (canShowItem(category)) {
-                currentShownItems.add(category);
-            }
+            currentShownItems.add(category);
         }
 
         listAdapter.setItems(oldItems, currentShownItems);
@@ -351,12 +362,10 @@ public class PreferencesFragment extends BaseFragment {
 
     private BaseRow getNextVisibleElement(int i, BaseRow element) {
         if (i != reorderedPreferences.size() - 1) {
-            boolean found = false;
-            for (BaseRow category : reorderedPreferences) {
-                if (category == element) {
-                    found = true;
-                } else if (found && canShowItem(category)) {
-                    return category;
+            for (int j = i + 1; j < reorderedPreferences.size(); j++) {
+                BaseRow row = reorderedPreferences.get(j);
+                if (element != row && canShowItem(row)) {
+                    return row;
                 }
             }
         }

@@ -108,6 +108,7 @@ public class MessagePreviewView extends FrameLayout {
         ActionBarPopupWindow.ActionBarPopupWindowLayout menu;
         ActionBarMenuSubItem quoteButton, clearQuoteButton;
         ActionBarMenuSubItem replyAnotherChatButton, quoteAnotherChatButton;
+        ActionBarMenuSubItem replyToPrivateChatButton;
         ActionBarMenuSubItem deleteReplyButton;
         ToggleButton changePositionBtn;
         FrameLayout changeSizeBtnContainer;
@@ -917,6 +918,13 @@ public class MessagePreviewView extends FrameLayout {
                     btn2.addView(quoteAnotherChatButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48));
                     btn2.addView(replyAnotherChatButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48));
                     menu.addView(btn2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+
+                    if (canReplyToPrivateChat()) {
+                        replyToPrivateChatButton = new ActionBarMenuSubItem(context, true, false, false, resourcesProvider);
+                        replyToPrivateChatButton.setTextAndIcon(LocaleController.getString(R.string.CustomF_ReplyPvt), R.drawable.msg_message_s);
+                        replyToPrivateChatButton.setOnClickListener(v -> replyToPrivateChat());
+                        menu.addView(replyToPrivateChatButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                    }
                 }
 
                 if (!messagePreviewParams.noforwards && !messagePreviewParams.hasSecretMessages) {
@@ -1910,6 +1918,14 @@ public class MessagePreviewView extends FrameLayout {
     }
 
     protected void selectAnotherChat(boolean forward) {
+
+    }
+
+    protected boolean canReplyToPrivateChat() {
+        return false;
+    }
+
+    protected void replyToPrivateChat() {
 
     }
 

@@ -153,6 +153,32 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.getString(R.string.Chats), category -> {
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .icon(R.drawable.chats_pin)
+                            .value(PinnedEmojisActivity.getRowDescription())
+                            .onClick(() -> {
+                                PinnedEmojisActivity activity = new PinnedEmojisActivity();
+                                activity.setFragment(fragment);
+                                fragment.presentFragment(activity);
+                            })
+                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
+                                @Override
+                                public String getTitle() {
+                                    return LocaleController.getString(R.string.PinnedEmojisList);
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return PinnedEmojisActivity.getRowDescription();
+                                }
+                            })
+                            .title(LocaleController.getString(R.string.PinnedEmojisList))
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .icon(R.drawable.msg_reactions)
+                            .onClick(() -> fragment.presentFragment(new PinnedReactionsActivity()))
+                            .title(LocaleController.getString(R.string.PinnedReactions))
+                            .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.defaultEmojiButtonAction)
                             .options(List.of(
@@ -239,21 +265,22 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 })
                 .category(LocaleController.getString(R.string.FilterAvailableTitle), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.dialogFiltersUpdated))
+                            // use account-specific notification center instead of global used by postNotificationName
                             .preferenceValue(OctoConfig.INSTANCE.hideChatFolders)
                             .title(LocaleController.getString(R.string.HideAllChatFolders))
-                            .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.dialogFiltersUpdated))
+                            // use account-specific notification center instead of global used by postNotificationName
                             .preferenceValue(OctoConfig.INSTANCE.hideOnlyAllChatsFolder)
                             .title(LocaleController.getString(R.string.HideAllChatFolder))
                             .showIf(OctoConfig.INSTANCE.hideChatFolders, true)
-                            .requiresRestart(true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideFoldersWhenForwarding)
                             .title(LocaleController.getString(R.string.HideChatFoldersWhenForwarding))
                             .showIf(OctoConfig.INSTANCE.hideChatFolders, true)
-                            .requiresRestart(true)
                             .build());
                 })
                 .category(LocaleController.getString(R.string.DoubleTapActionsHeader), category -> {

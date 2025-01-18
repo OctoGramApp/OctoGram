@@ -69,6 +69,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
     private boolean isRemoved;
     private Runnable removedAction;
     private boolean animateChanges;
+    private boolean forceRemoveAnimations = false;
     private ValueAnimator moveAnimator;
     private ValueAnimator scaleAnimator;
 
@@ -83,6 +84,10 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
 
     public void setAnimateChanges() {
         this.animateChanges = true;
+    }
+
+    public void setForceRemoveAnimations(boolean forceRemoveAnimations) {
+        this.forceRemoveAnimations = forceRemoveAnimations;
     }
 
     public void setRemoved(Runnable action) {
@@ -270,7 +275,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
         if (moveAnimator != null) {
             return true;
         }
-        if (!animateChanges) {
+        if (!animateChanges || forceRemoveAnimations) {
             return false;
         }
         animateChanges = false;

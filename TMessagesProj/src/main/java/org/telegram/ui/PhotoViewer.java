@@ -82,9 +82,7 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
-import android.transition.Visibility;
 import android.util.FloatProperty;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
 import android.util.Range;
@@ -303,8 +301,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.preferences.ui.components.CustomFab;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import it.octogram.android.utils.VideoUtils;
@@ -6789,8 +6787,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
 
         pickerViewSendButton = new ImageView(parentActivity);
         pickerViewSendButton.setScaleType(ImageView.ScaleType.CENTER);
-        // pickerViewSendDrawable = Theme.createSimpleSelectorCircleDrawable(dp(48), getThemedColor(Theme.key_chat_editMediaButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_chat_editMediaButton));
-        pickerViewSendDrawable = CustomFab.createFabBackground(48, getThemedColor(Theme.key_chat_editMediaButton), getThemedColor(Theme.key_dialogFloatingButtonPressed));
+        pickerViewSendDrawable = Theme.createSimpleSelectorCircleDrawable(dp(48), getThemedColor(Theme.key_chat_editMediaButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_chat_editMediaButton));
         pickerViewSendButton.setBackgroundDrawable(pickerViewSendDrawable);
         pickerViewSendButton.setImageResource(R.drawable.msg_input_send_mini);
         pickerViewSendButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_dialogFloatingIcon), PorterDuff.Mode.MULTIPLY));
@@ -13569,6 +13566,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
         }
         if (currentMessageObject != null && currentMessageObject.isVideo() || (OctoConfig.INSTANCE.playGifAsVideo.getValue() && currentMessageObject != null && currentMessageObject.isGif()) || currentBotInlineResult != null && (currentBotInlineResult.type.equals("video") || MessageObject.isVideoDocument(currentBotInlineResult.document)) || (pageBlocksAdapter != null && pageBlocksAdapter.isVideo(index)) || (sendPhotoType == SELECT_TYPE_NO_SELECT && ((MediaController.PhotoEntry)imagesArrLocals.get(index)).isVideo)) {
+            OctoLogging.d("PlayAsGifDebug", String.format("%s", OctoConfig.INSTANCE.playGifAsVideo.getValue() && currentMessageObject != null && currentMessageObject.isGif()));
             playerAutoStarted = true;
             onActionClick(false);
         } else if (!imagesArrLocals.isEmpty()) {
@@ -18210,6 +18208,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private boolean shouldMessageObjectAutoPlayed(MessageObject messageObject) {
+        OctoLogging.d("PlayAsGifDebug", String.format("%s", messageObject != null && (messageObject.isVideo() || (OctoConfig.INSTANCE.playGifAsVideo.getValue() && messageObject.isGif())) && (messageObject.mediaExists || messageObject.attachPathExists || messageObject.hasVideoQualities() || messageObject.canStreamVideo() && SharedConfig.streamMedia) && SharedConfig.isAutoplayVideo()));
         return messageObject != null && (messageObject.isVideo() || (OctoConfig.INSTANCE.playGifAsVideo.getValue() && messageObject.isGif())) && (messageObject.mediaExists || messageObject.attachPathExists || messageObject.hasVideoQualities() || messageObject.canStreamVideo() && SharedConfig.streamMedia) && SharedConfig.isAutoplayVideo();
     }
 
@@ -19715,43 +19714,96 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private boolean enableSwipeToPiP() {
-        return (pipItem.getVisibility() == View.VISIBLE ||
+        boolean uiConditions = pipItem.getVisibility() == View.VISIBLE ||
                 (menuItem.getVisibility() == View.VISIBLE &&
-                        (menuItem.isSubItemVisible(5) || menuItem.isSubItemVisible(48)))) &&
-                OctoConfig.INSTANCE.swipeToPip.getValue() &&
-                pipAvailable &&
-                textureUploaded &&
-                videoPlayer != null &&
+                        (menuItem.isSubItemVisible(5) || menuItem.isSubItemVisible(48)));
+
+        boolean playerConditions = videoPlayer != null &&
                 videoPlayer.getRepeatCount() == 0 &&
-                checkInlinePermissions() &&
-                !changingTextureView &&
+                textureUploaded;
+
+        boolean stateConditions = !changingTextureView &&
                 !switchingInlineMode &&
                 !isInline;
+
+        return uiConditions &&
+                OctoConfig.INSTANCE.swipeToPip.getValue() &&
+                pipAvailable &&
+                playerConditions &&
+                checkInlinePermissions() &&
+                stateConditions;
     }
 
+    private static final float MIN_DRAG_CM = 0.4f;
+    private static final float DRAG_DISTANCE_DIVISOR = 6.0f;
+    private static final float MIN_VELOCITY_PORTRAIT = 850f;
+
     private void customDraggingHandle(MotionEvent motionEvent) {
-        if (velocityTracker == null) velocityTracker = VelocityTracker.obtain();
-        velocityTracker.computeCurrentVelocity(1000);
 
-        float yVelocity = velocityTracker.getYVelocity();
-        float dragDistance = Math.abs(dragY - motionEvent.getY());
-        float maxDragDistance = getContainerViewHeight() / 6.0f;
-        float minDragDistance = AndroidUtilities.getPixelsInCM(0.4f, false);
-        float minVelocity = AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y ? 1250 : 850;
+        initVelocityTrackerIfNeeded();
 
-        if (dragDistance <= maxDragDistance && (dragDistance <= minDragDistance || Math.abs(yVelocity) < minVelocity)) {
-            if (pickerView.getVisibility() == View.VISIBLE) {
-                toggleActionBar(true, true);
-                toggleCheckImageView(true);
-            }
-            animateTo(1.0f, 0.0f, 0.0f, false);
-        } else if (!enableSwipeToPiP() || dragY - motionEvent.getY() <= 0.0f) {
+        DragMetrics metrics = calculateDragMetrics(motionEvent);
+
+        if (shouldCancelDrag(metrics)) {
+            handleCancelDrag();
+        } else if (!canEnablePiP(metrics)) {
             closePhoto(true, false);
         } else {
             switchToPip(true);
         }
 
+        cleanup();
+    }
+
+    private void initVelocityTrackerIfNeeded() {
+        if (velocityTracker == null) {
+            velocityTracker = VelocityTracker.obtain();
+        }
+        velocityTracker.computeCurrentVelocity(1000);
+    }
+
+    private record DragMetrics(float yVelocity, float dragDistance, float maxDragDistance, float minDragDistance, float minVelocity, float dragDelta) {}
+
+    private DragMetrics calculateDragMetrics(MotionEvent motionEvent) {
+        float MIN_VELOCITY_LANDSCAPE = 1250f;
+        return new DragMetrics(
+                velocityTracker.getYVelocity(),
+                Math.abs(dragY - motionEvent.getY()),
+                getContainerViewHeight() / DRAG_DISTANCE_DIVISOR,
+                AndroidUtilities.getPixelsInCM(MIN_DRAG_CM, false),
+                AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y
+                        ? MIN_VELOCITY_LANDSCAPE
+                        : MIN_VELOCITY_PORTRAIT,
+                dragY - motionEvent.getY()
+        );
+    }
+
+    private boolean shouldCancelDrag(DragMetrics metrics) {
+        boolean isInDragThreshold = metrics.dragDistance <= metrics.maxDragDistance;
+        boolean isLowForceEvent = metrics.dragDistance <= metrics.minDragDistance ||
+                Math.abs(metrics.yVelocity) < metrics.minVelocity;
+
+        return isInDragThreshold && isLowForceEvent;
+    }
+
+    private void handleCancelDrag() {
+        if (pickerView.getVisibility() == View.VISIBLE) {
+            toggleActionBar(true, true);
+            toggleCheckImageView(true);
+        }
+        animateTo(1.0f, 0.0f, 0.0f, false);
+    }
+
+    private boolean canEnablePiP(DragMetrics metrics) {
+        return enableSwipeToPiP() && metrics.dragDelta > 0.0f;
+    }
+
+    private void cleanup() {
         draggingDown = false;
+        if (velocityTracker != null) {
+            velocityTracker.recycle();
+            velocityTracker = null;
+        }
     }
 
 

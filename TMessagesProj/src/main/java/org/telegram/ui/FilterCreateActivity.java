@@ -45,6 +45,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
@@ -56,6 +60,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -72,6 +77,7 @@ import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.PollEditTextCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextCell;
+import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.UserCell;
 import org.telegram.ui.Components.AnimatedColor;
@@ -100,6 +106,7 @@ import java.util.Collections;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.icons.IconSelectorAlert;
 import it.octogram.android.utils.FolderIconController;
+import it.octogram.android.utils.FolderUtils;
 
 public class FilterCreateActivity extends BaseFragment {
 
@@ -192,6 +199,7 @@ public class FilterCreateActivity extends BaseFragment {
             filter.name = "";
             filter.color = (int) (Math.random() * 8);
             creatingNew = true;
+            FolderUtils.updateFilterVisibility(filter.id, true);
         }
         newFilterName = filter.name;
         newFilterEmoticon = filter.emoticon;
@@ -203,6 +211,7 @@ public class FilterCreateActivity extends BaseFragment {
         }
         newNeverShow = new ArrayList<>(filter.neverShow);
         newPinned = filter.pinnedDialogs.clone();
+        showFolder = isFolderVisible();
     }
 
     private int requestingInvitesReqId;
@@ -254,6 +263,8 @@ public class FilterCreateActivity extends BaseFragment {
     private ArrayList<ItemInner> oldItems = new ArrayList<>();
     private ArrayList<ItemInner> items = new ArrayList<>();
 
+    boolean showFolder = true;
+
     private void updateRows(boolean animated) {
 
         oldItems.clear();
@@ -264,6 +275,8 @@ public class FilterCreateActivity extends BaseFragment {
         items.add(new ItemInner(VIEW_TYPE_HINT, false));
         nameRow = items.size();
         items.add(ItemInner.asEdit());
+        items.add(ItemInner.asShadow(null));
+        items.add(ItemInner.asSwitch(LocaleController.getString(R.string.ShowFolder)));
         items.add(ItemInner.asShadow(null));
         items.add(ItemInner.asHeader(LocaleController.getString(R.string.FilterInclude)));
         items.add(ItemInner.asButton(R.drawable.msg2_chats_add, LocaleController.getString(R.string.FilterAddChats), false).whenClicked(v -> selectChatsFor(true)));
@@ -449,6 +462,22 @@ public class FilterCreateActivity extends BaseFragment {
                 PollEditTextCell cell = (PollEditTextCell) view;
                 cell.getTextView().requestFocus();
                 AndroidUtilities.showKeyboard(cell.getTextView());
+            } else if (item.viewType == VIEW_TYPE_SWITCH) {
+                /*if (creatingNew) {
+                    AndroidUtilities.shakeViewSpring(view, shiftDp = -shiftDp);
+                    BotWebViewVibrationEffect.APP_ERROR.vibrate();
+                    doNotCloseWhenSave = true;
+                    if (doneItem.getAlpha() > 0) {
+                        showSaveHint(false);
+                    } else {
+                        BulletinFactory.of(this).createErrorBulletin(LocaleController.getString(R.string.ShowFolderCreation)).show();
+                    }
+                    return;
+                }*/
+
+                showFolder = !showFolder;
+                adapter.notifyItemChanged(position);
+                checkDoneButton(true);
             }
         });
         listView.setOnItemLongClickListener((view, position) -> {
@@ -884,6 +913,10 @@ public class FilterCreateActivity extends BaseFragment {
     private void save(boolean progress, Runnable after) {
         saveFilterToServer(filter, newFilterFlags, newFilterEmoticon, newFilterName, newFilterColor, newAlwaysShow, newNeverShow, newPinned, creatingNew, false, hasUserChanged, true, progress, this, () -> {
 
+            if (showFolder != isFolderVisible()) {
+                updateFolderVisibleToConfig();
+            }
+
             hasUserChanged = false;
             creatingNew = false;
             filter.flags = newFilterFlags;
@@ -1079,6 +1112,9 @@ public class FilterCreateActivity extends BaseFragment {
                 hasUserChanged = true;
             }
         }
+        if (isFolderVisible() != showFolder) {
+            hasUserChanged = true;
+        }
         if (!TextUtils.equals(filter.name, newFilterName)) {
             return true;
         }
@@ -1112,6 +1148,28 @@ public class FilterCreateActivity extends BaseFragment {
         }
     }
 
+    private boolean _isFolderVisible = true;
+    private boolean _isHFDefined = false;
+    private boolean isFolderVisible() {
+        if (filter != null && !_isHFDefined && !creatingNew) {
+            try {
+                String value = OctoConfig.INSTANCE.hiddenFolderAssoc.getValue();
+                JSONObject jsonObject = new JSONObject(new JSONTokener(value));
+                JSONArray currentList = jsonObject.getJSONArray(FolderUtils.getKey());
+                for (int i = 0; i < currentList.length(); i++) {
+                    int hiddenFolderId = currentList.getInt(i);
+                    if (hiddenFolderId == filter.id) {
+                        _isFolderVisible = false;
+                        break;
+                    }
+                }
+            } catch (JSONException ignored) {}
+        }
+        _isHFDefined = true;
+
+        return _isFolderVisible;
+    }
+
     private void setTextLeft(View cell) {
         if (cell instanceof PollEditTextCell) {
             PollEditTextCell textCell = (PollEditTextCell) cell;
@@ -1140,6 +1198,7 @@ public class FilterCreateActivity extends BaseFragment {
     private static final int VIEW_TYPE_CREATE_LINK = 8;
     private static final int VIEW_TYPE_HEADER_COLOR_PREVIEW = 9;
     private static final int VIEW_TYPE_COLOR = 10;
+    private static final int VIEW_TYPE_SWITCH = 199;
 
     private static class ItemInner extends AdapterWithDiffUtils.Item {
 
@@ -1215,6 +1274,13 @@ public class FilterCreateActivity extends BaseFragment {
             return item;
         }
 
+
+        public static ItemInner asSwitch(CharSequence text) {
+            ItemInner item = new ItemInner(VIEW_TYPE_SWITCH, true);
+            item.text = text;
+            return item;
+        }
+
         public static ItemInner asCreateLink() {
             return new ItemInner(VIEW_TYPE_CREATE_LINK, false);
         }
@@ -1259,6 +1325,9 @@ public class FilterCreateActivity extends BaseFragment {
                     TextUtils.equals(link.title, other.link.title) &&
                     link.peers.size() == other.link.peers.size()
                 );
+            }
+            if (viewType == VIEW_TYPE_SWITCH) {
+                return false;
             }
             return true;
         }
@@ -1390,6 +1459,10 @@ public class FilterCreateActivity extends BaseFragment {
                     break;
                 case VIEW_TYPE_COLOR:
                     view = new PeerColorActivity.PeerColorGrid(getContext(), PeerColorActivity.PeerColorGrid.TYPE_FOLDER_TAG, currentAccount, resourceProvider);
+                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    break;
+                case VIEW_TYPE_SWITCH:
+                    view = new TextCheckCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case VIEW_TYPE_SHADOW_TEXT:
@@ -1543,6 +1616,10 @@ public class FilterCreateActivity extends BaseFragment {
                         checkDoneButton(true);
                     });
                     break;
+                }
+                case VIEW_TYPE_SWITCH: {
+                    TextCheckCell checkCell = (TextCheckCell) holder.itemView;
+                    checkCell.setTextAndCheck(item.text, showFolder, false);
                 }
             }
         }
@@ -2646,5 +2723,12 @@ public class FilterCreateActivity extends BaseFragment {
             }
             previewView.setText(Emoji.replaceEmoji(text, previewView.getPaint().getFontMetricsInt(), false), animated && !LocaleController.isRTL);
         }
+    }
+    private void updateFolderVisibleToConfig() {
+        if (filter == null) {
+            return;
+        }
+
+        FolderUtils.updateFilterVisibility(filter.id, showFolder);
     }
 }

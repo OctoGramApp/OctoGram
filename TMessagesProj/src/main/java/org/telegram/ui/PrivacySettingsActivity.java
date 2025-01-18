@@ -347,7 +347,7 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                             value = 548;
                         } else if (which == 5) {
                             value = 730;
-                        } else if (which == 253) {
+                        } else if (which == 6) {
                             if (currentPassword != null && currentPassword.has_password) {
                                 LogoutActivity currentLogoutActivity = new LogoutActivity();
                                 currentLogoutActivity.isDeleteAccountActivity = true;

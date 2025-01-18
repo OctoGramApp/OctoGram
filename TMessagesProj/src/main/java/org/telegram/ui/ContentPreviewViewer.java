@@ -96,6 +96,9 @@ import org.telegram.ui.Stories.DarkThemeResourceProvider;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.octogram.android.EmojiStatus;
+import it.octogram.android.OctoConfig;
+
 public class ContentPreviewViewer {
 
     private class FrameLayoutDrawer extends FrameLayout {
@@ -248,6 +251,18 @@ public class ContentPreviewViewer {
 
         default boolean isStickerEditor() {
             return false;
+        }
+
+        default boolean canPinEmoji() {
+            return false;
+        }
+
+        default void pinEmoji(TLRPC.Document document) {
+
+        }
+
+        default void unpinEmoji(TLRPC.Document document) {
+
         }
     }
 
@@ -670,6 +685,19 @@ public class ContentPreviewViewer {
                     items.add(LocaleController.getString(R.string.SendEmojiPreview));
                     icons.add(R.drawable.msg_send);
                     actions.add(0);
+
+                    if (delegate.canPinEmoji() && OctoConfig.INSTANCE.usePinnedEmojisFeature.getValue()) {
+                        int emojiStatus = OctoConfig.INSTANCE.getEmojiStatus(currentDocument.id);
+                        if (emojiStatus == EmojiStatus.CAN_BE_ADDED.getValue()) {
+                            items.add(LocaleController.getString(R.string.PinnedEmojisList_AddButton));
+                            icons.add(R.drawable.msg_pin);
+                            actions.add(9);
+                        } else if (emojiStatus == EmojiStatus.CAN_BE_REMOVED.getValue()) {
+                            items.add(LocaleController.getString(R.string.PinnedEmojisList_RemoveButton));
+                            icons.add(R.drawable.msg_unpin);
+                            actions.add(10);
+                        }
+                    }
                 }
                 Boolean canSetAsStatus = delegate.canSetAsStatus(currentDocument);
                 if (canSetAsStatus != null) {
@@ -688,7 +716,7 @@ public class ContentPreviewViewer {
                     icons.add(R.drawable.msg_copy);
                     actions.add(3);
                 }
-                if (delegate.needRemoveFromRecent(currentDocument)) {
+                if (delegate.needRemoveFromRecent(currentDocument) && !actions.contains(10)) { // don't show remove from recent if emoji is pinned
                     items.add(LocaleController.getString(R.string.RemoveFromRecent));
                     icons.add(R.drawable.msg_delete);
                     actions.add(4);
@@ -728,6 +756,10 @@ public class ContentPreviewViewer {
                         delegate.removeFromRecent(currentDocument);
                     } else if (action == 5) {
                         MediaDataController.getInstance(currentAccount).addRecentSticker(MediaDataController.TYPE_FAVE, parentObject, currentDocument, (int) (System.currentTimeMillis() / 1000), inFavs);
+                    } else if (action == 9) {
+                        delegate.pinEmoji(currentDocument);
+                    } else if (action == 10) {
+                        delegate.unpinEmoji(currentDocument);
                     }
                     dismissPopupWindow();
                 };

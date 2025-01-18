@@ -4013,7 +4013,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
     }
 
     public void onCameraButtonLongPress() {
-        if ((!photosEnabled && !videosEnabled && !checkCanRemoveRestrictionsByBoosts()) && delegate != null) {
+        if ((photosEnabled || videosEnabled || !checkCanRemoveRestrictionsByBoosts()) && delegate != null) {
             delegate.didPressedButton(0, false, true, 0, 0, false, false);
         }
     }
@@ -5389,7 +5389,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                         attachButton.setTextAndIcon(1, getString("ChatGallery", R.string.ChatGallery), Theme.chat_attachButtonDrawables[0], Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
                         attachButton.setTag(1);
                     } else if (position == cameraButton) {
-                        attachButton.setTextAndIcon(itemCameraId, LocaleController.getString(R.string.VoipCamera), getContext().getDrawable(R.drawable.photo_camera_24px).mutate(), Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
+                        attachButton.setTextAndIcon(itemCameraId, LocaleController.getString(R.string.VoipCamera), getContext().getResources().getDrawable(R.drawable.photo_camera_24px).mutate(), Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
                         attachButton.setTag(itemCameraId);
                     } else if (position == documentButton) {
                         attachButton.setTextAndIcon(4, getString("ChatDocument", R.string.ChatDocument), Theme.chat_attachButtonDrawables[2], Theme.key_chat_attachFileBackground, Theme.key_chat_attachFileText);
@@ -5462,12 +5462,12 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             attachBotsEndRow = -1;
             if (!(baseFragment instanceof ChatActivity)) {
                 galleryButton = buttonsCount++;
+                if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
+                    cameraButton = buttonsCount++;
+                }
                 documentButton = buttonsCount++;
                 if (allowEnterCaption) {
                     musicButton = buttonsCount++;
-                }
-                if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
-                    cameraButton = buttonsCount++;
                 }
             } else if (editingMessageObject != null) {
                 if (editType == EDITMEDIA_TYPE_ANY) {
@@ -5478,14 +5478,14 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     if (editType == EDITMEDIA_TYPE_PHOTOVIDEO) {
                         galleryButton = buttonsCount++;
                     }
+                    if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
+                        cameraButton = buttonsCount++;
+                    }
                     if (editType == EDITMEDIA_TYPE_FILE) {
                         documentButton = buttonsCount++;
                     }
                     if (editType == EDITMEDIA_TYPE_MUSIC) {
                         musicButton = buttonsCount++;
-                    }
-                    if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
-                        cameraButton = buttonsCount++;
                     }
                 }
             } else {

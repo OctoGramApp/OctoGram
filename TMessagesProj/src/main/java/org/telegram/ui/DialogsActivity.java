@@ -254,14 +254,12 @@ import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.preferences.ui.custom.MonetAndroidFixDialog;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.theme.MonetIconController;
+import it.octogram.android.utils.FolderUtils;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.SendMessageOptions;
-import it.octogram.android.utils.UpdatesManager;
 
 public class DialogsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, FloatingDebugProvider {
 
@@ -2283,8 +2281,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                     }
                                 }
                                 ((DialogCell) view).startOutAnimation();
-                                parentPage.archivePullViewState = ARCHIVE_ITEM_STATE_SHOWED;
+                                //parentPage.archivePullViewState = ARCHIVE_ITEM_STATE_SHOWED;
                                 if (OctoConfig.INSTANCE.openArchiveOnPull.getValue()) {
+                                    disableActionBarScrolling = true;
+                                    smoothScrollBy(0, diff, CubicBezierInterpolator.EASE_OUT_QUINT);
+                                    parentPage.archivePullViewState = ARCHIVE_ITEM_STATE_HIDDEN;
                                     AndroidUtilities.runOnUIThread(() -> {
                                         Bundle args = new Bundle();
                                         args.putInt("folderId", 1);
@@ -2293,8 +2294,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                         dialogsActivity.setDelegate(delegate);
                                         presentFragment(dialogsActivity, onlySelect);
                                     }, 200);
-                                } else if (AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
-                                    AndroidUtilities.makeAccessibilityAnnouncement(LocaleController.getString(R.string.AccDescrArchivedChatsShown));
+                                } else {
+                                    parentPage.archivePullViewState = ARCHIVE_ITEM_STATE_SHOWED;
+                                    if (AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
+                                        AndroidUtilities.makeAccessibilityAnnouncement(LocaleController.getString(R.string.AccDescrArchivedChatsShown));
+                                    }
                                 }
                             }
                         }
@@ -3429,6 +3433,23 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     }
                 }
 
+                private void showHideAlert(MessagesController.DialogFilter dialogFilter, boolean defaultTab) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+                    builder.setTitle(LocaleController.getString(R.string.HideFolder));
+                    builder.setMessage(LocaleController.getString(R.string.HideFolder_Alert));
+                    builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+                    builder.setPositiveButton(LocaleController.getString(R.string.HideFolder_Alert_Btn), (dialog2, which2) -> {
+                        if (defaultTab) {
+                            OctoConfig.INSTANCE.hideOnlyAllChatsFolder.updateValue(true);
+                        } else {
+                            FolderUtils.updateFilterVisibility(dialogFilter.id, false);
+                        }
+                        getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    showDialog(alertDialog);
+                }
+
                 @Override
                 public void onSamePageSelected() {
                     scrollToTop(true, false);
@@ -3658,6 +3679,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                 } else {
                                     FilterCreateActivity.FilterInvitesBottomSheet.show(DialogsActivity.this, finalFilter, null);
                                 }
+                            })
+                            .add(R.drawable.msg_archive_hide, LocaleController.getString(R.string.HideFolder), () -> {
+                                showHideAlert(dialogFilter, defaultTab);
                             })
                             .addIf(!defaultTab, R.drawable.msg_delete, LocaleController.getString(R.string.FilterDeleteItem), true, () -> {
                                 showDeleteAlert(dialogFilter);
@@ -4708,14 +4732,13 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, dp(2), dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, dp(4), dp(2)).setDuration(200));
             floatingButtonContainer.setStateListAnimator(animator);
-            floatingButtonContainer.setOutlineProvider(new OutlineProvider());
-            /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+            floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, dp(56), dp(56));
                 }
-            });*/
+            });
         }
         Drawable drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
         if (Build.VERSION.SDK_INT < 21) {
@@ -4979,19 +5002,17 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
 
             FrameLayout writeButtonBackground = new FrameLayout(context);
-            var writeButtonDrawable = CustomFab.createFabBackground(56, getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Theme.key_dialogFloatingButtonPressed));
-            /*Drawable writeButtonDrawable = Theme.createSimpleSelectorCircleDrawable(dp(56), getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_dialogFloatingButton));
+            Drawable writeButtonDrawable = Theme.createSimpleSelectorCircleDrawable(dp(56), getThemedColor(Theme.key_dialogFloatingButton), getThemedColor(Build.VERSION.SDK_INT >= 21 ? Theme.key_dialogFloatingButtonPressed : Theme.key_dialogFloatingButton));
             if (Build.VERSION.SDK_INT < 21) {
                 Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow_profile).mutate();
                 shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
                 CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                 combinedDrawable.setIconSize(dp(56), dp(56));
                 writeButtonDrawable = combinedDrawable;
-            }*/
+            }
             writeButtonBackground.setBackgroundDrawable(writeButtonDrawable);
             writeButtonBackground.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            writeButtonBackground.setOutlineProvider(new OutlineProvider());
-            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 writeButtonBackground.setOutlineProvider(new ViewOutlineProvider() {
                     @SuppressLint("NewApi")
                     @Override
@@ -4999,7 +5020,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         outline.setOval(0, 0, dp(56), dp(56));
                     }
                 });
-            }*/
+            }
             writeButtonBackground.setOnClickListener(v -> {
                 if (delegate == null || selectedDialogs.isEmpty()) {
                     return;
@@ -6718,11 +6739,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             filterOptions = null;
         }
         ArrayList<MessagesController.DialogFilter> filters = getMessagesController().getDialogFilters();
-        if (filters.size() > 1) {
-            if (OctoConfig.INSTANCE.hideChatFolders.getValue()) {
-                filterTabsView.removeTabs();
-                filterTabsView.setVisibility(View.GONE);
-            }
+        if (filters.size() > 1 && FolderUtils.areThereFolders()) {
             if (force || filterTabsView.getVisibility() != View.VISIBLE) {
                 boolean animatedUpdateItems = animated;
                 if (filterTabsView.getVisibility() != View.VISIBLE) {
@@ -6739,15 +6756,21 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     selectWithStableId = true;
                 }
                 filterTabsView.removeTabs();
+
+                ArrayList<Integer> hiddenFolders = FolderUtils.getHiddenFolders();
+
                 for (int a = 0, N = filters.size(); a < N; a++) {
                     if (filters.get(a).isDefault()) {
                         if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue())
                             filterTabsView.addTab(a, 0, LocaleController.getString(R.string.FilterAllChats), true,  filters.get(a).locked, filters.get(a).emoticon);
                     } else {
+                        if (hiddenFolders.contains(filters.get(a).id)) {
+                            continue;
+                        }
                         filterTabsView.addTab(a, filters.get(a).localId, filters.get(a).name, false, filters.get(a).locked, filters.get(a).emoticon);
                     }
                 }
-                if (OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
+                if (OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue() || !hiddenFolders.isEmpty()) {
                     id = filterTabsView.getFirstTabId();
                     updateCurrentTab = true;
                     viewPages[0].selectedType = id;
@@ -6988,6 +7011,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (MessagesController.getGlobalNotificationsSettings().getBoolean("askedAboutMiuiLockscreen", false)) {
                 return;
             }
+            if (OctoConfig.INSTANCE.forceHideLockScreenPopup.getValue()) {
+                return;
+            }
             showDialog(new AlertDialog.Builder(getParentActivity())
                     .setTopAnimation(R.raw.permission_request_apk, AlertsCreator.PERMISSIONS_REQUEST_TOP_ICON_SIZE, false, Theme.getColor(Theme.key_dialogTopBackground))
                     .setMessage(getString(R.string.PermissionXiaomiLockscreen))
@@ -7014,6 +7040,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             if (MessagesController.getGlobalNotificationsSettings().getBoolean("askedAboutFSILockscreen", false)) {
+                return;
+            }
+            if (OctoConfig.INSTANCE.forceHideLockScreenPopup.getValue()) {
                 return;
             }
             showDialog(new AlertDialog.Builder(getParentActivity())
@@ -12327,21 +12356,21 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (getParentActivity() == null) {
             return;
         }
-        // Drawable drawable;
+        Drawable drawable;
         if (floatingButtonContainer != null) {
-            /*drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
+            drawable = Theme.createSimpleSelectorCircleDrawable(dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
             if (Build.VERSION.SDK_INT < 21) {
                 Drawable shadowDrawable = ContextCompat.getDrawable(getParentActivity(), R.drawable.floating_shadow).mutate();
                 shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
                 CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                 combinedDrawable.setIconSize(dp(56), dp(56));
                 drawable = combinedDrawable;
-            }*/
-            floatingButtonContainer.setBackground(CustomFab.createFabBackground());
+            }
+            floatingButtonContainer.setBackground(drawable);
         }
 
         if (floatingButton2Container != null) {
-            /*drawable = Theme.createSimpleSelectorCircleDrawable(
+            drawable = Theme.createSimpleSelectorCircleDrawable(
                     dp(36),
                     ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhite), Color.WHITE, 0.1f),
                     Theme.blendOver(Theme.getColor(Theme.key_windowBackgroundWhite), Theme.getColor(Theme.key_listSelector))
@@ -12352,8 +12381,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                 combinedDrawable.setIconSize(dp(36), dp(36));
                 drawable = combinedDrawable;
-            }*/
-            floatingButton2Container.setBackground(CustomFab.createFabBackground(40, getThemedColor(Theme.key_chats_actionBackground), getThemedColor(Theme.key_chats_actionPressedBackground)));
+            }
+            floatingButton2Container.setBackground(drawable);
         }
     }
 

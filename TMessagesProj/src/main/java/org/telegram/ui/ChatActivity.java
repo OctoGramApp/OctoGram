@@ -1101,6 +1101,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int OPTION_MESSAGE_DETAILS = 201;
     private final static int OPTION_COPY_PHOTO = 202;
     private final static int OPTION_CLEAR_FROM_CACHE = 203;
+    private final static int OPTION_REPLY_PRIVATE = 299;
 
     private boolean isChannelBottomMuteView = false;
 
@@ -10634,6 +10635,53 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     fragment.setDelegate(ChatActivity.this);
                     presentFragment(fragment);
                 }
+            }
+
+            @Override
+            protected boolean canReplyToPrivateChat() {
+                if (currentChat == null) {
+                    return false;
+                }
+
+                TLRPC.Message messageOwner = messagePreviewParams.replyMessage.messages.get(0).messageOwner;
+                long userId = messageOwner.from_id.user_id;
+                long chatId = messageOwner.peer_id.user_id;
+                return chatId == 0 && userId > 0 && userId != UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
+            }
+
+            @Override
+            protected void replyToPrivateChat() {
+                dismiss(false);
+
+                Bundle args = new Bundle();
+                args.putLong("user_id", messagePreviewParams.replyMessage.messages.get(0).messageOwner.from_id.user_id);
+
+                ChatActivity chatActivity = new ChatActivity(args);
+                presentFragment(chatActivity);
+
+                if (replyingMessageObject != null) {
+                    if (chatActivityEnterView != null && chatActivity.chatActivityEnterView != null) {
+                        chatActivity.chatActivityEnterView.setFieldText(
+                                chatActivityEnterView.getFieldText()
+                        );
+                    }
+                    if (replyingQuoteGroup != null) {
+                        chatActivity.replyingQuoteGroup = replyingQuoteGroup;
+                    } else if (replyingMessageObject != null) {
+                        chatActivity.replyingQuoteGroup = getGroup(replyingMessageObject.getGroupId());
+                    }
+                    if (replyingTopMessage != null) {
+                        chatActivity.replyingTopMessage = replyingTopMessage;
+                    } else if (threadMessageObject != null) {
+                        chatActivity.replyingTopMessage = threadMessageObject;
+                    }
+                    chatActivity.showFieldPanelForReplyQuote(replyingMessageObject, replyingQuote);
+                }
+
+                replyingMessageObject = null;
+                replyingQuote = null;
+                messagePreviewParams.updateReply(null, null, dialog_id, null);
+                fallbackFieldPanel();
             }
 
             @Override
@@ -29379,6 +29427,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             options.add(OPTION_REPLY);
                             icons.add(R.drawable.menu_reply);
                         }
+                        if (!noforwardsOrPaidMedia && !selectedObject.isSponsored() && selectedObject.contentType == 0 && chatMode == MODE_DEFAULT && !isInsideContainer && currentChat != null && currentUser == null && selectedObject.messageOwner.peer_id.user_id == 0 && selectedObject.messageOwner.from_id.user_id > 0 && selectedObject.messageOwner.from_id.user_id != getUserConfig().getClientUserId()) {
+                            items.add(LocaleController.getString(R.string.CustomF_ReplyPvt));
+                            options.add(OPTION_REPLY_PRIVATE);
+                            icons.add(R.drawable.menu_reply);
+                        }
                         if ((selectedObject.type == MessageObject.TYPE_TEXT || selectedObject.isDice() || selectedObject.isAnimatedEmoji() || selectedObject.isAnimatedEmojiStickers() || getMessageCaption(selectedObject, selectedObjectGroup) != null) && !noforwardsOrPaidMedia && !selectedObject.sponsoredCanReport) {
                             items.add(LocaleController.getString(R.string.Copy));
                             options.add(OPTION_COPY);
@@ -32024,6 +32077,23 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else {
                     showFieldPanelForReply(selectedObject);
                 }
+                break;
+            }
+            case OPTION_REPLY_PRIVATE: {
+                Bundle args = new Bundle();
+                args.putLong("user_id", selectedObject.messageOwner.from_id.user_id);
+
+                ChatActivity chatActivity = new ChatActivity(args);
+                presentFragment(chatActivity);
+
+                if (chatActivityEnterView != null && chatActivity.chatActivityEnterView != null) {
+                    chatActivity.chatActivityEnterView.setFieldText(
+                            chatActivityEnterView.getFieldText()
+                    );
+                }
+                chatActivity.replyingQuoteGroup = getGroup(selectedObject.getGroupId());
+                chatActivity.replyingTopMessage = selectedObject;
+                chatActivity.showFieldPanelForReplyQuote(selectedObject, null);
                 break;
             }
             case OPTION_ADD_TO_STICKERS_OR_MASKS: {

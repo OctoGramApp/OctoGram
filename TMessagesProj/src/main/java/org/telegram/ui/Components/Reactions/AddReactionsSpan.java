@@ -30,15 +30,21 @@ public class AddReactionsSpan extends ReplacementSpan {
     private StaticLayout layout;
     private float width, height;
     private int alpha;
+    private boolean isGenericEmojisUsage = false;
 
     public AddReactionsSpan(float textSize, Theme.ResourcesProvider resourcesProvider) {
+        this(textSize, resourcesProvider, false);
+    }
+
+    public AddReactionsSpan(float textSize, Theme.ResourcesProvider resourcesProvider, boolean isGenericEmojisUsage) {
         textPaint.setTextSize(dp(textSize));
         textPaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText5, resourcesProvider));
+        this.isGenericEmojisUsage = isGenericEmojisUsage;
     }
 
     public void makeLayout() {
         if (layout == null) {
-            layout = new StaticLayout(LocaleController.getString(R.string.ReactionAddReactionsHint), textPaint, AndroidUtilities.displaySize.x, LocaleController.isRTL ? Layout.Alignment.ALIGN_OPPOSITE : Layout.Alignment.ALIGN_NORMAL, 1, 0, false);
+            layout = new StaticLayout(LocaleController.getString(isGenericEmojisUsage ? R.string.PinnedEmojisList_Add : R.string.ReactionAddReactionsHint), textPaint, AndroidUtilities.displaySize.x, LocaleController.isRTL ? Layout.Alignment.ALIGN_OPPOSITE : Layout.Alignment.ALIGN_NORMAL, 1, 0, false);
             width = layout.getLineWidth(0);
             height = layout.getHeight();
         }

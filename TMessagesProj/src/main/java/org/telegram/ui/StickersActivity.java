@@ -89,6 +89,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import it.octogram.android.preferences.ui.PinnedEmojisActivity;
+
 public class StickersActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private static final int MENU_ARCHIVE = 0;
@@ -125,6 +127,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
     private int featuredRow;
     private int masksRow;
     private int emojiPacksRow;
+    private int pinnedEmojisListRow;
     private int masksInfoRow;
     private int archivedRow;
     private int archivedInfoRow;
@@ -421,6 +424,8 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                 presentFragment(new StickersActivity(MediaDataController.TYPE_MASK, null));
             } else if (position == emojiPacksRow) {
                 presentFragment(new StickersActivity(MediaDataController.TYPE_EMOJIPACKS, null));
+            } else if (position == pinnedEmojisListRow) {
+                presentFragment(new PinnedEmojisActivity());
             } else if (position == suggestRow) {
                 if (getParentActivity() == null) {
                     return;
@@ -666,10 +671,12 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
             }
             archivedInfoRow = -1;
             emojiPacksRow = rowCount++;
+            pinnedEmojisListRow = rowCount++;
         } else {
             featuredRow = -1;
             masksRow = -1;
             emojiPacksRow = -1;
+            pinnedEmojisListRow = -1;
 
             if (mediaDataController.getArchivedStickersCount(currentType) != 0) {
                 boolean inserted = archivedRow == -1;
@@ -1178,6 +1185,9 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                             int count = mediaDataController.getStickerSets(type).size();
                             settingsCell.imageView.setTranslationX(-AndroidUtilities.dp(2));
                             settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.Emoji), count > 0 ? Integer.toString(count) : "", R.drawable.msg2_smile_status, true);
+                        } else if (position == pinnedEmojisListRow) {
+                            settingsCell.imageView.setTranslationX(-AndroidUtilities.dp(2));
+                            settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.PinnedEmojisList), PinnedEmojisActivity.getRowDescription(), R.drawable.chats_pin, true);
                         } else if (position == suggestRow) {
                             String value;
                             switch (SharedConfig.suggestStickers) {
@@ -1399,7 +1409,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                 return TYPE_STICKER_SET;
             } else if (i == stickersBotInfo || i == archivedInfoRow || i == loopInfoRow || i == suggestAnimatedEmojiInfoRow || i == masksInfoRow || i == dynamicPackOrderInfo) {
                 return TYPE_INFO;
-            } else if (i == archivedRow || i == masksRow || i == featuredRow || i == emojiPacksRow || i == suggestRow || i == featuredStickersShowMoreRow) {
+            } else if (i == archivedRow || i == masksRow || i == featuredRow || i == emojiPacksRow || i == suggestRow || i == featuredStickersShowMoreRow || i == pinnedEmojisListRow) {
                 return TYPE_TEXT_AND_VALUE;
             } else if (i == stickersShadowRow || i == featuredStickersShadowRow) {
                 return TYPE_SHADOW;

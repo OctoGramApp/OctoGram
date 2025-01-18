@@ -31,6 +31,10 @@ import android.widget.TextView;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import org.checkerframework.checker.units.qual.A;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
@@ -934,8 +938,32 @@ public class Emoji {
     }
 
     public static void sortEmoji() {
+        ArrayList<String> temp = new ArrayList<>();
+
+        if (OctoConfig.INSTANCE.canShowPreviewEmojis()) {
+            try {
+                String currentList = OctoConfig.INSTANCE.pinnedEmojisList.getValue();
+                JSONArray object = new JSONArray(new JSONTokener(currentList));
+
+                for (int i = 0; i < object.length(); i++) {
+                    try {
+                        JSONObject jsonObject = object.getJSONObject(i);
+                        if (jsonObject.has("emoticon")) {
+                            temp.add(jsonObject.getString("emoticon"));
+                        } else if (jsonObject.has("document_id")) {
+                            temp.add("animated_"+jsonObject.getLong("document_id"));
+                        }
+                    } catch (JSONException e) {}
+                }
+            } catch (JSONException ignored) {}
+        }
+
         recentEmoji.clear();
         for (HashMap.Entry<String, Integer> entry : emojiUseHistory.entrySet()) {
+            if (temp.contains(entry.getKey())) {
+                recentEmoji.remove(entry.getKey());
+                continue;
+            }
             recentEmoji.add(entry.getKey());
         }
         Collections.sort(recentEmoji, (lhs, rhs) -> {
@@ -954,6 +982,18 @@ public class Emoji {
             }
             return 0;
         });
+
+        if (!temp.isEmpty()) {
+            ArrayList<String> recentEmojiFinal = new ArrayList<>(temp);
+
+            if (!OctoConfig.INSTANCE.hideRecentEmojis.getValue()) {
+                recentEmojiFinal.addAll(recentEmoji);
+            }
+
+            recentEmoji.clear();
+            recentEmoji.addAll(recentEmojiFinal);
+        }
+
         while (recentEmoji.size() > MAX_RECENT_EMOJI_COUNT) {
             recentEmoji.remove(recentEmoji.size() - 1);
         }

@@ -49,6 +49,7 @@ import androidx.core.util.Consumer;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
+import it.octogram.android.utils.FolderUtils;
 
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
@@ -2372,6 +2373,7 @@ public class MessagesController extends BaseController implements NotificationCe
             SharedConfig.updateChatListSwipeSetting(SwipeGestureSettingsView.SWIPE_GESTURE_FOLDERS);
         }
         lockFiltersInternal();
+        FolderUtils.updateFilterVisibility(filter.id, true);
     }
 
     public void updateEmojiStatus(TLRPC.EmojiStatus newStatus) {

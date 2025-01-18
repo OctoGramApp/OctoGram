@@ -24,7 +24,7 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 public abstract class BaseRow extends AdapterWithDiffUtils.Item {
 
     @Nullable
-    private final CharSequence title;
+    private CharSequence title;
     @Nullable
     private final String summary;
     private final boolean requiresRestart;
@@ -89,6 +89,10 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
     @Nullable
     public CharSequence getTitle() {
         return title;
+    }
+
+    public void setTitle(@Nullable CharSequence title) {
+        this.title = title;
     }
 
     @Nullable

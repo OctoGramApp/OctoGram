@@ -94,9 +94,6 @@ import org.telegram.ui.Components.VerticalPositionAutoAnimator;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
-
 public class GroupCreateActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, View.OnClickListener {
 
     private ScrollView scrollView;
@@ -962,8 +959,6 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButton, "translationZ", AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButton, "translationZ", AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
             floatingButton.setStateListAnimator(animator);
-            floatingButton.setOutlineProvider(new OutlineProvider());
-/*
             floatingButton.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
@@ -971,7 +966,6 @@ public class GroupCreateActivity extends BaseFragment implements NotificationCen
                     outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                 }
             });
-*/
         }
         frameLayout.addView(floatingButton);
         floatingButton.setOnClickListener(v -> onDonePressed(true));

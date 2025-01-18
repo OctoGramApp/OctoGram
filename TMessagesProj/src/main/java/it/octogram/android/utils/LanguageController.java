@@ -29,8 +29,10 @@ import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.logs.OctoLogging;
 
 public class LanguageController {
+    private static final String TAG = "LanguageController";
 
     private static File getFileFromLang(String langCode) {
         return new File(ApplicationLoader.getFilesDirFixed(), "octogram_" + langCode.toLowerCase().replace("-", "_") + ".xml");
@@ -47,6 +49,7 @@ public class LanguageController {
                     AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface));
                 }
 
+                OctoLogging.d(TAG, langCode);
                 String remoteUrl = String.format("https://raw.githubusercontent.com/OctoGramApp/assets/lang_packs/LanguagePacks/version_%s.json", langCode);
                 JSONObject obj = new JSONObject(new StandardHTTPRequest(remoteUrl).request());
                 JSONObject versioning = new JSONObject(OctoConfig.INSTANCE.languagePackVersioning.getValue());

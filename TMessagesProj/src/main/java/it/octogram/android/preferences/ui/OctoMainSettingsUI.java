@@ -144,7 +144,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.OctoPrivacyPolicy))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://translations.%s", OctoUtils.getDomain()))))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://%s/translate", OctoUtils.getDomain()))))
                             .icon(R.drawable.msg_translate)
                             .title(getString(R.string.TranslateOcto))
                             .description(getString(R.string.TranslateOcto_Desc))
@@ -216,7 +216,7 @@ public class OctoMainSettingsUI implements PreferencesEntry {
             String defaultText = (String) positiveButton.getText();
             positiveButton.setEnabled(false);
 
-            new CountDownTimer(10000, 1000) {
+            new CountDownTimer(5000, 1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     int currentSeconds = (int) millisUntilFinished / 1000 + 1;

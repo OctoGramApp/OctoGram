@@ -51,6 +51,8 @@ import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
 import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+import it.octogram.android.preferences.ui.PinnedEmojisActivity;
+import it.octogram.android.preferences.ui.PinnedReactionsActivity;
 import it.octogram.android.utils.BrowserUtils;
 
 /**
@@ -64,6 +66,7 @@ import it.octogram.android.utils.BrowserUtils;
  * directing the user to the appropriate fragments or activities.
  * Additionally, it manages the unlocking and display of new app icons
  * based on specific deep links.
+ *
  * @noinspection deprecation
  */
 public class DeepLinkManager extends LaunchActivity {
@@ -151,6 +154,18 @@ public class DeepLinkManager extends LaunchActivity {
                 handleFrancesco(fragment);
                 return true;
             }
+            case DeepLinkDef.XIMI -> {
+                handleXimi(fragment);
+                return true;
+            }
+            case DeepLinkDef.PINNED_EMOJIS -> {
+                fragment.presentFragment(new PinnedEmojisActivity());
+                return true;
+            }
+            case DeepLinkDef.PINNED_REACTIONS -> {
+                fragment.presentFragment(new PinnedReactionsActivity());
+                return true;
+            }
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             Log.d(TAG, "Deep link not recognized: " + deepLink);
@@ -177,6 +192,28 @@ public class DeepLinkManager extends LaunchActivity {
         }
         BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, bulletinText).show();
         OctoConfig.INSTANCE.useTranslationsArgsFix.updateValue(!OctoConfig.INSTANCE.useTranslationsArgsFix.getValue());
+    }
+
+    /**
+     * Handles the Ximi deep link action.
+     * <p>
+     * This method toggles the "forceHideLockScreenPopup" configuration property
+     * and displays a bulletin to inform the user about the change.
+     *
+     * @param fragment The fragment associated with the Ximi deep link event.
+     */
+    private static void handleXimi(BaseFragment fragment) {
+        final String bulletinText = OctoConfig.INSTANCE.forceHideLockScreenPopup.getValue()
+                ? "Force hide lock screen popup has been disabled."
+                : "Force hide lock screen popup has been enabled.";
+
+        BulletinFactory.of(fragment)
+                .createSimpleBulletin(R.raw.info, bulletinText)
+                .show();
+
+        OctoConfig.INSTANCE.forceHideLockScreenPopup.updateValue(
+                !OctoConfig.INSTANCE.forceHideLockScreenPopup.getValue()
+        );
     }
 
     /**
@@ -267,6 +304,8 @@ public class DeepLinkManager extends LaunchActivity {
     private static String getDeepLinkType(String deepLink) {
         if (deepLink.equalsIgnoreCase("tg:francesco") || deepLink.equalsIgnoreCase("tg://francesco")) {
             return DeepLinkDef.FRANCESCO;
+        } else if (deepLink.equalsIgnoreCase("tg:ximi") || deepLink.equalsIgnoreCase("tg://ximi")) {
+            return DeepLinkDef.XIMI;
         } else if (deepLink.equalsIgnoreCase("tg:fox") || deepLink.equalsIgnoreCase("tg://fox")) {
             return DeepLinkDef.FOX;
         } else if (deepLink.equalsIgnoreCase("tg:chupagram") || deepLink.equalsIgnoreCase("tg://chupagram")) {
@@ -287,7 +326,7 @@ public class DeepLinkManager extends LaunchActivity {
             return DeepLinkDef.APPEARANCE;
         } else if (deepLink.equalsIgnoreCase("tg:appearance/app") || deepLink.equalsIgnoreCase("tg://appearance/app")) {
             return DeepLinkDef.APPEARANCE_APP;
-        } else if (deepLink.equalsIgnoreCase("tg:appearance/chats") || deepLink.equalsIgnoreCase("tg://appearance/chats")) {
+        } else if (deepLink.equalsIgnoreCase("tg:appearance/chat") || deepLink.equalsIgnoreCase("tg://appearance/chat")) {
             return DeepLinkDef.APPEARANCE_CHAT;
         } else if (deepLink.equalsIgnoreCase("tg:appearance/drawer") || deepLink.equalsIgnoreCase("tg://appearance/drawer")) {
             return DeepLinkDef.APPEARANCE_DRAWER;
@@ -295,6 +334,10 @@ public class DeepLinkManager extends LaunchActivity {
             return DeepLinkDef.UPDATE;
         } else if (deepLink.startsWith("tg:user") || deepLink.startsWith("tg://user")) {
             return DeepLinkDef.USER;
+        } else if (deepLink.startsWith("tg:pinned_emojis") || deepLink.startsWith("tg://pinned_emojis")) {
+            return DeepLinkDef.PINNED_EMOJIS;
+        } else if (deepLink.startsWith("tg:pinned_reactions") || deepLink.startsWith("tg://pinned_reactions")) {
+            return DeepLinkDef.PINNED_REACTIONS;
         } else {
             return null;
         }

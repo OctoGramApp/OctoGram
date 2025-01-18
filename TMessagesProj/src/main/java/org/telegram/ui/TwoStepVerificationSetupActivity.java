@@ -91,8 +91,6 @@ import org.telegram.ui.Components.spoilers.SpoilersTextView;
 
 import java.util.ArrayList;
 
-import it.octogram.android.preferences.ui.components.CustomFab;
-
 public class TwoStepVerificationSetupActivity extends BaseFragment {
 
     private RLottieImageView imageView;
@@ -328,15 +326,14 @@ public class TwoStepVerificationSetupActivity extends BaseFragment {
         floatingProgressView.setScaleY(0.1f);
         floatingButtonContainer.addView(floatingProgressView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
-        var drawable = CustomFab.createFabBackground();
-        /*Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
+        Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
         if (Build.VERSION.SDK_INT < 21) {
             Drawable shadowDrawable = ContextCompat.getDrawable(context, R.drawable.floating_shadow).mutate();
             shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
             CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
             combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
             drawable = combinedDrawable;
-        }*/
+        }
         floatingButtonContainer.setBackground(drawable);
 
         bottomSkipButton = new TextView(context);

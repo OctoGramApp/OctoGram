@@ -429,12 +429,45 @@
     <string name="OctoTgBrowserNoPromptTitle">Never ask for confirmation</string>
     <string name="OctoTgBrowserNoPromptDesc">Telegram will always open links from these websites without asking for confirmation.</string>
 
+    <!--Hide folders-->
+    <string name="ShowFolder">Show folder</string>
+    <string name="HideFolder">Hide folder</string>
+    <string name="HideFolder_Alert">Are you sure you want to hide this folder? You can show it from settings.</string>
+    <string name="HideFolder_Alert_Btn">Hide</string>
+
     <!-- Privacy Policy -->
     <string name="PrivacyPolicyLogin">By continuing,\nyou agree to the *Privacy Policy*.</string>
     <string name="OctoPrivacyPolicy">OctoGram Privacy Policy</string>
 
     <string name="MKVAsVideo">Show MKV as Video</string>
     <string name="StreamAllVideos">Stream All Videos</string>
+
+    <!--Pinned Emojis List-->
+    <string name="PinnedEmojisList">Pinned Emojis</string>
+    <string name="PinnedEmojisList_Status">Enable Pinned Emojis</string>
+    <string name="PinnedEmojisList_Add">Add an emoji…</string>
+    <string name="PinnedEmojisList_Limit">You can select up to 25 emojis.</string>
+    <string name="PinnedEmojisList_Pinned">This emoji is already pinned.</string>
+    <string name="PinnedEmojisList_HideRecent">Hide Recent Emojis</string>
+    <string name="PinnedEmojisList_HideRecent_Desc">You can hide the list of recent emoji and show only the pinned ones by activating this option.</string>
+    <string name="PinnedEmojisList_Apply">Update Pinned Emoji</string>
+    <string name="PinnedEmojisList_Description">You can pin emojis from any pack.</string>
+    <string name="PinnedEmojisList_AddButton">Pin Emoji</string>
+    <string name="PinnedEmojisList_RemoveButton">Unpin Emoji</string>
+
+    <!--Pinned Reactions List-->
+    <string name="PinnedReactions">Pinned Reactions</string>
+    <string name="PinnedReactions_Chats">Chats</string>
+    <string name="PinnedReactions_Channels">Channels</string>
+    <string name="PinnedReactions_Status_Chats">Enable Pinned Reactions in Chats</string>
+    <string name="PinnedReactions_Status_Channels">Enable Pinned Reactions in Channels</string>
+    <string name="PinnedReactions_Description">You can pin reactions from any pack.</string>
+    <string name="PinnedReactions_Description_Channels">You can pin just default reactions.</string>
+    <string name="PinnedReactions_Limit">You can select up to 5 reactions.</string>
+    <string name="PinnedReactions_Type">This emoji is unsupported.</string>
+
+    <!--Reply in private chat-->
+    <string name="CustomF_ReplyPvt">Reply in Private Chat</string>
 
     <!-- Message Details -->
     <string name="MessageDetails">Details</string>
@@ -664,10 +697,6 @@
     <string name="ChatCamera">Camera</string>
     <string name="Style">Style</string>
     <string name="ForwardedMessage">Forwarded Message</string>
-
-    <!-- Squared Fab -->
-    <string name="SquaredFab">Squared FAB (Experimental)</string>
-    <string name="SquaredFab_Desc">Use squared FAB instead of rounded</string>
 
     <!-- DC Style desc-->
     <string name="DCStyleNothing_Desc">The indicator will be hidden.</string>

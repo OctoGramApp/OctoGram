@@ -29,9 +29,15 @@ public class TextIconRow extends BaseRow implements Clickable {
     private final int icon;
     private final Runnable onClick;
     private final ConfigProperty<Boolean> preference;
-    private final String value;
+    private String value;
     private final String newID;
     private boolean wasNewBadgeVisible = false;
+    private final OnDynamicDataUpdate dynamicDataUpdate;
+
+    public interface OnDynamicDataUpdate {
+        String getTitle();
+        String getValue();
+    }
 
     private TextIconRow(CharSequence title,
                         ConfigProperty<Boolean> showIf,
@@ -42,16 +48,23 @@ public class TextIconRow extends BaseRow implements Clickable {
                         boolean requiresRestart,
                         ConfigProperty<Boolean> preferenceValue,
                         Runnable onClick,
-                        String newID) {
+                        String newID,
+                        OnDynamicDataUpdate dynamicDataUpdate) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_ICON);
         this.icon = icon;
         this.onClick = onClick;
         this.preference = preferenceValue;
         this.value = value;
         this.newID = newID;
+        this.dynamicDataUpdate = dynamicDataUpdate;
     }
 
     public void bindCell(TextCell cell) {
+        if (dynamicDataUpdate != null) {
+            setTitle(dynamicDataUpdate.getTitle());
+            value = dynamicDataUpdate.getValue();
+        }
+
         if (preference != null) {
             if (icon != -1) {
                 cell.setTextAndCheckAndIcon(rebindTitle(), preference.getValue(), icon, hasDivider());
@@ -119,6 +132,7 @@ public class TextIconRow extends BaseRow implements Clickable {
         private int icon = -1;
         private String value;
         private String newID = null;
+        private OnDynamicDataUpdate dynamicDataUpdate;
 
         public TextIconRowBuilder onClick(Runnable onClick) {
             this.onClick = onClick;
@@ -140,8 +154,13 @@ public class TextIconRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public TextIconRowBuilder setDynamicDataUpdate(OnDynamicDataUpdate dynamicDataUpdate) {
+            this.dynamicDataUpdate = dynamicDataUpdate;
+            return this;
+        }
+
         public TextIconRow build() {
-            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, onClick, newID);
+            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, onClick, newID, dynamicDataUpdate);
         }
     }
 

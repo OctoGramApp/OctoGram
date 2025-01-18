@@ -106,19 +106,23 @@ public class DcInfoSelector extends FrameLayout {
 
         MessagesController.PeerColors peerColors = MessagesController.getInstance(UserConfig.selectedAccount).profilePeerColors;
         MessagesController.PeerColor peerColor = peerColors == null ? null : peerColors.getColor(UserObject.getProfileColorId(user));
+        boolean canUsePeerColors = false;
+        if (peerColor != null)  {
+            canUsePeerColors = peerColor.getBgColor1(Theme.isCurrentThemeDark()) != peerColor.getBgColor2(Theme.isCurrentThemeDark());
+            canUsePeerColors &= peerColor.getBgColor1(Theme.isCurrentThemeDark()) != Theme.getColor(Theme.key_windowBackgroundWhite);
+            canUsePeerColors &= peerColor.getBgColor2(Theme.isCurrentThemeDark()) != Theme.getColor(Theme.key_windowBackgroundWhite);
+        }
 
         profileViewFrame = new FrameLayout(context);
-        if (peerColor != null) {
-            GradientDrawable border2 = new GradientDrawable(
-                    GradientDrawable.Orientation.BOTTOM_TOP,
-                    new int[]{
-                            peerColor.getBgColor1(Theme.isCurrentThemeDark()),
-                            peerColor.getBgColor2(Theme.isCurrentThemeDark())
-                    }
-            );
-            border2.setCornerRadius(dp(25));
-            profileViewFrame.setBackground(border2);
-        }
+        GradientDrawable border2 = new GradientDrawable(
+                GradientDrawable.Orientation.BOTTOM_TOP,
+                new int[]{
+                        canUsePeerColors ? peerColor.getBgColor1(Theme.isCurrentThemeDark()) : Theme.getColor(Theme.key_avatar_backgroundActionBarBlue),
+                        canUsePeerColors ? peerColor.getBgColor2(Theme.isCurrentThemeDark()) : Theme.getColor(Theme.key_avatar_backgroundActionBarBlue)
+                }
+        );
+        border2.setCornerRadius(dp(25));
+        profileViewFrame.setBackground(border2);
         profilePreview = new PeerColorActivity.ProfilePreview(context, UserConfig.selectedAccount, 0, null);
         profilePreview.setColor(UserObject.getProfileColorId(user), false);
         profilePreview.setEmoji(UserObject.getProfileEmojiId(user), false);

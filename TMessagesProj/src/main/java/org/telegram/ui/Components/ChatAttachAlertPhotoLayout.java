@@ -134,7 +134,6 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     private static final int VIEW_TYPE_AVATAR_CONSTRUCTOR = 4;
     private static final int SHOW_FAST_SCROLL_MIN_COUNT = 30;
     private final boolean needCamera;
-    private final boolean disableAttachCamera = OctoConfig.INSTANCE.isHiddenCameraPreview();
 
     private RecyclerListView cameraPhotoRecyclerView;
     private LinearLayoutManager cameraPhotoLayoutManager;
@@ -262,6 +261,8 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     boolean forceDarkTheme;
     private AnimationNotificationsLocker notificationsLocker = new AnimationNotificationsLocker();
     private boolean showAvatarConstructor;
+    
+    private boolean hideCameraPreview = OctoConfig.INSTANCE.isHiddenCameraPreview();
 
     public void updateAvatarPicker() {
         showAvatarConstructor = parentAlert.avatarPicker != 0 && !parentAlert.isPhotoPicker;
@@ -775,7 +776,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         gridView.setFastScrollVisible(true);
         gridView.getFastScroll().setAlpha(0f);
         gridView.getFastScroll().usePadding = false;
-        gridView.setAdapter(adapter = new PhotoAttachAdapter(context, needCamera && !disableAttachCamera));
+        gridView.setAdapter(adapter = new PhotoAttachAdapter(context, needCamera && !hideCameraPreview));
         adapter.createCache();
         gridView.setClipToPadding(false);
         gridView.setItemAnimator(null);
@@ -859,7 +860,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             if (!mediaEnabled || parentAlert.destroyed) {
                 return;
             }
-            if (needCamera && disableAttachCamera) {
+            if (needCamera && hideCameraPreview) {
                 position++;
             }
             BaseFragment fragment = parentAlert.baseFragment;
@@ -891,7 +892,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 }
             }
             if (position != 0 || !needCamera || selectedAlbumEntry != galleryAlbumEntry) {
-                if (selectedAlbumEntry == galleryAlbumEntry && needCamera || disableAttachCamera && (selectedAlbumEntry != galleryAlbumEntry || shouldLoadAllMedia())) {
+                if (selectedAlbumEntry == galleryAlbumEntry && needCamera || hideCameraPreview && (selectedAlbumEntry != galleryAlbumEntry || shouldLoadAllMedia())) {
                     position--;
                 }
                 if (showAvatarConstructor) {
@@ -1013,7 +1014,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             }
         });
         gridView.setOnItemLongClickListener((view, position) -> {
-            if (disableAttachCamera) position++;
+            if (hideCameraPreview) position++;
             if (parentAlert.storyMediaPicker) {
                 return false;
             }
@@ -2075,7 +2076,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                             dragging = true;
                         }
                     } else if (dragging) {
-                        if (cameraView != null && !disableAttachCamera) {
+                        if (cameraView != null && !hideCameraPreview) {
                             cameraView.setTranslationY(cameraView.getTranslationY() + dy);
                             lastY = newY;
                             zoomControlView.setTag(null);
@@ -2276,7 +2277,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     cameraView.setZoom(0.0f);
                     */
                     if (evControlView != null) evControlView.setSliderValue(0.5f, true);
-                    if (!disableAttachCamera) cameraZoom = cameraView.resetZoom();
+                    if (!hideCameraPreview) cameraZoom = cameraView.resetZoom();
                     if (zoomControlView != null) zoomControlView.setSliderValue(cameraZoom, false);
                     if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.getCameraType() != CameraType.CAMERA_X) {
                         CameraController.getInstance().startPreview(((CameraView) cameraView).getCameraSessionObject());
@@ -2567,7 +2568,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         if (cameraView == null || cameraInitAnimation != null || parentAlert.isDismissed()) {
             return;
         }
-        if (!cameraView.isInited() && LiteMode.isEnabled(LiteMode.FLAGS_CHAT) && !disableAttachCamera) {
+        if (!cameraView.isInited() && LiteMode.isEnabled(LiteMode.FLAGS_CHAT) && !hideCameraPreview) {
             return;
         }
         if (Build.VERSION.SDK_INT >= 23) {
@@ -2692,7 +2693,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             gridView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         }
 
-        if ((!LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || disableAttachCamera) && cameraView != null && cameraView.isInited()) {
+        if ((!LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview) && cameraView != null && cameraView.isInited()) {
             cameraView.showTexture(true, animated);
         }
     }
@@ -2718,7 +2719,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             return;
         }
         if (cameraView == null) {
-            final boolean lazy = !LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || disableAttachCamera;
+            final boolean lazy = !LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview;
             if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.getCameraType() != CameraType.CAMERA_X) {
                 cameraView = new CameraView(getContext(), isCameraFrontfaceBeforeEnteringEditMode != null ? isCameraFrontfaceBeforeEnteringEditMode : parentAlert.openWithFrontFaceCamera, lazy) {
 
@@ -3247,7 +3248,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             gridView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
         }
 
-        if ((!LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || disableAttachCamera) && cameraView != null) {
+        if ((!LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview) && cameraView != null) {
             cameraView.showTexture(false, animated);
         }
     }
@@ -3315,7 +3316,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         } else {
             cameraViewW = (int) startWidth;
             cameraViewH = (int) startHeight;
-            if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.getCameraType() != CameraType.CAMERA_X && disableAttachCamera) {
+            if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.getCameraType() != CameraType.CAMERA_X && hideCameraPreview) {
                 cameraView.getTextureView().setScaleX(1f);
                 cameraView.getTextureView().setScaleY(1f);
             }
@@ -4246,7 +4247,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     public void pauseCamera(boolean pause) {
-        if (disableAttachCamera) {
+        if (hideCameraPreview) {
             return;
         }
         if (needCamera && !noCameraPermissions) {

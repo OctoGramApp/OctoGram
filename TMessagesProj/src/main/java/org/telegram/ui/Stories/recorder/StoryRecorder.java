@@ -165,8 +165,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import it.octogram.android.OctoConfig;
-
 public class StoryRecorder implements NotificationCenter.NotificationCenterDelegate {
 
     private final Theme.ResourcesProvider resourcesProvider = new DarkThemeResourceProvider();
@@ -362,7 +360,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
             src.backgroundPaint.setColor(Theme.getColor(Theme.key_chats_actionBackground));
             src.iconDrawable = floatingButton.getContext().getResources().getDrawable(R.drawable.story_camera).mutate();
             src.iconSize = AndroidUtilities.dp(56);
-            src.rounding = OctoConfig.INSTANCE.useSquaredFab.getValue() ? AndroidUtilities.dp(16.0f) : Math.max(src.screenRect.width(), src.screenRect.height()) / 2f;
+            src.rounding = Math.max(src.screenRect.width(), src.screenRect.height()) / 2f;
             return src;
         }
 

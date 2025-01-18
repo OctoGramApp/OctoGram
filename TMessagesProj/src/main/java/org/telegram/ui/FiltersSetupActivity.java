@@ -69,6 +69,7 @@ import org.telegram.ui.Components.UndoView;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.FolderUtils;
 
 public class FiltersSetupActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -80,6 +81,8 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
     private boolean orderChanged;
 
     private boolean ignoreUpdates;
+
+    private ArrayList<Integer> hiddenFolders;
 
     private boolean highlightTags;
     public FiltersSetupActivity highlightTags() {
@@ -380,6 +383,9 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         }
 
         private ValueAnimator moveImageViewAnimator;
+        private boolean wasFolderHidden = false;
+        private boolean wasIconVisible = false;
+        private boolean mustAnimateIcon = false;
 
         public void setFilter(MessagesController.DialogFilter filter, boolean divider, int position) {
             int oldId = currentFilter == null ? -1 : currentFilter.id;
@@ -473,19 +479,42 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                 name = LocaleController.getString(R.string.FilterAllChats);
             }
             if (!animated) {
-                progressToLock = currentFilter.locked ? 1f : 0;
+                //progressToLock = (currentFilter.locked || isFolderHidden()) ? 1f : 0;
             }
+
             textView.setText(Emoji.replaceEmoji(name, textView.getPaint().getFontMetricsInt(), dp(20), false));
+
+            Drawable drawable;
+            if ((isFolderHidden() || wasFolderHidden) && !filter.locked) {
+                drawable = ContextCompat.getDrawable(getContext(), R.drawable.msg_archive_hide);
+                wasFolderHidden = true;
+            } else {
+                drawable = ContextCompat.getDrawable(getContext(), R.drawable.other_lockedfolders2);
+                wasFolderHidden = false;
+            }
+            textView.setDrawablePadding(dp(8));
+            drawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_stickers_menu), PorterDuff.Mode.MULTIPLY));
+            textView.setRightDrawable(drawable);
+
+            boolean mustShowIcon = filter.locked || isFolderHidden();
+            if (mustShowIcon != wasIconVisible) {
+                wasIconVisible = mustShowIcon;
+                mustAnimateIcon = true;
+            }
 
             valueTextView.setText(info);
             needDivider = divider;
 
-            if (filter.isDefault()) {
+            /*if (filter.isDefault()) {
                 optionsImageView.setVisibility(View.GONE);
             } else {
                 optionsImageView.setVisibility(View.VISIBLE);
-            }
+            }*/
             invalidate();
+        }
+
+        private boolean isFolderHidden() {
+            return currentFilter.isDefault() ? OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue() : hiddenFolders.contains(currentFilter.id);
         }
 
         public MessagesController.DialogFilter getCurrentFilter() {
@@ -501,18 +530,34 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
             if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                 canvas.drawLine(LocaleController.isRTL ? 0 : dp(62), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? dp(62) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
             }
-            if (currentFilter != null) {
-                if (currentFilter.locked && progressToLock != 1f) {
+
+            //if (currentFilter != null) {
+                if (wasIconVisible && progressToLock != 1f) {
                     progressToLock += 16 / 150f;
-                    invalidate();
-                } else if (!currentFilter.locked && progressToLock != 0) {
+                    //invalidate();
+                    if (!mustAnimateIcon) {
+                        progressToLock = 1f;
+                    }
+                } else if (!wasIconVisible && progressToLock != 0) {
                     progressToLock -= 16 / 150f;
-                    invalidate();
+                    //invalidate();
+                    if (!mustAnimateIcon) {
+                        progressToLock = 0f;
+                    }
                 }
-            }
+            //}
+
             progressToLock = Utilities.clamp(progressToLock, 1f, 0f);
             textView.setRightDrawableScale(progressToLock);
             textView.invalidate();
+
+            if (mustAnimateIcon) {
+                if (progressToLock == 1f || progressToLock == 0f) {
+                    mustAnimateIcon = false;
+                } else {
+                    invalidate();
+                }
+            }
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -544,6 +589,8 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
         oldItems.clear();
         oldItems.addAll(items);
         items.clear();
+
+        hiddenFolders = FolderUtils.getHiddenFolders();
 
         ArrayList<TLRPC.TL_dialogFilterSuggested> suggestedFilters = getMessagesController().suggestedFilters;
         ArrayList<MessagesController.DialogFilter> dialogFilters = getMessagesController().getDialogFilters();
@@ -895,14 +942,26 @@ public class FiltersSetupActivity extends BaseFragment implements NotificationCe
                         FilterCell cell = (FilterCell) v.getParent();
                         MessagesController.DialogFilter filter = cell.getCurrentFilter();
                         ItemOptions options = ItemOptions.makeOptions(FiltersSetupActivity.this, cell);
-                        options.add(R.drawable.msg_edit, LocaleController.getString(R.string.FilterEditItem), () -> {
+                        boolean isFolderHidden = filter.isDefault() ? OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue() : hiddenFolders.contains(filter.id);
+                        //options.add(R.drawable.msg_edit, LocaleController.getString(R.string.FilterEditItem), () -> {
+                        options.addIf(!filter.isDefault(), R.drawable.msg_edit, LocaleController.getString(R.string.FilterEditItem), () -> {
                             if (filter.locked) {
                                 showDialog(new LimitReachedBottomSheet(FiltersSetupActivity.this, mContext, LimitReachedBottomSheet.TYPE_FOLDERS, currentAccount, null));
                             } else {
                                 presentFragment(new FilterCreateActivity(filter));
                             }
                         });
-                        options.add(R.drawable.msg_delete, LocaleController.getString(R.string.FilterDeleteItem), true, () -> {
+                        options.add(isFolderHidden ? R.drawable.msg_addfolder : R.drawable.msg_archive_hide, LocaleController.getString(isFolderHidden ? R.string.ShowFolder : R.string.HideFolder), () -> {
+                            if (filter.isDefault()) {
+                                OctoConfig.INSTANCE.hideOnlyAllChatsFolder.updateValue(!isFolderHidden);
+                            } else {
+                                FolderUtils.updateFilterVisibility(filter.id, hiddenFolders.contains(filter.id));
+                            }
+                            updateRows(true);
+                            getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+                        });
+                        //options.add(R.drawable.msg_delete, LocaleController.getString(R.string.FilterDeleteItem), true, () -> {
+                        options.addIf(!filter.isDefault(), R.drawable.msg_delete, LocaleController.getString(R.string.FilterDeleteItem), true, () -> {
                             if (filter.isChatlist()) {
                                 FolderBottomSheet.showForDeletion(FiltersSetupActivity.this, filter.id, success -> {
                                     updateRows(true);

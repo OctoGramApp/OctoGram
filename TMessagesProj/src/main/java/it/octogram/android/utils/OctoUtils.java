@@ -8,6 +8,7 @@
 
 package it.octogram.android.utils;
 
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
@@ -17,6 +18,7 @@ import android.os.Environment;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -122,10 +124,11 @@ public class OctoUtils {
     }
 
     public static String fixBrokenLang(String lang) {
-        if (lang.equals("in")) {
-            return "id";
-        }
-        return lang;
+        return switch (lang) {
+            case "in" -> "id";
+            case "es" -> "es-ES";
+            default -> lang;
+        };
     }
 
     public static void fixBrokenStringArgs(Object... args) {
@@ -193,68 +196,102 @@ public class OctoUtils {
     }
 
     public static String getDomain() {
-        return "OctoGram.me";
+        return "octogramapp.github.io";
     }
 
+    private static final String LOGS_DIRECTORY = "octologs";
+
+    /**
+     * Returns the directory for storing logs, creating it if it doesn't exist.
+     * Attempts to use external storage first, falls back to internal storage if necessary.
+     *
+     * @return The logs directory File object, or null if creation fails
+     */
     public static File getLogsDir() {
-        String OCTO_PATH = "/octologs";
-        File dir = null;
-        try {
-            if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-                dir = new File(ApplicationLoader.applicationContext.getExternalFilesDir(null), OCTO_PATH);
-            } else {
-                dir = new File(ApplicationLoader.applicationContext.getCacheDir().getAbsolutePath(), OCTO_PATH);
-            }
-        } catch (Exception ignored) {}
+        // Define constants at class level instead of method level
 
-        if (dir == null) {
-            try {
-                dir = new File(ApplicationLoader.applicationContext.getFilesDir().getAbsolutePath(), OCTO_PATH);
-            } catch (Exception ignored) {}
+        // Get application context once
+        var context = ApplicationLoader.applicationContext;
+        if (context == null) {
+            return null;
         }
 
-        if (dir != null && !dir.exists()) {
-            dir.mkdirs();
+        File logsDir = getPreferredLogsDirectory(context);
+
+        // Create directory if it doesn't exist
+        if (logsDir != null && !logsDir.exists() && !logsDir.mkdirs()) {
+            Log.e("LogsDirectory", "Failed to create logs directory at: " + logsDir.getAbsolutePath());
+            return null;
         }
 
-        return dir;
+        return logsDir;
     }
 
-    public static TLRPC.MessagesFilter getTLRPCFilterFromId(int id) {
-        TLRPC.MessagesFilter filter;
+    /**
+     * Determines and returns the preferred logs directory based on storage availability.
+     *
+     * @param context The application context
+     * @return The preferred logs directory File object, or null if all attempts fail
+     */
+    private static File getPreferredLogsDirectory(Context context) {
+        File directory = null;
 
-        if (id == MediaFilter.ALL.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterEmpty();
-        } else if (id == MediaFilter.PHOTOS.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterPhotos();
-        } else if (id == MediaFilter.VIDEOS.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterVideo();
-        } else if (id == MediaFilter.VOICE_MESSAGES.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterRoundVoice();
-        } else if (id == MediaFilter.VIDEO_MESSAGES.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterRoundVideo();
-        } else if (id == MediaFilter.FILES.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterDocument();
-        } else if (id == MediaFilter.MUSIC.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterMusic();
-        } else if (id == MediaFilter.GIFS.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterGif();
-        } else if (id == MediaFilter.LOCATIONS.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterGeo();
-        } else if (id == MediaFilter.CONTACTS.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterContacts();
-        } else if (id == MediaFilter.MENTIONS.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterMyMentions();
-        } else if (id == MediaFilter.URL.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterUrl();
-        } else if (id == MediaFilter.PINNED_MESSAGES.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterPinned();
-        } else if (id == MediaFilter.CHAT_PHOTOS.getValue()) {
-            filter = new TLRPC.TL_inputMessagesFilterChatPhotos();
-        } else {
-            filter = new TLRPC.TL_inputMessagesFilterEmpty();
+        // Try external storage first
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            try {
+                File externalDir = context.getExternalFilesDir(null);
+                if (externalDir != null) {
+                    directory = new File(externalDir, LOGS_DIRECTORY);
+                }
+            } catch (SecurityException e) {
+                Log.w("LogsDirectory", "Failed to access external storage", e);
+            }
         }
-        return filter;
+
+        // Fall back to cache directory
+        if (directory == null) {
+            try {
+                directory = new File(context.getCacheDir(), LOGS_DIRECTORY);
+            } catch (SecurityException e) {
+                Log.w("LogsDirectory", "Failed to access cache directory", e);
+            }
+        }
+
+        // Last resort: internal files directory
+        if (directory == null) {
+            try {
+                directory = new File(context.getFilesDir(), LOGS_DIRECTORY);
+            } catch (SecurityException e) {
+                Log.e("LogsDirectory", "Failed to access internal storage", e);
+            }
+        }
+
+        return directory;
+    }
+
+    /**
+     * Creates and returns a TLRPC.MessagesFilter based on the provided MediaFilter ID.
+     *
+     * @param id The MediaFilter ID value
+     * @return A TLRPC.MessagesFilter instance corresponding to the provided ID
+     */
+    public static TLRPC.MessagesFilter getTLRPCFilterFromId(int id) {
+        return switch (MediaFilter.fromValue(id)) {
+            case MediaFilter.PHOTOS -> new TLRPC.TL_inputMessagesFilterPhotos();
+            case MediaFilter.VIDEOS -> new TLRPC.TL_inputMessagesFilterVideo();
+            case MediaFilter.VOICE_MESSAGES -> new TLRPC.TL_inputMessagesFilterRoundVoice();
+            case MediaFilter.VIDEO_MESSAGES -> new TLRPC.TL_inputMessagesFilterRoundVideo();
+            case MediaFilter.FILES -> new TLRPC.TL_inputMessagesFilterDocument();
+            case MediaFilter.MUSIC -> new TLRPC.TL_inputMessagesFilterMusic();
+            case MediaFilter.GIFS -> new TLRPC.TL_inputMessagesFilterGif();
+            case MediaFilter.LOCATIONS -> new TLRPC.TL_inputMessagesFilterGeo();
+            case MediaFilter.CONTACTS -> new TLRPC.TL_inputMessagesFilterContacts();
+            case MediaFilter.MENTIONS -> new TLRPC.TL_inputMessagesFilterMyMentions();
+            case MediaFilter.URL -> new TLRPC.TL_inputMessagesFilterUrl();
+            case MediaFilter.PINNED_MESSAGES -> new TLRPC.TL_inputMessagesFilterPinned();
+            case MediaFilter.CHAT_PHOTOS -> new TLRPC.TL_inputMessagesFilterChatPhotos();
+            default -> new TLRPC.TL_inputMessagesFilterEmpty();
+        };
     }
 
     public static Spanned fromHtml(@NonNull String source) {
@@ -343,6 +380,10 @@ public class OctoUtils {
 
     public static void featureNotAvailable(Theme.ResourcesProvider resourceProvider) {
         BulletinFactory.global().createErrorBulletin("This feature is currently not available", resourceProvider).show();
+    }
+
+    public static void featureNotAvailable() {
+        BulletinFactory.global().createErrorBulletin("This feature is currently not available", null).show();
     }
 
     public static int getCustomStreamType(TLRPC.Chat chat) {

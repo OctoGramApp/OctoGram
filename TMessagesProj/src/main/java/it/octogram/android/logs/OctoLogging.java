@@ -43,10 +43,16 @@ public class OctoLogging {
     public static void ensureInitialized() {
         getInstance().initialize();
     }
+
+    public static void w(String message) {
+        log(Log.WARN, TAG, message, null);
+    }
+    public static void w(String tag, String message) {
+        log(Log.WARN, tag, message, null);
+    }
     public static void d(String message) {
         log(Log.DEBUG, TAG, message, null);
     }
-
 
     public static void d(String tag, String message) {
         log(Log.DEBUG, tag, message, null);

@@ -636,6 +636,10 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
 
         actionBar.setTitle(getString("ChannelEdit", R.string.ChannelEdit));
 
+        if (currentUser == null && !ChatObject.hasAdminRights(currentChat)) {
+            actionBar.setTitle(getString(R.string.MessageDetails));
+        }
+
         avatarContainer = new LinearLayout(context);
         avatarContainer.setOrientation(LinearLayout.VERTICAL);
         avatarContainer.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
@@ -1197,7 +1201,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
                 infoContainer.addView(channelAffiliateProgramsCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
             }
 
-            if (channelAffiliateProgramsCell != null && getMessagesController().starrefConnectAllowed && ChatObject.hasAdminRights(currentChat)) {
+            if (channelAffiliateProgramsCell != null && ChatObject.hasAdminRights(currentChat) && getMessagesController().starrefConnectAllowed) {
                 channelAffiliateProgramsCell.setVisibility(View.VISIBLE);
             }
             if (logCell != null) {
@@ -1733,7 +1737,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
     }
 
     private int getChannelAdminCount() {
-            if (info == null) {
+        if (info == null || info.participants == null || info.participants.participants == null) {
             return 1;
         }
         int count = 0;
@@ -1749,6 +1753,10 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
     }
 
     private void getRealChannelAdminCount() {
+        if (ChatObject.isChannel(currentChat) && !currentChat.megagroup && !ChatObject.hasAdminRights(currentChat)) {
+            return;
+        }
+
         TLRPC.TL_channels_getParticipants req = new TLRPC.TL_channels_getParticipants();
         req.channel = getMessagesController().getInputChannel(chatId);
         req.filter = new TLRPC.TL_channelParticipantsAdmins();
@@ -2088,6 +2096,13 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
                 if (isChannel) {
                     membersCell.setTextAndValueAndIcon(getString("ChannelSubscribers", R.string.ChannelSubscribers), String.format("%d", info.participants_count), R.drawable.msg_groups, true);
                     blockCell.setTextAndValueAndIcon(getString("ChannelBlacklist", R.string.ChannelBlacklist), String.format("%d", Math.max(info.banned_count, info.kicked_count)), R.drawable.msg_user_remove, logCell != null && logCell.getVisibility() == View.VISIBLE);
+
+                    if (!ChatObject.hasAdminRights(currentChat)) {
+                        membersCell.setEnabled(false);
+                        membersCell.setNeedDivider(false);
+                        blockCell.setVisibility(View.GONE);
+                        adminCell.setVisibility(View.GONE);
+                    }
                 } else {
                     if (ChatObject.isChannel(currentChat)) {
                         membersCell.setTextAndValueAndIcon(getString("ChannelMembers", R.string.ChannelMembers), String.format("%d", info.participants_count), R.drawable.msg_groups, true);

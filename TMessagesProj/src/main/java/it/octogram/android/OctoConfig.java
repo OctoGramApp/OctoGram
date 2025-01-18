@@ -20,7 +20,9 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MessageObject;
+import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,7 +84,19 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> enableSmartNotificationsForPrivateChats = newConfigProperty("enableSmartNotificationsForPrivateChats", false);
     public final ConfigProperty<Integer> defaultEmojiButtonAction = newConfigProperty("defaultEmojiButtonAction", DefaultEmojiButtonAction.DEFAULT.getValue());
     public final ConfigProperty<Boolean> rememberAllRepliesMessage = newConfigProperty("rememberAllRepliesMessage", true);
-    public final ConfigProperty<Boolean> swipeToPip = newConfigProperty("swipeToPip", true);
+    public final ConfigProperty<Boolean> swipeToPip = newConfigProperty("swipeToPip", false);
+    public final ConfigProperty<Boolean> usePinnedEmojisFeature = newConfigProperty("usePinnedEmojisFeature", false);
+    public final ConfigProperty<Boolean> hideRecentEmojis = newConfigProperty("hideRecentEmojis", false);
+    public final ConfigProperty<String> pinnedEmojisList = newConfigProperty("pinnedEmojisList", "[]");
+
+    /*Hidden folders*/
+    public final ConfigProperty<String> hiddenFolderAssoc = newConfigProperty("hiddenFolderAssoc", "{}");
+
+    /*Pinned reactions*/
+    public final ConfigProperty<Boolean> usePinnedReactionsChats = newConfigProperty("usePinnedReactionsChats", false);
+    public final ConfigProperty<String> pinnedReactionsChats = newConfigProperty("pinnedReactionsChats", "[]");
+    public final ConfigProperty<Boolean> usePinnedReactionsChannels = newConfigProperty("usePinnedReactionsChannels", false);
+    public final ConfigProperty<String> pinnedReactionsChannels = newConfigProperty("pinnedReactionsChannels", "[]");
 
     /*Appearance*/
     public final ConfigProperty<Integer> actionBarTitleOption = newConfigProperty("actionBarTitleOption", ActionBarTitleOption.APP_NAME.getValue());
@@ -134,6 +148,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> contextReportMessage = newConfigProperty("context_reportMessage", true);
     public final ConfigProperty<Boolean> contextMessageDetails = newConfigProperty("context_messageDetails", true);
     public final ConfigProperty<Boolean> contextNoQuoteForward = newConfigProperty("context_noQuoteForward", false);
+    public final ConfigProperty<Boolean> contextReplyPrivateChat = newConfigProperty("context_replyPrivateChat", false);
 
     /*Admin Shortcuts*/
     public final ConfigProperty<Boolean> shortcutsAdministrators = newConfigProperty("shortcuts_administrators", false);
@@ -172,6 +187,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
     public final ConfigProperty<Boolean> showRPCErrors = newConfigProperty("showRPCErrors", false);
     public final ConfigProperty<Boolean> useTranslationsArgsFix = newConfigProperty("useTranslationsArgsFix", true);
+    public final ConfigProperty<Boolean> forceHideLockScreenPopup = newConfigProperty("forceHideLockScreenPopup", false);
     public final ConfigProperty<Integer> uiTitleCenteredState = newConfigProperty("uiTitleCenteredState", ActionBarCenteredTitle.NEVER.getValue());
     public final ConfigProperty<Boolean> uiImmersivePopups = newConfigProperty("uiImmersivePopups", false);
     public final ConfigProperty<Integer> interfaceSwitchUI = newConfigProperty("interfaceSwitchUI", InterfaceSwitchUI.DEFAULT.getValue());
@@ -179,7 +195,6 @@ public class OctoConfig {
     public final ConfigProperty<Integer> interfaceSliderUI = newConfigProperty("interfaceSliderUI", InterfaceSliderUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> uiIconsType = newConfigProperty("uiIconsType", IconsUIType.DEFAULT.getValue());
     public final ConfigProperty<Boolean> uiRandomMemeIcons = newConfigProperty("uiRandomMemeIcons", false);
-    public final ConfigProperty<Boolean> useSquaredFab = newConfigProperty("useSquaredFab", false);
     public final ConfigProperty<Boolean> hideBottomBarChannels = newConfigProperty("hideBottomBarChannels", false);
     public final ConfigProperty<Boolean> hideOpenButtonChatsList = newConfigProperty("hideOpenButtonChatsList", false);
     public final ConfigProperty<Boolean> alwaysExpandBlockQuotes = newConfigProperty("alwaysExpandBlockQuotes", false);
@@ -489,22 +504,27 @@ public class OctoConfig {
                                     }
 
                                     Object exportFileSettingsValue = result.get(fieldName);
-                                    if (exportFileSettingsValue instanceof Boolean) {
-                                        configProperty.updateValue((ConfigProperty<Boolean>) configProperty, (Boolean) exportFileSettingsValue);
-                                    } else if (exportFileSettingsValue instanceof Integer) {
-                                        if (!isValueValid(fieldName, (Integer) exportFileSettingsValue)) {
-                                            Log.d(TAG, "failed to import "+fieldName+" as integer value is invalid");
-                                            continue;
-                                        }
+                                    switch (exportFileSettingsValue) {
+                                        case Boolean b ->
+                                                configProperty.updateValue((ConfigProperty<Boolean>) configProperty, b);
+                                        case Integer i -> {
+                                            if (!isValueValid(fieldName, i)) {
+                                                Log.d(TAG, "failed to import " + fieldName + " as integer value is invalid");
+                                                continue;
+                                            }
 
-                                        configProperty.updateValue((ConfigProperty<Integer>) configProperty, (Integer) exportFileSettingsValue);
-                                    } else if (exportFileSettingsValue instanceof String) {
-                                        if (!isValueValid(fieldName, (String) exportFileSettingsValue)) {
-                                            Log.d(TAG, "failed to import "+fieldName+" as string value is invalid");
-                                            continue;
+                                            configProperty.updateValue((ConfigProperty<Integer>) configProperty, i);
                                         }
+                                        case String s -> {
+                                            if (!isValueValid(fieldName, s)) {
+                                                Log.d(TAG, "failed to import " + fieldName + " as string value is invalid");
+                                                continue;
+                                            }
 
-                                        configProperty.updateValue((ConfigProperty<String>) configProperty, reparseStringValue(fieldName, (String) exportFileSettingsValue));
+                                            configProperty.updateValue((ConfigProperty<String>) configProperty, reparseStringValue(fieldName, s));
+                                        }
+                                        default -> {
+                                        }
                                     }
                                 }
                             } catch (JSONException e) {
@@ -647,5 +667,113 @@ public class OctoConfig {
 
     public boolean isHiddenCameraPreview() {
         return (cameraPreview.getValue() == CameraPreview.BOTTOM_BAR || cameraPreview.getValue() == CameraPreview.FLOATING);
+    }
+
+    private boolean canShowPreviewEmojis() {
+        if (!usePinnedEmojisFeature.getValue()) {
+            return false;
+        }
+
+        try {
+            JSONArray jsonArray = new JSONArray(new JSONTokener(pinnedEmojisList.getValue()));
+            return jsonArray.length() > 0;
+        } catch (JSONException ignored) {}
+
+        return false;
+    }
+
+    public int getEmojiStatus(Long documentId, boolean add, boolean remove) {
+        if (!usePinnedEmojisFeature.getValue()) {
+            return EmojiStatus.UNAVAILABLE.getValue();
+        }
+
+        try {
+            boolean isThereEmoji = false;
+            JSONArray newWithExcludedStatus = new JSONArray();
+            JSONArray jsonArray = new JSONArray(new JSONTokener(pinnedEmojisList.getValue()));
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject object = jsonArray.getJSONObject(i);
+                if (object.has("document_id") && object.getLong("document_id") == documentId) {
+                    isThereEmoji = true;
+                } else {
+                    newWithExcludedStatus.put(object);
+                }
+            }
+
+            if (isThereEmoji) {
+                if (remove) {
+                    OctoConfig.INSTANCE.pinnedEmojisList.updateValue(newWithExcludedStatus.toString());
+                }
+
+                return EmojiStatus.CAN_BE_REMOVED.getValue();
+            } else if (jsonArray.length() <= 25) {
+                if (add) {
+                    JSONObject newObject = new JSONObject();
+                    newObject.put("document_id", documentId);
+                    jsonArray.put(newObject);
+                    OctoConfig.INSTANCE.pinnedEmojisList.updateValue(jsonArray.toString());
+                }
+
+                return EmojiStatus.CAN_BE_ADDED.getValue();
+            }
+        } catch (JSONException ignored) {}
+
+        return EmojiStatus.UNAVAILABLE.getValue();
+    }
+
+    public int getEmojiStatus(Long documentId) {
+        return getEmojiStatus(documentId, false, false);
+    }
+    public boolean pinEmoji(Long documentId) {
+        boolean status = getEmojiStatus(documentId, true, false) == EmojiStatus.CAN_BE_ADDED.getValue();
+        if (status) {
+            Emoji.sortEmoji();
+        }
+        return status;
+    }
+
+    public boolean unpinEmoji(Long documentId) {
+        boolean status = getEmojiStatus(documentId, false, true) == EmojiStatus.CAN_BE_REMOVED.getValue();
+        if (status) {
+            Emoji.sortEmoji();
+        }
+        return status;
+    }
+
+    public ArrayList<ReactionsLayoutInBubble.VisibleReaction> getFavoriteReactions(boolean isChannel) {
+        ArrayList<ReactionsLayoutInBubble.VisibleReaction> reactions = new ArrayList<>();
+
+        if ((isChannel && !OctoConfig.INSTANCE.usePinnedReactionsChannels.getValue()) || (!isChannel && !OctoConfig.INSTANCE.usePinnedReactionsChats.getValue())) {
+            return reactions;
+        }
+
+        try {
+            String value = isChannel ? OctoConfig.INSTANCE.pinnedReactionsChannels.getValue() : OctoConfig.INSTANCE.pinnedReactionsChats.getValue();
+            JSONArray list = new JSONArray(new JSONTokener(value));
+
+            int successHandled = 0;
+            for (int i = 0; i < list.length(); i++) {
+                try {
+                    ReactionsLayoutInBubble.VisibleReaction visibleReaction = new ReactionsLayoutInBubble.VisibleReaction();
+                    JSONObject object = list.getJSONObject(i);
+                    if (object.has("emoticon")) {
+                        visibleReaction.emojicon = object.getString("emoticon");
+                        visibleReaction.hash = visibleReaction.emojicon.hashCode();
+                        successHandled++;
+                    } else if (object.has("document_id")) {
+                        visibleReaction.documentId = object.getLong("document_id");
+                        visibleReaction.hash = visibleReaction.documentId;
+                        successHandled++;
+                    }
+                    reactions.add(visibleReaction);
+                }catch (JSONException ignored) {}
+
+                if (successHandled >= 5) {
+                    break;
+                }
+            }
+        } catch (JSONException ignored) {}
+
+        return reactions;
     }
 }

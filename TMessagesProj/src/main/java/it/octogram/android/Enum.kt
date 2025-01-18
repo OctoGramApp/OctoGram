@@ -10,8 +10,25 @@ package it.octogram.android
 
 import android.graphics.Color
 import androidx.annotation.IntDef
+import it.octogram.android.CameraType.entries
+import it.octogram.android.Datacenter.entries
+import it.octogram.android.DcIdStyle.entries
+import it.octogram.android.DoubleTapAction.entries
+import it.octogram.android.EventType.entries
+import it.octogram.android.FontType.entries
+import it.octogram.android.MediaFilter.values
+import it.octogram.android.MenuItemId.entries
+import it.octogram.android.PhoneNumberAlternative.entries
+import it.octogram.android.PhotoResolution.entries
+import it.octogram.android.ViewType.entries
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
+
+enum class EmojiStatus(val value: Int) {
+    CAN_BE_ADDED(0),
+    CAN_BE_REMOVED(1),
+    UNAVAILABLE(2)
+}
 
 enum class DcIdStyle(val value: Int) {
     NONE(0),
@@ -205,7 +222,13 @@ enum class MediaFilter(val value: Int) {
     MENTIONS(10),
     URL(11),
     PINNED_MESSAGES(12),
-    CHAT_PHOTOS(13)
+    CHAT_PHOTOS(13);
+    companion object {
+        @JvmStatic
+        fun fromValue(value: Int): MediaFilter {
+            return values().find { it.value == value } ?: ALL
+        }
+    }
 }
 
 enum class CameraType(val value: Int) {

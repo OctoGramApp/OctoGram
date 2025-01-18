@@ -108,9 +108,6 @@ import org.telegram.ui.Stories.StoriesListPlaceProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
-
 public class ContactsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ContactsAdapter listViewAdapter;
@@ -834,14 +831,13 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                 animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
                 animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
                 floatingButton.setStateListAnimator(animator);
-                floatingButton.setOutlineProvider(new OutlineProvider());
-                /*floatingButton.setOutlineProvider(new ViewOutlineProvider() {
+                floatingButton.setOutlineProvider(new ViewOutlineProvider() {
                     @SuppressLint("NewApi")
                     @Override
                     public void getOutline(View view, Outline outline) {
                         outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                     }
-                });*/
+                });
             }
             floatingButtonContainer.addView(floatingButton, LayoutHelper.createFrame((Build.VERSION.SDK_INT >= 21 ? 56 : 60), (Build.VERSION.SDK_INT >= 21 ? 56 : 60), Gravity.LEFT | Gravity.TOP, 10, 6, 10, 0));
         }
