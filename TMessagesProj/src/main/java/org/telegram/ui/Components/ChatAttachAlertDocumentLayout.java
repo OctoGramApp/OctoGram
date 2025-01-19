@@ -111,6 +111,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
     public final static int TYPE_MUSIC = 1;
     public final static int TYPE_RINGTONE = 2;
     public final static int TYPE_EMOJI = 200;
+    public final static int TYPE_EXPORT = 300;
 
     private int type;
 
@@ -161,6 +162,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
     private final static int sort_button = 6;
     public boolean isSoundPicker;
     public boolean isEmojiPicker;
+    public boolean isExportPicker;
 
     private static class ListItem {
         public int icon;
@@ -206,6 +208,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
         allowMusic = type == TYPE_MUSIC;
         isSoundPicker = type == TYPE_RINGTONE;
         isEmojiPicker = type == TYPE_EMOJI;
+        isExportPicker = type == TYPE_EXPORT;
         sortByName = SharedConfig.sortFilesByName;
         loadRecentFiles();
 
@@ -810,6 +813,9 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
                 if (isEmojiPicker && !isEmojiFont(item.file)) {
                     return false;
                 }
+                if (isExportPicker && !isExportFile(item.file)) {
+                    return false;
+                }
                 if (item.file.length() == 0) {
                     return false;
                 }
@@ -880,6 +886,12 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
     public boolean isEmojiFont(File file) {
         boolean isValidEmojiFont = CustomEmojiController.isValidEmojiPack(file);
         if (!isValidEmojiFont) BulletinFactory.of(parentAlert.getContainer(), null).createErrorBulletinSubtitle(LocaleController.formatString("InvalidCustomEmojiSet", R.string.InvalidCustomEmojiSet), LocaleController.formatString("ErrorEmojiFontInvalidFormat", R.string.ErrorEmojiFontInvalidFormat), null).show();
+        return isValidEmojiFont;
+    }
+
+    public boolean isExportFile(File file) {
+        boolean isValidEmojiFont = file.getName().endsWith(".octoexport");
+        if (!isValidEmojiFont) BulletinFactory.of(parentAlert.getContainer(), null).createErrorBulletinSubtitle(LocaleController.formatString("ImportReadyImportFailedPickerTitle", R.string.ImportReadyImportFailedPickerTitle), LocaleController.formatString("ImportReadyImportFailedPickerDescription", R.string.ImportReadyImportFailedPickerDescription), null).show();
         return isValidEmojiFont;
     }
 
@@ -1379,7 +1391,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
             FileLog.e(e);
         }
 
-        if (!isSoundPicker && !isEmojiPicker) {
+        if (!isSoundPicker && !isEmojiPicker && !isExportPicker) {
             fs = new ListItem();
             fs.title = LocaleController.getString(R.string.Gallery);
             fs.subtitle = LocaleController.getString(R.string.GalleryInfo);

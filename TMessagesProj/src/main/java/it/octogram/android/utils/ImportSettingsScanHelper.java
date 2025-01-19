@@ -8,8 +8,6 @@
 
 package it.octogram.android.utils;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -22,6 +20,7 @@ import java.util.function.Supplier;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoAppearanceUI;
 import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
@@ -108,7 +107,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.experimentsEnabled.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.newBadgeIds.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.updateSignalingLastBuildID.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.updateSignalingCommitID.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.updateSignalingChangelog.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.uiRandomMemeIcons.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.shortcutsAdministrators.getKey());
@@ -251,6 +250,8 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideBottomBarChannels.getKey(), R.string.HideBottomBarChannels));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideOpenButtonChatsList.getKey(), R.string.HideOpenButtonChatsList));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alwaysExpandBlockQuotes.getKey(), R.string.AlwaysExpandBlockQuotes));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.profileBubbleHideBorder.getKey(), composeName(R.string.DrawerHeaderAsBubble, R.string.ProfileBubbleHideBorder)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.profileBubbleMoreTopPadding.getKey(), composeName(R.string.DrawerHeaderAsBubble, R.string.ProfileBubbleMoreTopPadding)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost.getKey(), R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost.getKey(), R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue.getKey(), R.string.DownloadBoostType));
@@ -266,14 +267,14 @@ public class ImportSettingsScanHelper {
         for (SettingsScanCategory category : categories) {
             for (SettingsScanOption option : category.options) {
                 if (isSettingKeyInvalid(option.optionKey)) {
-                    Log.e(OctoConfig.TAG, "Setting key " + option.optionKey + " is not valid - part of " + category.categoryId);
+                    OctoLogging.e(OctoConfig.TAG, "Setting key " + option.optionKey + " is not valid - part of " + category.categoryId);
                 }
             }
         }
 
         for (String excluded : excludedOptions) {
             if (isSettingKeyInvalid(excluded)) {
-                Log.e(OctoConfig.TAG, "Excluded option " + excluded + " is not valid");
+                OctoLogging.e(OctoConfig.TAG, "Excluded option " + excluded + " is not valid");
             }
         }
     }
@@ -299,11 +300,7 @@ public class ImportSettingsScanHelper {
     }
 
     private String composeName(int string1, int string2, boolean isCategory) {
-        if (isCategory) {
-            return String.format("%s — %s", LocaleController.getString(string1), LocaleController.getString(string2));
-        }
-
-        return String.format("%s: %s", LocaleController.getString(string1), LocaleController.getString(string2).toLowerCase());
+        return String.format("%s%s%s", LocaleController.getString(string1), isCategory ? " — " : ": ", LocaleController.getString(string2).toLowerCase());
     }
 
     private String composeName(int string1, int string2) {

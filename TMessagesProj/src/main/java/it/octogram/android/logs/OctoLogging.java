@@ -161,6 +161,10 @@ public class OctoLogging {
         };
     }
 
+    public static void w(String tag, String message, Exception e) {
+        log(Log.WARN, tag, message, e);
+    }
+
     private void initialize() {
         if (isInitialized) return;
 

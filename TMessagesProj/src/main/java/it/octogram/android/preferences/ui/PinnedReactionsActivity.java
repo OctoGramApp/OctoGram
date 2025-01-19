@@ -574,7 +574,7 @@ public class PinnedReactionsActivity extends BaseFragment {
                         }
                     } catch (JSONException ignored) {}
 
-                    if (i > 25) {
+                    if (i >= 5) {
                         break;
                     }
                 }

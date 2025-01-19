@@ -14,7 +14,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.PatternMatcher
-import android.util.Log
 import androidx.annotation.RequiresApi
 import it.octogram.android.logs.OctoLogging
 import org.telegram.messenger.ApplicationLoader
@@ -100,7 +99,7 @@ object MonetThemeController {
             val id = ids.find { it.first == color }?.second ?: 0
             ApplicationLoader.applicationContext.getColor(id)
         } catch (e: Exception) {
-            Log.e("Theme", "Error loading color $color")
+            OctoLogging.e("Theme", "Error loading color $color")
             e.printStackTrace()
             0
         }

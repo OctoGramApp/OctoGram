@@ -91,6 +91,12 @@ public class TranslationsWrapper {
             return YandexTranslator.isUnsupportedLanguage(currentLanguage);
         } else if (translationProvider == TranslatorProvider.DEEPL.getValue()) {
             return DeepLTranslator.isUnsupportedLanguage(currentLanguage);
+        } else if (translationProvider == TranslatorProvider.BAIDU.getValue()) {
+            return BaiduTranslator.isUnsupportedLanguage(currentLanguage);
+        } else if (translationProvider == TranslatorProvider.LINGO.getValue()) {
+            return LingoTranslator.isUnsupportedLanguage(currentLanguage);
+        } else if (translationProvider == TranslatorProvider.EMOJIS.getValue()) {
+            return EmojisTranslator.isUnsupportedLanguage(currentLanguage);
         } else return translationProvider != TranslatorProvider.DEFAULT.getValue();
     }
 

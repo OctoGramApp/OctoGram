@@ -19,7 +19,6 @@ import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.util.Range;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -274,7 +273,7 @@ public class CameraXController {
                 try {
                     return extensionsManager.isExtensionAvailable(cameraSelector, mode);
                 } catch (Exception e) {
-                    Log.d("CameraX-Extensions", String.format("Error: %s", e.getMessage()), e);
+                    OctoLogging.d("CameraX-Extensions", String.format("Error: %s", e.getMessage()), e);
                     OctoLogging.e(MessageFormat.format("CameraX-Extensions: {0}", e.getMessage()), e);
                 }
             }
@@ -667,7 +666,7 @@ public class CameraXController {
             };
 
             boolean isSupported = Arrays.asList(supportedDevices).contains(Build.DEVICE.toLowerCase(Locale.US).trim());
-            Log.d(TAG, String.format("Device %s ZSL support forced: %s (forced for: %s)", Build.DEVICE, isSupported, Arrays.asList(supportedDevices)));
+            OctoLogging.d(TAG, String.format("Device %s ZSL support forced: %s (forced for: %s)", Build.DEVICE, isSupported, Arrays.asList(supportedDevices)));
             OctoLogging.d(TAG, String.format("Device %s ZSL support forced: %s", Build.DEVICE, isSupported));
             return isSupported;
         }

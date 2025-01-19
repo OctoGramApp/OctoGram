@@ -15,7 +15,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -307,7 +306,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             AndroidUtilities.openForView(cacheFile, cacheFile.getName(), OctoConfig.CRASH_MIME_TYPE, getParentActivity(), getResourceProvider(), false);
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "Error opening crash content", e);
+            OctoLogging.e(TAG, "Error opening crash content", e);
             return false;
         }
     }
@@ -334,7 +333,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "Error sending crash content", e);
+            OctoLogging.e(TAG, "Error sending crash content", e);
             return false;
         }
     }

@@ -18,7 +18,6 @@ import android.os.Environment;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -220,7 +219,7 @@ public class OctoUtils {
 
         // Create directory if it doesn't exist
         if (logsDir != null && !logsDir.exists() && !logsDir.mkdirs()) {
-            Log.e("LogsDirectory", "Failed to create logs directory at: " + logsDir.getAbsolutePath());
+            OctoLogging.e("LogsDirectory", "Failed to create logs directory at: " + logsDir.getAbsolutePath());
             return null;
         }
 
@@ -244,7 +243,7 @@ public class OctoUtils {
                     directory = new File(externalDir, LOGS_DIRECTORY);
                 }
             } catch (SecurityException e) {
-                Log.w("LogsDirectory", "Failed to access external storage", e);
+                OctoLogging.w("LogsDirectory", "Failed to access external storage", e);
             }
         }
 
@@ -253,7 +252,7 @@ public class OctoUtils {
             try {
                 directory = new File(context.getCacheDir(), LOGS_DIRECTORY);
             } catch (SecurityException e) {
-                Log.w("LogsDirectory", "Failed to access cache directory", e);
+                OctoLogging.w("LogsDirectory", "Failed to access cache directory", e);
             }
         }
 
@@ -262,7 +261,7 @@ public class OctoUtils {
             try {
                 directory = new File(context.getFilesDir(), LOGS_DIRECTORY);
             } catch (SecurityException e) {
-                Log.e("LogsDirectory", "Failed to access internal storage", e);
+                OctoLogging.e("LogsDirectory", "Failed to access internal storage", e);
             }
         }
 

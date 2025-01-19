@@ -1494,7 +1494,8 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         super(context);
         this.shouldDrawBackground = shouldDrawBackground;
         this.fragment = fragment;
-        this.allowAnimatedEmoji = needAnimatedEmoji;
+        //this.allowAnimatedEmoji = needAnimatedEmoji;
+        this.allowAnimatedEmoji = !OctoConfig.INSTANCE.hideCustomEmojis.getValue();
         this.resourcesProvider = resourcesProvider;
 
         if (frozenAtStart) {
@@ -1756,8 +1757,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             }
         });
 
-        allowAnimatedEmoji = !OctoConfig.INSTANCE.hideCustomEmojis.getValue();
-        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, allowAnimatedEmoji, needAnimatedEmoji, 0, fragment != null ? () -> {
+        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, true, needAnimatedEmoji, 0, fragment != null ? () -> {
             if (delegate != null) {
                 delegate.onEmojiSettingsClick(emojiAdapter.frozenEmojiPacks);
             }
@@ -7367,10 +7367,6 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             if (isPremium && allowAnimatedEmoji && featuredEmojiSets.size() > 0 && featuredEmojiSets.get(0).set != null && MessagesController.getEmojiSettings(currentAccount).getLong("emoji_featured_hidden", 0) != featuredEmojiSets.get(0).set.id && needEmojiSearch) {
                 trendingHeaderRow = itemCount++;
                 trendingRow = itemCount++;
-                if (OctoConfig.INSTANCE.canShowPreviewEmojis()) {
-                    //pinnedHeaderRow = itemCount++;
-                }
-
                 recentlyUsedHeaderRow = itemCount++;
                 rowHashCodes.add(324953);
                 rowHashCodes.add(123342);
@@ -7380,27 +7376,6 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                 trendingRow = -1;
                 recentlyUsedHeaderRow = -1;
             }
-            /*if (OctoConfig.INSTANCE.canShowPreviewEmojis()) {
-                pinnedHeaderRow = itemCount++;
-                try {
-                    String currentList = OctoConfig.INSTANCE.pinnedEmojisList.getValue();
-                    JSONArray object = new JSONArray(new JSONTokener(currentList));
-
-                    for (int i = 0; i < object.length(); i++) {
-                        try {
-                            JSONObject jsonObject = object.getJSONObject(i);
-                            if (jsonObject.has("emoticon")) {
-                                rowHashCodes.add(Objects.hash(-43263, jsonObject.get("emoticon")));
-                                itemCount++;
-                            } else if (jsonObject.has("document_id")) {
-                                rowHashCodes.add(Objects.hash(-43263, "animated_"+jsonObject.getLong("document_id")));
-                                itemCount++;
-                            }
-                        } catch (JSONException e) {}
-                    }
-                } catch (JSONException ignored) {}
-
-            }*/
             ArrayList<String> recent = getRecentEmoji();
             if (emojiTabs != null) {
                 emojiTabs.showRecent(!recent.isEmpty());

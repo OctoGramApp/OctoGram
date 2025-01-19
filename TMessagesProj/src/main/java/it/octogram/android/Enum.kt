@@ -10,17 +10,7 @@ package it.octogram.android
 
 import android.graphics.Color
 import androidx.annotation.IntDef
-import it.octogram.android.CameraType.entries
-import it.octogram.android.Datacenter.entries
-import it.octogram.android.DcIdStyle.entries
-import it.octogram.android.DoubleTapAction.entries
-import it.octogram.android.EventType.entries
-import it.octogram.android.FontType.entries
-import it.octogram.android.MediaFilter.values
-import it.octogram.android.MenuItemId.entries
-import it.octogram.android.PhoneNumberAlternative.entries
-import it.octogram.android.PhotoResolution.entries
-import it.octogram.android.ViewType.entries
+import androidx.core.graphics.toColorInt
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 
@@ -38,7 +28,7 @@ enum class DcIdStyle(val value: Int) {
 
     companion object {
         fun fromInt(value: Int): DcIdStyle {
-            return entries.find { it.value == value } ?: NONE
+            return DcIdStyle.entries.find { it.value == value } ?: NONE
         }
     }
 }
@@ -67,7 +57,7 @@ enum class DoubleTapAction(val value: Int) {
 
     companion object {
         fun fromInt(value: Int): DoubleTapAction {
-            return entries.find { it.value == value } ?: DISABLED
+            return DoubleTapAction.entries.find { it.value == value } ?: DISABLED
         }
     }
 }
@@ -79,7 +69,7 @@ enum class PhoneNumberAlternative(val value: Int) {
 
     companion object {
         fun fromInt(value: Int): PhoneNumberAlternative {
-            return entries.find { it.value == value } ?: SHOW_HIDDEN_NUMBER_STRING
+            return PhoneNumberAlternative.entries.find { it.value == value } ?: SHOW_HIDDEN_NUMBER_STRING
         }
     }
 }
@@ -100,7 +90,7 @@ enum class EventType(val value: Int) {
 
     companion object {
         fun fromInt(value: Int): EventType {
-            return entries.find { it.value == value } ?: DEFAULT
+            return EventType.entries.find { it.value == value } ?: DEFAULT
         }
     }
 }
@@ -156,7 +146,7 @@ enum class PhotoResolution(val value: Int) {
 
     companion object {
         fun fromInt(value: Int): PhotoResolution {
-            return entries.find { it.value == value } ?: DEFAULT
+            return PhotoResolution.entries.find { it.value == value } ?: DEFAULT
         }
     }
 }
@@ -171,7 +161,10 @@ enum class TranslatorProvider(val value: Int) {
     DEFAULT(0),
     GOOGLE(1),
     YANDEX(2),
-    DEEPL(3)
+    DEEPL(3),
+    BAIDU(4),
+    LINGO(5),
+    EMOJIS(6)
 }
 
 enum class TranslatorFormality(val value: Int) {
@@ -226,7 +219,7 @@ enum class MediaFilter(val value: Int) {
     companion object {
         @JvmStatic
         fun fromValue(value: Int): MediaFilter {
-            return values().find { it.value == value } ?: ALL
+            return MediaFilter.entries.find { it.value == value } ?: ALL
         }
     }
 }
@@ -239,7 +232,7 @@ enum class CameraType(val value: Int) {
 
     companion object {
         fun fromInt(value: Int): CameraType {
-            return entries.find { it.value == value } ?: TELEGRAM
+            return CameraType.entries.find { it.value == value } ?: TELEGRAM
         }
     }
 }
@@ -276,7 +269,7 @@ enum class MenuItemId(val id: String, val itemId: Int) {
 
     companion object {
         fun getById(id: String): MenuItemId? {
-            return entries.find { it.id == id }
+            return MenuItemId.entries.find { it.id == id }
         }
     }
 }
@@ -319,6 +312,7 @@ enum class StickerUi(val value: Int) {
     DRAWER(21),
     HEADER_CUSTOM_TITLE(22),
     MONET_DIALOG(23),
+    LINK_VERIFY(24)
 }
 
 enum class DrawerBackgroundState(val value: Int) {
@@ -439,7 +433,7 @@ enum class ViewType {
     }
 
     companion object {
-        fun fromInt(value: Int): ViewType = entries[value]
+        fun fromInt(value: Int): ViewType = ViewType.entries[value]
     }
 
 }
@@ -455,35 +449,35 @@ enum class Datacenter(
         1,
         "MIA, Miami FL, USA",
         R.drawable.ic_pluto_datacenter,
-        Color.parseColor("#329AFE"),
+        "#329AFE".toColorInt(),
         "149.154.175.50"
     ),
     USA_2(
         3,
         "MIA, Miami FL, USA",
         R.drawable.ic_aurora_datacenter,
-        Color.parseColor("#DA5653"),
+        "#DA5653".toColorInt(),
         "149.154.175.100"
     ),
     AMSTERDAM_1(
         2,
         "AMS, Amsterdam, NL",
         R.drawable.ic_venus_datacenter,
-        Color.parseColor("#8B31FD"),
+        "#8B31FD".toColorInt(),
         "149.154.167.50"
     ),
     AMSTERDAM_2(
         4,
         "AMS, Amsterdam, NL",
         R.drawable.ic_vesta_datacenter,
-        Color.parseColor("#F7B139"),
+        "#F7B139".toColorInt(),
         "149.154.167.91"
     ),
     SINGAPORE(
         5,
         "SIN, Singapore, SG",
         R.drawable.ic_flora_datacenter,
-        Color.parseColor("#4BD199"),
+        "#4BD199".toColorInt(),
         "91.108.56.100"
     ),
     UNKNOWN(
@@ -496,7 +490,7 @@ enum class Datacenter(
 
     companion object {
         fun getDcInfo(dcId: Int): Datacenter {
-            return entries.find { it.dcId == dcId } ?: UNKNOWN
+            return Datacenter.entries.find { it.dcId == dcId } ?: UNKNOWN
         }
     }
 }
@@ -510,7 +504,7 @@ enum class FontType(val path: String) {
     COURIER_NEW_BOLD("fonts/courier_new_bold.ttf");
 
     companion object {
-        fun fromPath(path: String): FontType? = entries.find { it.path == path }
+        fun fromPath(path: String): FontType? = FontType.entries.find { it.path == path }
     }
 }
 

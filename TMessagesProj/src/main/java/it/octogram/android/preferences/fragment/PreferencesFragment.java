@@ -14,6 +14,7 @@ import static org.telegram.ui.Components.LayoutHelper.createLinear;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -161,6 +162,12 @@ public class PreferencesFragment extends BaseFragment {
                 menuItem.addSubItem(++i, element.icon, element.title);
             }
         }
+    }
+
+    @Override
+    public void onActivityResultFragment(int requestCode, int resultCode, Intent data) {
+        super.onActivityResultFragment(requestCode, resultCode, data);
+        entry.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

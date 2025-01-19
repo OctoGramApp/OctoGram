@@ -18,6 +18,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,6 +177,22 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.AlwaysExpandBlockQuotes))
                             .build());
                 })
+                .category(LocaleController.getString(R.string.DrawerHeaderAsBubble), OctoConfig.INSTANCE.drawerProfileAsBubble, category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> AndroidUtilities.runOnUIThread(() -> LaunchActivity.instance.reloadDrawerHeader()))
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.profileBubbleHideBorder)
+                            .title(LocaleController.getString(R.string.ProfileBubbleHideBorder))
+                            .showIf(OctoConfig.INSTANCE.drawerProfileAsBubble)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> AndroidUtilities.runOnUIThread(() -> LaunchActivity.instance.reloadDrawerHeader()))
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.profileBubbleMoreTopPadding)
+                            .title(LocaleController.getString(R.string.ProfileBubbleMoreTopPadding))
+                            .showIf(OctoConfig.INSTANCE.drawerProfileAsBubble)
+                            .build());
+                })
                 .category(LocaleController.getString(R.string.DownloadAndUploadBoost), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
@@ -202,23 +219,25 @@ public class OctoExperimentsUI implements PreferencesEntry {
     }
 
     public static void resetSettings() {
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.experimentsEnabled);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.mediaInGroupCall);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.showRPCErrors);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.gcOutputType);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.photoResolution);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.maxRecentStickers);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.forceUseIpV6);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.deviceIdentifyState);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.alternativeNavigation);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.animatedActionBar);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.navigationSmoothness);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.hideBottomBarChannels);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.hideOpenButtonChatsList);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.alwaysExpandBlockQuotes);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.uploadBoost);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.downloadBoost);
-        OctoConfig.INSTANCE.resetSingleConfig(OctoConfig.INSTANCE.downloadBoostValue);
+        OctoConfig.INSTANCE.experimentsEnabled.clear();
+        OctoConfig.INSTANCE.mediaInGroupCall.clear();
+        OctoConfig.INSTANCE.showRPCErrors.clear();
+        OctoConfig.INSTANCE.gcOutputType.clear();
+        OctoConfig.INSTANCE.photoResolution.clear();
+        OctoConfig.INSTANCE.maxRecentStickers.clear();
+        OctoConfig.INSTANCE.forceUseIpV6.clear();
+        OctoConfig.INSTANCE.deviceIdentifyState.clear();
+        OctoConfig.INSTANCE.alternativeNavigation.clear();
+        OctoConfig.INSTANCE.animatedActionBar.clear();
+        OctoConfig.INSTANCE.navigationSmoothness.clear();
+        OctoConfig.INSTANCE.hideBottomBarChannels.clear();
+        OctoConfig.INSTANCE.hideOpenButtonChatsList.clear();
+        OctoConfig.INSTANCE.alwaysExpandBlockQuotes.clear();
+        OctoConfig.INSTANCE.profileBubbleMoreTopPadding.clear();
+        OctoConfig.INSTANCE.profileBubbleHideBorder.clear();
+        OctoConfig.INSTANCE.uploadBoost.clear();
+        OctoConfig.INSTANCE.downloadBoost.clear();
+        OctoConfig.INSTANCE.downloadBoostValue.clear();
     }
 
     public static boolean checkExperimentsEnabled(Context context) {

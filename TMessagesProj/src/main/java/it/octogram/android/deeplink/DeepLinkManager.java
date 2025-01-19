@@ -11,7 +11,6 @@ package it.octogram.android.deeplink;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
-import android.util.Log;
 import android.view.HapticFeedbackConstants;
 
 import androidx.annotation.NonNull;
@@ -83,7 +82,7 @@ public class DeepLinkManager extends LaunchActivity {
      */
     public static boolean handleDeepLink(String deepLink) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            Log.d(TAG, "handleDeepLink: " + deepLink);
+            OctoLogging.d(TAG, "handleDeepLink: " + deepLink);
             OctoLogging.d(TAG, "handleDeepLink: " + deepLink);
         }
         var fragment = getCurrentFragment();
@@ -168,7 +167,7 @@ public class DeepLinkManager extends LaunchActivity {
             }
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            Log.d(TAG, "Deep link not recognized: " + deepLink);
+            OctoLogging.d(TAG, "Deep link not recognized: " + deepLink);
             OctoLogging.d(TAG, "Deep link not recognized: " + deepLink);
         }
         profileUserId = 0;
@@ -283,7 +282,7 @@ public class DeepLinkManager extends LaunchActivity {
                 profileUserId = Long.parseLong(userId);
             } catch (NumberFormatException ignore) {
                 if (BuildVars.DEBUG_PRIVATE_VERSION) {
-                    Log.e(TAG, "Invalid user ID in deep link: " + userId);
+                    OctoLogging.d(TAG, "Invalid user ID in deep link: " + userId);
                     OctoLogging.d(TAG, "Invalid user ID in deep link: " + userId);
                 }
             }
@@ -367,7 +366,7 @@ public class DeepLinkManager extends LaunchActivity {
      */
     public static void handleOpenProfileById(LaunchActivity launchActivity) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            Log.d(TAG, "handleOpenProfileById: " + profileUserId);
+            OctoLogging.d(TAG, "handleOpenProfileById: " + profileUserId);
             OctoLogging.d(TAG, "handleOpenProfileById: " + profileUserId);
         }
         if (profileUserId != 0) {
@@ -387,7 +386,7 @@ public class DeepLinkManager extends LaunchActivity {
 
     public static boolean handleMenuAction(@MenuAction int id, int currentAccount, LaunchActivity launchActivity) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            Log.d(TAG, "handleMenuAction: " + id);
+            OctoLogging.d(TAG, "handleMenuAction: " + id);
             OctoLogging.d(TAG, "handleMenuAction: " + id);
         }
         var fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
@@ -449,7 +448,7 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            Log.d(TAG, "Menu action not recognized: " + id);
+            OctoLogging.d(TAG, "Menu action not recognized: " + id);
             OctoLogging.d(TAG, "Menu action not recognized: " + id);
         }
         return false;

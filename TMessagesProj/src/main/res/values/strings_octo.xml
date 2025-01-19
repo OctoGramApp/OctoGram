@@ -22,6 +22,10 @@
     <string name="Acknowledge">Acknowledge</string>
     <string name="Warnings">Warnings</string>
 
+    <string name="TranslatorMinimizedChannel">Translator bar has been minimized for this channel.</string>
+    <string name="TranslatorMinimizedGroup">Translator bar has been minimized for this group.</string>
+    <string name="TranslatorMinimized">Translator bar has been minimized for this chat.</string>
+
     <!-- Media filtering -->
     <string name="MediaFilter">Filter by media type</string>
     <string name="MediaFilterItemAll">No filter</string>
@@ -53,6 +57,8 @@
     <string name="TranslatorProviderSuggestedPremium">Recommended if the account has a Telegram Premium subscription.</string>
     <string name="TranslatorProviderSuggestedGeneral">It\'s the fastest provider but may resort to translation errors.</string>
     <string name="TranslatorProviderSuggestedAccurate">It\'s very accurate but not recommended because of high limits.</string>
+    <string name="TranslatorProviderSuggestedChinese">It\'s suggested for Chinese users.</string>
+    <string name="TranslatorProviderSuggestedLingo">It\'s very limited, but more reliable for some languages.</string>
     <string name="TranslatorProviderUnsuggested">It doesn\'t support the language currently set.</string>
     <string name="TranslatorProviderUnsupported">The currently set language (%s) is not supported by the selected provider.</string>
     <string name="TranslatorProviderUnsupportedDialogs">The translation target language of some chats has been changed because the previously set language is not supported by the selected provider.</string>
@@ -420,6 +426,8 @@
     <string name="AlwaysExpandBlockQuotes">Always expand blockquotes</string>
     <string name="HideBottomBarChannels">Hide bottom bar in channels</string>
     <string name="HideOpenButtonChatsList">Hide open button in chats list</string>
+    <string name="ProfileBubbleHideBorder">Hide dashed border</string>
+    <string name="ProfileBubbleMoreTopPadding">Add more top padding</string>
 
     <!-- Telegram Browser -->
     <string name="OctoTgBrowser">Telegram Browser</string>
@@ -545,7 +553,8 @@
     <string name="ExportDataReady">Export is ready</string>
     <string name="ExportDataDescription">Choose a custom name for the file or press share directly to send it to a trusted chat.</string>
     <string name="ExportDataFilename">Custom file name</string>
-    <string name="ExportDataShare">Share</string>
+    <string name="ExportDataShare">Share to Telegram</string>
+    <string name="ExportDataSave">Save on this device</string>
     <string name="ExportDataShareFileComment">This file contains all the settings of OctoGram. Press here to set up my own configuration.</string>
     <string name="ExportDataShareDone">Export file has been sent successfully.</string>
     <string name="ExportDataShareFailedTitle">Error</string>
@@ -560,6 +569,9 @@
     <string name="ImportReadyImportDonePopup">To complete…</string>
     <string name="ImportReadyImportFailedZeroTitle">Error</string>
     <string name="ImportReadyImportFailedZeroCaption">You must select at least one option in order to proceed with the import.</string>
+    <string name="ImportReadyImportFailedDataCaption">The file you selected isn\'t an OctoGram backup.</string>
+    <string name="ImportReadyImportFailedPickerTitle">Invalid export file</string>
+    <string name="ImportReadyImportFailedPickerDescription">File must be an export file.</string>
     <string name="ImportReadyOpenFile">Open file preview</string>
     <string name="ResetSettings">Reset settings</string>
     <string name="ResetSettingsTitle">Reset settings</string>
@@ -730,5 +742,10 @@
     <string name="IncludeMutedChats_Desc">Include muted chats in the unread message counter.</string>
     <string name="ShowMessagesCounter">Show messages counter (Experimental)</string>
     <string name="ShowMessagesCounter_Desc">Show the unread message count instead of the unread chat count.</string>
+
+    <!-- App Link Verification -->
+    <string name="DontAskAgain">Don\'t ask again</string>
+    <string name="AppLinkNotVerifiedTitle">App links not verified</string>
+    <string name="AppLinkNotVerifiedMessage">For Android 12 and newer, you need to manually add link to verified links in order to open t.me links in OctoGram.</string>
 
 </resources>

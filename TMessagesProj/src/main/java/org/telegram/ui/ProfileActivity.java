@@ -5216,6 +5216,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         dcIdTextView.setInAnimation(context, R.anim.alpha_in);
         dcIdTextView.setOutAnimation(context, R.anim.alpha_out);
         dcIdTextView.setLongClickable(true);
+        dcIdTextView.setOnLongClickListener(v -> {
+            long id = 0;
+            if (userId != 0) {
+                TLRPC.User user = getMessagesController() != null ? getMessagesController().getUser(userId) : null;
+                if (user != null) id = UserAccountInfoController.getNiceId(user.id);
+            } else if (chatId != 0) {
+                TLRPC.Chat chat = getMessagesController() != null ? getMessagesController().getChat(chatId) : null;
+                if (chat != null) id = UserAccountInfoController.getNiceId(chat, chat.id);
+            }
+            AndroidUtilities.addToClipboard(String.format("%s", id));
+            if (AndroidUtilities.shouldShowClipboardToast()) {
+                BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString(R.string.IDCopied)).show();
+            }
+            return true;
+        });
         avatarContainer2.addView(dcIdTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 118 - 4, -2, 4, 0));
         // Octogram - Minimal dc id style - end
 

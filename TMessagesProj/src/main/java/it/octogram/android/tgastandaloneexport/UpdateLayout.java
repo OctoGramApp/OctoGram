@@ -75,6 +75,7 @@ public class UpdateLayout extends IUpdateLayout {
                 Long loadedSize = (Long) args[1];
                 Long totalSize = (Long) args[2];
                 float loadProgress = loadedSize / (float) totalSize;
+                updateLayoutIcon.setIcon(MediaActionDrawable.ICON_CANCEL, true, true);
                 updateLayoutIcon.setProgress(loadProgress, true);
                 updateTextViews[0].setText(LocaleController.formatString("AppUpdateDownloading", R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
             }
@@ -110,7 +111,7 @@ public class UpdateLayout extends IUpdateLayout {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
                 int width = MeasureSpec.getSize(widthMeasureSpec);
                 if (lastGradientWidth != width) {
-                    updateGradient = new LinearGradient(0, 0, width, 0, new int[]{0xff69BF72, 0xff53B3AD}, new float[]{0.0f, 1.0f}, Shader.TileMode.CLAMP);
+                    updateGradient = new LinearGradient(0, 0, width, 0, new int[]{0xff663dff, 0xffcc4499}, new float[]{0.0f, 1.0f}, Shader.TileMode.CLAMP);
                     lastGradientWidth = width;
                 }
             }
@@ -124,10 +125,12 @@ public class UpdateLayout extends IUpdateLayout {
             if (!SharedConfig.isAppUpdateAvailable()) {
                 return;
             }
-            if (updateLayoutIcon.getIcon() == MediaActionDrawable.ICON_DOWNLOAD) {
+
+            int neededIcon = getNeededAction(currentAccount);
+            if (neededIcon == MediaActionDrawable.ICON_DOWNLOAD) {
                 FileLoader.getInstance(currentAccount).loadFile(SharedConfig.pendingAppUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
                 updateAppUpdateViews(currentAccount,  true);
-            } else if (updateLayoutIcon.getIcon() == MediaActionDrawable.ICON_CANCEL) {
+            } else if (neededIcon == MediaActionDrawable.ICON_CANCEL) {
                 FileLoader.getInstance(currentAccount).cancelLoadFile(SharedConfig.pendingAppUpdate.document);
                 updateAppUpdateViews(currentAccount, true);
             } else {
@@ -161,6 +164,21 @@ public class UpdateLayout extends IUpdateLayout {
         updateLayout.addView(updateSizeTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.RIGHT, 0, 0, 17, 0));
     }
 
+    public int getNeededAction(int currentAccount) {
+        if (SharedConfig.isAppUpdateAvailable()) {
+            String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
+            File path = FileLoader.getInstance(currentAccount).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
+            if (path.exists()) {
+                return MediaActionDrawable.ICON_UPDATE;
+            } else if (FileLoader.getInstance(currentAccount).isLoadingFile(fileName)) {
+                return MediaActionDrawable.ICON_CANCEL;
+            } else {
+                return MediaActionDrawable.ICON_DOWNLOAD;
+            }
+        }
+        return -1;
+    }
+
     public void updateAppUpdateViews(int currentAccount, boolean animated) {
         if (sideMenuContainer == null) {
             return;
@@ -178,7 +196,7 @@ public class UpdateLayout extends IUpdateLayout {
             } else {
                 if (FileLoader.getInstance(currentAccount).isLoadingFile(fileName)) {
                     updateLayoutIcon.setIcon(MediaActionDrawable.ICON_CANCEL, true, animated);
-                    updateLayoutIcon.setProgress(0, false);
+                    //updateLayoutIcon.setProgress(0, false);
                     Float p = ImageLoader.getInstance().getFileProgress(fileName);
                     setUpdateText(LocaleController.formatString(R.string.AppUpdateDownloading, (int) ((p != null ? p : 0.0f) * 100)), animated);
                     showSize = false;

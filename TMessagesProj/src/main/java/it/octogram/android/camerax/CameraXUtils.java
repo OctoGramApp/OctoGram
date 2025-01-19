@@ -11,7 +11,6 @@ package it.octogram.android.camerax;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
-import android.util.Log;
 import android.util.Size;
 
 import androidx.annotation.OptIn;
@@ -198,7 +197,7 @@ public class CameraXUtils {
     private static int getResolutionFromConfig() {
         int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            Log.d("CameraXUtils", String.format(Locale.ROOT,"getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
+            OctoLogging.e("CameraXUtils", String.format(Locale.ROOT,"getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
             OctoLogging.d("CameraXUtils", String.format(Locale.ROOT,"getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
         }
         if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD)) {

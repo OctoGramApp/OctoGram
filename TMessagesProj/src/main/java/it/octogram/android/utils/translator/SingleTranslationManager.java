@@ -173,6 +173,12 @@ public class SingleTranslationManager {
             YandexTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
         } else if (translationProvider == TranslatorProvider.DEEPL.getValue()) {
             DeepLTranslator.executeTranslation(text.toString(), entities, toLanguage, OctoConfig.INSTANCE.translatorFormality.getValue(), callback);
+        } else if (translationProvider == TranslatorProvider.BAIDU.getValue()) {
+            BaiduTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
+        } else if (translationProvider == TranslatorProvider.LINGO.getValue()) {
+            LingoTranslator.executeTranslation(text.toString(), toLanguage, callback);
+        } else if (translationProvider == TranslatorProvider.EMOJIS.getValue()) {
+            EmojisTranslator.executeTranslation(text.toString(), callback);
         } else {
             callback.onResponseReceived();
             callback.onError();

@@ -6685,7 +6685,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
             checkAppUpdate(false, null);
         }
-        UpdatesManager.handleUpdateSignaling();
+        AndroidUtilities.runOnUIThread(() -> UpdatesManager.handleUpdateSignaling(), 3000);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ApplicationLoader.canDrawOverlays = Settings.canDrawOverlays(this);

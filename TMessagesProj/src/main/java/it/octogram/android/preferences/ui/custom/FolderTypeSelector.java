@@ -18,8 +18,6 @@ import android.widget.FrameLayout;
 
 import androidx.core.graphics.ColorUtils;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -33,6 +31,7 @@ import java.util.ArrayList;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TabMode;
 import it.octogram.android.TabStyle;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.FolderUtils;
 
 @SuppressLint("UseCompatLoadingForDrawables")
@@ -168,7 +167,7 @@ public class FolderTypeSelector extends FrameLayout {
 
             int addedTab = 0;
             for (int a = 0, N = filters.size(); a < N; a++) {
-                Log.e("updated", "up - "+filters.get(a).name+ " - "+filters.get(a).id);
+                OctoLogging.e("updated", "up - "+filters.get(a).name+ " - "+filters.get(a).id);
                 if (filters.get(a).isDefault()) {
                     if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
                         addedTab++;

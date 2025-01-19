@@ -10,12 +10,12 @@ package it.octogram.android.preferences.ui.custom;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Vibrator;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.inputmethod.EditorInfo;
@@ -58,9 +58,12 @@ import java.util.Objects;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 
 public class ExportDoneReadyBottomSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
+    public static final int CREATE_FILE_REQ = 300;
+
     private final Activity originalActivity;
     private final BaseFragment baseFragment;
     private final EditTextBoldCursor editText;
@@ -164,6 +167,17 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         buttonTextView.setOnClickListener(view -> shareExport(editText.getText().toString().trim()));
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
+        TextView saveTextView = new TextView(context);
+        saveTextView.setGravity(Gravity.CENTER);
+        saveTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        saveTextView.setText(LocaleController.getString(R.string.ExportDataSave));
+        saveTextView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
+        saveTextView.setOnClickListener(view -> {
+            dismiss();
+            saveFileLocally(editText.getText().toString().trim());
+        });
+        linearLayout.addView(saveTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 8));
+
         setCustomView(linearLayout);
     }
 
@@ -176,15 +190,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
     }
 
     public void shareExport(String fileNameText) {
-        if (fileNameText.contains("/") || fileNameText.length() > 40) {
-            if (baseFragment != null) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-                alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
-                alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
-                alertDialogBuilder.setPositiveButton("OK", null);
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-            }
+        if (isFileNameInvalid(fileNameText)) {
             return;
         }
 
@@ -237,13 +243,45 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
                 baseFragment.showDialog(shAlert);
             }
         } catch (JSONException e) {
-            Log.e(getClass().getName(), "Error sharing settings export", e);
+            OctoLogging.e(getClass().getName(), "Error sharing settings export", e);
         } catch (IOException e) {
-            Log.e(getClass().getName(), "Error generating settings export", e);
+            OctoLogging.e(getClass().getName(), "Error generating settings export", e);
         }
     }
 
-    private JSONObject createOctoExport() {
+    private void saveFileLocally(String fileNameText) {
+        if (isFileNameInvalid(fileNameText)) {
+            return;
+        }
+
+        if (fileNameText.isEmpty()) {
+            fileNameText = "my-octogram-export";
+        }
+
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, fileNameText+".octoexport");
+        baseFragment.startActivityForResult(intent, CREATE_FILE_REQ);
+    }
+
+    private boolean isFileNameInvalid(String fileNameText) {
+        if (fileNameText.contains("/") || fileNameText.length() > 40) {
+            if (baseFragment != null) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
+                alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
+                alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
+                alertDialogBuilder.setPositiveButton("OK", null);
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    public static JSONObject createOctoExport() {
         JSONObject mainObject = new JSONObject();
 
         for (Field field : OctoConfig.INSTANCE.getClass().getDeclaredFields()) {
@@ -261,7 +299,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 } catch (IllegalAccessException e) {
-                    Log.e(getClass().getName(), "Error getting settings export", e);
+                    throw new RuntimeException(e);
                 }
             }
         }

@@ -341,10 +341,18 @@ public class TranslateController extends BaseController {
     }
 
     public void setHideTranslateDialog(long dialogId, boolean hide) {
-        setHideTranslateDialog(dialogId, hide, false);
+        setHideTranslateDialog(dialogId, hide, false, false);
     }
 
     public void setHideTranslateDialog(long dialogId, boolean hide, boolean doNotNotify) {
+        setHideTranslateDialog(dialogId, hide, doNotNotify, false);
+    }
+
+    public void setHideTranslateWithMinimize(long dialogId, boolean hide) {
+        setHideTranslateDialog(dialogId, hide, false, true);
+    }
+
+    public void setHideTranslateDialog(long dialogId, boolean hide, boolean doNotNotify, boolean fromMinimize) {
         TLRPC.TL_messages_togglePeerTranslations req = new TLRPC.TL_messages_togglePeerTranslations();
         req.peer = getMessagesController().getInputPeer(dialogId);
         req.disabled = hide;
@@ -364,7 +372,11 @@ public class TranslateController extends BaseController {
         synchronized (this) {
             if (hide) {
                 hideTranslateDialogs.add(dialogId);
-                translatingDialogs.remove(dialogId);
+                if (!fromMinimize) {
+                    translatingDialogs.remove(dialogId);
+                } else if (!translatingDialogs.contains(dialogId)) {
+                    translatingDialogs.add(dialogId);
+                }
             } else {
                 hideTranslateDialogs.remove(dialogId);
             }

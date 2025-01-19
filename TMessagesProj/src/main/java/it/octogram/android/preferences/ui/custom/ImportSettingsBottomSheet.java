@@ -18,7 +18,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -58,6 +57,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.Switch;
 import org.telegram.ui.LaunchActivity;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +65,7 @@ import java.util.Objects;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.components.ImportSettingsTopLayerCell;
 import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.ImportSettingsScanHelper;
@@ -72,6 +73,7 @@ import it.octogram.android.utils.ImportSettingsScanHelper;
 public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private Activity originalActivity;
     private final MessageObject message;
+    private final File file;
     private Adapter adapter;
     private final ImportButton actionButton;
     private final ArrayList<Item> items = new ArrayList<>();
@@ -87,6 +89,14 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private static final int VIEW_TYPE_INFO = 3;
 
     public ImportSettingsBottomSheet(BaseFragment fragment, MessageObject message1) {
+        this(fragment, message1, null);
+    }
+
+    public ImportSettingsBottomSheet(BaseFragment fragment, File file) {
+        this(fragment, null, file);
+    }
+
+    public ImportSettingsBottomSheet(BaseFragment fragment, MessageObject message1, File file1) {
         super(fragment.getContext(), fragment, false, false, false, true, ActionBarType.FADING, fragment.getResourceProvider());
 
         items.clear();
@@ -97,12 +107,13 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         Context context = fragment.getContext();
         message = message1;
+        file = file1;
 
         setShowHandle(true);
         fixNavigationBar();
 
         recyclerListView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerListView.setPadding(backgroundPaddingLeft, headerTotalHeight, backgroundPaddingLeft, dp(116));
+        recyclerListView.setPadding(backgroundPaddingLeft, headerTotalHeight, backgroundPaddingLeft, dp(48+10+10 + (message == null ? 0 : 48)));
         recyclerListView.setOnItemClickListener((view, position, x, y) -> {
             if ((view == null) || (position < 0) || (position - 1 >= items.size())) {
                 return;
@@ -127,24 +138,35 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         buttonContainer.setBackgroundColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
 
         actionButton = new ImportButton(context);
-        actionButton.setOnClickListener(e -> executeFileImport(message));
+        actionButton.setOnClickListener(e -> executeFileImport());
         buttonContainer.addView(actionButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
 
-        TextView textView = new TextView(context);
-        textView.setGravity(Gravity.CENTER);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(LocaleController.getString(R.string.ImportReadyOpenFile));
-        textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
-        textView.setOnClickListener(view -> {
-            dismiss();
-            if (originalActivity != null) {
-                AndroidUtilities.openForView(message, originalActivity, null, false);
-            }
-        });
-        buttonContainer.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
+        if (message != null) {
+            TextView textView = new TextView(context);
+            textView.setGravity(Gravity.CENTER);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            textView.setText(LocaleController.getString(R.string.ImportReadyOpenFile));
+            textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
+            textView.setOnClickListener(view -> {
+                dismiss();
+                if (originalActivity != null) {
+                    AndroidUtilities.openForView(message, originalActivity, null, false);
+                }
+            });
+            buttonContainer.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
+        }
+
         containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
 
         updateItems();
+    }
+
+    @Override
+    protected void onDismissWithTouchOutside() {
+        super.onDismissWithTouchOutside();
+        if (file != null && file.getPath().startsWith(AndroidUtilities.getCacheDir().getPath())) {
+            file.delete();
+        }
     }
 
     @NonNull
@@ -192,17 +214,17 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                         totalImportableKeysCounter++;
 
                         if (BuildConfig.DEBUG) {
-                            Log.d("ImportSettings", "Unknown dataset option is going to be imported:" + fieldName);
+                            OctoLogging.d("ImportSettings", "Unknown dataset option is going to be imported:" + fieldName);
                         }
                     }
                 } catch (IllegalAccessException e) {
-                    Log.e(getClass().getName(), "Error getting settings state during import", e);
+                    OctoLogging.e(getClass().getName(), "Error getting settings state during import", e);
                 }
             }
         }
     }
 
-    private void executeFileImport(MessageObject message) {
+    private void executeFileImport() {
         if (dataToImport.isEmpty()) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
             alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
@@ -213,7 +235,16 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             return;
         }
 
-        int changedOptions = OctoConfig.INSTANCE.importMessageExport(message, dataToImport, settingsScan.excludedOptions);
+        int changedOptions = 0;
+        if (message != null) {
+            changedOptions = OctoConfig.INSTANCE.importMessageExport(message, dataToImport, settingsScan.excludedOptions);
+        } else if (file != null) {
+            changedOptions = OctoConfig.INSTANCE.importFileExport(file, dataToImport, settingsScan.excludedOptions);
+
+            if (file.getAbsolutePath().startsWith(AndroidUtilities.getCacheDir().getAbsolutePath())) {
+                file.delete();
+            }
+        }
 
         if (changedOptions > 0) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
@@ -368,7 +399,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             View view = null;
 
             if (viewType == VIEW_TYPE_HEADER) {
-                view = new ImportSettingsTopLayerCell(context, message.isOut());
+                view = new ImportSettingsTopLayerCell(context, message == null || message.isOut());
             } else if (viewType == VIEW_TYPE_CHECKBOX || viewType == VIEW_TYPE_SWITCH) {
                 view = new SwitchCell(context);
             } else if (viewType == VIEW_TYPE_INFO) {

@@ -25,6 +25,10 @@ public class StandardHTTPRequest {
         httpURLConnection.setConnectTimeout(1000);
     }
 
+    public HttpURLConnection getHttpURLConnection() {
+        return httpURLConnection;
+    }
+
     public StandardHTTPRequest header(String key, String value) {
         httpURLConnection.setRequestProperty(key, value);
         return this;

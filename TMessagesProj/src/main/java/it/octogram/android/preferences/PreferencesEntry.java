@@ -9,11 +9,16 @@
 package it.octogram.android.preferences;
 
 import android.content.Context;
+import android.content.Intent;
 
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 
 public interface PreferencesEntry {
 
     OctoPreferences getPreferences(PreferencesFragment fragment, Context context);
+
+    default void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+    };
 
 }

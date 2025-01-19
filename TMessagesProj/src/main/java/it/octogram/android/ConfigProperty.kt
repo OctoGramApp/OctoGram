@@ -28,6 +28,7 @@ class ConfigProperty<T>(
         "octoconfig",
         Activity.MODE_PRIVATE
     )
+    private val defaultValue = value
 
     fun getKey(): String? = key
 
@@ -64,6 +65,16 @@ class ConfigProperty<T>(
                 editor.apply()
             }
             value = newValue
+        }
+    }
+
+    /**
+     * Removes the key value from preferences
+     */
+    fun clear() {
+        if (key != null) {
+            octoPreferences.edit().remove(key).apply()
+            value = defaultValue
         }
     }
 

@@ -9,7 +9,7 @@
 package it.octogram.android.utils
 
 import android.graphics.Color
-import android.util.Log
+import it.octogram.android.logs.OctoLogging
 import org.telegram.messenger.BuildVars
 import org.telegram.messenger.R
 import org.telegram.tgnet.TLRPC
@@ -26,11 +26,11 @@ class SessionIconUtils {
         val apiId = authorization.api_id
 
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            Log.e(tag, "appName: $appName")
-            Log.e(tag, "apiId: $apiId")
-            Log.e(tag, "deviceModel: $deviceModel")
-            Log.e(tag, "platform: $platform")
-            Log.e(tag, "systemVersion: $systemVersion")
+            OctoLogging.e(tag, "appName: $appName")
+            OctoLogging.e(tag, "apiId: $apiId")
+            OctoLogging.e(tag, "deviceModel: $deviceModel")
+            OctoLogging.e(tag, "platform: $platform")
+            OctoLogging.e(tag, "systemVersion: $systemVersion")
         }
 
         val isWeb = appName.isNotEmpty() && appName.contains("web") &&
@@ -143,7 +143,7 @@ class SessionIconUtils {
     )
 
     private fun safeLowerCase(input: String?): String {
-        if (BuildVars.DEBUG_PRIVATE_VERSION) Log.e(tag, "safeLowerCase: $input")
+        if (BuildVars.DEBUG_PRIVATE_VERSION) OctoLogging.e(tag, "safeLowerCase: $input")
         return (input ?: "").lowercase()
     }
 }

@@ -463,18 +463,6 @@ public class FilterCreateActivity extends BaseFragment {
                 cell.getTextView().requestFocus();
                 AndroidUtilities.showKeyboard(cell.getTextView());
             } else if (item.viewType == VIEW_TYPE_SWITCH) {
-                /*if (creatingNew) {
-                    AndroidUtilities.shakeViewSpring(view, shiftDp = -shiftDp);
-                    BotWebViewVibrationEffect.APP_ERROR.vibrate();
-                    doNotCloseWhenSave = true;
-                    if (doneItem.getAlpha() > 0) {
-                        showSaveHint(false);
-                    } else {
-                        BulletinFactory.of(this).createErrorBulletin(LocaleController.getString(R.string.ShowFolderCreation)).show();
-                    }
-                    return;
-                }*/
-
                 showFolder = !showFolder;
                 adapter.notifyItemChanged(position);
                 checkDoneButton(true);

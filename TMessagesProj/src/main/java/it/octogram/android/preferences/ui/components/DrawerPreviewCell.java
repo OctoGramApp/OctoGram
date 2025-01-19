@@ -24,6 +24,8 @@ import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.DrawerProfileCell;
 
+import it.octogram.android.OctoConfig;
+
 @SuppressLint("ViewConstructor")
 public class DrawerPreviewCell extends FrameLayout {
     private final DrawerProfileCell drawerProfileCell;
@@ -56,7 +58,7 @@ public class DrawerPreviewCell extends FrameLayout {
 
         FrameLayout internalFrameLayout = getInternalFrameLayout(context);
 
-        setPadding(dp(inDrawer ? 10 : 15), dp(inDrawer ? 40 : 15), dp(inDrawer ? 10 : 15), dp(15));
+        setPadding(dp(inDrawer ? 10 : 15), dp(inDrawer ? (OctoConfig.INSTANCE.profileBubbleMoreTopPadding.getValue() ? 60 : 40) : 15), dp(inDrawer ? 10 : 15), dp(15));
 
         if (!inDrawer) {
             setBackground(Theme.createRoundRectDrawable(0, Theme.getColor(Theme.key_windowBackgroundWhite)));
@@ -128,12 +130,16 @@ public class DrawerPreviewCell extends FrameLayout {
         internalFrameLayout.setClipToPadding(true);
         internalFrameLayout.setClipToOutline(true);
         internalFrameLayout.setClipChildren(true);
-        internalFrameLayout.setPadding(dp(3), dp(3), dp(3), dp(3));
+        if (!OctoConfig.INSTANCE.profileBubbleHideBorder.getValue() || !inDrawer) {
+            internalFrameLayout.setPadding(dp(3), dp(3), dp(3), dp(3));
+        }
         GradientDrawable border = new GradientDrawable();
         border.setShape(GradientDrawable.RECTANGLE);
-        border.setColor(Theme.getColor(Theme.key_chats_menuBackground));
         border.setAlpha(255);
-        border.setStroke(dp(1), AndroidUtilities.getTransparentColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText), 0.5f), dp(5), dp(5));
+        if (!OctoConfig.INSTANCE.profileBubbleHideBorder.getValue() || !inDrawer) {
+            border.setColor(Theme.getColor(Theme.key_chats_menuBackground));
+            border.setStroke(dp(1), AndroidUtilities.getTransparentColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText), 0.5f), dp(5), dp(5));
+        }
         border.setCornerRadius(dp(25));
         internalFrameLayout.setBackground(border);
         internalFrameLayout.addView(scaledFrameLayout);

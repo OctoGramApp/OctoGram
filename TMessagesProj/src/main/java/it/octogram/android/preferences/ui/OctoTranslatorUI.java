@@ -10,6 +10,7 @@ package it.octogram.android.preferences.ui;
 
 import android.content.Context;
 
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
@@ -187,7 +188,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
     }
 
     public static List<PopupChoiceDialogOption> getProvidersPopupOptions() {
-        return List.of(
+        List<PopupChoiceDialogOption> list = List.of(
                 updateProviderAvailability(new PopupChoiceDialogOption()
                         .setId(TranslatorProvider.DEFAULT.getValue())
                         .setItemTitle("Telegram")
@@ -200,8 +201,27 @@ public class OctoTranslatorUI implements PreferencesEntry {
                         .setId(TranslatorProvider.DEEPL.getValue())
                         .setItemTitle("DeepL")
                         .setItemDescription(LocaleController.getString(R.string.TranslatorProviderSuggestedAccurate))),
-                updateProviderAvailability(new PopupChoiceDialogOption().setId(TranslatorProvider.YANDEX.getValue()).setItemTitle("Yandex"))
+                updateProviderAvailability(new PopupChoiceDialogOption().setId(TranslatorProvider.YANDEX.getValue()).setItemTitle("Yandex")),
+                updateProviderAvailability(new PopupChoiceDialogOption()
+                        .setId(TranslatorProvider.BAIDU.getValue())
+                        .setItemTitle("Baidu")
+                        .setItemDescription(LocaleController.getString(R.string.TranslatorProviderSuggestedChinese))),
+                updateProviderAvailability(new PopupChoiceDialogOption()
+                        .setId(TranslatorProvider.LINGO.getValue())
+                        .setItemTitle("Lingo")
+                        .setItemDescription(LocaleController.getString(R.string.TranslatorProviderSuggestedLingo)))
         );
+
+        if (BuildVars.DEBUG_PRIVATE_VERSION || BuildVars.DEBUG_VERSION || OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.EMOJIS.getValue()) {
+            ArrayList<PopupChoiceDialogOption> data = new ArrayList<>(list);
+            data.add(new PopupChoiceDialogOption()
+                    .setId(TranslatorProvider.EMOJIS.getValue())
+                    .setItemTitle("Emojis")
+                    .setItemDescription("For the meme"));
+            return data;
+        }
+
+        return list;
     }
 
     private static PopupChoiceDialogOption updateProviderAvailability(PopupChoiceDialogOption provider) {
@@ -240,7 +260,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
         }
 
         if (except != canSelectKeepMarkdown) {
-            canSelectKeepMarkdown.setValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue());
+            canSelectKeepMarkdown.setValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.LINGO.getValue() && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue());
         }
     }
 

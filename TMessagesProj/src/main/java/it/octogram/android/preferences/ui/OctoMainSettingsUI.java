@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.CountDownTimer;
+import android.provider.DocumentsContract;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -25,19 +26,30 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
+import org.telegram.ui.Components.ChatAttachAlert;
+import org.telegram.ui.Components.ChatAttachAlertDocumentLayout;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.LaunchActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.UUID;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -45,18 +57,24 @@ import it.octogram.android.preferences.rows.impl.FooterRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.ExportDoneReadyBottomSheet;
+import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.LogsMigrator;
 import it.octogram.android.utils.OctoUtils;
 
-public class OctoMainSettingsUI implements PreferencesEntry {
+public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
     private final ConfigProperty<Boolean> logsOnlyPbeta = new ConfigProperty<>(null, false);
     private void updateConfigs() {
         logsOnlyPbeta.updateValue(BuildVars.DEBUG_PRIVATE_VERSION);
     }
+
+    private PreferencesFragment fragment;
+    private ChatAttachAlert chatAttachAlert;
+
     @Override
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         updateConfigs();
+        this.fragment = fragment;
         var footer = AndroidUtilities.replaceTags(formatString(R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING));
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
                 .octoAnimation(getString(R.string.OctoMainSettingsHeader))
@@ -69,6 +87,16 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                                 .icon(R.drawable.msg_cancel)
                                 .title("Crash the app")
                                 .description("Yup, this is literally a crash button")
+                                .build());
+                        category.row(new TextDetailRow.TextDetailRowBuilder()
+                                .onClick(() -> {
+                                    OctoConfig.INSTANCE.updateSignalingCommitID.updateValue("z");
+                                    OctoConfig.INSTANCE.updateSignalingChangelog.updateValue("update test");
+                                    AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
+                                })
+                                .icon(R.drawable.round_update_white_28)
+                                .title("Test app signaling")
+                                .description("Check update message")
                                 .build());
                     }
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -106,8 +134,13 @@ public class OctoMainSettingsUI implements PreferencesEntry {
                 .category(getString(R.string.OctoMainSettingsManageCategory), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> openExportSettingsProcedure(fragment, context))
-                            .icon(R.drawable.msg_customize)
+                            .icon(R.drawable.msg_saved)
                             .title(getString(R.string.Export))
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> openImportSettingsProcedure(fragment, context))
+                            .icon(R.drawable.msg_customize)
+                            .title(getString(R.string.ImportReady))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> openResetSettingsProcedure(context))
@@ -157,6 +190,106 @@ public class OctoMainSettingsUI implements PreferencesEntry {
     private void openExportSettingsProcedure(PreferencesFragment fragment, Context context) {
         var bottomSheet = new ExportDoneReadyBottomSheet(context, fragment.getParentActivity(), fragment);
         bottomSheet.show();
+    }
+
+    private void openImportSettingsProcedure(PreferencesFragment fragment, Context context) {
+        chatAttachAlert = new ChatAttachAlert(context, fragment, false, false);
+        chatAttachAlert.setExportPicker();
+        chatAttachAlert.init();
+        chatAttachAlert.show();
+        chatAttachAlert.setDocumentsDelegate(this);
+    }
+
+    public void startDocumentSelectActivity() {
+        try {
+            Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            photoPickerIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
+            photoPickerIntent.setType("application/*");
+            fragment.startActivityForResult(photoPickerIntent, 21);
+        } catch (Exception e) {
+            OctoLogging.e(e);
+        }
+    }
+
+    private void startImportActivity(File firstFile) {
+        if (firstFile.getName().endsWith(".octoexport") && OctoConfig.isValidExport(firstFile)) {
+            ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(fragment, firstFile);
+            sheet.setOriginalActivity(fragment.getParentActivity());
+            sheet.show();
+        } else {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(fragment.getParentActivity());
+            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
+            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedDataCaption));
+            alertDialogBuilder.setPositiveButton("OK", null);
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+
+            if (firstFile.getAbsolutePath().startsWith(AndroidUtilities.getCacheDir().getAbsolutePath())) {
+                firstFile.delete();
+            }
+        }
+    }
+
+    @Override
+    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fMessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+        File firstFile = new File(files.get(0));
+
+        if (chatAttachAlert != null) {
+            chatAttachAlert = null;
+        }
+
+        if (!firstFile.exists() || !firstFile.isFile()) {
+            return;
+        }
+
+        startImportActivity(firstFile);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ExportDoneReadyBottomSheet.CREATE_FILE_REQ && data != null) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                try {
+                    OutputStream outputStream = ApplicationLoader.applicationContext.getContentResolver().openOutputStream(uri);
+                    if (outputStream != null) {
+                        outputStream.write(ExportDoneReadyBottomSheet.createOctoExport().toString().getBytes());
+                        outputStream.close();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } else if (requestCode == 21 && data != null) {
+            if (chatAttachAlert != null) {
+                chatAttachAlert.dismiss();
+                chatAttachAlert = null;
+            }
+
+            Uri uri = data.getData();
+            if (uri != null) {
+                File cacheDir = AndroidUtilities.getCacheDir();
+                String tempFile = UUID.randomUUID().toString().replace("-", "") + ".octoexport";
+                File file = new File(cacheDir.getPath(), tempFile);
+                try {
+                    final InputStream inputStream = ApplicationLoader.applicationContext.getContentResolver().openInputStream(uri);
+                    if (inputStream != null) {
+                        OutputStream outputStream = new FileOutputStream(file);
+                        final byte[] buffer = new byte[4 * 1024];
+                        int read;
+                        while ((read = inputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, read);
+                        }
+                        inputStream.close();
+                        outputStream.flush();
+                        outputStream.close();
+                        startImportActivity(file);
+                    }
+                } catch (IOException e) {
+                    OctoLogging.e(e);
+                }
+            }
+        }
     }
 
     private void openResetSettingsProcedure(Context context) {

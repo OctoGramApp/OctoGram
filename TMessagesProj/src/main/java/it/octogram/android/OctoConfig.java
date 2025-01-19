@@ -10,7 +10,6 @@ package it.octogram.android;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -36,6 +35,7 @@ import java.util.Map;
 
 import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.drawer.MenuOrderController;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 
 @SuppressWarnings("unchecked")
@@ -198,6 +198,8 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideBottomBarChannels = newConfigProperty("hideBottomBarChannels", false);
     public final ConfigProperty<Boolean> hideOpenButtonChatsList = newConfigProperty("hideOpenButtonChatsList", false);
     public final ConfigProperty<Boolean> alwaysExpandBlockQuotes = newConfigProperty("alwaysExpandBlockQuotes", false);
+    public final ConfigProperty<Boolean> profileBubbleHideBorder = newConfigProperty("profileBubbleHideBorder", false);
+    public final ConfigProperty<Boolean> profileBubbleMoreTopPadding = newConfigProperty("profileBubbleMoreTopPadding", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -206,7 +208,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> autoDownloadUpdatesStatus = newConfigProperty("autoDownloadUpdatesStatus", AutoDownloadUpdate.NEVER.getValue());
 
     /* Updates: Signaling */
-    public final ConfigProperty<Integer> updateSignalingLastBuildID = newConfigProperty("updateSignalingLastBuildID", 0);
+    public final ConfigProperty<String> updateSignalingCommitID = newConfigProperty("updateSignalingCommitID", BuildConfig.GIT_COMMIT_HASH);
     public final ConfigProperty<String> updateSignalingChangelog = newConfigProperty("updateSignalingChangelog", null);
 
     /*Translator*/
@@ -233,6 +235,9 @@ public class OctoConfig {
 
     /* Settings: NEW badge */
     public final ConfigProperty<String> newBadgeIds = newConfigProperty("newBadgeIds", "[]");
+
+    /* Verify Link Tip */
+    public final ConfigProperty<Boolean> verifyLinkTip = newConfigProperty("verifyLinkTip", false);
 
     private <T> ConfigProperty<T> newConfigProperty(String key, T defaultValue) {
         ConfigProperty<T> property = new ConfigProperty<>(key, defaultValue);
@@ -407,17 +412,11 @@ public class OctoConfig {
         }
     }
 
-    public void resetSingleConfig(ConfigProperty<?> property) {
-        synchronized (this) {
-            SharedPreferences.Editor editor = PREFS.edit();
-            editor.remove(property.getKey());
-            editor.apply();
-        }
+    public static boolean isValidMessageExport(MessageObject message) {
+        return isValidExport(OctoUtils.getFileContentFromMessage(message));
     }
 
-    public static boolean isValidMessageExport(MessageObject message) {
-        File downloadedFile = OctoUtils.getFileContentFromMessage(message);
-
+    public static boolean isValidExport(File downloadedFile) {
         if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
             try {
                 FileInputStream downloadedFileStream = new FileInputStream(downloadedFile);
@@ -435,12 +434,11 @@ public class OctoConfig {
                     return true;
                 }
             } catch (IOException e) {
-                Log.e(TAG, "an io exception occurred internally during isValidMessageExport OctoConfig", e);
+                OctoLogging.e(TAG, "an io exception occurred internally during isValidMessageExport OctoConfig", e);
             } catch (JSONException e) {
-                Log.e(TAG, "a json exception occurred internally during isValidMessageExport OctoConfig", e);
+                OctoLogging.e(TAG, "a json exception occurred internally during isValidMessageExport OctoConfig", e);
             }
         }
-
         return false;
     }
 
@@ -454,7 +452,7 @@ public class OctoConfig {
                     return false;
                 }
             } catch (JSONException e) {
-                Log.e(TAG, "failed to handle isJSONArrayValidData OctoConfig", e);
+                OctoLogging.e(TAG, "failed to handle isJSONArrayValidData OctoConfig", e);
             }
         }
 
@@ -466,87 +464,102 @@ public class OctoConfig {
         int changed = 0;
 
         if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
-            try {
-                FileInputStream downloadedFileStream = new FileInputStream(downloadedFile);
+            changed = completeMessageExport(downloadedFile, dataToImport, excludedOptionsByConfig);
+        }
 
-                StringBuilder jsonStringBuilder = new StringBuilder();
-                int character;
-                while ((character = downloadedFileStream.read()) != -1) {
-                    jsonStringBuilder.append((char) character);
-                }
+        return changed;
+    }
 
-                downloadedFileStream.close();
+    public int importFileExport(File file, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
+        int changed = 0;
 
-                JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
-                if (INSTANCE.isJSONArrayValidData(result)) {
-                    for (Field field : this.getClass().getDeclaredFields()) {
-                        if (field.getType().equals(ConfigProperty.class)) {
-                            try {
-                                ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
-                                if (configProperty == null) {
+        if (file.exists() && file.isFile() && file.getName().endsWith(".octoexport") && file.length() <= 1024 * 30) {
+            changed = completeMessageExport(file, dataToImport, excludedOptionsByConfig);
+        }
+
+        return changed;
+    }
+
+    private int completeMessageExport(File file, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
+        int changed = 0;
+
+        try {
+            FileInputStream downloadedFileStream = new FileInputStream(file);
+
+            StringBuilder jsonStringBuilder = new StringBuilder();
+            int character;
+            while ((character = downloadedFileStream.read()) != -1) {
+                jsonStringBuilder.append((char) character);
+            }
+
+            downloadedFileStream.close();
+
+            JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
+
+            if (isJSONArrayValidData(result)) {
+                for (Field field : this.getClass().getDeclaredFields()) {
+                    if (field.getType().equals(ConfigProperty.class)) {
+                        try {
+                            ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
+                            if (configProperty == null) {
+                                continue;
+                            }
+
+                            String fieldName = configProperty.getKey();
+                            Object fieldValue = configProperty.getValue();
+
+                            if (fieldName == null || fieldValue == null || !result.has(fieldName) || !dataToImport.contains(fieldName) || excludedOptionsByConfig.contains(fieldName)) {
+                                continue;
+                            }
+
+                            if (result.get(fieldName).getClass().equals(fieldValue.getClass())) {
+                                changed++;
+
+                                if (fieldValue == result.get(fieldName) && !BuildConfig.DEBUG_PRIVATE_VERSION) {
+                                    // в целях отладки, например, чтобы проверить правильность условий для целого числа/строки,
+                                    // мы принудительно импортируем, даже если текущее установленное значение идентично значению экспорта
                                     continue;
                                 }
 
-                                String fieldName = configProperty.getKey();
-                                Object fieldValue = configProperty.getValue();
-
-                                if (fieldName == null || fieldValue == null || !result.has(fieldName) || !dataToImport.contains(fieldName) || excludedOptionsByConfig.contains(fieldName)) {
-                                    continue;
-                                }
-
-                                if (result.get(fieldName).getClass().equals(fieldValue.getClass())) {
-                                    changed++;
-
-                                    if (fieldValue == result.get(fieldName) && !BuildConfig.DEBUG_PRIVATE_VERSION) {
-                                        // в целях отладки, например, чтобы проверить правильность условий для целого числа/строки,
-                                        // мы принудительно импортируем, даже если текущее установленное значение идентично значению экспорта
+                                var exportFileSettingsValue = result.get(fieldName);
+                                //noinspection IfCanBeSwitch
+                                if (exportFileSettingsValue instanceof Boolean b) {
+                                    configProperty.updateValue((ConfigProperty<Boolean>) configProperty, b);
+                                } else if (exportFileSettingsValue instanceof Integer i) {
+                                    if (!isValueValid(fieldName, i)) {
+                                        OctoLogging.d(TAG, "failed to import " + fieldName + " as integer value is invalid");
                                         continue;
                                     }
 
-                                    Object exportFileSettingsValue = result.get(fieldName);
-                                    switch (exportFileSettingsValue) {
-                                        case Boolean b ->
-                                                configProperty.updateValue((ConfigProperty<Boolean>) configProperty, b);
-                                        case Integer i -> {
-                                            if (!isValueValid(fieldName, i)) {
-                                                Log.d(TAG, "failed to import " + fieldName + " as integer value is invalid");
-                                                continue;
-                                            }
-
-                                            configProperty.updateValue((ConfigProperty<Integer>) configProperty, i);
-                                        }
-                                        case String s -> {
-                                            if (!isValueValid(fieldName, s)) {
-                                                Log.d(TAG, "failed to import " + fieldName + " as string value is invalid");
-                                                continue;
-                                            }
-
-                                            configProperty.updateValue((ConfigProperty<String>) configProperty, reparseStringValue(fieldName, s));
-                                        }
-                                        default -> {
-                                        }
+                                    configProperty.updateValue((ConfigProperty<Integer>) configProperty, i);
+                                } else if (exportFileSettingsValue instanceof String s) {
+                                    if (!isValueValid(fieldName, s)) {
+                                        OctoLogging.d(TAG, "failed to import " + fieldName + " as string value is invalid");
+                                        continue;
                                     }
+
+                                    configProperty.updateValue((ConfigProperty<String>) configProperty, reparseStringValue(fieldName, s));
                                 }
-                            } catch (JSONException e) {
-                                Log.e(TAG, "Error validating put-settings export", e);
-                            } catch (IllegalAccessException e) {
-                                Log.e(TAG, "Error getting settings export", e);
                             }
+                        } catch (JSONException e) {
+                            OctoLogging.e(TAG, "Error validating put-settings export", e);
+                        } catch (IllegalAccessException e) {
+                            OctoLogging.e(TAG, "Error getting settings export", e);
                         }
                     }
-
-                    if (!OctoConfig.INSTANCE.experimentsEnabled.getValue()) {
-                        OctoConfig.INSTANCE.experimentsEnabled.updateValue(true);
-                        // force enable experiments after import
-                    }
-
-                    MenuOrderController.reloadConfig();
                 }
-            } catch (IOException e) {
-                Log.e(TAG, "an io exception occurred internally during isValidMessageExport octoconfig", e);
-            } catch (JSONException e) {
-                Log.e(TAG, "a json exception occurred internally during isValidMessageExport octoconfig", e);
+
+                if (!OctoConfig.INSTANCE.experimentsEnabled.getValue()) {
+                    OctoConfig.INSTANCE.experimentsEnabled.updateValue(true);
+                    // force enable experiments after import
+                }
+
+                MenuOrderController.reloadConfig();
             }
+        } catch (IOException e) {
+            OctoLogging.e(TAG, "an io exception occurred internally during isValidMessageExport octoconfig", e);
+        } catch (JSONException e) {
+            OctoLogging.e(TAG, "a json exception occurred internally during isValidMessageExport octoconfig", e);
         }
 
         return changed;
@@ -569,7 +582,7 @@ public class OctoConfig {
             case "photoResolution" -> value >= PhotoResolution.LOW.getValue() && value <= PhotoResolution.HIGH.getValue();
             case "tabMode" -> value >= TabMode.TEXT.getValue() && value <= TabMode.ICON.getValue();
             case "translatorMode" -> value >= TranslatorMode.DEFAULT.getValue() && value <= TranslatorMode.EXTERNAL.getValue();
-            case "translatorProvider" -> value >= TranslatorProvider.DEFAULT.getValue() && value <= TranslatorProvider.YANDEX.getValue();
+            case "translatorProvider" -> value >= TranslatorProvider.DEFAULT.getValue() && value <= TranslatorProvider.EMOJIS.getValue();
             case "translatorFormality" -> value >= TranslatorFormality.DEFAULT.getValue() && value <= TranslatorFormality.HIGH.getValue();
             case "defaultEmojiButtonAction" -> value >= DefaultEmojiButtonAction.DEFAULT.getValue() && value <= DefaultEmojiButtonAction.STICKERS.getValue();
             case "stickerShape" -> value >= StickerShape.DEFAULT.getValue() && value <= StickerShape.MESSAGE.getValue();
@@ -669,7 +682,7 @@ public class OctoConfig {
         return (cameraPreview.getValue() == CameraPreview.BOTTOM_BAR || cameraPreview.getValue() == CameraPreview.FLOATING);
     }
 
-    private boolean canShowPreviewEmojis() {
+    public boolean canShowPreviewEmojis() {
         if (!usePinnedEmojisFeature.getValue()) {
             return false;
         }

@@ -13,8 +13,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +25,7 @@ import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.LaunchActivity;
@@ -36,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
@@ -152,7 +152,7 @@ public class UpdatesManager {
 
             checkPrivateBetaData(callback);
         } catch (JSONException e) {
-            Log.e(UpdatesManager.class.getName(), "Update check failed due to invalid data!", e);
+            OctoLogging.e(UpdatesManager.class.getName(), "Update check failed due to invalid data!", e);
             callback.onError();
         }
     }
@@ -384,7 +384,7 @@ public class UpdatesManager {
                             break;
                         }
 
-                        StringBuilder finalUpdate = new StringBuilder(String.format("%s\n\n%s", LocaleController.getString(R.string.UpdatesPbetaWarning), commitText));
+                        StringBuilder finalUpdate = new StringBuilder(String.format("%s\n%s", LocaleController.getString(R.string.UpdatesPbetaWarning), commitText));
 
                         TLRPC.Document currentMediaDocument = message.media.document;
                         String currentAbiRelease = OctoUtils.getCurrentAbi(false);
@@ -408,7 +408,7 @@ public class UpdatesManager {
                                     }
 
                                     currentMediaDocument = msg2.media.document;
-                                    finalUpdate.append(String.format("\n\nWe selected the %s BUILD ARCHITECTURE for this update.", currentAbiRelease.toUpperCase()));
+                                    finalUpdate.append(String.format("\nWe selected the %s BUILD ARCHITECTURE for this update.", currentAbiRelease.toUpperCase()));
                                 }
                             }
                         }
@@ -638,7 +638,7 @@ public class UpdatesManager {
             TLRPC.TL_help_appUpdate update = SharedConfig.pendingAppUpdate;
 
             if (!TextUtils.isEmpty(update.text)) {
-                OctoConfig.INSTANCE.updateSignalingLastBuildID.updateValue(BuildConfig.BUILD_VERSION);
+                OctoConfig.INSTANCE.updateSignalingCommitID.updateValue(BuildConfig.GIT_COMMIT_HASH);
                 OctoConfig.INSTANCE.updateSignalingChangelog.updateValue(update.text);
             }
 
@@ -647,10 +647,9 @@ public class UpdatesManager {
     }
 
     public static void handleUpdateSignaling() {
-        if (OctoConfig.INSTANCE != null && OctoConfig.INSTANCE.updateSignalingLastBuildID != null && OctoConfig.INSTANCE.updateSignalingChangelog != null) {
+        if (OctoConfig.INSTANCE != null) {
 
-            boolean isValidUpdate = OctoConfig.INSTANCE.updateSignalingLastBuildID.getValue() != 0;
-            isValidUpdate &= OctoConfig.INSTANCE.updateSignalingLastBuildID.getValue() < BuildConfig.BUILD_VERSION;
+            boolean isValidUpdate = !Objects.equals(OctoConfig.INSTANCE.updateSignalingCommitID.getValue(), BuildConfig.GIT_COMMIT_HASH);
             isValidUpdate &= !TextUtils.isEmpty(OctoConfig.INSTANCE.updateSignalingChangelog.getValue());
 
             if (isValidUpdate) {
@@ -658,18 +657,19 @@ public class UpdatesManager {
                 update.message = OctoConfig.INSTANCE.updateSignalingChangelog.getValue();
                 update.media = new TLRPC.TL_messageMediaEmpty();
                 update.popup = false;
-                update.type = "update";
-                update.flags |= 2;
-                update.inbox_date = (int) System.currentTimeMillis();
-                ArrayList<TLRPC.Update> updates = new ArrayList<>();
-                updates.add(update);
-                MessagesController.getInstance(UserConfig.selectedAccount).processUpdateArray(updates, null, null, false, 0);
+                update.type = "announcement";
+                update.flags = 2;
+                update.inbox_date = (int) (System.currentTimeMillis() / 1000);
+                final TLRPC.TL_updates updates = new TLRPC.TL_updates();
+                updates.updates.add(update);
+                Utilities.stageQueue.postRunnable(() -> MessagesController.getInstance(UserConfig.selectedAccount).processUpdates(updates, false));
+                ConnectionsManager.getInstance(UserConfig.selectedAccount).resumeNetworkMaybe();
             }
 
-            OctoConfig.INSTANCE.updateSignalingLastBuildID.updateValue(0);
-            OctoConfig.INSTANCE.updateSignalingChangelog.updateValue(null);
+            OctoConfig.INSTANCE.updateSignalingCommitID.clear();
+            OctoConfig.INSTANCE.updateSignalingChangelog.clear();
         } else {
-            Log.e("OctoConfig", "OctoConfig INSTANCE or properties are not initialized");
+            OctoLogging.e("OctoConfig", "OctoConfig INSTANCE or properties are not initialized");
         }
     }
 

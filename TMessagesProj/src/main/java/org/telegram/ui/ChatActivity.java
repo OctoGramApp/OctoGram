@@ -128,6 +128,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.zxing.common.detector.MathUtils;
 
+import org.telegram.PhoneFormat.CallingCodeInfo;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -291,6 +292,7 @@ import it.octogram.android.CustomEmojiController;
 import it.octogram.android.DoubleTapAction;
 import it.octogram.android.MediaFilter;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.TranslatorMode;
@@ -18746,7 +18748,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 avatarContainer.setTitle(LocaleController.getString(R.string.SavedMessages));
             } else if (!MessagesController.isSupportUser(currentUser) && getContactsController().contactsDict.get(currentUser.id) == null && (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                 if (!TextUtils.isEmpty(currentUser.phone)) {
-                    avatarContainer.setTitle(PhoneFormat.getInstance().format("+" + currentUser.phone), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
+                    avatarContainer.setTitle(getFakePhoneNumber(currentUser.phone), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
                 } else {
                     avatarContainer.setTitle(AndroidUtilities.removeDiacritics(UserObject.getUserName(currentUser)), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
                 }
@@ -41882,5 +41884,36 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         ChatActivity chatActivity = parentChatActivity != null ? parentChatActivity : this;
         if (chatActivity.hashtagSearchTabs == null) return 0;
         return chatActivity.hashtagSearchTabs.getCurrentHeight();
+    }
+
+    private CharSequence getFakePhoneNumber(String phone) {
+        String text = PhoneFormat.getInstance().format("+" + phone);
+
+        if (OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()) {
+            PhoneNumberAlternative alternative = PhoneNumberAlternative.Companion.fromInt(OctoConfig.INSTANCE.phoneNumberAlternative.getValue());
+
+            switch (alternative) {
+                case PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER -> {
+                    CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phone);
+                    String phoneCountry = info != null ? info.callingCode : "";
+                    return String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
+                }
+                case PhoneNumberAlternative.SHOW_USERNAME -> {
+                    if (currentUser != null) {
+                        if (currentUser.username != null && !currentUser.username.isEmpty()) {
+                            return currentUser.username;
+                        }
+                        return currentUser.first_name != null ? currentUser.first_name : "Unknown";
+                    }
+                }
+                default -> {
+                    if (currentUser != null) {
+                        return currentUser.first_name != null ? currentUser.first_name : "Unknown";
+                    }
+                }
+            }
+        }
+
+        return text;
     }
 }
