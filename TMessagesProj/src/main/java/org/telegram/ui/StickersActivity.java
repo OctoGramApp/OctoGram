@@ -90,6 +90,7 @@ import java.util.List;
 import java.util.Locale;
 
 import it.octogram.android.preferences.ui.PinnedEmojisActivity;
+import it.octogram.android.preferences.ui.PinnedReactionsActivity;
 
 public class StickersActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -128,6 +129,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
     private int masksRow;
     private int emojiPacksRow;
     private int pinnedEmojisListRow;
+    private int pinnedReactionsListRow;
     private int masksInfoRow;
     private int archivedRow;
     private int archivedInfoRow;
@@ -426,6 +428,8 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                 presentFragment(new StickersActivity(MediaDataController.TYPE_EMOJIPACKS, null));
             } else if (position == pinnedEmojisListRow) {
                 presentFragment(new PinnedEmojisActivity());
+            } else if (position == pinnedReactionsListRow) {
+                presentFragment(new PinnedReactionsActivity());
             } else if (position == suggestRow) {
                 if (getParentActivity() == null) {
                     return;
@@ -710,8 +714,10 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
 
         if (currentType == MediaDataController.TYPE_IMAGE) {
             reactionsDoubleTapRow = rowCount++;
+            pinnedReactionsListRow = rowCount++;
         } else {
             reactionsDoubleTapRow = -1;
+            pinnedReactionsListRow = -1;
         }
 
         stickersBotInfo = -1;
@@ -1188,6 +1194,9 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                         } else if (position == pinnedEmojisListRow) {
                             settingsCell.imageView.setTranslationX(-AndroidUtilities.dp(2));
                             settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.PinnedEmojisList), PinnedEmojisActivity.getRowDescription(), R.drawable.chats_pin, true);
+                        } else if (position == pinnedReactionsListRow) {
+                            settingsCell.imageView.setTranslationX(-AndroidUtilities.dp(2));
+                            settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.PinnedReactions), PinnedReactionsActivity.getRowDescription(), R.drawable.msg_reactions, true);
                         } else if (position == suggestRow) {
                             String value;
                             switch (SharedConfig.suggestStickers) {
@@ -1230,7 +1239,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                     break;
                 case TYPE_DOUBLE_TAP_REACTIONS: {
                     TextSettingsCell settingsCell = (TextSettingsCell) holder.itemView;
-                    settingsCell.setText(LocaleController.getString(R.string.DoubleTapSetting), false);
+                    settingsCell.setText(LocaleController.getString(R.string.DoubleTapSetting), true);
                     settingsCell.setIcon(R.drawable.msg2_reactions2);
                     String reaction = MediaDataController.getInstance(currentAccount).getDoubleTapReaction();
                     if (reaction != null) {
@@ -1409,7 +1418,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                 return TYPE_STICKER_SET;
             } else if (i == stickersBotInfo || i == archivedInfoRow || i == loopInfoRow || i == suggestAnimatedEmojiInfoRow || i == masksInfoRow || i == dynamicPackOrderInfo) {
                 return TYPE_INFO;
-            } else if (i == archivedRow || i == masksRow || i == featuredRow || i == emojiPacksRow || i == suggestRow || i == featuredStickersShowMoreRow || i == pinnedEmojisListRow) {
+            } else if (i == archivedRow || i == masksRow || i == featuredRow || i == emojiPacksRow || i == suggestRow || i == featuredStickersShowMoreRow || i == pinnedEmojisListRow || i == pinnedReactionsListRow) {
                 return TYPE_TEXT_AND_VALUE;
             } else if (i == stickersShadowRow || i == featuredStickersShadowRow) {
                 return TYPE_SHADOW;

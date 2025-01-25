@@ -301,6 +301,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.QualityPreset;
+import it.octogram.android.VideoQuality;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.utils.ForwardContext;
@@ -9883,6 +9885,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             videoPlayer.setDelegate(new VideoPlayer.VideoPlayerDelegate() {
 
                 private boolean firstState = true;
+                private boolean updatedQuality = false;
 
                 @Override
                 public void onStateChanged(boolean playWhenReady, int playbackState) {
@@ -9961,6 +9964,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     if (firstFrameView != null && (videoPlayer == null || !videoPlayer.isLooping())) {
                         AndroidUtilities.runOnUIThread(() -> firstFrameView.updateAlpha(), 64);
                     }
+                    adaptQuality();
                 }
 
                 @Override
@@ -9972,6 +9976,35 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     }
                     if (firstFrameView != null && (videoPlayer == null || !videoPlayer.isLooping())) {
                         AndroidUtilities.runOnUIThread(() -> firstFrameView.updateAlpha(), 64);
+                    }
+                    adaptQuality();
+                }
+
+                private void adaptQuality() {
+                    if (updatedQuality) {
+                        return;
+                    }
+                    updatedQuality = true;
+
+                    int currentState = OctoConfig.INSTANCE.useQualityPreset.getValue();
+                    if (currentState != QualityPreset.AUTO.getValue()) {
+                        int maxQuality = -1;
+                        int maxQualityIndex = -1;
+                        VideoPlayer.Quality maxQualityValue = null;
+                        for (int i = 0; i < videoPlayer.getQualitiesCount(); ++i) {
+                            VideoPlayer.Quality q = videoPlayer.getQuality(i);
+                            if (maxQuality == -1 || (currentState == QualityPreset.HIGHEST.getValue() ? (q.p() > maxQuality) : (q.p() < maxQuality))) {
+                                maxQuality = q.p();
+                                maxQualityIndex = i;
+                                maxQualityValue = q;
+                            }
+                        }
+                        if (maxQualityIndex != -1) {
+                            videoPlayer.setSelectedQuality(maxQualityIndex);
+                            VideoPlayer.saveQuality(maxQualityValue, currentMessageObject);
+                            updateQualityItems();
+                            videoItem.closeSubMenu();
+                        }
                     }
                 }
 

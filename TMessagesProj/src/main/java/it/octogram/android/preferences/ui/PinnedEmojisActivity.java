@@ -236,6 +236,7 @@ public class PinnedEmojisActivity extends BaseFragment {
         actionButton.setText(new SpannableStringBuilder(LocaleController.getString(R.string.PinnedEmojisList_Apply)), false);
         actionButton.setOnClickListener(v -> {
             JSONArray reactionsList = grabReactions();
+
             OctoConfig.INSTANCE.usePinnedEmojisFeature.updateValue(checked && reactionsList.length() > 0);
             OctoConfig.INSTANCE.hideRecentEmojis.updateValue(hideRecentEmojis);
             OctoConfig.INSTANCE.pinnedEmojisList.updateValue(reactionsList.toString());
@@ -541,7 +542,7 @@ public class PinnedEmojisActivity extends BaseFragment {
 
     private boolean checkChangesBeforeExit() {
         if (checked != OctoConfig.INSTANCE.usePinnedEmojisFeature.getValue()) {
-            OctoConfig.INSTANCE.usePinnedEmojisFeature.updateValue(checked);
+            OctoConfig.INSTANCE.usePinnedEmojisFeature.updateValue(checked && grabReactions().length() > 0);
         }
         boolean hasChanges = hideRecentEmojis != OctoConfig.INSTANCE.hideRecentEmojis.getValue() || checkChangesInList();
 

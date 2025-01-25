@@ -177,6 +177,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
     public final ConfigProperty<Integer> navigationSmoothness = newConfigProperty("navigationSmoothness", 1000);
     public final ConfigProperty<Boolean> animatedActionBar = newConfigProperty("animatedActionBar", false);
+    public final ConfigProperty<Integer> useQualityPreset = newConfigProperty("useQualityPreset", QualityPreset.AUTO.getValue());
     public final ConfigProperty<Boolean> uploadBoost = newConfigProperty("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = newConfigProperty("downloadBoost", false);
     public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", DownloadBoost.NORMAL.getValue());
@@ -604,7 +605,7 @@ public class OctoConfig {
             case "uiIconsType" -> value >= IconsUIType.DEFAULT.getValue() && value <= IconsUIType.MATERIAL_DESIGN_3.getValue();
             case "uiTitleCenteredState" -> value >= ActionBarCenteredTitle.ALWAYS.getValue() && value <= ActionBarCenteredTitle.NEVER.getValue();
             case "shortcutsPosition" -> value >= ShortcutsPosition.THREE_DOTS.getId() && value <= ShortcutsPosition.PROFILE_DOTS.getId();
-            case "cameraPreview" -> value >= CameraPreview.DEFAULT && value <= CameraPreview.BOTTOM_BAR;
+            case "cameraPreview" -> value >= CameraPreview.DEFAULT && value <= CameraPreview.HIDDEN;
             default -> false;
         };
     }
@@ -678,10 +679,6 @@ public class OctoConfig {
         };
     }
 
-    public boolean isHiddenCameraPreview() {
-        return (cameraPreview.getValue() == CameraPreview.BOTTOM_BAR || cameraPreview.getValue() == CameraPreview.FLOATING);
-    }
-
     public boolean canShowPreviewEmojis() {
         if (!usePinnedEmojisFeature.getValue()) {
             return false;
@@ -751,6 +748,10 @@ public class OctoConfig {
             Emoji.sortEmoji();
         }
         return status;
+    }
+
+    public int getFavoriteReactionsCount() {
+        return getFavoriteReactions(true).size() + getFavoriteReactions(false).size();
     }
 
     public ArrayList<ReactionsLayoutInBubble.VisibleReaction> getFavoriteReactions(boolean isChannel) {

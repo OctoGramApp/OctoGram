@@ -3926,7 +3926,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             int width = Math.max(nextAttachLayout.getWidth(), currentAttachLayout.getWidth());
             if (nextAttachLayout instanceof ChatAttachAlertPhotoLayoutPreview) {
                 nextAttachLayout.setTranslationX(width);
-                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout && OctoConfig.INSTANCE.isHiddenCameraPreview()) {
+                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) currentAttachLayout;
                     if (photoLayout != null) {
                         if (photoLayout.cameraView != null) {
@@ -3942,7 +3942,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 }
             } else {
                 currentAttachLayout.setTranslationX(-width);
-                if (nextAttachLayout == photoLayout && OctoConfig.INSTANCE.isHiddenCameraPreview()) {
+                if (nextAttachLayout == photoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) nextAttachLayout;
                     if (photoLayout.cameraView != null) {
                         photoLayout.cameraView.setVisibility(View.VISIBLE);
@@ -5403,7 +5403,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                         attachButton.setTextAndIcon(1, getString("ChatGallery", R.string.ChatGallery), Theme.chat_attachButtonDrawables[0], Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
                         attachButton.setTag(1);
                     } else if (position == cameraButton) {
-                        attachButton.setTextAndIcon(itemCameraId, LocaleController.getString(R.string.VoipCamera), getContext().getResources().getDrawable(R.drawable.photo_camera_24px).mutate(), Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
+                        attachButton.setTextAndIcon(itemCameraId, LocaleController.getString(R.string.BottomCamera), getContext().getResources().getDrawable(R.drawable.photo_camera_24px).mutate(), Theme.key_chat_attachGalleryBackground, Theme.key_chat_attachGalleryText);
                         attachButton.setTag(itemCameraId);
                     } else if (position == documentButton) {
                         attachButton.setTextAndIcon(4, getString("ChatDocument", R.string.ChatDocument), Theme.chat_attachButtonDrawables[2], Theme.key_chat_attachFileBackground, Theme.key_chat_attachFileText);
@@ -5476,7 +5476,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             attachBotsEndRow = -1;
             if (!(baseFragment instanceof ChatActivity)) {
                 galleryButton = buttonsCount++;
-                if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
+                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
                     cameraButton = buttonsCount++;
                 }
                 documentButton = buttonsCount++;
@@ -5492,7 +5492,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     if (editType == EDITMEDIA_TYPE_PHOTOVIDEO) {
                         galleryButton = buttonsCount++;
                     }
-                    if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
+                    if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
                         cameraButton = buttonsCount++;
                     }
                     if (editType == EDITMEDIA_TYPE_FILE) {
@@ -5504,7 +5504,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 }
             } else {
                 galleryButton = buttonsCount++;
-                if (OctoConfig.INSTANCE.isHiddenCameraPreview()) {
+                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
                     cameraButton = buttonsCount++;
                 }
                 if (photosEnabled || videosEnabled) {

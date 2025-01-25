@@ -151,7 +151,10 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                                             .setItemTitle(R.string.CameraButtonPosition_Default),
                                     new PopupChoiceDialogOption()
                                             .setId(CameraPreview.BOTTOM_BAR)
-                                            .setItemTitle(R.string.CameraButtonPosition_BottomBar))
+                                            .setItemTitle(R.string.CameraButtonPosition_BottomBar),
+                                    new PopupChoiceDialogOption()
+                                            .setId(CameraPreview.HIDDEN)
+                                            .setItemTitle(R.string.CameraButtonPosition_Hidden))
                             )
                             .title(R.string.CameraButtonPosition)
                             .description(R.string.CameraButtonPosition_Desc)

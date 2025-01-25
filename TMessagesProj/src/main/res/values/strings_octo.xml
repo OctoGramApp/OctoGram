@@ -344,10 +344,16 @@
     <string name="SmootherNavigation_Desc">Choose the fluidity of individual screens in the app</string>
     <string name="AnimatedActionBar">Animated action bar</string>
     <string name="AnimatedActionBarn_Desc">Make the action bar transition animation more linear</string>
+    <string name="UseQualityPreset">Use quality preset</string>
+    <string name="UseQualityPreset_Default">Auto</string>
+    <string name="UseQualityPreset_HighQuality">Highest</string>
+    <string name="UseQualityPreset_HighQuality_Desc">It automatically selects the highest quality when you watch a video or story.</string>
+    <string name="UseQualityPreset_LowQuality">Lowest</string>
+    <string name="UseQualityPreset_LowQuality_Desc">It automatically selects the Lowest quality when you watch a video or story.</string>
     <string name="UploadBoost">Upload boost</string>
     <string name="DownloadBoost">Download boost</string>
     <string name="DownloadBoostType">Download Boost type</string>
-    <string name="DownloadAndUploadBoost">Upload &amp; Download Boost</string>
+    <string name="DownloadAndUploadBoost">Upload &amp; Download</string>
     <string name="Fast">Fast</string>
     <string name="Extreme">Extreme</string>
     <string name="TabletMode">Force Tablet Mode</string>
@@ -473,6 +479,7 @@
     <string name="PinnedReactions_Description_Channels">You can pin just default reactions.</string>
     <string name="PinnedReactions_Limit">You can select up to 5 reactions.</string>
     <string name="PinnedReactions_Type">This emoji is unsupported.</string>
+    <string name="PinnedReactions_Apply">Update Pinned Reactions</string>
 
     <!--Reply in private chat-->
     <string name="CustomF_ReplyPvt">Reply in Private Chat</string>
@@ -679,9 +686,8 @@
     <string name="CameraButtonPosition_Desc">Choose the position of the camera button</string>
     <string name="CameraButtonPosition_Default">Default</string>
     <string name="CameraButtonPosition_BottomBar">Bottom Bar</string>
-
-    <string name="DisableCameraPreview">Disable camera preview</string>
-    <string name="DisableCameraPreview_Desc">Disables camera preview in the attachments menu</string>
+    <string name="CameraButtonPosition_Hidden">Hidden</string>
+    <string name="BottomCamera">Camera</string>
 
     <string name="OctoCameraSettings">Camera Settings</string>
     <string name="OctoCameraSettingsHeader">Here you can customize your camera experience with the app</string>

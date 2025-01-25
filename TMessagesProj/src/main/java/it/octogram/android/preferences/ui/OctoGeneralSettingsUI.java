@@ -175,8 +175,24 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.PinnedEmojisList))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .icon(R.drawable.msg_reactions)
-                            .onClick(() -> fragment.presentFragment(new PinnedReactionsActivity()))
+                            .icon(R.drawable.msg2_reactions2)
+                            .value(PinnedReactionsActivity.getRowDescription())
+                            .onClick(() -> {
+                                PinnedReactionsActivity activity = new PinnedReactionsActivity();
+                                activity.setFragment(fragment);
+                                fragment.presentFragment(activity);
+                            })
+                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
+                                @Override
+                                public String getTitle() {
+                                    return LocaleController.getString(R.string.PinnedReactions);
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return PinnedReactionsActivity.getRowDescription();
+                                }
+                            })
                             .title(LocaleController.getString(R.string.PinnedReactions))
                             .build());
                     category.row(new ListRow.ListRowBuilder()

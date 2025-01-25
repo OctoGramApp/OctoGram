@@ -191,6 +191,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
+import it.octogram.android.OctoConfig;
+import it.octogram.android.QualityPreset;
 import it.octogram.android.StoreUtils;
 
 public class PeerStoriesView extends SizeNotifierFrameLayout implements NotificationCenter.NotificationCenterDelegate {
@@ -388,6 +390,13 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         notificationsLocker = new AnimationNotificationsLocker();
         this.storyItems = new ArrayList<>();
         this.uploadingStories = new ArrayList<>();
+
+        if (UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+            int currentState = OctoConfig.INSTANCE.useQualityPreset.getValue();
+            if (currentState != QualityPreset.AUTO.getValue()) {
+                MessagesController.getInstance(UserConfig.selectedAccount).setStoryQuality(currentState == QualityPreset.HIGHEST.getValue());
+            }
+        }
 
         this.imageReceiver = new ImageReceiver() {
 

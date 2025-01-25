@@ -118,6 +118,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.octogram.android.BaseCameraView;
+import it.octogram.android.CameraPreview;
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.camerax.CameraXController;
@@ -262,7 +263,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     private AnimationNotificationsLocker notificationsLocker = new AnimationNotificationsLocker();
     private boolean showAvatarConstructor;
     
-    private boolean hideCameraPreview = OctoConfig.INSTANCE.isHiddenCameraPreview();
+    private final boolean hideCameraPreview = (
+            OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR ||
+                    OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.HIDDEN
+    );
 
     public void updateAvatarPicker() {
         showAvatarConstructor = parentAlert.avatarPicker != 0 && !parentAlert.isPhotoPicker;
@@ -2693,7 +2697,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             gridView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         }
 
-        if ((!LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview) && cameraView != null && cameraView.isInited()) {
+        if ((OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.HIDDEN || !LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview) && cameraView != null && cameraView.isInited()) {
             cameraView.showTexture(true, animated);
         }
     }
@@ -2719,7 +2723,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             return;
         }
         if (cameraView == null) {
-            final boolean lazy = !LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview;
+            final boolean lazy = OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.HIDDEN || !LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview;
             if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.getCameraType() != CameraType.CAMERA_X) {
                 cameraView = new CameraView(getContext(), isCameraFrontfaceBeforeEnteringEditMode != null ? isCameraFrontfaceBeforeEnteringEditMode : parentAlert.openWithFrontFaceCamera, lazy) {
 
@@ -3248,7 +3252,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             gridView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
         }
 
-        if ((!LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview) && cameraView != null) {
+        if ((OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.HIDDEN || !LiteMode.isEnabled(LiteMode.FLAGS_CHAT) || hideCameraPreview) && cameraView != null) {
             cameraView.showTexture(false, animated);
         }
     }

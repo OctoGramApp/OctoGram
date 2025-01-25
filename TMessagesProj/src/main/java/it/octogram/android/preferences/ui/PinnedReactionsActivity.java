@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,17 +75,23 @@ import java.util.List;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.PreferenceType;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.custom.ReactionsContainerPreview;
 
 public class PinnedReactionsActivity extends BaseFragment {
-
-    private PeerColorActivity.ColoredActionBar colorBar;
 
     public static final int PAGE_CHATS = 0;
     public static final int PAGE_CHANNELS = 1;
 
     public Page chatsPage;
     public Page channelsPage;
+
+    private PreferencesFragment fragment;
+
+    public void setFragment(PreferencesFragment fragment) {
+        this.fragment = fragment;
+    }
 
     public Page getCurrentPage() {
         return viewPager.getCurrentPosition() == 0 ? chatsPage : channelsPage;
@@ -223,7 +230,7 @@ public class PinnedReactionsActivity extends BaseFragment {
             switchLayout.addView(editText, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             actionButton = new ButtonWithCounterView(context, getResourceProvider());
-            actionButton.setText(new SpannableStringBuilder(LocaleController.getString(R.string.PinnedEmojisList_Apply)), false);
+            actionButton.setText(new SpannableStringBuilder(LocaleController.getString(R.string.PinnedReactions_Apply)), false);
             actionButton.setOnClickListener(v -> buttonClick());
             addView(scrollView);
             addView(actionButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM, 13, 13, 13, 13));
@@ -552,7 +559,7 @@ public class PinnedReactionsActivity extends BaseFragment {
 
         public boolean hasChanges() {
             if (checked != getCurrentState().getValue()) {
-                getCurrentState().updateValue(checked);
+                getCurrentState().updateValue(checked && !selectedCustomEmojisList.isEmpty());
             }
             return checkChangesInList();
         }
@@ -777,36 +784,14 @@ public class PinnedReactionsActivity extends BaseFragment {
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 if (actionBarContainer != null) {
-                    ((MarginLayoutParams) actionBarContainer.getLayoutParams()).height = ActionBar.getCurrentActionBarHeight();
-                    ((MarginLayoutParams) actionBarContainer.getLayoutParams()).topMargin = AndroidUtilities.statusBarHeight;
+                    ((MarginLayoutParams) actionBarContainer.getLayoutParams()).height = ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight;
+                    ((MarginLayoutParams) backButton.getLayoutParams()).topMargin = AndroidUtilities.statusBarHeight / 2;
+                    ((MarginLayoutParams) tabsView.getLayoutParams()).topMargin = AndroidUtilities.statusBarHeight / 2;
                 }
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             }
         };
         frameLayout.setFitsSystemWindows(true);
-
-        colorBar = new PeerColorActivity.ColoredActionBar(context, resourceProvider) {
-            @Override
-            protected void onUpdateColor() {
-                updateLightStatusBar();
-                updateActionBarButtonsColor();
-                if (tabsView != null) {
-                    tabsView.setBackgroundColor(getTabsViewBackgroundColor());
-                }
-            }
-
-            private int lastBtnColor = 0;
-            public void updateActionBarButtonsColor() {
-                final int btnColor = getActionBarButtonColor();
-                if (lastBtnColor != btnColor) {
-                    if (backButton != null) {
-                        lastBtnColor = btnColor;
-                        backButton.setColorFilter(new PorterDuffColorFilter(btnColor, PorterDuff.Mode.SRC_IN));
-                    }
-                }
-            }
-        };
-        frameLayout.addView(colorBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL));
 
         Utilities.Callback2<Boolean, Integer> onScrollEndCallback = (Boolean isShowing, Integer page) -> {
             ReactionsContainerLayout preview = null;
@@ -837,7 +822,6 @@ public class PinnedReactionsActivity extends BaseFragment {
             @Override
             protected void onTabAnimationUpdate(boolean manual) {
                 tabsView.setSelected(viewPager.getPositionAnimated());
-                colorBar.setProgressToGradient(viewPager.getPositionAnimated());
             }
 
             @Override
@@ -882,6 +866,7 @@ public class PinnedReactionsActivity extends BaseFragment {
         frameLayout.addView(viewPager, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL));
 
         actionBarContainer = new FrameLayout(context);
+        actionBarContainer.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefault, getResourceProvider()));
         frameLayout.addView(actionBarContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL));
 
         tabsView = new FilledTabsView(context);
@@ -899,6 +884,9 @@ public class PinnedReactionsActivity extends BaseFragment {
                 onScrollEndCallback.run(false, tab == PAGE_CHANNELS ? PAGE_CHATS : PAGE_CHANNELS);
             }, 100);
         });
+        tabsView.setBackgroundColor(AndroidUtilities.computePerceivedBrightness(Theme.getColor(Theme.key_actionBarDefault, getResourceProvider())) > .721f ?
+                Theme.getColor(Theme.key_actionBarDefaultIcon, getResourceProvider()) :
+                Theme.adaptHSV(Theme.getColor(Theme.key_actionBarDefault, getResourceProvider()), +.08f, -.08f));
         actionBarContainer.addView(tabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 40, Gravity.CENTER));
 
         backButton = new ImageView(context);
@@ -912,8 +900,6 @@ public class PinnedReactionsActivity extends BaseFragment {
             }
         });
         actionBarContainer.addView(backButton, LayoutHelper.createFrame(54, 54, Gravity.LEFT | Gravity.CENTER_VERTICAL));
-
-        colorBar.updateColors();
 
         FrameLayout contentView;
         fragmentView = contentView = frameLayout;
@@ -942,6 +928,9 @@ public class PinnedReactionsActivity extends BaseFragment {
     @Override
     public boolean isSwipeBackEnabled(MotionEvent event) {
         if (hasUnsavedChanged()) {
+            return false;
+        }
+        if (viewPager.getCurrentPosition() > PAGE_CHATS) {
             return false;
         }
         return super.isSwipeBackEnabled(event);
@@ -987,6 +976,14 @@ public class PinnedReactionsActivity extends BaseFragment {
     }
 
     @Override
+    public void onFragmentDestroy() {
+        super.onFragmentDestroy();
+        if (fragment != null) {
+            fragment.notifyItemChanged(PreferenceType.TEXT_ICON.getAdapterType());
+        }
+    }
+
+    @Override
     public void onFragmentClosed() {
         super.onFragmentClosed();
         Bulletin.removeDelegate(this);
@@ -995,5 +992,10 @@ public class PinnedReactionsActivity extends BaseFragment {
     public void updateLightStatusBar() {
         if (getParentActivity() == null) return;
         AndroidUtilities.setLightStatusBar(getParentActivity().getWindow(), isLightStatusBar());
+    }
+
+    public static String getRowDescription() {
+        int count = OctoConfig.INSTANCE.getFavoriteReactionsCount();
+        return count > 0 ? String.valueOf(count) : LocaleController.getString(R.string.PasswordOff);
     }
 }

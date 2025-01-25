@@ -28,6 +28,7 @@ import it.octogram.android.ConfigProperty;
 import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhotoResolution;
+import it.octogram.android.QualityPreset;
 import it.octogram.android.StickerUi;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
@@ -194,6 +195,24 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .build());
                 })
                 .category(LocaleController.getString(R.string.DownloadAndUploadBoost), category -> {
+                    category.row(new ListRow.ListRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .currentValue(OctoConfig.INSTANCE.useQualityPreset)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(QualityPreset.AUTO.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_Default)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(QualityPreset.HIGHEST.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_HighQuality))
+                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_HighQuality_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(QualityPreset.LOWEST.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_LowQuality))
+                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_LowQuality_Desc))
+                            ))
+                            .title(LocaleController.getString(R.string.UseQualityPreset))
+                            .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.uploadBoost)

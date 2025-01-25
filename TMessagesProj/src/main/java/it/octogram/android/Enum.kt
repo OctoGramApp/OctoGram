@@ -237,6 +237,12 @@ enum class CameraType(val value: Int) {
     }
 }
 
+enum class QualityPreset(val value: Int) {
+    AUTO(0),
+    HIGHEST(1),
+    LOWEST(2)
+}
+
 enum class IconsUIType(val value: Int) {
     DEFAULT(0),
     SOLAR(1),
@@ -553,10 +559,10 @@ enum class MonetTheme(val monetThemeName: String, val monetThemeFileName: String
 
 object CameraPreview {
     const val DEFAULT = 0
-    const val FLOATING = 1
-    const val BOTTOM_BAR = 2
+    const val BOTTOM_BAR = 1
+    const val HIDDEN = 2
 
-    @IntDef(DEFAULT, FLOATING, BOTTOM_BAR)
+    @IntDef(DEFAULT, BOTTOM_BAR)
     @Retention(AnnotationRetention.SOURCE)
     annotation class PreviewType
 }
