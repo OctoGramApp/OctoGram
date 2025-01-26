@@ -311,6 +311,7 @@ import it.octogram.android.QualityPreset;
 import it.octogram.android.VideoQuality;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
+import it.octogram.android.utils.BrowserUtils;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import it.octogram.android.utils.VideoUtils;
@@ -10266,6 +10267,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
 
                     int currentState = OctoConfig.INSTANCE.useQualityPreset.getValue();
                     if (currentState != QualityPreset.AUTO.getValue()) {
+                        if (currentState == QualityPreset.DYNAMIC.getValue()) {
+                            currentState = BrowserUtils.isUsingWifi() ? QualityPreset.HIGHEST.getValue() : QualityPreset.LOWEST.getValue();
+                        }
                         int maxQuality = -1;
                         int maxQualityIndex = -1;
                         VideoPlayer.Quality maxQualityValue = null;

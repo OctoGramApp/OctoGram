@@ -18,4 +18,5 @@ public class MenuActionDef {
     public static final int LITE_MODE_ID = 206;
     public static final int PROXY_LIST_ID = 207;
     public static final int BROWSER_HOME_ID = 914;
+    public static final int DATA_AND_STORAGE = 915;
 }

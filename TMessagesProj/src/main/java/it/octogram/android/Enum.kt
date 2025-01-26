@@ -240,7 +240,8 @@ enum class CameraType(val value: Int) {
 enum class QualityPreset(val value: Int) {
     AUTO(0),
     HIGHEST(1),
-    LOWEST(2)
+    LOWEST(2),
+    DYNAMIC(3)
 }
 
 enum class IconsUIType(val value: Int) {
@@ -271,7 +272,8 @@ enum class MenuItemId(val id: String, val itemId: Int) {
     DIVIDER("divider", 0),
     ATTACH_MENU_BOT("attach_menu_bot", 205),
     DOWNLOADS("downloads", 912),
-    TELEGRAM_BROWSER("tg_browser", 914);
+    TELEGRAM_BROWSER("tg_browser", 914),
+    DATA_AND_STORAGE("data_and_storage", 915);
 
     companion object {
         fun getById(id: String): MenuItemId? {

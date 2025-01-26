@@ -376,6 +376,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                         case TELEGRAM_BROWSER -> icon = R.drawable.msg_link2;
                         case ARCHIVED_MESSAGES -> icon = R.drawable.msg_archive;
                         case DATACENTER_STATUS -> icon = datacenterIcon;
+                        case DATA_AND_STORAGE -> icon = R.drawable.msg2_data;
                         case QR_LOGIN -> icon = R.drawable.msg_qrcode;
                         case ATTACH_MENU_BOT -> {
                             TLRPC.TL_attachMenuBots menuBots = MediaDataController.getInstance(UserConfig.selectedAccount).getAttachMenuBots();

@@ -252,6 +252,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alwaysExpandBlockQuotes.getKey(), R.string.AlwaysExpandBlockQuotes));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.profileBubbleHideBorder.getKey(), composeName(R.string.DrawerHeaderAsBubble, R.string.ProfileBubbleHideBorder)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.profileBubbleMoreTopPadding.getKey(), composeName(R.string.DrawerHeaderAsBubble, R.string.ProfileBubbleMoreTopPadding)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useQualityPreset.getKey(), R.string.UseQualityPreset));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost.getKey(), R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost.getKey(), R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue.getKey(), R.string.DownloadBoostType));
@@ -264,8 +265,11 @@ public class ImportSettingsScanHelper {
     }
 
     private void testSettings() {
+        ArrayList<String> allKeys = new ArrayList<>();
+
         for (SettingsScanCategory category : categories) {
             for (SettingsScanOption option : category.options) {
+                allKeys.add(option.optionKey);
                 if (isSettingKeyInvalid(option.optionKey)) {
                     OctoLogging.e(OctoConfig.TAG, "Setting key " + option.optionKey + " is not valid - part of " + category.categoryId);
                 }
@@ -273,8 +277,26 @@ public class ImportSettingsScanHelper {
         }
 
         for (String excluded : excludedOptions) {
+            allKeys.add(excluded);
             if (isSettingKeyInvalid(excluded)) {
                 OctoLogging.e(OctoConfig.TAG, "Excluded option " + excluded + " is not valid");
+            }
+        }
+
+        for (Field field : OctoConfig.INSTANCE.getClass().getDeclaredFields()) {
+            if (field.getType().equals(ConfigProperty.class)) {
+                try {
+                    ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
+
+                    if (configProperty != null) {
+                        String key = configProperty.getKey();
+                        if (!allKeys.contains(key)) {
+                            OctoLogging.e(OctoConfig.TAG, "Setting key " + key + " is not part of backup");
+                        }
+                    }
+                } catch (IllegalAccessException ignored) {
+
+                }
             }
         }
     }

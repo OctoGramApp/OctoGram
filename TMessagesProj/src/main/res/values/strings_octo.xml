@@ -349,7 +349,9 @@
     <string name="UseQualityPreset_HighQuality">Highest</string>
     <string name="UseQualityPreset_HighQuality_Desc">It automatically selects the highest quality when you watch a video or story.</string>
     <string name="UseQualityPreset_LowQuality">Lowest</string>
-    <string name="UseQualityPreset_LowQuality_Desc">It automatically selects the Lowest quality when you watch a video or story.</string>
+    <string name="UseQualityPreset_LowQuality_Desc">It automatically selects the lowest quality when you watch a video or story.</string>
+    <string name="UseQualityPreset_Dynamic">Dynamic</string>
+    <string name="UseQualityPreset_Dynamic_Desc">It will use the lower quality only if you are not using Wi-Fi.</string>
     <string name="UploadBoost">Upload boost</string>
     <string name="DownloadBoost">Download boost</string>
     <string name="DownloadBoostType">Download Boost type</string>

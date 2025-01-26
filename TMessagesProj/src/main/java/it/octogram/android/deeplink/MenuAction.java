@@ -19,7 +19,8 @@ import androidx.annotation.IntDef;
         MenuActionDef.QR_LOGIN_ID,
         MenuActionDef.LITE_MODE_ID,
         MenuActionDef.PROXY_LIST_ID,
-        MenuActionDef.BROWSER_HOME_ID
+        MenuActionDef.BROWSER_HOME_ID,
+        MenuActionDef.DATA_AND_STORAGE
 })
 public @interface MenuAction {
 }

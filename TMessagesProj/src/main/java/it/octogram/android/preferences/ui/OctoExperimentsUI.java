@@ -209,7 +209,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(QualityPreset.LOWEST.getValue())
                                             .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_LowQuality))
-                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_LowQuality_Desc))
+                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_LowQuality_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(QualityPreset.DYNAMIC.getValue())
+                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_Dynamic))
+                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_Dynamic_Desc))
                             ))
                             .title(LocaleController.getString(R.string.UseQualityPreset))
                             .build());

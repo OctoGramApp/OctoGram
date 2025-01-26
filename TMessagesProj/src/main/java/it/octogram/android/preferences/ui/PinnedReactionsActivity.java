@@ -29,7 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
-import androidx.core.graphics.ColorUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,7 +63,6 @@ import org.telegram.ui.Components.Reactions.CustomReactionEditText;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Components.ReactionsContainerLayout;
 import org.telegram.ui.Components.ViewPagerFixed;
-import org.telegram.ui.PeerColorActivity;
 import org.telegram.ui.SelectAnimatedEmojiDialog;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
@@ -806,9 +804,7 @@ public class PinnedReactionsActivity extends BaseFragment {
 
             if (preview != null) {
                 if (!isShowing) {
-                    if (preview.getAlpha() > 0f) {
-                        preview.animate().alpha(0f).setDuration(250).start();
-                    }
+                    preview.startCloseAnimation();
                     return;
                 }
 

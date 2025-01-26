@@ -606,6 +606,7 @@ public class OctoConfig {
             case "uiTitleCenteredState" -> value >= ActionBarCenteredTitle.ALWAYS.getValue() && value <= ActionBarCenteredTitle.NEVER.getValue();
             case "shortcutsPosition" -> value >= ShortcutsPosition.THREE_DOTS.getId() && value <= ShortcutsPosition.PROFILE_DOTS.getId();
             case "cameraPreview" -> value >= CameraPreview.DEFAULT && value <= CameraPreview.HIDDEN;
+            case "useQualityPreset" -> value >= QualityPreset.AUTO.getValue() && value <= QualityPreset.DYNAMIC.getValue();
             default -> false;
         };
     }

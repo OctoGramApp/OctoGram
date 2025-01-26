@@ -48,7 +48,8 @@ public class MenuOrderController {
             MenuItemId.POWER_USAGE.getId(),
             MenuItemId.PROXY_SETTINGS.getId(),
             MenuItemId.ATTACH_MENU_BOT.getId(),
-            MenuItemId.TELEGRAM_BROWSER.getId()
+            MenuItemId.TELEGRAM_BROWSER.getId(),
+            MenuItemId.DATA_AND_STORAGE.getId()
     };
 
     static {
@@ -261,91 +262,91 @@ public class MenuOrderController {
         list.add(
                 new EditableMenuItem(
                         list_items[0],
-                        LocaleController.getString(R.string.NewGroup),
+                        R.string.NewGroup,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[1],
-                        LocaleController.getString(R.string.Contacts),
+                        R.string.Contacts,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[2],
-                        LocaleController.getString(R.string.Calls),
+                        R.string.Calls,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[3],
-                        LocaleController.getString(R.string.SavedMessages),
+                        R.string.SavedMessages,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[4],
-                        LocaleController.getString(R.string.Settings),
+                        R.string.Settings,
                         OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[5],
-                        LocaleController.getString(R.string.OctoGramSettings),
+                        R.string.OctoGramSettings,
                         OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[6],
-                        LocaleController.getString(R.string.NewChannel),
+                        R.string.NewChannel,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[7],
-                        LocaleController.getString(R.string.InviteFriends),
+                        R.string.InviteFriends,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[8],
-                        LocaleController.getString(R.string.TelegramFeatures),
+                        R.string.TelegramFeatures,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[9],
-                        LocaleController.getString(R.string.ArchivedChats),
+                        R.string.ArchivedChats,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[10],
-                        LocaleController.getString(R.string.DatacenterStatus),
+                        R.string.DatacenterStatus,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[11],
-                        LocaleController.getString(R.string.AuthAnotherClient),
+                        R.string.AuthAnotherClient,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[12],
-                        LocaleController.getString(R.string.SetEmojiStatus),
+                        R.string.SetEmojiStatus,
                         false,
                         true
                 )
@@ -353,49 +354,56 @@ public class MenuOrderController {
         list.add(
                 new EditableMenuItem(
                         list_items[13],
-                        LocaleController.getString(R.string.MyProfile),
+                        R.string.MyProfile,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[14],
-                        LocaleController.getString(R.string.Devices),
+                        R.string.Devices,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[15],
-                        LocaleController.getString(R.string.DownloadMenuItem),
+                        R.string.DownloadMenuItem,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[16],
-                        LocaleController.getString(R.string.PowerUsage),
+                        R.string.PowerUsage,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[17],
-                        LocaleController.getString(R.string.ProxySettings),
+                        R.string.ProxySettings,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[18],
-                        LocaleController.getString(R.string.AttachedMenuBot),
+                        R.string.AttachedMenuBot,
                         false
                 )
         );
         list.add(
                 new EditableMenuItem(
                         list_items[19],
-                        LocaleController.getString(R.string.OctoTgBrowser),
+                        R.string.OctoTgBrowser,
+                        false
+                )
+        );
+        list.add(
+                new EditableMenuItem(
+                        list_items[20],
+                        R.string.DataSettings,
                         false
                 )
         );
@@ -406,7 +414,7 @@ public class MenuOrderController {
                     list.add(
                             new EditableMenuItem(
                                     DIVIDER_ITEM,
-                                    LocaleController.getString(R.string.Divider),
+                                    R.string.Divider,
                                     false
                             )
                     );
@@ -524,13 +532,13 @@ public class MenuOrderController {
         public final boolean isDefault;
         public final boolean isPremium;
 
-        public EditableMenuItem(String menu_id, String menu_text, boolean menu_default) {
+        public EditableMenuItem(String menu_id, int menu_text, boolean menu_default) {
             this(menu_id, menu_text, menu_default, false);
         }
 
-        public EditableMenuItem(String menu_id, String menu_text, boolean menu_default, boolean is_premium) {
+        public EditableMenuItem(String menu_id, int menu_text, boolean menu_default, boolean is_premium) {
             id = menu_id;
-            text = menu_text;
+            text = LocaleController.getString(menu_text);
             isDefault = menu_default;
             isPremium = is_premium;
         }

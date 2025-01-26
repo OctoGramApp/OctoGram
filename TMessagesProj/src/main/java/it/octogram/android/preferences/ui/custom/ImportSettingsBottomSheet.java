@@ -115,7 +115,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         recyclerListView.setLayoutManager(new LinearLayoutManager(context));
         recyclerListView.setPadding(backgroundPaddingLeft, headerTotalHeight, backgroundPaddingLeft, dp(48+10+10 + (message == null ? 0 : 48)));
         recyclerListView.setOnItemClickListener((view, position, x, y) -> {
-            if ((view == null) || (position < 0) || (position - 1 >= items.size())) {
+            if (items.isEmpty() || (view == null) || (position < 0) || (position - 1 >= items.size())) {
                 return;
             }
 

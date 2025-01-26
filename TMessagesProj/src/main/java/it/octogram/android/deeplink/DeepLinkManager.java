@@ -28,6 +28,7 @@ import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.AppIconBulletinLayout;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
+import org.telegram.ui.DataSettingsActivity;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.LauncherIconController;
@@ -423,6 +424,10 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new DatacenterActivity());
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
+            case MenuActionDef.DATA_AND_STORAGE:
+                fragment.presentFragment(new DataSettingsActivity());
+                drawerLayoutContainer.closeDrawer(false);
+                return true;
             case MenuActionDef.QR_LOGIN_ID:
                 var fg = getQrActivity(currentAccount, launchActivity);
                 actionBarLayout.presentFragment(fg, false, true, true, false);
@@ -448,7 +453,6 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            OctoLogging.d(TAG, "Menu action not recognized: " + id);
             OctoLogging.d(TAG, "Menu action not recognized: " + id);
         }
         return false;

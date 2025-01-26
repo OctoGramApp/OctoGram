@@ -8,6 +8,10 @@
 
 package it.octogram.android.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -47,5 +51,20 @@ public class BrowserUtils {
         String searchUrl = LocaleController.getString("SearchEngine" + engineType + "SearchURL");
         String host = AndroidUtilities.getHostAuthority(searchUrl);
         return "https://"+host;
+    }
+
+    public static boolean isUsingWifi() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) LaunchActivity.instance.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager == null) {
+            return false;
+        }
+
+        try {
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isAvailable() && networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
+        } catch (SecurityException e) {
+            return false;
+        }
     }
 }

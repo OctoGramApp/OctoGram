@@ -1515,6 +1515,28 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         animator.start();
     }
 
+    public void startCloseAnimation() {
+        setTransitionProgress(0);
+        setAlpha(1f);
+        notificationsLocker.lock();
+        ObjectAnimator animator;
+        if (allowSmoothEnterTransition()) {
+            animator = ObjectAnimator.ofFloat(this, ReactionsContainerLayout.TRANSITION_PROGRESS_VALUE, 1f, 0f).setDuration(250);
+            animator.setInterpolator(new OvershootInterpolator(0.5f));
+        } else {
+            animator = ObjectAnimator.ofFloat(this, ReactionsContainerLayout.TRANSITION_PROGRESS_VALUE, 1f, 0f).setDuration(250);
+            animator.setInterpolator(new OvershootInterpolator(0.5f));
+        }
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                notificationsLocker.unlock();
+            }
+        });
+        animator.start();
+    }
+
     public int getTotalWidth() {
         int itemsCount = getItemsCount();
         int width;

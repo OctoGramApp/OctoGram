@@ -192,6 +192,7 @@ import java.util.concurrent.CountDownLatch;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.QualityPreset;
 import it.octogram.android.StoreUtils;
+import it.octogram.android.utils.BrowserUtils;
 
 public class PeerStoriesView extends SizeNotifierFrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -392,6 +393,9 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         if (UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
             int currentState = OctoConfig.INSTANCE.useQualityPreset.getValue();
             if (currentState != QualityPreset.AUTO.getValue()) {
+                if (currentState == QualityPreset.DYNAMIC.getValue()) {
+                    currentState = BrowserUtils.isUsingWifi() ? QualityPreset.HIGHEST.getValue() : QualityPreset.LOWEST.getValue();
+                }
                 MessagesController.getInstance(UserConfig.selectedAccount).setStoryQuality(currentState == QualityPreset.HIGHEST.getValue());
             }
         }

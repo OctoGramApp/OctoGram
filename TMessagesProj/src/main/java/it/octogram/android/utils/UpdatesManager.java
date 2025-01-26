@@ -8,9 +8,6 @@
 
 package it.octogram.android.utils;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.text.TextUtils;
 
 import org.json.JSONArray;
@@ -616,18 +613,7 @@ public class UpdatesManager {
         }
 
         if (autoDownloadUpdatesStatus == AutoDownloadUpdate.ONLY_ON_WIFI.getValue()) {
-            ConnectivityManager connectivityManager = (ConnectivityManager) LaunchActivity.instance.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            if (connectivityManager == null) {
-                return false;
-            }
-
-            try {
-                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                return networkInfo != null && networkInfo.isAvailable() && networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
-            } catch (SecurityException e) {
-                return false;
-            }
+            return BrowserUtils.isUsingWifi();
         }
 
         return false;
