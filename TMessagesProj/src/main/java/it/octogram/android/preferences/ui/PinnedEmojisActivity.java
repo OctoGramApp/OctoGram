@@ -269,7 +269,7 @@ public class PinnedEmojisActivity extends BaseFragment {
                     JSONObject jsonObject = object.getJSONObject(i);
                     if (jsonObject.has("emoticon")) {
                         String emoji = jsonObject.getString("emoticon");
-                        CharSequence localCharSequence = Emoji.replaceEmoji(emoji, editText.getPaint().getFontMetricsInt(), dp(18), false);
+                        CharSequence localCharSequence = Emoji.replaceEmoji(emoji, editText.getPaint().getFontMetricsInt(), false);
                         Spannable spannable = new SpannableString(localCharSequence);
                         spannable.setSpan(emoji, 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         editText.append(spannable);
@@ -357,7 +357,7 @@ public class PinnedEmojisActivity extends BaseFragment {
                 emoji = emoji.replace("\uFE0F", "");
 
                 if (!selectedEmoticonsList.contains(emoji)) {
-                    CharSequence localCharSequence = Emoji.replaceEmoji(emoji, editText.getPaint().getFontMetricsInt(), dp(20), false);
+                    CharSequence localCharSequence = Emoji.replaceEmoji(emoji, editText.getPaint().getFontMetricsInt(), false);
                     Spannable spannable = new SpannableString(localCharSequence);
                     spannable.setSpan(emoji, 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     editText.setText(editText.getText().insert(i, spannable));

@@ -397,13 +397,27 @@ public class SessionCell extends FrameLayout {
         var customColor2 = drawableInfo.getCustomColor2();
 
         var iconDrawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, iconId);
+
+        // Drawable bgDrawable = new CircleGradientDrawable(dp(sz), colorKey == -1 ? 0xFF000000 : Theme.getColor(colorKey), colorKey2 == -1 ? 0xFF000000 : Theme.getColor(colorKey2));
+        var bgDrawable = new CircleGradientDrawable(dp(sz), colorKey == -1 ? customColor : Theme.getColor(colorKey), colorKey2 == -1 ? customColor2 : Theme.getColor(colorKey2));
+        var drawable = new CombinedDrawable(bgDrawable, iconDrawable);
+
+        var platform = session.platform.toLowerCase();
+
+        if (platform.isEmpty()) {
+            platform = session.system_version.toLowerCase();
+        }
+
         if (iconDrawable != null) {
             iconDrawable.mutate();
             iconDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_avatar_text), PorterDuff.Mode.SRC_IN));
+
+            if (platform.contains("fragment")) {
+                drawable.setIconSize((int) (iconDrawable.getIntrinsicWidth() / 44.0f * sz), (int) (iconDrawable.getIntrinsicHeight() / 44.0f * sz));
+            }
         }
-        var bgDrawable = new CircleGradientDrawable(dp(sz), colorKey == -1 ? customColor : Theme.getColor(colorKey), colorKey2 == -1 ? customColor2 : Theme.getColor(colorKey2));
-        // Drawable bgDrawable = new CircleGradientDrawable(dp(sz), colorKey == -1 ? 0xFF000000 : Theme.getColor(colorKey), colorKey2 == -1 ? 0xFF000000 : Theme.getColor(colorKey2));
-        return new CombinedDrawable(bgDrawable, iconDrawable);
+
+        return drawable;
     }
 
     public static class CircleGradientDrawable extends Drawable {

@@ -36,6 +36,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
@@ -272,7 +273,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                 AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
                 progressDialog.setCanCancel(false);
 
-                TLRPC.TL_account_deleteAccount req = new TLRPC.TL_account_deleteAccount();
+                TL_account.deleteAccount req = new TL_account.deleteAccount();
                 req.reason = String.format("deletion requested by the user via %s - request made after 2fa confirmation", OctoUtils.getDomain()) ;
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                     if (response instanceof TLRPC.TL_boolTrue) {

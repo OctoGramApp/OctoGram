@@ -160,32 +160,32 @@ public class FolderTypeSelector extends FrameLayout {
         filterTabsView.removeTabs();
 
         if (isSinglePreview) {
-            filterTabsView.addTab(1, 1, "App", false, false, "\uD83C\uDFE0");
+            filterTabsView.addTab(1, 1, "App", "\uD83C\uDFE0", null, false, false, false);
         } else {
             ArrayList<MessagesController.DialogFilter> filters = MessagesController.getInstance(UserConfig.selectedAccount).getDialogFilters();
             ArrayList<Integer> hiddenFolders = FolderUtils.getHiddenFolders();
 
             int addedTab = 0;
             for (int a = 0, N = filters.size(); a < N; a++) {
-                OctoLogging.e("updated", "up - "+filters.get(a).name+ " - "+filters.get(a).id);
+                OctoLogging.e("updated", "up - " + filters.get(a).name + " - " + filters.get(a).id);
                 if (filters.get(a).isDefault()) {
                     if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
                         addedTab++;
-                        filterTabsView.addTab(a, 0, LocaleController.getString(R.string.FilterAllChats), true,  filters.get(a).locked, filters.get(a).emoticon);
+                        filterTabsView.addTab(a, 0, LocaleController.getString(R.string.FilterAllChats), filters.get(a).emoticon, null, false, true, filters.get(a).locked);
                     }
                 } else {
                     if (hiddenFolders.contains(filters.get(a).id)) {
                         continue;
                     }
                     addedTab++;
-                    filterTabsView.addTab(a, filters.get(a).localId, filters.get(a).name, false, filters.get(a).locked, filters.get(a).emoticon);
+                    filterTabsView.addTab(a, filters.get(a).localId, filters.get(a).name, filters.get(a).emoticon, null, false, false, filters.get(a).locked);
                 }
             }
 
             if (addedTab == 0 || addedTab == 1) {
-                filterTabsView.addTab(1, 1, "App", addedTab == 0, false, "\uD83C\uDFE0");
-                filterTabsView.addTab(2, 2, "OctoGram", false, false, "\u2764");
-                filterTabsView.addTab(3, 3, "Telegram", false, false, "\u2B50");
+                filterTabsView.addTab(1, 1, "App", "\uD83C\uDFE0", null, false, addedTab == 0, false);
+                filterTabsView.addTab(2, 2, "OctoGram", "\u2764", null, false, false, false);
+                filterTabsView.addTab(3, 3, "Telegram", "\u2B50", null, false, false, false);
             }
         }
 

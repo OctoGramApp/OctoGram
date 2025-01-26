@@ -125,7 +125,7 @@ public class DcInfoSelector extends FrameLayout {
         profileViewFrame.setBackground(border2);
         profilePreview = new PeerColorActivity.ProfilePreview(context, UserConfig.selectedAccount, 0, null);
         profilePreview.setColor(UserObject.getProfileColorId(user), false);
-        profilePreview.setEmoji(UserObject.getProfileEmojiId(user), false);
+        profilePreview.setEmoji(UserObject.getProfileEmojiId(user), false, false);
         profilePreview.setCustomInfoText(String.format(Locale.ENGLISH, "id: %s (dc%s)", getCurrentChatIDFormat(), dc_id));
         profileViewFrame.addView(profilePreview, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER_VERTICAL));
         navigationFrame.addView(profileViewFrame, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER_VERTICAL));

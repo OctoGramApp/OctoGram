@@ -86,7 +86,7 @@ public class TextDetailCellMultiline extends LinearLayout {
 
     public void setTextWithEmojiAndValue(CharSequence text, CharSequence value, boolean divider) {
         charSequence = text;
-        spoilersTextView.setText(Emoji.replaceEmoji(text, spoilersTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+        spoilersTextView.setText(Emoji.replaceEmoji(text, spoilersTextView.getPaint().getFontMetricsInt(), false));
         valueTextView.setText(value);
         needDivider = divider;
         setWillNotDraw(!divider);
