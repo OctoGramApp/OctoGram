@@ -26,6 +26,8 @@
     <string name="TranslatorMinimizedGroup">Translator bar has been minimized for this group.</string>
     <string name="TranslatorMinimized">Translator bar has been minimized for this chat.</string>
 
+    <string name="TranscriptionTooLong">This voice message is too long.</string>
+
     <!-- Media filtering -->
     <string name="MediaFilter">Filter by media type</string>
     <string name="MediaFilterItemAll">No filter</string>
@@ -205,9 +207,6 @@
     <string name="HideAllChatFolder">Hide \"All Chats\" tab</string>
     <string name="HideAllChatFolders">Totally hide folders</string>
     <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
-    <string name="Replies">Replies</string>
-    <string name="ReplyTracking">Enable Reply Tracking</string>
-    <string name="ReplyTracking_Desc">Keep track of replies to specific messages for easier reference.</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="EnableSmartNotificationsForPrivateChats">Enable smart notifications for private chats</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>

@@ -60,6 +60,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
         updateShortcutsState.run();
 
         return OctoPreferences.builder(LocaleController.getString(R.string.Appearance))
+                .deepLink("tg://appearance")
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, LocaleController.getString(R.string.OctoAppearanceSettingsHeader))
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI())))

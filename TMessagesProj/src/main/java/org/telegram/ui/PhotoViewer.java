@@ -22157,6 +22157,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 AndroidUtilities.runOnUIThread(() -> {
                     captionEdit.setText(finalText.text);
+                    applyCaption();
                 });
             }
 

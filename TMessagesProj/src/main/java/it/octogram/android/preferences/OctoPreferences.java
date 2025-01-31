@@ -29,7 +29,7 @@ import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 
-public record OctoPreferences(CharSequence title, List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
+public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
 
     public static OctoPreferencesBuilder builder(String name) {
         return new OctoPreferencesBuilder(name);
@@ -39,21 +39,33 @@ public record OctoPreferences(CharSequence title, List<BaseRow> preferences, Lis
         public int icon;
         public String title;
         public Runnable run;
+        public boolean danger = false;
 
         public OctoContextMenuElement(int icon, String title, Runnable run) {
             this.icon = icon;
             this.title = title;
             this.run = run;
         }
+
+        public OctoContextMenuElement asDanger() {
+            danger = true;
+            return this;
+        }
     }
 
     public static class OctoPreferencesBuilder {
         private final String name;
+        private String deepLink = "";
         private final List<OctoContextMenuElement> elements = new ArrayList<>();
         private final List<BaseRow> preferences = new ArrayList<>();
 
         public OctoPreferencesBuilder(String name) {
             this.name = name;
+        }
+
+        public OctoPreferencesBuilder deepLink(String deepLink) {
+            this.deepLink = deepLink;
+            return this;
         }
 
         public OctoPreferencesBuilder addContextMenuItem(OctoContextMenuElement element) {
@@ -143,7 +155,7 @@ public record OctoPreferences(CharSequence title, List<BaseRow> preferences, Lis
         }
 
         public OctoPreferences build() {
-            return new OctoPreferences(name, preferences, elements);
+            return new OctoPreferences(name, deepLink, preferences, elements);
         }
     }
 }

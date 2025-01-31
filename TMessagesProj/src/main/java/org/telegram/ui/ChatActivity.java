@@ -6640,15 +6640,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         pagedownButton = new FrameLayout(context);
         pagedownButton.setVisibility(View.INVISIBLE);
         contentView.addView(pagedownButton, LayoutHelper.createFrame(66, 61, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, -3, 5));
-        pagedownButton.setOnClickListener(view -> onPageDownClicked());
-        if (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue()) {
-            pagedownButton.setOnLongClickListener(view -> {
-                returnToMessageId = 0;
-                returnToMessageIdsStack.clear();
-                onPageDownClicked();
-                return true;
-            });
-        }
+//        pagedownButton.setOnClickListener(view -> onPageDownClicked());
+        pagedownButton.setOnLongClickListener(view -> {
+            returnToMessageId = 0;
+            returnToMessageIdsStack.clear();
+            onPageDownClicked();
+            return true;
+        });
         ScaleStateListAnimator.apply(pagedownButton, .13f, 2f);
 
         searchUpButton = new FrameLayout(context);
@@ -10088,9 +10086,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         };
         if (createUnreadMessageAfterId != 0) {
             scrollToMessageId(createUnreadMessageAfterId, 0, false, returnToLoadIndex, true, 0, inCaseLoading);
-        } else if (returnToMessageId > 0 || (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue() && !returnToMessageIdsStack.empty())) {
-            if (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue() && !returnToMessageIdsStack.empty()) 
-                returnToMessageId = returnToMessageIdsStack.pop();
+        } else if (returnToMessageId > 0 || !returnToMessageIdsStack.empty()) {
+            if (!returnToMessageIdsStack.empty()) returnToMessageId = returnToMessageIdsStack.pop();
             scrollToMessageId(returnToMessageId, 0, true, returnToLoadIndex, true, 0, inCaseLoading);
         } else {
             scrollToLastMessage(false, true, inCaseLoading);
@@ -15998,8 +15995,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         }
         returnToMessageId = fromMessageId;
-        if (OctoConfig.INSTANCE.rememberAllRepliesMessage.getValue() && fromMessageId > 0)
-            returnToMessageIdsStack.push(returnToMessageId);
+        if (fromMessageId > 0) returnToMessageIdsStack.push(returnToMessageId);
         returnToLoadIndex = loadIndex;
         needSelectFromMessageId = select;
     }

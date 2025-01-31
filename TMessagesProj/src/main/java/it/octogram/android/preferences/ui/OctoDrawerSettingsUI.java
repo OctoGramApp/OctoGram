@@ -54,6 +54,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
         updateItemsVisibility();
 
         return OctoPreferences.builder(LocaleController.formatString(R.string.DrawerTitle))
+                .deepLink("tg://appearance/drawer")
                 .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_openin, LocaleController.getString(R.string.Drawer_Test), () -> LaunchActivity.instance.drawerLayoutContainer.openDrawer(true)))
                 .category(LocaleController.formatString(R.string.DrawerTitle), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()

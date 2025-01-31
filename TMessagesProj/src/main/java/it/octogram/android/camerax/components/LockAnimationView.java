@@ -32,10 +32,10 @@ public class LockAnimationView extends LinearLayout {
         super(context);
         setGravity(Gravity.CENTER_HORIZONTAL);
         AppCompatImageView imageView = new AppCompatImageView(context) {
-            float idleProgress;
-            boolean incIdle;
             private final int lockColor = Theme.getColor(Theme.key_chat_messagePanelVoiceLock);
             private final int backgroundLockColor = Theme.getColor(Theme.key_chat_messagePanelVoiceLockBackground);
+            float idleProgress;
+            boolean incIdle;
 
             @SuppressLint("DrawAllocation")
             @Override

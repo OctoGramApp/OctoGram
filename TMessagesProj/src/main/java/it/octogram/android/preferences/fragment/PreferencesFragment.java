@@ -10,6 +10,7 @@ package it.octogram.android.preferences.fragment;
 
 import static android.widget.LinearLayout.VERTICAL;
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.ui.Components.LayoutHelper.createLinear;
 
 import android.annotation.SuppressLint;
@@ -43,6 +44,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
+import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
@@ -55,6 +57,7 @@ import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AnimatedTextView;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.FireworksOverlay;
@@ -159,7 +162,12 @@ public class PreferencesFragment extends BaseFragment {
             menuItem.setContentDescription(LocaleController.getString(R.string.AccDescrMoreOptions));
 
             for (OctoPreferences.OctoContextMenuElement element : preferences.elements()) {
-                menuItem.addSubItem(++i, element.icon, element.title);
+                ActionBarMenuSubItem item = menuItem.addSubItem(++i, element.icon, element.title);
+                if (element.danger) {
+                    item.setIconColor(Theme.getColor(Theme.key_text_RedRegular));
+                    item.setTextColor(Theme.getColor(Theme.key_text_RedBold));
+                    item.setSelectorColor(Theme.multAlpha(Theme.getColor(Theme.key_text_RedRegular), .12f));
+                }
             }
         }
     }
@@ -193,6 +201,20 @@ public class PreferencesFragment extends BaseFragment {
         if (AndroidUtilities.isTablet()) {
             actionBar.setOccupyStatusBar(false);
         }
+
+        if (!preferences.deepLink().isEmpty()) {
+            BaseFragment fragment1 = this;
+            actionBar.setLongClickable(true);
+            actionBar.setOnLongClickListener(v -> {
+                AndroidUtilities.addToClipboard(preferences.deepLink());
+                BulletinFactory.of(fragment1)
+                        .createSimpleBulletin(R.raw.copy, getString(R.string.AffiliateProgramLinkCopiedTitle))
+                        .show();
+
+                return true;
+            });
+        }
+
         actionBar.setAllowOverlayTitle(true);
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
@@ -703,6 +725,7 @@ public class PreferencesFragment extends BaseFragment {
         private final ImageView arrowView;
         private final Switch switchView;
         private final CheckBox2 checkBoxView;
+        private final LinearLayout textViewLayout;
 
         private boolean needDivider, needLine;
 
@@ -746,7 +769,7 @@ public class PreferencesFragment extends BaseFragment {
             arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
             arrowView.setImageResource(R.drawable.arrow_more);
 
-            LinearLayout textViewLayout = new LinearLayout(context);
+            textViewLayout = new LinearLayout(context);
             textViewLayout.setOrientation(LinearLayout.HORIZONTAL);
             textViewLayout.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
 
@@ -816,6 +839,8 @@ public class PreferencesFragment extends BaseFragment {
             }
 
             countTextView.setText(MessageFormat.format(" {0}/{1}", selectedOptions, expandableRows.getItemsList().size()));
+
+            ((MarginLayoutParams) textViewLayout.getLayoutParams()).rightMargin = AndroidUtilities.dp((LocaleController.isRTL ? 64 : 75) + 4);
 
             needLine = !expandableRows.getItemsList().isEmpty();
             needDivider = true;

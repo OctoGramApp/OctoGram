@@ -8,8 +8,6 @@
 
 package it.octogram.android.preferences
 
-import it.octogram.android.preferences.PreferenceType.entries
-
 
 enum class PreferenceType(val adapterType: Int, val isEnabled: Boolean) {
     CUSTOM(-1, false),

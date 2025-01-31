@@ -27,4 +27,5 @@ public class DeepLinkDef {
     public static final String USER = "user";
     public static final String PINNED_EMOJIS = "pinned_emojis";
     public static final String PINNED_REACTIONS = "pinned_reactions";
+    public static final String TRANSLATOR = "translator";
 }

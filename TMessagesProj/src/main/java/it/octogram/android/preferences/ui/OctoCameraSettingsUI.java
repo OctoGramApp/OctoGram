@@ -80,6 +80,7 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         updateConfigs();
         return OctoPreferences.builder(getString(R.string.OctoCameraSettings))
+                .deepLink("tg://camera")
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.CAMERA, true, getString(R.string.OctoCameraSettingsHeader))
                 .category(R.string.CameraType, category -> category.row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(new CameraTypeSelector(context) {

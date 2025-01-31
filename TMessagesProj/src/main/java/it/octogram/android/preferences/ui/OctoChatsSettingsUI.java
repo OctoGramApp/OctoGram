@@ -45,6 +45,7 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
 
         return OctoPreferences.builder(LocaleController.getString(R.string.ChatTitle))
                 //.sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, LocaleController.getString(R.string.OctoAppearanceSettingsHeader))
+                .deepLink("tg://appearance/chat")
                 .category(LocaleController.getString(R.string.Chats), category -> category.row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(stickerSizeCell = new StickerSizeCell(context))
                         .build()

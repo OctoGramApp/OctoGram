@@ -593,10 +593,7 @@ public class FilterCreateActivity extends BaseFragment {
                 }
             } else if (item.viewType == VIEW_TYPE_CREATE_LINK || item.viewType == VIEW_TYPE_BUTTON && item.iconResId == R.drawable.msg2_link2) {
                 onClickCreateLink(view);
-            } else if (item.viewType == VIEW_TYPE_EDIT_EMOTICON) {
-                PollEditTextCell cell = (PollEditTextCell) view;
-                cell.getTextView().requestFocus();
-                AndroidUtilities.showKeyboard(cell.getTextView());
+            } else if (item.viewType == VIEW_TYPE_EDIT) {
 //                PollEditTextCell cell = (PollEditTextCell) view;
 //                cell.getTextView().requestFocus();
 //                AndroidUtilities.showKeyboard(cell.getTextView());
@@ -1364,7 +1361,6 @@ public class FilterCreateActivity extends BaseFragment {
     private static final int VIEW_TYPE_HEADER_COLOR_PREVIEW = 9;
     private static final int VIEW_TYPE_COLOR = 10;
     private static final int VIEW_TYPE_SWITCH = 199;
-    private static final int VIEW_TYPE_EDIT_EMOTICON = 132;
     private static final int VIEW_TYPE_HEADER_ANIMATED = 11;
 
     private static class ItemInner extends AdapterWithDiffUtils.Item {
@@ -1565,17 +1561,6 @@ public class FilterCreateActivity extends BaseFragment {
                         }
                     };
 
-                    iconSelectorAlert = new IconSelectorAlert(mContext) {
-                        @Override
-                        protected void onItemClick(String emoticon) {
-                            super.onItemClick(emoticon);
-                            newFilterEmoticon = emoticon;
-                            adapter.notifyItemChanged(nameRow);
-                            checkDoneButton(true);
-                        }
-                    };
-                    iconSelectorAlert.show();
-
                     cell.setAllowEntities(false);
                     cell.editTextEmoji.getEditText().setEmojiColor(getThemedColor(Theme.key_featuredStickers_addButton));
                     cell.editTextEmoji.setEmojiViewCacheType(AnimatedEmojiDrawable.CACHE_TYPE_TOGGLEABLE_EDIT);
@@ -1590,9 +1575,10 @@ public class FilterCreateActivity extends BaseFragment {
                         public void onTextChanged(CharSequence s, int start, int before, int count) {}
                         @Override
                         public void afterTextChanged(Editable s) {
-                            if (!TextUtils.equals(s, newFilterName)) {
-                                nameChangedManually = !TextUtils.isEmpty(s);
-                                newFilterName = AnimatedEmojiSpan.onlyEmojiSpans(s);
+                            CharSequence newName = s;
+                            if (!TextUtils.equals(newName, newFilterName)) {
+                                nameChangedManually = !TextUtils.isEmpty(newName);
+                                newFilterName = AnimatedEmojiSpan.onlyEmojiSpans(newName);
                                 if (folderTagsHeader != null) {
                                     folderTagsHeader.setPreviewText(AnimatedEmojiSpan.cloneSpans(newFilterName, -1, folderTagsHeader.getPreviewTextPaint().getFontMetricsInt(), .5f), true);
                                 }
@@ -1607,63 +1593,24 @@ public class FilterCreateActivity extends BaseFragment {
                     editText.setPadding(dp(23 - 16), editText.getPaddingTop(), editText.getPaddingRight(), editText.getPaddingBottom());
                     cell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     cell.editTextEmoji.getEditText().setImeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+
+                    cell.setOnChangeIcon(mContext, (m) -> {
+                        iconSelectorAlert = new IconSelectorAlert(mContext);
+                        iconSelectorAlert.setOnItemClick((emoticon) -> {
+                            newFilterEmoticon = emoticon;
+                            nameEditTextCell.setIcon(FolderIconController.getTabIcon(newFilterEmoticon), true);
+                            checkDoneButton(true);
+                        });
+                        cell.editTextEmoji.hidePopup(true);
+                        cell.editTextEmoji.closeKeyboard();
+                        iconSelectorAlert.show();
+                    });
+                    cell.setIcon(FolderIconController.getTabIcon(newFilterEmoticon), false);
+
                     view = cell;
                     break;
                 }
 
-//                case VIEW_TYPE_EDIT_EMOTICON: {
-//                    PollEditTextCell cell = new PollEditTextCell(mContext, false, PollEditTextCell.TYPE_DEFAULT, null, view1 -> {
-//                        iconSelectorAlert = new IconSelectorAlert(mContext) {
-//                            @Override
-//                            protected void onItemClick(String emoticon) {
-//                                super.onItemClick(emoticon);
-//                                newFilterEmoticon = emoticon;
-//                                adapter.notifyItemChanged(nameRow);
-//                                checkDoneButton(true);
-//                            }
-//                        };
-//                        iconSelectorAlert.show();
-//                    });
-//                    cell.createErrorTextView();
-//                    cell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-//                    cell.addTextWatcher(new TextWatcher() {
-//                        @Override
-//                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//                        }
-//
-//                        @Override
-//                        public void afterTextChanged(Editable s) {
-//                            if (cell.getTag() != null) {
-//                                return;
-//                            }
-//                            String newName = s.toString();
-//                            if (!TextUtils.equals(newName, newFilterName)) {
-//                                nameChangedManually = !TextUtils.isEmpty(newName);
-//                                newFilterName = newName;
-//                                if (folderTagsHeader != null) {
-//                                    folderTagsHeader.setPreviewText((newFilterName == null ? "" : newFilterName).toUpperCase(), true);
-//                                }
-//                            }
-//                            RecyclerView.ViewHolder holder = listView.findViewHolderForAdapterPosition(nameRow);
-//                            if (holder != null) {
-//                                setTextLeft(holder.itemView);
-//                            }
-//                            checkDoneButton(true);
-//                        }
-//                    });
-//                    EditTextBoldCursor editText = cell.getTextView();
-//                    cell.setShowNextButton(true);
-//                    editText.setOnFocusChangeListener((v, hasFocus) -> cell.getTextView2().setAlpha(hasFocus || newFilterName.length() > MAX_NAME_LENGTH ? 1.0f : 0.0f));
-//                    editText.setImeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
-//                    view = cell;
-//                    break;
-//                }
                 case VIEW_TYPE_SHADOW:
                     view = new ShadowSectionCell(mContext);
                     break;
@@ -1827,11 +1774,6 @@ public class FilterCreateActivity extends BaseFragment {
                 case VIEW_TYPE_CREATE_LINK: {
                     createLinkCell = (CreateLinkCell) holder.itemView;
                     createLinkCell.setDivider(divider);
-                    break;
-                }
-                case VIEW_TYPE_EDIT: {
-                    PollEditTextCell cell = (PollEditTextCell) holder.itemView;
-                    cell.setIcon(FolderIconController.getTabIcon(newFilterEmoticon));
                     break;
                 }
                 case VIEW_TYPE_HEADER_COLOR_PREVIEW: {

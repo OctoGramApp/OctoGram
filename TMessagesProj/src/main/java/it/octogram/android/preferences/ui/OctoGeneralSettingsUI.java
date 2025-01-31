@@ -51,6 +51,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
         ConfigProperty<Boolean> isDcIdVisible = new ConfigProperty<>(null, OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.NONE.getValue());
 
         return OctoPreferences.builder(LocaleController.getString(R.string.OctoGeneralSettings))
+                .deepLink("tg://general")
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, LocaleController.getString(R.string.OctoGeneralSettingsHeader))
                 .category(LocaleController.getString(R.string.PrivacyHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -379,13 +380,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .onClick(() -> fragment.presentFragment(new ReactionsDoubleTapManageActivity()))
                             .showIf(canShowSelectReaction)
                             .title(LocaleController.getString(R.string.CustomEmojiReaction))
-                            .build());
-                })
-                .category(LocaleController.getString(R.string.Replies), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.rememberAllRepliesMessage)
-                            .title(LocaleController.getString(R.string.ReplyTracking))
-                            .description(LocaleController.getString(R.string.ReplyTracking_Desc))
                             .build());
                 })
                 .category(LocaleController.getString(R.string.Notifications), category -> {

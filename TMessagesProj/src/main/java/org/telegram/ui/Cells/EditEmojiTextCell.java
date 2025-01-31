@@ -6,6 +6,8 @@ import static org.telegram.ui.Components.EditTextEmoji.STYLE_GIFT;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
@@ -56,6 +58,8 @@ public class EditEmojiTextCell extends FrameLayout {
     private boolean focused;
 
     private boolean allowEntities = true;
+
+    private ImageView moveImageView;
 
     final AnimatedColor limitColor;
     private int limitCount;
@@ -309,6 +313,23 @@ public class EditEmojiTextCell extends FrameLayout {
                     Theme.dividerPaint
             );
         }
+    }
+
+    public void setOnChangeIcon(Context context, OnClickListener onChangeIcon) {
+        editTextEmoji.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.RIGHT | Gravity.TOP, 72 - 7 - 21, 0, 0, 0));
+        moveImageView = new ImageView(context);
+        moveImageView.setFocusable(true);
+        moveImageView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_stickers_menuSelector)));
+        moveImageView.setScaleType(ImageView.ScaleType.CENTER);
+        moveImageView.setOnClickListener(onChangeIcon);
+        moveImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
+        moveImageView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        addView(moveImageView, LayoutHelper.createFrame(48, 48, Gravity.LEFT | Gravity.CENTER_VERTICAL, 12, 0, 8, 0));
+    }
+
+    public void setIcon(int icon, boolean animated) {
+        moveImageView.setImageResource(icon);
+        AndroidUtilities.updateViewVisibilityAnimated(moveImageView, true, 0.5f, animated);
     }
 
     @Override

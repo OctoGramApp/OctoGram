@@ -9,9 +9,11 @@
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -19,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -36,6 +39,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CircularProgressDrawable;
 import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.LayoutHelper;
@@ -98,6 +102,19 @@ public class NavigationSettingsUI extends BaseFragment {
                 }
             }
         });
+
+
+        BaseFragment fragment1 = this;
+        actionBar.setLongClickable(true);
+        actionBar.setOnLongClickListener(v -> {
+            AndroidUtilities.addToClipboard("tg://experimental/navigation");
+            BulletinFactory.of(fragment1)
+                    .createSimpleBulletin(R.raw.copy, getString(R.string.AffiliateProgramLinkCopiedTitle))
+                    .show();
+
+            return true;
+        });
+
         Drawable checkmark = ContextCompat.getDrawable(context, R.drawable.ic_ab_done);
         if (checkmark != null) {
             checkmark.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.MULTIPLY));
@@ -378,7 +395,13 @@ public class NavigationSettingsUI extends BaseFragment {
                 builder.setMessage(LocaleController.getString(R.string.NavigationDiscardReload));
                 builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> applyAndFinish());
                 builder.setNegativeButton(LocaleController.getString(R.string.PassportDiscard), (dialog, which) -> finishFragment());
-                showDialog(builder.create());
+
+                AlertDialog dialog;
+                showDialog(dialog = builder.create());
+                TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                if (button != null) {
+                    button.setTextColor(getThemedColor(Theme.key_text_RedBold));
+                }
             }
             return false;
         }

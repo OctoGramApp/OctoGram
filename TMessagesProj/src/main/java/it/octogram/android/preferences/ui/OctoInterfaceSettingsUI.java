@@ -71,6 +71,7 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
         wasCenteredAtBeginning = wasCentered;
 
         return OctoPreferences.builder(LocaleController.getString(R.string.AppTitleSettings))
+                .deepLink("tg://appearance/app")
                 .category(LocaleController.getString(R.string.ImproveInterface), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.uiTitleCenteredState)

@@ -6228,6 +6228,11 @@ public class MessageObject {
         }
         if (TextUtils.isEmpty(messageOwner.voiceTranscription)) {
             SpannableString ssb = new SpannableString(getString(R.string.NoWordsRecognized));
+
+            if (getDuration() > MessagesController.getInstance(currentAccount).transcribeAudioTrialDurationMax * 1000) {
+                ssb = new SpannableString(getString(R.string.TranscriptionTooLong));
+            }
+
             ssb.setSpan(new CharacterStyle() {
                 @Override
                 public void updateDrawState(TextPaint textPaint) {

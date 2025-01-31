@@ -59,6 +59,7 @@ public class OctoUpdatesUI implements PreferencesEntry {
         }
 
         OctoPreferences build = OctoPreferences.builder(LocaleController.getString(R.string.Updates))
+                .deepLink("tg://update")
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.UPDATES, true, LocaleController.getString(R.string.UpdatesSettingsHeader))
                 .row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(checkCell = new CustomUpdatesCheckCell(context, () -> checkForUpdates(fragment, context)))

@@ -76,6 +76,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
         }
 
         return OctoPreferences.builder(LocaleController.getString(R.string.Translator))
+                .deepLink("tg://translator")
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.TRANSLATOR, true, LocaleController.getString(R.string.TranslatorHeader))
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onClick(() -> {

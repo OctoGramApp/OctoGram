@@ -561,8 +561,8 @@ enum class MonetTheme(val monetThemeName: String, val monetThemeFileName: String
 
 object CameraPreview {
     const val DEFAULT = 0
-    const val BOTTOM_BAR = 1
-    const val HIDDEN = 2
+    const val HIDDEN = 1
+    const val BOTTOM_BAR = 2
 
     @IntDef(DEFAULT, BOTTOM_BAR)
     @Retention(AnnotationRetention.SOURCE)

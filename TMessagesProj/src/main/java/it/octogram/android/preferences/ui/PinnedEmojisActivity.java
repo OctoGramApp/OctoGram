@@ -9,6 +9,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -21,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -107,6 +109,17 @@ public class PinnedEmojisActivity extends BaseFragment {
                     }
                 }
             }
+        });
+
+        BaseFragment fragment1 = this;
+        actionBar.setLongClickable(true);
+        actionBar.setOnLongClickListener(v -> {
+            AndroidUtilities.addToClipboard("tg://pinned_emojis");
+            BulletinFactory.of(fragment1)
+                    .createSimpleBulletin(R.raw.copy, getString(R.string.AffiliateProgramLinkCopiedTitle))
+                    .show();
+
+            return true;
         });
 
         scrollView = new ScrollView(context);
@@ -328,7 +341,7 @@ public class PinnedEmojisActivity extends BaseFragment {
         }
 
         BaseFragment fragment = this;
-        emojiView = new EmojiView(this, true, false, false, getContext(), false, null, null, true, getResourceProvider(), false);
+        emojiView = new EmojiView(null, true, false, false, getContext(), false, null, null, true, getResourceProvider(), false);
 
         emojiView.setDelegate(new EmojiView.EmojiViewDelegate() {
             @Override
@@ -394,7 +407,7 @@ public class PinnedEmojisActivity extends BaseFragment {
                     } catch (Exception ignored) { }
                 } else {
                     BulletinFactory.of(fragment)
-                            .createSimpleBulletin(R.raw.ic_pin, LocaleController.getString(R.string.PinnedEmojisList_Pinned))
+                            .createSimpleBulletin(document, LocaleController.getString(R.string.PinnedEmojisList_Pinned))
                             .show();
                 }
             }
@@ -553,7 +566,12 @@ public class PinnedEmojisActivity extends BaseFragment {
             builder.setMessage(text);
             builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> actionButton.performClick());
             builder.setNegativeButton(getString(R.string.Discard), (dialogInterface, i) -> finishFragment());
-            builder.show();
+
+            AlertDialog dialog = builder.show();
+            TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            if (button != null) {
+                button.setTextColor(getThemedColor(Theme.key_text_RedBold));
+            }
         }
         return hasChanges;
     }

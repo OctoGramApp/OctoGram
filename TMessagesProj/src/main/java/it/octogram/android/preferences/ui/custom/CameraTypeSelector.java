@@ -33,11 +33,11 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.NumberPicker;
 
-import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
 
 
 public abstract class CameraTypeSelector extends LinearLayout {
+    private final NumberPicker picker1;
     Paint pickerDividersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     String[] strings = new String[]{
             LocaleController.getString(R.string.CameraTypeDefault),
@@ -45,7 +45,6 @@ public abstract class CameraTypeSelector extends LinearLayout {
             LocaleController.getString(R.string.CameraType2),
             LocaleController.getString(R.string.CameraTypeSystem),
     };
-    private final NumberPicker picker1;
 
     public CameraTypeSelector(Context context) {
         super(context);
@@ -105,14 +104,7 @@ public abstract class CameraTypeSelector extends LinearLayout {
                     lensPaint.setColor(color);
                     canvas.drawCircle(lensCenterX, lensCenterY, Math.round(lensDiameter / 2F), lensPaint);
                 }
-                int cameraIconId;
-                switch (CameraType.Companion.fromInt(picker1.getValue())) {
-                    case TELEGRAM -> cameraIconId = R.drawable.telegram_camera_icon;
-                    case CAMERA_X -> cameraIconId = R.drawable.x_camera_icon;
-                    case CAMERA_2 -> cameraIconId = R.drawable.camera_revert2;
-                    default -> cameraIconId = R.drawable.system_camera_icon;
-                }
-
+                int cameraIconId = getCameraDrawable(picker1.getValue());
                 Drawable cameraDrawable = AppCompatResources.getDrawable(context, cameraIconId);
                 var iconHeight = Math.round(h * 0.37F);
                 var iconWidth = Math.round(iconHeight * 0.9803F);
@@ -178,6 +170,19 @@ public abstract class CameraTypeSelector extends LinearLayout {
         if (picker1.getValue() == 1) {
             canvas.drawLine(dp(8), getMeasuredHeight() - 1, getMeasuredWidth() - dp(8), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
+    }
+
+    private int getCameraDrawable(int cameraType) {
+        return switch (cameraType) {
+            case 0 -> // TELEGRAM
+                    R.drawable.telegram_camera_icon;
+            case 1 -> // CAMERA_X
+                    R.drawable.x_camera_icon;
+            case 2 -> // CAMERA_2
+                    R.drawable.camera_revert2;
+            default -> // SYSTEM_CAMERA
+                    R.drawable.system_camera_icon;
+        };
     }
 
     protected abstract void onSelectedCamera(int cameraSelected);

@@ -51,6 +51,7 @@ import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
 import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+import it.octogram.android.preferences.ui.OctoTranslatorUI;
 import it.octogram.android.preferences.ui.PinnedEmojisActivity;
 import it.octogram.android.preferences.ui.PinnedReactionsActivity;
 import it.octogram.android.utils.BrowserUtils;
@@ -140,6 +141,10 @@ public class DeepLinkManager extends LaunchActivity {
             }
             case DeepLinkDef.APPEARANCE_DRAWER -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
+                return true;
+            }
+            case DeepLinkDef.TRANSLATOR -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoTranslatorUI()));
                 return true;
             }
             case DeepLinkDef.UPDATE -> {
@@ -330,6 +335,8 @@ public class DeepLinkManager extends LaunchActivity {
             return DeepLinkDef.APPEARANCE_CHAT;
         } else if (deepLink.equalsIgnoreCase("tg:appearance/drawer") || deepLink.equalsIgnoreCase("tg://appearance/drawer")) {
             return DeepLinkDef.APPEARANCE_DRAWER;
+        } else if (deepLink.equalsIgnoreCase("tg:translator") || deepLink.equalsIgnoreCase("tg://translator")) {
+            return DeepLinkDef.TRANSLATOR;
         } else if (deepLink.equalsIgnoreCase("tg:update") || deepLink.equalsIgnoreCase("tg://update")) {
             return DeepLinkDef.UPDATE;
         } else if (deepLink.startsWith("tg:user") || deepLink.startsWith("tg://user")) {

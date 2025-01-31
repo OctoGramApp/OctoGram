@@ -49,6 +49,33 @@ public class EffectSelectorView extends LinearLayout {
         setBackground(gd);
     }
 
+    @NonNull
+    private static List<Integer> getListEffect(CameraXView cameraXView) {
+        Set<Integer> effectSet = new HashSet<>();
+
+        if (cameraXView.isNightModeSupported()) {
+            effectSet.add(CameraXController.EffectFacing.CAMERA_NIGHT);
+        }
+        if (cameraXView.isAutoModeSupported()) {
+            effectSet.add(CameraXController.EffectFacing.CAMERA_AUTO);
+        }
+        effectSet.add(CameraXController.EffectFacing.CAMERA_NONE);
+        if (cameraXView.isWideModeSupported()) {
+            effectSet.add(CameraXController.EffectFacing.CAMERA_WIDE);
+        }
+        if (cameraXView.isHdrModeSupported()) {
+            effectSet.add(CameraXController.EffectFacing.CAMERA_HDR);
+        }
+        if (cameraXView.isBokehModeSupported()) {
+            effectSet.add(CameraXController.EffectFacing.CAMERA_BOKEH);
+        }
+        if (cameraXView.isFaceRetouchModeSupported()) {
+            effectSet.add(CameraXController.EffectFacing.CAMERA_FACE_RETOUCH);
+        }
+
+        return List.copyOf(effectSet);
+    }
+
     public void resetSelectedEffect() {
         for (int i = 0; i < getChildCount(); i++) {
             LinearLayout linearLayout = (LinearLayout) getChildAt(i);
@@ -99,33 +126,6 @@ public class EffectSelectorView extends LinearLayout {
         };
         buttonEffect.toggleButton(effect == CameraXController.EffectFacing.CAMERA_NONE, false);
         return buttonEffect;
-    }
-
-    @NonNull
-    private static List<Integer> getListEffect(CameraXView cameraXView) {
-        Set<Integer> effectSet = new HashSet<>();
-
-        if (cameraXView.isNightModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_NIGHT);
-        }
-        if (cameraXView.isAutoModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_AUTO);
-        }
-        effectSet.add(CameraXController.EffectFacing.CAMERA_NONE);
-        if (cameraXView.isWideModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_WIDE);
-        }
-        if (cameraXView.isHdrModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_HDR);
-        }
-        if (cameraXView.isBokehModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_BOKEH);
-        }
-        if (cameraXView.isFaceRetouchModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_FACE_RETOUCH);
-        }
-
-        return List.copyOf(effectSet);
     }
 
     protected void onEffectSelected(int cameraEffect) {

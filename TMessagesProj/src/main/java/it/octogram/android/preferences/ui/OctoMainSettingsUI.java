@@ -76,6 +76,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
         this.fragment = fragment;
         var footer = AndroidUtilities.replaceTags(formatString(R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING));
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
+                .deepLink("tg://octosettings")
                 .octoAnimation(getString(R.string.OctoMainSettingsHeader))
                 .category(getString(R.string.Settings), category -> {
                     if ("it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName())) {

@@ -8,6 +8,7 @@ import static org.telegram.ui.Components.Reactions.ReactionsUtils.createAnimated
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -27,6 +28,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -41,6 +43,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -331,7 +334,14 @@ public class PinnedReactionsActivity extends BaseFragment {
                     }
                 }
 
-                protected void onEmojiSelected(View view, Long documentId, TLRPC.Document document, Integer until) {
+                protected void onEmojiSelected(View view, Long documentId, TLRPC.Document document, TL_stars.TL_starGiftUnique gift, Integer until) {
+                    if (gift != null) {
+                        BulletinFactory.of(fragment)
+                                .createSimpleBulletin(gift.sticker, LocaleController.getString(R.string.PinnedReactions_Type))
+                                .show();
+                        return;
+                    }
+
                     if (!selectedCustomEmojisList.contains(documentId)) {
                         if (type == PAGE_CHANNELS) {
                             boolean isReactionEmoji = false;
@@ -778,6 +788,16 @@ public class PinnedReactionsActivity extends BaseFragment {
         actionBar.setVisibility(View.GONE);
         actionBar.setAllowOverlayTitle(false);
 
+        BaseFragment fragment1 = this;
+        actionBar.setLongClickable(true);
+        actionBar.setOnLongClickListener(v -> {
+            AndroidUtilities.addToClipboard("tg://pinned_reactions");
+            BulletinFactory.of(fragment1)
+                    .createSimpleBulletin(R.raw.copy, getString(R.string.AffiliateProgramLinkCopiedTitle))
+                    .show();
+
+            return true;
+        });
         FrameLayout frameLayout = new FrameLayout(context) {
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -942,7 +962,12 @@ public class PinnedReactionsActivity extends BaseFragment {
         builder.setMessage(text);
         builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> buttonClick());
         builder.setNegativeButton(getString(R.string.Discard), (dialogInterface, i) -> finishFragment());
-        builder.show();
+
+        AlertDialog dialog = builder.show();
+        TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (button != null) {
+            button.setTextColor(getThemedColor(Theme.key_text_RedBold));
+        }
     }
 
     private void buttonClick() {

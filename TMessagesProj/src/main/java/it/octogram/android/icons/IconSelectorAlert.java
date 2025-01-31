@@ -49,6 +49,16 @@ import it.octogram.android.utils.OctoUtils;
 @SuppressLint("ClickableViewAccessibility")
 public class IconSelectorAlert extends BottomSheet {
 
+    private OnItemClickListener onItemClickListener;
+
+    public void setOnItemClick(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(String emoticon);
+    }
+
     private final LinearLayout linearLayout;
     private final NestedScrollView scrollView;
     private final int[] location = new int[2];
@@ -166,7 +176,9 @@ public class IconSelectorAlert extends BottomSheet {
         recyclerListView.setSelectorType(3);
         recyclerListView.setSelectorDrawableColor(Theme.getColor(Theme.key_listSelector));
         recyclerListView.setOnItemClickListener((view, position) -> {
-            this.onItemClick(OctoUtils.safeToString(view.getTag()));
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(OctoUtils.safeToString(view.getTag()));
+            }
             dismiss();
         });
         header.addView(recyclerListView);
@@ -216,6 +228,9 @@ public class IconSelectorAlert extends BottomSheet {
     }
 
     protected void onItemClick(String emoticon) {
+        if (onItemClickListener != null) {
+            onItemClickListener.onItemClick(emoticon);
+        }
     }
 
     private void runShadowAnimation(final boolean show) {
@@ -275,16 +290,13 @@ public class IconSelectorAlert extends BottomSheet {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            var view = new AppCompatImageView(parent.getContext()) {
-                @Override
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    int iconSize = MeasureSpec.makeMeasureSpec(parent.getMeasuredWidth() / 6, MeasureSpec.EXACTLY);
-                    super.onMeasure(iconSize, iconSize);
-                }
-            };
-            view.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
-            view.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
-            return new RecyclerListView.Holder(view);
+            var imageView = new AppCompatImageView(parent.getContext());
+            int containerWidth = parent.getMeasuredWidth();
+            int iconSize = (int) (containerWidth / 6.0f * 0.9f);
+            imageView.setLayoutParams(new RecyclerView.LayoutParams(iconSize, iconSize));
+            imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
+            imageView.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
+            return new RecyclerListView.Holder(imageView);
         }
 
         @Override

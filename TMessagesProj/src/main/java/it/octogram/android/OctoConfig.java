@@ -83,7 +83,6 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
     public final ConfigProperty<Boolean> enableSmartNotificationsForPrivateChats = newConfigProperty("enableSmartNotificationsForPrivateChats", false);
     public final ConfigProperty<Integer> defaultEmojiButtonAction = newConfigProperty("defaultEmojiButtonAction", DefaultEmojiButtonAction.DEFAULT.getValue());
-    public final ConfigProperty<Boolean> rememberAllRepliesMessage = newConfigProperty("rememberAllRepliesMessage", true);
     public final ConfigProperty<Boolean> swipeToPip = newConfigProperty("swipeToPip", false);
     public final ConfigProperty<Boolean> usePinnedEmojisFeature = newConfigProperty("usePinnedEmojisFeature", false);
     public final ConfigProperty<Boolean> hideRecentEmojis = newConfigProperty("hideRecentEmojis", false);

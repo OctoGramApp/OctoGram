@@ -154,7 +154,6 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideFoldersWhenForwarding.getKey(), R.string.HideChatFoldersWhenForwarding));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.doubleTapActionOut.getKey(), R.string.PreferredActionOutgoing));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.doubleTapAction.getKey(), R.string.PreferredActionIncoming));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.rememberAllRepliesMessage.getKey(), R.string.ReplyTracking));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.accentColorAsNotificationColor.getKey(), R.string.AccentColorAsNotificationColor));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getKey(), R.string.EnableSmartNotificationsForPrivateChats));
     }
