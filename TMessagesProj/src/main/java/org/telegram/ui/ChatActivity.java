@@ -6640,7 +6640,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         pagedownButton = new FrameLayout(context);
         pagedownButton.setVisibility(View.INVISIBLE);
         contentView.addView(pagedownButton, LayoutHelper.createFrame(66, 61, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, -3, 5));
-//        pagedownButton.setOnClickListener(view -> onPageDownClicked());
+        pagedownButton.setOnClickListener(view -> onPageDownClicked());
         pagedownButton.setOnLongClickListener(view -> {
             returnToMessageId = 0;
             returnToMessageIdsStack.clear();

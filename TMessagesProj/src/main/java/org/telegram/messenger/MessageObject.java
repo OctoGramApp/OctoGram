@@ -6229,7 +6229,7 @@ public class MessageObject {
         if (TextUtils.isEmpty(messageOwner.voiceTranscription)) {
             SpannableString ssb = new SpannableString(getString(R.string.NoWordsRecognized));
 
-            if (getDuration() > MessagesController.getInstance(currentAccount).transcribeAudioTrialDurationMax * 1000) {
+            if (getDuration() > MessagesController.getInstance(currentAccount).transcribeAudioTrialDurationMax) {
                 ssb = new SpannableString(getString(R.string.TranscriptionTooLong));
             }
 
