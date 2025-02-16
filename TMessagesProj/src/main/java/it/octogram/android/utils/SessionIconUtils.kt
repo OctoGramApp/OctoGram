@@ -8,7 +8,7 @@
 
 package it.octogram.android.utils
 
-import android.graphics.Color
+import androidx.core.graphics.toColorInt
 import it.octogram.android.logs.OctoLogging
 import org.telegram.messenger.BuildVars
 import org.telegram.messenger.R
@@ -85,16 +85,16 @@ class SessionIconUtils {
 
     fun setDeviceAttributes(session: TLRPC.TL_authorization): DeviceAttributes {
         val sessionType = getSessionTypeObject(session)
-        val octoColor = Color.parseColor("#3D358B")
+        val octoColor = "#3D358B".toColorInt()
 
-        val tgxColor = Color.parseColor("#6785A6")
-        val tgxColor2 = Color.parseColor("#202E3D")
+        val tgxColor = "#6785A6".toColorInt()
+        val tgxColor2 = "#202E3D".toColorInt()
 
-        val materialGramColor = Color.parseColor("#3E6EAE")
-        val materialGramColor2 = Color.parseColor("#8BB3F8")
+        val materialGramColor = "#3E6EAE".toColorInt()
+        val materialGramColor2 = "#8BB3F8".toColorInt()
 
-        val swiftGramColor = Color.parseColor("#F67E47")
-        val swiftGramColor2 = Color.parseColor("#F1532C")
+        val swiftGramColor = "#F67E47".toColorInt()
+        val swiftGramColor2 = "#F1532C".toColorInt()
 
         return when (sessionType) {
             SessionType.SAFARI -> DeviceAttributes(R.drawable.device_web_safari, Theme.key_avatar_backgroundPink, Theme.key_avatar_background2Pink, R.raw.safari_30)

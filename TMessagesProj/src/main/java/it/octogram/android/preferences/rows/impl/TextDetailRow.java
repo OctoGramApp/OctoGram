@@ -29,13 +29,15 @@ public class TextDetailRow extends BaseRow implements Clickable {
     private final int icon;
     private final Runnable onClick;
     private final String newID;
+    private final String propertySelectionTag;
     private boolean wasNewBadgeVisible = false;
 
-    private TextDetailRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, int icon, Runnable onClick, String newID) {
+    private TextDetailRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, String propertySelectionTag, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, int icon, Runnable onClick, String newID) {
         super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_DETAIL);
         this.icon = icon;
         this.onClick = onClick;
         this.newID = newID;
+        this.propertySelectionTag = propertySelectionTag;
     }
 
     public void bindCell(TextDetailSettingsCell cell) {
@@ -77,10 +79,15 @@ public class TextDetailRow extends BaseRow implements Clickable {
         return title;
     }
 
+    public String getPropertySelectionTag() {
+        return propertySelectionTag;
+    }
+
     public static class TextDetailRowBuilder extends BaseRowBuilder<TextDetailRow> {
         private Runnable onClick;
         private int icon = -1;
         private String newID = null;
+        private String propertySelectionTag = null;
 
         public TextDetailRowBuilder onClick(Runnable onClick) {
             this.onClick = onClick;
@@ -97,8 +104,13 @@ public class TextDetailRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public TextDetailRowBuilder propertySelectionTag(String propertySelectionTag) {
+            this.propertySelectionTag = propertySelectionTag;
+            return this;
+        }
+
         public TextDetailRow build() {
-            return new TextDetailRow(title, description, requiresRestart, showIf, showIfReverse, divider, icon, onClick, newID);
+            return new TextDetailRow(title, description, requiresRestart, propertySelectionTag, showIf, showIfReverse, divider, icon, onClick, newID);
         }
     }
 }

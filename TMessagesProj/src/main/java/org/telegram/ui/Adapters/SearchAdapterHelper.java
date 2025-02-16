@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 public class SearchAdapterHelper {
 
     public static class HashtagObject {
-        String hashtag;
+        public String hashtag;
         int date;
     }
 

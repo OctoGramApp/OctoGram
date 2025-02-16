@@ -79,6 +79,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import it.octogram.android.OctoConfig;
+
 public class MentionsAdapter extends RecyclerListView.SelectionAdapter implements NotificationCenter.NotificationCenterDelegate {
 
     private boolean allowStickers = true;
@@ -1504,9 +1506,13 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
             ArrayList<String> newResult = new ArrayList<>();
             String hashtagString = result.toString().toLowerCase();
             ArrayList<SearchAdapterHelper.HashtagObject> hashtags = searchAdapterHelper.getHashtags();
+            newResult.addAll(OctoConfig.INSTANCE.getPinnedHashtags(hashtagString));
             for (int a = 0; a < hashtags.size(); a++) {
                 SearchAdapterHelper.HashtagObject hashtagObject = hashtags.get(a);
                 if (hashtagObject != null && hashtagObject.hashtag != null && hashtagObject.hashtag.startsWith(hashtagString)) {
+                    if (newResult.contains(hashtagObject.hashtag)) {
+                        continue;
+                    }
                     newResult.add(hashtagObject.hashtag);
                 }
             }

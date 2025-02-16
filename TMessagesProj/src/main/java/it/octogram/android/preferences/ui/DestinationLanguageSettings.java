@@ -47,6 +47,7 @@ import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
 
+/** @noinspection SequencedCollectionMethodCanBeUsed*/
 public class DestinationLanguageSettings extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ListAdapter listAdapter;
@@ -186,6 +187,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
         return fragmentView;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void didReceivedNotification(int id, int account, Object... args) {
         if (id == NotificationCenter.suggestedLangpack) {
@@ -241,6 +243,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
         separatorRow++;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onResume() {
         super.onResume();
@@ -257,20 +260,29 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void processSearch(final String query) {
-        String q = query.trim().toLowerCase();
+        if (query == null || query.trim().isEmpty()) {
+            if (searchResult != null) {
+                searchResult.clear();
+                searchListViewAdapter.notifyDataSetChanged();
+            }
+            return;
+        }
+
+        String normalizedQuery = query.trim().toLowerCase();
 
         if (searchResult == null) {
             searchResult = new ArrayList<>();
         } else {
             searchResult.clear();
         }
-        for (int i = 0; i < allLanguages.size(); ++i) {
-            TranslateController.Language l = allLanguages.get(i);
-            if (l.q.startsWith(q)) {
-                searchResult.add(0, l);
-            } else if (l.q.contains(q)) {
-                searchResult.add(l);
+        for (TranslateController.Language language : allLanguages) {
+            String languageQuery = language.q.toLowerCase();
+            if (languageQuery.startsWith(normalizedQuery)) {
+                searchResult.add(0, language);
+            } else if (languageQuery.contains(normalizedQuery)) {
+                searchResult.add(language);
             }
         }
 
@@ -360,7 +372,7 @@ public class DestinationLanguageSettings extends BaseFragment implements Notific
                 }
                 case 1: {
                     ShadowSectionCell sectionCell = (ShadowSectionCell) holder.itemView;
-                    sectionCell.setBackgroundDrawable(Theme.getThemedDrawableByKey(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
+                    sectionCell.setBackground(Theme.getThemedDrawableByKey(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                     break;
                 }
                 case 2: {

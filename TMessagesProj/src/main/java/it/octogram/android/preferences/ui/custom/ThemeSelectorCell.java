@@ -100,19 +100,17 @@ public class ThemeSelectorCell extends FrameLayout {
         addView(recyclerView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 150, Gravity.START, 0, 8, 0, 8));
         updateRowsId();
         recyclerView.post(() -> {
-            //noinspection ConstantConditions
-            int selectedPosition = map.getOrDefault(selectedDefault, 0);
-            prevSelectedPosition = selectedPosition;
-            listAdapter.setSelectedItem(selectedPosition);
-            if (selectedPosition > 0 && selectedPosition < rowCount / 2) {
-                selectedPosition -= 1;
+            Integer selectedPosition = map.get(selectedDefault);
+            prevSelectedPosition = selectedPosition != null ? selectedPosition : 0;
+            listAdapter.setSelectedItem(prevSelectedPosition);
+            if (prevSelectedPosition > 0 && prevSelectedPosition < rowCount / 2) {
+                prevSelectedPosition -= 1;
             }
-            int finalSelectedPosition = Math.min(selectedPosition, rowCount - 1);
+            int finalSelectedPosition = Math.min(prevSelectedPosition, rowCount - 1);
             layoutManager.scrollToPositionWithOffset(finalSelectedPosition, 0);
         });
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void updateRowsId() {
         map.clear();
         rowCount = 0;
@@ -129,7 +127,7 @@ public class ThemeSelectorCell extends FrameLayout {
         lunarNewYearTheme = rowCount++;
         map.put(EventType.LUNAR_NEW_YEAR.getValue(), lunarNewYearTheme);
         if (listAdapter != null) {
-            listAdapter.notifyDataSetChanged();
+            listAdapter.notifyItemRangeInserted(0, rowCount);
         }
     }
 

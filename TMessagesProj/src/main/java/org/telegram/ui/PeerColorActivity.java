@@ -2524,6 +2524,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                     statusEmoji.detach();
                 }
             };
+
             botVerificationEmoji = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(titleView, dp(17));
             statusEmoji = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(titleView, dp(24));
             titleView.setLeftDrawableOutside(true);
@@ -2538,7 +2539,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
             subtitleView.setTextSize(14);
             subtitleView.setTextColor(0x80FFFFFF);
             subtitleView.setScrollNonFitText(true);
-            addView(subtitleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 97, 0, 16, 30.66f));
+            addView(subtitleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 97, 0, 16, 30.66f)); //30.66
 
             customInfoView = new AnimatedTextView(context);
             customInfoView.setAnimationProperties(1f, 0, 300, CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -2547,7 +2548,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
             customInfoView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
             customInfoView.setTextColor(0x80FFFFFF);
             customInfoView.setVisibility(GONE);
-            addView(customInfoView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 97, 53, 16, 0));
+            addView(customInfoView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, dp(7), Gravity.LEFT | Gravity.BOTTOM, 97, 0, 16, 10));
 
             imageReceiver.setRoundRadius(dp(54));
             long botVerificationId = 0, emojiStatusId = 0;

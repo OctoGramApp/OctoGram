@@ -32,4 +32,3 @@ TMessagesProj_App/play/
 .run/
 *.jks
 move_icon.sh
-clear_env.sh

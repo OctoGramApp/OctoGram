@@ -144,6 +144,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DrawerOrderSettings()))
                             .icon(R.drawable.msg_new_filter)
+                            .propertySelectionTag("drawerElements")
                             .title(LocaleController.getString(R.string.DrawerElements))
                             .description(LocaleController.getString(R.string.DrawerElements_Desc))
                             .build());
@@ -176,6 +177,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                         .build()))
                 .category(LocaleController.getString(R.string.Style), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .propertySelectionTag("eventType")
                             .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
                                 @Override
                                 protected void onSelectedEvent(int eventSelected) {

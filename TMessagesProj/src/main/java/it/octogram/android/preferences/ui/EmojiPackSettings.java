@@ -385,6 +385,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         processFiles(filesToUpload);
     }
 
+    /** @noinspection SequencedCollectionMethodCanBeUsed*/
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
         private final SparseBooleanArray selectedItems = new SparseBooleanArray();
 

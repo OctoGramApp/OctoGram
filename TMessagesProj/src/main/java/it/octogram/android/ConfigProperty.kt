@@ -9,6 +9,7 @@
 package it.octogram.android
 
 import android.app.Activity
+import androidx.core.content.edit
 import org.telegram.messenger.ApplicationLoader
 
 /**
@@ -53,16 +54,16 @@ class ConfigProperty<T>(
     fun updateValue(newValue: T) {
         if (value != newValue) {
             if (key != null) {
-                val editor = octoPreferences.edit()
-                when (newValue) {
-                    is String? -> editor.putString(key, newValue)
-                    is Int -> editor.putInt(key, newValue)
-                    is Boolean -> editor.putBoolean(key, newValue)
-                    is Float -> editor.putFloat(key, newValue)
-                    is Long -> editor.putLong(key, newValue)
-                    else -> throw IllegalArgumentException("Unsupported type")
+                octoPreferences.edit {
+                    when (newValue) {
+                        is String? -> putString(key, newValue)
+                        is Int -> putInt(key, newValue)
+                        is Boolean -> putBoolean(key, newValue)
+                        is Float -> putFloat(key, newValue)
+                        is Long -> putLong(key, newValue)
+                        else -> throw IllegalArgumentException("Unsupported type")
+                    }
                 }
-                editor.apply()
             }
             value = newValue
         }
@@ -73,7 +74,7 @@ class ConfigProperty<T>(
      */
     fun clear() {
         if (key != null) {
-            octoPreferences.edit().remove(key).apply()
+            octoPreferences.edit { remove(key) }
             value = defaultValue
         }
     }

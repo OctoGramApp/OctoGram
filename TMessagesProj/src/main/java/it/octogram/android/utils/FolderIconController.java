@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TabMode;
+import kotlin.Pair;
 
 public class FolderIconController {
     public static LinkedHashMap<String, Integer> folderIcons = new LinkedHashMap<>();
@@ -91,7 +92,7 @@ public class FolderIconController {
         return R.drawable.filter_custom;
     }
 
-    public static String[] getEmoticonData(int newFilterFlags) {
+    public static Pair<String, String> getEmoticonData(int newFilterFlags) {
         int flags = newFilterFlags & MessagesController.DIALOG_FILTER_FLAG_ALL_CHATS;
         String newName = "";
         String newEmoticon = "";
@@ -140,6 +141,6 @@ public class FolderIconController {
                 newEmoticon = "\uD83D\uDCE2";
             }
         }
-        return new String[]{newName, newEmoticon};
+        return new Pair<>(newName, newEmoticon);
     }
 }

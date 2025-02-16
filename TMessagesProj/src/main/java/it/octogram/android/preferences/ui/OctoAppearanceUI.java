@@ -20,6 +20,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.Theme;
 
 import java.util.List;
 
@@ -162,7 +163,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(ShortcutsPosition.CHAT_INFO.getId())
                                             .setItemTitle(getString(R.string.AdminShortcutsPositionChatInfo))
-                                            .setItemDescription(getString(R.string.AdminShortcutsPositionChatInfo_Desc)+" "+getString(R.string.AdminShortcutsPositionChatInfo_Alert)),
+                                            .setItemDescription(getString(R.string.AdminShortcutsPositionChatInfo_Desc) + " " + getString(R.string.AdminShortcutsPositionChatInfo_Alert)),
                                     new PopupChoiceDialogOption()
                                             .setId(ShortcutsPosition.PROFILE_DOTS.getId())
                                             .setItemTitle(getString(R.string.AdminShortcutsPositionChatThreeDots))
@@ -265,6 +266,20 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .title(LocaleController.getString(R.string.HideDividers))
                             .build());
                 })
+//                .category("Monet Theme Settings", category -> {
+//                    category.row(new SwitchRow.SwitchRowBuilder()
+//                            .preferenceValue(OctoConfig.INSTANCE.monetUseGradient)
+//                            .title("Use Monet Gradient")
+//                            .build());
+//                    category.row(new SwitchRow.SwitchRowBuilder().onPostUpdate(() -> Theme.reloadAllResources(context))
+//                            .preferenceValue(OctoConfig.INSTANCE.monetUseAltOutColor)
+//                            .title("Use Monet Alt Out Color")
+//                            .build());
+//                    category.row(new SwitchRow.SwitchRowBuilder()
+//                            .preferenceValue(OctoConfig.INSTANCE.monetUseNicknameColorFull)
+//                            .title("Use Monet Nickname Color Full")
+//                            .build());
+//                })
                 .category(getString(R.string.LocalOther), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.forcePacmanAnimation)

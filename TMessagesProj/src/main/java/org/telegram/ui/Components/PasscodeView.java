@@ -79,7 +79,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+import it.octogram.android.utils.FingerprintUtils;
 
 public class PasscodeView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
     private final static float BACKGROUND_SPRING_STIFFNESS = 300f;
@@ -1189,7 +1191,7 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
         Activity parentActivity = AndroidUtilities.findActivity(getContext());
         if (parentActivity != null && fingerprintView.getVisibility() == VISIBLE && !ApplicationLoader.mainInterfacePaused && (!(parentActivity instanceof LaunchActivity) || ((LaunchActivity) parentActivity).allowShowFingerprintDialog(this))) {
             try {
-                if (BiometricManager.from(getContext()).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS && FingerprintController.isKeyReady() && !FingerprintController.checkDeviceFingerprintsChanged()) {
+                if (BiometricManager.from(getContext()).canAuthenticate(/*BiometricManager.Authenticators.BIOMETRIC_STRONG*/ FingerprintUtils.getAuthenticationStatus()) == BiometricManager.BIOMETRIC_SUCCESS && FingerprintController.isKeyReady() && !FingerprintController.checkDeviceFingerprintsChanged()) {
                     final Executor executor = ContextCompat.getMainExecutor(getContext());
                     BiometricPrompt prompt = new BiometricPrompt(LaunchActivity.instance, executor, new BiometricPrompt.AuthenticationCallback() {
                         @Override
@@ -1213,7 +1215,8 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
                     final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                             .setTitle(LocaleController.getString(R.string.UnlockToUse))
                             .setNegativeButtonText(LocaleController.getString(R.string.UsePIN))
-                            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                            //.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                            .setAllowedAuthenticators(FingerprintUtils.getAuthenticationStatus())
                             .build();
                     prompt.authenticate(promptInfo);
                     showPin(false);

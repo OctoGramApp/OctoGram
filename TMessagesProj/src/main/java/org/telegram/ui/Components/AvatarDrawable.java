@@ -100,6 +100,7 @@ public class AvatarDrawable extends Drawable {
     public static final int AVATAR_TYPE_NEW_CHATS = 24;
     public static final int AVATAR_TYPE_PREMIUM = 25;
     public static final int AVATAR_TYPE_STARS = 26;
+    public static final int AVATAR_TYPE_HASHTAGS = 126;
 
     /**
      * Matches {@link org.telegram.ui.Components.AvatarConstructorFragment#defaultColors}
@@ -321,6 +322,10 @@ public class AvatarDrawable extends Drawable {
                 advancedGradient = new GradientTools();
             }
             advancedGradient.setColors(0xFF4D8DFF, 0xFF2BBFFF, 0xFF20E2CD, 0xFF0EE1F1);
+        } else if (avatarType == AVATAR_TYPE_HASHTAGS) {
+            hasGradient = true;
+            color = getThemedColor(Theme.keys_avatar_background[getColorIndex(5)]);
+            color2 = getThemedColor(Theme.keys_avatar_background2[getColorIndex(5)]);
         } else {
             hasGradient = true;
             color = getThemedColor(Theme.keys_avatar_background[getColorIndex(4)]);
@@ -668,6 +673,8 @@ public class AvatarDrawable extends Drawable {
                 drawable = Theme.avatarDrawables[22];
             } else if (avatarType == AVATAR_TYPE_STARS) {
                 drawable = Theme.avatarDrawables[23];
+            } else if (avatarType == AVATAR_TYPE_HASHTAGS) {
+                drawable = Theme.hashtagDrawable;
             } else {
                 drawable = Theme.avatarDrawables[9];
             }

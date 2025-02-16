@@ -41,6 +41,10 @@ public class SwitchRow extends BaseRow implements Clickable {
         this.lockedAction = lockedAction;
     }
 
+    public ConfigProperty<Boolean> getPreferenceValueConfig() {
+        return preferenceValue;
+    }
+
     public boolean getPreferenceValue() {
         return preferenceValue.getValue();
     }

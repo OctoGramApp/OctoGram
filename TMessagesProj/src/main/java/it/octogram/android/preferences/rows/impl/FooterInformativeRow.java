@@ -24,10 +24,25 @@ import it.octogram.android.preferences.rows.Clickable;
 public class FooterInformativeRow extends BaseRow implements Clickable {
 
     private final Runnable onClick;
+    private final OnDynamicDataUpdate dynamicDataUpdate;
 
-    private FooterInformativeRow(@Nullable CharSequence title, Runnable onClick, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+    public interface OnDynamicDataUpdate {
+        String getTitle();
+    }
+
+    private FooterInformativeRow(@Nullable CharSequence title, Runnable onClick, ConfigProperty<Boolean> showIf, boolean showIfReverse, OnDynamicDataUpdate dynamicDataUpdate) {
         super(title, null, false, showIf, showIfReverse, PreferenceType.FOOTER_INFORMATIVE);
+        this.dynamicDataUpdate = dynamicDataUpdate;
         this.onClick = onClick;
+    }
+
+    @Nullable
+    public CharSequence getDynamicTitle() {
+        if (dynamicDataUpdate != null) {
+            setTitle(dynamicDataUpdate.getTitle());
+        }
+
+        return super.getTitle();
     }
 
     @Override
@@ -39,14 +54,21 @@ public class FooterInformativeRow extends BaseRow implements Clickable {
 
     public static class FooterInformativeRowBuilder extends BaseRowBuilder<FooterInformativeRow> {
         private Runnable onClick;
+        private OnDynamicDataUpdate dynamicDataUpdate;
 
         public FooterInformativeRowBuilder onClick(Runnable onClick) {
             this.onClick = onClick;
             return this;
         }
 
+
+        public FooterInformativeRowBuilder setDynamicDataUpdate(OnDynamicDataUpdate dynamicDataUpdate) {
+            this.dynamicDataUpdate = dynamicDataUpdate;
+            return this;
+        }
+
         public FooterInformativeRow build() {
-            return new FooterInformativeRow(title, onClick, showIf, showIfReverse);
+            return new FooterInformativeRow(title, onClick, showIf, showIfReverse, dynamicDataUpdate);
         }
     }
 }

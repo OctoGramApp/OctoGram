@@ -29,10 +29,12 @@ public class TextIconRow extends BaseRow implements Clickable {
     private final int icon;
     private final Runnable onClick;
     private final ConfigProperty<Boolean> preference;
+    private final String propertySelectionTag;
     private String value;
     private final String newID;
     private boolean wasNewBadgeVisible = false;
     private final OnDynamicDataUpdate dynamicDataUpdate;
+    private final boolean isBlue;
 
     public interface OnDynamicDataUpdate {
         String getTitle();
@@ -47,16 +49,20 @@ public class TextIconRow extends BaseRow implements Clickable {
                         @Nullable String value,
                         boolean requiresRestart,
                         ConfigProperty<Boolean> preferenceValue,
+                        String propertySelectionTag,
                         Runnable onClick,
                         String newID,
-                        OnDynamicDataUpdate dynamicDataUpdate) {
+                        OnDynamicDataUpdate dynamicDataUpdate,
+                        boolean isBlue) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_ICON);
         this.icon = icon;
         this.onClick = onClick;
         this.preference = preferenceValue;
+        this.propertySelectionTag = propertySelectionTag;
         this.value = value;
         this.newID = newID;
         this.dynamicDataUpdate = dynamicDataUpdate;
+        this.isBlue = isBlue;
     }
 
     public void bindCell(TextCell cell) {
@@ -84,8 +90,16 @@ public class TextIconRow extends BaseRow implements Clickable {
         }
     }
 
+    public boolean isBlue() {
+        return isBlue;
+    }
+
     public ConfigProperty<Boolean> getPreference() {
         return preference;
+    }
+
+    public String getPropertySelectionTag() {
+        return propertySelectionTag;
     }
 
     @Override
@@ -133,6 +147,8 @@ public class TextIconRow extends BaseRow implements Clickable {
         private String value;
         private String newID = null;
         private OnDynamicDataUpdate dynamicDataUpdate;
+        private String propertySelectionTag;
+        private boolean isBlue;
 
         public TextIconRowBuilder onClick(Runnable onClick) {
             this.onClick = onClick;
@@ -154,13 +170,23 @@ public class TextIconRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public TextIconRowBuilder propertySelectionTag(String propertySelectionTag) {
+            this.propertySelectionTag = propertySelectionTag;
+            return this;
+        }
+
         public TextIconRowBuilder setDynamicDataUpdate(OnDynamicDataUpdate dynamicDataUpdate) {
             this.dynamicDataUpdate = dynamicDataUpdate;
             return this;
         }
 
+        public TextIconRowBuilder isBlue(boolean isBlue) {
+            this.isBlue = isBlue;
+            return this;
+        }
+
         public TextIconRow build() {
-            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, onClick, newID, dynamicDataUpdate);
+            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, propertySelectionTag, onClick, newID, dynamicDataUpdate, isBlue);
         }
     }
 

@@ -38,9 +38,9 @@ import java.util.Set;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TranslatorProvider;
-import it.octogram.android.utils.translator.QueueTranslationManager;
-import it.octogram.android.utils.translator.SingleTranslationManager;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.QueueTranslationManager;
+import it.octogram.android.translator.SingleTranslationManager;
+import it.octogram.android.translator.TranslationsWrapper;
 
 public class TranslateController extends BaseController {
 

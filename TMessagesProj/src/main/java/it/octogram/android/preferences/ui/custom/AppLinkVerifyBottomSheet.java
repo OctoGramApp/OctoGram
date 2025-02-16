@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationUserState;
-import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.TypedValue;
@@ -24,6 +23,7 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.OneUIUtilities;
 import org.telegram.messenger.R;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -138,9 +138,9 @@ public class AppLinkVerifyBottomSheet extends CustomBottomSheet {
         buttonTextView.setOnClickListener(view -> {
             Intent intent;
             if (OneUIUtilities.isOneUI()) {
-                intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
+                intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Utilities.uriParseSafe("package:" + context.getPackageName()));
             } else {
-                intent = new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, Uri.parse("package:" + context.getPackageName()));
+                intent = new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, Utilities.uriParseSafe("package:" + context.getPackageName()));
             }
             context.startActivity(intent);
         });

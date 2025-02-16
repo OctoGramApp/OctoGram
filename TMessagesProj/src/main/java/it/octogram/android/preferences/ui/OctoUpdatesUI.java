@@ -9,18 +9,14 @@
 package it.octogram.android.preferences.ui;
 
 import android.content.Context;
-import android.net.Uri;
 
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.Components.BulletinFactory;
@@ -41,7 +37,6 @@ import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
-import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.components.CustomUpdatesCheckCell;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 import it.octogram.android.utils.UpdatesManager;
@@ -107,23 +102,9 @@ public class OctoUpdatesUI implements PreferencesEntry {
                         .showIf(isPbetaUser, true)
                         .build())
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.formatString(R.string.UpdatesSettingsPbetaDescription, LocaleController.getString(R.string.UpdatesSettingsAuto)))
+                        .title(LocaleController.formatString(R.string.UpdatesSettingsPbetaDescription, LocaleController.getString(R.string.UpdatesSettingsAuto).toLowerCase()))
                         .showIf(isPbetaUser)
                         .build())
-                .category(LocaleController.getString(R.string.UpdatesSettingsLinks), category -> {
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
-                            .value("@OctoGramApp")
-                            .icon(R.drawable.msg_channel)
-                            .title(LocaleController.getString(R.string.OfficialChannel))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH))))
-                            .value(BuildConfig.GIT_COMMIT_HASH)
-                            .icon(R.drawable.outline_source_white_28)
-                            .title(LocaleController.getString(R.string.SourceCode))
-                            .build());
-                })
                 .build();
         preUpdateUI();
         return build;

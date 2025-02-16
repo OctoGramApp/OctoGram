@@ -19,6 +19,10 @@ public interface PreferencesEntry {
 
     default void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-    };
+    }
+
+    default boolean isLockedContent() {
+        return false;
+    }
 
 }

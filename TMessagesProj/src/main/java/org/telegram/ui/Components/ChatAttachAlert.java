@@ -147,8 +147,8 @@ import it.octogram.android.CameraPreview;
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.utils.translator.SingleTranslationManager;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.SingleTranslationManager;
+import it.octogram.android.translator.TranslationsWrapper;
 
 public class ChatAttachAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate, BottomSheet.BottomSheetDelegateInterface {
 

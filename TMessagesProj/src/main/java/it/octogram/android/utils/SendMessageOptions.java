@@ -8,6 +8,8 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -18,8 +20,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-
-import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -44,126 +44,39 @@ import org.telegram.ui.LaunchActivity;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.utils.translator.SingleTranslationManager;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.SingleTranslationManager;
+import it.octogram.android.translator.TranslationsWrapper;
 
 @SuppressLint({"ClickableViewAccessibility", "ViewConstructor"})
 public class SendMessageOptions extends LinearLayout {
     private final Theme.ResourcesProvider resourcesProvider;
+    private final Object commentTextView;
+    private final Object fragment;
     private ActionBarPopupWindow sendPopupWindow;
     private boolean returnSendersNames;
     private ActionBarMenuSubItem showCaptionView;
     private ActionBarMenuSubItem hideCaptionView;
-    private final Object commentTextView;
-    private final Object fragment;
 
-    /* TODO: NEED REVISION
-    });
-        sendPopupLayout2.setDispatchKeyEventListener(keyEvent -> {
-            if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getRepeatCount() == 0 && sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                sendPopupWindow.dismiss();
-            }
-        });
-        sendPopupLayout2.setShownFromBottom(false);
-        sendPopupLayout2.setupRadialSelectors(getThemedColor(Theme.key_dialogButtonSelector));
-
-        ActionBarMenuSubItem sendWithoutSound = new ActionBarMenuSubItem(parentActivity, true, true, resourcesProvider);
-        sendWithoutSound.setTextAndIcon(LocaleController.getString(R.string.SendWithoutSound), R.drawable.input_notify_off);
-        sendWithoutSound.setMinimumWidth(dp(196));
-        sendPopupLayout2.addView(sendWithoutSound, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-        sendWithoutSound.setOnClickListener(v -> {
-            if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                sendPopupWindow.dismiss();
-            }
-            this.notify = false;
-     */
-
-    public SendMessageOptions(Context parentActivity, Object fragment, ForwardContext forwardContext, boolean showSchedule, boolean showNotify, Delegate delegate, Theme.ResourcesProvider resourcesProvider, Object commentTextView) {
+    public SendMessageOptions(Context parentActivity, Object fragment, ForwardContext forwardContext, boolean showSchedule, boolean showNotify, Delegate delegate, Object commentTextView, Theme.ResourcesProvider resourcesProvider) {
         super(parentActivity);
         setOrientation(VERTICAL);
 
-        this.fragment = fragment;
         this.resourcesProvider = resourcesProvider;
         this.commentTextView = commentTextView;
-
-        ForwardContext.ForwardParams forwardParams = forwardContext.getForwardParams();
-        ForwardUtil(parentActivity, forwardContext, resourcesProvider, forwardParams);
-
-        ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout2 = getActionBarPopupWindowLayout(parentActivity, resourcesProvider);
-
-        boolean showTranslateButton = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled();
+        this.fragment = fragment;
+        var forwardParams = forwardContext.getForwardParams();
+        var showTranslateButton = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled();
 
         if (isTextFieldEmpty()) {
             showTranslateButton = false;
         }
 
-        if (showSchedule) {
-            //ActionBarMenuSubItem scheduleItem = new ActionBarMenuSubItem(getContext(), true, !showNotify, resourcesProvider);
-            ActionBarMenuSubItem scheduleItem = new ActionBarMenuSubItem(getContext(), true, !showNotify && !showTranslateButton, resourcesProvider);
-            scheduleItem.setTextAndIcon(LocaleController.getString(R.string.ScheduleMessage), R.drawable.msg_calendar2);
-            scheduleItem.setMinimumWidth(AndroidUtilities.dp(196));
-            scheduleItem.setOnClickListener(v -> {
-                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                    sendPopupWindow.dismiss();
-                }
-                AlertsCreator.createScheduleDatePickerDialog(parentActivity, 0, (notify, scheduleDate) -> {
-                    forwardParams.notify = notify;
-                    forwardParams.scheduleDate = scheduleDate;
-                    delegate.sendMessage();
-                }, resourcesProvider);
-            });
-            popupLayout2.addView(scheduleItem, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-        }
-
-        if (showNotify) {
-            //ActionBarMenuSubItem sendWithoutSoundButton = new ActionBarMenuSubItem(getContext(), !showSchedule, true, resourcesProvider);
-            ActionBarMenuSubItem sendWithoutSoundButton = new ActionBarMenuSubItem(getContext(), !showSchedule, !showTranslateButton, resourcesProvider);
-            sendWithoutSoundButton.setTextAndIcon(LocaleController.getString(R.string.SendWithoutSound), R.drawable.input_notify_off);
-            sendWithoutSoundButton.setMinimumWidth(AndroidUtilities.dp(196));
-            sendWithoutSoundButton.setOnClickListener(v -> {
-                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                    sendPopupWindow.dismiss();
-                }
-                forwardParams.notify = false;
-                delegate.sendMessage();
-            });
-            popupLayout2.addView(sendWithoutSoundButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-        }
-
-        if (showTranslateButton) {
-            String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
-            String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
-            ActionBarMenuSubItem sendWithoutSoundButton = new ActionBarMenuSubItem(getContext(), !showSchedule && !showNotify, true, resourcesProvider);
-            sendWithoutSoundButton.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
-            sendWithoutSoundButton.setMinimumWidth(AndroidUtilities.dp(196));
-            sendWithoutSoundButton.setOnClickListener(v -> executeMessageTranslation(destinationLanguage));
-            if (!(fragment instanceof SizeNotifierFrameLayout)) {
-                sendWithoutSoundButton.setOnLongClickListener(v -> {
-                    executeTranslationToCustomDestination();
-                    return true;
-                });
-            }
-            popupLayout2.addView(sendWithoutSoundButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-        }
-
-        ActionBarMenuSubItem sendMessage = new ActionBarMenuSubItem(getContext(), true, true, resourcesProvider);
-        sendMessage.setTextAndIcon(LocaleController.getString(R.string.SendMessage), R.drawable.msg_send);
-        sendMessage.setMinimumWidth(AndroidUtilities.dp(196));
-        popupLayout2.addView(sendMessage, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-        sendMessage.setOnClickListener(v -> {
-            if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                sendPopupWindow.dismiss();
-            }
-            delegate.sendMessage();
-        });
-        popupLayout2.setupRadialSelectors(getThemedColor());
-        addView(popupLayout2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-    }
-
-    private void ForwardUtil(Context parentActivity, ForwardContext forwardContext, Theme.ResourcesProvider resourcesProvider, ForwardContext.ForwardParams forwardParams) {
         if (forwardContext.getForwardingMessages() != null) {
+            LinearLayout linearLayout2 = new LinearLayout(getContext());
+            linearLayout2.setOrientation(VERTICAL);
+
             Paint paint = new Paint();
-            paint.setColor(Theme.getColor(Theme.key_divider));
+            paint.setColor(Theme.getColor(Theme.key_divider, resourcesProvider));
             View dividerView = new View(getContext()) {
 
                 @Override
@@ -176,17 +89,16 @@ public class SendMessageOptions extends LinearLayout {
                     canvas.drawRect(getPaddingLeft(), getPaddingTop(), getMeasuredWidth() - getPaddingRight(), getMeasuredHeight() - getPaddingBottom(), paint);
                 }
             };
-
-            ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout1 = getActionBarPopupWindowLayout(parentActivity, resourcesProvider, dividerView);
+            var sendPopupLayout1 = getSendPopupLayout1(parentActivity, resourcesProvider, dividerView);
 
             ActionBarMenuSubItem showSendersNameView = new ActionBarMenuSubItem(getContext(), true, true, false, resourcesProvider);
-            popupLayout1.addView(showSendersNameView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-            showSendersNameView.setTextAndIcon(LocaleController.getString(R.string.ShowSendersName), 0);
+            linearLayout2.addView(showSendersNameView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+            showSendersNameView.setTextAndIcon(getString(R.string.ShowSendersName), 0);
             showSendersNameView.setChecked(!forwardParams.noQuote);
 
             ActionBarMenuSubItem hideSendersNameView = new ActionBarMenuSubItem(getContext(), true, false, true, resourcesProvider);
-            popupLayout1.addView(hideSendersNameView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-            hideSendersNameView.setTextAndIcon(LocaleController.getString(R.string.HideSendersName), 0);
+            linearLayout2.addView(hideSendersNameView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+            hideSendersNameView.setTextAndIcon(getString(R.string.HideSendersName), 0);
             hideSendersNameView.setChecked(forwardParams.noQuote);
             showSendersNameView.setOnClickListener(e -> {
                 if (forwardParams.noQuote) {
@@ -219,16 +131,16 @@ public class SendMessageOptions extends LinearLayout {
             }
 
             if (hasCaption) {
-                popupLayout1.addView(dividerView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+                linearLayout2.addView(dividerView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
                 showCaptionView = new ActionBarMenuSubItem(getContext(), true, false, false, resourcesProvider);
-                popupLayout1.addView(showCaptionView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-                showCaptionView.setTextAndIcon(LocaleController.getString(R.string.ShowCaption), 0);
+                linearLayout2.addView(showCaptionView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                showCaptionView.setTextAndIcon(getString(R.string.ShowCaption), 0);
                 showCaptionView.setChecked(!forwardParams.noCaption);
 
                 hideCaptionView = new ActionBarMenuSubItem(getContext(), true, false, true, resourcesProvider);
-                popupLayout1.addView(hideCaptionView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-                hideCaptionView.setTextAndIcon(LocaleController.getString(R.string.HideCaption), 0);
+                linearLayout2.addView(hideCaptionView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                hideCaptionView.setTextAndIcon(getString(R.string.HideCaption), 0);
                 hideCaptionView.setChecked(forwardParams.noCaption);
                 showCaptionView.setOnClickListener(e -> {
                     if (forwardParams.noCaption) {
@@ -257,14 +169,77 @@ public class SendMessageOptions extends LinearLayout {
                     }
                 });
             }
-            popupLayout1.setupRadialSelectors(getThemedColor());
-            addView(popupLayout1, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, -8));
+            sendPopupLayout1.addView(linearLayout2, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+            sendPopupLayout1.setupRadialSelectors(getThemedColor());
+            addView(sendPopupLayout1, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, -8));
         }
+        LinearLayout linearLayout = new LinearLayout(getContext());
+        linearLayout.setOrientation(VERTICAL);
+        ActionBarPopupWindow.ActionBarPopupWindowLayout sendPopupLayout2 = getSendPopupLayout2(parentActivity, resourcesProvider);
+
+        if (showSchedule) {
+            ActionBarMenuSubItem scheduleButton = new ActionBarMenuSubItem(getContext(), true, !showNotify && !showTranslateButton, resourcesProvider);
+            scheduleButton.setTextAndIcon(getString(R.string.ScheduleMessage), R.drawable.msg_calendar2);
+            scheduleButton.setMinimumWidth(AndroidUtilities.dp(196));
+            scheduleButton.setOnClickListener(v -> {
+                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                    sendPopupWindow.dismiss();
+                }
+                AlertsCreator.createScheduleDatePickerDialog(parentActivity, 0, (notify, scheduleDate) -> {
+                    forwardParams.notify = notify;
+                    forwardParams.scheduleDate = scheduleDate;
+                    delegate.sendMessage();
+                }, resourcesProvider);
+            });
+            linearLayout.addView(scheduleButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        }
+        if (showNotify) {
+            ActionBarMenuSubItem sendWithoutSoundButton = new ActionBarMenuSubItem(getContext(), !showSchedule, !showTranslateButton, resourcesProvider);
+            sendWithoutSoundButton.setTextAndIcon(getString(R.string.SendWithoutSound), R.drawable.input_notify_off);
+            sendWithoutSoundButton.setMinimumWidth(AndroidUtilities.dp(196));
+            sendWithoutSoundButton.setOnClickListener(v -> {
+                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                    sendPopupWindow.dismiss();
+                }
+                forwardParams.notify = false;
+                delegate.sendMessage();
+            });
+            linearLayout.addView(sendWithoutSoundButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        }
+
+        if (showTranslateButton) {
+            String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+            String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
+            ActionBarMenuSubItem sendWithoutSoundButton = new ActionBarMenuSubItem(getContext(), !showSchedule && !showNotify, true, resourcesProvider);
+            sendWithoutSoundButton.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
+            sendWithoutSoundButton.setMinimumWidth(AndroidUtilities.dp(196));
+            sendWithoutSoundButton.setOnClickListener(v -> executeMessageTranslation(destinationLanguage));
+            if (!(fragment instanceof SizeNotifierFrameLayout)) {
+                sendWithoutSoundButton.setOnLongClickListener(v -> {
+                    executeTranslationToCustomDestination();
+                    return true;
+                });
+            }
+            linearLayout.addView(sendWithoutSoundButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        }
+
+        ActionBarMenuSubItem sendMessage = new ActionBarMenuSubItem(getContext(), !showNotify || !showSchedule, true, resourcesProvider);
+        sendMessage.setTextAndIcon(getString(R.string.SendMessage), R.drawable.msg_send);
+        sendMessage.setMinimumWidth(AndroidUtilities.dp(196));
+        sendMessage.setOnClickListener(v -> {
+            if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                sendPopupWindow.dismiss();
+            }
+            delegate.sendMessage();
+        });
+        linearLayout.addView(sendMessage, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        sendPopupLayout2.addView(linearLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        sendPopupLayout2.setupRadialSelectors(getThemedColor());
+        addView(sendPopupLayout2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
-    @NonNull
-    private ActionBarPopupWindow.ActionBarPopupWindowLayout getActionBarPopupWindowLayout(Context parentActivity, Theme.ResourcesProvider resourcesProvider, View dividerView) {
-        ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout1 = new ActionBarPopupWindow.ActionBarPopupWindowLayout(parentActivity, resourcesProvider) {
+    private ActionBarPopupWindow.ActionBarPopupWindowLayout getSendPopupLayout1(Context parentActivity, Theme.ResourcesProvider resourcesProvider, View dividerView) {
+        ActionBarPopupWindow.ActionBarPopupWindowLayout sendPopupLayout1 = new ActionBarPopupWindow.ActionBarPopupWindowLayout(parentActivity, resourcesProvider) {
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 if (dividerView.getParent() != null) {
@@ -276,9 +251,9 @@ public class SendMessageOptions extends LinearLayout {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             }
         };
-        popupLayout1.setAnimationEnabled(false);
-        popupLayout1.setOnTouchListener(new OnTouchListener() {
-            private final Rect popupRect = new Rect();
+        sendPopupLayout1.setAnimationEnabled(false);
+        sendPopupLayout1.setOnTouchListener(new OnTouchListener() {
+            private final android.graphics.Rect popupRect = new android.graphics.Rect();
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -293,22 +268,21 @@ public class SendMessageOptions extends LinearLayout {
                 return false;
             }
         });
-        popupLayout1.setDispatchKeyEventListener(keyEvent -> {
+        sendPopupLayout1.setDispatchKeyEventListener(keyEvent -> {
             if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getRepeatCount() == 0 && sendPopupWindow != null && sendPopupWindow.isShowing()) {
                 sendPopupWindow.dismiss();
             }
         });
-        popupLayout1.setShownFromBottom(false);
-        return popupLayout1;
+        sendPopupLayout1.setShownFromBottom(false);
+        return sendPopupLayout1;
     }
 
-    @NonNull
-    private ActionBarPopupWindow.ActionBarPopupWindowLayout getActionBarPopupWindowLayout(Context parentActivity, Theme.ResourcesProvider resourcesProvider) {
-        ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout2 = new ActionBarPopupWindow.ActionBarPopupWindowLayout(parentActivity, resourcesProvider);
-        popupLayout2.setAnimationEnabled(false);
-        popupLayout2.setOnTouchListener(new OnTouchListener() {
+    private ActionBarPopupWindow.ActionBarPopupWindowLayout getSendPopupLayout2(Context parentActivity, Theme.ResourcesProvider resourcesProvider) {
+        ActionBarPopupWindow.ActionBarPopupWindowLayout sendPopupLayout2 = new ActionBarPopupWindow.ActionBarPopupWindowLayout(parentActivity, resourcesProvider);
+        sendPopupLayout2.setAnimationEnabled(false);
+        sendPopupLayout2.setOnTouchListener(new OnTouchListener() {
 
-            private final Rect popupRect = new Rect();
+            private final Rect popupRect = new android.graphics.Rect();
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -323,13 +297,13 @@ public class SendMessageOptions extends LinearLayout {
                 return false;
             }
         });
-        popupLayout2.setDispatchKeyEventListener(keyEvent -> {
+        sendPopupLayout2.setDispatchKeyEventListener(keyEvent -> {
             if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK && keyEvent.getRepeatCount() == 0 && sendPopupWindow != null && sendPopupWindow.isShowing()) {
                 sendPopupWindow.dismiss();
             }
         });
-        popupLayout2.setShownFromBottom(false);
-        return popupLayout2;
+        sendPopupLayout2.setShownFromBottom(false);
+        return sendPopupLayout2;
     }
 
     public void setSendPopupWindow(ActionBarPopupWindow sendPopupWindow) {
@@ -341,10 +315,6 @@ public class SendMessageOptions extends LinearLayout {
         return color != null ? color : Theme.getColor(Theme.key_dialogButtonSelector);
     }
 
-    public interface Delegate {
-        void sendMessage();
-    }
-
     private boolean isTextFieldEmpty() {
         return commentTextView != null && TextUtils.isEmpty(getTextFieldContent());
     }
@@ -353,16 +323,13 @@ public class SendMessageOptions extends LinearLayout {
         if (commentTextView == null) {
             return "";
         }
-
-        if (commentTextView instanceof ChatActivityEnterView) {
-            return OctoUtils.safeToString(((ChatActivityEnterView) commentTextView).getFieldText()).trim();
+        CharSequence text = null;
+        if (commentTextView instanceof ChatActivityEnterView chatActivityEnterView) {
+            text = chatActivityEnterView.getFieldText();
+        } else if (commentTextView instanceof EditTextEmoji editTextEmoji) {
+            text = editTextEmoji.getText();
         }
-
-        if (commentTextView instanceof EditTextEmoji) {
-            return OctoUtils.safeToString(((EditTextEmoji) commentTextView).getText()).trim();
-        }
-
-        return "";
+        return OctoUtils.safeToString(text).trim();
     }
 
     private void executeTranslationToCustomDestination() {
@@ -433,7 +400,7 @@ public class SendMessageOptions extends LinearLayout {
             @Override
             public void onError() {
                 if (finalFactory != null) {
-                    finalFactory.createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorFailed)).show();
+                    finalFactory.createSimpleBulletin(R.raw.info, getString(R.string.TranslatorFailed)).show();
                 }
             }
 
@@ -444,5 +411,9 @@ public class SendMessageOptions extends LinearLayout {
                 }
             }
         });
+    }
+
+    public interface Delegate {
+        void sendMessage();
     }
 }

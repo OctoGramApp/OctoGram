@@ -87,7 +87,7 @@ public class PopupChoiceDialogUtils {
                         tempLayout.addView(new FolderTypeSelector(builder.getContext(), true, option.tabModeIconUI), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
                     }
 
-                    cell.addView(tempLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, option.tabStyleIconUI != null ? 44 : 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT)));
+                    cell.addView(tempLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, (option.tabStyleIconUI != null || option.tabModeIconUI != null) ? 44 : 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT)));
                 }
 
                 if (!option.clickable) {

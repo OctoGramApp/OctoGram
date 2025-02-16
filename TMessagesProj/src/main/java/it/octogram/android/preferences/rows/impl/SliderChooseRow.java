@@ -22,11 +22,15 @@ public class SliderChooseRow extends BaseRow {
 
     private final List<Pair<Integer, String>> options;
     private final ConfigProperty<Integer> preferenceValue;
+    private final Runnable onUpdate;
+    private final Runnable onTouchEnd;
 
-    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<Integer> currentValue, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+    protected SliderChooseRow(List<Pair<Integer, String>> options, ConfigProperty<Integer> currentValue, ConfigProperty<Boolean> showIf, boolean showIfReverse, Runnable onUpdate, Runnable onTouchEnd) {
         super(null, null, false, showIf, showIfReverse, PreferenceType.SLIDER_CHOOSE);
         this.options = options;
         this.preferenceValue = currentValue;
+        this.onUpdate = onUpdate;
+        this.onTouchEnd = onTouchEnd;
     }
 
     public List<Pair<Integer, String>> getOptions() {
@@ -35,6 +39,14 @@ public class SliderChooseRow extends BaseRow {
 
     public ConfigProperty<Integer> getPreferenceValue() {
         return preferenceValue;
+    }
+
+    public Runnable getOnUpdate() {
+        return onUpdate;
+    }
+
+    public Runnable getOnTouchEnd() {
+        return onTouchEnd;
     }
 
     public int getIntValue() {
@@ -62,14 +74,26 @@ public class SliderChooseRow extends BaseRow {
 
     public static class SliderChooseRowBuilder extends ToggleableBaseRowBuilder<SliderChooseRow, Integer> {
         private final List<Pair<Integer, String>> options = new ArrayList<>();
+        private Runnable onUpdate;
+        private Runnable onTouchEnd;
 
         public SliderChooseRowBuilder options(List<Pair<Integer, String>> options) {
             this.options.addAll(options);
             return this;
         }
 
+        public SliderChooseRowBuilder onUpdate(Runnable onUpdate) {
+            this.onUpdate = onUpdate;
+            return this;
+        }
+
+        public SliderChooseRowBuilder onTouchEnd(Runnable onTouchEnd) {
+            this.onTouchEnd = onTouchEnd;
+            return this;
+        }
+
         public SliderChooseRow build() {
-            return new SliderChooseRow(options, preferenceValue, showIf, showIfReverse);
+            return new SliderChooseRow(options, preferenceValue, showIf, showIfReverse, onUpdate, onTouchEnd);
         }
     }
 }

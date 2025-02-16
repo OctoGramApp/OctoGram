@@ -96,6 +96,10 @@ public class TextDetailSettingsCell extends FrameLayout {
         }
     }
 
+    public boolean isMultiline() {
+        return multiline;
+    }
+
     public void setTextAndValue(CharSequence text, CharSequence value, boolean divider) {
         textView.setText(text);
         valueTextView.setText(value);

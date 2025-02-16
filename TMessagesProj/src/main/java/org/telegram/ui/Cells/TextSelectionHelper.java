@@ -67,7 +67,7 @@ import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
 import java.util.ArrayList;
 
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.TranslationsWrapper;
 
 public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.SelectableView> {
 

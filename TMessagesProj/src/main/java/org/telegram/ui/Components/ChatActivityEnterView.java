@@ -201,8 +201,8 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.PromptBeforeSendMedia;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.utils.PopupPromptUtils;
-import it.octogram.android.utils.translator.SingleTranslationManager;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.SingleTranslationManager;
+import it.octogram.android.translator.TranslationsWrapper;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate, SuggestEmojiView.AnchorViewDelegate {
 

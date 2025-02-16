@@ -8,6 +8,8 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
@@ -51,13 +53,12 @@ import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UserAccountInfoController;
 
 public class DetailsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
+    private final MessageObject messageObject;
     private int rowCount;
     private ListAdapter listAdapter;
     private RecyclerListView listView;
-
     private int detailsPreviewMessagesRow;
     private int detailsPreviewDividerRow;
-
     private int aboutInfoHeaderRow;
     private int nameUserHeaderRow;
     private int idUserHeaderRow;
@@ -72,55 +73,48 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
     private int messageDateRow;
     private int messageDateEditedRow;
     private int messageDividerRow;
-
     private int forwardMessageHeaderRow;
     private int forwardMessageDateRow;
     private int forwardDividerRow;
-
     private int forwardUserHeaderRow;
     private int forwardUserNameRow;
     private int forwardUserUsernameRow;
     private int forwardUserDatacenterRow;
     private int forwardUserIdRow;
-
     private int repliedMessageHeaderRow;
     private int repliedMessageIdRow;
     private int repliedMessageTextRow;
     private int repliedMessageTextLengthRow;
     private int repliedMessageDateRow;
     private int repliedDividerRow;
-
     private int repliedUserHeaderRow;
     private int repliedUserNameRow;
     private int repliedUserUsernameRow;
     private int repliedUserDatacenterRow;
     private int repliedUserIdRow;
-
     private int groupHeaderRow;
     private int groupDatacenterRow;
     private int groupNameRow;
     private int groupIdRow;
     private int groupUsernameRow;
     private int groupDividerRow;
-
     private int fileHeaderRow;
     private int fileNameRow;
     private int filePathRow;
     private int fileMimeType;
     private int fileSizeRow;
     private int fileDuration;
-    private int fileFramerate;
+    private int fileFrameRate;
+    private int fileResolution;
+    private int fileCodec;
     private int fileBitrate;
     private int fileDCRow;
     private int fileEmojiRow;
     private int fileDividerRow;
-
     private String filePath;
     private String fileName;
     private String durationString;
     private String emoji;
-
-    private final MessageObject messageObject;
     private TLRPC.Chat fromChat;
     private TLRPC.User fromUser;
     private TLRPC.User fromForwardedUser;
@@ -131,7 +125,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
     private UserAccountInfoController.UserAccountInfo fromUserInfo;
     private UserAccountInfoController.UserAccountInfo fromChatInfo;
 
-    private double fileBitrateCachedValue;
+    private VideoInfo videoInfo;
 
     public DetailsActivity(MessageObject messageObject) {
         this.messageObject = messageObject;
@@ -174,7 +168,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setTitle(LocaleController.getString(R.string.MessageDetails));
+        actionBar.setTitle(getString(R.string.MessageDetails));
         actionBar.setAllowOverlayTitle(false);
         if (AndroidUtilities.isTablet()) {
             actionBar.setOccupyStatusBar(false);
@@ -208,10 +202,10 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     textDetailCell.revealSpoilers();
                 } else if (!getMessagesController().isChatNoForwards(fromChat)) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                    builder.setItems(new CharSequence[]{LocaleController.getString(R.string.Copy)}, new int[]{R.drawable.msg_copy}, (dialogInterface, i) -> {
+                    builder.setItems(new CharSequence[]{getString(R.string.Copy)}, new int[]{R.drawable.msg_copy}, (dialogInterface, i) -> {
                         if (i == 0) {
                             AndroidUtilities.addToClipboard(textDetailCell.getText());
-                            BulletinFactory.of(DetailsActivity.this).createCopyBulletin(LocaleController.getString(R.string.TextCopied)).show();
+                            BulletinFactory.of(DetailsActivity.this).createCopyBulletin(getString(R.string.TextCopied)).show();
                         }
                     });
                     showDialog(builder.create());
@@ -222,14 +216,14 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
             if (view instanceof TextDetailCellMultiline) {
                 if (getMessagesController().isChatNoForwards(fromChat)) {
                     if (fromChat != null && fromChat.broadcast) {
-                        BulletinFactory.of(DetailsActivity.this).createSimpleBulletin(R.raw.ic_ban, LocaleController.getString(R.string.ForwardsRestrictedInfoChannel)).show();
+                        BulletinFactory.of(DetailsActivity.this).createSimpleBulletin(R.raw.ic_ban, getString(R.string.ForwardsRestrictedInfoChannel)).show();
                     } else {
-                        BulletinFactory.of(DetailsActivity.this).createSimpleBulletin(R.raw.ic_ban, LocaleController.getString(R.string.ForwardsRestrictedInfoGroup)).show();
+                        BulletinFactory.of(DetailsActivity.this).createSimpleBulletin(R.raw.ic_ban, getString(R.string.ForwardsRestrictedInfoGroup)).show();
                     }
                 } else {
                     TextDetailCellMultiline textDetailCell = (TextDetailCellMultiline) view;
                     AndroidUtilities.addToClipboard(textDetailCell.getText());
-                    BulletinFactory.of(DetailsActivity.this).createCopyBulletin(LocaleController.getString(R.string.TextCopied)).show();
+                    BulletinFactory.of(DetailsActivity.this).createCopyBulletin(getString(R.string.TextCopied)).show();
                 }
                 return true;
             }
@@ -290,7 +284,9 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         filePathRow = -1;
         fileSizeRow = -1;
         fileDuration = -1;
-        fileFramerate = -1;
+        fileFrameRate = -1;
+        fileResolution = -1;
+        fileCodec = -1;
         fileBitrate = -1;
         fileDCRow = -1;
         fileEmojiRow = -1;
@@ -414,18 +410,14 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                             durationString = AndroidUtilities.formatShortDuration(duration);
                             fileDuration = rowCount++;
                         } else if (messageObject.messageOwner.media.document.attributes.get(a) instanceof TLRPC.TL_documentAttributeSticker) {
-                            TLRPC.TL_documentAttributeSticker attribute = (TLRPC.TL_documentAttributeSticker) messageObject.messageOwner.media.document.attributes.get(a);
+                            TLRPC.TL_documentAttributeSticker attribute;
+                            attribute = (TLRPC.TL_documentAttributeSticker) messageObject.messageOwner.media.document.attributes.get(a);
                             Emoji.preloadEmoji(attribute.alt);
                             emoji = attribute.alt;
                             fileEmojiRow = rowCount++;
                         }
 
-                        if (messageObject.messageOwner.media.document.attributes.get(a) instanceof TLRPC.TL_documentAttributeVideo) {
-                            fileBitrate = rowCount++;
-
-                            long bitSizeData = messageObject.messageOwner.media.document.size;
-                            fileBitrateCachedValue = bitSizeData / messageObject.messageOwner.media.document.attributes.get(a).duration;
-                        }
+                        videoInfo = new VideoInfo(messageObject, a);
                     }
                 }
             }
@@ -475,6 +467,15 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         }
     }
 
+    @Override
+    public void didReceivedNotification(int id, int account, final Object... args) {
+        if (id == NotificationCenter.emojiLoaded) {
+            if (listView != null) {
+                listView.invalidateViews();
+            }
+        }
+    }
+
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
         private final Context mContext;
 
@@ -496,21 +497,21 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                 case 2:
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == aboutInfoHeaderRow) {
-                        headerCell.setText(fromUser.bot ? LocaleController.getString(R.string.BotInfo) : LocaleController.getString(R.string.UserInfo));
+                        headerCell.setText(fromUser.bot ? getString(R.string.BotInfo) : getString(R.string.UserInfo));
                     } else if (position == messageHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.Message));
+                        headerCell.setText(getString(R.string.Message));
                     } else if (position == forwardMessageHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.ForwardedMessage));
+                        headerCell.setText(getString(R.string.ForwardedMessage));
                     } else if (position == forwardUserHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.ForwardedFrom));
+                        headerCell.setText(getString(R.string.ForwardedFrom));
                     } else if (position == repliedMessageHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.MessageInReply));
+                        headerCell.setText(getString(R.string.MessageInReply));
                     } else if (position == repliedUserHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.InReplyTo));
+                        headerCell.setText(getString(R.string.InReplyTo));
                     } else if (position == groupHeaderRow) {
-                        headerCell.setText(fromChat != null && fromChat.broadcast ? LocaleController.getString(R.string.AccDescrChannel) : LocaleController.getString(R.string.AccDescrGroup));
+                        headerCell.setText(fromChat != null && fromChat.broadcast ? getString(R.string.AccDescrChannel) : getString(R.string.AccDescrGroup));
                     } else if (position == fileHeaderRow) {
-                        headerCell.setText(LocaleController.getString(R.string.ChatDocument));
+                        headerCell.setText(getString(R.string.ChatDocument));
                     }
                     break;
                 case 3:
@@ -522,47 +523,47 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                         if (fromUser.last_name != null) {
                             full_name += " " + fromUser.last_name;
                         }
-                        textDetailCell.setTextWithEmojiAndValue(full_name, LocaleController.getString(R.string.FullName), true);
+                        textDetailCell.setTextWithEmojiAndValue(full_name, getString(R.string.FullName), true);
                     } else if (position == usernameRow) {
-                        textDetailCell.setTextAndValue("@" + UserObject.getPublicUsername(fromUser), LocaleController.getString(R.string.Username), true);
+                        textDetailCell.setTextAndValue("@" + UserObject.getPublicUsername(fromUser), getString(R.string.Username), true);
                     } else if (position == messageIdRow) {
                         textDetailCell.setTextAndValue(String.valueOf(messageObject.getId()), "ID", true);
                     } else if (position == messageTextRow) {
                         CharSequence message = messageObject.messageOwner.message;
                         message = MessageStringHelper.getSpannableString(message.toString(), messageObject.messageOwner.entities, true);
-                        textDetailCell.setTextWithAnimatedEmojiAndValue(MessageStringHelper.getUrlNoUnderlineText(message), messageObject.messageOwner.entities, LocaleController.getString(R.string.MessageText), true);
+                        textDetailCell.setTextWithAnimatedEmojiAndValue(MessageStringHelper.getUrlNoUnderlineText(message), messageObject.messageOwner.entities, getString(R.string.MessageText), true);
                     } else if (position == messageTextLengthRow) {
-                        textDetailCell.setTextAndValue(String.valueOf(messageObject.messageOwner.message.length()), LocaleController.getString(R.string.MessageTextLength), true);
+                        textDetailCell.setTextAndValue(String.valueOf(messageObject.messageOwner.message.length()), getString(R.string.MessageTextLength), true);
                     } else if (position == messageDateRow) {
                         long date = (long) messageObject.messageOwner.date * 1000;
-                        CharSequence title = messageObject.scheduled ? LocaleController.getString(R.string.MessageScheduledDate) : LocaleController.getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.messageOwner.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        CharSequence title = messageObject.scheduled ? getString(R.string.MessageScheduledDate) : getString(R.string.MessageDate);
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == forwardMessageDateRow) {
                         long date = (long) messageObject.messageOwner.fwd_from.date * 1000;
-                        CharSequence title = messageObject.scheduled ? LocaleController.getString(R.string.MessageScheduledDate) : LocaleController.getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.messageOwner.fwd_from.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        CharSequence title = messageObject.scheduled ? getString(R.string.MessageScheduledDate) : getString(R.string.MessageDate);
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.fwd_from.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == forwardUserNameRow) {
                         String full_name = fromForwardedUser.first_name;
                         if (fromForwardedUser.last_name != null) {
                             full_name += " " + fromForwardedUser.last_name;
                         }
-                        textDetailCell.setTextWithEmojiAndValue(full_name, LocaleController.getString(R.string.FullName), fromForwardedUser.id != 0);
+                        textDetailCell.setTextWithEmojiAndValue(full_name, getString(R.string.FullName), fromForwardedUser.id != 0);
                     } else if (position == forwardUserUsernameRow) {
-                        textDetailCell.setTextAndValue("@" + UserObject.getPublicUsername(fromForwardedUser), LocaleController.getString(R.string.Username), true);
+                        textDetailCell.setTextAndValue("@" + UserObject.getPublicUsername(fromForwardedUser), getString(R.string.Username), true);
                     } else if (position == forwardUserIdRow) {
                         textDetailCell.setTextAndValue(String.valueOf(fromForwardedUserInfo.userId), "ID", false);
                     } else if (position == repliedMessageTextRow) {
                         CharSequence message = messageObject.replyMessageObject.messageOwner.message;
                         message = MessageStringHelper.getSpannableString(message.toString(), messageObject.replyMessageObject.messageOwner.entities, true);
-                        textDetailCell.setTextWithAnimatedEmojiAndValue(MessageStringHelper.getUrlNoUnderlineText(message), messageObject.replyMessageObject.messageOwner.entities, LocaleController.getString(R.string.MessageText), true);
+                        textDetailCell.setTextWithAnimatedEmojiAndValue(MessageStringHelper.getUrlNoUnderlineText(message), messageObject.replyMessageObject.messageOwner.entities, getString(R.string.MessageText), true);
                     } else if (position == repliedMessageTextLengthRow) {
-                        textDetailCell.setTextAndValue(String.valueOf(messageObject.replyMessageObject.messageOwner.message.length()), LocaleController.getString(R.string.MessageTextLength), true);
+                        textDetailCell.setTextAndValue(String.valueOf(messageObject.replyMessageObject.messageOwner.message.length()), getString(R.string.MessageTextLength), true);
                     } else if (position == repliedMessageIdRow) {
                         textDetailCell.setTextAndValue(String.valueOf(messageObject.replyMessageObject.messageOwner.id), "ID", true);
                     } else if (position == repliedMessageDateRow) {
                         long date = (long) messageObject.replyMessageObject.messageOwner.date * 1000;
-                        CharSequence title = messageObject.scheduled ? LocaleController.getString(R.string.MessageScheduledDate) : LocaleController.getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.replyMessageObject.messageOwner.date == 0x7ffffffe ? LocaleController.getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        CharSequence title = messageObject.scheduled ? getString(R.string.MessageScheduledDate) : getString(R.string.MessageDate);
+                        textDetailCell.setTextAndValue(messageObject.replyMessageObject.messageOwner.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == repliedUserIdRow) {
                         textDetailCell.setTextAndValue(String.valueOf(fromRepliedUserInfo.userId), "ID", false);
                     } else if (position == repliedUserNameRow) {
@@ -570,26 +571,26 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                         if (fromRepliedUser.last_name != null) {
                             full_name += " " + fromRepliedUser.last_name;
                         }
-                        textDetailCell.setTextWithEmojiAndValue(full_name, LocaleController.getString(R.string.FullName), true);
+                        textDetailCell.setTextWithEmojiAndValue(full_name, getString(R.string.FullName), true);
                     } else if (position == repliedUserUsernameRow) {
-                        textDetailCell.setTextAndValue("@" + UserObject.getPublicUsername(fromRepliedUser), LocaleController.getString(R.string.Username), true);
+                        textDetailCell.setTextAndValue("@" + UserObject.getPublicUsername(fromRepliedUser), getString(R.string.Username), true);
                     } else if (position == groupNameRow) {
                         if (fromChat.broadcast) {
-                            textDetailCell.setTextWithEmojiAndValue(fromChat.title, LocaleController.getString(R.string.EnterChannelName), true);
+                            textDetailCell.setTextWithEmojiAndValue(fromChat.title, getString(R.string.EnterChannelName), true);
                         } else {
-                            textDetailCell.setTextWithEmojiAndValue(fromChat.title, LocaleController.getString(R.string.GroupName), true);
+                            textDetailCell.setTextWithEmojiAndValue(fromChat.title, getString(R.string.GroupName), true);
                         }
                     } else if (position == groupUsernameRow) {
-                        textDetailCell.setTextAndValue("@" + fromChat.username, LocaleController.getString(R.string.Username), true);
+                        textDetailCell.setTextAndValue("@" + fromChat.username, getString(R.string.Username), true);
                     } else if (position == groupIdRow) {
                         textDetailCell.setTextAndValue(String.valueOf(fromChatInfo.userId), "ID", false);
                     } else if (position == fileNameRow) {
-                        textDetailCell.setTextAndValue(fileName, LocaleController.getString(R.string.FileName), true);
+                        textDetailCell.setTextAndValue(fileName, getString(R.string.FileName), true);
                     } else if (position == filePathRow) {
-                        textDetailCell.setTextAndValue(filePath, LocaleController.getString(R.string.FilePath), true);
+                        textDetailCell.setTextAndValue(filePath, getString(R.string.FilePath), true);
                     } else if (position == fileSizeRow) {
                         long size = messageObject.getSize() != 0 ? messageObject.getSize() : new File(filePath).length();
-                        textDetailCell.setTextAndValue(AndroidUtilities.formatFileSize(size), LocaleController.getString(R.string.FileSize), true);
+                        textDetailCell.setTextAndValue(AndroidUtilities.formatFileSize(size), getString(R.string.FileSize), true);
                     } else if (position == fileDCRow) {
                         int DC = -1;
                         if (messageObject.messageOwner.media.photo != null && messageObject.messageOwner.media.photo.dc_id > 0) {
@@ -597,30 +598,34 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                         } else if (messageObject.messageOwner.media.document != null && messageObject.messageOwner.media.document.dc_id > 0) {
                             DC = messageObject.messageOwner.media.document.dc_id;
                         }
-                        textDetailCell.setTextAndValue(Datacenter.Companion.getDcInfo(DC).getDcName(), LocaleController.getString(R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(Datacenter.Companion.getDcInfo(DC).getDcName(), getString(R.string.FileDC), true);
                     } else if (position == messageForwardsRow) {
-                        textDetailCell.setTextAndValue(String.valueOf(messageObject.messageOwner.forwards), LocaleController.getString(R.string.ForwardsNumber), true);
+                        textDetailCell.setTextAndValue(String.valueOf(messageObject.messageOwner.forwards), getString(R.string.ForwardsNumber), true);
                     } else if (position == messageDateEditedRow) {
                         long date = (long) messageObject.messageOwner.edit_date * 1000;
-                        textDetailCell.setTextAndValue(LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), LocaleController.getString(R.string.EditedDate), true);
+                        textDetailCell.setTextAndValue(LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), getString(R.string.EditedDate), true);
                     } else if (position == fileDuration) {
-                        textDetailCell.setTextAndValue(durationString, LocaleController.getString(R.string.UserRestrictionsDuration), true);
-                    } else if (position == fileFramerate) {
-                        //textDetailCell.setTextAndValue(String.valueOf(videoInfo.getFrameRate()), LocaleController.getString(R.string.FileFrameRate), true);
+                        textDetailCell.setTextAndValue(durationString, getString(R.string.UserRestrictionsDuration), true);
+//                    } else if (position == fileFrameRate) {
+//                        textDetailCell.setTextAndValue(String.valueOf(videoInfo.getFrameRate()), LocaleController.getString(R.string.fileFrameRate), true);
+                    } else if (position == fileResolution) {
+                        textDetailCell.setTextAndValue(videoInfo.getResolution(), getString(R.string.FileResolution), true);
+                    } else if (position == fileCodec) {
+                        textDetailCell.setTextAndValue(videoInfo.getCodec(), getString(R.string.FileCodec), true);
                     } else if (position == fileBitrate) {
-                        textDetailCell.setTextAndValue(OctoUtils.formatBitrate(fileBitrateCachedValue), LocaleController.getString(R.string.FileBitrate), true);
+                        textDetailCell.setTextAndValue(OctoUtils.formatBitrate(videoInfo.getBitrate()), getString(R.string.FileBitrate), true);
                     } else if (position == fileEmojiRow) {
-                        textDetailCell.setTextWithEmojiAndValue(emoji, LocaleController.getString(R.string.AssociatedEmoji), true);
+                        textDetailCell.setTextWithEmojiAndValue(emoji, getString(R.string.AssociatedEmoji), true);
                     } else if (position == fileMimeType) {
-                        textDetailCell.setTextAndValue(messageObject.messageOwner.media.document.mime_type, LocaleController.getString(R.string.MimeType), true);
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.media.document.mime_type, getString(R.string.MimeType), true);
                     } else if (position == groupDatacenterRow) {
-                        textDetailCell.setTextAndValue(fromChatInfo.dcInfo.getDcName(), LocaleController.getString(R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromChatInfo.dcInfo.getDcName(), getString(R.string.FileDC), true);
                     } else if (position == repliedUserDatacenterRow) {
-                        textDetailCell.setTextAndValue(fromRepliedUserInfo.dcInfo.getDcName(), LocaleController.getString(R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromRepliedUserInfo.dcInfo.getDcName(), getString(R.string.FileDC), true);
                     } else if (position == forwardUserDatacenterRow) {
-                        textDetailCell.setTextAndValue(fromForwardedUserInfo.dcInfo.getDcName(), LocaleController.getString(R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromForwardedUserInfo.dcInfo.getDcName(), getString(R.string.FileDC), true);
                     } else if (position == dcRow) {
-                        textDetailCell.setTextAndValue(fromUserInfo.dcInfo.getDcName(), LocaleController.getString(R.string.FileDC), true);
+                        textDetailCell.setTextAndValue(fromUserInfo.dcInfo.getDcName(), getString(R.string.FileDC), true);
                     }
                     break;
                 case 4:
@@ -677,9 +682,9 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     position == repliedMessageIdRow || position == repliedUserNameRow || position == repliedUserUsernameRow ||
                     position == repliedUserIdRow || position == groupNameRow || position == groupIdRow || position == groupUsernameRow ||
                     position == fileNameRow || position == filePathRow || position == fileSizeRow || position == fileDCRow ||
-                    position == messageForwardsRow || position == messageDateEditedRow || position == fileDuration || position == fileFramerate ||
-                    position == fileBitrate || position == fileEmojiRow || position == fileMimeType || position == groupDatacenterRow ||
-                    position == repliedUserDatacenterRow || position == forwardUserDatacenterRow || position == dcRow ||
+                    position == messageForwardsRow || position == messageDateEditedRow || position == fileDuration || position == fileFrameRate ||
+                    position == fileResolution || position == fileBitrate || position == fileEmojiRow || position == fileMimeType || position == fileCodec ||
+                    position == groupDatacenterRow || position == repliedUserDatacenterRow || position == forwardUserDatacenterRow || position == dcRow ||
                     position == messageTextLengthRow || position == repliedMessageTextLengthRow) {
                 return 3;
             } else if (position == detailsPreviewMessagesRow) {
@@ -780,12 +785,49 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         }
     }
 
-    @Override
-    public void didReceivedNotification(int id, int account, final Object... args) {
-        if (id == NotificationCenter.emojiLoaded) {
-            if (listView != null) {
-                listView.invalidateViews();
+    public class VideoInfo {
+        private double fileBitrateCachedValue;
+        private String resolution;
+        private String codec;
+
+        public VideoInfo(MessageObject messageObject, int attributeIndex) {
+            if (messageObject.messageOwner.media.document.attributes.get(attributeIndex) instanceof TLRPC.TL_documentAttributeVideo) {
+                TLRPC.TL_documentAttributeVideo attribute;
+                attribute = (TLRPC.TL_documentAttributeVideo) messageObject.messageOwner.media.document.attributes.get(attributeIndex);
+
+                if (attribute.duration > 0 && messageObject.messageOwner.media.document.size > 0) {
+                    fileBitrate = rowCount++;
+                    fileBitrateCachedValue = (double) messageObject.messageOwner.media.document.size / attribute.duration;
+                } else {
+                    fileBitrate = -1;
+                }
+
+                if (attribute.w > 0 && attribute.h > 0) {
+                    fileResolution = rowCount++;
+                    resolution = String.format("%sx%s", attribute.w, attribute.h);
+                } else {
+                    fileResolution = -1;
+                }
+
+                if (attribute.video_codec != null && !attribute.video_codec.isEmpty()) {
+                    fileCodec = rowCount++;
+                    codec = attribute.video_codec;
+                } else {
+                    fileCodec = -1;
+                }
             }
+        }
+
+        public double getBitrate() {
+            return fileBitrateCachedValue;
+        }
+
+        public String getResolution() {
+            return resolution;
+        }
+
+        public String getCodec() {
+            return codec;
         }
     }
 }

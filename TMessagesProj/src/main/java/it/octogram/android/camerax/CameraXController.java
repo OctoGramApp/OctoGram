@@ -86,11 +86,15 @@ import it.octogram.android.utils.JpegImageUtils;
 
 public class CameraXController {
 
+    protected static final String TAG = "CameraXController";
+    private static Camera camera;
+    private final CameraLifecycle lifecycle;
+    private final MeteringPointFactory meteringPointFactory;
+    private final Preview.SurfaceProvider surfaceProvider;
+    public float oldZoomSelection = 0F; // TODO: fix for UW Lens
     private boolean isFrontface;
     private boolean isInitiated = false;
-    private final CameraLifecycle lifecycle;
     private ProcessCameraProvider provider;
-    private static Camera camera;
     private CameraSelector cameraSelector;
     private CameraXView.VideoSavedCallback videoSavedCallback;
     private boolean abandonCurrentVideo = false;
@@ -98,15 +102,46 @@ public class CameraXController {
     private Preview previewUseCase;
     private VideoCapture<Recorder> vCapture;
     private Recording recording;
-    private final MeteringPointFactory meteringPointFactory;
-    private final Preview.SurfaceProvider surfaceProvider;
     private ExtensionsManager extensionsManager;
     private boolean stableFPSPreviewOnly = false;
     private boolean noSupportedSurfaceCombinationWorkaround = false;
-
-    public float oldZoomSelection = 0F; // TODO: fix for UW Lens
     private int selectedEffect = EffectFacing.CAMERA_NONE;
-    protected static final String TAG = "CameraXController";
+
+    public CameraXController(CameraLifecycle lifecycle, MeteringPointFactory factory, Preview.SurfaceProvider surfaceProvider) {
+        this.lifecycle = lifecycle;
+        this.meteringPointFactory = factory;
+        this.surfaceProvider = surfaceProvider;
+    }
+
+    public static boolean hasGoodCamera(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+    }
+
+    @OptIn(markerClass = ExperimentalZeroShutterLag.class)
+    public static boolean isZSLSupported() {
+        if (ForceZslSupport.isForcedZslDevice()) return true;
+        if (camera == null) return false;
+        return camera.getCameraInfo().isZslSupported();
+    }
+
+    @OptIn(markerClass = ExperimentalZeroShutterLag.class)
+    private static ImageCapture.Builder getCaptureModeBuilder() {
+        var iCaptureBuilder = new ImageCapture.Builder();
+
+        int captureMode;
+        if (OctoConfig.INSTANCE.cameraXZeroShutter.getValue()) {
+            captureMode = ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG;
+        } else if (OctoConfig.INSTANCE.cameraXPerformanceMode.getValue()) {
+            captureMode = ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY;
+        } else {
+            captureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY;
+        }
+
+        iCaptureBuilder.setCaptureMode(captureMode);
+        iCaptureBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
+
+        return iCaptureBuilder;
+    }
 
     public void setTorchEnabled(boolean b) {
         if (camera != null) {
@@ -114,41 +149,6 @@ public class CameraXController {
         } else {
             OctoLogging.e("Camera is not initialized.");
         }
-    }
-
-    public static class CameraLifecycle implements LifecycleOwner {
-
-        private final LifecycleRegistry lifecycleRegistry;
-
-        public CameraLifecycle() {
-            lifecycleRegistry = new LifecycleRegistry(this);
-            lifecycleRegistry.setCurrentState(Lifecycle.State.CREATED);
-        }
-
-        public void start() {
-            try {
-                lifecycleRegistry.setCurrentState(Lifecycle.State.RESUMED);
-            } catch (IllegalStateException ignored) {
-            }
-        }
-
-        public void stop() {
-            try {
-                lifecycleRegistry.setCurrentState(Lifecycle.State.DESTROYED);
-            } catch (IllegalStateException ignored) {
-            }
-        }
-
-        @NonNull
-        public Lifecycle getLifecycle() {
-            return lifecycleRegistry;
-        }
-    }
-
-    public CameraXController(CameraLifecycle lifecycle, MeteringPointFactory factory, Preview.SurfaceProvider surfaceProvider) {
-        this.lifecycle = lifecycle;
-        this.meteringPointFactory = factory;
-        this.surfaceProvider = surfaceProvider;
     }
 
     public boolean isInitied() {
@@ -193,13 +193,13 @@ public class CameraXController {
         );
     }
 
+    public int getCameraEffect() {
+        return selectedEffect;
+    }
+
     public void setCameraEffect(@EffectFacing int effect) {
         selectedEffect = effect;
         bindUseCases();
-    }
-
-    public int getCameraEffect() {
-        return selectedEffect;
     }
 
     public void switchCamera() {
@@ -222,10 +222,6 @@ public class CameraXController {
         }
     }
 
-    public static boolean hasGoodCamera(Context context) {
-        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
-    }
-
     private int getNextFlashMode(int legacyMode) {
         return switch (legacyMode) {
             case ImageCapture.FLASH_MODE_AUTO -> ImageCapture.FLASH_MODE_ON;
@@ -246,13 +242,6 @@ public class CameraXController {
 
     public boolean isFlashAvailable() {
         return camera.getCameraInfo().hasFlashUnit();
-    }
-
-    @OptIn(markerClass = ExperimentalZeroShutterLag.class)
-    public static boolean isZSLSupported() {
-        if (ForceZslSupport.isForcedZslDevice()) return true;
-        if (camera == null) return false;
-        return camera.getCameraInfo().isZslSupported();
     }
 
     public boolean isModeSupported(@ExtensionMode.Mode int mode) {
@@ -358,25 +347,6 @@ public class CameraXController {
         }
     }
 
-    @OptIn(markerClass = ExperimentalZeroShutterLag.class)
-    private static ImageCapture.Builder getCaptureModeBuilder() {
-        var iCaptureBuilder = new ImageCapture.Builder();
-
-        int captureMode;
-        if (OctoConfig.INSTANCE.cameraXZeroShutter.getValue()) {
-            captureMode = ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG;
-        } else if (OctoConfig.INSTANCE.cameraXPerformanceMode.getValue()) {
-            captureMode = ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY;
-        } else {
-            captureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY;
-        }
-
-        iCaptureBuilder.setCaptureMode(captureMode);
-        iCaptureBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
-
-        return iCaptureBuilder;
-    }
-
     public void setZoom(float value) {
         camera.getCameraControl().setLinearZoom(oldZoomSelection = value); // TODO: make more smooth
     }
@@ -441,7 +411,6 @@ public class CameraXController {
 
         camera.getCameraControl().startFocusAndMetering(action);
     }
-
 
     public void recordVideo(final File path, boolean mirror, CameraXView.VideoSavedCallback onStop) {
         if (noSupportedSurfaceCombinationWorkaround) {
@@ -536,14 +505,12 @@ public class CameraXController {
         });
     }
 
-
     public void stopVideoRecording(final boolean abandon) {
         abandonCurrentVideo = abandon;
         if (recording != null) {
             recording.stop();
         }
     }
-
 
     public void takePicture(final File file, Runnable onTake) {
         if (stableFPSPreviewOnly) return;
@@ -637,7 +604,15 @@ public class CameraXController {
         return x * (1 - f) + y * f;
     }
 
-    @IntDef({EffectFacing.CAMERA_NONE, EffectFacing.CAMERA_AUTO, EffectFacing.CAMERA_HDR, EffectFacing.CAMERA_NIGHT})
+    @IntDef({
+            EffectFacing.CAMERA_NONE,
+            EffectFacing.CAMERA_AUTO,
+            EffectFacing.CAMERA_HDR,
+            EffectFacing.CAMERA_NIGHT,
+            EffectFacing.CAMERA_WIDE,
+            EffectFacing.CAMERA_BOKEH,
+            EffectFacing.CAMERA_FACE_RETOUCH
+    })
     @Retention(RetentionPolicy.SOURCE)
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public @interface EffectFacing {
@@ -648,6 +623,35 @@ public class CameraXController {
         int CAMERA_WIDE = 4;
         int CAMERA_BOKEH = 5;
         int CAMERA_FACE_RETOUCH = 6;
+    }
+
+    public static class CameraLifecycle implements LifecycleOwner {
+
+        private final LifecycleRegistry lifecycleRegistry;
+
+        public CameraLifecycle() {
+            lifecycleRegistry = new LifecycleRegistry(this);
+            lifecycleRegistry.setCurrentState(Lifecycle.State.CREATED);
+        }
+
+        public void start() {
+            try {
+                lifecycleRegistry.setCurrentState(Lifecycle.State.RESUMED);
+            } catch (IllegalStateException ignored) {
+            }
+        }
+
+        public void stop() {
+            try {
+                lifecycleRegistry.setCurrentState(Lifecycle.State.DESTROYED);
+            } catch (IllegalStateException ignored) {
+            }
+        }
+
+        @NonNull
+        public Lifecycle getLifecycle() {
+            return lifecycleRegistry;
+        }
     }
 
     static class ForceZslSupport {

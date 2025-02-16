@@ -27,5 +27,10 @@ public class DeepLinkDef {
     public static final String USER = "user";
     public static final String PINNED_EMOJIS = "pinned_emojis";
     public static final String PINNED_REACTIONS = "pinned_reactions";
+    public static final String PINNED_HASHTAGS = "pinned_hashtags";
     public static final String TRANSLATOR = "translator";
+    public static final String INFO = "octogram";
+    public static final String DC_STATUS = "dc";
+    public static final String PRIVACY = "privacy";
+    public static final String LOCKED_CHATS = "locked_chats";
 }

@@ -10,23 +10,18 @@ package it.octogram.android.utils;
 
 import android.os.SystemClock;
 
-import androidx.annotation.NonNull;
+import org.telegram.messenger.Utilities;
 
-import org.json.JSONObject;
-import org.telegram.messenger.AndroidUtilities;
-
-import java.util.ArrayList;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 import it.octogram.android.Datacenter;
-import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.preferences.ui.custom.DatacenterStatus;
 
 public class DatacenterController {
-    private static final String BASE_URL = "https://raw.githubusercontent.com/OctoGramApp/assets/main/DCStatus/dc_status.json";
-
     public static class DatacenterStatusChecker {
         private UpdateCallback updateCallback;
-        private volatile boolean isRunning = false;
-        private volatile boolean doneStopRunning = true;
         private Thread thread;
 
         public void setOnUpdate(UpdateCallback updateCallback) {
@@ -34,78 +29,57 @@ public class DatacenterController {
         }
 
         public void runListener() {
-            if (isRunning) return;
-            isRunning = true;
-            if (!doneStopRunning) return;
+            if (updateCallback == null) {
+                return;
+            }
+
+            if (thread != null) {
+                thread.interrupt();
+            }
+
             thread = new Thread() {
                 @Override
                 public void run() {
-                    while (isRunning) {
-                        try {
-                            var url = String.format("%s?ms=%s", BASE_URL, (int) (Math.random() * 10000));
-                            var obj = new JSONObject(new StandardHTTPRequest(url).request());
-                            var listDatacenters = obj.getJSONArray("status");
-                            int refreshTimeIn = obj.getInt("refresh_in_time");
-                            var infoArrayList = new DCInfo();
-                            for (int i = 0; i < listDatacenters.length(); i++) {
-                                var dcInfo = listDatacenters.getJSONObject(i);
-                                var dcID = dcInfo.getInt("dc_id");
-                                var status = dcInfo.getInt("dc_status");
-                                var lastDown = dcInfo.getInt("last_down");
-                                var lastLag = dcInfo.getInt("last_lag");
-                                var ping = StandardHTTPRequest.ping(Datacenter.Companion.getDcInfo(dcInfo.getInt("dc_id")).getIp());  //dcInfo.getInt("ping");
-                                infoArrayList.add(new DCStatus(dcID, status, ping, lastDown, lastLag));
-                                SystemClock.sleep(25);
+                    while (!Thread.currentThread().isInterrupted()) {
+                        updateCallback.onNewCycle();
+
+                        long timeToSleep = 60 * 1000L;
+                        for (int i = 1; i <= 5; i++) {
+                            Datacenter dcInfo = Datacenter.Companion.getDcInfo(i);
+
+                            long dnsResolved = System.currentTimeMillis();
+                            try (Socket socket = new Socket()) {
+                                socket.connect(new InetSocketAddress(dcInfo.getIp(), 80), 10000);
+                                int diff = Math.round(System.currentTimeMillis() - dnsResolved);
+                                socket.close();
+                                updateCallback.onUpdate(i, DatacenterStatus.AVAILABLE, diff);
+                            } catch (IOException e) {
+                                updateCallback.onUpdate(i, DatacenterStatus.UNAVAILABLE);
                             }
-                            if (updateCallback != null) {
-                                AndroidUtilities.runOnUIThread(() -> updateCallback.onUpdate(infoArrayList));
-                            }
-                            SystemClock.sleep(1000L * refreshTimeIn);
-                        } catch (Exception ignored) {
-                            SystemClock.sleep(1000L);
+                            int diff = Math.round(System.currentTimeMillis() - dnsResolved);
+                            timeToSleep -= diff;
+                            SystemClock.sleep(500L);
+                            timeToSleep -= 500L;
+                            // handle SLOW dc status && better timing
                         }
+
+                        SystemClock.sleep(Utilities.clamp(timeToSleep, 60 * 1000L, 5 * 1000L));
                     }
-                    doneStopRunning = true;
                 }
             };
             thread.start();
         }
 
-        public void stop(boolean forced) {
-            isRunning = false;
-            doneStopRunning = forced;
-            if (forced) {
-                thread.interrupt();
-            }
+        public void stop() {
+            thread.interrupt();
         }
 
         public interface UpdateCallback {
-            void onUpdate(DCInfo result);
-        }
-    }
-
-    public static class DCInfo extends ArrayList<DCStatus> {
-
-        public DCStatus getByDc(int dcID) {
-            for (int i = 0; i < size(); i++) {
-                DCStatus DCStatus = get(i);
-                if (DCStatus.dcID == dcID) return DCStatus;
+            void onUpdate(int dcId, int status, int parameter);
+            default void onUpdate(int dcId, int status) {
+                onUpdate(dcId, status, 0);
             }
-            return null;
-        }
-    }
-
-    public record DCStatus(int dcID, int status, int ping, int lastDown, int lastLag) {
-        @NonNull
-        @Override
-        public String toString() {
-            return "DCStatus{" +
-                    "dcID=" + dcID +
-                    ", status=" + status +
-                    ", ping=" + ping +
-                    ", lastDown=" + lastDown +
-                    ", lastLag=" + lastLag +
-                    '}';
+            void onNewCycle();
         }
     }
 }

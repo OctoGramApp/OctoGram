@@ -962,9 +962,9 @@ public class FilterCreateActivity extends BaseFragment {
             return;
         }
         int flags = newFilterFlags & MessagesController.DIALOG_FILTER_FLAG_ALL_CHATS;
-        String[] result = FolderIconController.getEmoticonData(flags);
-        String newName = result[0];
-        String newEmoticon = result[1];
+        var result = FolderIconController.getEmoticonData(flags);
+        String newName = result.getFirst();
+        String newEmoticon = result.getSecond();
         if (newName != null && newName.length() > MAX_NAME_LENGTH) {
             newName = "";
         }

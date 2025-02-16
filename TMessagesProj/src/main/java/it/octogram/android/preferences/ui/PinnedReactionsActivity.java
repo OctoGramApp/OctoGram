@@ -37,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -65,6 +64,7 @@ import org.telegram.ui.Components.Reactions.BackSpaceButtonView;
 import org.telegram.ui.Components.Reactions.CustomReactionEditText;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Components.ReactionsContainerLayout;
+import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Components.ViewPagerFixed;
 import org.telegram.ui.SelectAnimatedEmojiDialog;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
@@ -101,6 +101,9 @@ public class PinnedReactionsActivity extends BaseFragment {
     public boolean loading;
     private final List<TLRPC.TL_availableReaction> allAvailableReactions = new ArrayList<>();
 
+    /**
+     * @noinspection UnnecessaryUnicodeEscape
+     */
     public class Page extends FrameLayout {
 
         private final FrameLayout bottomDialogLayout;
@@ -177,7 +180,7 @@ public class PinnedReactionsActivity extends BaseFragment {
             enableReactionsCell.setHeight(56);
             enableReactionsCell.setBackgroundColor(Theme.getColor(enableReactionsCell.isChecked() ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked));
             enableReactionsCell.setTypeface(AndroidUtilities.bold());
-            enableReactionsCell.setTextAndCheck(LocaleController.getString(type == PAGE_CHATS ? R.string.PinnedReactions_Status_Chats : R.string.PinnedReactions_Status_Channels), false, false);
+            enableReactionsCell.setTextAndCheck(getString(type == PAGE_CHATS ? R.string.PinnedReactions_Status_Chats : R.string.PinnedReactions_Status_Channels), false, false);
             enableReactionsCell.setColors(Theme.key_windowBackgroundCheckText, Theme.key_switchTrackBlue, Theme.key_switchTrackBlueChecked, Theme.key_switchTrackBlueThumb, Theme.key_switchTrackBlueThumbChecked);
             enableReactionsCell.setOnClickListener(v -> setCheckedEnableReactionCell(!enableReactionsCell.isChecked(), true, false));
             contentLayout.addView(enableReactionsCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
@@ -186,7 +189,7 @@ public class PinnedReactionsActivity extends BaseFragment {
             infoCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
             infoCell.setTopPadding(12);
             infoCell.setBottomPadding(16);
-            infoCell.setText(LocaleController.getString(type == PAGE_CHATS ? R.string.PinnedReactions_Description : R.string.PinnedReactions_Description_Channels));
+            infoCell.setText(getString(type == PAGE_CHATS ? R.string.PinnedReactions_Description : R.string.PinnedReactions_Description_Channels));
             contentLayout.addView(infoCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             reactionsPreview = new ReactionsContainerPreview(context, getParentLayout(), null);
@@ -197,7 +200,7 @@ public class PinnedReactionsActivity extends BaseFragment {
             contentLayout.addView(shadowSectionCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             HeaderCell headerCell = new HeaderCell(context);
-            headerCell.setText(LocaleController.getString(R.string.PinnedReactions));
+            headerCell.setText(getString(R.string.PinnedReactions));
             headerCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
             headerCell.setTextSize(15);
             headerCell.setTopMargin(14);
@@ -231,7 +234,7 @@ public class PinnedReactionsActivity extends BaseFragment {
             switchLayout.addView(editText, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             actionButton = new ButtonWithCounterView(context, getResourceProvider());
-            actionButton.setText(new SpannableStringBuilder(LocaleController.getString(R.string.PinnedReactions_Apply)), false);
+            actionButton.setText(new SpannableStringBuilder(getString(R.string.PinnedReactions_Apply)), false);
             actionButton.setOnClickListener(v -> buttonClick());
             addView(scrollView);
             addView(actionButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM, 13, 13, 13, 13));
@@ -273,13 +276,15 @@ public class PinnedReactionsActivity extends BaseFragment {
                             addReactionToEditText(emoji, selectedEmojisMap, selectedCustomEmojisList, editable, selectAnimatedEmojiDialog, editText.getFontMetricsInt());
                             successHandled++;
                         }
-                    } catch (JSONException ignored) { }
+                    } catch (JSONException ignored) {
+                    }
 
                     if (successHandled >= 5) {
                         break;
                     }
                 }
-            } catch (JSONException ignored) {}
+            } catch (JSONException ignored) {
+            }
 
             editText.append(editable);
             editText.setSelection(editText.getText().length());
@@ -337,7 +342,7 @@ public class PinnedReactionsActivity extends BaseFragment {
                 protected void onEmojiSelected(View view, Long documentId, TLRPC.Document document, TL_stars.TL_starGiftUnique gift, Integer until) {
                     if (gift != null) {
                         BulletinFactory.of(fragment)
-                                .createSimpleBulletin(gift.sticker, LocaleController.getString(R.string.PinnedReactions_Type))
+                                .createSimpleBulletin(gift.sticker, getString(R.string.PinnedReactions_Type))
                                 .show();
                         return;
                     }
@@ -354,7 +359,7 @@ public class PinnedReactionsActivity extends BaseFragment {
 
                             if (!isReactionEmoji) {
                                 BulletinFactory.of(fragment)
-                                        .createSimpleBulletin(document, LocaleController.getString(R.string.PinnedReactions_Type))
+                                        .createSimpleBulletin(document, getString(R.string.PinnedReactions_Type))
                                         .show();
                                 return;
                             }
@@ -376,7 +381,8 @@ public class PinnedReactionsActivity extends BaseFragment {
                             editText.getText().insert(selectionEnd, spannable);
                             editText.setSelection(selectionEnd + spannable.length());
                             selectAnimatedEmojiDialog.setMultiSelected(documentId, true);
-                        } catch (Exception ignored) { }
+                        } catch (Exception ignored) {
+                        }
                     } else {
                         selectedCustomEmojisList.remove(documentId);
                         AnimatedEmojiSpan removedSpan = selectedEmojisMap.remove(documentId);
@@ -408,6 +414,15 @@ public class PinnedReactionsActivity extends BaseFragment {
             selectAnimatedEmojiDialog.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
             bottomDialogLayout.addView(selectAnimatedEmojiDialog, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM));
 
+            BackSpaceButtonView backSpaceButtonView = getBackSpaceButtonView();
+            bottomDialogLayout.addView(backSpaceButtonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.RIGHT, 0, 0, 8, 8));
+            for (Long selectedEmojisId : selectedCustomEmojisList) {
+                selectAnimatedEmojiDialog.setMultiSelected(selectedEmojisId, false);
+            }
+        }
+
+        @NonNull
+        private BackSpaceButtonView getBackSpaceButtonView() {
             BackSpaceButtonView backSpaceButtonView = new BackSpaceButtonView(getContext(), getResourceProvider());
             backSpaceButtonView.setOnBackspace(isFast -> {
                 if (deleteSelectedEmojis()) {
@@ -443,10 +458,7 @@ public class PinnedReactionsActivity extends BaseFragment {
                 }
                 reactionsPreview.tagSelector.setVisibleReactionsList(grabAsVisibleReactions(), true);
             });
-            bottomDialogLayout.addView(backSpaceButtonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.RIGHT, 0, 0, 8, 8));
-            for (Long selectedEmojisId : selectedCustomEmojisList) {
-                selectAnimatedEmojiDialog.setMultiSelected(selectedEmojisId, false);
-            }
+            return backSpaceButtonView;
         }
 
         private boolean deleteSelectedEmojis() {
@@ -557,7 +569,7 @@ public class PinnedReactionsActivity extends BaseFragment {
         private boolean checkMaxNumberReached() {
             if (grabReactions().length() >= 5) {
                 BulletinFactory.of(fragment)
-                        .createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString(R.string.PinnedReactions_Limit))
+                        .createSimpleBulletin(R.raw.chats_infotip, getString(R.string.PinnedReactions_Limit))
                         .show();
                 return false;
             }
@@ -587,13 +599,15 @@ public class PinnedReactionsActivity extends BaseFragment {
                         } else if (jsonObject.has("document_id")) {
                             savedDocumentIds.add(jsonObject.getLong("document_id"));
                         }
-                    } catch (JSONException ignored) {}
+                    } catch (JSONException ignored) {
+                    }
 
                     if (i >= 5) {
                         break;
                     }
                 }
-            } catch (JSONException ignored) {}
+            } catch (JSONException ignored) {
+            }
 
             JSONArray currentReactions = grabReactions();
             ArrayList<String> currentEmoticons = new ArrayList<>();
@@ -606,7 +620,8 @@ public class PinnedReactionsActivity extends BaseFragment {
                     } else if (object.has("emoticon")) {
                         currentEmoticons.add(object.getString("emoticon").replace("\uFE0F", ""));
                     }
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
             }
 
             if (currentEmoticons.size() != savedEmoticons.size() || currentDocumentIds.size() != savedDocumentIds.size()) {
@@ -652,7 +667,8 @@ public class PinnedReactionsActivity extends BaseFragment {
                     if (documentId == availableReaction.activate_animation.id) {
                         try {
                             object.put("emoticon", availableReaction.reaction.replace("\uFE0F", ""));
-                        } catch (JSONException ignored) {}
+                        } catch (JSONException ignored) {
+                        }
                         isReactionEmoji = true;
                         break;
                     }
@@ -661,7 +677,8 @@ public class PinnedReactionsActivity extends BaseFragment {
                 if (!isReactionEmoji) {
                     try {
                         object.put("document_id", documentId);
-                    } catch (JSONException ignored) {}
+                    } catch (JSONException ignored) {
+                    }
                 }
 
                 jsonArray.put(object);
@@ -685,7 +702,8 @@ public class PinnedReactionsActivity extends BaseFragment {
                         reaction.hash = reaction.emojicon.hashCode();
                     }
                     finalList.add(reaction);
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
             }
 
             if (finalList.isEmpty()) {
@@ -756,7 +774,7 @@ public class PinnedReactionsActivity extends BaseFragment {
         private int actionBarHeight;
 
         @Override
-        protected void dispatchDraw(Canvas canvas) {
+        protected void dispatchDraw(@NonNull Canvas canvas) {
             super.dispatchDraw(canvas);
             if (getParentLayout() != null) {
                 getParentLayout().drawHeaderShadow(canvas, actionBarHeight);
@@ -788,28 +806,14 @@ public class PinnedReactionsActivity extends BaseFragment {
         actionBar.setVisibility(View.GONE);
         actionBar.setAllowOverlayTitle(false);
 
-        BaseFragment fragment1 = this;
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
-            AndroidUtilities.addToClipboard("tg://pinned_reactions");
-            BulletinFactory.of(fragment1)
-                    .createSimpleBulletin(R.raw.copy, getString(R.string.AffiliateProgramLinkCopiedTitle))
-                    .show();
+            String link = "tg://pinned_reactions";
+            showDialog(new ShareAlert(context, null, link, false, link, false));
 
             return true;
         });
-        FrameLayout frameLayout = new FrameLayout(context) {
-            @Override
-            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                if (actionBarContainer != null) {
-                    ((MarginLayoutParams) actionBarContainer.getLayoutParams()).height = ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight;
-                    ((MarginLayoutParams) backButton.getLayoutParams()).topMargin = AndroidUtilities.statusBarHeight / 2;
-                    ((MarginLayoutParams) tabsView.getLayoutParams()).topMargin = AndroidUtilities.statusBarHeight / 2;
-                }
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            }
-        };
-        frameLayout.setFitsSystemWindows(true);
+        FrameLayout frameLayout = getFrameLayout(context);
 
         Utilities.Callback2<Boolean, Integer> onScrollEndCallback = (Boolean isShowing, Integer page) -> {
             ReactionsContainerLayout preview = null;
@@ -887,8 +891,8 @@ public class PinnedReactionsActivity extends BaseFragment {
 
         tabsView = new FilledTabsView(context);
         tabsView.setTabs(
-                LocaleController.getString(R.string.PinnedReactions_Chats),
-                LocaleController.getString(R.string.PinnedReactions_Channels)
+                getString(R.string.PinnedReactions_Chats),
+                getString(R.string.PinnedReactions_Channels)
         );
         tabsView.onTabSelected(tab -> {
             if (viewPager != null) {
@@ -921,6 +925,23 @@ public class PinnedReactionsActivity extends BaseFragment {
         fragmentView = contentView = frameLayout;
 
         return contentView;
+    }
+
+    @NonNull
+    private FrameLayout getFrameLayout(Context context) {
+        FrameLayout frameLayout = new FrameLayout(context) {
+            @Override
+            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                if (actionBarContainer != null) {
+                    actionBarContainer.getLayoutParams().height = ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight;
+                    ((MarginLayoutParams) backButton.getLayoutParams()).topMargin = AndroidUtilities.statusBarHeight / 2;
+                    ((MarginLayoutParams) tabsView.getLayoutParams()).topMargin = AndroidUtilities.statusBarHeight / 2;
+                }
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
+        };
+        frameLayout.setFitsSystemWindows(true);
+        return frameLayout;
     }
 
     public boolean hasUnsavedChanged() {
@@ -957,10 +978,10 @@ public class PinnedReactionsActivity extends BaseFragment {
             return;
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), getResourceProvider());
-        builder.setTitle(LocaleController.getString(R.string.UnsavedChanges));
-        String text = LocaleController.getString(R.string.ReactionApplyChangesDialog);
+        builder.setTitle(getString(R.string.UnsavedChanges));
+        String text = getString(R.string.ReactionApplyChangesDialog);
         builder.setMessage(text);
-        builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> buttonClick());
+        builder.setPositiveButton(getString(R.string.ApplyTheme), (dialogInterface, i) -> buttonClick());
         builder.setNegativeButton(getString(R.string.Discard), (dialogInterface, i) -> finishFragment());
 
         AlertDialog dialog = builder.show();
@@ -1017,6 +1038,6 @@ public class PinnedReactionsActivity extends BaseFragment {
 
     public static String getRowDescription() {
         int count = OctoConfig.INSTANCE.getFavoriteReactionsCount();
-        return count > 0 ? String.valueOf(count) : LocaleController.getString(R.string.PasswordOff);
+        return count > 0 ? String.valueOf(count) : getString(R.string.PasswordOff);
     }
 }

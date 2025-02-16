@@ -309,7 +309,7 @@ public class ActionBar extends FrameLayout {
             Drawable drawable = Theme.getCurrentHolidayDrawable();
             if (drawable != null) {
                 SimpleTextView titleView = child == titlesContainer ? titleTextView[0] : (SimpleTextView) child;
-                if (titleView != null && titleView.getVisibility() == View.VISIBLE && titleView.getText() instanceof String && !titleView.getText().isEmpty() && !((String) titleView.getText()).isBlank()) {
+                if (titleView != null && titleView.getVisibility() == View.VISIBLE && titleView.getText() instanceof String && !TextUtils.isEmpty(titleView.getText()) && !((String) titleView.getText()).isBlank()) {
                     TextPaint textPaint = titleView.getTextPaint();
                     textPaint.getFontMetricsInt(fontMetricsInt);
                     textPaint.getTextBounds((String) titleView.getText(), 0, 1, rect);

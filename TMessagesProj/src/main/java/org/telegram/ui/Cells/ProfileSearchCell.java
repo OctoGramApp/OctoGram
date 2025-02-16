@@ -29,6 +29,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.NonNull;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhoneNumberAlternative;
+import it.octogram.android.utils.OctoUtils;
+
+import org.telegram.PhoneFormat.CallingCodeInfo;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
@@ -438,7 +442,8 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         }
         if (nameString.length() == 0) {
             if (user != null && user.phone != null && user.phone.length() != 0) {
-                nameString = PhoneFormat.getInstance().format("+" + user.phone);
+//                nameString = PhoneFormat.getInstance().format("+" + user.phone);
+                nameString = OctoUtils.hidePhoneNumber(user);
             } else {
                 nameString = getString(R.string.HiddenName);
             }

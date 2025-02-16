@@ -198,7 +198,6 @@ public class CameraXUtils {
         int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             OctoLogging.e("CameraXUtils", String.format(Locale.ROOT,"getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
-            OctoLogging.d("CameraXUtils", String.format(Locale.ROOT,"getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
         }
         if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD)) {
             return 480;
@@ -208,6 +207,8 @@ public class CameraXUtils {
             return 1080;
         } else if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.UHD)) {
             return 2160;
+        } else if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.MAX)) {
+            return 4096;
         } else {
             return -1;
         }
@@ -232,7 +233,7 @@ public class CameraXUtils {
         return switch (SharedConfig.getDevicePerformanceClass()) {
             case SharedConfig.PERFORMANCE_CLASS_LOW -> 720;
             case SharedConfig.PERFORMANCE_CLASS_AVERAGE -> 1080;
-            case SharedConfig.PERFORMANCE_CLASS_HIGH -> 2160;
+            case SharedConfig.PERFORMANCE_CLASS_HIGH -> isPreview ? 2160 : 4096;
             default -> OctoConfig.INSTANCE.cameraXZeroShutter.getValue() && isPreview ? 1080 : 2160;
         };
     }

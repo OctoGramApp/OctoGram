@@ -41,12 +41,12 @@ import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.translator.TranslationsWrapper;
 import it.octogram.android.utils.PopupChoiceDialogOption;
-import it.octogram.android.utils.translator.TranslationsWrapper;
 
 public class OctoTranslatorUI implements PreferencesEntry {
-    private final ConfigProperty<Boolean> showButtonBool = new ConfigProperty<>(null, false);
-    private final ConfigProperty<Boolean> translateEntireChat = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> showButtonBool = new ConfigProperty<>("showTranslateButton", false);
+    private final ConfigProperty<Boolean> translateEntireChat = new ConfigProperty<>("canTranslateEntireChat", false);
     private final ConfigProperty<Boolean> canSelectDoNotTranslate = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectProvider = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectFormality = new ConfigProperty<>(null, false);
@@ -126,6 +126,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                     );
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DestinationLanguageSettings()))
+                            .propertySelectionTag("destinationLanguage")
                             .value(getTranslateDestinationStatus())
                             .showIf(canSelectProvider)
                             .title(LocaleController.getString(R.string.TranslatorDestination))
@@ -133,6 +134,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                     );
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new RestrictedLanguagesSelectActivity()))
+                            .propertySelectionTag("doNotTranslate")
                             .value(getDoNotTranslateStatus())
                             .showIf(canSelectDoNotTranslate)
                             .title(LocaleController.getString(R.string.DoNotTranslate))

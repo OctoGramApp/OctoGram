@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.utils.translator;
+package it.octogram.android.translator;
 
 import androidx.core.util.Pair;
 
@@ -20,7 +20,7 @@ import java.util.List;
 
 import it.octogram.android.TranslatorFormality;
 import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.utils.translator.raw.RawDeepLTranslator;
+import it.octogram.android.translator.raw.RawDeepLTranslator;
 
 public class DeepLTranslator {
     private static final RawDeepLTranslator rawInstance = new RawDeepLTranslator();

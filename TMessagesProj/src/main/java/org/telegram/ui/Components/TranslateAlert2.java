@@ -62,8 +62,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-import it.octogram.android.utils.translator.SingleTranslationManager;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.SingleTranslationManager;
+import it.octogram.android.translator.TranslationsWrapper;
 
 public class TranslateAlert2 extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 

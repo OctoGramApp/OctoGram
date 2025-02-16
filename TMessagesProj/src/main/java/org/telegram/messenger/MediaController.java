@@ -1277,7 +1277,8 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 }
                 proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
                 PowerManager powerManager = (PowerManager) ApplicationLoader.applicationContext.getSystemService(Context.POWER_SERVICE);
-                proximityWakeLock = OctoConfig.INSTANCE.disableProximityEvents.getValue() ? null:powerManager.newWakeLock(0x00000020, "telegram:proximity_lock");
+                proximityWakeLock = powerManager.newWakeLock(0x00000020, "telegram:proximity_lock");
+                // proximityWakeLock = OctoConfig.INSTANCE.disableProximityEvents.getValue() ? null:powerManager.newWakeLock(0x00000020, "telegram:proximity_lock");
             } catch (Exception e) {
                 FileLog.e(e);
             }
@@ -1801,7 +1802,8 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
     }
 
     private boolean isNearToSensor(float value) {
-        return !OctoConfig.INSTANCE.disableProximityEvents.getValue() && value < 5.0f && value != proximitySensor.getMaximumRange();
+        // return !OctoConfig.INSTANCE.disableProximityEvents.getValue() && value < 5.0f && value != proximitySensor.getMaximumRange();
+        return value < 5.0f && value != proximitySensor.getMaximumRange();
     }
 
     public boolean isRecordingOrListeningByProximity() {

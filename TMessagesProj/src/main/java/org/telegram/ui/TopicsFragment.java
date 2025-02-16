@@ -53,6 +53,7 @@ import androidx.recyclerview.widget.LinearSmoothScrollerCustom;
 import androidx.recyclerview.widget.RecyclerView;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.FingerprintUtils;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -199,6 +200,9 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
     private static final int boost_group_id = 14;
     private static final int report = 15;
 
+    private static final int lock_chat = 999;
+    private static final int unlock_chat = 998;
+
     private boolean removeFragmentOnTransitionEnd;
     private boolean finishDialogRightSlidingPreviewOnTransitionEnd;
     TLRPC.ChatFull chatFull;
@@ -217,6 +221,9 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
     private boolean bottomPannelVisible = true;
     private float searchAnimationProgress = 0f;
     private TL_stories.TL_premium_boostsStatus boostsStatus;
+
+    private ActionBarMenuSubItem lockChatSubMenu;
+    private ActionBarMenuSubItem unlockChatSubMenu;
 
     private long startArchivePullingTime;
     private boolean scrollingManually;
@@ -740,6 +747,18 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                     case report:
                         ReportBottomSheet.openChat(TopicsFragment.this, -chatId);
                         break;
+                    case lock_chat:
+                    case unlock_chat:
+                        if (FingerprintUtils.hasFingerprint()) {
+                            FingerprintUtils.lockChat(-chatId, id == lock_chat);
+                            lockChatSubMenu.setVisibility(id == lock_chat ? View.GONE : View.VISIBLE);
+                            unlockChatSubMenu.setVisibility(id == unlock_chat ? View.GONE : View.VISIBLE);
+                            getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
+                        } else {
+                            lockChatSubMenu.setVisibility(View.GONE);
+                            unlockChatSubMenu.setVisibility(View.GONE);
+                        }
+                        break;
                 }
                 super.onItemClick(id);
             }
@@ -796,6 +815,8 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
         addMemberSubMenu = other.addSubItem(add_member_id, R.drawable.msg_addcontact, LocaleController.getString(R.string.AddMember));
         boostGroupSubmenu = other.addSubItem(boost_group_id, 0, new RLottieDrawable(R.raw.boosts, "" + R.raw.boosts, AndroidUtilities.dp(24), AndroidUtilities.dp(24)), LocaleController.getString(R.string.BoostingBoostGroupMenu), true, false);
         createTopicSubmenu = other.addSubItem(create_topic_id, R.drawable.msg_topic_create, LocaleController.getString(R.string.CreateTopic));
+        lockChatSubMenu = other.addSubItem(lock_chat, R.drawable.solar_key, LocaleController.getString(R.string.LockChat));
+        unlockChatSubMenu = other.addSubItem(unlock_chat, R.drawable.solar_unlock_2, LocaleController.getString(R.string.UnLockChat));
         reportSubmenu = other.addSubItem(report, R.drawable.msg_report, LocaleController.getString(R.string.ReportChat));
         deleteChatSubmenu = other.addSubItem(delete_chat_id, R.drawable.msg_leave, LocaleController.getString(R.string.LeaveMegaMenu), themeDelegate);
 
@@ -2570,6 +2591,11 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
         reportSubmenu.setVisibility(chatLocal != null && !chatLocal.creator && !ChatObject.hasAdminRights(chatLocal) ? View.VISIBLE : View.GONE);
         updateCreateTopicButton(true);
         groupCall = getMessagesController().getGroupCall(chatId, true);
+
+        boolean canLock = FingerprintUtils.hasFingerprint();
+        boolean isLocked = FingerprintUtils.isChatLocked(-chatId);
+        lockChatSubMenu.setVisibility(canLock && !isLocked ? View.VISIBLE : View.GONE);
+        unlockChatSubMenu.setVisibility(canLock && isLocked ? View.VISIBLE : View.GONE);
 
         checkGroupCallJoin(false);
     }

@@ -41,16 +41,7 @@ public class SliderCell extends FrameLayout {
 
         sizeBar = new SeekBarView(context);
         sizeBar.setReportChanges(true);
-        sizeBar.setDelegate((stop, progress) -> {
-            sliderRow.getPreferenceValue().updateValue(Math.round(startRadius + (endRadius - startRadius) * progress));
-
-            Runnable runnable = sliderRow.getRunnable();
-            if (runnable != null) {
-                runnable.run();
-            }
-
-            requestLayout();
-        });
+        setSlidable(true);
         addView(sizeBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 38, Gravity.START | Gravity.TOP, 5, 5, 39, 0));
     }
 
@@ -59,6 +50,19 @@ public class SliderCell extends FrameLayout {
         this.startRadius = sliderRow.getMin();
         this.endRadius = sliderRow.getMax();
         sizeBar.setSeparatorsCount(endRadius - startRadius + 1);
+    }
+
+    public void setSlidable(boolean isSlidable) {
+        sizeBar.setDelegate(isSlidable ? (stop, progress) -> {
+            sliderRow.getPreferenceValue().updateValue(Math.round(startRadius + (endRadius - startRadius) * progress));
+
+            Runnable runnable = sliderRow.getRunnable();
+            if (runnable != null) {
+                runnable.run();
+            }
+
+            requestLayout();
+        } : null);
     }
 
     @Override

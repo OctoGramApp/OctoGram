@@ -43,7 +43,7 @@ public class OctoAnimationFragment extends FrameLayout  {
     private final ImageView octoImageView;
     private final EasterEggAnimation easterEggAnimation = new EasterEggAnimation();
 
-    public static int sz = 260;
+    public static int sz = 240;
 
     @SuppressLint("ClickableViewAccessibility")
     public OctoAnimationFragment(Context context, TextView textView) {
@@ -78,7 +78,7 @@ public class OctoAnimationFragment extends FrameLayout  {
                     upscaleAfterAnimation = true;
                     clicksCount[0]++;
 
-                    if (clicksCount[0] > 5) {
+                    if (clicksCount[0] >= 5) {
                         easterEggAnimation.enableEasterEgg();
                         clicksCount[0] = 0;
                     }
@@ -130,7 +130,10 @@ public class OctoAnimationFragment extends FrameLayout  {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                isAnimating = false;
+
+                if (!easterEggEnabled) {
+                    isAnimating = false;
+                }
 
                 if (easterEggEnabled) {
                     easterEggAnimation.handleDisappearStart();
@@ -138,7 +141,7 @@ public class OctoAnimationFragment extends FrameLayout  {
                     handleOnLongClickEnd();
                 }
 
-                easterEggEnabled = false;
+                //easterEggEnabled = false;
                 upscaleAfterAnimation = false;
             }
         });

@@ -83,6 +83,7 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                 .deepLink("tg://camera")
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.CAMERA, true, getString(R.string.OctoCameraSettingsHeader))
                 .category(R.string.CameraType, category -> category.row(new CustomCellRow.CustomCellRowBuilder()
+                        .propertySelectionTag("cameraType")
                         .layout(new CameraTypeSelector(context) {
                             @Override
                             protected void onSelectedCamera(int cameraSelected) {

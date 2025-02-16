@@ -2501,16 +2501,31 @@ public class Theme {
         }
 
         public boolean isMonet() {
-            return "Monet Dark".equals(name) || "Monet Light".equals(name) || "Monet Amoled".equals(name);
+            return MonetTheme.MONET_DARK.getMonetThemeName().equals(name) ||
+                    MonetTheme.MONET_LIGHT.getMonetThemeName().equals(name) ||
+                    MonetTheme.MONET_AMOLED.getMonetThemeName().equals(name);
+                    // || MonetTheme.MONET_OLED.getMonetThemeName().equals(name);
         }
 
         public boolean isDark() {
             if (isDark != UNKNOWN) {
                 return isDark == DARK;
             }
-            if ("Dark Blue".equals(name) || "Night".equals(name) || "Amoled".equals(name) || "Monet Dark".equals(name) || "Monet Amoled".equals(name)) {
+            if (
+                    "Dark Blue".equals(name) ||
+                    "Night".equals(name) ||
+                    "Amoled".equals(name) ||
+                    MonetTheme.MONET_DARK.getMonetThemeName().equals(name) ||
+                    MonetTheme.MONET_AMOLED.getMonetThemeName().equals(name)
+            ) {
                 isDark = DARK;
-            } else if ("Blue".equals(name) || "Arctic Blue".equals(name) || "Day".equals(name) || "Monet Light".equals(name)) {
+            } else if (
+                    "Blue".equals(name) ||
+                    "Arctic Blue".equals(name) ||
+                    "Day".equals(name) ||
+                    MonetTheme.MONET_LIGHT.getMonetThemeName().equals(name)
+                    // || MonetTheme.MONET_OLED.getMonetThemeName().equals(name)
+            ) {
                 isDark = LIGHT;
             }
             if (isDark == UNKNOWN) {
@@ -3121,6 +3136,7 @@ public class Theme {
 
     public static Drawable listSelector;
     public static Drawable[] avatarDrawables = new Drawable[24];
+    public static Drawable hashtagDrawable;
 
     public static Drawable moveUpDrawable;
 
@@ -4727,19 +4743,21 @@ public class Theme {
         themesDict.put("Amoled", themeInfo);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            int[] sortIndices = {6, 7, 8};
-            int[] isDarkArray = {ThemeInfo.LIGHT, ThemeInfo.DARK, ThemeInfo.DARK};
+            int[] sortIndices = {6, 7, 8}; // , 9};
+            int[] isDarkArray = {ThemeInfo.LIGHT, ThemeInfo.DARK, ThemeInfo.DARK}; //, ThemeInfo.LIGHT};
 
             MonetTheme[] monetThemes = {
                     MonetTheme.MONET_LIGHT,
                     MonetTheme.MONET_DARK,
-                    MonetTheme.MONET_AMOLED
+                    MonetTheme.MONET_AMOLED,
+                    // MonetTheme.MONET_OLED
             };
 
             String[][] previewColors = {
                     {"n1_50", "a1_100", "a1_600"},
                     {"n1_900", "n2_800", "a1_100"},
-                    {"n1_1000", "n2_800", "a1_100"}
+                    {"n1_1000", "n2_800", "a1_100"},
+                    // {"n1_1000", "a1_100", "a1_100"},
             };
 
             for (int i = 0; i < monetThemes.length; i++) {
@@ -5227,6 +5245,21 @@ public class Theme {
         return canStartHolidayAnimation;
     }
 
+    /**
+     * Determines the event type based on the current date and time.
+     * Returns an integer representing a specific event.
+     * <p>
+     * Event Types:
+     * - 0 → Christmas and New Year period (December 24-31, January 1)
+     * - 1 → Valentine's Day (February 14)
+     * - 2 → Halloween and All Saints' Day (October 30-31, November 1 before 12 PM)
+     * - 3 → Chinese New Year period (January 21 - February 20, varies each year)
+     * <p>
+     * Note: The calculation for the Chinese New Year is currently simplified
+     * and does not follow the actual lunar calendar.
+     *
+     * @return int representing the event type, or -1 if no event matches.
+     */
     public static int getEventType() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
@@ -7322,7 +7355,7 @@ public class Theme {
                 switchingNightTheme = false;
             }
         } else {
-            if (currentTheme != currentDayTheme && (currentTheme == null || currentDayTheme != null && currentTheme.isDark() != currentDayTheme.isDark())) {
+            if (currentTheme != currentDayTheme && (currentTheme == null || currentDayTheme != null && currentTheme.isLight() != currentDayTheme.isLight())) {
                 isInNigthMode = false;
                 lastThemeSwitchTime = SystemClock.elapsedRealtime();
                 switchingNightTheme = true;
@@ -8253,6 +8286,7 @@ public class Theme {
                             finished = true;
                             break;
                         } else {
+                            var isAndroid12OrHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
                             if ((idx = line.indexOf('=')) != -1) {
                                 String key = line.substring(0, idx);
                                 String param = line.substring(idx + 1).trim();
@@ -8263,13 +8297,26 @@ public class Theme {
                                     } catch (Exception ignore) {
                                         value = Utilities.parseInt(param);
                                     }
-                                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (param.startsWith("a") || param.startsWith("n") || param.startsWith("monet"))) {
-                                    value = MonetThemeController.INSTANCE.getColor(param.trim());
+                                } else if (isAndroid12OrHigher && (param.startsWith("a") || param.startsWith("n") || param.startsWith("monet"))) {
+                                    value = MonetThemeController.INSTANCE.getColor(key.trim(), param.trim());
                                 } else {
                                     value = Utilities.parseInt(param);
                                 }
-                                int keyFromString = ThemeColors.stringKeyToInt(key);
+                                int keyFromString;
+//                                if (OctoConfig.INSTANCE.monetUseGradient.getValue()) {
+//                                    key = key.replace("noGradient", "chat_outBubbleGradient");
+//                                }
+                                keyFromString = ThemeColors.stringKeyToInt(key);
                                 if (keyFromString >= 0) {
+//                                    if (isAndroid12OrHigher && currentTheme.isMonet() && OctoConfig.INSTANCE.monetUseNicknameColorFull.getValue()) {
+//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageBlue"), MonetThemeController.INSTANCE.getColor("a1_400"));
+//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageCyan"), MonetThemeController.INSTANCE.getColor("a1_400"));
+//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageGreen"), MonetThemeController.INSTANCE.getColor("a1_400"));
+//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageOrange"), MonetThemeController.INSTANCE.getColor("a1_400"));
+//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessagePink"), MonetThemeController.INSTANCE.getColor("a1_400"));
+//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageRed"), MonetThemeController.INSTANCE.getColor("a1_400"));
+//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageViolet"), MonetThemeController.INSTANCE.getColor("a1_400"));
+//                                    }
                                     stringMap.put(keyFromString, value);
                                 }
                             }
@@ -8521,6 +8568,8 @@ public class Theme {
             dialogs_pinnedDrawable = resources.getDrawable(R.drawable.list_pin);
             dialogs_forum_arrowDrawable = resources.getDrawable(R.drawable.msg_mini_forumarrow);
             moveUpDrawable = resources.getDrawable(R.drawable.preview_arrow);
+
+            hashtagDrawable = resources.getDrawable(R.drawable.menu_hashtag);
 
             RectF rect = new RectF();
             chat_updatePath[0] = new Path();

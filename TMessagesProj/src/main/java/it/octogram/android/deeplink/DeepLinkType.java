@@ -32,7 +32,11 @@ import java.lang.annotation.RetentionPolicy;
         DeepLinkDef.PINNED_EMOJIS,
         DeepLinkDef.PINNED_REACTIONS,
         DeepLinkDef.XIMI,
-        DeepLinkDef.TRANSLATOR
+        DeepLinkDef.TRANSLATOR,
+        DeepLinkDef.INFO,
+        DeepLinkDef.DC_STATUS,
+        DeepLinkDef.PRIVACY,
+        DeepLinkDef.LOCKED_CHATS
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface DeepLinkType {

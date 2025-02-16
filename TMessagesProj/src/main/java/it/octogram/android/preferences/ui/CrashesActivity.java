@@ -14,7 +14,6 @@ import static org.telegram.messenger.LocaleController.getString;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
+import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -234,7 +234,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                         case CrashOption.COPY_CRASH_LINE ->
                                 copyCrashLine(position);
                         case CrashOption.OPEN_REPORT_URL -> {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(REPORT_URL));
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Utilities.uriParseSafe(REPORT_URL));
                             context.startActivity(browserIntent);
                         }
                     }

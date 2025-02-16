@@ -308,15 +308,14 @@ import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.QualityPreset;
-import it.octogram.android.VideoQuality;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.utils.BrowserUtils;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import it.octogram.android.utils.VideoUtils;
-import it.octogram.android.utils.translator.SingleTranslationManager;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.SingleTranslationManager;
+import it.octogram.android.translator.TranslationsWrapper;
 
 @SuppressLint("WrongConstant")
 @SuppressWarnings("unchecked")

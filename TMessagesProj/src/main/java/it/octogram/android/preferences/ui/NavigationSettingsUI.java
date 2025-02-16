@@ -9,7 +9,6 @@
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
@@ -39,10 +38,10 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
-import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CircularProgressDrawable;
 import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.LaunchActivity;
@@ -104,13 +103,10 @@ public class NavigationSettingsUI extends BaseFragment {
         });
 
 
-        BaseFragment fragment1 = this;
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
-            AndroidUtilities.addToClipboard("tg://experimental/navigation");
-            BulletinFactory.of(fragment1)
-                    .createSimpleBulletin(R.raw.copy, getString(R.string.AffiliateProgramLinkCopiedTitle))
-                    .show();
+            String link = "tg://experimental/navigation";
+            showDialog(new ShareAlert(context, null, link, false, link, false));
 
             return true;
         });

@@ -9,7 +9,9 @@
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -19,19 +21,15 @@ import android.view.Gravity;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.core.content.ContextCompat;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.StickerImageView;
-
-import java.util.Objects;
+import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
@@ -39,14 +37,29 @@ import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.OctoUtils;
 
 
+@SuppressLint("ViewConstructor")
 public class DatacenterHeader extends LinearLayout {
-    public DatacenterHeader(Context context) {
+    private final ButtonWithCounterView buttonWithCounterView;
+    private boolean firstTime = true;
+    private boolean _isWaiting = false;
+    private final int pageType;
+    private final ColoredImageSpan startMonitorSpan;
+    private final ColoredImageSpan stopMonitorSpan;
+
+    public DatacenterHeader(Context context, int pageType, Runnable startMonitoring) {
         super(context);
+
+        startMonitorSpan = new ColoredImageSpan(R.drawable.media_photo_flash_on2);
+        //startMonitorSpan.setOverrideColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        stopMonitorSpan = new ColoredImageSpan(R.drawable.msg_pollstop);
+        //stopMonitorSpan.setOverrideColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+
+        this.pageType = pageType;
+
         setGravity(Gravity.CENTER_HORIZONTAL);
         setOrientation(VERTICAL);
         StickerImageView rLottieImageView = new StickerImageView(context, UserConfig.selectedAccount);
         rLottieImageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
-        rLottieImageView.setStickerNum(StickerUi.DATACENTER_STATUS.getValue());
         rLottieImageView.getImageReceiver().setAutoRepeat(1);
 
         addView(rLottieImageView, LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 20, 0, 0));
@@ -58,24 +71,68 @@ public class DatacenterHeader extends LinearLayout {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         textView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
         textView.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection));
-        String text = LocaleController.getString(R.string.DatacenterStatusSection_Desc);
+
+        String text;
+        if (pageType == DcStatusActivity.PAGE_NETWORK) {
+            rLottieImageView.setStickerNum(StickerUi.DATACENTER_STATUS.getValue());
+            text = getString(R.string.DatacenterStatusSection_Desc);
+        } else if (pageType == DcStatusActivity.PAGE_MEDIA) {
+            rLottieImageView.setStickerNum(StickerUi.MEDIA_LOADING.getValue());
+            text = getString(R.string.DatacenterStatusSection_Desc_Media);
+        } else {
+            rLottieImageView.setStickerNum(StickerUi.WEB_SEARCH.getValue());
+            text = getString(R.string.DatacenterStatusSection_Desc_Web);
+        }
+
         Spannable htmlParsed = new SpannableString(OctoUtils.fromHtml(text));
         textView.setText(MessageStringHelper.getUrlNoUnderlineText(htmlParsed));
         textView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
 
-        AppCompatTextView buttonTextView = new AppCompatTextView(context);
-        buttonTextView.setPadding(dp(34), 0, dp(34), 0);
-        buttonTextView.setGravity(Gravity.CENTER);
-        buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        buttonTextView.setTypeface(AndroidUtilities.bold());
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-        spannableStringBuilder.append(".  ").append(LocaleController.getString(R.string.WebVersion));
-        spannableStringBuilder.setSpan(new ColoredImageSpan(Objects.requireNonNull(ContextCompat.getDrawable(getContext(), R.drawable.device_web_other))), 0, 1, 0);
-        buttonTextView.setText(spannableStringBuilder);
-        buttonTextView.setOnClickListener(view -> Browser.openUrl(AndroidUtilities.findActivity(context), String.format("https://%s/dcstatus", OctoUtils.getDomain())));
+        buttonWithCounterView = new ButtonWithCounterView(context, null);
+        buttonWithCounterView.setPadding(dp(34), 0, dp(34), 0);
+        updateStatus(true);
+        buttonWithCounterView.setOnClickListener(view -> {
+            if (!_isWaiting && pageType != DcStatusActivity.PAGE_NETWORK) {
+                return;
+            }
 
-        buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed)));
-        addView(buttonTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM, 16, 15, 16, 16));
+            startMonitoring.run();
+        });
+
+        buttonWithCounterView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+        buttonWithCounterView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed)));
+        addView(buttonWithCounterView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM, 16, 15, 16, 16));
+    }
+
+    public void updateStatus(boolean isWaiting) {
+        if (_isWaiting == isWaiting) {
+            return;
+        }
+        _isWaiting = isWaiting;
+
+        if (pageType != DcStatusActivity.PAGE_NETWORK) {
+            buttonWithCounterView.setLoading(!isWaiting);
+        }
+
+        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+        int text = getText(isWaiting || pageType != DcStatusActivity.PAGE_NETWORK);
+
+        spannableStringBuilder.append(".  ").append(getString(text));
+        spannableStringBuilder.setSpan((isWaiting || pageType != DcStatusActivity.PAGE_NETWORK) ? startMonitorSpan : stopMonitorSpan, 0, 1, 0);
+        buttonWithCounterView.setText(spannableStringBuilder, pageType == DcStatusActivity.PAGE_NETWORK);
+
+        firstTime = false;
+    }
+
+    private int getText(boolean isWaiting) {
+        if (!isWaiting) {
+            return R.string.DatacenterStatusSection_Stop;
+        }
+        return switch (pageType) {
+            case DcStatusActivity.PAGE_NETWORK -> R.string.DatacenterStatusSection_Start;
+            case DcStatusActivity.PAGE_MEDIA -> R.string.DatacenterStatusSection_Start_Media;
+            case DcStatusActivity.PAGE_WEB -> R.string.DatacenterStatusSection_Start_Ping;
+            default -> R.string.DatacenterStatusSection_Stop;
+        };
     }
 }

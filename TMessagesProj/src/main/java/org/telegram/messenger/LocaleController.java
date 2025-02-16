@@ -27,7 +27,7 @@ import androidx.annotation.StringRes;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.LanguageController;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.TranslationsWrapper;
 
 import org.telegram.messenger.time.FastDateFormat;
 import org.telegram.ui.Components.TranslateAlert2;

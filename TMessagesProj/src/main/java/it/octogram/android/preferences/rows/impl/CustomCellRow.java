@@ -25,11 +25,13 @@ public class CustomCellRow extends BaseRow implements Clickable {
 
     private final Runnable onClick;
     private final View layout;
+    private final String propertySelectionTag;
 
-    private CustomCellRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, Runnable onClick, View layout) {
+    private CustomCellRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, String propertySelectionTag, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, Runnable onClick, View layout) {
         super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.CUSTOM);
         this.onClick = onClick;
         this.layout = layout;
+        this.propertySelectionTag = propertySelectionTag;
     }
 
     @Override
@@ -43,10 +45,15 @@ public class CustomCellRow extends BaseRow implements Clickable {
         return layout;
     }
 
+    public String getPropertySelectionTag() {
+        return propertySelectionTag;
+    }
+
     public static class CustomCellRowBuilder extends BaseRowBuilder<CustomCellRow> {
 
         private Runnable onClick;
         private View layout;
+        private String propertySelectionTag;
 
         public CustomCellRowBuilder layout(View layout) {
             this.layout = layout;
@@ -58,9 +65,14 @@ public class CustomCellRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public CustomCellRowBuilder propertySelectionTag(String propertySelectionTag) {
+            this.propertySelectionTag = propertySelectionTag;
+            return this;
+        }
+
         @Override
         public CustomCellRow build() {
-            return new CustomCellRow(title, description, requiresRestart, showIf, showIfReverse, divider, onClick, layout);
+            return new CustomCellRow(title, description, requiresRestart, propertySelectionTag, showIf, showIfReverse, divider, onClick, layout);
         }
     }
 }

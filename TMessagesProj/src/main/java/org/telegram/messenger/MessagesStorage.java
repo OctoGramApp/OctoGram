@@ -356,11 +356,11 @@ public class MessagesStorage extends BaseController {
                         FileLog.e(e2);
                     }
                 }
-                try {
+                /*try {
                     database.executeFast("CREATE TABLE IF NOT EXISTS dialog_filter_octo(id INTEGER PRIMARY KEY, ord INTEGER, unread_count INTEGER, flags INTEGER, title TEXT, emoticon TEXT, color INTEGER DEFAULT -1)").stepThis().dispose();
                 } catch (Exception e) {
                     FileLog.e(e);
-                }
+                }*/
                 if (version < LAST_DB_VERSION) {
                     try {
                         updateDbToLastVersion(version);

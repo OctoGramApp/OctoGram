@@ -10,7 +10,7 @@ package it.octogram.android.preferences;
 
 import android.content.Context;
 
-import com.google.android.exoplayer2.util.Consumer;
+import androidx.core.util.Consumer;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -110,7 +110,6 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
                     .description(description)
                     .build()
             );
-            preferences.add(new EmptyCellRow());
             preferences.add(new ShadowRow());
             return this;
         }

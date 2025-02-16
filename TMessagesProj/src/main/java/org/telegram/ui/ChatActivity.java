@@ -301,10 +301,11 @@ import it.octogram.android.preferences.ui.DetailsActivity;
 import it.octogram.android.preferences.ui.components.CustomMediaFilterDialog;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
+import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.MessageHelper;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.TranslationsWrapper;
 
 @SuppressWarnings("unchecked")
 public class ChatActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, LocationActivity.LocationActivityDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate, ChatActivityInterface, FloatingDebugProvider, InstantCameraView.Delegate, ForwardContext {
@@ -1497,6 +1498,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int shortcuts_permissions = 1102;
     private final static int shortcuts_invite_links = 1103;
     private final static int shortcuts_members = 1104;
+    private final static int lock_chat = 1106;
+    private final static int unlock_chat = 1107;
 
     private final static int attach_photo = 0;
     private final static int attach_gallery = 1;
@@ -3585,6 +3588,15 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             }
                         }
                     }, themeDelegate);
+                } else if (id == lock_chat || id == unlock_chat) {
+                    if ((currentUser == null && currentChat == null) || !FingerprintUtils.hasFingerprint() || currentEncryptedChat != null) {
+                        return;
+                    }
+                    boolean newStatus = !FingerprintUtils.isChatLocked(currentUser, currentChat);
+                    headerItem.showSubItem(newStatus ? unlock_chat : lock_chat);
+                    headerItem.hideSubItem(newStatus ? lock_chat : unlock_chat);
+                    FingerprintUtils.lockChat(currentUser, currentChat, newStatus);
+                    getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
                 } else if (id == share_contact) {
                     if (currentUser == null || getParentActivity() == null) {
                         return;
@@ -4193,6 +4205,17 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
             if (!isTopic) {
                 clearHistoryItem = headerItem.lazilyAddSubItem(clear_history, R.drawable.msg_clear, LocaleController.getString(R.string.ClearHistory));
+            }
+            if (FingerprintUtils.hasFingerprint() && currentEncryptedChat == null) {
+                boolean isChatLocked = FingerprintUtils.isChatLocked(currentUser, currentChat);
+                headerItem.lazilyAddSubItem(lock_chat, R.drawable.solar_key, LocaleController.getString(R.string.LockChat));
+                headerItem.lazilyAddSubItem(unlock_chat, R.drawable.solar_unlock_2, LocaleController.getString(R.string.UnLockChat));
+
+                if (isChatLocked) {
+                    headerItem.hideSubItem(lock_chat);
+                } else {
+                    headerItem.hideSubItem(unlock_chat);
+                }
             }
             boolean addedSettings = false;
             if (!isTopic) {
@@ -18772,7 +18795,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 avatarContainer.setTitle(LocaleController.getString(R.string.SavedMessages));
             } else if (!MessagesController.isSupportUser(currentUser) && getContactsController().contactsDict.get(currentUser.id) == null && (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                 if (!TextUtils.isEmpty(currentUser.phone)) {
-                    avatarContainer.setTitle(getFakePhoneNumber(currentUser.phone), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
+                    avatarContainer.setTitle(OctoUtils.hidePhoneNumber(currentUser), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
                 } else {
                     avatarContainer.setTitle(AndroidUtilities.removeDiacritics(UserObject.getUserName(currentUser)), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated, OctoConfig.INSTANCE.slidingTitle.getValue());
                 }
@@ -42244,37 +42267,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         }
         return -1;
-    }
-
-    private CharSequence getFakePhoneNumber(String phone) {
-        String text = PhoneFormat.getInstance().format("+" + phone);
-
-        if (OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()) {
-            PhoneNumberAlternative alternative = PhoneNumberAlternative.Companion.fromInt(OctoConfig.INSTANCE.phoneNumberAlternative.getValue());
-
-            switch (alternative) {
-                case PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER -> {
-                    CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phone);
-                    String phoneCountry = info != null ? info.callingCode : "";
-                    return String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
-                }
-                case PhoneNumberAlternative.SHOW_USERNAME -> {
-                    if (currentUser != null) {
-                        if (currentUser.username != null && !currentUser.username.isEmpty()) {
-                            return currentUser.username;
-                        }
-                        return currentUser.first_name != null ? currentUser.first_name : "Unknown";
-                    }
-                }
-                default -> {
-                    if (currentUser != null) {
-                        return currentUser.first_name != null ? currentUser.first_name : "Unknown";
-                    }
-                }
-            }
-        }
-
-        return text;
     }
 
     public boolean handleDoubleTapAction(MessageObject message, int doubleTapAction) {

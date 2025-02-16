@@ -116,7 +116,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.TranslationsWrapper;
 
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;

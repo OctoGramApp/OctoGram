@@ -52,6 +52,7 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.EmojiView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Reactions.CustomReactionEditText;
+import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ import it.octogram.android.preferences.fragment.PreferencesFragment;
 
 
 
+/** @noinspection UnnecessaryUnicodeEscape*/
 public class PinnedEmojisActivity extends BaseFragment {
 
     private EmojiView emojiView;
@@ -111,13 +113,10 @@ public class PinnedEmojisActivity extends BaseFragment {
             }
         });
 
-        BaseFragment fragment1 = this;
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
-            AndroidUtilities.addToClipboard("tg://pinned_emojis");
-            BulletinFactory.of(fragment1)
-                    .createSimpleBulletin(R.raw.copy, getString(R.string.AffiliateProgramLinkCopiedTitle))
-                    .show();
+            String link = "tg://pinned_emojis";
+            showDialog(new ShareAlert(context, null, link, false, link, false));
 
             return true;
         });
@@ -358,7 +357,7 @@ public class PinnedEmojisActivity extends BaseFragment {
 
             @Override
             public void onEmojiSelected(String emoji) {
-                if (!checkMaxNumberReached()) {
+                if (checkMaxNumberNotReached()) {
                     return;
                 }
 
@@ -384,7 +383,7 @@ public class PinnedEmojisActivity extends BaseFragment {
 
             @Override
             public void onCustomEmojiSelected(long documentId, TLRPC.Document document, String emoticon, boolean isRecent) {
-                if (!checkMaxNumberReached()) {
+                if (checkMaxNumberNotReached()) {
                     return;
                 }
 
@@ -502,15 +501,15 @@ public class PinnedEmojisActivity extends BaseFragment {
         }
     }
 
-    private boolean checkMaxNumberReached() {
+    private boolean checkMaxNumberNotReached() {
         if (grabReactions().length() > 25) {
             BulletinFactory.of(this)
                     .createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString(R.string.PinnedEmojisList_Limit))
                     .show();
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override

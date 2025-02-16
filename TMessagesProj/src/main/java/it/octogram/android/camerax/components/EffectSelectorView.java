@@ -23,13 +23,17 @@ import androidx.annotation.NonNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.LayoutHelper;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import it.octogram.android.camerax.CameraXController;
 import it.octogram.android.camerax.CameraXView;
 
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 public class EffectSelectorView extends LinearLayout {
 
     private ButtonEffectView oldSelection;
@@ -49,33 +53,6 @@ public class EffectSelectorView extends LinearLayout {
         setBackground(gd);
     }
 
-    @NonNull
-    private static List<Integer> getListEffect(CameraXView cameraXView) {
-        Set<Integer> effectSet = new HashSet<>();
-
-        if (cameraXView.isNightModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_NIGHT);
-        }
-        if (cameraXView.isAutoModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_AUTO);
-        }
-        effectSet.add(CameraXController.EffectFacing.CAMERA_NONE);
-        if (cameraXView.isWideModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_WIDE);
-        }
-        if (cameraXView.isHdrModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_HDR);
-        }
-        if (cameraXView.isBokehModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_BOKEH);
-        }
-        if (cameraXView.isFaceRetouchModeSupported()) {
-            effectSet.add(CameraXController.EffectFacing.CAMERA_FACE_RETOUCH);
-        }
-
-        return List.copyOf(effectSet);
-    }
-
     public void resetSelectedEffect() {
         for (int i = 0; i < getChildCount(); i++) {
             LinearLayout linearLayout = (LinearLayout) getChildAt(i);
@@ -89,7 +66,7 @@ public class EffectSelectorView extends LinearLayout {
 
     public void loadEffects(CameraXView cameraXView) {
         if (getChildCount() == 0) {
-            var list_effect = getListEffect(cameraXView);
+            var list_effect = CameraEffectUtils.getSupportedEffects(cameraXView);
             if (list_effect.size() == 1) {
                 return;
             }
@@ -183,5 +160,43 @@ public class EffectSelectorView extends LinearLayout {
             }
         }
         return notchSize;
+    }
+
+    public static final class CameraEffectUtils {
+        /**
+         * Returns a list of supported camera effects based on the camera capabilities.
+         * The effects are returned in a consistent order, with basic effects first
+         * followed by advanced effects.
+         *
+         * @param cameraXView The camera view to check for supported effects
+         * @return An immutable list of supported camera effects
+         * @throws NullPointerException if cameraXView is null
+         */
+        @CameraXController.EffectFacing
+        @NonNull
+        public static List<Integer> getSupportedEffects(@NonNull CameraXView cameraXView) {
+            Set<Integer> effectSet = new LinkedHashSet<>();
+
+            effectSet.add(CameraXController.EffectFacing.CAMERA_NONE);
+            addEffectIfSupported(effectSet, cameraXView::isAutoModeSupported, CameraXController.EffectFacing.CAMERA_AUTO);
+            addEffectIfSupported(effectSet, cameraXView::isNightModeSupported, CameraXController.EffectFacing.CAMERA_NIGHT);
+            addEffectIfSupported(effectSet, cameraXView::isWideModeSupported, CameraXController.EffectFacing.CAMERA_WIDE);
+            addEffectIfSupported(effectSet, cameraXView::isHdrModeSupported, CameraXController.EffectFacing.CAMERA_HDR);
+            addEffectIfSupported(effectSet, cameraXView::isBokehModeSupported, CameraXController.EffectFacing.CAMERA_BOKEH);
+            addEffectIfSupported(effectSet, cameraXView::isFaceRetouchModeSupported, CameraXController.EffectFacing.CAMERA_FACE_RETOUCH);
+
+            return List.copyOf(effectSet);
+        }
+
+        /**
+         * Helper method to add an effect to the set if the capability check returns true.
+         *
+         * @param effectSet       The set to add the effect to
+         * @param capabilityCheck The capability check to perform
+         * @param effect          The effect to add if supported
+         */
+        private static void addEffectIfSupported(Set<Integer> effectSet, BooleanSupplier capabilityCheck, @CameraXController.EffectFacing int effect) {
+            if (capabilityCheck.getAsBoolean()) effectSet.add(effect);
+        }
     }
 }

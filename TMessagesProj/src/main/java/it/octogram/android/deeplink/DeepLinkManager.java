@@ -19,6 +19,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -41,7 +42,7 @@ import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.DatacenterActivity;
+import it.octogram.android.preferences.ui.DcStatusActivity;
 import it.octogram.android.preferences.ui.NavigationSettingsUI;
 import it.octogram.android.preferences.ui.OctoAppearanceUI;
 import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
@@ -49,10 +50,13 @@ import it.octogram.android.preferences.ui.OctoChatsSettingsUI;
 import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
+import it.octogram.android.preferences.ui.OctoInfoSettingsUI;
 import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
 import it.octogram.android.preferences.ui.OctoTranslatorUI;
 import it.octogram.android.preferences.ui.PinnedEmojisActivity;
+import it.octogram.android.preferences.ui.PinnedHashtagsActivity;
 import it.octogram.android.preferences.ui.PinnedReactionsActivity;
 import it.octogram.android.utils.BrowserUtils;
 
@@ -68,7 +72,7 @@ import it.octogram.android.utils.BrowserUtils;
  * Additionally, it manages the unlocking and display of new app icons
  * based on specific deep links.
  *
- * @noinspection deprecation
+ * @noinspection deprecation, SequencedCollectionMethodCanBeUsed
  */
 public class DeepLinkManager extends LaunchActivity {
     private static final String TAG = "DeepLinkManager";
@@ -85,10 +89,21 @@ public class DeepLinkManager extends LaunchActivity {
     public static boolean handleDeepLink(String deepLink) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             OctoLogging.d(TAG, "handleDeepLink: " + deepLink);
-            OctoLogging.d(TAG, "handleDeepLink: " + deepLink);
         }
+
+        Uri uri;
+        String parameter = null;
+        try {
+            uri = Utilities.uriParseSafe(deepLink);
+            if (uri != null) {
+                parameter = uri.getQueryParameter("t");
+            }
+        } catch (UnsupportedOperationException ignored) {
+            return false;
+        }
+
         var fragment = getCurrentFragment();
-        var deepLinkType = getDeepLinkType(deepLink);
+        var deepLinkType = getDeepLinkType(uri);
         if (fragment == null) return false;
         if (deepLinkType == null) return false;
         if (!deepLinkType.equals(DeepLinkDef.USER)) {
@@ -108,7 +123,7 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
             }
             case DeepLinkDef.EXPERIMENTAL -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.EXPERIMENTAL_NAVIGATION -> {
@@ -116,35 +131,47 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
             }
             case DeepLinkDef.CAMERA -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoCameraSettingsUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoCameraSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.GENERAL -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.OCTOSETTINGS -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoMainSettingsUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoMainSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE_APP -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE_CHAT -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE_DRAWER -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.TRANSLATOR -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoTranslatorUI()));
+                fragment.presentFragment(new PreferencesFragment(new OctoTranslatorUI(), parameter));
+                return true;
+            }
+            case DeepLinkDef.INFO -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoInfoSettingsUI(), parameter));
+                return true;
+            }
+            case DeepLinkDef.PRIVACY -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), parameter));
+                return true;
+            }
+            case DeepLinkDef.LOCKED_CHATS -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), "lockedChats"));
                 return true;
             }
             case DeepLinkDef.UPDATE -> {
@@ -171,9 +198,20 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new PinnedReactionsActivity());
                 return true;
             }
+            case DeepLinkDef.PINNED_HASHTAGS -> {
+                fragment.presentFragment(new PinnedHashtagsActivity());
+                return true;
+            }
+            case DeepLinkDef.DC_STATUS -> {
+                DcStatusActivity activity = new DcStatusActivity();
+                if (parameter != null) {
+                    activity.handleParameter(parameter);
+                }
+                fragment.presentFragment(activity);
+                return true;
+            }
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            OctoLogging.d(TAG, "Deep link not recognized: " + deepLink);
             OctoLogging.d(TAG, "Deep link not recognized: " + deepLink);
         }
         profileUserId = 0;
@@ -280,74 +318,87 @@ public class DeepLinkManager extends LaunchActivity {
      */
     private static void handleUserDeepLink(String deepLink) {
         deepLink = deepLink.replace("tg:user", "tg://telegram.org").replace("tg://user", "tg://telegram.org");
-        Uri data = Uri.parse(deepLink);
-        String userId = data.getQueryParameter("id");
+        Uri data = Utilities.uriParseSafe(deepLink);
+        if (data != null) {
+            String userId = data.getQueryParameter("id");
 
-        if (userId != null) {
-            try {
-                profileUserId = Long.parseLong(userId);
-            } catch (NumberFormatException ignore) {
-                if (BuildVars.DEBUG_PRIVATE_VERSION) {
-                    OctoLogging.d(TAG, "Invalid user ID in deep link: " + userId);
-                    OctoLogging.d(TAG, "Invalid user ID in deep link: " + userId);
+            if (userId != null) {
+                try {
+                    profileUserId = Long.parseLong(userId);
+                } catch (NumberFormatException ignore) {
+                    if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                        OctoLogging.d(TAG, "Invalid user ID in deep link: " + userId);
+                    }
                 }
             }
         }
     }
 
     /**
-     * Determines the deep link type based on the provided deep link string.
+     * Determines the deep link type based on the provided deep link URI.
      * <p>
      * This method checks the deep link against a predefined list of deep link patterns
      * and returns the corresponding deep link type defined in {@link DeepLinkDef}.
      * If the deep link does not match any known pattern, it returns null.
      *
-     * @param deepLink The deep link string to analyze.
+     * @param uri The deep link URI to analyze.
      * @return The deep link type as a String, or null if the deep link is not recognized.
      */
     @DeepLinkType
-    private static String getDeepLinkType(String deepLink) {
-        if (deepLink.equalsIgnoreCase("tg:francesco") || deepLink.equalsIgnoreCase("tg://francesco")) {
-            return DeepLinkDef.FRANCESCO;
-        } else if (deepLink.equalsIgnoreCase("tg:ximi") || deepLink.equalsIgnoreCase("tg://ximi")) {
-            return DeepLinkDef.XIMI;
-        } else if (deepLink.equalsIgnoreCase("tg:fox") || deepLink.equalsIgnoreCase("tg://fox")) {
-            return DeepLinkDef.FOX;
-        } else if (deepLink.equalsIgnoreCase("tg:chupagram") || deepLink.equalsIgnoreCase("tg://chupagram")) {
-            return DeepLinkDef.CHUPAGRAM;
-        } else if (deepLink.equalsIgnoreCase("tg:yukigram") || deepLink.equalsIgnoreCase("tg://yukigram")) {
-            return DeepLinkDef.YUKIGRAM;
-        } else if (deepLink.equalsIgnoreCase("tg:experimental") || deepLink.equalsIgnoreCase("tg://experimental")) {
-            return DeepLinkDef.EXPERIMENTAL;
-        } else if (deepLink.equalsIgnoreCase("tg:experimental/navigation") || deepLink.equalsIgnoreCase("tg://experimental/navigation")) {
-            return DeepLinkDef.EXPERIMENTAL_NAVIGATION;
-        } else if (deepLink.equalsIgnoreCase("tg:camera") || deepLink.equalsIgnoreCase("tg://camera")) {
-            return DeepLinkDef.CAMERA;
-        } else if (deepLink.equalsIgnoreCase("tg:general") || deepLink.equalsIgnoreCase("tg://general")) {
-            return DeepLinkDef.GENERAL;
-        } else if (deepLink.equalsIgnoreCase("tg:octosettings") || deepLink.equalsIgnoreCase("tg://octosettings")) {
-            return DeepLinkDef.OCTOSETTINGS;
-        } else if (deepLink.equalsIgnoreCase("tg:appearance") || deepLink.equalsIgnoreCase("tg://appearance")) {
-            return DeepLinkDef.APPEARANCE;
-        } else if (deepLink.equalsIgnoreCase("tg:appearance/app") || deepLink.equalsIgnoreCase("tg://appearance/app")) {
-            return DeepLinkDef.APPEARANCE_APP;
-        } else if (deepLink.equalsIgnoreCase("tg:appearance/chat") || deepLink.equalsIgnoreCase("tg://appearance/chat")) {
-            return DeepLinkDef.APPEARANCE_CHAT;
-        } else if (deepLink.equalsIgnoreCase("tg:appearance/drawer") || deepLink.equalsIgnoreCase("tg://appearance/drawer")) {
-            return DeepLinkDef.APPEARANCE_DRAWER;
-        } else if (deepLink.equalsIgnoreCase("tg:translator") || deepLink.equalsIgnoreCase("tg://translator")) {
-            return DeepLinkDef.TRANSLATOR;
-        } else if (deepLink.equalsIgnoreCase("tg:update") || deepLink.equalsIgnoreCase("tg://update")) {
-            return DeepLinkDef.UPDATE;
-        } else if (deepLink.startsWith("tg:user") || deepLink.startsWith("tg://user")) {
-            return DeepLinkDef.USER;
-        } else if (deepLink.startsWith("tg:pinned_emojis") || deepLink.startsWith("tg://pinned_emojis")) {
-            return DeepLinkDef.PINNED_EMOJIS;
-        } else if (deepLink.startsWith("tg:pinned_reactions") || deepLink.startsWith("tg://pinned_reactions")) {
-            return DeepLinkDef.PINNED_REACTIONS;
-        } else {
+    private static String getDeepLinkType(Uri uri) {
+        if (uri == null) {
             return null;
         }
+        String scheme = uri.getScheme();
+        if (!"tg".equalsIgnoreCase(scheme)) {
+            return null;
+        }
+        String authority = uri.getAuthority();
+        if (authority == null) {
+            return null;
+        }
+        authority = authority.toLowerCase();
+        return switch (authority) {
+            case "francesco" -> DeepLinkDef.FRANCESCO;
+            case "ximi" -> DeepLinkDef.XIMI;
+            case "fox" -> DeepLinkDef.FOX;
+            case "chupagram" -> DeepLinkDef.CHUPAGRAM;
+            case "yukigram" -> DeepLinkDef.YUKIGRAM;
+            case "experimental" -> {
+                if (uri.getPath() != null) {
+                    if (uri.getPath().equalsIgnoreCase("/navigation"))
+                        yield DeepLinkDef.EXPERIMENTAL_NAVIGATION;
+                }
+                yield DeepLinkDef.EXPERIMENTAL;
+            }
+            case "camera" -> DeepLinkDef.CAMERA;
+            case "general" -> DeepLinkDef.GENERAL;
+            case "octosettings" -> DeepLinkDef.OCTOSETTINGS;
+            case "appearance" -> {
+                if (uri.getPath() != null) {
+                    if (uri.getPath().equalsIgnoreCase("/app")) yield DeepLinkDef.APPEARANCE_APP;
+                    if (uri.getPath().equalsIgnoreCase("/chat")) yield DeepLinkDef.APPEARANCE_CHAT;
+                    if (uri.getPath().equalsIgnoreCase("/drawer"))
+                        yield DeepLinkDef.APPEARANCE_DRAWER;
+                }
+                yield DeepLinkDef.APPEARANCE;
+            }
+            case "translator" -> DeepLinkDef.TRANSLATOR;
+            case "update" -> DeepLinkDef.UPDATE;
+            case "pinned_emojis" -> DeepLinkDef.PINNED_EMOJIS;
+            case "pinned_reactions" -> DeepLinkDef.PINNED_REACTIONS;
+            case "pinned_hashtags" -> DeepLinkDef.PINNED_HASHTAGS;
+            case "octogram" -> DeepLinkDef.INFO;
+            case "dc" -> DeepLinkDef.DC_STATUS;
+            case "privacy" -> DeepLinkDef.PRIVACY;
+            case "locked_chats" -> DeepLinkDef.LOCKED_CHATS;
+            default -> {
+                if (authority.startsWith("user")) {
+                    yield DeepLinkDef.USER;
+                }
+                yield null;
+            }
+        };
     }
 
     /**
@@ -375,7 +426,6 @@ public class DeepLinkManager extends LaunchActivity {
     public static void handleOpenProfileById(LaunchActivity launchActivity) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             OctoLogging.d(TAG, "handleOpenProfileById: " + profileUserId);
-            OctoLogging.d(TAG, "handleOpenProfileById: " + profileUserId);
         }
         if (profileUserId != 0) {
             Bundle args = new Bundle();
@@ -394,7 +444,6 @@ public class DeepLinkManager extends LaunchActivity {
 
     public static boolean handleMenuAction(@MenuAction int id, int currentAccount, LaunchActivity launchActivity) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            OctoLogging.d(TAG, "handleMenuAction: " + id);
             OctoLogging.d(TAG, "handleMenuAction: " + id);
         }
         var fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
@@ -428,7 +477,7 @@ public class DeepLinkManager extends LaunchActivity {
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
             case MenuActionDef.DATACENTER_ID:
-                fragment.presentFragment(new DatacenterActivity());
+                fragment.presentFragment(new DcStatusActivity());
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
             case MenuActionDef.DATA_AND_STORAGE:

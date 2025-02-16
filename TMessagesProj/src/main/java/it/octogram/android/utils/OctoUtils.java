@@ -24,6 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.telegram.PhoneFormat.CallingCodeInfo;
+import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -48,6 +50,7 @@ import it.octogram.android.Datacenter;
 import it.octogram.android.IconsUIType;
 import it.octogram.android.MediaFilter;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.logs.OctoLogging;
 
 
@@ -401,6 +404,33 @@ public class OctoUtils {
         } else {
             return R.drawable.msg_emoji_cat;
         }
+    }
+    public static CharSequence hidePhoneNumber(@NonNull TLRPC.User user) {
+        var phone = user.phone;
+        String text = PhoneFormat.getInstance().format("+" + phone);
+
+        if (OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()) {
+            PhoneNumberAlternative alternative = PhoneNumberAlternative.Companion.fromInt(OctoConfig.INSTANCE.phoneNumberAlternative.getValue());
+
+            switch (alternative) {
+                case PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER -> {
+                    CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phone);
+                    String phoneCountry = info != null ? info.callingCode : "";
+                    return String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
+                }
+                case PhoneNumberAlternative.SHOW_USERNAME -> {
+                    if (user.username != null && !user.username.isEmpty()) {
+                        return user.username;
+                    }
+                    return user.first_name != null ? user.first_name : "Unknown";
+                }
+                default -> {
+                    return user.first_name != null ? user.first_name : "Unknown";
+                }
+            }
+        }
+
+        return text;
     }
 }
 

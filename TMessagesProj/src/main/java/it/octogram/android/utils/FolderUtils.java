@@ -70,10 +70,6 @@ public class FolderUtils {
     }
 
     public static boolean areThereFolders() {
-        if (OctoConfig.INSTANCE.hideChatFolders.getValue()) {
-            return false;
-        }
-
         ArrayList<MessagesController.DialogFilter> filters = MessagesController.getInstance(UserConfig.selectedAccount).getDialogFilters();
         if (filters.size() > 1) {
             boolean isThereVisibleFolder = false;

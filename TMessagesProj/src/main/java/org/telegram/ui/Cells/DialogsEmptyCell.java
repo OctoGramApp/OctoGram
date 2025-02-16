@@ -47,7 +47,8 @@ public class DialogsEmptyCell extends LinearLayout {
     public final static int TYPE_WELCOME_NO_CONTACTS = 0,
         TYPE_WELCOME_WITH_CONTACTS = 1,
         TYPE_FILTER_NO_CHATS_TO_DISPLAY = 2,
-        TYPE_FILTER_ADDING_CHATS = 3;
+        TYPE_FILTER_ADDING_CHATS = 3,
+        TYPE_FILTER_HIDDEN_CHATS = 70;
     private final static int TYPE_UNSPECIFIED = -1;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -56,7 +57,8 @@ public class DialogsEmptyCell extends LinearLayout {
             TYPE_WELCOME_NO_CONTACTS,
             TYPE_WELCOME_WITH_CONTACTS,
             TYPE_FILTER_NO_CHATS_TO_DISPLAY,
-            TYPE_FILTER_ADDING_CHATS
+            TYPE_FILTER_ADDING_CHATS,
+            TYPE_FILTER_HIDDEN_CHATS
     })
     public @interface EmptyType {}
 
@@ -149,6 +151,12 @@ public class DialogsEmptyCell extends LinearLayout {
                     titleView.setText(LocaleController.getString(R.string.FilterNoChatsToDisplay));
                     help = LocaleController.getString(R.string.FilterNoChatsToDisplayInfo);
                 }
+                break;
+            case TYPE_FILTER_HIDDEN_CHATS:
+                imageView.setAutoRepeat(false);
+                icon = R.raw.utyan_passcode;
+                titleView.setText(LocaleController.getString(R.string.LockedChats_Empty));
+                help = LocaleController.getString(R.string.FilterNoChatsToDisplayInfo);
                 break;
             default:
             case TYPE_FILTER_ADDING_CHATS:
@@ -269,7 +277,7 @@ public class DialogsEmptyCell extends LinearLayout {
 
     public void updateLayout() {
         int offset = 0;
-        if (getParent() instanceof View && (currentType == TYPE_FILTER_NO_CHATS_TO_DISPLAY || currentType == TYPE_FILTER_ADDING_CHATS)) {
+        if (getParent() instanceof View && (currentType == TYPE_FILTER_NO_CHATS_TO_DISPLAY || currentType == TYPE_FILTER_ADDING_CHATS || currentType == TYPE_FILTER_HIDDEN_CHATS)) {
             View view = (View) getParent();
             int paddingTop = view.getPaddingTop();
             if (paddingTop != 0) {
@@ -309,7 +317,7 @@ public class DialogsEmptyCell extends LinearLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (currentType == TYPE_WELCOME_NO_CONTACTS || currentType == TYPE_WELCOME_WITH_CONTACTS) {
             super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(measureUtyanHeight(heightMeasureSpec), MeasureSpec.EXACTLY));
-        } else if (currentType == TYPE_FILTER_NO_CHATS_TO_DISPLAY || currentType == TYPE_FILTER_ADDING_CHATS) {
+        } else if (currentType == TYPE_FILTER_NO_CHATS_TO_DISPLAY || currentType == TYPE_FILTER_ADDING_CHATS || currentType == TYPE_FILTER_HIDDEN_CHATS) {
             int totalHeight;
             if (getParent() instanceof View) {
                 View view = (View) getParent();

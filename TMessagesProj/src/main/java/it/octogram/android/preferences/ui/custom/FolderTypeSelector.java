@@ -178,7 +178,7 @@ public class FolderTypeSelector extends FrameLayout {
                         continue;
                     }
                     addedTab++;
-                    filterTabsView.addTab(a, filters.get(a).localId, filters.get(a).name, filters.get(a).emoticon, null, false, false, filters.get(a).locked);
+                    filterTabsView.addTab(a, filters.get(a).localId, filters.get(a).name, filters.get(a).emoticon, filters.get(a).entities, false, false, filters.get(a).locked);
                 }
             }
 

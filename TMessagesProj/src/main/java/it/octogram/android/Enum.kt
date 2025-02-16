@@ -62,6 +62,11 @@ enum class DoubleTapAction(val value: Int) {
     }
 }
 
+enum class WarningsBehavior(val value: Int) {
+    SHOW_PROMPT(0),
+    REQUEST_BIOMETRIC_AUTH(1)
+}
+
 enum class PhoneNumberAlternative(val value: Int) {
     SHOW_HIDDEN_NUMBER_STRING(0),
     SHOW_FAKE_PHONE_NUMBER(1),
@@ -110,13 +115,15 @@ object CameraXResolution {
     const val FHD = 2
     const val UHD = 3
     const val NONE = 4
+    const val MAX = 5
 
     private val resolutionMap = mapOf(
         SD to 480,
         HD to 720,
         FHD to 1080,
         UHD to 2160,
-        NONE to -1
+        NONE to -1,
+        MAX to 4096
     )
 
     fun getCameraXResolution(@CameraXResolution resolution: Int): Int {
@@ -133,6 +140,7 @@ object CameraXResolution {
             HD -> return 720
             FHD -> return 1080
             UHD -> return 2160
+            MAX -> return 4096
             NONE -> return -1
         }
         return -1
@@ -320,7 +328,11 @@ enum class StickerUi(val value: Int) {
     DRAWER(21),
     HEADER_CUSTOM_TITLE(22),
     MONET_DIALOG(23),
-    LINK_VERIFY(24)
+    LINK_VERIFY(24),
+    MAIN_SETTINGS(25),
+    MEDIA_LOADING(26),
+    WEB_SEARCH(27),
+    PRIVACY(28)
 }
 
 enum class DrawerBackgroundState(val value: Int) {
@@ -503,6 +515,37 @@ enum class Datacenter(
     }
 }
 
+enum class WebPages(
+    var id: Int,
+    var pageName: String,
+    val icon: Int,
+    var website: String,
+    val category: Int
+) {
+    TELEGRAM(1, "Telegram",  R.drawable.telegram_camera_icon, "https://telegram.org", 1),
+    FAQ(2, "FAQ", R.drawable.msg_emoji_question, "https://telegram.org/faq", 1),
+    DOCUMENTATION(3, "Documentation", R.drawable.msg_bot, "https://core.telegram.org/", 1),
+    TG_CORE(4, "Telegram Core", R.drawable.left_status_profile, "https://my.telegram.org", 2),
+    TRANSLATIONS(5, "Translations", R.drawable.msg_translate, "https://translations.telegram.org", 2),
+    CONTEST(6, "Contest", R.drawable.gift_unpack, "https://contest.com", 2),
+    ADS(7, "Ads", R.drawable.msg_language, "https://ads.telegram.org", 2),
+    GATEWAY(8, "Gateway", R.drawable.msg2_ask_question, "https://gateway.telegram.org", 2),
+    TELEGRAPH(9, "Telegraph", R.drawable.msg_text_outlined, "https://telegra.ph", 3),
+    FRAGMENT(10, "Fragment", R.drawable.fragment, "https://fragment.com", 3),
+    QUIZ_DIRECTORY(11, "Quiz Directory", R.drawable.msg_channel, "https://quiz.directory", 3);
+}
+
+enum class WebPagesCategory(var id: Int, var text: String) {
+    WEBSITES(1, LocaleController.getString(R.string.DatacenterStatus_Web)),
+    PLATFORMS(2, LocaleController.getString(R.string.DatacenterStatus_WebPlatforms)),
+    SERVICES(3, LocaleController.getString(R.string.DatacenterStatus_WebServices));
+
+    companion object {
+        fun getPageInfo(pageId: Int): WebPagesCategory {
+            return WebPagesCategory.entries.find { it.id == pageId } ?: WEBSITES
+        }
+    }
+}
 
 enum class FontType(val path: String) {
     ROBOTO_MEDIUM("fonts/rmedium.ttf"),
@@ -517,7 +560,8 @@ enum class FontType(val path: String) {
 }
 
 object VideoQuality {
-    const val value = 0
+    const val VALUE = 0
+
     fun getValue(@Quality quality: Int): Int {
         return quality
     }
@@ -556,7 +600,8 @@ enum class PromptBeforeSendMedia(val id: Int) {
 enum class MonetTheme(val monetThemeName: String, val monetThemeFileName: String) {
     MONET_AMOLED("Monet Amoled", "monet_amoled.attheme"),
     MONET_DARK("Monet Dark", "monet_dark.attheme"),
-    MONET_LIGHT("Monet Light", "monet_light.attheme");
+    MONET_LIGHT("Monet Light", "monet_light.attheme"),
+    // MONET_OLED("Monet Oled", "monet_oled.attheme");
 }
 
 object CameraPreview {

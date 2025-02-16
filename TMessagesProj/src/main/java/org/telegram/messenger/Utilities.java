@@ -15,6 +15,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 
 import com.carrotsearch.randomizedtesting.Xoroshiro128PlusRandom;
 
@@ -53,12 +54,13 @@ public class Utilities {
 
     static {
         try {
-            File URANDOM_FILE = new File("/dev/urandom");
-            FileInputStream sUrandomIn = new FileInputStream(URANDOM_FILE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                random = SecureRandom.getInstanceStrong();
+            } else {
+                random = new SecureRandom();
+            }
             byte[] buffer = new byte[1024];
-            sUrandomIn.read(buffer);
-            sUrandomIn.close();
-            random.setSeed(buffer);
+            random.nextBytes(buffer);
         } catch (Exception e) {
             FileLog.e(e);
         }
@@ -213,7 +215,7 @@ public class Utilities {
             Matcher matcher = pattern.matcher(value);
             if (matcher.find()) {
                 String num = matcher.group(0);
-                val = Long.parseLong(num);
+                if (num != null) val = Long.parseLong(num);
             }
         } catch (Exception ignore) {
 
@@ -271,6 +273,7 @@ public class Utilities {
         for (int a = offset1; a < arr1.length; a++) {
             if (arr1[a + offset1] != arr2[a + offset2]) {
                 result = false;
+                break;
             }
         }
         return result;
@@ -571,15 +574,18 @@ public class Utilities {
         return v;
     }
 
+    @SafeVarargs
     public static void doCallbacks(Utilities.Callback<Runnable> ...actions) {
         doCallbacks(0, actions);
     }
+    @SafeVarargs
     private static void doCallbacks(int i, Utilities.Callback<Runnable> ...actions) {
         if (actions != null && actions.length > i) {
             actions[i].run(() -> doCallbacks(i + 1, actions));
         }
     }
 
+    @SafeVarargs
     public static void raceCallbacks(Runnable onFinish, Utilities.Callback<Runnable> ...actions) {
         if (actions == null || actions.length == 0) {
             if (onFinish != null) {

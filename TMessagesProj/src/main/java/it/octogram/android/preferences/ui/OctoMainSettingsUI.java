@@ -9,7 +9,6 @@
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
@@ -22,12 +21,10 @@ import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
-import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
@@ -48,19 +45,19 @@ import java.util.UUID;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StickerUi;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.rows.impl.FooterRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.ExportDoneReadyBottomSheet;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.LogsMigrator;
-import it.octogram.android.utils.OctoUtils;
 
+/** @noinspection SequencedCollectionMethodCanBeUsed*/
 public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
     private final ConfigProperty<Boolean> logsOnlyPbeta = new ConfigProperty<>(null, false);
     private void updateConfigs() {
@@ -74,10 +71,9 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
     public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
         updateConfigs();
         this.fragment = fragment;
-        var footer = AndroidUtilities.replaceTags(formatString(R.string.OctoMainSettingsFooter, BuildConfig.BUILD_VERSION_STRING));
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
                 .deepLink("tg://octosettings")
-                .octoAnimation(getString(R.string.OctoMainSettingsHeader))
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.MAIN_SETTINGS, true, getString(R.string.OctoMainSettingsHeader))
                 .category(getString(R.string.Settings), category -> {
                     if ("it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName())) {
                         category.row(new TextDetailRow.TextDetailRowBuilder()
@@ -121,6 +117,11 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                             .title(getString(R.string.ChatCamera))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI())))
+                            .icon(R.drawable.menu_privacy)
+                            .title(getString(R.string.PrivacySettings))
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoExperimentsUI())))
                             .icon(R.drawable.outline_science_white)
                             .title(getString(R.string.Experiments))
@@ -148,42 +149,35 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                             .title(getString(R.string.ResetSettings))
                             .build());
                 })
-                .category(getString(R.string.OctoMainSettingsInfoCategory), category -> {
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new DatacenterActivity()))
+                .category(getString(R.string.OctoMainSettingsInfo), category -> {
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new DcStatusActivity()))
                             .icon(R.drawable.datacenter_status)
                             .title(getString(R.string.DatacenterStatus))
-                            .description(getString(R.string.DatacenterStatus_Desc))
                             .build());
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                    category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
                                 LogsMigrator.migrateOldLogs();
                                 fragment.presentFragment(new CrashesActivity());
                             })
-                            .icon(R.drawable.msg_secret_hw)
+                            .icon(R.drawable.msg2_help)
                             .title(getString(R.string.CrashHistory))
                             .description(getString(R.string.CrashHistory_Desc))
                             .build());
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
+                    category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new OctoLogsActivity()))
                             .icon(R.drawable.msg_log)
-                            .title(LocaleController.getString(R.string.CrashHistory)+ " (PBETA)")
-                            .description(LocaleController.getString(R.string.CrashHistory_Desc))
+                            .title(getString(R.string.CrashHistory)+ " (PBETA)")
+                            .description(getString(R.string.CrashHistory_Desc))
                             .showIf(logsOnlyPbeta)
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://%s/privacy", OctoUtils.getDomain()))))
-                            .icon(R.drawable.msg2_policy)
-                            .title(getString(R.string.OctoPrivacyPolicy))
-                            .build());
-                    category.row(new TextDetailRow.TextDetailRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Uri.parse(String.format("https://%s/translate", OctoUtils.getDomain()))))
-                            .icon(R.drawable.msg_translate)
-                            .title(getString(R.string.TranslateOcto))
-                            .description(getString(R.string.TranslateOcto_Desc))
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoInfoSettingsUI())))
+                            .icon(R.drawable.msg_info)
+                            .title(getString(R.string.OctoInfoSettingsHeader))
                             .build());
                 })
-                .row(new FooterRow.FooterRowBuilder().title(footer).build())
+                //.row(new FooterRow.FooterRowBuilder().title("OctoGram v"+BuildConfig.BUILD_VERSION_STRING).build())
                 .build();
     }
 
@@ -218,14 +212,16 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
             sheet.show();
         } else {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(fragment.getParentActivity());
-            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
-            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedDataCaption));
+            alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportFailedZeroTitle));
+            alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportFailedDataCaption));
             alertDialogBuilder.setPositiveButton("OK", null);
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
 
             if (firstFile.getAbsolutePath().startsWith(AndroidUtilities.getCacheDir().getAbsolutePath())) {
-                firstFile.delete();
+                if (!firstFile.delete()) {
+                    OctoLogging.e("Failed to delete file: " + firstFile.getAbsolutePath());
+                }
             }
         }
     }
@@ -328,9 +324,9 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     warningBuilder.getDismissRunnable().run();
 
                     AlertDialog.Builder errorBuilder = new AlertDialog.Builder(context);
-                    errorBuilder.setTitle(LocaleController.getString(R.string.Warning));
-                    errorBuilder.setPositiveButton(LocaleController.getString(R.string.OK), null);
-                    errorBuilder.setMessage(LocaleController.getString(R.string.ResetSettingsBackupFailed));
+                    errorBuilder.setTitle(getString(R.string.Warning));
+                    errorBuilder.setPositiveButton(getString(R.string.OK), null);
+                    errorBuilder.setMessage(getString(R.string.ResetSettingsBackupFailed));
                     AlertDialog alertDialog = errorBuilder.create();
                     alertDialog.show();
                 });

@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.utils.translator;
+package it.octogram.android.translator;
 
 import org.telegram.tgnet.TLRPC;
 

@@ -12907,11 +12907,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             ImportSettingsScanHelper helper = new ImportSettingsScanHelper();
             for (ImportSettingsScanHelper.SettingsScanCategory category : helper.categories) {
                 minGuid++;
-                defaultList.add(new SearchResult(minGuid, category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.get())));
+                defaultList.add(new SearchResult(minGuid, category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.onCall())));
 
                 for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
                     minGuid++;
-                    defaultList.add(new SearchResult(minGuid, option.getName(), category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.get())));
+                    defaultList.add(new SearchResult(minGuid, option.getName(), category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.onCall(option.optionKey))));
                 }
             }
 

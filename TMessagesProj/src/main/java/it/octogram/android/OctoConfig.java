@@ -46,14 +46,11 @@ public class OctoConfig {
     private final List<ConfigProperty<?>> properties = new ArrayList<>();
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
     public static final String STICKERS_PLACEHOLDER_PACK_NAME = "octo_placeholders_android";
+    public static final String PRIVATE_BETA_GROUP_HASH = "61-fnrres2ExNWFk";
     public static final String CRASH_MIME_TYPE = "message/rfc822";
     public static final String EXPORT_BACKUP_MIME_TYPE = "text/json";
 
     /*General*/
-    public final ConfigProperty<Boolean> hidePhoneNumber = newConfigProperty("hidePhoneNumber", true);
-    public final ConfigProperty<Boolean> hideOtherPhoneNumber = newConfigProperty("hideOtherPhoneNumber", true);
-    public final ConfigProperty<Integer> phoneNumberAlternative = newConfigProperty("phoneNumberAlternative", PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue());
-    public final ConfigProperty<Boolean> promptBeforeCalling = newConfigProperty("promptBeforeCalling", true);
     public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM.getValue());
     public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API.getValue());
     public final ConfigProperty<Boolean> registrationDateInProfiles = newConfigProperty("registrationDateInProfiles", false);
@@ -66,27 +63,41 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> hideCustomEmojis = newConfigProperty("hideCustomEmojis", false);
     public final ConfigProperty<Boolean> activeNoiseSuppression = newConfigProperty("activeNoiseSuppression", false);
     public final ConfigProperty<Boolean> unmuteVideosWithVolumeDown = newConfigProperty("unmuteVideosWithVolumeDown", true);
-    public final ConfigProperty<Boolean> disableProximityEvents = newConfigProperty("disableProximityEvents", false);
     public final ConfigProperty<Boolean> startWithRearCamera = newConfigProperty("startWithRearCamera", false);
     public final ConfigProperty<Boolean> hideSentTimeOnStickers = newConfigProperty("hideSentTimeOnStickers", false);
     public final ConfigProperty<Boolean> hideOnlyAllChatsFolder = newConfigProperty("hideOnlyAllChatsFolder", false);
-    public final ConfigProperty<Boolean> hideChatFolders = newConfigProperty("hideChatFolders", false);
     public final ConfigProperty<Boolean> hideStories = newConfigProperty("hideStories", false);
     public final ConfigProperty<Boolean> alwaysShowDownloads = newConfigProperty("alwaysShowDownloads", false);
     public final ConfigProperty<Integer> doubleTapAction = newConfigProperty("doubleTapAction", DoubleTapAction.REACTION.getValue());
     public final ConfigProperty<Integer> doubleTapActionOut = newConfigProperty("doubleTapActionOut", DoubleTapAction.REACTION.getValue());
-    public final ConfigProperty<Boolean> hideFoldersWhenForwarding = newConfigProperty("showFoldersWhenForwarding", false);
     public final ConfigProperty<Boolean> accentColorAsNotificationColor = newConfigProperty("accentColorAsNotificationColor", false);
     public final ConfigProperty<Boolean> openArchiveOnPull = newConfigProperty("openArchiveOnPull", false);
     public final ConfigProperty<Integer> deviceIdentifyState = newConfigProperty("deviceIdentifyState", DeviceIdentifyState.DEFAULT.getValue());
     public final ConfigProperty<Boolean> forceUseIpV6 = newConfigProperty("forceUseIpV6", false);
-    public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
     public final ConfigProperty<Boolean> enableSmartNotificationsForPrivateChats = newConfigProperty("enableSmartNotificationsForPrivateChats", false);
     public final ConfigProperty<Integer> defaultEmojiButtonAction = newConfigProperty("defaultEmojiButtonAction", DefaultEmojiButtonAction.DEFAULT.getValue());
     public final ConfigProperty<Boolean> swipeToPip = newConfigProperty("swipeToPip", false);
     public final ConfigProperty<Boolean> usePinnedEmojisFeature = newConfigProperty("usePinnedEmojisFeature", false);
     public final ConfigProperty<Boolean> hideRecentEmojis = newConfigProperty("hideRecentEmojis", false);
     public final ConfigProperty<String> pinnedEmojisList = newConfigProperty("pinnedEmojisList", "[]");
+    public final ConfigProperty<Boolean> usePinnedHashtagsFeature = newConfigProperty("usePinnedHashtagsFeature", false);
+    public final ConfigProperty<String> pinnedHashtagsList = newConfigProperty("pinnedHashtagsList", "[]");
+
+    /* Privacy */
+    public final ConfigProperty<Boolean> hidePhoneNumber = newConfigProperty("hidePhoneNumber", true);
+    public final ConfigProperty<Boolean> hideOtherPhoneNumber = newConfigProperty("hideOtherPhoneNumber", true);
+    public final ConfigProperty<Integer> phoneNumberAlternative = newConfigProperty("phoneNumberAlternative", PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue());
+    public final ConfigProperty<Boolean> promptBeforeCalling = newConfigProperty("promptBeforeCalling", true);
+    public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
+    public final ConfigProperty<Boolean> biometricOpenArchive = newConfigProperty("biometricOpenArchive", false);
+    public final ConfigProperty<Boolean> biometricOpenCallsLog = newConfigProperty("biometricOpenCallsLog", false);
+    public final ConfigProperty<Boolean> biometricOpenSavedMessages = newConfigProperty("biometricOpenSavedMessages", false);
+    public final ConfigProperty<Boolean> biometricOpenSecretChats = newConfigProperty("biometricOpenSecretChats", false);
+    public final ConfigProperty<Boolean> shownHiddenChatsHint = newConfigProperty("shownHiddenChatsHint", false);
+    public final ConfigProperty<String> hiddenChats = newConfigProperty("hiddenChats", "[]");
+    public final ConfigProperty<Boolean> allowUsingDevicePIN = newConfigProperty("allowUsingDevicePIN", false);
+    public final ConfigProperty<Boolean> allowUsingFaceUnlock = newConfigProperty("allowUsingFaceUnlock", false);
+    public final ConfigProperty<Integer> biometricAskEvery = newConfigProperty("biometricAskEvery", 10);
 
     /*Hidden folders*/
     public final ConfigProperty<String> hiddenFolderAssoc = newConfigProperty("hiddenFolderAssoc", "{}");
@@ -132,6 +143,11 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> promptBeforeSendingGIFs = newConfigProperty("promptBeforeSendingGIFs", false);
     public final ConfigProperty<Boolean> promptBeforeSendingVoiceMessages = newConfigProperty("promptBeforeSendingVoiceMessages", false);
     public final ConfigProperty<Boolean> promptBeforeSendingVideoMessages = newConfigProperty("promptBeforeSendingVideoMessages", false);
+
+    /*Monet Settings*/
+//    public final ConfigProperty<Boolean> monetUseGradient = newConfigProperty("monet_useGradient", false);
+//    public final ConfigProperty<Boolean> monetUseAltOutColor = newConfigProperty("monet_useAltOutColor", false);
+//    public final ConfigProperty<Boolean> monetUseNicknameColorFull = newConfigProperty("monet_useNicknameColorFull", false);
 
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
@@ -752,6 +768,38 @@ public class OctoConfig {
 
     public int getFavoriteReactionsCount() {
         return getFavoriteReactions(true).size() + getFavoriteReactions(false).size();
+    }
+
+    public ArrayList<String> getPinnedHashtags(String hashtagString) {
+        ArrayList<String> hashtags = new ArrayList<>();
+
+        if (!OctoConfig.INSTANCE.usePinnedHashtagsFeature.getValue()) {
+            return hashtags;
+        }
+
+        try {
+            String value = OctoConfig.INSTANCE.pinnedHashtagsList.getValue();
+            JSONArray list = new JSONArray(new JSONTokener(value));
+
+            int successHandled = 0;
+            for (int i = 0; i < list.length(); i++) {
+                try {
+                    String hashtag = "#"+ list.getString(i);
+
+                    if (hashtag.startsWith(hashtagString)) {
+                        hashtags.add(hashtag);
+                    }
+
+                    successHandled++;
+                }catch (JSONException ignored) {}
+
+                if (successHandled >= 15) {
+                    break;
+                }
+            }
+        } catch (JSONException ignored) {}
+
+        return hashtags;
     }
 
     public ArrayList<ReactionsLayoutInBubble.VisibleReaction> getFavoriteReactions(boolean isChannel) {

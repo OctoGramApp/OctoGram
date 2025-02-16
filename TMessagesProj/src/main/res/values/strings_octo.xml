@@ -151,20 +151,25 @@
     <string name="ErrorSendingCrashContent">There was an error while sending crash logs</string>
 
     <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
-    <string name="OctoMainSettingsFooter">OctoGram v%s. Thank you for your interest in the project :)</string>
     <string name="OctoMainSettingsManageCategory">Manage</string>
-    <string name="OctoMainSettingsInfoCategory">Info</string>
+    <string name="OctoMainSettingsChats">Chats</string>
+    <string name="OctoMainSettingsInfo">Info</string>
+    <string name="OctoInfoSettingsHeader">Discover more...</string>
     <string name="OfficialChannel">Official Channel</string>
-    <string name="OfficialChannel_Desc">Stay informed about new updates</string>
+    <string name="OfficialGroup">Official Group</string>
+    <string name="OfficialPbetaChat">Private Beta Chat</string>
+    <string name="ContributeUsingPbeta">Contribute to the development</string>
+    <string name="ContributeUsingPbeta_Desc">You can contribute to development by requesting access to our internal testing group! You will have access to all features in preview.</string>
+    <string name="ContributeUsingPbeta_Desc_Already">Thank you for being part of our private beta group! You already have access to all features in preview.</string>
     <string name="ContributeOcto">Contribute to OctoGram</string>
-    <string name="ContributeOcto_Desc">Help us creating a better app if you are a developer</string>
     <string name="TranslateOcto">Translate OctoGram</string>
-    <string name="TranslateOcto_Desc">Help us translating OctoGram in your language</string>
+    <string name="CodeLicense">Project License</string>
     <string name="SourceCode">View Source Code</string>
 
-    <string name="OctoGeneralSettings">General Settings</string>
-    <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app, as well as privacy</string>
-    <string name="PrivacyHeader">Privacy</string>
+    <string name="OctoPrivacySettings">Privacy Settings</string>
+    <string name="OctoPrivacySettingsBrief">Privacy</string>
+    <string name="OctoPrivacySettingsHeader">Here you can customize some privacy settings related to the app</string>
+    <string name="PhoneNumberPrivacy">Phone numbers</string>
     <string name="HidePhoneNumber">Hide phone number</string>
     <string name="HidePhoneNumber_Desc">Hide your phone number in the app interfaces</string>
     <string name="HideOtherPhoneNumber">Hide other people\'s phone number</string>
@@ -175,8 +180,10 @@
     <string name="ShowFakePhoneNumber_Desc">Show a fake phone number in your profile, like %s.</string>
     <string name="ShowUsernameAsPhoneNumber">Show username</string>
     <string name="ShowUsernameAsPhoneNumber_Desc">Show your username as your phone number in your profile.</string>
+
+    <string name="OctoGeneralSettings">General Settings</string>
+    <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app</string>
     <string name="PromptBeforeCalling">Prompt before calling</string>
-    <string name="PromptBeforeCalling_Desc">Show a prompt to avoid accidental calls</string>
     <string name="DcIdHeader">Datacenter and User ID</string>
     <string name="DcIdTypeDescriptionBotapi">It introduces a "-" sign for groups and prepends "-100" for supergroups, broadcast groups, and channels.</string>
     <string name="DcIdTypeDescriptionTelegram">It shows IDs directly as they are provided by Telegram.</string>
@@ -202,17 +209,13 @@
     <string name="VoiceImprovements_Desc">Enables noise suppression and voice normalization while in a call</string>
     <string name="UnmuteWithVolumeDown">Unmute videos with volume down</string>
     <string name="UnmuteWithVolumeDown_Desc">Unmute a video by pressing the volume down button</string>
-    <string name="DisableProximitySensor">Disable proximity sensor</string>
     <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
     <string name="HideAllChatFolder">Hide \"All Chats\" tab</string>
-    <string name="HideAllChatFolders">Totally hide folders</string>
-    <string name="HideChatFoldersWhenForwarding">Hide chat folders when forwarding</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
     <string name="EnableSmartNotificationsForPrivateChats">Enable smart notifications for private chats</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
     <string name="OpenArchiveOnPull_Desc">Automatically opens the archive when pulling down</string>
     <string name="PromptBeforeDeletingChatHistory">Prompt before deleting chat history</string>
-    <string name="PromptBeforeDeletingChatHistory_Desc">Show a prompt to avoid accidental deletions</string>
     <string name="DoubleTapActionsHeader">Double tap actions</string>
     <string name="PreferredActionIncoming">Incoming messages</string>
     <string name="PreferredActionOutgoing">Outgoing messages</string>
@@ -220,6 +223,37 @@
     <string name="TryConnectWithIPV6">Try connecting through IPv6</string>
     <string name="DefaultEmojiButtonType">Emoji button action</string>
     <string name="DefaultEmojiButtonTypeDefault">Default</string>
+
+    <string name="BiometricSettings">Biometric</string>
+    <string name="UnlockToSaveOption">Unlock to edit</string>
+    <string name="UnlockToOpenPage">Unlock to open</string>
+    <string name="LockedChats">Locked chats</string>
+    <string name="LockedChats_Lock">Lock a new chat</string>
+    <string name="LockedChats_Lock_Destination">to update the locked list</string>
+    <string name="LockedChats_Lock_Destination_Sure">will be locked</string>
+    <string name="LockedChats_Empty">No locked chats found</string>
+    <string name="LockedChatsHelpTitle">These are your locked chats</string>
+    <string name="LockedChatsHelpDescription">You can hide a chat so that you can only open it with your fingerprint. **Tap to config >**</string>
+    <string name="LockedChatsHelpDescription_Settings">You can lock chats using the 3 dots in-chat, in the chat list, or by pressing the button below.</string>
+    <string name="LockedChatsHelpHint1Title">Hidden chats</string>
+    <string name="LockedChatsHelpHint1Description">You can choose to hide or show each chat individually.</string>
+    <string name="LockedChatsHelpHint2Title">Unlock with biometric</string>
+    <string name="LockedChatsHelpHint2Description">Only you can view the content of these chats by unlocking it with your fingerprint or face.</string>
+    <string name="LockedChatsHelpHint3Title">Applied only locally</string>
+    <string name="LockedChatsHelpHint3Description">Hidden chats will be displayed normally on other devices.</string>
+    <string name="LockedChatsHelpHintEditList">Edit list</string>
+    <string name="LockChat">Lock chat</string>
+    <string name="UnLockChat">Unlock chat</string>
+    <string name="LockChat_Brief">Lock</string>
+    <string name="UnLockChat_Brief">Unlock</string>
+    <string name="BiometricSettingsAllowFaceUnlock">Allow using Face Unlock</string>
+    <string name="BiometricSettingsAllowDevicePIN">Allow using device PIN</string>
+    <string name="BiometricSettingsOpenArchive">Request auth to open archive</string>
+    <string name="BiometricSettingsOpenSavedMessages">Request auth to open saved messages</string>
+    <string name="BiometricSettingsOpenSecretChats">Request auth to open secret chats</string>
+    <string name="BiometricSettingsOpenCallsLog">Request auth to open calls log</string>
+    <string name="BiometricAskEvery">Ask for authentication every…</string>
+    <string name="BiometricAskEvery_Desc">Biometric authentication will only be required once every %1$s.</string>
 
     <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
     <string name="BlurHeader">Blur</string>
@@ -430,6 +464,7 @@
     <string name="AudioTypeMono">Mono (Default)</string>
     <string name="MaxRecentStickers">Max Recent Stickers</string>
     <string name="MaxStickerSizeDefault">20 (Default)</string>
+    <string name="MaxRecentSticker_Unlimited">Unlimited</string>
     <string name="AlwaysExpandBlockQuotes">Always expand blockquotes</string>
     <string name="HideBottomBarChannels">Hide bottom bar in channels</string>
     <string name="HideOpenButtonChatsList">Hide open button in chats list</string>
@@ -465,7 +500,7 @@
     <string name="PinnedEmojisList_Pinned">This emoji is already pinned.</string>
     <string name="PinnedEmojisList_HideRecent">Hide Recent Emojis</string>
     <string name="PinnedEmojisList_HideRecent_Desc">You can hide the list of recent emoji and show only the pinned ones by activating this option.</string>
-    <string name="PinnedEmojisList_Apply">Update Pinned Emoji</string>
+    <string name="PinnedEmojisList_Apply">Update Pinned Emojis</string>
     <string name="PinnedEmojisList_Description">You can pin emojis from any pack.</string>
     <string name="PinnedEmojisList_AddButton">Pin Emoji</string>
     <string name="PinnedEmojisList_RemoveButton">Unpin Emoji</string>
@@ -482,8 +517,25 @@
     <string name="PinnedReactions_Type">This emoji is unsupported.</string>
     <string name="PinnedReactions_Apply">Update Pinned Reactions</string>
 
+    <!--Pinned Hashtags-->
+    <string name="PinnedHashtags">Pinned Hashtags</string>
+    <string name="PinnedHashtags_Status">Enable Pinned Hashtags</string>
+    <string name="PinnedHashtags_Limit">You can select up to 10 hashtags.</string>
+    <string name="PinnedHashtags_Description">You can pin any hashtag you want to find it easily.</string>
+    <string name="PinnedHashtags_Input">Tag</string>
+    <string name="PinnedHashtags_Input_Desc">To pin a new hashtag, write the name and press enter on the keyboard.</string>
+    <string name="PinnedHashtags_Pinned">This hashtag is already pinned.</string>
+    <string name="PinnedHashtags_Apply">Update Pinned Hashtags</string>
+    <string name="PinnedHashtags_Apply_Dialog">You have changed the list of hashtags. Apply changes?</string>
+    <string name="PinnedHashtags_Recent">Suggested Hashtags</string>
+
     <!--Reply in private chat-->
     <string name="CustomF_ReplyPvt">Reply in Private Chat</string>
+
+    <!--Select settings options-->
+    <string name="SelectElement">Select elements</string>
+    <string name="SelectElement_Desc">Tap an item on this page to share the direct link</string>
+    <string name="SelectElement_CopyPage">Share direct page link</string>
 
     <!-- Message Details -->
     <string name="MessageDetails">Details</string>
@@ -507,6 +559,8 @@
     <string name="FileSize">Size</string>
     <string name="FileFrameRate">FPS</string>
     <string name="FileBitrate">Bitrate</string>
+    <string name="FileResolution">Resolution</string>
+    <string name="FileCodec">Codec</string>
 
     <!-- Context menu -->
     <string name="CopyPhoto">Copy photo</string>
@@ -645,13 +699,41 @@
 
     <!-- Datacenter Section -->
     <string name="DatacenterStatus">Datacenter Status</string>
-    <string name="DatacenterStatus_Desc">View datacenter info</string>
+    <string name="DatacenterStatus_Media">Datacenter Test</string>
+    <string name="DatacenterStatus_Web">Web Status</string>
+    <string name="DatacenterStatus_WebPlatforms">Web Platforms</string>
+    <string name="DatacenterStatus_WebServices">Web Services</string>
+    <string name="DatacenterStatusSection_Tab_Network">Network</string>
+    <string name="DatacenterStatusSection_Tab_Media">Media</string>
+    <string name="DatacenterStatusSection_Tab_Web">Web</string>
     <string name="DatacenterStatusSection_Desc">Check the Telegram\'s <![CDATA[<a href="https://core.telegram.org/api/datacenter">Datacenter</a>]]> Status in realtime.</string>
-    <string name="WebVersion">Open Web Version</string>
-    <string name="DatacenterStatusSheetPing">Ping</string>
-    <string name="DatacenterStatusSheetIP">IP Address</string>
-    <string name="DatacenterStatusSheetLastLag">Last lag time</string>
-    <string name="DatacenterStatusSheetLastDowntime">Last down time</string>
+    <string name="DatacenterStatusSection_Desc_Media">Here you can test downloads from different datacenters.</string>
+    <string name="DatacenterStatusSection_Desc_Web">Here you can test pings to different Telegram websites.</string>
+    <string name="DatacenterStatusSection_Start">Start monitoring</string>
+    <string name="DatacenterStatusSection_Start_Media">Try downloading</string>
+    <string name="DatacenterStatusSection_Start_Ping">Try pinging</string>
+    <string name="DatacenterStatusSection_Stop">Stop activity</string>
+    <string name="DatacenterStatusSection_CopyIP">Copy IP</string>
+    <string name="DatacenterStatusSection_CopyIP_Text">IP address copied to clipboard.</string>
+    <string name="DatacenterStatusSection_DwCompleted">Download completed</string>
+    <string name="DatacenterStatusSection_DwFailed">Download failed</string>
+    <string name="DatacenterStatusSection_DwFailed_DiscoverMode">Tap here to see the reason</string>
+    <string name="DatacenterStatusSection_DwFailed_DiscoverMode_Text">Telegram has imposed a limit on this download as too many requests have been made recently. Please wait a few minutes and try the ping again.</string>
+    <string name="DatacenterStatusSection_Interrupted">Interrupted</string>
+    <string name="DatacenterStatusSection_Status_Downloads">The test uses a %1$d MB file.</string>
+    <string name="DatacenterStatusSection_NextUpdate">Next update</string>
+    <string name="DatacenterStatusSection_NextUpdate_Waiting">Waiting</string>
+    <string name="DatacenterStatusSection_NextUpdate_Waiting_Desc">the start of the activity</string>
+    <string name="DatacenterStatusSection_NextUpdate_InSeconds">in %1$d seconds</string>
+    <string name="DatacenterStatusSection_Failed">An error occurred during the download attempt. Please try again later.</string>
+    <string name="DatacenterStatusSection_Close">Monitoring</string>
+    <string name="DatacenterStatusSection_Close_Desc">An activity is running. Do you want to stop it?</string>
+    <string name="DatacenterStatusSection_InternetIssue">Internet issue</string>
+    <string name="DatacenterStatusSection_InternetIssue_Desc">It seems that your network connection isn\'t stable. Do you want to proceed anyway?</string>
+    <string name="DatacenterStatusSection_TestBackend">Test backend</string>
+    <string name="DatacenterStatusSection_TestBackend_Desc">Downloads tests aren\'t available in test backends.</string>
+    <string name="DatacenterStatusSection_TermsAccept">By proceeding, you agree to the DC Status <![CDATA[<a href="https://%s/dcterms">Terms of Service</a>]]>.</string>
+
     <string name="DownloadMenuItem">Downloads</string>
     <string name="AttachedMenuBot">Attach Menu Bot</string>
 
@@ -709,7 +791,7 @@
     <!-- Monet Dialog Fix -->
     <string name="ChangeIcon">Change App Icon</string>
     <string name="ChangeIconDesc">Since on Android 12 the monet icon was forced and you upgraded to Android 13, you need to change the app icon to the default one for a better support.</string>
-    
+
     <string name="VoipAnsweringAsAccount">answering as %s</string>
     <string name="ViewStats">View Stats</string>
     <string name="Appearance">Appearance</string>

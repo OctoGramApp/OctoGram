@@ -337,6 +337,7 @@ public class OctoLogsActivity extends BaseFragment implements NotificationCenter
             return new RecyclerListView.Holder(view);
         }
 
+        /** @noinspection SequencedCollectionMethodCanBeUsed*/
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List payloads) {
             Object payload = payloads.isEmpty() ? null : payloads.get(0);

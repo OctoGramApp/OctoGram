@@ -105,8 +105,8 @@ import java.util.HashMap;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.utils.translator.SingleTranslationManager;
-import it.octogram.android.utils.translator.TranslationsWrapper;
+import it.octogram.android.translator.SingleTranslationManager;
+import it.octogram.android.translator.TranslationsWrapper;
 
 public class PhotoPickerActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 

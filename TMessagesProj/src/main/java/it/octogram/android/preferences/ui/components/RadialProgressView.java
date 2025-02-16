@@ -36,6 +36,7 @@ public class RadialProgressView extends FrameLayout {
     private boolean isInitiated = false;
     private int colorKey1, colorKey2;
     private boolean drawRadialBackShadow = true;
+    private boolean isPaused = false;
 
     public RadialProgressView(Context context, int colorKey1) {
         super(context);
@@ -51,6 +52,11 @@ public class RadialProgressView extends FrameLayout {
     public void setColor(int colorKey1) {
         this.colorKey1 = colorKey1;
         this.colorKey2 = colorKey1;
+    }
+
+    public void setPaused(boolean paused) {
+        isPaused = paused;
+        invalidate();
     }
 
     public void setDrawRadialBackShadow(boolean drawRadialBackShadow) {
@@ -111,7 +117,9 @@ public class RadialProgressView extends FrameLayout {
         }
 
         super.dispatchDraw(canvas);
-        invalidate();
+        if (!isPaused) {
+            invalidate();
+        }
     }
 
     @Override

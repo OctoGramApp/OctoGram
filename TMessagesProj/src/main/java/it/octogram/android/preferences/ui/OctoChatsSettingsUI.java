@@ -35,7 +35,6 @@ import it.octogram.android.preferences.ui.components.StickerSizeCell;
 import it.octogram.android.utils.ExpandableRowsOption;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
-/** @noinspection deprecation*/
 public class OctoChatsSettingsUI implements PreferencesEntry {
     private StickerSizeCell stickerSizeCell;
     @Override

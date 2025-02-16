@@ -118,7 +118,6 @@ public class FilterTabsView extends FrameLayout {
         public int id;
         public CharSequence title;
         public CharSequence realTitle;
-
         public int titleWidth;
         public String emoticon;
         public int iconWidth;
@@ -129,20 +128,21 @@ public class FilterTabsView extends FrameLayout {
 
         public Tab(int i, String t, String e, ArrayList<TLRPC.MessageEntity> et, boolean noanimate) {
             id = i;
-            title = (customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) == TabMode.ICON.getValue() ? "" : t;
-            realTitle = new SpannableStringBuilder(t);
-            realTitle = Emoji.replaceEmoji(title, textPaint.getFontMetricsInt(), false);
+            realTitle = t != null ? new SpannableStringBuilder(t) : new SpannableStringBuilder("");
+
+            realTitle = Emoji.replaceEmoji(realTitle, textPaint.getFontMetricsInt(), false);
+            title = ((customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) == TabMode.ICON.getValue()) ? "" : realTitle;
 //            MessageObject.addEntitiesToText(title, e, false, false, false, true);
-            realTitle = MessageObject.replaceAnimatedEmoji(title, et, textPaint.getFontMetricsInt());
-            emoticon = e;
+            realTitle = MessageObject.replaceAnimatedEmoji(realTitle, et, textPaint.getFontMetricsInt());
+            this.emoticon = (i != Integer.MAX_VALUE) ? (e != null ? e : "") : "\uD83D\uDCAC";
             this.noanimate = noanimate;
         }
 
         public int getWidth(boolean store) {
             iconWidth = FolderIconController.getTotalIconWidth(customTabMode);
-            int width = titleWidth = (int) Math.ceil(HintView2.measureCorrectly(title, textPaint));
+            int width = titleWidth = (int) Math.ceil(HintView2.measureCorrectly(title != null ? title : "", textPaint));
             width += iconWidth;
-            int c;
+            int c = 0;
             if (!OctoConfig.INSTANCE.hideUnreadCounterOnFolder.getValue() && store) {
                 c = delegate.getTabCounter(id);
                 if (c < 0) {
@@ -164,14 +164,17 @@ public class FilterTabsView extends FrameLayout {
         }
 
         public boolean setTitle(String newTitle, ArrayList<TLRPC.MessageEntity> newEntities, boolean noanimate) {
-            if (TextUtils.equals(title, newTitle)) {
+            boolean isIconMode = (customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) != TabMode.ICON.getValue();
+
+            if (TextUtils.equals(realTitle, newTitle)) {
                 return false;
             }
-            title = (customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) == TabMode.ICON.getValue() ? "" : newTitle;
-            realTitle = new SpannableStringBuilder(newTitle);
-            realTitle = Emoji.replaceEmoji(title, textPaint.getFontMetricsInt(), false);
+            realTitle = newTitle != null ? newTitle : "";
+            title = new SpannableStringBuilder(realTitle);
+            title = Emoji.replaceEmoji(title, textPaint.getFontMetricsInt(), false);
 //            MessageObject.addEntitiesToText(title, newEntities, false, false, false, true);
-            realTitle = MessageObject.replaceAnimatedEmoji(title, newEntities, textPaint.getFontMetricsInt());
+            title = MessageObject.replaceAnimatedEmoji(title, newEntities, textPaint.getFontMetricsInt());
+            title = isIconMode ? title : "";
             this.noanimate = noanimate;
             return true;
         }

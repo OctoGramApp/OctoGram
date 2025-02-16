@@ -9,6 +9,7 @@
 package it.octogram.android.theme
 
 import android.os.Build
+import androidx.annotation.ChecksSdkIntAtLeast
 import org.telegram.ui.LauncherIconController
 
 
@@ -17,6 +18,7 @@ object MonetIconController {
         return LauncherIconController.isEnabled(LauncherIconController.LauncherIcon.MONET)
     }
 
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
     fun needMonetMigration(): Boolean {
         return isSelectedMonet() && Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2
     }

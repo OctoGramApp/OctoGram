@@ -79,6 +79,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
+import it.octogram.android.preferences.ui.components.LockedChatsHelp;
+import it.octogram.android.utils.FingerprintUtils;
+
 public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements DialogCell.DialogCellDelegate {
     public final static int VIEW_TYPE_DIALOG = 0,
             VIEW_TYPE_FLICKER = 1,
@@ -99,7 +102,8 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             VIEW_TYPE_REQUIRED_EMPTY = 16,
             VIEW_TYPE_FOLDER_UPDATE_HINT = 17,
             VIEW_TYPE_STORIES = 18,
-            VIEW_TYPE_ARCHIVE_FULLSCREEN = 19;
+            VIEW_TYPE_ARCHIVE_FULLSCREEN = 19,
+            VIEW_TYPE_LOCKEDCHATS_FULLSCREEN = 99;
 
     private Context mContext;
     private ArchiveHintCell archiveHintCell;
@@ -282,7 +286,8 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                     dialogsStableIds.put(dialog.id, stableId);
                 }
             } else {
-                if (viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN) {
+                //if (viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN) {
+                if (viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN || viewType == VIEW_TYPE_LOCKEDCHATS_FULLSCREEN) {
                     stableId = 5;
                 } else {
                     stableId = stableIdPointer++;
@@ -312,7 +317,8 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             if (viewTypeEmpty == VIEW_TYPE_LAST_EMPTY) {
                 stableId = 1;
             } else {
-                if (viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN) {
+                //if (viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN) {
+                if (viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN || viewType == VIEW_TYPE_LOCKEDCHATS_FULLSCREEN) {
                     stableId = 5;
                 } else {
                     stableId = stableIdPointer++;
@@ -557,7 +563,8 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
         return viewType != VIEW_TYPE_FLICKER && viewType != VIEW_TYPE_EMPTY && viewType != VIEW_TYPE_DIVIDER &&
                 viewType != VIEW_TYPE_SHADOW && viewType != VIEW_TYPE_HEADER &&
                 viewType != VIEW_TYPE_LAST_EMPTY && viewType != VIEW_TYPE_NEW_CHAT_HINT && viewType != VIEW_TYPE_CONTACTS_FLICKER &&
-                viewType != VIEW_TYPE_REQUIREMENTS && viewType != VIEW_TYPE_REQUIRED_EMPTY && viewType != VIEW_TYPE_STORIES && viewType != VIEW_TYPE_ARCHIVE_FULLSCREEN;
+                viewType != VIEW_TYPE_REQUIREMENTS && viewType != VIEW_TYPE_REQUIRED_EMPTY && viewType != VIEW_TYPE_STORIES && viewType != VIEW_TYPE_ARCHIVE_FULLSCREEN &&
+                viewType != VIEW_TYPE_LOCKEDCHATS_FULLSCREEN;
     }
 
     @Override
@@ -677,6 +684,14 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                 );
                 view = lastEmptyView;
                 break;
+            case VIEW_TYPE_LOCKEDCHATS_FULLSCREEN:
+                LastEmptyView lastEmptyViewLockedChats = new LastEmptyView(mContext);
+                lastEmptyViewLockedChats.addView(
+                        new LockedChatsHelp(mContext, null, DialogsAdapter.this::onLockedChatsSettingsClick, null),
+                        LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER, 0, -(int) (DialogStoriesCell.HEIGHT_IN_DP * .5f), 0, 0)
+                );
+                view = lastEmptyViewLockedChats;
+                break;
             case VIEW_TYPE_LAST_EMPTY: {
                 view = new LastEmptyView(mContext);
                 break;
@@ -757,7 +772,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                 break;
             }
         }
-        view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, viewType == VIEW_TYPE_EMPTY || viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN ? RecyclerView.LayoutParams.MATCH_PARENT : RecyclerView.LayoutParams.WRAP_CONTENT));
+        view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, viewType == VIEW_TYPE_EMPTY || viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN || viewType == VIEW_TYPE_LOCKEDCHATS_FULLSCREEN ? RecyclerView.LayoutParams.MATCH_PARENT : RecyclerView.LayoutParams.WRAP_CONTENT));
         return new RecyclerListView.Holder(view);
     }
 
@@ -769,9 +784,17 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
 
     }
 
+    protected void onLockedChatsSettingsClick() {
+
+    }
+
     public int lastDialogsEmptyType = -1;
 
     public int dialogsEmptyType() {
+        if (dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS) {
+            return DialogsEmptyCell.TYPE_FILTER_HIDDEN_CHATS;
+        }
+
         if (dialogsType == 7 || dialogsType == 8) {
             if (MessagesController.getInstance(currentAccount).isDialogsEndReached(folderId)) {
                 return DialogsEmptyCell.TYPE_FILTER_NO_CHATS_TO_DISPLAY;
@@ -1291,7 +1314,8 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             boolean collapsedView = DialogsAdapter.this.collapsedView;
             int paddingTop = parent.getPaddingTop();
             paddingTop -= blurOffset;
-            if (folderId == 1 && size == 1 && itemInternals.get(0).viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN) {
+            //if (folderId == 1 && size == 1 && itemInternals.get(0).viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN) {
+            if ((folderId == 1 && size == 1 && itemInternals.get(0).viewType == VIEW_TYPE_ARCHIVE_FULLSCREEN) || (dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS && size == 1 && itemInternals.get(0).viewType == VIEW_TYPE_LOCKEDCHATS_FULLSCREEN)) {
                 height = MeasureSpec.getSize(heightMeasureSpec);
                 if (height == 0) {
                     height = parent.getMeasuredHeight();
@@ -1383,10 +1407,18 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
         if (array == null) {
             array = new ArrayList<>();
         }
+
+        boolean state = dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS;
+        array.removeIf((dialog) -> FingerprintUtils.isChatLocked(dialog) != state);
+
         dialogsCount = array.size();
         isEmpty = false;
         if (dialogsCount == 0 && parentFragment.isArchive()) {
             itemInternals.add(new ItemInternal(VIEW_TYPE_ARCHIVE_FULLSCREEN));
+            return;
+        }
+        if (dialogsCount == 0 && dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS) {
+            itemInternals.add(new ItemInternal(VIEW_TYPE_LOCKEDCHATS_FULLSCREEN));
             return;
         }
 

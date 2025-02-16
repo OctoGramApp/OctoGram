@@ -237,6 +237,7 @@ import it.octogram.android.StoreUtils;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.deeplink.DeepLinkManager;
 import it.octogram.android.icons.IconsResources;
+import it.octogram.android.preferences.fragment.ActionBarOverride;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.theme.MonetThemeController;
 import it.octogram.android.utils.ForwardContext;
@@ -284,9 +285,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     private ImageView themeSwitchImageView;
     private View themeSwitchSunView;
     private RLottieDrawable themeSwitchSunDrawable;
-    private ActionBarLayout actionBarLayout;
-    private ActionBarLayout layersActionBarLayout;
-    private ActionBarLayout rightActionBarLayout;
+    //private ActionBarLayout actionBarLayout;
+    //private ActionBarLayout layersActionBarLayout;
+    //private ActionBarLayout rightActionBarLayout;
+    private ActionBarOverride actionBarLayout;
+    private ActionBarOverride layersActionBarLayout;
+    private ActionBarOverride rightActionBarLayout;
     private RelativeLayout launchLayout;
     private FrameLayout shadowTablet;
     private FrameLayout shadowTabletSide;
@@ -440,7 +444,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             SharedConfig.lastPauseTime = (int) (SystemClock.elapsedRealtime() / 1000);
         }
         AndroidUtilities.fillStatusBarHeight(this, false);
-        actionBarLayout = new ActionBarLayout(this, true);
+        //actionBarLayout = new ActionBarLayout(this, true);
+        actionBarLayout = new ActionBarOverride(this, true);
 
         frameLayout = new FrameLayout(this) {
             @Override
@@ -1159,7 +1164,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             }
             launchLayout.addView(actionBarLayout.getView());
 
-            rightActionBarLayout = new ActionBarLayout(this, false);
+            //rightActionBarLayout = new ActionBarLayout(this, false);
+            rightActionBarLayout = new ActionBarOverride(this, false);
             rightActionBarLayout.setFragmentStack(rightFragmentsStack);
             rightActionBarLayout.setDelegate(this);
             launchLayout.addView(rightActionBarLayout.getView());
@@ -1201,7 +1207,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
             });
 
-            layersActionBarLayout = new ActionBarLayout(this, false);
+            //layersActionBarLayout = new ActionBarLayout(this, false);
+            layersActionBarLayout = new ActionBarOverride(this, false);
             layersActionBarLayout.setRemoveActionBarExtraHeight(true);
             layersActionBarLayout.setBackgroundView(shadowTablet);
             layersActionBarLayout.setUseAlphaAnimations(true);

@@ -4964,7 +4964,8 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             float childTop = firstChild.getTop();
             float listH = listView.getMeasuredHeight();
             float scrollY = (firstPosition / parentCount) * cellHeight - childTop;
-            return Utilities.clamp(scrollY / (((float) cellCount) * cellHeight - listH), 1f, 0f);
+            return clamp(scrollY / (((float) cellCount) * cellHeight - listH), 0f, 1f);
+            //return Utilities.clamp(scrollY / (((float) cellCount) * cellHeight - listH), 1f, 0f);
         }
 
         @Override
