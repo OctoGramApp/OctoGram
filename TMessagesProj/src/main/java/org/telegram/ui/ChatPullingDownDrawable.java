@@ -31,6 +31,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
@@ -757,10 +758,14 @@ public class ChatPullingDownDrawable implements NotificationCenter.NotificationC
         int oldAlpha = composeBackgroundPaint.getAlpha();
         int oldAlphaText = textPaint2.getAlpha();
 
+        boolean drawBottomPanel = canShowBottomPanelDynamic == null || canShowBottomPanelDynamic.run();
         composeBackgroundPaint.setAlpha((int) (oldAlpha * progressToBottomPanel));
-        canvas.drawRect(0, top, width, bottom, composeBackgroundPaint);
+        //canvas.drawRect(0, top, width, bottom, composeBackgroundPaint);
+        if (drawBottomPanel) {
+            canvas.drawRect(0, top, width, bottom, composeBackgroundPaint);
+        }
 
-        if (layout1 != null && swipeToReleaseProgress < 1f) {
+        if (layout1 != null && swipeToReleaseProgress < 1f && drawBottomPanel) {
             textPaint2.setAlpha((int) (oldAlphaText * (1f - swipeToReleaseProgress) * progressToBottomPanel));
             float y = top + (bottom - top - layout1.getHeight()) / 2f - AndroidUtilities.dp(10) * swipeToReleaseProgress;
             canvas.save();
@@ -769,7 +774,7 @@ public class ChatPullingDownDrawable implements NotificationCenter.NotificationC
             canvas.restore();
         }
 
-        if (layout2 != null && swipeToReleaseProgress > 0) {
+        if (layout2 != null && swipeToReleaseProgress > 0 && drawBottomPanel) {
             textPaint2.setAlpha((int) (oldAlphaText * swipeToReleaseProgress * progressToBottomPanel));
             float y = top + (bottom - top - layout2.getHeight()) / 2f + AndroidUtilities.dp(10) * (1f - swipeToReleaseProgress);
             canvas.save();
@@ -780,6 +785,12 @@ public class ChatPullingDownDrawable implements NotificationCenter.NotificationC
 
         textPaint2.setAlpha(oldAlphaText);
         composeBackgroundPaint.setAlpha(oldAlpha);
+    }
+
+    private Utilities.Callback0Return<Boolean> canShowBottomPanelDynamic;
+
+    public void setCanShowBottomPanelDynamic(Utilities.Callback0Return<Boolean> canShowBottomPanelDynamic) {
+        this.canShowBottomPanelDynamic = canShowBottomPanelDynamic;
     }
 
     boolean showBottomPanel;

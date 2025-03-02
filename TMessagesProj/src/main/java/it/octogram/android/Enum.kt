@@ -9,7 +9,9 @@
 package it.octogram.android
 
 import android.graphics.Color
+import androidx.annotation.DrawableRes
 import androidx.annotation.IntDef
+import androidx.annotation.StringDef
 import androidx.core.graphics.toColorInt
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
@@ -147,6 +149,7 @@ object CameraXResolution {
     }
 }
 
+
 enum class PhotoResolution(val value: Int) {
     LOW(0),
     DEFAULT(1),
@@ -257,35 +260,73 @@ enum class IconsUIType(val value: Int) {
     SOLAR(1),
     MATERIAL_DESIGN_3(2)
 }
+@StringDef(
+    DrawerItem.MY_PROFILE_ID, DrawerItem.NEW_GROUP_ID, DrawerItem.CONTACTS_ID, DrawerItem.CALLS_ID,
+    DrawerItem.SAVED_MESSAGE_ID, DrawerItem.SETTINGS_ID, DrawerItem.OCTOGRAM_SETTINGS_ID,
+    DrawerItem.NEW_CHANNEL_ID, DrawerItem.NEW_SECRET_CHAT_ID, DrawerItem.INVITE_FRIENDS_ID,
+    DrawerItem.TELEGRAM_FEATURES_ID, DrawerItem.ARCHIVED_MESSAGES_ID, DrawerItem.DATACENTER_STATUS_ID,
+    DrawerItem.QR_LOGIN_ID, DrawerItem.SET_STATUS_ID, DrawerItem.CONNECTED_DEVICES_ID,
+    DrawerItem.POWER_USAGE_ID, DrawerItem.PROXY_SETTINGS_ID, DrawerItem.DIVIDER_ID,
+    DrawerItem.ATTACH_MENU_BOT_ID, DrawerItem.DOWNLOADS_ID, DrawerItem.TELEGRAM_BROWSER_ID,
+    DrawerItem.DATA_AND_STORAGE_ID
+)
+@Retention(AnnotationRetention.SOURCE)
+annotation class DrawerItemDef
 
-enum class MenuItemId(val id: String, val itemId: Int) {
-    MY_PROFILE("my_profile", 16),
-    NEW_GROUP("new_group", 2),
-    CONTACTS("contacts", 6),
-    CALLS("calls", 10),
-    SAVED_MESSAGE("saved_message", 11),
-    SETTINGS("settings", 8),
-    OCTOGRAM_SETTINGS("octogram_settings", 100),
-    NEW_CHANNEL("new_channel", 4),
-    NEW_SECRET_CHAT("new_secret_chat", 3),
-    INVITE_FRIENDS("invite_friends", 7),
-    TELEGRAM_FEATURES("telegram_features", 13),
-    ARCHIVED_MESSAGES("archived_messages", 202),
-    DATACENTER_STATUS("datacenter_status", 101),
-    QR_LOGIN("qr_login", 204),
-    SET_STATUS("set_status", 15),
-    CONNECTED_DEVICES("connected_devices", 913),
-    POWER_USAGE("power_usage", 206),
-    PROXY_SETTINGS("proxy_settings", 207),
-    DIVIDER("divider", 0),
-    ATTACH_MENU_BOT("attach_menu_bot", 205),
-    DOWNLOADS("downloads", 912),
-    TELEGRAM_BROWSER("tg_browser", 914),
-    DATA_AND_STORAGE("data_and_storage", 915);
+object DrawerItem {
+    const val MY_PROFILE_ID = "my_profile"
+    const val NEW_GROUP_ID = "new_group"
+    const val CONTACTS_ID = "contacts"
+    const val CALLS_ID = "calls"
+    const val SAVED_MESSAGE_ID = "saved_message"
+    const val SETTINGS_ID = "settings"
+    const val OCTOGRAM_SETTINGS_ID = "octogram_settings"
+    const val NEW_CHANNEL_ID = "new_channel"
+    const val NEW_SECRET_CHAT_ID = "new_secret_chat"
+    const val INVITE_FRIENDS_ID = "invite_friends"
+    const val TELEGRAM_FEATURES_ID = "telegram_features"
+    const val ARCHIVED_MESSAGES_ID = "archived_messages"
+    const val DATACENTER_STATUS_ID = "datacenter_status"
+    const val QR_LOGIN_ID = "qr_login"
+    const val SET_STATUS_ID = "set_status"
+    const val CONNECTED_DEVICES_ID = "connected_devices"
+    const val POWER_USAGE_ID = "power_usage"
+    const val PROXY_SETTINGS_ID = "proxy_settings"
+    const val DIVIDER_ID = "divider"
+    const val ATTACH_MENU_BOT_ID = "attach_menu_bot"
+    const val DOWNLOADS_ID = "downloads"
+    const val TELEGRAM_BROWSER_ID = "tg_browser"
+    const val DATA_AND_STORAGE_ID = "data_and_storage"
 
-    companion object {
-        fun getById(id: String): MenuItemId? {
-            return MenuItemId.entries.find { it.id == id }
+    enum class Id(@DrawerItemDef val id: String, val itemId: Int) {
+        MY_PROFILE(MY_PROFILE_ID, 16),
+        NEW_GROUP(NEW_GROUP_ID, 2),
+        CONTACTS(CONTACTS_ID, 6),
+        CALLS(CALLS_ID, 10),
+        SAVED_MESSAGE(SAVED_MESSAGE_ID, 11),
+        SETTINGS(SETTINGS_ID, 8),
+        OCTOGRAM_SETTINGS(OCTOGRAM_SETTINGS_ID, 100),
+        NEW_CHANNEL(NEW_CHANNEL_ID, 4),
+        NEW_SECRET_CHAT(NEW_SECRET_CHAT_ID, 3),
+        INVITE_FRIENDS(INVITE_FRIENDS_ID, 7),
+        TELEGRAM_FEATURES(TELEGRAM_FEATURES_ID, 13),
+        ARCHIVED_MESSAGES(ARCHIVED_MESSAGES_ID, 202),
+        DATACENTER_STATUS(DATACENTER_STATUS_ID, 101),
+        QR_LOGIN(QR_LOGIN_ID, 204),
+        SET_STATUS(SET_STATUS_ID, 15),
+        CONNECTED_DEVICES(CONNECTED_DEVICES_ID, 913),
+        POWER_USAGE(POWER_USAGE_ID, 206),
+        PROXY_SETTINGS(PROXY_SETTINGS_ID, 207),
+        DIVIDER(DIVIDER_ID, 0),
+        ATTACH_MENU_BOT(ATTACH_MENU_BOT_ID, 205),
+        DOWNLOADS(DOWNLOADS_ID, 912),
+        TELEGRAM_BROWSER(TELEGRAM_BROWSER_ID, 914),
+        DATA_AND_STORAGE(DATA_AND_STORAGE_ID, 915);
+
+        companion object INSTANCE {
+            fun getById(id: String): Id? {
+                return Id.entries.find { it.id == id }
+            }
         }
     }
 }
@@ -332,7 +373,8 @@ enum class StickerUi(val value: Int) {
     MAIN_SETTINGS(25),
     MEDIA_LOADING(26),
     WEB_SEARCH(27),
-    PRIVACY(28)
+    OLD_PRIVACY(28),
+    PRIVACY(29)
 }
 
 enum class DrawerBackgroundState(val value: Int) {
@@ -380,7 +422,9 @@ enum class ExpandableRowsIds(val id: Int) {
     REPLIES_AND_LINKS(1),
     PROMPT_BEFORE_SENDING(2),
     CONTEXT_MENU_ELEMENTS(3),
-    ADMIN_SHORTCUTS(4)
+    ADMIN_SHORTCUTS(4),
+    LOCKED_ELEMENTS(5),
+    LOCKED_ACCOUNTS(6)
 }
 
 enum class ShortcutsPosition(val id: Int) {
@@ -516,10 +560,10 @@ enum class Datacenter(
 }
 
 enum class WebPages(
-    var id: Int,
-    var pageName: String,
-    val icon: Int,
-    var website: String,
+    val id: Int,
+    val pageName: String,
+    @DrawableRes val icon: Int,
+    val website: String,
     val category: Int
 ) {
     TELEGRAM(1, "Telegram",  R.drawable.telegram_camera_icon, "https://telegram.org", 1),
@@ -535,7 +579,7 @@ enum class WebPages(
     QUIZ_DIRECTORY(11, "Quiz Directory", R.drawable.msg_channel, "https://quiz.directory", 3);
 }
 
-enum class WebPagesCategory(var id: Int, var text: String) {
+enum class WebPagesCategory(val id: Int, var text: String) {
     WEBSITES(1, LocaleController.getString(R.string.DatacenterStatus_Web)),
     PLATFORMS(2, LocaleController.getString(R.string.DatacenterStatus_WebPlatforms)),
     SERVICES(3, LocaleController.getString(R.string.DatacenterStatus_WebServices));
@@ -601,7 +645,6 @@ enum class MonetTheme(val monetThemeName: String, val monetThemeFileName: String
     MONET_AMOLED("Monet Amoled", "monet_amoled.attheme"),
     MONET_DARK("Monet Dark", "monet_dark.attheme"),
     MONET_LIGHT("Monet Light", "monet_light.attheme"),
-    // MONET_OLED("Monet Oled", "monet_oled.attheme");
 }
 
 object CameraPreview {
@@ -609,7 +652,7 @@ object CameraPreview {
     const val HIDDEN = 1
     const val BOTTOM_BAR = 2
 
-    @IntDef(DEFAULT, BOTTOM_BAR)
+    @IntDef(DEFAULT, HIDDEN, BOTTOM_BAR)
     @Retention(AnnotationRetention.SOURCE)
     annotation class PreviewType
 }

@@ -9,11 +9,14 @@
 package org.telegram.ui.Cells;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.ui.Components.TextStyleSpan.FLAG_STYLE_SPOILER;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.view.Gravity;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -38,6 +41,9 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.GroupCreateCheckBox;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.PremiumGradient;
+import org.telegram.ui.Components.TextStyleSpan;
+
+import it.octogram.android.utils.FingerprintUtils;
 
 public class DrawerUserCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -58,6 +64,7 @@ public class DrawerUserCell extends FrameLayout implements NotificationCenter.No
         avatarDrawable.setTextSize(dp(20));
 
         imageView = new BackupImageView(context);
+        imageView.setBlurAllowed(true);
         imageView.setRoundRadius(dp(18));
         addView(imageView, LayoutHelper.createFrame(36, 36, Gravity.LEFT | Gravity.TOP, 14, 6, 0, 0));
 
@@ -178,6 +185,17 @@ public class DrawerUserCell extends FrameLayout implements NotificationCenter.No
         imageView.getImageReceiver().setCurrentAccount(account);
         imageView.setForUserOrChat(user, avatarDrawable);
         checkBox.setVisibility(account == UserConfig.selectedAccount ? VISIBLE : INVISIBLE);
+
+        if (FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(user.id)) {
+            AndroidUtilities.runOnUIThread(() -> {
+                SpannableString spoileredText = new SpannableString(user.first_name);
+                TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
+                run.flags |= FLAG_STYLE_SPOILER;
+                spoileredText.setSpan(new TextStyleSpan(run), 1, spoileredText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                textView.setText(spoileredText);
+                imageView.setHasBlur(true);
+            }, 10);
+        }
     }
 
     public int getAccountNumber() {

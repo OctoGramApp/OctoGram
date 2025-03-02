@@ -1626,6 +1626,7 @@ public class LocaleController {
         return formatString(key, res, args);
     }
 
+    @Deprecated
     public static String formatString(String key, int res, Object... args) {
         return formatString(key, null, res, 0, args);
     }

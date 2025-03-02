@@ -4208,8 +4208,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             if (FingerprintUtils.hasFingerprint() && currentEncryptedChat == null) {
                 boolean isChatLocked = FingerprintUtils.isChatLocked(currentUser, currentChat);
-                headerItem.lazilyAddSubItem(lock_chat, R.drawable.solar_key, LocaleController.getString(R.string.LockChat));
-                headerItem.lazilyAddSubItem(unlock_chat, R.drawable.solar_unlock_2, LocaleController.getString(R.string.UnLockChat));
+                headerItem.lazilyAddSubItem(lock_chat, R.drawable.edit_passcode, LocaleController.getString(R.string.LockChat));
+                headerItem.lazilyAddSubItem(unlock_chat, R.drawable.menu_unlock, LocaleController.getString(R.string.UnLockChat));
 
                 if (isChatLocked) {
                     headerItem.hideSubItem(lock_chat);
@@ -4940,6 +4940,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             pullingDownDrawable.updateDialog();
                         }
                         pullingDownDrawable.onAttach();
+                        pullingDownDrawable.setCanShowBottomPanelDynamic(() -> !_isBottomOverlayHidden);
                     }
                     pullingDownDrawable.setWidth(getMeasuredWidth());
                     float progress = Math.min(1f, pullingDownOffset / AndroidUtilities.dp(110));
@@ -9669,7 +9670,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         contentView.addView(undoView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT, 8, 0, 8, 8));
     }
 
+    private boolean _isBottomOverlayHidden = false;
     private boolean isBottomOverlayHidden() {
+        _isBottomOverlayHidden = OctoConfig.INSTANCE.hideBottomBarChannels.getValue() && isChannelBottomMuteView && !currentChat.creator && !ChatObject.canWriteToChat(currentChat) && !actionBar.isActionModeShowed() && !searchItem.isSearchFieldVisible();
+        return _isBottomOverlayHidden;
+    }
+
+    private boolean shouldIgnoreBottomOverlayConditions() {
         return OctoConfig.INSTANCE.hideBottomBarChannels.getValue() && isChannelBottomMuteView && !currentChat.creator && !ChatObject.canWriteToChat(currentChat);
     }
 
@@ -26140,6 +26147,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         } else {
             bottomOverlayImage.setVisibility(View.INVISIBLE);
         }
+
+        if (!inPreviewMode && isBottomOverlayHidden() && chatMode != MODE_SEARCH) {
+            bottomOverlayChat.setVisibility(View.INVISIBLE);
+            chatActivityEnterView.setFieldFocused(false);
+            chatActivityEnterView.setVisibility(View.INVISIBLE);
+        }
+
         if (inPreviewMode) {
             if (searchContainer != null) {
                 searchContainer.setVisibility(View.INVISIBLE);
@@ -26147,11 +26161,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             bottomOverlayChat.setVisibility(View.INVISIBLE);
             chatActivityEnterView.setFieldFocused(false);
             chatActivityEnterView.setVisibility(View.INVISIBLE);
-        } else if (isBottomOverlayHidden()) {
-            bottomOverlayChat.setVisibility(View.INVISIBLE);
-            chatActivityEnterView.setFieldFocused(false);
-            chatActivityEnterView.setVisibility(View.INVISIBLE);
-        } else if (bottomOverlayLinks) {
+        } else if (bottomOverlayLinks && !shouldIgnoreBottomOverlayConditions()) {
             bottomOverlayChat.setVisibility(View.VISIBLE);
             chatActivityEnterView.setVisibility(View.INVISIBLE);
         } else if (searchItem != null && searchItemVisible) {
@@ -26239,7 +26249,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
             }
 
-            chatActivityEnterView.setVisibility(View.VISIBLE);
+            //chatActivityEnterView.setVisibility(View.VISIBLE);
+            chatActivityEnterView.setVisibility(shouldIgnoreBottomOverlayConditions() ? View.INVISIBLE : View.VISIBLE);
 
             if (searchExpandAnimator != null) {
                 searchExpandAnimator.removeAllListeners();
@@ -26276,7 +26287,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     muteItemGap.setVisibility(View.VISIBLE);
                 }
             }
-            if (isInsideContainer || forceNoBottom) {
+            if (shouldIgnoreBottomOverlayConditions()) {
+
+            } else if (isInsideContainer || forceNoBottom) {
                 bottomOverlayChat.setVisibility(View.GONE);
                 chatActivityEnterView.setVisibility(View.GONE);
             } else if (isReport()) {

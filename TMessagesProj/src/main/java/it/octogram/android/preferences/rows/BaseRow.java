@@ -43,6 +43,10 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
         this(null, null, false, showIf, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }
 
+    public BaseRow(PreferenceType type, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+        this(null, null, false, showIf, showIfReverse, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
+    }
+
     public BaseRow(PreferenceType type) {
         this(null, null, false, null, false, !OctoConfig.INSTANCE.disableDividers.getValue(), type, false);
     }

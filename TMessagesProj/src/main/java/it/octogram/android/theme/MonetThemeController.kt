@@ -100,16 +100,10 @@ object MonetThemeController {
     }
 
     fun getColor(color: String): Int {
-        return getColor("", color, false)
+        return getColor(color, false)
     }
 
-    fun getColor(key: String, color: String): Int {
-        return getColor(key, color, false)
-    }
-
-    fun getColor(key: String, color: String, isAmoled: Boolean): Int {
-//        android.util.Log.d("New Theme", "key: $key, color: $color, isAmoled: $isAmoled")
-
+    fun getColor(color: String, isAmoled: Boolean): Int {
         return try {
             OctoLogging.d("Theme", "Loading color $color")
             val id = ids.find { it.first == parseColorKey(color, isAmoled) }?.second ?: 0

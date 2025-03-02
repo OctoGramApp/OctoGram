@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import it.octogram.android.DrawerFavoriteOption;
-import it.octogram.android.MenuItemId;
+import it.octogram.android.DrawerItem;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 
@@ -29,27 +29,27 @@ public class MenuOrderController {
     public static JSONArray data;
     public static final String DIVIDER_ITEM = "divider";
     public static final String[] list_items = new String[]{
-            MenuItemId.NEW_GROUP.getId(),
-            MenuItemId.CONTACTS.getId(),
-            MenuItemId.CALLS.getId(),
-            MenuItemId.SAVED_MESSAGE.getId(),
-            MenuItemId.SETTINGS.getId(),
-            MenuItemId.OCTOGRAM_SETTINGS.getId(),
-            MenuItemId.NEW_CHANNEL.getId(),
-            MenuItemId.INVITE_FRIENDS.getId(),
-            MenuItemId.TELEGRAM_FEATURES.getId(),
-            MenuItemId.ARCHIVED_MESSAGES.getId(),
-            MenuItemId.DATACENTER_STATUS.getId(),
-            MenuItemId.QR_LOGIN.getId(),
-            MenuItemId.SET_STATUS.getId(),
-            MenuItemId.MY_PROFILE.getId(),
-            MenuItemId.CONNECTED_DEVICES.getId(),
-            MenuItemId.DOWNLOADS.getId(),
-            MenuItemId.POWER_USAGE.getId(),
-            MenuItemId.PROXY_SETTINGS.getId(),
-            MenuItemId.ATTACH_MENU_BOT.getId(),
-            MenuItemId.TELEGRAM_BROWSER.getId(),
-            MenuItemId.DATA_AND_STORAGE.getId()
+            DrawerItem.Id.NEW_GROUP.getId(),
+            DrawerItem.Id.CONTACTS.getId(),
+            DrawerItem.Id.CALLS.getId(),
+            DrawerItem.Id.SAVED_MESSAGE.getId(),
+            DrawerItem.Id.SETTINGS.getId(),
+            DrawerItem.Id.OCTOGRAM_SETTINGS.getId(),
+            DrawerItem.Id.NEW_CHANNEL.getId(),
+            DrawerItem.Id.INVITE_FRIENDS.getId(),
+            DrawerItem.Id.TELEGRAM_FEATURES.getId(),
+            DrawerItem.Id.ARCHIVED_MESSAGES.getId(),
+            DrawerItem.Id.DATACENTER_STATUS.getId(),
+            DrawerItem.Id.QR_LOGIN.getId(),
+            DrawerItem.Id.SET_STATUS.getId(),
+            DrawerItem.Id.MY_PROFILE.getId(),
+            DrawerItem.Id.CONNECTED_DEVICES.getId(),
+            DrawerItem.Id.DOWNLOADS.getId(),
+            DrawerItem.Id.POWER_USAGE.getId(),
+            DrawerItem.Id.PROXY_SETTINGS.getId(),
+            DrawerItem.Id.ATTACH_MENU_BOT.getId(),
+            DrawerItem.Id.TELEGRAM_BROWSER.getId(),
+            DrawerItem.Id.DATA_AND_STORAGE.getId()
     };
 
     static {
@@ -208,8 +208,8 @@ public class MenuOrderController {
 
     private static void ensureMinimumItems() {
         if (data.length() == 0 && OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()) {
-            data.put(MenuItemId.SETTINGS.getId());
-            data.put(MenuItemId.OCTOGRAM_SETTINGS.getId());
+            data.put(DrawerItem.Id.SETTINGS.getId());
+            data.put(DrawerItem.Id.OCTOGRAM_SETTINGS.getId());
             OctoConfig.INSTANCE.setDrawerItems(data.toString());
         }
     }
@@ -259,171 +259,52 @@ public class MenuOrderController {
 
     public static ArrayList<EditableMenuItem> getMenuItemsEditable() {
         ArrayList<EditableMenuItem> list = new ArrayList<>();
-        list.add(
-                new EditableMenuItem(
-                        list_items[0],
-                        R.string.NewGroup,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[1],
-                        R.string.Contacts,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[2],
-                        R.string.Calls,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[3],
-                        R.string.SavedMessages,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[4],
-                        R.string.Settings,
-                        OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[5],
-                        R.string.OctoGramSettings,
-                        OctoConfig.INSTANCE.drawerFavoriteOption.getValue() != DrawerFavoriteOption.SETTINGS.getValue()
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[6],
-                        R.string.NewChannel,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[7],
-                        R.string.InviteFriends,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[8],
-                        R.string.TelegramFeatures,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[9],
-                        R.string.ArchivedChats,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[10],
-                        R.string.DatacenterStatus,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[11],
-                        R.string.AuthAnotherClient,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[12],
-                        R.string.SetEmojiStatus,
-                        false,
-                        true
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[13],
-                        R.string.MyProfile,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[14],
-                        R.string.Devices,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[15],
-                        R.string.DownloadMenuItem,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[16],
-                        R.string.PowerUsage,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[17],
-                        R.string.ProxySettings,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[18],
-                        R.string.AttachedMenuBot,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[19],
-                        R.string.OctoTgBrowser,
-                        false
-                )
-        );
-        list.add(
-                new EditableMenuItem(
-                        list_items[20],
-                        R.string.DataSettings,
-                        false
-                )
-        );
 
-        for (int i = 0; i < data.length(); i++) {
-            try {
-                if (data.getString(i).equals(DIVIDER_ITEM)) {
-                    list.add(
-                            new EditableMenuItem(
-                                    DIVIDER_ITEM,
-                                    R.string.Divider,
-                                    false
-                            )
-                    );
-                }
-            } catch (JSONException ignored) {
-            }
+        for (int i = 0; i < list_items.length; i++) {
+            boolean isFavoriteSettings = i == 4 || i == 5;
+            list.add(new EditableMenuItem(list_items[i], getMenuStringRes(i), isFavoriteSettings));
         }
+
+        try {
+            for (int i = 0; i < data.length(); i++) {
+                if (DIVIDER_ITEM.equals(data.getString(i))) {
+                    list.add(new EditableMenuItem(DIVIDER_ITEM, R.string.Divider, false));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         return list;
     }
+
+    private static int getMenuStringRes(int index) {
+        return switch (index) {
+            case 0 -> R.string.NewGroup;
+            case 1 -> R.string.Contacts;
+            case 2 -> R.string.Calls;
+            case 3 -> R.string.SavedMessages;
+            case 4 -> R.string.Settings;
+            case 5 -> R.string.OctoGramSettings;
+            case 6 -> R.string.NewChannel;
+            case 7 -> R.string.InviteFriends;
+            case 8 -> R.string.TelegramFeatures;
+            case 9 -> R.string.ArchivedChats;
+            case 10 -> R.string.DatacenterStatus;
+            case 11 -> R.string.AuthAnotherClient;
+            case 12 -> R.string.SetEmojiStatus;
+            case 13 -> R.string.MyProfile;
+            case 14 -> R.string.Devices;
+            case 15 -> R.string.DownloadMenuItem;
+            case 16 -> R.string.PowerUsage;
+            case 17 -> R.string.ProxySettings;
+            case 18 -> R.string.AttachedMenuBot;
+            case 19 -> R.string.OctoTgBrowser;
+            case 20 -> R.string.DataSettings;
+            default -> throw new IllegalArgumentException("Invalid index: " + index);
+        };
+    }
+
 
     public static void addItem(String id) {
         if (getArrayPosition(id) == -1 || id.equals(DIVIDER_ITEM)) {
@@ -452,7 +333,7 @@ public class MenuOrderController {
         for (int i = 0; i < data.length(); i++) {
             try {
                 String idTmp = data.getString(i);
-                if (i != position && (idTmp.equals(MenuItemId.DIVIDER.getId()) || seenItems.add(idTmp))) {
+                if (i != position && (idTmp.equals(DrawerItem.Id.DIVIDER.getId()) || seenItems.add(idTmp))) {
                     result.put(idTmp);
                 }
             } catch (JSONException e) {

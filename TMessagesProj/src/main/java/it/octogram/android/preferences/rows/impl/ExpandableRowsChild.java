@@ -22,10 +22,10 @@ public class ExpandableRowsChild extends BaseRow implements Clickable {
     private final ExpandableRowsOption item;
     private final int refersToId;
 
-    public ExpandableRowsChild(ExpandableRowsOption item, int refersToId) {
-        super(PreferenceType.EXPANDABLE_ROWS_CHILD);
+    public ExpandableRowsChild(ExpandableRowsOption item, ExpandableRows parent) {
+        super(PreferenceType.EXPANDABLE_ROWS_CHILD, parent.getShowIfPreferenceValue(), parent.getShowIfReverse());
         this.item = item;
-        this.refersToId = refersToId;
+        this.refersToId = parent.getId();
     }
 
     public ExpandableRowsOption getItem() {

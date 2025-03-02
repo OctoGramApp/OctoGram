@@ -125,7 +125,7 @@ public class CameraXController {
     }
 
     @OptIn(markerClass = ExperimentalZeroShutterLag.class)
-    private static ImageCapture.Builder getCaptureModeBuilder() {
+    private ImageCapture.Builder getCaptureModeBuilder() {
         var iCaptureBuilder = new ImageCapture.Builder();
 
         int captureMode;
@@ -146,8 +146,12 @@ public class CameraXController {
     public void setTorchEnabled(boolean b) {
         if (camera != null) {
             camera.getCameraControl().enableTorch(b);
-        } else {
-            OctoLogging.e("Camera is not initialized.");
+        }
+    }
+
+    public void setLowLightBoostEnabled(boolean b) {
+        if (camera != null) {
+            camera.getCameraControl().enableLowLightBoostAsync(b);
         }
     }
 
@@ -287,16 +291,16 @@ public class CameraXController {
         }
     }
 
-    public CameraSelector getCameraSelectorForEffect(CameraSelector cameraSelector, int selectedEffect) {
-        var mode = switch (selectedEffect) {
+    @SuppressLint("SwitchIntDef")
+    public CameraSelector getCameraSelectorForEffect(CameraSelector cameraSelector, @EffectFacing int selectedEffect) {
+        return extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, switch (selectedEffect) {
             case EffectFacing.CAMERA_NIGHT -> ExtensionMode.NIGHT;
             case EffectFacing.CAMERA_HDR -> ExtensionMode.HDR;
             case EffectFacing.CAMERA_AUTO -> ExtensionMode.AUTO;
             case EffectFacing.CAMERA_BOKEH -> ExtensionMode.BOKEH;
             case EffectFacing.CAMERA_FACE_RETOUCH -> ExtensionMode.FACE_RETOUCH;
             default -> ExtensionMode.NONE;
-        };
-        return extensionsManager.getExtensionEnabledCameraSelector(cameraSelector, mode);
+        });
     }
 
     public void bindUseCases() {
@@ -342,13 +346,16 @@ public class CameraXController {
             }
         }
 
+        // setLowLightBoostEnabled(OctoConfig.INSTANCE.cameraXLowLightBoost.getValue()); Some issue regarding color
+
         if (camera != null) {
             camera.getCameraControl().setLinearZoom(oldZoomSelection);
         }
     }
 
-    public void setZoom(float value) {
-        camera.getCameraControl().setLinearZoom(oldZoomSelection = value); // TODO: make more smooth
+    public boolean isLowLightBoostSupported() {
+        if (camera == null) return false;
+        return camera.getCameraInfo().isLowLightBoostSupported();
     }
 
     public float getMaxZoom() {
@@ -359,10 +366,15 @@ public class CameraXController {
         return camera.getCameraInfo().getZoomState().getValue() != null ? camera.getCameraInfo().getZoomState().getValue().getMinZoomRatio() : 0.0f;
     }
 
+    public void setZoom(float value) {
+        oldZoomSelection = value;
+        camera.getCameraControl().setLinearZoom(value);
+    }
+
     public float resetZoom() {
         if (camera == null) return 0.0f;
 
-        camera.getCameraControl().setLinearZoom(0f);
+        camera.getCameraControl().setZoomRatio(0f);
         var zoomState = camera.getCameraInfo().getZoomState().getValue();
         return zoomState != null ? (oldZoomSelection = zoomState.getLinearZoom()) : 0.0f;
     }
@@ -430,8 +442,7 @@ public class CameraXController {
                 .withAudioEnabled()
                 .start(AsyncTask.THREAD_POOL_EXECUTOR, videoRecordEvent -> {
                     if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
-                        VideoRecordEvent.Finalize finalize;
-                        finalize = (VideoRecordEvent.Finalize) videoRecordEvent;
+                        VideoRecordEvent.Finalize finalize = (VideoRecordEvent.Finalize) videoRecordEvent;
                         if (finalize.hasError()) {
                             if (noSupportedSurfaceCombinationWorkaround) {
                                 AndroidUtilities.runOnUIThread(() -> {
@@ -616,13 +627,13 @@ public class CameraXController {
     @Retention(RetentionPolicy.SOURCE)
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public @interface EffectFacing {
-        int CAMERA_NONE = 0;
-        int CAMERA_NIGHT = 1;
-        int CAMERA_HDR = 2;
-        int CAMERA_AUTO = 3;
-        int CAMERA_WIDE = 4;
-        int CAMERA_BOKEH = 5;
-        int CAMERA_FACE_RETOUCH = 6;
+        int CAMERA_NONE = 0,
+        CAMERA_NIGHT = 1,
+        CAMERA_HDR = 2,
+        CAMERA_AUTO = 3,
+        CAMERA_WIDE = 4,
+        CAMERA_BOKEH = 5,
+        CAMERA_FACE_RETOUCH = 6;
     }
 
     public static class CameraLifecycle implements LifecycleOwner {

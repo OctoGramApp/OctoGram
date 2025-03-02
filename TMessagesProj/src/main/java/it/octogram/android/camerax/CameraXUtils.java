@@ -22,6 +22,8 @@ import androidx.camera.core.ZoomState;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.video.Quality;
 import androidx.camera.video.QualitySelector;
+import androidx.camera.video.Recorder;
+import androidx.camera.video.VideoCapture;
 import androidx.core.content.ContextCompat;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -37,9 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import it.octogram.android.CameraXResolution;
 import it.octogram.android.OctoConfig;
@@ -149,19 +148,16 @@ public class CameraXUtils {
         OctoLogging.d(tag, "Added listener for ProcessCameraProvider.");
     }
 
+    @SuppressLint("RestrictedApi")
     private static Map<Quality, Size> getAvailableVideoSizes(CameraSelector cameraSelector, ProcessCameraProvider provider) {
-        //noinspection deprecation
-        return cameraSelector.filter(provider.getAvailableCameraInfos()).stream()
+        return new HashMap<>(provider.getAvailableCameraInfos().stream()
+                .filter(cameraInfo -> cameraSelector.filter(List.of(cameraInfo)).contains(cameraInfo))
                 .findFirst()
-                .map(camInfo ->
-                        QualitySelector.getSupportedQualities(camInfo).stream().collect(
-                                Collectors.toMap(
-                                        Function.identity(),
-                                        quality -> Optional.ofNullable(QualitySelector.getResolution(camInfo, quality))
-                                                .orElse(new Size(0, 0))
-                                )
-                        )
-                ).orElse(new HashMap<>());
+                .map(cameraInfo -> QualitySelector.getQualityToResolutionMap(
+                        Recorder.getVideoCapabilities(cameraInfo),
+                        VideoCapture.withOutput(new Recorder.Builder().build()).getDynamicRange())
+                )
+                .orElse(new HashMap<>()));
     }
 
     public static void loadSuggestedResolution() {
@@ -197,7 +193,7 @@ public class CameraXUtils {
     private static int getResolutionFromConfig() {
         int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            OctoLogging.e("CameraXUtils", String.format(Locale.ROOT,"getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
+            OctoLogging.e("CameraXUtils", String.format(Locale.ROOT, "getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
         }
         if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD)) {
             return 480;
@@ -213,6 +209,7 @@ public class CameraXUtils {
             return -1;
         }
     }
+
     public static Size getPreviewBestSize() {
         int suggestedRes = getSuggestedResolution(true);
         return getAvailableVideoSizes().values().stream()

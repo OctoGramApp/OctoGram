@@ -166,8 +166,15 @@ public class CustomNotificationStyle extends VoIPService {
             builder.setChannelId("incoming_calls4" + chanIndex);
         }
 
+        String packageName = getPackageName();
+        if (packageName == null) {
+            OctoLogging.e("Package name is null. Cannot set action for intents.");
+            return builder.build();
+        }
+
+
         Intent endIntent = new Intent(this, VoIPActionsReceiver.class);
-        endIntent.setAction(getPackageName() + ".DECLINE_CALL");
+        endIntent.setAction(packageName + ".DECLINE_CALL");
         endIntent.putExtra("call_id", getCallID());
         var endTitle = new SpannableString(LocaleController.getString(R.string.VoipDeclineCall));
         endTitle.setSpan(new ForegroundColorSpan(Color.parseColor("#F44336")), 0, endTitle.length(), 0);
@@ -176,7 +183,7 @@ public class CustomNotificationStyle extends VoIPService {
         builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
 
         Intent answerIntent = new Intent(this, VoIPActionsReceiver.class);
-        answerIntent.setAction(getPackageName() + ".ANSWER_CALL");
+        answerIntent.setAction(packageName + ".ANSWER_CALL");
         answerIntent.putExtra("call_id", getCallID());
         var answerTitle = new SpannableString(LocaleController.getString(R.string.VoipAnswerCall));
         answerTitle.setSpan(new ForegroundColorSpan(Color.parseColor("#00AA00")), 0, answerTitle.length(), 0);
@@ -213,7 +220,7 @@ public class CustomNotificationStyle extends VoIPService {
             callStyle.setIsVideo(video);
             builder.setStyle(callStyle);
         } else { // For API level below 31
-            RemoteViews customView = new RemoteViews(getPackageName(), LocaleController.isRTL ? R.layout.call_notification_rtl : R.layout.call_notification);
+            RemoteViews customView = new RemoteViews(packageName, LocaleController.isRTL ? R.layout.call_notification_rtl : R.layout.call_notification);
             customView.setTextViewText(R.id.name, name);
             if (TextUtils.isEmpty(subText)) {
                 customView.setViewVisibility(R.id.subtitle, View.GONE);

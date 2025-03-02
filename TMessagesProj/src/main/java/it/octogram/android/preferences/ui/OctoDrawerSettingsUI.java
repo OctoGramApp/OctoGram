@@ -24,7 +24,7 @@ import java.util.List;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.DrawerBackgroundState;
 import it.octogram.android.DrawerFavoriteOption;
-import it.octogram.android.MenuItemId;
+import it.octogram.android.DrawerItem;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.icons.IconsUtils;
@@ -209,7 +209,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
         boolean hasSettingsDrawerButton = false;
         for (int i = 0; i < MenuOrderController.data.length(); i++) {
             try {
-                if (MenuOrderController.data.getString(i).equals(MenuItemId.SETTINGS.getId())) {
+                if (MenuOrderController.data.getString(i).equals(DrawerItem.Id.SETTINGS.getId())) {
                     hasSettingsDrawerButton = true;
                     break;
                 }

@@ -815,8 +815,8 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
         addMemberSubMenu = other.addSubItem(add_member_id, R.drawable.msg_addcontact, LocaleController.getString(R.string.AddMember));
         boostGroupSubmenu = other.addSubItem(boost_group_id, 0, new RLottieDrawable(R.raw.boosts, "" + R.raw.boosts, AndroidUtilities.dp(24), AndroidUtilities.dp(24)), LocaleController.getString(R.string.BoostingBoostGroupMenu), true, false);
         createTopicSubmenu = other.addSubItem(create_topic_id, R.drawable.msg_topic_create, LocaleController.getString(R.string.CreateTopic));
-        lockChatSubMenu = other.addSubItem(lock_chat, R.drawable.solar_key, LocaleController.getString(R.string.LockChat));
-        unlockChatSubMenu = other.addSubItem(unlock_chat, R.drawable.solar_unlock_2, LocaleController.getString(R.string.UnLockChat));
+        lockChatSubMenu = other.addSubItem(lock_chat, R.drawable.edit_passcode, LocaleController.getString(R.string.LockChat));
+        unlockChatSubMenu = other.addSubItem(unlock_chat, R.drawable.menu_unlock, LocaleController.getString(R.string.UnLockChat));
         reportSubmenu = other.addSubItem(report, R.drawable.msg_report, LocaleController.getString(R.string.ReportChat));
         deleteChatSubmenu = other.addSubItem(delete_chat_id, R.drawable.msg_leave, LocaleController.getString(R.string.LeaveMegaMenu), themeDelegate);
 

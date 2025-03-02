@@ -177,7 +177,6 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                             .title(getString(R.string.OctoInfoSettingsHeader))
                             .build());
                 })
-                //.row(new FooterRow.FooterRowBuilder().title("OctoGram v"+BuildConfig.BUILD_VERSION_STRING).build())
                 .build();
     }
 

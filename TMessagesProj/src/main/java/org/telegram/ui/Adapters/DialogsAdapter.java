@@ -1408,8 +1408,10 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             array = new ArrayList<>();
         }
 
-        boolean state = dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS;
-        array.removeIf((dialog) -> FingerprintUtils.isChatLocked(dialog) != state);
+        if ((FingerprintUtils.hasLockedChats() || dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS) && FingerprintUtils.hasFingerprintCached()) {
+            boolean state = dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS;
+            array.removeIf((dialog) -> FingerprintUtils.isChatLocked(dialog) != state);
+        }
 
         dialogsCount = array.size();
         isEmpty = false;

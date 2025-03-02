@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Random;
 
 import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.Datacenter;
@@ -405,6 +406,7 @@ public class OctoUtils {
             return R.drawable.msg_emoji_cat;
         }
     }
+
     public static CharSequence hidePhoneNumber(@NonNull TLRPC.User user) {
         var phone = user.phone;
         String text = PhoneFormat.getInstance().format("+" + phone);
@@ -431,6 +433,23 @@ public class OctoUtils {
         }
 
         return text;
+    }
+
+    static char[] SPOILER_CHARS = new char[] {
+            '⠌', '⡢', '⢑', '⠨', '⠥', '⠮', '⡑'
+    };
+
+    public static String createSpoiledName(String name) {
+        if (name == null || name.isEmpty()) {
+            return name;
+        }
+        Random random = new Random();
+        StringBuilder spoiledName = new StringBuilder();
+        spoiledName.append(name.charAt(0));
+        for (int i = 1; i < name.length(); i++) {
+            spoiledName.append(SPOILER_CHARS[random.nextInt(SPOILER_CHARS.length)]);
+        }
+        return spoiledName.toString();
     }
 }
 

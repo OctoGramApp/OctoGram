@@ -12,11 +12,11 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 
 import it.octogram.android.DrawerFavoriteOption;
-import it.octogram.android.MenuItemId;
+import it.octogram.android.DrawerItem;
 import it.octogram.android.OctoConfig;
 
 public class IconsUtils {
-    public static int getIconWithEventType(MenuItemId id) {
+    public static int getIconWithEventType(DrawerItem.Id id) {
         int eventType = getEventType();
 
         return switch (id) {

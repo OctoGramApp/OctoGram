@@ -8999,6 +8999,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         }
         if (event.getAction() == KeyEvent.ACTION_DOWN && (event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP || event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             if (VoIPService.getSharedInstance() != null) {
+                // Broken when OctoConfig.INSTANCE.mediaInGroupCall is active
                 if (Build.VERSION.SDK_INT >= 32) {
                     boolean oldValue = WebRtcAudioTrack.isSpeakerMuted();
                     AudioManager am = (AudioManager) parentActivity.getSystemService(AUDIO_SERVICE);

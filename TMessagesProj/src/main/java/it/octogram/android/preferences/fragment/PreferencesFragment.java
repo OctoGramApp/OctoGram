@@ -42,10 +42,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ContactsController;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -62,6 +65,8 @@ import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AnimatedTextView;
+import org.telegram.ui.Components.AvatarDrawable;
+import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.ColoredImageSpan;
@@ -99,6 +104,7 @@ import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.ExpandableRows;
 import it.octogram.android.preferences.rows.impl.ExpandableRowsChild;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
+import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SliderRow;
@@ -141,6 +147,7 @@ public class PreferencesFragment extends BaseFragment {
         typesWithDividerSupport.add(PreferenceType.TEXT_DETAIL);
         typesWithDividerSupport.add(PreferenceType.TEXT_ICON);
         typesWithDividerSupport.add(PreferenceType.EXPANDABLE_ROWS);
+        typesWithDividerSupport.add(PreferenceType.EXPANDABLE_ROWS_CHILD);
 
         typesWithCopySupport.add(PreferenceType.SWITCH.getAdapterType());
         typesWithCopySupport.add(PreferenceType.LIST.getAdapterType());
@@ -179,7 +186,7 @@ public class PreferencesFragment extends BaseFragment {
 
             if (baseRow instanceof ExpandableRows expandableRows) {
                 for (ExpandableRowsOption item : expandableRows.getItemsList()) {
-                    reorderedPreferences.add(new ExpandableRowsChild(item, expandableRows.getId()));
+                    reorderedPreferences.add(new ExpandableRowsChild(item, expandableRows));
                 }
             }
         }
@@ -343,7 +350,7 @@ public class PreferencesFragment extends BaseFragment {
 
             if (row instanceof ExpandableRows expandableRow) {
                 SwitchCell switchCell = (SwitchCell) view;
-                if (isSelectingItems || (LocaleController.isRTL ? x > dp(19 + 37 + 19) : x < view.getMeasuredWidth() - dp(19 + 37 + 19))) {
+                if (expandableRow.isMainSwitchHidden() || isSelectingItems || (LocaleController.isRTL ? x > dp(19 + 37 + 19) : x < view.getMeasuredWidth() - dp(19 + 37 + 19))) {
                     int expRowID = expandableRow.getId();
                     if (expandedRowIds.contains(expRowID)) {
                         expandedRowIds.removeIf(z -> z == expRowID);
@@ -369,13 +376,17 @@ public class PreferencesFragment extends BaseFragment {
                 SwitchCell switchCell = (SwitchCell) view;
 
                 ExpandableRowsOption singleItem = expandableRow.getItem();
+                if (singleItem.onClick != null && !singleItem.onClick.get()) {
+                    return;
+                }
+
                 singleItem.property.updateValue(!singleItem.property.getValue());
 
                 switchCell.reload();
                 reloadMainCellFromSecondary(switchCell);
 
-                if (singleItem.onClick != null) {
-                    singleItem.onClick.run();
+                if (singleItem.onPostUpdate != null) {
+                    singleItem.onPostUpdate.run();
                 }
             } else if (row instanceof Clickable) {
                 boolean isProceedingForPremiumAlert = false;
@@ -602,10 +613,14 @@ public class PreferencesFragment extends BaseFragment {
         listView.smoothScrollToPosition(currentShownItems.size() - 1);
     }
 
-    public void notifyItemChanged(int type) {
+    public void notifyItemChanged(int... types) {
         for (int i = 0; i < listAdapter.getItemCount(); i++) {
-            if (listAdapter.getItemViewType(i) == type) {
-                listAdapter.notifyItemChanged(i);
+            int itemType = listAdapter.getItemViewType(i);
+            for (int type : types) {
+                if (itemType == type) {
+                    listAdapter.notifyItemChanged(i);
+                    break;
+                }
             }
         }
     }
@@ -653,9 +668,14 @@ public class PreferencesFragment extends BaseFragment {
 
             BaseRow nextElement = getNextVisibleElement(i, category);
 
-            if (nextElement == null || !typesWithDividerSupport.contains(nextElement.getType())) {
+            if (nextElement != null) {
+                boolean nextElementSupportDivider = typesWithDividerSupport.contains(nextElement.getType());
+                if (!nextElementSupportDivider && nextElement.getType() == PreferenceType.HEADER && !((HeaderRow) nextElement).getUseHeaderStyle()) {
+                    nextElementSupportDivider = true;
+                }
+
                 // disable divider if next element doesn't support it
-                category.setDivider(false);
+                category.setDivider(nextElementSupportDivider);
             }
 
             if (category.getType() == PreferenceType.SHADOW && nextElement != null && (nextElement.getType() == PreferenceType.FOOTER || nextElement.getType() == PreferenceType.FOOTER_INFORMATIVE || nextElement.getType() == PreferenceType.SHADOW)) {
@@ -728,9 +748,11 @@ public class PreferencesFragment extends BaseFragment {
             return false;
         }
 
-        if (item instanceof ExpandableRowsChild expandableRow) {
-            return expandedRowIds.contains(expandableRow.getRefersToId());
-        } else if (item.getShowIfPreferenceValue() != null) {
+        if (item instanceof ExpandableRowsChild expandableRow && !expandedRowIds.contains(expandableRow.getRefersToId())) {
+            return false;
+        }
+
+        if (item.getShowIfPreferenceValue() != null) {
             return item.getShowIfReverse() != item.getShowIfPreferenceValue().getValue();
         }
 
@@ -911,7 +933,15 @@ public class PreferencesFragment extends BaseFragment {
                     break;
                 case EMPTY_CELL:
                 case HEADER:
-                    ((HeaderCell) holder.itemView).setText(currentShownItems.get(position).getTitle());
+                    HeaderRow headerRow = (HeaderRow) currentShownItems.get(position);
+                    HeaderCell headerCell = (HeaderCell) holder.itemView;
+                    headerCell.setText(headerRow.getTitle());
+                    if (!headerRow.getUseHeaderStyle()) {
+                        headerCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+                        headerCell.setTextSize(16);
+                        headerCell.getTextView().setTypeface(null);
+                        headerCell.setTopMargin(10);
+                    }
                     break;
                 case SWITCH:
                     TextCheckCell checkCell = (TextCheckCell) holder.itemView;
@@ -1038,7 +1068,11 @@ public class PreferencesFragment extends BaseFragment {
 
                     switchCell.setAsSwitch(expandableRows);
                     switchCell.setIsSelectingItems(isSelectingItems);
-                    additionalItems.add(switchCell.switchView);
+                    if (expandableRows.isMainSwitchHidden()) {
+                        switchCell.switchView.setVisibility(View.GONE);
+                    } else {
+                        additionalItems.add(switchCell.switchView);
+                    }
                     break;
                 case EXPANDABLE_ROWS_CHILD:
                     SwitchCell switchCellChild = (SwitchCell) holder.itemView;
@@ -1049,8 +1083,7 @@ public class PreferencesFragment extends BaseFragment {
                         index.addSecondaryCell(switchCellChild);
                     }
 
-                    boolean showDivider = position + 1 < currentShownItems.size();
-                    switchCellChild.setAsCheckbox(expandableRowsChild.getItem(), showDivider);
+                    switchCellChild.setAsCheckbox(expandableRowsChild);
                     switchCellChild.setIsSelectingItems(isSelectingItems);
                     additionalItems.add(switchCellChild.checkBoxView);
                     break;
@@ -1086,6 +1119,8 @@ public class PreferencesFragment extends BaseFragment {
     private static class SwitchCell extends FrameLayout {
 
         private final ImageView imageView;
+        private final AvatarDrawable avatarDrawable;
+        private final BackupImageView backupImageView;
         private final TextView textView;
         private final AnimatedTextView countTextView;
         private final ImageView arrowView;
@@ -1139,12 +1174,19 @@ public class PreferencesFragment extends BaseFragment {
             textViewLayout.setOrientation(LinearLayout.HORIZONTAL);
             textViewLayout.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
 
+            avatarDrawable = new AvatarDrawable();
+            avatarDrawable.setTextSize(dp(12));
+
+            backupImageView = new BackupImageView(context);
+            backupImageView.setRoundRadius(dp(18));
+
             boolean isRTL = LocaleController.isRTL;
+            textViewLayout.addView(backupImageView, createLinear(36, 36, Gravity.CENTER_VERTICAL, 25, 0, 0, 0));
             textViewLayout.addView(textView, createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
             textViewLayout.addView(countTextView, createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER_VERTICAL, isRTL ? 6 : 0, 0, isRTL ? 0 : 6, 0));
             textViewLayout.addView(arrowView, createLinear(16, 16, 0, Gravity.CENTER_VERTICAL, isRTL ? 0 : 2, 0, 0, 0));
 
-            addView(textViewLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), 64, 0, 8, 0));
+            addView(textViewLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), 73, 0, 8, 0));
 
             switchView = new Switch(context);
             switchView.setVisibility(GONE);
@@ -1174,9 +1216,9 @@ public class PreferencesFragment extends BaseFragment {
 
         private boolean isSwitch;
         private ExpandableRows _expandableRows;
-        private ExpandableRowsOption _item;
-        private boolean _divider;
+        private ExpandableRowsChild _item;
         private boolean isSelectingItems = false;
+        private boolean hasAddedUserData = false;
 
         public void setAsSwitch(ExpandableRows expandableRows) {
             isSwitch = true;
@@ -1197,6 +1239,7 @@ public class PreferencesFragment extends BaseFragment {
             arrowView.setVisibility(VISIBLE);
             textView.setTranslationX(0);
             switchView.setVisibility(VISIBLE);
+            backupImageView.setVisibility(GONE);
             switchView.setChecked(selectedOptions > 0, true);
 
             boolean currentExpanded = expandedRowIds.contains(expandableRows.getId());
@@ -1209,35 +1252,56 @@ public class PreferencesFragment extends BaseFragment {
 
             ((MarginLayoutParams) textViewLayout.getLayoutParams()).rightMargin = dp((LocaleController.isRTL ? 64 : 75) + 4);
 
-            needLine = !expandableRows.getItemsList().isEmpty();
-            needDivider = true;
+            needLine = !expandableRows.getItemsList().isEmpty() && !expandableRows.isMainSwitchHidden();
+            needDivider = expandableRows.hasDivider();
             setWillNotDraw(false);
         }
 
-        public void setAsCheckbox(ExpandableRowsOption item, boolean divider) {
+        public void setAsCheckbox(ExpandableRowsChild expandableRow) {
             isSwitch = false;
-            _item = item;
-            _divider = divider;
+            _item = expandableRow;
 
-            checkBoxView.setVisibility(VISIBLE);
-            checkBoxView.setChecked(item.property.getValue(), true);
             imageView.setVisibility(GONE);
             switchView.setVisibility(GONE);
             countTextView.setVisibility(GONE);
             arrowView.setVisibility(GONE);
-            textView.setText(item.optionTitle);
-            textView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));
+            checkBoxView.setVisibility(VISIBLE);
+            checkBoxView.setChecked(expandableRow.getItem().property.getValue(), true);
+
+            if (expandableRow.getItem().hasAccount()) {
+                if (!hasAddedUserData) {
+                    int account = expandableRow.getItem().accountId;
+                    TLRPC.User user = UserConfig.getInstance(account).getCurrentUser();
+                    avatarDrawable.setInfo(account, user);
+                    textView.setText(ContactsController.formatName(user.first_name, user.last_name));
+                    backupImageView.getImageReceiver().setCurrentAccount(account);
+                    backupImageView.setForUserOrChat(user, avatarDrawable);
+                    backupImageView.setVisibility(VISIBLE);
+                    hasAddedUserData = true;
+
+                    CharSequence text = user.first_name;
+                    try {
+                        text = Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), false);
+                    } catch (Exception ignore) {}
+                    textView.setText(text);
+                    textView.setTranslationX(dp(15) * (LocaleController.isRTL ? -2.2f : 1));
+                }
+            } else {
+                backupImageView.setVisibility(GONE);
+                textView.setText(expandableRow.getItem().optionTitle);
+                textView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));
+            }
 
             needLine = false;
-            needDivider = divider;
-            setWillNotDraw(!divider);
+            needDivider = expandableRow.hasDivider();
+            setWillNotDraw(!expandableRow.hasDivider());
         }
 
         public void reload() {
             if (isSwitch) {
                 setAsSwitch(_expandableRows);
             } else {
-                setAsCheckbox(_item, _divider);
+                setAsCheckbox(_item);
             }
         }
 
@@ -1303,13 +1367,5 @@ public class PreferencesFragment extends BaseFragment {
 
     public void reloadInterface() {
         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
-    }
-
-    public void reloadMainInfo() {
-        getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
-    }
-
-    public void reloadDialogs() {
-        getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
     }
 }

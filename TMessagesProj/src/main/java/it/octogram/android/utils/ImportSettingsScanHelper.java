@@ -11,6 +11,7 @@ package it.octogram.android.utils;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.lang.reflect.Field;
@@ -28,6 +29,7 @@ import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
 import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
+import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
 import it.octogram.android.preferences.ui.OctoTranslatorUI;
 import it.octogram.android.preferences.ui.OctoUpdatesUI;
 
@@ -45,6 +47,7 @@ public class ImportSettingsScanHelper {
         SettingsScanCategory appearanceDrawerCategory = new SettingsScanCategory("appearanceDrawer", composeName(R.string.Appearance, R.string.DrawerTitle, true), R.drawable.msg_map_type, (t) -> new PreferencesFragment(new OctoDrawerSettingsUI(), t));
         SettingsScanCategory appearanceAppCategory = new SettingsScanCategory("appearanceApp", composeName(R.string.Appearance, R.string.AppTitleSettings, true), R.drawable.media_draw, (t) -> new PreferencesFragment(new OctoInterfaceSettingsUI(), t));
         SettingsScanCategory chatCameraCategory = new SettingsScanCategory("chatcamera", R.string.ChatCamera, R.drawable.msg_camera, (t) -> new PreferencesFragment(new OctoCameraSettingsUI(), t));
+        SettingsScanCategory privacyCategory = new SettingsScanCategory("privacy", R.string.PrivacySettings, R.drawable.menu_privacy, (t) -> new PreferencesFragment(new OctoPrivacySettingsUI(), t));
         SettingsScanCategory experimentsCategory = new SettingsScanCategory("experiments", R.string.Experiments, R.drawable.outline_science_white, (t) -> new PreferencesFragment(new OctoExperimentsUI(), t));
         SettingsScanCategory updatesCategory = new SettingsScanCategory("updates", R.string.Updates, R.drawable.round_update_white_28, (t) -> new PreferencesFragment(new OctoUpdatesUI(), t));
 
@@ -55,8 +58,9 @@ public class ImportSettingsScanHelper {
         fillAppearanceDrawerOptions(appearanceDrawerCategory);
         fillAppearanceAppOptions(appearanceAppCategory);
         fillChatCameraOptions(chatCameraCategory);
-        fillExperimentsCategory(experimentsCategory);
-        fillUpdatesCategory(updatesCategory);
+        fillPrivacyOptions(privacyCategory);
+        fillExperimentsOptions(experimentsCategory);
+        fillUpdatesOptions(updatesCategory);
 
         categories.add(generalCategory);
         categories.add(translatorCategory);
@@ -65,6 +69,7 @@ public class ImportSettingsScanHelper {
         categories.add(appearanceDrawerCategory);
         categories.add(appearanceAppCategory);
         categories.add(chatCameraCategory);
+        categories.add(privacyCategory);
         categories.add(experimentsCategory);
         categories.add(updatesCategory);
 
@@ -126,14 +131,12 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.pinnedReactionsChannels.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.usePinnedHashtagsFeature.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.pinnedHashtagsList.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.verifyLinkTip.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.shownHiddenChatsHint.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.hiddenChats.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hidePhoneNumber.getKey(), R.string.HidePhoneNumber));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideOtherPhoneNumber.getKey(), R.string.HideOtherPhoneNumber));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.phoneNumberAlternative.getKey(), composeName(R.string.HidePhoneNumber, R.string.InsteadPhoneNumber)));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeCalling.getKey(), R.string.PromptBeforeCalling));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory.getKey(), R.string.PromptBeforeDeletingChatHistory));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.registrationDateInProfiles.getKey(), R.string.ShowRegistrationDate));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.dcIdStyle.getKey(), composeName(R.string.DcIdHeader, R.string.Style)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.dcIdType.getKey(), composeName(R.string.DcIdHeader, R.string.Type)));
@@ -233,7 +236,24 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.cameraPreview.getKey(), R.string.CameraButtonPosition));
     }
 
-    private void fillExperimentsCategory(SettingsScanCategory category) {
+    private void fillPrivacyOptions(SettingsScanCategory category) {
+        category.setCanShow(FingerprintUtils::hasFingerprint);
+        category.isSecureContext = true;
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenArchive.getKey(), R.string.BiometricSettingsOpenArchive));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenCallsLog.getKey(), R.string.BiometricSettingsOpenCallsLog));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenSavedMessages.getKey(), R.string.BiometricSettingsOpenSavedMessages));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenSecretChats.getKey(), R.string.BiometricSettingsOpenSecretChats));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.allowUsingDevicePIN.getKey(), composeName(R.string.BiometricSettings, R.string.BiometricSettingsAllowDevicePIN)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.allowUsingFaceUnlock.getKey(), composeName(R.string.BiometricSettings, R.string.BiometricSettingsAllowFaceUnlock)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricAskEvery.getKey(), composeName(R.string.BiometricSettings, R.string.BiometricAskEvery)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeCalling.getKey(), composeName(R.string.Warnings, R.string.PromptBeforeCalling)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory.getKey(), composeName(R.string.Warnings, R.string.PromptBeforeDeletingChatHistory)));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hidePhoneNumber.getKey(), R.string.HidePhoneNumber));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideOtherPhoneNumber.getKey(), R.string.HideOtherPhoneNumber));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.phoneNumberAlternative.getKey(), composeName(R.string.PhoneNumberPrivacy, R.string.InsteadPhoneNumber)));
+    }
+
+    private void fillExperimentsOptions(SettingsScanCategory category) {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.mediaInGroupCall.getKey(), R.string.MediaStream));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showRPCErrors.getKey(), R.string.ShowRPCErrors));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.gcOutputType.getKey(), R.string.AudioTypeInCall));
@@ -255,7 +275,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue.getKey(), R.string.DownloadBoostType));
     }
 
-    private void fillUpdatesCategory(SettingsScanCategory category) {
+    private void fillUpdatesOptions(SettingsScanCategory category) {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.autoDownloadUpdatesStatus.getKey(), R.string.UpdatesSettingsAutoDownload));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.autoCheckUpdateStatus.getKey(), R.string.UpdatesSettingsAuto));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.preferBetaVersion.getKey(), R.string.UpdatesSettingsBeta));
@@ -331,6 +351,8 @@ public class ImportSettingsScanHelper {
         public String categoryName;
         public int categoryResourceName;
         public int categoryIcon;
+        private Utilities.CallbackVoidReturn<Boolean> canShow;
+        public boolean isSecureContext = false;
         public ArrayList<SettingsScanOption> options = new ArrayList<>();
         public SettingsScanRequestInterface onGetFragment;
 
@@ -354,6 +376,18 @@ public class ImportSettingsScanHelper {
             }
 
             return LocaleController.getString(categoryResourceName);
+        }
+
+        public void setCanShow(Utilities.CallbackVoidReturn<Boolean> callback) {
+            this.canShow = callback;
+        }
+
+        public boolean canShow() {
+            if (canShow == null) {
+                return true;
+            }
+
+            return canShow.run();
         }
 
         public interface SettingsScanRequestInterface {

@@ -95,6 +95,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> biometricOpenSecretChats = newConfigProperty("biometricOpenSecretChats", false);
     public final ConfigProperty<Boolean> shownHiddenChatsHint = newConfigProperty("shownHiddenChatsHint", false);
     public final ConfigProperty<String> hiddenChats = newConfigProperty("hiddenChats", "[]");
+    public final ConfigProperty<String> hiddenAccounts = newConfigProperty("hiddenAccounts", "[]");
     public final ConfigProperty<Boolean> allowUsingDevicePIN = newConfigProperty("allowUsingDevicePIN", false);
     public final ConfigProperty<Boolean> allowUsingFaceUnlock = newConfigProperty("allowUsingFaceUnlock", false);
     public final ConfigProperty<Integer> biometricAskEvery = newConfigProperty("biometricAskEvery", 10);
@@ -144,11 +145,6 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> promptBeforeSendingVoiceMessages = newConfigProperty("promptBeforeSendingVoiceMessages", false);
     public final ConfigProperty<Boolean> promptBeforeSendingVideoMessages = newConfigProperty("promptBeforeSendingVideoMessages", false);
 
-    /*Monet Settings*/
-//    public final ConfigProperty<Boolean> monetUseGradient = newConfigProperty("monet_useGradient", false);
-//    public final ConfigProperty<Boolean> monetUseAltOutColor = newConfigProperty("monet_useAltOutColor", false);
-//    public final ConfigProperty<Boolean> monetUseNicknameColorFull = newConfigProperty("monet_useNicknameColorFull", false);
-
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
     public final ConfigProperty<Integer> tabStyle = newConfigProperty("tabStyle", TabStyle.DEFAULT.getValue());
@@ -186,6 +182,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
     public final ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.CAMERA_X.getValue());
     public final ConfigProperty<Integer> cameraPreview = newConfigProperty("cameraPreview", CameraPreview.DEFAULT);
+    // public final ConfigProperty<Boolean> cameraXLowLightBoost = newConfigProperty("cameraXLowLightBoost", false);
 
     /*Experiments*/
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
@@ -499,9 +496,7 @@ public class OctoConfig {
     private int completeMessageExport(File file, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
         int changed = 0;
 
-        try {
-            FileInputStream downloadedFileStream = new FileInputStream(file);
-
+        try (FileInputStream downloadedFileStream = new FileInputStream(file)) {
             StringBuilder jsonStringBuilder = new StringBuilder();
             int character;
             while ((character = downloadedFileStream.read()) != -1) {
@@ -583,49 +578,76 @@ public class OctoConfig {
 
     private boolean isValueValid(String fieldName, int value) {
         return switch (fieldName) {
-            case "blurEffectStrength" -> value >= 0 && value <= 255;
-            case "cameraXResolution" -> value >= CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD) && value <= CameraXResolution.INSTANCE.enumToValue(CameraXResolution.UHD);
-            case "dcIdStyle" -> value >= DcIdStyle.NONE.getValue() && value <= DcIdStyle.MINIMAL.getValue();
-            case "dcIdType" -> value == DcIdType.BOT_API.getValue() || value == DcIdType.TELEGRAM.getValue();
+            case "blurEffectStrength" -> isValidInRange(value, 0, 255);
+            case "cameraXResolution" ->
+                    isValidInRange(value, CameraXResolution.SD, CameraXResolution.UHD);
+            case "dcIdStyle" ->
+                    isValidInRange(value, DcIdStyle.NONE.getValue(), DcIdStyle.MINIMAL.getValue());
+            case "dcIdType" ->
+                    value == DcIdType.BOT_API.getValue() || value == DcIdType.TELEGRAM.getValue();
             case "doubleTapAction", "doubleTapActionOut" ->
-                    value >= DoubleTapAction.DISABLED.getValue() && value <= DoubleTapAction.EDIT.getValue();
+                    isValidInRange(value, DoubleTapAction.DISABLED.getValue(), DoubleTapAction.EDIT.getValue());
             case "downloadBoostValue" ->
-                    value >= DownloadBoost.NORMAL.getValue() && value <= DownloadBoost.EXTREME.getValue();
-            case "eventType" -> value >= EventType.DEFAULT.getValue() && value <= EventType.NONE.getValue();
-            case "gcOutputType" -> value == AudioType.MONO.getValue() || value == AudioType.STEREO.getValue();
-            case "maxRecentStickers" -> value >= 0 && value <= 9;
-            case "maxStickerSize" -> value >= 2 && value <= 20;
-            case "photoResolution" -> value >= PhotoResolution.LOW.getValue() && value <= PhotoResolution.HIGH.getValue();
-            case "tabMode" -> value >= TabMode.TEXT.getValue() && value <= TabMode.ICON.getValue();
-            case "translatorMode" -> value >= TranslatorMode.DEFAULT.getValue() && value <= TranslatorMode.EXTERNAL.getValue();
-            case "translatorProvider" -> value >= TranslatorProvider.DEFAULT.getValue() && value <= TranslatorProvider.EMOJIS.getValue();
-            case "translatorFormality" -> value >= TranslatorFormality.DEFAULT.getValue() && value <= TranslatorFormality.HIGH.getValue();
-            case "defaultEmojiButtonAction" -> value >= DefaultEmojiButtonAction.DEFAULT.getValue() && value <= DefaultEmojiButtonAction.STICKERS.getValue();
-            case "stickerShape" -> value >= StickerShape.DEFAULT.getValue() && value <= StickerShape.MESSAGE.getValue();
-            case "drawerBackground" -> value >= DrawerBackgroundState.WALLPAPER.getValue() && value <= DrawerBackgroundState.COLOR.getValue();
-            case "drawerFavoriteOption" -> value >= DrawerFavoriteOption.NONE.getValue() && value <= DrawerFavoriteOption.ARCHIVED_CHATS.getValue();
-            case "drawerBlurBackgroundLevel" -> value >= 1 && value <= 100;
-            case "drawerDarkenBackgroundLevel" -> value >= 1 && value <= 255;
-            case "actionBarTitleOption" -> value >= ActionBarTitleOption.EMPTY.getValue() && value <= ActionBarTitleOption.FOLDER_NAME.getValue();
-            case "deviceIdentifyState" -> value >= DeviceIdentifyState.DEFAULT.getValue() && value <= DeviceIdentifyState.FORCE_SMARTPHONE.getValue();
-            case "phoneNavigationAlternative" -> value >= PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue() && value <= PhoneNumberAlternative.SHOW_USERNAME.getValue();
-            case "navigationSmoothness" -> value == 200 || value == 400 || value == 500 || value == 600 || value == 800 || value == 1000;
-            case "autoDownloadUpdatesStatus" -> value >= AutoDownloadUpdate.ALWAYS.getValue() && value <= AutoDownloadUpdate.NEVER.getValue();
-            case "cameraType" -> value >= CameraType.TELEGRAM.getValue() && value <= CameraType.SYSTEM_CAMERA.getValue();
-            case "interfaceCheckboxUI" -> value >= InterfaceCheckboxUI.DEFAULT.getValue() && value <= InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue();
-            case "interfaceSliderUI" -> value >= InterfaceSliderUI.DEFAULT.getValue() && value <= InterfaceSliderUI.ANDROID.getValue();
-            case "interfaceSwitchUI" -> value >= InterfaceSwitchUI.DEFAULT.getValue() && value <= InterfaceSwitchUI.GOOGLE.getValue();
-            case "phoneNumberAlternative" -> value >= PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue() && value <= PhoneNumberAlternative.SHOW_USERNAME.getValue();
-            case "tabStyle" -> value >= TabStyle.DEFAULT.getValue() && value <= TabStyle.FULL.getValue();
-            case "uiIconsType" -> value >= IconsUIType.DEFAULT.getValue() && value <= IconsUIType.MATERIAL_DESIGN_3.getValue();
-            case "uiTitleCenteredState" -> value >= ActionBarCenteredTitle.ALWAYS.getValue() && value <= ActionBarCenteredTitle.NEVER.getValue();
-            case "shortcutsPosition" -> value >= ShortcutsPosition.THREE_DOTS.getId() && value <= ShortcutsPosition.PROFILE_DOTS.getId();
-            case "cameraPreview" -> value >= CameraPreview.DEFAULT && value <= CameraPreview.HIDDEN;
-            case "useQualityPreset" -> value >= QualityPreset.AUTO.getValue() && value <= QualityPreset.DYNAMIC.getValue();
+                    isValidInRange(value, DownloadBoost.NORMAL.getValue(), DownloadBoost.EXTREME.getValue());
+            case "eventType" ->
+                    isValidInRange(value, EventType.DEFAULT.getValue(), EventType.NONE.getValue());
+            case "gcOutputType" ->
+                    value == AudioType.MONO.getValue() || value == AudioType.STEREO.getValue();
+            case "maxRecentStickers" -> isValidInRange(value, 0, 9);
+            case "maxStickerSize" -> isValidInRange(value, 2, 20);
+            case "photoResolution" ->
+                    isValidInRange(value, PhotoResolution.LOW.getValue(), PhotoResolution.HIGH.getValue());
+            case "tabMode" ->
+                    isValidInRange(value, TabMode.TEXT.getValue(), TabMode.ICON.getValue());
+            case "translatorMode" ->
+                    isValidInRange(value, TranslatorMode.DEFAULT.getValue(), TranslatorMode.EXTERNAL.getValue());
+            case "translatorProvider" ->
+                    isValidInRange(value, TranslatorProvider.DEFAULT.getValue(), TranslatorProvider.EMOJIS.getValue());
+            case "translatorFormality" ->
+                    isValidInRange(value, TranslatorFormality.DEFAULT.getValue(), TranslatorFormality.HIGH.getValue());
+            case "defaultEmojiButtonAction" ->
+                    isValidInRange(value, DefaultEmojiButtonAction.DEFAULT.getValue(), DefaultEmojiButtonAction.STICKERS.getValue());
+            case "stickerShape" ->
+                    isValidInRange(value, StickerShape.DEFAULT.getValue(), StickerShape.MESSAGE.getValue());
+            case "drawerBackground" ->
+                    isValidInRange(value, DrawerBackgroundState.WALLPAPER.getValue(), DrawerBackgroundState.COLOR.getValue());
+            case "drawerFavoriteOption" ->
+                    isValidInRange(value, DrawerFavoriteOption.NONE.getValue(), DrawerFavoriteOption.ARCHIVED_CHATS.getValue());
+            case "drawerBlurBackgroundLevel" -> isValidInRange(value, 1, 100);
+            case "drawerDarkenBackgroundLevel" -> isValidInRange(value, 1, 255);
+            case "actionBarTitleOption" ->
+                    isValidInRange(value, ActionBarTitleOption.EMPTY.getValue(), ActionBarTitleOption.FOLDER_NAME.getValue());
+            case "deviceIdentifyState" ->
+                    isValidInRange(value, DeviceIdentifyState.DEFAULT.getValue(), DeviceIdentifyState.FORCE_SMARTPHONE.getValue());
+            case "phoneNumberAlternative" ->
+                    isValidInRange(value, PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue(), PhoneNumberAlternative.SHOW_USERNAME.getValue());
+            //case "phoneNavigationAlternative" -> isValidInRange(value, PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue(), PhoneNumberAlternative.SHOW_USERNAME.getValue());
+            case "navigationSmoothness" -> isValidNavigationSmoothness(value);
+            case "autoDownloadUpdatesStatus" ->
+                    isValidInRange(value, AutoDownloadUpdate.ALWAYS.getValue(), AutoDownloadUpdate.NEVER.getValue());
+            case "cameraType" ->
+                    isValidInRange(value, CameraType.TELEGRAM.getValue(), CameraType.SYSTEM_CAMERA.getValue());
+            case "interfaceCheckboxUI" ->
+                    isValidInRange(value, InterfaceCheckboxUI.DEFAULT.getValue(), InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue());
+            case "interfaceSliderUI" ->
+                    isValidInRange(value, InterfaceSliderUI.DEFAULT.getValue(), InterfaceSliderUI.ANDROID.getValue());
+            case "interfaceSwitchUI" ->
+                    isValidInRange(value, InterfaceSwitchUI.DEFAULT.getValue(), InterfaceSwitchUI.GOOGLE.getValue());
+            case "tabStyle" ->
+                    isValidInRange(value, TabStyle.DEFAULT.getValue(), TabStyle.FULL.getValue());
+            case "uiIconsType" ->
+                    isValidInRange(value, IconsUIType.DEFAULT.getValue(), IconsUIType.MATERIAL_DESIGN_3.getValue());
+            case "uiTitleCenteredState" ->
+                    isValidInRange(value, ActionBarCenteredTitle.ALWAYS.getValue(), ActionBarCenteredTitle.NEVER.getValue());
+            case "shortcutsPosition" ->
+                    isValidInRange(value, ShortcutsPosition.THREE_DOTS.getId(), ShortcutsPosition.PROFILE_DOTS.getId());
+            case "cameraPreview" ->
+                    isValidInRange(value, CameraPreview.DEFAULT, CameraPreview.HIDDEN);
+            case "useQualityPreset" ->
+                    isValidInRange(value, QualityPreset.AUTO.getValue(), QualityPreset.DYNAMIC.getValue());
             default -> false;
         };
     }
-
 
     private boolean isValueValid(String fieldName, String value) {
         return switch (fieldName) {
@@ -639,8 +661,17 @@ public class OctoConfig {
         if (fieldName.equals("drawerItems")) {
             return MenuOrderController.reparseMenuItemsAsString(value);
         }
-
         return value;
+    }
+
+    private boolean isValidInRange(int value, int minValue, int maxValue) {
+        return value >= minValue && value <= maxValue;
+    }
+
+    private boolean isValidNavigationSmoothness(int value) {
+        return value == 200 || value == 400 ||
+                value == 500 || value == 600
+                || value == 800 || value == 1000;
     }
 
     public void setDrawerItems(String drawerItemsList) {
@@ -750,6 +781,7 @@ public class OctoConfig {
     public int getEmojiStatus(Long documentId) {
         return getEmojiStatus(documentId, false, false);
     }
+
     public boolean pinEmoji(Long documentId) {
         boolean status = getEmojiStatus(documentId, true, false) == EmojiStatus.CAN_BE_ADDED.getValue();
         if (status) {
@@ -784,14 +816,14 @@ public class OctoConfig {
             int successHandled = 0;
             for (int i = 0; i < list.length(); i++) {
                 try {
-                    String hashtag = "#"+ list.getString(i);
+                    String hashtag = "#" + list.getString(i);
 
                     if (hashtag.startsWith(hashtagString)) {
                         hashtags.add(hashtag);
                     }
 
                     successHandled++;
-                }catch (JSONException ignored) {}
+                } catch (JSONException ignored) {}
 
                 if (successHandled >= 15) {
                     break;
@@ -828,7 +860,7 @@ public class OctoConfig {
                         successHandled++;
                     }
                     reactions.add(visibleReaction);
-                }catch (JSONException ignored) {}
+                } catch (JSONException ignored) {}
 
                 if (successHandled >= 5) {
                     break;

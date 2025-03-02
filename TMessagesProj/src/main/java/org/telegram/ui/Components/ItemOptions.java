@@ -65,6 +65,9 @@ import org.telegram.ui.Stories.recorder.ToggleButton;
 import java.util.Arrays;
 import java.util.Collections;
 
+import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.OctoUtils;
+
 public class ItemOptions {
 
     public static ItemOptions makeOptions(@NonNull BaseFragment fragment, @NonNull View scrimView) {
@@ -357,6 +360,70 @@ public class ItemOptions {
         imageView.setScaleX(checked ? 0.84f : 1.0f);
         imageView.setScaleY(checked ? 0.84f : 1.0f);
         subItem.addView(imageView, LayoutHelper.createFrame(34, 34, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), -5, 0, -5, 0));
+
+        if (checked) {
+            final float strokeWidth = 2;
+            View checkView = new View(context);
+            checkView.setBackground(Theme.createOutlineCircleDrawable(dp(34), Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider), dp(strokeWidth)));
+            subItem.addView(checkView, LayoutHelper.createFrame(34 + strokeWidth, 34 + strokeWidth, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), -5 - strokeWidth / 2.0f, 0, -5, 0));
+        }
+
+        subItem.setColors(textColor != null ? textColor : Theme.getColor(textColorKey, resourcesProvider), iconColor != null ? iconColor : Theme.getColor(iconColorKey, resourcesProvider));
+        subItem.setSelectorColor(selectorColor != null ? selectorColor : Theme.multAlpha(Theme.getColor(textColorKey, resourcesProvider), .12f));
+
+        subItem.setOnClickListener(view1 -> {
+            if (onClickListener != null) {
+                onClickListener.run();
+            }
+            dismiss();
+        });
+        if (minWidthDp > 0) {
+            subItem.setMinimumWidth(dp(minWidthDp));
+            addView(subItem, LayoutHelper.createLinear(minWidthDp, LayoutHelper.WRAP_CONTENT));
+        } else {
+            addView(subItem, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        }
+
+        return this;
+    }
+
+    public ItemOptions addChatForLockedAccounts(TLObject obj, boolean checked, Runnable onClickListener) {
+        if (context == null) {
+            return this;
+        }
+
+        final int textColorKey = Theme.key_actionBarDefaultSubmenuItem;
+        final int iconColorKey = Theme.key_actionBarDefaultSubmenuItemIcon;
+
+        ActionBarMenuSubItem subItem = new ActionBarMenuSubItem(context, false, false, resourcesProvider);
+        subItem.setPadding(dp(18), 0, dp(18), 0);
+        boolean lockedAccount = false;
+        if (obj instanceof TLRPC.User) {
+            TLRPC.User user = (TLRPC.User) obj;
+            subItem.setText(UserObject.getUserName(user));
+
+            if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(user.id)) {
+                subItem.setText(OctoUtils.createSpoiledName(UserObject.getUserName(user)));
+                subItem.setSubtext(LocaleController.getString(R.string.ThisAccountLocked).toLowerCase());
+                lockedAccount = true;
+            }
+        }
+
+        subItem.setClipToPadding(false);
+        subItem.textView.setPadding(subItem.checkViewLeft ? (subItem.checkView != null ? dp(43) : 0) : dp(43), 0, subItem.checkViewLeft ? dp(43) : (subItem.checkView != null ? dp(43) : 0), 0);
+        BackupImageView imageView = new BackupImageView(context);
+        imageView.setBlurAllowed(true);
+        AvatarDrawable avatarDrawable = new AvatarDrawable();
+        avatarDrawable.setInfo(obj);
+        imageView.setRoundRadius(dp(34));
+        imageView.setForUserOrChat(obj, avatarDrawable);
+        imageView.setScaleX(checked ? 0.84f : 1.0f);
+        imageView.setScaleY(checked ? 0.84f : 1.0f);
+        subItem.addView(imageView, LayoutHelper.createFrame(34, 34, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), -5, 0, -5, 0));
+
+        if (lockedAccount) {
+            imageView.setHasBlur(true);
+        }
 
         if (checked) {
             final float strokeWidth = 2;

@@ -952,7 +952,7 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
                 onPasscodeError();
                 return;
             }
-            if (!PasscodeController.checkPasscode((Activity) getContext(), password) && !SharedConfig.checkPasscode(password)) {
+            if (!SharedConfig.checkPasscode(password)) {
                 SharedConfig.increaseBadPasscodeTries();
                 if (SharedConfig.passcodeRetryInMs > 0) {
                     checkRetryTextView();

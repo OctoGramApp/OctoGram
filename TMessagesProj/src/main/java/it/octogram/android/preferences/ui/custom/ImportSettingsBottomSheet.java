@@ -68,6 +68,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.components.ImportSettingsTopLayerCell;
 import it.octogram.android.utils.AppRestartHelper;
+import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 
 public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
@@ -76,10 +77,15 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private final File file;
     private Adapter adapter;
     private final ImportButton actionButton;
+
     private final ArrayList<Item> items = new ArrayList<>();
     private final ArrayList<Item> oldItems = new ArrayList<>();
     private static final ArrayList<String> dataToImport = new ArrayList<>();
+    private static final ArrayList<String> secureContexts = new ArrayList<>();
     private static final ImportSettingsScanHelper settingsScan = new ImportSettingsScanHelper();
+
+    private static boolean hasAuthorizedBiometric = false;
+
     private int totalImportableKeysCounter = 0;
     private int externalKeysUnavailableInScan = 0;
     private static final List<String> expanded = new ArrayList<>();
@@ -102,6 +108,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         items.clear();
         oldItems.clear();
         expanded.clear();
+        hasAuthorizedBiometric = false;
 
         initDataToImportList();
 
@@ -159,13 +166,18 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
 
         updateItems();
+        if (!secureContexts.isEmpty()) {
+            reloadActionButtonSize();
+        }
     }
 
     @Override
     protected void onDismissWithTouchOutside() {
         super.onDismissWithTouchOutside();
         if (file != null && file.getPath().startsWith(AndroidUtilities.getCacheDir().getPath())) {
-            file.delete();
+            if (file.delete()) {
+                OctoLogging.d("ImportSettings", "File has been deleted after import: " + file.getAbsolutePath());
+            }
         }
     }
 
@@ -187,13 +199,24 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
     private void initDataToImportList() {
         dataToImport.clear();
+        secureContexts.clear();
         externalKeysUnavailableInScan = 0;
         totalImportableKeysCounter = 0;
 
+        ArrayList<String> tempIgnoredSecureKeys = new ArrayList<>();
+
         for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
-            dataToImport.add(category.categoryId);
+            if (!category.isSecureContext) {
+                dataToImport.add(category.categoryId);
+            } else {
+                secureContexts.add(category.categoryId);
+            }
             for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                dataToImport.add(option.optionKey);
+                if (!category.isSecureContext) {
+                    dataToImport.add(option.optionKey);
+                } else {
+                    tempIgnoredSecureKeys.add(option.optionKey);
+                }
                 totalImportableKeysCounter++;
             }
         }
@@ -208,7 +231,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
                     String fieldName = configProperty.getKey();
                     // здесь фильтрация является основополагающей, иначе будут показаны дополнительные элементы, которые не следует импортировать.
-                    if (!dataToImport.contains(fieldName) && !settingsScan.excludedOptions.contains(fieldName)) {
+                    if (!dataToImport.contains(fieldName) && !tempIgnoredSecureKeys.contains(fieldName) && !settingsScan.excludedOptions.contains(fieldName)) {
                         dataToImport.add(fieldName);
                         externalKeysUnavailableInScan++;
                         totalImportableKeysCounter++;
@@ -242,7 +265,10 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             changedOptions = OctoConfig.INSTANCE.importFileExport(file, dataToImport, settingsScan.excludedOptions);
 
             if (file.getAbsolutePath().startsWith(AndroidUtilities.getCacheDir().getAbsolutePath())) {
-                file.delete();
+                if (file.delete()) {
+                    OctoLogging.d("ImportSettings", "File has been deleted after import: " + file.getAbsolutePath());
+                }
+
             }
         }
 
@@ -275,6 +301,28 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     }
 
     private void handleOnClickPosition(View view, Item item, float x) {
+        if (!hasAuthorizedBiometric && secureContexts.contains(item.itemRelationId)) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
+            alertDialogBuilder.setTitle(LocaleController.getString(R.string.Warning));
+            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportSecureContext));
+            alertDialogBuilder.setPositiveButton(LocaleController.getString(R.string.Proceed), (dialog, which) -> FingerprintUtils.checkFingerprint(getContext(), FingerprintUtils.IMPORT_SETTINGS, true, new FingerprintUtils.FingerprintResult() {
+                @Override
+                public void onSuccess() {
+                    hasAuthorizedBiometric = true;
+                    handleOnClickPosition(view, item, x);
+                }
+
+                @Override
+                public void onFailed() {
+
+                }
+            }));
+            alertDialogBuilder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+            return;
+        }
+
         if (item.viewType == VIEW_TYPE_SWITCH) {
             if (item.hasInnerData() && (LocaleController.isRTL ? x > dp(19 + 37 + 19) : x < view.getMeasuredWidth() - dp(19 + 37 + 19))) {
                 if (!expanded.contains(item.itemRelationId)) {
@@ -639,6 +687,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         private boolean isExpanded;
+        private boolean _isLocked = false;
 
         public void set(Item item, boolean divider) {
             if (item.viewType == VIEW_TYPE_SWITCH) {
@@ -659,7 +708,17 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 switchView.setChecked(dataToImport.contains(item.itemRelationId), true);
                 needLine = containing;
 
-                boolean currentExpanded = expanded.contains(item.itemRelationId);
+                boolean isLocked = !hasAuthorizedBiometric && secureContexts.contains(item.itemRelationId);
+                if (_isLocked != isLocked) {
+                    _isLocked = isLocked;
+                    arrowView.setScaleX(isLocked ? 0.8f : 1f);
+                    arrowView.setScaleY(isLocked ? 0.8f : 1f);
+                    arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(isLocked ? Theme.key_stickers_menu : Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
+                    arrowView.setImageResource(isLocked ? R.drawable.other_lockedfolders2 : R.drawable.arrow_more);
+                    arrowView.setTranslationX(isLocked ? dp(2) : 0);
+                }
+
+                boolean currentExpanded = expanded.contains(item.itemRelationId) && !isLocked;
                 if (isExpanded != currentExpanded) {
                     isExpanded = currentExpanded;
                     arrowView.animate().rotation(isExpanded ? 180 : 0).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).setDuration(240).start();

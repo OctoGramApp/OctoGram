@@ -13,6 +13,7 @@ import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 
 public class HeaderRow extends BaseRow {
+    private boolean useHeaderStyle = true;
 
     public HeaderRow(CharSequence title) {
         super(title, PreferenceType.HEADER);
@@ -22,4 +23,12 @@ public class HeaderRow extends BaseRow {
         super(title, null, false, showIf, false, PreferenceType.HEADER);
     }
 
+    public HeaderRow headerStyle(boolean useHeaderStyle) {
+        this.useHeaderStyle = useHeaderStyle;
+        return this;
+    }
+
+    public boolean getUseHeaderStyle() {
+        return useHeaderStyle;
+    }
 }

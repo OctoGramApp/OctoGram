@@ -1,7 +1,6 @@
 package it.octogram.android.preferences.ui.components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -28,8 +27,6 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
-import it.octogram.android.preferences.ui.DcStatusActivity;
-
 public class LockedChatsHelp extends FrameLayout {
     private LinkSpanDrawable.LinksTextView subtitleTextView;
     private ButtonWithCounterView button;
@@ -43,7 +40,7 @@ public class LockedChatsHelp extends FrameLayout {
 
         ImageView archiveIcon = new ImageView(context);
         archiveIcon.setBackground(Theme.createCircleDrawable(dp(80), Theme.getColor(Theme.key_avatar_backgroundSaved, resourcesProvider)));
-        archiveIcon.setImageResource(R.drawable.solar_key);
+        archiveIcon.setImageResource(R.drawable.edit_passcode);
         archiveIcon.setScaleType(ImageView.ScaleType.CENTER);
         layout.addView(archiveIcon, LayoutHelper.createLinear(80, 80, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, (buttonCallback != null ? 14 : 0), 0, 14));
 
@@ -73,7 +70,7 @@ public class LockedChatsHelp extends FrameLayout {
         layout.addView(subtitleTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 0, 32, 25));
 
         layout.addView(
-                makeHint(R.drawable.solar_key, LocaleController.getString(R.string.LockedChatsHelpHint1Title), LocaleController.getString(R.string.LockedChatsHelpHint1Description), resourcesProvider),
+                makeHint(R.drawable.edit_passcode, LocaleController.getString(R.string.LockedChatsHelpHint1Title), LocaleController.getString(R.string.LockedChatsHelpHint1Description), resourcesProvider),
                 LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
         );
         layout.addView(

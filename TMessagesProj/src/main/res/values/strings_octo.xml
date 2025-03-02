@@ -224,9 +224,12 @@
     <string name="DefaultEmojiButtonType">Emoji button action</string>
     <string name="DefaultEmojiButtonTypeDefault">Default</string>
 
+    <string name="ActionsSettingsBiometric">Actions</string>
     <string name="BiometricSettings">Biometric</string>
     <string name="UnlockToSaveOption">Unlock to edit</string>
     <string name="UnlockToOpenPage">Unlock to open</string>
+    <string name="UnlockToImportSettings">Unlock to import privacy settings</string>
+    <string name="UnlockToSwitchAccount">Unlock to switch account</string>
     <string name="LockedChats">Locked chats</string>
     <string name="LockedChats_Lock">Lock a new chat</string>
     <string name="LockedChats_Lock_Destination">to update the locked list</string>
@@ -246,6 +249,7 @@
     <string name="UnLockChat">Unlock chat</string>
     <string name="LockChat_Brief">Lock</string>
     <string name="UnLockChat_Brief">Unlock</string>
+    <string name="BiometricSettingsHideChats">Hide locked content in search</string>
     <string name="BiometricSettingsAllowFaceUnlock">Allow using Face Unlock</string>
     <string name="BiometricSettingsAllowDevicePIN">Allow using device PIN</string>
     <string name="BiometricSettingsOpenArchive">Request auth to open archive</string>
@@ -254,6 +258,13 @@
     <string name="BiometricSettingsOpenCallsLog">Request auth to open calls log</string>
     <string name="BiometricAskEvery">Ask for authentication every…</string>
     <string name="BiometricAskEvery_Desc">Biometric authentication will only be required once every %1$s.</string>
+    <string name="BiometricUnavailable">Many security settings aren\'t available because the device doesn\'t support biometric unlocking. If it\'s enabled, check the system settings.</string>
+    <string name="LockedActions">Locked actions</string>
+    <string name="LockedAccounts">Locked accounts</string>
+    <string name="ThisAccountLocked">Locked account</string>
+    <string name="ThisAccountLocked_Desc">Unlock the account with biometric unlocking or switch accounts.</string>
+    <string name="ThisAccountLocked_Unlock">Unlock</string>
+    <string name="ThisAccountLocked_Switch">Switch accounts</string>
 
     <string name="OctoAppearanceSettingsHeader">Make telegram your own by customizing the settings below</string>
     <string name="BlurHeader">Blur</string>
@@ -625,6 +636,7 @@
     <string name="ImportReadyDescription">An OctoGram configuration was detected in this file. Keep in mind that this will overwrite your settings. Do you want to proceed with the import?</string>
     <string name="ImportReadyDescriptionFromExternal">This file, sent by an external user, contains a configuration of OctoGram and may activate unwanted experimental options. Are you sure you want to apply it?</string>
     <string name="ImportReadyImport">Proceed with import</string>
+    <string name="ImportReadyImportSecureContext">This option contains some privacy and security settings regarding your app. Some parts, such as saved messages, may be restricted by fingerprint authentication. Do you want to import them?</string>
     <string name="ImportReadyImportSelected">Import selected</string>
     <string name="ImportReadyOtherOptions">Another %d unspecified options will be imported automatically.</string>
     <string name="ImportReadyImportDone">%d options have been imported successfully. Restart the app to complete the transfer.</string>

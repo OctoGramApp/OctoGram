@@ -192,6 +192,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 
 @SuppressLint("HardwareIds")
@@ -1657,7 +1658,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     private boolean pendingSwitchingAccount;
 
     private void onAuthSuccess(TLRPC.TL_auth_authorization res, boolean afterSignup) {
-        PasscodeController.removePasscodeForAccount(res.user.id);
+        FingerprintUtils.lockAccount(res.user.id, false);
         MessagesController.getInstance(currentAccount).cleanup();
         ConnectionsManager.getInstance(currentAccount).setUserId(res.user.id);
         UserConfig.getInstance(currentAccount).clearConfig();

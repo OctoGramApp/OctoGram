@@ -6744,7 +6744,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         ActionBarMenuItem otherItem = actionMode.addItemWithWidth(0, R.drawable.ic_ab_other, dp(54), LocaleController.getString(R.string.AccDescrMoreOptions));
         archiveItem = otherItem.addSubItem(archive, R.drawable.msg_archive, LocaleController.getString(R.string.Archive));
         pin2Item = otherItem.addSubItem(pin2, R.drawable.msg_pin, LocaleController.getString(R.string.DialogPin));
-        lockUnlockItem = otherItem.addSubItem(lock_unlock, isHiddenChats() ? R.drawable.solar_unlock_2 : R.drawable.solar_key, LocaleController.getString(isHiddenChats() ? R.string.UnLockChat_Brief : R.string.LockChat_Brief));
+        lockUnlockItem = otherItem.addSubItem(lock_unlock, isHiddenChats() ? R.drawable.menu_unlock : R.drawable.edit_passcode, LocaleController.getString(isHiddenChats() ? R.string.UnLockChat_Brief : R.string.LockChat_Brief));
         addToFolderItem = otherItem.addSubItem(add_to_folder, R.drawable.msg_addfolder, LocaleController.getString(R.string.FilterAddTo));
         removeFromFolderItem = otherItem.addSubItem(remove_from_folder, R.drawable.msg_removefolder, LocaleController.getString(R.string.FilterRemoveFrom));
         readItem = otherItem.addSubItem(read, R.drawable.msg_markread, LocaleController.getString(R.string.MarkAsRead));

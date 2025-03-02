@@ -8,25 +8,43 @@
 
 package it.octogram.android.utils;
 
+import java.util.function.Supplier;
+
 import it.octogram.android.ConfigProperty;
 
 public class ExpandableRowsOption {
     public ConfigProperty<Boolean> property;
     public String optionTitle;
-    public Runnable onClick;
+    public Supplier<Boolean> onClick;
+    public Runnable onPostUpdate;
+    public int accountId = -1;
 
-    public ExpandableRowsOption setProperty(ConfigProperty<Boolean> property) {
+    public ExpandableRowsOption property(ConfigProperty<Boolean> property) {
         this.property = property;
         return this;
     }
 
-    public ExpandableRowsOption setOptionTitle(String optionTitle) {
+    public ExpandableRowsOption optionTitle(String optionTitle) {
         this.optionTitle = optionTitle;
         return this;
     }
 
-    public ExpandableRowsOption setOnClick(Runnable onClick) {
+    public ExpandableRowsOption accountId(int accountId) {
+        this.accountId = accountId;
+        return this;
+    }
+
+    public ExpandableRowsOption onClick(Supplier<Boolean> onClick) {
         this.onClick = onClick;
         return this;
+    }
+
+    public ExpandableRowsOption onPostUpdate(Runnable onPostUpdate) {
+        this.onPostUpdate = onPostUpdate;
+        return this;
+    }
+
+    public boolean hasAccount() {
+        return accountId != -1;
     }
 }

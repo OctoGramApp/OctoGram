@@ -2504,7 +2504,6 @@ public class Theme {
             return MonetTheme.MONET_DARK.getMonetThemeName().equals(name) ||
                     MonetTheme.MONET_LIGHT.getMonetThemeName().equals(name) ||
                     MonetTheme.MONET_AMOLED.getMonetThemeName().equals(name);
-                    // || MonetTheme.MONET_OLED.getMonetThemeName().equals(name);
         }
 
         public boolean isDark() {
@@ -2524,7 +2523,6 @@ public class Theme {
                     "Arctic Blue".equals(name) ||
                     "Day".equals(name) ||
                     MonetTheme.MONET_LIGHT.getMonetThemeName().equals(name)
-                    // || MonetTheme.MONET_OLED.getMonetThemeName().equals(name)
             ) {
                 isDark = LIGHT;
             }
@@ -4750,14 +4748,12 @@ public class Theme {
                     MonetTheme.MONET_LIGHT,
                     MonetTheme.MONET_DARK,
                     MonetTheme.MONET_AMOLED,
-                    // MonetTheme.MONET_OLED
             };
 
             String[][] previewColors = {
                     {"n1_50", "a1_100", "a1_600"},
                     {"n1_900", "n2_800", "a1_100"},
                     {"n1_1000", "n2_800", "a1_100"},
-                    // {"n1_1000", "a1_100", "a1_100"},
             };
 
             for (int i = 0; i < monetThemes.length; i++) {
@@ -8298,25 +8294,13 @@ public class Theme {
                                         value = Utilities.parseInt(param);
                                     }
                                 } else if (isAndroid12OrHigher && (param.startsWith("a") || param.startsWith("n") || param.startsWith("monet"))) {
-                                    value = MonetThemeController.INSTANCE.getColor(key.trim(), param.trim());
+                                    value = MonetThemeController.INSTANCE.getColor(param.trim());
                                 } else {
                                     value = Utilities.parseInt(param);
                                 }
                                 int keyFromString;
-//                                if (OctoConfig.INSTANCE.monetUseGradient.getValue()) {
-//                                    key = key.replace("noGradient", "chat_outBubbleGradient");
-//                                }
                                 keyFromString = ThemeColors.stringKeyToInt(key);
                                 if (keyFromString >= 0) {
-//                                    if (isAndroid12OrHigher && currentTheme.isMonet() && OctoConfig.INSTANCE.monetUseNicknameColorFull.getValue()) {
-//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageBlue"), MonetThemeController.INSTANCE.getColor("a1_400"));
-//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageCyan"), MonetThemeController.INSTANCE.getColor("a1_400"));
-//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageGreen"), MonetThemeController.INSTANCE.getColor("a1_400"));
-//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageOrange"), MonetThemeController.INSTANCE.getColor("a1_400"));
-//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessagePink"), MonetThemeController.INSTANCE.getColor("a1_400"));
-//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageRed"), MonetThemeController.INSTANCE.getColor("a1_400"));
-//                                        stringMap.put(ThemeColors.stringKeyToInt("avatar_nameInMessageViolet"), MonetThemeController.INSTANCE.getColor("a1_400"));
-//                                    }
                                     stringMap.put(keyFromString, value);
                                 }
                             }

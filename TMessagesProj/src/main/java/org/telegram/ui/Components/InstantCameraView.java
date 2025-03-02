@@ -68,6 +68,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.RequiresApi;
+import androidx.camera.core.MeteringPointFactory;
+import androidx.camera.core.Preview;
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
 import com.google.android.exoplayer2.ExoPlayer;
@@ -128,7 +132,6 @@ import javax.microedition.khronos.egl.EGLSurface;
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.camerax.CameraXController;
-import it.octogram.android.camerax.CameraXRoundVideoMessage;
 import it.octogram.android.camerax.CameraXUtils;
 
 @TargetApi(18)
@@ -150,8 +153,8 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private ImageView muteImageView;
     private float progress;
     private CameraInfo selectedCamera;
-    public boolean isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
-    public volatile boolean cameraReady;
+    private boolean isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
+    private volatile boolean cameraReady;
     private AnimatorSet muteAnimation;
     private TLRPC.InputFile file;
     private TLRPC.InputEncryptedFile encryptedFile;
@@ -161,7 +164,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private boolean isSecretChat;
     private VideoEditedInfo videoEditedInfo;
     private VideoPlayer videoPlayer;
-    public Bitmap lastBitmap;
+    private Bitmap lastBitmap;
     private int recordingGuid;
 
     private volatile boolean cameraTextureAvailable;
@@ -182,17 +185,21 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
     private long recordedTime;
     private boolean cancelled;
 
-    public CameraGLThread cameraThread;
-    public Size[] previewSize = new Size[2];
+    private CameraGLThread cameraThread;
+    private Size[] previewSize = new Size[2];
     private Size pictureSize;
     private Size aspectRatio = SharedConfig.roundCamera16to9 ? new Size(16, 9) : new Size(4, 3);
     private TextureView textureView;
-    public BackupImageView textureOverlayView;
+    private BackupImageView textureOverlayView;
     private final boolean useCamera2 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && SharedConfig.isUsingCamera2(currentAccount);
     private CameraSession cameraSession;
     private boolean bothCameras;
     private Camera2Session[] camera2Sessions = new Camera2Session[2];
     private Camera2Session camera2SessionCurrent;
+    @TargetApi(21)
+    private CameraXController cameraXController;
+    @TargetApi(21)
+    private CameraXController.CameraLifecycle camLifecycle;
     public boolean needDrawFlickerStub;
 
     private boolean isCameraSessionInitiated() {
@@ -265,8 +272,6 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             -1394191079 // samsung a31
     };
     private boolean allowSendingWhileRecording;
-
-    private CameraXRoundVideoMessage cameraXRoundVideoMessage = new CameraXRoundVideoMessage();
 
     @SuppressLint("ClickableViewAccessibility")
     public InstantCameraView(Context context, Delegate delegate, Theme.ResourcesProvider resourcesProvider) {
@@ -363,11 +368,18 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         addView(switchCameraButton, LayoutHelper.createFrame(62, 62, Gravity.LEFT | Gravity.BOTTOM, 8, 0, 0, 0));
         switchCameraButton.setOnClickListener(v -> {
             if (CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue()) {
-                if (!cameraReady || !cameraXRoundVideoMessage.isCameraXInitied() || cameraThread == null){
+                if (!cameraReady || !cameraXController.isInitied() || cameraThread == null) {
                     return;
                 }
-                flashing = false;
-                cameraXRoundVideoMessage.toggleCamera(this);
+                saveLastCameraBitmap();
+                if (lastBitmap != null) {
+                    needDrawFlickerStub = false;
+                    textureOverlayView.setImageBitmap(lastBitmap);
+                    textureOverlayView.setAlpha(1f);
+                }
+                isFrontface = !isFrontface;
+                cameraReady = false;
+                cameraThread.reinitForNewCamera();
             } else {
                 if (!cameraReady || !isCameraSessionInitiated() || cameraThread == null) {
                     return;
@@ -396,7 +408,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 @Override
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     float p = (float) valueAnimator.getAnimatedValue();
-                    if ((!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) && p > 0.5f && !didSwap[0]) {
+                    if (p > 0.5f && !didSwap[0]) {
                         didSwap[0] = true;
                         doSwap.run();
                     }
@@ -410,7 +422,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    if ((!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) && !didSwap[0]) {
+                    if (!didSwap[0]) {
                         didSwap[0] = true;
                         doSwap.run();
                     }
@@ -427,9 +439,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         flashButton.setScaleType(ImageView.ScaleType.CENTER);
         addView(flashButton, LayoutHelper.createFrame(62, 62, Gravity.LEFT | Gravity.BOTTOM, 62 - 4, 0, 0, 0));
         flashButton.setOnClickListener(v -> {
-            toggleFlashingState();
-            handleFlashUpdate();
+            flashing = !flashing;
+            updateFlash();
         });
+        updateFlash();
 
         flashViews.add(switchCameraButton);
         flashViews.add(flashButton);
@@ -467,24 +480,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         blurBehindDrawable = new BlurBehindDrawable(parentView, this, 0, resourcesProvider);
     }
 
-    private void toggleFlashingState() {
-        flashing = !flashing;
-    }
-
-    private void handleFlashUpdate() {
-        if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-            updateFlash();
-        } else {
-            cameraXRoundVideoMessage.updateFlashStatus(this);
-        }
-    }
-
     private Boolean wasFlashing;
-    public boolean flashing;
+    private boolean flashing;
     private boolean frontFlashing;
-    public void updateFlash() {
+    private void updateFlash() {
         final boolean shouldFrontFlash = flashing && recording && isFrontface;
-
         if (frontFlashing != shouldFrontFlash) {
             if (frontFlashing = shouldFrontFlash) {
                 flashViews.flashIn(null);
@@ -493,13 +493,14 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             }
         }
 
-        var flashState = flashing && !isFrontface && recording;
         if (useCamera2) {
             if (camera2Sessions[1] != null) {
-                camera2Sessions[1].setFlash(flashState);
+                camera2Sessions[1].setFlash(flashing && !isFrontface && recording);
             }
-        } else if (CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue() && cameraXRoundVideoMessage.isCameraReady(this)) {
-            cameraXRoundVideoMessage.getController().ifPresent(controller -> controller.setTorchEnabled(flashState));
+        } else if (CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue()) {
+            if (cameraXController != null && cameraXController.isInitied()) {
+                cameraXController.setTorchEnabled(flashing && !isFrontface && recording);
+            }
         } else {
             if (cameraSession != null) {
 //                final String mode = (
@@ -508,7 +509,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
 //                        Camera.Parameters.FLASH_MODE_OFF
 //                );
 //                cameraSession.setCurrentFlashMode(mode);
-                cameraSession.setTorchEnabled(flashState);
+                cameraSession.setTorchEnabled(flashing && !isFrontface && recording);
             }
         }
 
@@ -644,7 +645,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 }
             }
         } else {
-            cameraXRoundVideoMessage.stopCamera(this);
+            try {
+                cameraXController.stopVideoRecording(true);
+                cameraXController.closeCamera();
+            } catch (Exception ignored) {}
         }
     }
 
@@ -719,12 +723,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         if (recording) {
             cancelled = recordedTime < 800;
             recording = false;
-            if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-                updateFlash();
-            } else {
-                flashing = false;
-                cameraXRoundVideoMessage.updateFlashStatus(this);
-            }
+            updateFlash();
             if (cameraThread != null) {
                 NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordStopped, recordingGuid, cancelled ? 4 : 2);
                 saveLastCameraBitmap();
@@ -745,20 +744,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 videoPlayer.releasePlayer(true);
                 videoPlayer = null;
             }
-            if (CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue()) {
-                flashing = false;
-                cameraXRoundVideoMessage.updateFlashStatus(this);
-            }
             showCamera(true);
             try {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
             } catch (Exception ignore) {}
-            AndroidUtilities.lockOrientation(
-                    delegate.getParentActivity(),
-                    AndroidUtilities.isTablet() ?
-                            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED :
-                            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            );
+            AndroidUtilities.lockOrientation(delegate.getParentActivity());
             invalidate();
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordResumed);
         }
@@ -768,6 +758,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         if (textureView != null) {
             return;
         }
+        camLifecycle = new CameraXController.CameraLifecycle();
 
         if (switchCameraDrawable == null) {
             switchCameraDrawable = new RLottieDrawable(R.raw.roundcamera_flip, "roundcamera_flip", dp(28), dp(28));
@@ -797,9 +788,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             if (!useCamera2) {
                 isFrontface = !OctoConfig.INSTANCE.startWithRearCamera.getValue();
             }
-            if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-                updateFlash();
-            }
+            updateFlash();
             recordedTime = 0;
             progress = 0;
         }
@@ -912,7 +901,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                         }
                     }
                 } else {
-                    cameraXRoundVideoMessage.stopCamera(InstantCameraView.this);
+                    try {
+                        cameraXController.stopVideoRecording(false);
+                        cameraXController.closeCamera();
+                    } catch (Exception ignored) {}
                 }
                 return true;
             }
@@ -1080,11 +1072,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             cancelled = recordedTime < 800;
             recording = false;
             flashing = false;
-            if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-                updateFlash();
-            } else {
-                cameraXRoundVideoMessage.updateFlashStatus(this);
-            }
+            updateFlash();
             int reason;
             if (cancelled) {
                 reason = 4;
@@ -1144,11 +1132,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         cancelled = true;
         recording = false;
         flashing = false;
-        if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-            updateFlash();
-        } else {
-            cameraXRoundVideoMessage.updateFlashStatus(this);
-        }
+        updateFlash();
         NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordStopped, recordingGuid, byGesture ? 0 : 6);
         if (cameraThread != null) {
             saveLastCameraBitmap();
@@ -1420,49 +1404,65 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             } else {
                 if (index == 1) return;
                 surfaceTexture.setDefaultBufferSize(previewSize[0].getWidth(), previewSize[0].getHeight());
-                cameraSession = new CameraSession(selectedCamera, previewSize[0], pictureSize, ImageFormat.JPEG, true);
-                updateFlash();
-                cameraThread.setCurrentSession(cameraSession);
-                CameraController.getInstance().openRound(cameraSession, surfaceTexture, () -> {
-                    if (cameraSession != null) {
-                        updateFlash();
+                if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
+                    cameraSession = new CameraSession(selectedCamera, previewSize[0], pictureSize, ImageFormat.JPEG, true);
+                    updateFlash();
+                    cameraThread.setCurrentSession(cameraSession);
+                    CameraController.getInstance().openRound(cameraSession, surfaceTexture, () -> {
+                        if (cameraSession != null) {
+                            updateFlash();
 
-                        boolean updateScale = false;
-                        try {
-                            Camera.Size size = cameraSession.getCurrentPreviewSize();
-                            if (size.width != previewSize[0].getWidth() || size.height != previewSize[0].getHeight()) {
-                                previewSize[0] = new Size(size.width, size.height);
-                                FileLog.d("InstantCamera change preview size to w = " + previewSize[0].getWidth() + " h = " + previewSize[0].getHeight());
+                            boolean updateScale = false;
+                            try {
+                                Camera.Size size = cameraSession.getCurrentPreviewSize();
+                                if (size.width != previewSize[0].getWidth() || size.height != previewSize[0].getHeight()) {
+                                    previewSize[0] = new Size(size.width, size.height);
+                                    FileLog.d("InstantCamera change preview size to w = " + previewSize[0].getWidth() + " h = " + previewSize[0].getHeight());
+                                }
+                            } catch (Exception e) {
+                                FileLog.e(e);
                             }
-                        } catch (Exception e) {
-                            FileLog.e(e);
-                        }
 
-                        try {
-                            Camera.Size size = cameraSession.getCurrentPictureSize();
-                            if (size.width != pictureSize.getWidth() || size.height != pictureSize.getHeight()) {
-                                pictureSize = new Size(size.width, size.height);
-                                FileLog.d("InstantCamera change picture size to w = " + pictureSize.getWidth() + " h = " + pictureSize.getHeight());
-                                updateScale = true;
+                            try {
+                                Camera.Size size = cameraSession.getCurrentPictureSize();
+                                if (size.width != pictureSize.getWidth() || size.height != pictureSize.getHeight()) {
+                                    pictureSize = new Size(size.width, size.height);
+                                    FileLog.d("InstantCamera change picture size to w = " + pictureSize.getWidth() + " h = " + pictureSize.getHeight());
+                                    updateScale = true;
+                                }
+                            } catch (Exception e) {
+                                FileLog.e(e);
                             }
-                        } catch (Exception e) {
-                            FileLog.e(e);
-                        }
-                        if (BuildVars.LOGS_ENABLED) {
-                            FileLog.d("InstantCamera camera initied");
-                        }
-                        cameraSession.setInitied();
-                        if (updateScale) {
-                            if (cameraThread != null) {
-                                cameraThread.reinitForNewCamera();
+                            if (BuildVars.LOGS_ENABLED) {
+                                FileLog.d("InstantCamera camera initied");
+                            }
+                            cameraSession.setInitied();
+                            if (updateScale) {
+                                if (cameraThread != null) {
+                                    cameraThread.reinitForNewCamera();
+                                }
                             }
                         }
-                    }
-                }, () -> {
-                    if (cameraThread != null) {
-                        cameraThread.setCurrentSession(cameraSession);
-                    }
-                });
+                    }, () -> {
+                        if (cameraThread != null) {
+                            cameraThread.setCurrentSession(cameraSession);
+                        }
+                    });
+                } else {
+                    MeteringPointFactory factory = new SurfaceOrientedMeteringPointFactory(previewSize[0].getWidth(), previewSize[0].getHeight());
+                    Preview.SurfaceProvider surfaceProvider = request -> {
+                        Surface surface = new Surface(surfaceTexture);
+                        request.provideSurface(surface, ContextCompat.getMainExecutor(getContext()), result -> {});
+                    };
+                    cameraXController = new CameraXController(camLifecycle, factory, surfaceProvider);
+                    cameraXController.setStableFPSPreviewOnly(true);
+                    cameraXController.initCamera(getContext(), isFrontface, ()-> {
+                        if (cameraThread != null) {
+                            cameraThread.setOrientation();
+                        }
+                    });
+                    camLifecycle.start();
+                }
             }
         });
     }
@@ -1790,11 +1790,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     cameraTextureAvailable = true;
                     requestRender(i == 0, i == 1);
                 });
-                if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-                    createCamera(a, cameraSurface[a]);
-                } else {
-                    cameraXRoundVideoMessage.configureCameraView(InstantCameraView.this, cameraSurface[0]);
-                }
+                createCamera(a, cameraSurface[a]);
             }
 
             if (BuildVars.LOGS_ENABLED) {
@@ -1933,9 +1929,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     scaleY = temp;
                 }
                 recording = true;
-                if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-                    updateFlash();
-                }
+                updateFlash();
             }
 
             if (videoEncoder != null && (surfaceIndex == 0 && updateTexImage1 || surfaceIndex == 1 && updateTexImage2)) {
@@ -2034,11 +2028,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
 
                     cameraSurface[0] = new SurfaceTexture(cameraTexture[0]);
                     cameraSurface[0].setOnFrameAvailableListener(surfaceTexture -> requestRender(true, false));
-                    if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-                        createCamera(0, cameraSurface[0]);
-                    } else {
-                        cameraXRoundVideoMessage.configureCameraView(InstantCameraView.this, cameraSurface[0]);
-                    }
+                    createCamera(0, cameraSurface[0]);
 
                     updateScale();
 
@@ -2099,14 +2089,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     break;
                 }
                 case DO_SETORIENTATION_MESSAGE: {
-                    cameraXRoundVideoMessage.getController()
-                            .ifPresent(controller -> {
-                                int rotationAngle = controller.getDisplayOrientation();
-                                android.opengl.Matrix.setIdentityM(mMVPMatrix, 0);
-                                if (rotationAngle != 0) {
-                                    android.opengl.Matrix.rotateM(mMVPMatrix, 0, rotationAngle, 0, 0, 1);
-                                }
-                            });
+                    int rotationAngle = cameraXController.getDisplayOrientation();
+                    android.opengl.Matrix.setIdentityM(mMVPMatrix, 0);
+                    if (rotationAngle != 0) {
+                        android.opengl.Matrix.rotateM(mMVPMatrix, 0, rotationAngle, 0, 0, 1);
+                    }
                 }
             }
         }
@@ -3382,9 +3369,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     recordPlusTime = fromPause ? recordedTime : 0;
                     recordStartTime = System.currentTimeMillis();
                     recording = true;
-                    if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.cameraType.getValue() != CameraType.CAMERA_X.getValue()) {
-                        updateFlash();
-                    }
+                    updateFlash();
                     invalidate();
                     NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.recordStarted, recordingGuid, false);
                 });
@@ -3894,7 +3879,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 }
             } else if (CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue()) {
                 float zoom = Math.min(1f, Math.max(0, pinchScale - 1f));
-                cameraXRoundVideoMessage.getController().ifPresent(controller -> controller.setZoom(zoom));
+                cameraXController.setZoom(zoom);
             } else {
                 float zoom = Math.min(1f, Math.max(0, pinchScale - 1f));
                 cameraSession.setZoom(zoom);
@@ -3931,7 +3916,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     }
                 } else if (CameraXUtils.isCameraXSupported() && OctoConfig.INSTANCE.cameraType.getValue() == CameraType.CAMERA_X.getValue()) {
                     if (cameraSession != null) {
-                        cameraXRoundVideoMessage.getController().ifPresent(controller -> controller.setZoom(zoomValue));
+                        cameraXController.setZoom(zoomValue);
                     }
                 } else {
                     if (cameraSession != null) {

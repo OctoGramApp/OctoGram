@@ -9,6 +9,7 @@
 package org.telegram.ui.Adapters;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -16,13 +17,13 @@ import androidx.annotation.Keep;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.DividerCell;
@@ -38,13 +39,13 @@ import org.telegram.ui.LaunchActivity;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import it.octogram.android.MenuItemId;
+import it.octogram.android.DrawerItem;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.drawer.MenuOrderController;
+import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
-import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
@@ -242,7 +243,6 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
     private void resetItems() {
         accountNumbers.clear();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
-            if (PasscodeController.isProtectedAccount(UserConfig.getInstance(a).getClientUserId())) continue;
             if (UserConfig.getInstance(a).isClientActivated()) {
                 accountNumbers.add(a);
             }
@@ -363,7 +363,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         for (int i = 0; i < item_size; i++) {
             MenuOrderController.EditableMenuItem data = MenuOrderController.getSingleAvailableMenuItem(i);
             if (data != null) {
-                MenuItemId menuItemId = MenuItemId.Companion.getById(data.id);
+                var menuItemId = DrawerItem.Id.INSTANCE.getById(data.id);
                 if (menuItemId != null) {
                     int icon = IconsUtils.getIconWithEventType(menuItemId);
                     switch (menuItemId) {

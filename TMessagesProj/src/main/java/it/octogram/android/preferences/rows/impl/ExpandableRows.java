@@ -17,6 +17,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 
 import java.util.ArrayList;
 
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
@@ -29,14 +30,16 @@ public class ExpandableRows extends BaseRow implements Clickable {
     private final CharSequence mainItemTitle;
     private final ArrayList<ExpandableRowsOption> itemsList;
     private final Runnable onSingleStateChange;
+    private final boolean hideMainSwitch;
 
-    private ExpandableRows(int id, int icon, @Nullable CharSequence title, ArrayList<ExpandableRowsOption> itemsList, Runnable onSingleStateChange) {
-        super(PreferenceType.EXPANDABLE_ROWS);
+    private ExpandableRows(int id, int icon, @Nullable CharSequence title, ArrayList<ExpandableRowsOption> itemsList, Runnable onSingleStateChange, boolean hideMainSwitch, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+        super(PreferenceType.EXPANDABLE_ROWS, showIf, showIfReverse);
         this.id = id;
         this.icon = icon;
         this.mainItemTitle = title;
         this.itemsList = itemsList;
         this.onSingleStateChange = onSingleStateChange;
+        this.hideMainSwitch = hideMainSwitch;
     }
 
     public int getId() {
@@ -59,6 +62,10 @@ public class ExpandableRows extends BaseRow implements Clickable {
         return onSingleStateChange;
     }
 
+    public boolean isMainSwitchHidden() {
+        return hideMainSwitch;
+    }
+
     @Override
     public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
         return true;
@@ -70,6 +77,7 @@ public class ExpandableRows extends BaseRow implements Clickable {
         private CharSequence mainItemTitle;
         private final ArrayList<ExpandableRowsOption> itemsList = new ArrayList<>();
         private Runnable onSingleStateChange;
+        private boolean hideMainSwitch = false;
 
         public ExpandableRowsBuilder setId(int id) {
             this.id = id;
@@ -87,7 +95,18 @@ public class ExpandableRows extends BaseRow implements Clickable {
         }
 
         public ExpandableRowsBuilder addRow(ExpandableRowsOption item) {
-            itemsList.add(item);
+            if (item != null) {
+                itemsList.add(item);
+            }
+            return this;
+        }
+
+        public ExpandableRowsBuilder addRow(ArrayList<ExpandableRowsOption> item) {
+            for (ExpandableRowsOption expandableRowsOption : item) {
+                if (expandableRowsOption != null) {
+                    itemsList.add(expandableRowsOption);
+                }
+            }
             return this;
         }
 
@@ -96,8 +115,13 @@ public class ExpandableRows extends BaseRow implements Clickable {
             return this;
         }
 
+        public ExpandableRowsBuilder hideMainSwitch(boolean hide) {
+            hideMainSwitch = hide;
+            return this;
+        }
+
         public ExpandableRows build() {
-            return new ExpandableRows(id, icon, mainItemTitle, itemsList, onSingleStateChange);
+            return new ExpandableRows(id, icon, mainItemTitle, itemsList, onSingleStateChange, hideMainSwitch, showIf, showIfReverse);
         }
     }
 }

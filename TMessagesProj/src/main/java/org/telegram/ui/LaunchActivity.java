@@ -1871,6 +1871,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 return false;
             }
         }
+        actionBarLayout.handleAccountState();
         boolean pushOpened = false;
         long push_user_id = 0;
         long push_chat_id = 0;

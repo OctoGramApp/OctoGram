@@ -24,7 +24,7 @@
 }
 
 # Some members of this class are being accessed from native methods. Keep them unobfuscated.
--keep class com.google.android.exoplayer2.video.VideoDecoderOutputBufferRenderer {
+-keep class com.google.android.exoplayer2.decoder.VideoDecoderOutputBuffer {
   *;
 }
 
@@ -50,15 +50,15 @@
 # Constructors accessed via reflection in DefaultDownloaderFactory
 -dontnote com.google.android.exoplayer2.source.dash.offline.DashDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.dash.offline.DashDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DefaultDownloaderFactory);
+  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
 }
 -dontnote com.google.android.exoplayer2.source.hls.offline.HlsDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.hls.offline.HlsDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DefaultDownloaderFactory);
+  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
 }
 -dontnote com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader
 -keepclassmembers class com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DefaultDownloaderFactory);
+  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
 }
 
 # Constructors accessed via reflection in DownloadHelper
@@ -182,3 +182,21 @@
 -dontwarn android.support.annotation.Size
 -dontwarn android.support.annotation.VisibleForTesting
 -dontwarn android.support.v4.app.NotificationCompat$Builder
+
+-overloadaggressively
+
+# -obfuscationdictionary          proguard_phrase.txt
+# -classobfuscationdictionary     proguard_phrase.txt
+# -packageobfuscationdictionary   proguard_phrase.txt
+
+# https://developers.google.com/ml-kit/known-issues#android_issues
+-keep class com.google.mlkit.nl.languageid.internal.ThickLanguageIdentifier { *; }
+-keep class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni { *; }
+-keepclasseswithmembernames class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni {
+  native <methods>;
+}
+
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    @com.google.android.gms.common.annotation.KeepName *;
+}

@@ -228,7 +228,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.downloadBoost)
                             .title(LocaleController.getString(R.string.DownloadBoost))
                             .build());
-                    category.row(new HeaderRow(LocaleController.getString(R.string.DownloadBoostType), OctoConfig.INSTANCE.downloadBoost));
+                    category.row(new HeaderRow(LocaleController.getString(R.string.DownloadBoostType), OctoConfig.INSTANCE.downloadBoost).headerStyle(false));
                     category.row(new SliderChooseRow.SliderChooseRowBuilder()
                             .options(new ArrayList<>() {{
                                 add(new Pair<>(0, LocaleController.getString(R.string.Default)));
