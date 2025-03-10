@@ -108,6 +108,9 @@ dependencies {
     implementation libs.play.services.location
     implementation libs.play.services.wallet
     implementation libs.play.services.safetynet
+    implementation libs.play.services.cast.framework
+    implementation libs.play.services.recaptcha
+    implementation libs.androidx.mediarouter
 
     implementation libs.mp4parser.isoparser
     implementation(libs.stripe.android) {
@@ -125,6 +128,7 @@ dependencies {
         exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
         exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
     }
+    implementation libs.nanohttpd
 
     // CameraX Implementation
     implementation libs.camera.camera2

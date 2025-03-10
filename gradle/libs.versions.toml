@@ -16,6 +16,7 @@ androidx_interpolator = "1.0.0"
 androidx_biometric = "1.1.0"
 androidx_cardview = "1.0.0"
 androidx_browser = "1.8.0"
+androidx_mediarouter = "1.7.0"
 
 # Google Play Integrity e RecyclerView
 google_play_integrity = "1.4.0"
@@ -40,6 +41,8 @@ play_services_wearable = "19.0.0"
 play_services_location = "21.3.0" # NOT YET SUPPORTED BY TELEGRAM
 play_services_wallet = "19.4.0"
 play_services_safetynet = "18.1.0"
+play_services_cast_framework = "21.4.0"
+play_services_recaptcha = "18.4.0"
 
 # Other dependencies
 mp4parser_isoparser = "1.0.6" # NOT YET SUPPORTED BY TELEGRAM
@@ -49,6 +52,7 @@ billing = "7.1.1"
 commons_text = "1.10.0"
 gson = "2.11.0"
 guava = "33.4.0-android"
+nanohttpd = "2.3.1" # Aggiunto per nanohttpd
 
 # CameraX Implementation
 camerax_version = "1.5.0-alpha06"
@@ -80,6 +84,7 @@ androidx-interpolator = { module = "androidx.interpolator:interpolator", version
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "androidx_biometric" }
 androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "androidx_cardview" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
+androidx-mediarouter = { module = "androidx.mediarouter:mediarouter", version.ref = "androidx_mediarouter" }
 
 # Google Play Integrity e RecyclerView
 google-play-integrity = { module = "com.google.android.play:integrity", version.ref = "google_play_integrity" }
@@ -104,6 +109,9 @@ play-services-wearable = { module = "com.google.android.gms:play-services-wearab
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "play_services_location" }
 play-services-wallet = { module = "com.google.android.gms:play-services-wallet", version.ref = "play_services_wallet" }
 play-services-safetynet = { module = "com.google.android.gms:play-services-safetynet", version.ref = "play_services_safetynet" }
+play-services-cast-framework = { module = "com.google.android.gms:play-services-cast-framework", version.ref = "play_services_cast_framework" }
+play-services-recaptcha = { module = "com.google.android.recaptcha:recaptcha", version.ref = "play_services_recaptcha" }
+nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
 
 # Other dependencies
 mp4parser-isoparser = { module = "com.googlecode.mp4parser:isoparser", version.ref = "mp4parser_isoparser" }
@@ -113,6 +121,7 @@ billing = { module = "com.android.billingclient:billing", version.ref = "billing
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons_text" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
+
 
 # CameraX Implementation
 camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax_version" }
