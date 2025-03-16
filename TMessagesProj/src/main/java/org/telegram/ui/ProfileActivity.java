@@ -2926,6 +2926,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                         updateEmojiStatusDrawableColor(1f);
                         onlineTextView[1].setTextColor(0xB3FFFFFF);
+                        dcIdTextView.setTextColor(0xB3FFFFFF);
                         actionBar.setItemsBackgroundColor(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR, false);
                         actionBar.setItemsColor(Color.WHITE, false);
                         overlaysView.setOverlaysVisible();
@@ -5882,6 +5883,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             statusColor = getThemedColor(Theme.key_avatar_subtitleInProfileBlue);
         }
         onlineTextView[1].setTextColor(ColorUtils.blendARGB(applyPeerColor(statusColor, true, online), 0xB3FFFFFF, value));
+        dcIdTextView.setTextColor(ColorUtils.blendARGB(applyPeerColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue), true, false), 0xB3FFFFFF, value));
         if (extraHeight > AndroidUtilities.dp(88f)) {
             nameTextView[1].setPivotY(AndroidUtilities.lerp(0, nameTextView[1].getMeasuredHeight(), value));
             nameTextView[1].setScaleX(AndroidUtilities.lerp(1.12f, 1.67f, value));
@@ -8805,9 +8807,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     avatarColor = getAverageColor(avatarImage.getImageReceiver());
                     nameTextView[1].setTextColor(Color.WHITE);
                     onlineTextView[1].setTextColor(0xB3FFFFFF);
-                    dcIdTextView.getCurrentView().setTextColor(Color.argb(179, 255, 255, 255));
-                    dcIdTextView.getNextView().setTextColor(Color.argb(179, 255, 255, 255));
-                    dcIdTextView.setAlpha(0.0f);
+                    dcIdTextView.setAlpha(0f);
+                    dcIdTextView.setTextColor(0xB3FFFFFF);
                     actionBar.setItemsBackgroundColor(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR, false);
                     if (showStatusButton != null) {
                         showStatusButton.setBackgroundColor(0x23ffffff);
@@ -10048,6 +10049,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         onlineTextView[1].setTextColor(applyPeerColor(getThemedColor(key), true, isOnline[0]));
                     }
                 }
+                if (dcIdTextView != null) {
+                    if (!isPulledDown) {
+                        dcIdTextView.setTextColor(applyPeerColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue), true, false));
+                    }
+                }
             }
             hasCustomPhoto = user.photo != null && user.photo.personal;
             try {
@@ -10524,6 +10530,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 statusColor = getThemedColor(Theme.key_avatar_subtitleInProfileBlue);
             }
             onlineTextView[1].setTextColor(ColorUtils.blendARGB(applyPeerColor(statusColor, true, isOnline[0]), 0xB3FFFFFF, currentExpandAnimatorValue));
+        }
+        if (dcIdTextView != null) {
+            dcIdTextView.setTextColor(applyPeerColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue), true, false));
         }
         if (showStatusButton != null) {
             showStatusButton.setBackgroundColor(ColorUtils.blendARGB(Theme.multAlpha(Theme.adaptHSV(actionBarBackgroundColor, +0.18f, -0.1f), 0.5f), 0x23ffffff, currentExpandAnimatorValue));
@@ -13744,8 +13753,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     nameTextView[1].setTextColor(getThemedColor(Theme.key_profile_title));
                 }
                 if (dcIdTextView != null) {
-                    dcIdTextView.getCurrentView().setTextColor(Theme.getColor(Theme.key_avatar_subtitleInProfileBlue));
-                    dcIdTextView.getNextView().setTextColor(Theme.getColor(Theme.key_avatar_subtitleInProfileBlue));
+                    dcIdTextView.setTextColor(applyPeerColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue), true, false));
                 }
                 if (actionBar != null) {
                     actionBar.setItemsColor(peerColor != null ? Color.WHITE : getThemedColor(Theme.key_actionBarDefaultIcon), false);

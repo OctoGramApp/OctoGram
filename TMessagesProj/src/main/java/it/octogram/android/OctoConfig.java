@@ -100,7 +100,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> biometricOpenSecretChats = newConfigProperty("biometricOpenSecretChats", false);
     public final ConfigProperty<Boolean> biometricOpenSettings = newConfigProperty("biometricOpenSettings", false);
     public final ConfigProperty<Boolean> shownHiddenChatsHint = newConfigProperty("shownHiddenChatsHint", false);
-    public final ConfigProperty<String> hiddenChats = newConfigProperty("hiddenChats", "[]");
+    public final ConfigProperty<String> hiddenChats = newConfigProperty("hiddenChats", "{}");
     public final ConfigProperty<String> hiddenAccounts = newConfigProperty("hiddenAccounts", "[]");
     public final ConfigProperty<Boolean> hideHiddenAccounts = newConfigProperty("hideHiddenAccounts", false);
     public final ConfigProperty<Boolean> allowUsingDevicePIN = newConfigProperty("allowUsingDevicePIN", false);
@@ -398,7 +398,13 @@ public class OctoConfig {
             }
 
             if (newDrawerItems.length() > 0) {
-                OctoConfig.INSTANCE.drawerItems.updateValue(newDrawerItems.toString());
+                drawerItems.updateValue(newDrawerItems.toString());
+                return true;
+            }
+        } else if (property.getKey() != null && property.getKey().equals(hiddenChats.getKey())) {
+            if (PREFS.getString(hiddenChats.getKey(), hiddenChats.getValue()).startsWith("[")) {
+                PREFS.edit().remove(hiddenChats.getKey()).apply();
+                hiddenChats.updateValue("{}");
                 return true;
             }
         }

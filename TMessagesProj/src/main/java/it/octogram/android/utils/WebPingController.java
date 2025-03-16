@@ -68,7 +68,6 @@ public class WebPingController {
                         callback.onUpdate(page.getId(), FAILED);
                     }
                     parsedPageIds.add(page.getId());
-                    //SystemClock.sleep(250L);
                 }
 
                 if (Thread.currentThread().isInterrupted()) {

@@ -13,8 +13,11 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.DialogObject;
@@ -29,12 +32,15 @@ import org.telegram.ui.LaunchActivity;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 
 public class FingerprintUtils {
-    private static final ArrayList<String> cachedChatsLists = new ArrayList<>();
+    private static final HashMap<String, ArrayList<String>> cachedChatsLists = new HashMap<>();
     private static boolean readFromConfig = false;
     private static final ArrayList<Long> cachedAccountsList = new ArrayList<>();
     private static boolean readFromConfigAccountsList = false;
@@ -204,6 +210,14 @@ public class FingerprintUtils {
         }
     }
 
+    private static String getAccountId() {
+        return "U" + UserConfig.getInstance(UserConfig.selectedAccount).clientUserId;
+    }
+
+    private static String getAccountId(long accountId) {
+        return "U"+accountId;
+    }
+
     public static boolean isChatLocked(TLRPC.User currentUser, TLRPC.Chat currentChat) {
         return isChatLocked(getState(currentUser, currentChat));
     }
@@ -222,7 +236,7 @@ public class FingerprintUtils {
 
     public static boolean isChatLocked(String chatState) {
         reloadLockedChatsList();
-        return cachedChatsLists.contains(chatState);
+        return cachedChatsLists.containsKey(getAccountId()) && Objects.requireNonNull(cachedChatsLists.get(getAccountId())).contains(chatState);
     }
 
     public static void lockChat(TLRPC.User currentUser, TLRPC.Chat currentChat, boolean state) {
@@ -236,16 +250,23 @@ public class FingerprintUtils {
     public static void lockChat(String chatState, boolean state) {
         reloadLockedChatsList();
 
-        int originalChatStatesLength = cachedChatsLists.size();
+        ArrayList<String> cachedChatsListForAccount = cachedChatsLists.containsKey(getAccountId()) ? cachedChatsLists.get(getAccountId()) : new ArrayList<>();
+        assert cachedChatsListForAccount != null;
+        int originalChatStatesLength = cachedChatsListForAccount.size();
 
-        if (state && !cachedChatsLists.contains(chatState)) {
-            cachedChatsLists.add(chatState);
+        if (state && !cachedChatsListForAccount.contains(chatState)) {
+            cachedChatsListForAccount.add(chatState);
         } else if (!state) {
-            cachedChatsLists.remove(chatState);
+            cachedChatsListForAccount.remove(chatState);
         }
 
-        if (cachedChatsLists.size() != originalChatStatesLength) {
-            OctoConfig.INSTANCE.hiddenChats.updateValue(cachedChatsLists.toString());
+        if (cachedChatsListForAccount.size() != originalChatStatesLength) {
+            if (cachedChatsListForAccount.isEmpty()) {
+                cachedChatsLists.remove(getAccountId());
+            } else {
+                cachedChatsLists.put(getAccountId(), cachedChatsListForAccount);
+            }
+            OctoConfig.INSTANCE.hiddenChats.updateValue(new Gson().toJson(cachedChatsLists));
         }
     }
 
@@ -266,20 +287,27 @@ public class FingerprintUtils {
     public static void lockChatsMulti(ArrayList<String> chatStates, boolean state) {
         reloadLockedChatsList();
 
-        int originalChatStatesLength = cachedChatsLists.size();
+        ArrayList<String> cachedChatsListForAccount = cachedChatsLists.containsKey(getAccountId()) ? cachedChatsLists.get(getAccountId()) : new ArrayList<>();
+        assert cachedChatsListForAccount != null;
+        int originalChatStatesLength = cachedChatsListForAccount.size();
 
         if (state) {
             for (String chatState : chatStates) {
-                if (!cachedChatsLists.contains(chatState)) {
-                    cachedChatsLists.add(chatState);
+                if (!cachedChatsListForAccount.contains(chatState)) {
+                    cachedChatsListForAccount.add(chatState);
                 }
             }
         } else {
-            cachedChatsLists.removeIf(chatStates::contains);
+            cachedChatsListForAccount.removeIf(chatStates::contains);
         }
 
-        if (cachedChatsLists.size() != originalChatStatesLength) {
-            OctoConfig.INSTANCE.hiddenChats.updateValue(cachedChatsLists.toString());
+        if (cachedChatsListForAccount.size() != originalChatStatesLength) {
+            if (cachedChatsListForAccount.isEmpty()) {
+                cachedChatsLists.remove(getAccountId());
+            } else {
+                cachedChatsLists.put(getAccountId(), cachedChatsListForAccount);
+            }
+            OctoConfig.INSTANCE.hiddenChats.updateValue(new Gson().toJson(cachedChatsLists));
         }
     }
 
@@ -298,12 +326,40 @@ public class FingerprintUtils {
         readFromConfig = true;
         try {
             String value = OctoConfig.INSTANCE.hiddenChats.getValue();
-            JSONArray jsonObject = new JSONArray(new JSONTokener(value));
-            for (int i = 0; i < jsonObject.length(); i++) {
-                try {
-                    cachedChatsLists.add(jsonObject.getString(i));
-                } catch (JSONException ignored) {
+
+            //Gson().fromJson would be a valid alternative, but using this specific method allows
+            // to check local saved values before importing them
+
+            ArrayList<String> allowedAccountIds = new ArrayList<>();
+            for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
+                long id = UserConfig.getInstance(a).clientUserId;
+                if (id > 0) {
+                    allowedAccountIds.add(getAccountId(id));
                 }
+            }
+
+            JSONObject jsonObject = new JSONObject(new JSONTokener(value));
+            for (Iterator<String> it = jsonObject.keys(); it.hasNext(); ) {
+                String key = it.next();
+
+                if (!allowedAccountIds.contains(key)) {
+                    continue;
+                }
+
+                try {
+                    JSONArray lockedChatsForAccount = jsonObject.getJSONArray(key);
+                    ArrayList<String> tempList = new ArrayList<>();
+
+                    for (int i = 0; i < lockedChatsForAccount.length(); i++) {
+                        try {
+                            tempList.add(lockedChatsForAccount.getString(i));
+                        } catch (JSONException ignored) {}
+                    }
+
+                    if (!tempList.isEmpty()) {
+                        cachedChatsLists.put(key, tempList);
+                    }
+                } catch (JSONException ignored) {}
             }
         } catch (JSONException ignored) {
         }
@@ -311,31 +367,34 @@ public class FingerprintUtils {
 
     public static boolean hasLockedChats() {
         reloadLockedChatsList();
-        return !cachedChatsLists.isEmpty();
+        return cachedChatsLists.containsKey(getAccountId()) && !Objects.requireNonNull(cachedChatsLists.get(getAccountId())).isEmpty();
     }
 
     public static int getLockedChatsCount() {
         reloadLockedChatsList();
-        return cachedChatsLists.size();
+        return !cachedChatsLists.containsKey(getAccountId()) ? 0 : Objects.requireNonNull(cachedChatsLists.get(getAccountId())).size();
     }
 
     public static ArrayList<LockedChat> getLockedChats() {
         ArrayList<LockedChat> lockedChats = new ArrayList<>();
-        MessagesController messagesController = MessagesController.getInstance(UserConfig.selectedAccount);
         reloadLockedChatsList();
-        for (String state : cachedChatsLists) {
-            if (state.startsWith("u_")) {
-                if (state.equals("u_sm")) {
-                    state = "u_" + UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
-                }
-                TLRPC.User user = messagesController.getUser(Long.parseLong(state.split("u_")[1]));
-                if (user != null) {
-                    lockedChats.add(new LockedChat(null, user));
-                }
-            } else if (state.startsWith("g_")) {
-                TLRPC.Chat chat = messagesController.getChat(-Long.parseLong(state.split("g_")[1]));
-                if (chat != null) {
-                    lockedChats.add(new LockedChat(chat, null));
+
+        if (cachedChatsLists.containsKey(getAccountId())) {
+            MessagesController messagesController = MessagesController.getInstance(UserConfig.selectedAccount);
+            for (String state : Objects.requireNonNull(cachedChatsLists.get(getAccountId()))) {
+                if (state.startsWith("u_")) {
+                    if (state.equals("u_sm")) {
+                        state = "u_" + UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
+                    }
+                    TLRPC.User user = messagesController.getUser(Long.parseLong(state.split("u_")[1]));
+                    if (user != null) {
+                        lockedChats.add(new LockedChat(null, user));
+                    }
+                } else if (state.startsWith("g_")) {
+                    TLRPC.Chat chat = messagesController.getChat(-Long.parseLong(state.split("g_")[1]));
+                    if (chat != null) {
+                        lockedChats.add(new LockedChat(chat, null));
+                    }
                 }
             }
         }

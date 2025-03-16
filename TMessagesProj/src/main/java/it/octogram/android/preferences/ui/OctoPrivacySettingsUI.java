@@ -57,6 +57,7 @@ import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.components.LockedChatsHelp;
 import it.octogram.android.utils.ExpandableRowsOption;
 import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoPrivacySettingsUI implements PreferencesEntry {
@@ -244,7 +245,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER.getValue())
                                             .setItemTitle(getString(R.string.ShowFakePhoneNumber))
-                                            .setItemDescription(formatString(R.string.ShowFakePhoneNumber_Desc, "+39 123 456 7890")),
+                                            .setItemDescription(formatString(R.string.ShowFakePhoneNumber_Desc, OctoUtils.hiddenPhoneNumberSample(UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser()))),
                                     new PopupChoiceDialogOption()
                                             .setId(PhoneNumberAlternative.SHOW_USERNAME.getValue())
                                             .setItemTitle(getString(R.string.ShowUsernameAsPhoneNumber))

@@ -2621,7 +2621,9 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                 customInfoView.setVisibility(VISIBLE);
             }
 
-            customInfoView.getDrawable().setText(text, true, true);
+            var draw = customInfoView.getDrawable();
+            draw.setText(text, true, true);
+            draw.setTextColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue));
         }
 
         public void overrideAvatarColor(int colorId) {

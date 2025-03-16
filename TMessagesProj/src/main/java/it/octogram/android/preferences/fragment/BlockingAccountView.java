@@ -362,7 +362,7 @@ public class BlockingAccountView extends ViewGroup {
     }
 
     private void askForFingerprint() {
-        FingerprintUtils.checkFingerprint(ApplicationLoader.applicationContext, FingerprintUtils.FingerprintAction.UNLOCK_ACCOUNT, true, new FingerprintUtils.FingerprintResult() {
+        FingerprintUtils.checkFingerprint(ApplicationLoader.applicationContext, isPageView ? FingerprintUtils.FingerprintAction.OPEN_PAGE : FingerprintUtils.FingerprintAction.UNLOCK_ACCOUNT, true, new FingerprintUtils.FingerprintResult() {
             @Override
             public void onSuccess() {
                 handleSuccessState(true);

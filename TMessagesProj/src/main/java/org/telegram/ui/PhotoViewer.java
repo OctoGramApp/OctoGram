@@ -10428,6 +10428,17 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     }
                     updatedQuality = true;
 
+                    if (videoPlayer == null) {
+                        OctoLogging.e("PhotoViewer", "videoPlayer is null in adaptQuality");
+                        return;
+                    }
+
+                    int qualitiesCount = videoPlayer.getQualitiesCount();
+                    if (qualitiesCount == 0) {
+                        OctoLogging.e("PhotoViewer", "No video qualities available in adaptQuality");
+                        return;
+                    }
+
                     int currentState = OctoConfig.INSTANCE.useQualityPreset.getValue();
                     if (currentState != QualityPreset.AUTO.getValue()) {
                         if (currentState == QualityPreset.DYNAMIC.getValue()) {
@@ -10436,9 +10447,16 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         int maxQuality = -1;
                         int maxQualityIndex = -1;
                         VideoPlayer.Quality maxQualityValue = null;
-                        for (int i = 0; i < videoPlayer.getQualitiesCount(); ++i) {
+                        for (int i = 0; i < qualitiesCount; ++i) {
                             VideoPlayer.Quality q = videoPlayer.getQuality(i);
-                            if (maxQuality == -1 || (currentState == QualityPreset.HIGHEST.getValue() ? (q.p() > maxQuality) : (q.p() < maxQuality))) {
+
+                            if (q == null) {
+                                OctoLogging.e("PhotoViewer", "Null quality at index " + i);
+                                continue;
+                            }
+
+                            if (maxQuality == -1 ||
+                                    (currentState == QualityPreset.HIGHEST.getValue() ? (q.p() > maxQuality) : (q.p() < maxQuality))) {
                                 maxQuality = q.p();
                                 maxQualityIndex = i;
                                 maxQualityValue = q;
@@ -10448,7 +10466,14 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                             videoPlayer.setSelectedQuality(maxQualityIndex);
                             VideoPlayer.saveQuality(maxQualityValue, currentMessageObject);
                             updateQualityItems();
-                            videoItem.closeSubMenu();
+
+                            if (videoItem != null) {
+                                videoItem.closeSubMenu();
+                            } else {
+                                OctoLogging.e("PhotoViewer", "videoItem is null in adaptQuality");
+                            }
+                        } else {
+                            OctoLogging.e("PhotoViewer", "No valid quality selected in adaptQuality");
                         }
                     }
                 }

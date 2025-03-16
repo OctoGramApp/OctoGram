@@ -10,7 +10,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.os.Build;
@@ -886,7 +885,7 @@ public class PinnedReactionsActivity extends BaseFragment {
         frameLayout.addView(viewPager, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL));
 
         actionBarContainer = new FrameLayout(context);
-        actionBarContainer.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefault, getResourceProvider()));
+        actionBarContainer.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefault));
         frameLayout.addView(actionBarContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL));
 
         tabsView = new FilledTabsView(context);
@@ -913,7 +912,7 @@ public class PinnedReactionsActivity extends BaseFragment {
         backButton.setScaleType(ImageView.ScaleType.CENTER);
         backButton.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarWhiteSelector), Theme.RIPPLE_MASK_CIRCLE_20DP));
         backButton.setImageResource(R.drawable.ic_ab_back);
-        backButton.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+        backButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
         backButton.setOnClickListener(v -> {
             if (onBackPressed()) {
                 finishFragment();

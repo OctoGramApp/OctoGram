@@ -322,7 +322,6 @@ public class UpdatesManager {
         TLRPC.Chat chatInstance = getPrivateBetaChatInstance();
 
         if (chatInstance == null) {
-            //OctoConfig.INSTANCE.receivePBetaUpdates.updateValue(false);
             callback.onNoUpdate();
             return;
         }

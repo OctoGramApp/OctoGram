@@ -13,6 +13,7 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.ui.Components.LayoutHelper.createLinear;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -514,11 +515,11 @@ public class PreferencesFragment extends BaseFragment {
             ((FrameLayout) fragmentView).addView(buttonContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48 + 25 + 10 + 10, Gravity.FILL_HORIZONTAL | Gravity.BOTTOM));
         }
 
-        float destination = isSelectingItems ? 100f : 0f;
-        ValueAnimator animator = ValueAnimator.ofFloat(isSelectingItems ? 0f : 100f, destination);
+        float destination = isSelectingItems ? 1f : 0f;
+        ValueAnimator animator = ValueAnimator.ofFloat(isSelectingItems ? 0f : 1f, destination);
         animator.setDuration(250);
         animator.addUpdateListener(animation -> {
-            float animatedValue = (float) animation.getAnimatedValue() / 100f;
+            float animatedValue = (float) animation.getAnimatedValue();
 
             actionBar.setBackgroundColor(ColorUtils.blendARGB(Theme.getColor(Theme.key_actionBarDefault), Theme.getColor(Theme.key_windowBackgroundWhite), animatedValue));
             actionBar.setTitleColor(ColorUtils.blendARGB(Theme.getColor(Theme.key_actionBarDefaultTitle), Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), animatedValue));
@@ -528,9 +529,26 @@ public class PreferencesFragment extends BaseFragment {
             if (actionBar.menu != null) {
                 actionBar.menu.setAlpha(1f - animatedValue);
             }
+        });
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation) {
 
-            if (animatedValue == (destination / 100f)) {
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation) {
                 AndroidUtilities.setLightStatusBar(getParentActivity().getWindow(), isLightStatusBar());
+            }
+
+            @Override
+            public void onAnimationCancel(@NonNull Animator animation) {
+                onAnimationEnd(animation);
+            }
+
+            @Override
+            public void onAnimationRepeat(@NonNull Animator animation) {
+
             }
         });
         animator.start();

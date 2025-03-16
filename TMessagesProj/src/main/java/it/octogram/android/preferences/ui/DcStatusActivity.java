@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -61,6 +60,7 @@ import org.telegram.ui.LaunchActivity;
 
 import java.util.HashMap;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.WebPages;
 import it.octogram.android.WebPagesCategory;
 import it.octogram.android.preferences.ui.custom.DatacenterStatus;
@@ -153,7 +153,7 @@ public class DcStatusActivity extends BaseFragment {
                     }
 
                     WebPageDetailsCell view = new WebPageDetailsCell(context);
-                    view.setData(page, true);
+                    view.setData(page, !OctoConfig.INSTANCE.disableDividers.getValue());
                     viewsAssocWebPage.put(page.getId(), view);
                     contentLayout.addView(view);
                     lastView = view;
@@ -396,7 +396,9 @@ public class DcStatusActivity extends BaseFragment {
             textLayout.addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, dp(5), 0, 2, 0, 0));
 
             updateDrawable = ContextCompat.getDrawable(context, R.drawable.pip_replay_large);
+            updateDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.SRC_IN));
             starDrawable = ContextCompat.getDrawable(context, R.drawable.star_24px);
+            starDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.SRC_IN));
 
             setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
             setWillNotDraw(false);
@@ -753,7 +755,7 @@ public class DcStatusActivity extends BaseFragment {
         backButton.setScaleType(ImageView.ScaleType.CENTER);
         backButton.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarWhiteSelector), Theme.RIPPLE_MASK_CIRCLE_20DP));
         backButton.setImageResource(R.drawable.ic_ab_back);
-        backButton.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+        backButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
         backButton.setOnClickListener(v -> {
             if (onBackPressed()) {
                 finishFragment();
@@ -765,6 +767,7 @@ public class DcStatusActivity extends BaseFragment {
         termsButton.setScaleType(ImageView.ScaleType.CENTER);
         termsButton.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarWhiteSelector), Theme.RIPPLE_MASK_CIRCLE_20DP));
         termsButton.setImageResource(R.drawable.msg_info);
+        termsButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
         termsButton.setOnClickListener(v -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format("https://%s/dcterms", OctoUtils.getDomain()))));
         actionBarContainer.addView(termsButton, LayoutHelper.createFrame(54, 54, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
 

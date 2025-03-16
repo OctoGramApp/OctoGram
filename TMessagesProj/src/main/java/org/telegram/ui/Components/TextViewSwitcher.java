@@ -56,4 +56,9 @@ public class TextViewSwitcher extends ViewSwitcher {
         getCurrentView().invalidate();
         getNextView().invalidate();
     }
+
+    public void setTextColor(int color) {
+        getCurrentView().setTextColor(color);
+        getNextView().setTextColor(color);
+    }
 }

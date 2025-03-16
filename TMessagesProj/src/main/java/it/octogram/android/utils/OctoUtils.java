@@ -300,8 +300,9 @@ public class OctoUtils {
     public static Spanned fromHtml(@NonNull String source) {
         return fromHtml(source, null);
     }
+
     public static Spanned fromHtml(@NonNull String source, Html.TagHandler tagHandler) {
-        return HtmlCompat.fromHtml(source, HtmlCompat.FROM_HTML_MODE_LEGACY,null, tagHandler);
+        return HtmlCompat.fromHtml(source, HtmlCompat.FROM_HTML_MODE_LEGACY, null, tagHandler);
     }
 
     public static ArrayList<String> getStringParts(String query, int maxBlockSize) throws IOException {
@@ -311,7 +312,7 @@ public class OctoUtils {
             return parts;
         }
 
-        while(query.length() > maxBlockSize) {
+        while (query.length() > maxBlockSize) {
             String maxBlockStr = query.substring(0, maxBlockSize);
 
             int currentStop = maxBlockStr.lastIndexOf("\n\n");
@@ -352,7 +353,7 @@ public class OctoUtils {
         }
     }
 
-    public static int getDcIcon(){
+    public static int getDcIcon() {
         return Datacenter.Companion.getDcInfo(AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId()).getIcon();
     }
 
@@ -408,6 +409,7 @@ public class OctoUtils {
     }
 
     public static CharSequence hidePhoneNumber(@NonNull TLRPC.User user) {
+        android.util.Log.d("OctoUtils", "hidePhoneNumber: " + user);
         var phone = user.phone;
         String text = PhoneFormat.getInstance().format("+" + phone);
 
@@ -433,6 +435,13 @@ public class OctoUtils {
         }
 
         return text;
+    }
+
+    public static CharSequence hiddenPhoneNumberSample(@NonNull TLRPC.User user) {
+        var phone = user.phone;
+        CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phone);
+        String phoneCountry = info != null ? info.callingCode : "";
+        return String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
     }
 
     static char[] SPOILER_CHARS = new char[] {

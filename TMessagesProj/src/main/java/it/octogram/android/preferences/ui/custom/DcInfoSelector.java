@@ -43,7 +43,7 @@ import it.octogram.android.DcIdStyle;
 import it.octogram.android.DcIdType;
 import it.octogram.android.OctoConfig;
 
-@SuppressLint("UseCompatLoadingForDrawables")
+@SuppressLint({"UseCompatLoadingForDrawables", "ViewConstructor"})
 public class DcInfoSelector extends FrameLayout {
 
     public static final int height = dp(38);
@@ -58,9 +58,11 @@ public class DcInfoSelector extends FrameLayout {
     private final Integer dc_id = AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId();
     private static final String telegramBotApiChatId = "-1001966997491";
     private final String defaultChatId = String.format("%s", user.id);
+    private final Theme.ResourcesProvider resourceProvider;
 
-    public DcInfoSelector(Context context) {
+    public DcInfoSelector(Context context, Theme.ResourcesProvider resourceProvider) {
         super(context);
+        this.resourceProvider = resourceProvider;
 
         FrameLayout internalFrameLayout = new FrameLayout(context);
         internalFrameLayout.setClipToPadding(true);
@@ -70,7 +72,7 @@ public class DcInfoSelector extends FrameLayout {
 
         GradientDrawable border = new GradientDrawable();
         border.setShape(GradientDrawable.RECTANGLE);
-        border.setStroke(dp(1), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText), 150), dp(5), dp(5));
+        border.setStroke(dp(1), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourceProvider), 150), dp(5), dp(5));
         border.setCornerRadius(dp(25));
         internalFrameLayout.setBackground(border);
 
@@ -122,7 +124,7 @@ public class DcInfoSelector extends FrameLayout {
         );
         border2.setCornerRadius(dp(25));
         profileViewFrame.setBackground(border2);
-        profilePreview = new PeerColorActivity.ProfilePreview(context, UserConfig.selectedAccount, 0, null);
+        profilePreview = new PeerColorActivity.ProfilePreview(context, UserConfig.selectedAccount, 0, resourceProvider);
         profilePreview.setColor(UserObject.getProfileColorId(user), false);
         profilePreview.setEmoji(UserObject.getProfileEmojiId(user), false, false);
         profilePreview.setCustomInfoText(String.format(Locale.ENGLISH, "id: %s (dc%s)", getCurrentChatIDFormat(), dc_id));
@@ -141,8 +143,8 @@ public class DcInfoSelector extends FrameLayout {
         linearLayout.setPadding(dp(23), 0, dp(23), 0);
         linearLayout.setLayoutParams(LayoutHelper.createLinear(LayoutParams.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        int colorText = Theme.getColor(Theme.key_windowBackgroundWhiteBlackText);
-        int colorText2 = Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2);
+        int colorText = Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourceProvider);
+        int colorText2 = Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourceProvider);
 
         animatedIdView = new AnimatedTextView(context);
         animatedIdView.setAnimationProperties(1f, 0, 300, CubicBezierInterpolator.EASE_OUT_QUINT);

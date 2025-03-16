@@ -341,8 +341,6 @@ public class CameraXController {
             }
         }
 
-        // setLowLightBoostEnabled(OctoConfig.INSTANCE.cameraXLowLightBoost.getValue()); Some issue regarding color
-
         if (camera != null) {
             camera.getCameraControl().setLinearZoom(oldZoomSelection);
         }

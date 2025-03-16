@@ -56,7 +56,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, getString(R.string.OctoGeneralSettingsHeader))
                 .category(getString(R.string.DcIdHeader), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(dcInfoSelector = new DcInfoSelector(context))
+                            .layout(dcInfoSelector = new DcInfoSelector(context, fragment.getResourceProvider()))
                             .showIf(isDcIdVisible)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
