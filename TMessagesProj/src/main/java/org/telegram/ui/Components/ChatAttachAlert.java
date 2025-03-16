@@ -4057,22 +4057,6 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             }
         }
     }
-    private void handleCameraAction() {
-        if (!photosEnabled && !videosEnabled) {
-            if (checkCanRemoveRestrictionsByBoosts()) return;
-            showLayout(new ChatAttachRestrictedLayout(1, this, getContext(), resourcesProvider));
-            return;
-        }
-        photoLayout.checkCamera(false);
-        photoLayout.openCamera(true);
-    }
-
-    public void onCameraButtonLongPress() {
-        if ((photosEnabled || videosEnabled || !checkCanRemoveRestrictionsByBoosts()) && delegate != null) {
-            delegate.didPressedButton(0, false, true, 0, 0, false, false);
-        }
-    }
-
     public AttachAlertLayout getCurrentAttachLayout() {
         return currentAttachLayout;
     }
@@ -6075,5 +6059,21 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
     private void toggleCaptionAbove() {
         setCaptionAbove(!captionAbove);
+    }
+
+    private void handleCameraAction() {
+        if (!photosEnabled && !videosEnabled) {
+            if (checkCanRemoveRestrictionsByBoosts()) return;
+            showLayout(restrictedLayout = new ChatAttachRestrictedLayout(1, this, getContext(), resourcesProvider));
+            return;
+        }
+        photoLayout.checkCamera(false);
+        photoLayout.openCamera(true);
+    }
+
+    public void onCameraButtonLongPress() {
+        if ((photosEnabled || videosEnabled || !checkCanRemoveRestrictionsByBoosts()) && delegate != null) {
+            delegate.didPressedButton(0, false, true, 0, 0, false, false, 0);
+        }
     }
 }

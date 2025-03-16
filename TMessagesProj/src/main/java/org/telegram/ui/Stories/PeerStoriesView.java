@@ -3614,7 +3614,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                 ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_featuredStickers_buttonText, resourcesProvider), 30))
         );
         buttonTextView.setOnClickListener(v -> {
-            if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
+            if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.isDownloadedFromAnyStore()) {
                 if (LaunchActivity.instance != null) {
                     LaunchActivity.instance.checkAppUpdate(true, null);
                 }

@@ -8,6 +8,9 @@
 
 package it.octogram.android.crashlytics;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.LinearLayout;
@@ -16,7 +19,6 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -47,8 +49,8 @@ public class CrashlyticsBottomSheet extends CustomBottomSheet {
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString(R.string.OctoCrashedTitle));
-        textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
+        textView.setText(getString(R.string.OctoCrashedTitle));
+        textView.setPadding(dp(30), 0, dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         textView = new AppCompatTextView(activity);
@@ -56,17 +58,17 @@ public class CrashlyticsBottomSheet extends CustomBottomSheet {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setText(R.string.OctoCrashedSubTitle);
-        textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
+        textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         var buttonTextView = new AppCompatTextView(activity);
-        buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+        buttonTextView.setPadding(dp(34), 0, dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setTypeface(AndroidUtilities.bold());
         buttonTextView.setText(R.string.Acknowledge);
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> {
             Crashlytics.archiveLatestCrash();
             dismiss();

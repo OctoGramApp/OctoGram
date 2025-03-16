@@ -17,6 +17,8 @@ import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
@@ -34,6 +36,7 @@ import org.telegram.ui.Components.spoilers.SpoilersTextView;
 import org.telegram.ui.LaunchActivity;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -45,12 +48,13 @@ import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UpdatesManager;
 
 public class OctoInfoSettingsUI implements PreferencesEntry {
+    @NonNull
     @Override
-    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
+    public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         TLRPC.Chat pbetaChatInstance = UpdatesManager.getPrivateBetaChatInstance();
 
         return OctoPreferences.builder(getString(R.string.OctoInfoSettingsHeader))
-                .deepLink("tg://octogram")
+                .deepLink(DeepLinkDef.INFO)
                 .octoAnimation("Discover more on the OctoGram world")
                 .row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(getPbetaJoinGroupSuggestion(context, fragment, pbetaChatInstance))
@@ -61,20 +65,20 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
                             .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
                             .value("@OctoGramApp")
                             .icon(R.drawable.msg_channel)
-                            .title(LocaleController.getString(R.string.OfficialChannel))
+                            .title(getString(R.string.OfficialChannel))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramChat", fragment, 1))
                             .value("@OctoGramChat")
                             .icon(R.drawable.msg_groups)
-                            .title(LocaleController.getString(R.string.OfficialGroup))
+                            .title(getString(R.string.OfficialGroup))
                             .build());
                 })
                 .category(getString(R.string.OctoMainSettingsInfo), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format("https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH))))
                             .icon(R.drawable.outline_source_white_28)
-                            .title(LocaleController.getString(R.string.SourceCode))
+                            .title(getString(R.string.SourceCode))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format("https://%s/privacy", OctoUtils.getDomain()))))
@@ -132,9 +136,9 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
         textViewButton.setTypeface(AndroidUtilities.bold());
         layout.addView(textViewButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 21, 16, 21, 15));
 
-        textView.setText(LocaleController.getString(R.string.ContributeUsingPbeta));
-        detailTextView.setText(LocaleController.getString(pbetaChatInstance != null ? R.string.ContributeUsingPbeta_Desc_Already : R.string.ContributeUsingPbeta_Desc));
-        textViewButton.setText(LocaleController.getString(pbetaChatInstance != null ? R.string.OfficialPbetaChat : R.string.RequestToJoinGroup));
+        textView.setText(getString(R.string.ContributeUsingPbeta));
+        detailTextView.setText(getString(pbetaChatInstance != null ? R.string.ContributeUsingPbeta_Desc_Already : R.string.ContributeUsingPbeta_Desc));
+        textViewButton.setText(getString(pbetaChatInstance != null ? R.string.OfficialPbetaChat : R.string.RequestToJoinGroup));
 
         textViewButton.setOnClickListener(v -> {
             if (pbetaChatInstance != null) {

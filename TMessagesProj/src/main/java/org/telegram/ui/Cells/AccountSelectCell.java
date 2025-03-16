@@ -34,6 +34,9 @@ import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
 
+import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.OctoUtils;
+
 public class AccountSelectCell extends FrameLayout {
 
     private SimpleTextView textView;
@@ -52,6 +55,7 @@ public class AccountSelectCell extends FrameLayout {
         avatarDrawable.setTextSize(dp(12));
 
         imageView = new BackupImageView(context);
+        imageView.setBlurAllowed(true);
         imageView.setRoundRadius(dp(18));
         addView(imageView, LayoutHelper.createFrame(36, 36, Gravity.LEFT | Gravity.TOP, 10, 10, 0, 0));
 
@@ -121,6 +125,11 @@ public class AccountSelectCell extends FrameLayout {
             avatarDrawable.setInfo(user);
             infoTextView.setText(ContactsController.formatName(user.first_name, user.last_name));
             imageView.setForUserOrChat(user, avatarDrawable);
+
+            if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(user.id)) {
+                infoTextView.setText(OctoUtils.createSpoiledName(ContactsController.formatName(user.first_name, user.last_name)));
+                imageView.setHasBlur(true);
+            }
         } else {
             TLRPC.Chat chat = (TLRPC.Chat) object;
             avatarDrawable.setInfo(chat);
@@ -137,6 +146,11 @@ public class AccountSelectCell extends FrameLayout {
         imageView.getImageReceiver().setCurrentAccount(account);
         imageView.setForUserOrChat(user, avatarDrawable);
         checkImageView.setVisibility(check && account == UserConfig.selectedAccount ? VISIBLE : INVISIBLE);
+
+        if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(user.id)) {
+            textView.setText(OctoUtils.createSpoiledName(ContactsController.formatName(user.first_name, user.last_name)));
+            imageView.setHasBlur(true);
+        }
     }
 
     public int getAccountNumber() {

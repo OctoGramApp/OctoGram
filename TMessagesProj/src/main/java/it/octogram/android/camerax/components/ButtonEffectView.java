@@ -8,6 +8,8 @@
 
 package it.octogram.android.camerax.components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -27,7 +29,6 @@ import android.widget.RelativeLayout;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.res.ResourcesCompat;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 
@@ -64,7 +65,7 @@ public class ButtonEffectView extends RelativeLayout {
     }
 
     private Bitmap getIcon() {
-        int w = AndroidUtilities.dp(50);
+        int w = dp(50);
         Bitmap bmp = Bitmap.createBitmap(w, w, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp);
 

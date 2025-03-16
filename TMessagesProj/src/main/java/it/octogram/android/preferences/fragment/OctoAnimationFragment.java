@@ -227,7 +227,7 @@ public class OctoAnimationFragment extends FrameLayout  {
 
         private void handleDisappearCompleted() {
             avatarImageView = new BackupImageView(getContext());
-            avatarImageView.getImageReceiver().setRoundRadius(AndroidUtilities.dp(100));
+            avatarImageView.getImageReceiver().setRoundRadius(dp(100));
             avatarImageView.setScaleX(0f);
             avatarImageView.setScaleY(0f);
             addView(avatarImageView, octoImageView.getLayoutParams());

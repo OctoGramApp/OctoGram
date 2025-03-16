@@ -215,6 +215,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
     private LongSparseArray<DialogsSearchAdapter.RecentSearchObject> recentSearchObjectsById = new LongSparseArray<>();
     TL_stories.StoryItem storyItem;
 
+    private boolean useNewShareLink;
     public void setStoryToShare(TL_stories.StoryItem storyItem) {
         this.storyItem = storyItem;
     }
@@ -485,6 +486,10 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         this(context, messages, text, channel, copyLink, fullScreen, null);
     }
 
+    public ShareAlert(final Context context, ArrayList<MessageObject> messages, final String text, boolean channel, final String copyLink, boolean fullScreen, boolean useNewShareLink) {
+        this(context, null, messages, text, null, channel, copyLink, null, fullScreen, false, false, null, null, useNewShareLink);
+    }
+
     public ShareAlert(final Context context, ArrayList<MessageObject> messages, final String text, boolean channel, final String copyLink, boolean fullScreen, Theme.ResourcesProvider resourcesProvider) {
         this(context, null, messages, text, null, channel, copyLink, null, fullScreen, false, false, null, resourcesProvider);
     }
@@ -494,9 +499,14 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
     }
 
     public ShareAlert(final Context context, ChatActivity fragment, ArrayList<MessageObject> messages, final String text, final String text2, boolean channel, final String copyLink, final String copyLink2, boolean fullScreen, boolean forCall, boolean includeStory, Integer video_timestamp, Theme.ResourcesProvider theme) {
+        this(context, fragment, messages, text, text2, channel, copyLink, copyLink2, fullScreen, forCall, includeStory, video_timestamp, theme, false);
+    }
+
+    public ShareAlert(final Context context, ChatActivity fragment, ArrayList<MessageObject> messages, final String text, final String text2, boolean channel, final String copyLink, final String copyLink2, boolean fullScreen, boolean forCall, boolean includeStory, Integer video_timestamp, Theme.ResourcesProvider theme, boolean useNewShareLink) {
         super(context, true, theme);
         this.resourcesProvider = theme;
         this.includeStory = includeStory;
+        this.useNewShareLink = useNewShareLink;
 
         parentActivity = AndroidUtilities.findActivity(context);
 
@@ -1339,7 +1349,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         containerView.addView(shadow[1], frameLayoutParams);
 
         if (isChannel || linkToCopy[0] != null) {
-            if (darkTheme) {
+            if (darkTheme || this.useNewShareLink) {
                 pickerBottom = new FrameLayout(context);
 
                 pickerBottomLayout = new BlurredFrameLayout(context, sizeNotifierFrameLayout);
@@ -2356,7 +2366,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         sendInternal(withSound, 0);
     }
 
-        protected void sendInternal(boolean withSound, int scheduleDate) {
+    protected void sendInternal(boolean withSound, int scheduleDate) {
         for (int a = 0; a < selectedDialogs.size(); a++) {
             long key = selectedDialogs.keyAt(a);
             if (AlertsCreator.checkSlowMode(getContext(), currentAccount, key, frameLayout2.getTag() != null && commentTextView.length() > 0)) {
@@ -2377,16 +2387,8 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
         int messagesCount = 0;
         ArrayList<Long> paidDialogIds = new ArrayList<>();
         if (sendingMessageObjects != null) {
-            List<Long> removeKeys = new ArrayList<>();
             for (int a = 0; a < selectedDialogs.size(); a++) {
-                long key = selectedDialogs.keyAt(a);
-                TLRPC.TL_forumTopic topic = selectedDialogTopics.get(selectedDialogs.get(key));
-                MessageObject replyTopMsg = topic != null ? new MessageObject(currentAccount, topic.topicStartMessage, false, false) : null;
-                if (replyTopMsg != null) {
-                    replyTopMsg.isTopicMainMessage = true;
-                }
-
-                final long did = key;
+                final long did = selectedDialogs.keyAt(a);
                 long thisPrice = MessagesController.getInstance(currentAccount).getSendPaidMessagesStars(did);
                 if (thisPrice <= 0) {
                     thisPrice = DialogObject.getMessagesStarsPrice(MessagesController.getInstance(currentAccount).isUserContactBlocked(did));
@@ -2400,27 +2402,6 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 if (thisPrice > 0 && !paidDialogIds.contains(did)) {
                     paidDialogIds.add(did);
                 }
-
-
-                int result;
-                    if (frameLayout2.getTag() != null && commentTextView.length() > 0) {
-                        SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(text[0] == null ? null : text[0].toString(), key, replyTopMsg, replyTopMsg, null, true, entities, null, null, withSound, scheduleDate, null, false));
-                    }
-                    result = SendMessagesHelper.getInstance(currentAccount).sendMessage(sendingMessageObjects, key, forwardContext.getForwardParams().noQuote, forwardContext.getForwardParams().noCaption, withSound, scheduleDate, replyTopMsg, video_timestamp);
-                if (result != 0) {
-                    removeKeys.add(key);
-                }
-                if (selectedDialogs.size() == 1) {
-                    AlertsCreator.showSendMediaAlert(result, parentFragment, null);
-                }
-            }
-            if (!removeKeys.isEmpty()) {
-                for (int a = 0; a < removeKeys.size(); a++) {
-                    selectedDialogs.remove(removeKeys.get(a));
-                }
-                if (selectedDialogs.size() == 0) {
-                    onDialogsUnselected(0);
-                }
             }
         } else {
             int num;
@@ -2431,11 +2412,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             }
             if (storyItem != null) {
                 for (int a = 0; a < selectedDialogs.size(); a++) {
-                    long key = selectedDialogs.keyAt(a);
-                    TLRPC.TL_forumTopic topic = selectedDialogTopics.get(selectedDialogs.get(key));
-                    MessageObject replyTopMsg = topic != null ? new MessageObject(currentAccount, topic.topicStartMessage, false, false) : null;
-
-                    final long did = key;
+                    final long did = selectedDialogs.keyAt(a);
                     long thisPrice = MessagesController.getInstance(currentAccount).getSendPaidMessagesStars(did);
                     if (thisPrice <= 0) {
                         thisPrice = DialogObject.getMessagesStarsPrice(MessagesController.getInstance(currentAccount).isUserContactBlocked(did));
@@ -2451,31 +2428,10 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                     if (thisPrice > 0 && !paidDialogIds.contains(did)) {
                         paidDialogIds.add(did);
                     }
-
-
-                    SendMessagesHelper.SendMessageParams params;
-                    if (storyItem == null) {
-                        if (frameLayout2.getTag() != null && commentTextView.length() > 0) {
-                            params = SendMessagesHelper.SendMessageParams.of(text[0] == null ? null : text[0].toString(), key, replyTopMsg, replyTopMsg, null, true, entities, null, null, withSound, scheduleDate, null, false);
-                        } else {
-                            params = SendMessagesHelper.SendMessageParams.of(sendingText[num], key, replyTopMsg, replyTopMsg, null, true, null, null, null, withSound, scheduleDate, null, false);
-                        }
-                    } else {
-                        if (frameLayout2.getTag() != null && commentTextView.length() > 0 && text[0] != null) {
-                            SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(text[0].toString(), key, null, replyTopMsg, null, true, null, null, null, withSound, scheduleDate, null, false));
-                        }
-                        params = SendMessagesHelper.SendMessageParams.of(null, key, replyTopMsg, replyTopMsg, null, true, null, null, null, withSound, scheduleDate, null, false);
-                        params.sendingStory = storyItem;
-                    }
-                    SendMessagesHelper.getInstance(currentAccount).sendMessage(params);
                 }
             } else if (sendingText[num] != null) {
                 for (int a = 0; a < selectedDialogs.size(); a++) {
-                    long key = selectedDialogs.keyAt(a);
-                    TLRPC.TL_forumTopic topic = selectedDialogTopics.get(selectedDialogs.get(key));
-                    MessageObject replyTopMsg = topic != null ? new MessageObject(currentAccount, topic.topicStartMessage, false, false) : null;
-
-                    final long did = key;
+                    final long did = selectedDialogs.keyAt(a);
                     long thisPrice = MessagesController.getInstance(currentAccount).getSendPaidMessagesStars(did);
                     if (thisPrice <= 0) {
                         thisPrice = DialogObject.getMessagesStarsPrice(MessagesController.getInstance(currentAccount).isUserContactBlocked(did));
@@ -2489,14 +2445,108 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                     if (thisPrice > 0 && !paidDialogIds.contains(did)) {
                         paidDialogIds.add(did);
                     }
-
-                    if (frameLayout2.getTag() != null && commentTextView.length() > 0) {
-                        SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(text[0] == null ? null : text[0].toString(), key, replyTopMsg, replyTopMsg, null, true, entities, null, null, withSound, scheduleDate, null, false));
-                    }
-                    SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(sendingText[num], key, replyTopMsg, replyTopMsg, null, true, null, null, null, withSound, scheduleDate, null, false));
                 }
             }
         }
+
+        AlertsCreator.ensurePaidMessagesMultiConfirmation(currentAccount, paidDialogIds, messagesCount, prices -> {
+            boolean hadPaid = false;
+            if (sendingMessageObjects != null) {
+                List<Long> removeKeys = new ArrayList<>();
+                for (int a = 0; a < selectedDialogs.size(); a++) {
+                    long key = selectedDialogs.keyAt(a);
+                    final Long price = prices == null ? (Long) 0L : prices.get(key);
+                    if (price != null && price > 0) hadPaid = true;
+                    TLRPC.TL_forumTopic topic = selectedDialogTopics.get(selectedDialogs.get(key));
+                    MessageObject replyTopMsg = topic != null ? new MessageObject(currentAccount, topic.topicStartMessage, false, false) : null;
+                    if (replyTopMsg != null) {
+                        replyTopMsg.isTopicMainMessage = true;
+                    }
+                    int result;
+                    if (frameLayout2.getTag() != null && commentTextView.length() > 0) {
+                        SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(text[0] == null ? null : text[0].toString(), key, replyTopMsg, replyTopMsg, null, true, entities, null, null, withSound, scheduleDate, null, false);
+                        params.payStars = price == null ? 0 : price;
+                        SendMessagesHelper.getInstance(currentAccount).sendMessage(params);
+                    }
+                    result = SendMessagesHelper.getInstance(currentAccount).sendMessage(sendingMessageObjects, key, forwardContext.getForwardParams().noQuote,forwardContext.getForwardParams().noCaption, withSound, scheduleDate, replyTopMsg, video_timestamp, price == null ? 0 : price);
+                    if (result != 0) {
+                        removeKeys.add(key);
+                    }
+                    if (selectedDialogs.size() == 1) {
+                        AlertsCreator.showSendMediaAlert(result, parentFragment, null);
+
+                        if (result != 0) {
+                            break;
+                        }
+                    }
+                }
+                for (long key : removeKeys) {
+                    TLRPC.Dialog dialog = selectedDialogs.get(key);
+                    selectedDialogs.remove(key);
+                    if (dialog != null) {
+                        selectedDialogTopics.remove(dialog);
+                    }
+                }
+                if (!selectedDialogs.isEmpty()) {
+                    onSend(selectedDialogs, sendingMessageObjects.size(), selectedDialogs.size() == 1 ? selectedDialogTopics.get(selectedDialogs.valueAt(0)) : null, !hadPaid);
+                }
+            } else {
+                int num;
+                if (switchView != null) {
+                    num = switchView.currentTab;
+                } else {
+                    num = 0;
+                }
+                if (storyItem != null) {
+                    for (int a = 0; a < selectedDialogs.size(); a++) {
+                        long key = selectedDialogs.keyAt(a);
+                        final Long price = prices == null ? (Long) 0L : prices.get(key);
+                        if (price != null && price > 0) hadPaid = true;
+                        TLRPC.TL_forumTopic topic = selectedDialogTopics.get(selectedDialogs.get(key));
+                        MessageObject replyTopMsg = topic != null ? new MessageObject(currentAccount, topic.topicStartMessage, false, false) : null;
+
+                        SendMessagesHelper.SendMessageParams params;
+                        if (storyItem == null) {
+                            if (frameLayout2.getTag() != null && commentTextView.length() > 0) {
+                                params = SendMessagesHelper.SendMessageParams.of(text[0] == null ? null : text[0].toString(), key, replyTopMsg, replyTopMsg, null, true, entities, null, null, withSound, scheduleDate, null, false);
+                            } else {
+                                params = SendMessagesHelper.SendMessageParams.of(sendingText[num], key, replyTopMsg, replyTopMsg, null, true, null, null, null, withSound, scheduleDate, null, false);
+                            }
+                        } else {
+                            if (frameLayout2.getTag() != null && commentTextView.length() > 0 && text[0] != null) {
+                                SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(text[0].toString(), key, null, replyTopMsg, null, true, null, null, null, withSound, 0, null, false));
+                            }
+                            params = SendMessagesHelper.SendMessageParams.of(null, key, replyTopMsg, replyTopMsg, null, true, null, null, null, withSound, 0, null, false);
+                            params.sendingStory = storyItem;
+                        }
+                        params.payStars = price == null ? 0 : price;
+                        SendMessagesHelper.getInstance(currentAccount).sendMessage(params);
+                    }
+                } else if (sendingText[num] != null) {
+                    for (int a = 0; a < selectedDialogs.size(); a++) {
+                        long key = selectedDialogs.keyAt(a);
+                        final Long price = prices == null ? (Long) 0L : prices.get(key);
+                        if (price != null && price > 0) hadPaid = true;
+                        TLRPC.TL_forumTopic topic = selectedDialogTopics.get(selectedDialogs.get(key));
+                        MessageObject replyTopMsg = topic != null ? new MessageObject(currentAccount, topic.topicStartMessage, false, false) : null;
+
+                        if (frameLayout2.getTag() != null && commentTextView.length() > 0) {
+                            SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(text[0] == null ? null : text[0].toString(), key, replyTopMsg, replyTopMsg, null, true, entities, null, null, withSound, scheduleDate, null, false);
+                            params.payStars = price == null ? 0 : price;
+                            SendMessagesHelper.getInstance(currentAccount).sendMessage(params);
+                        }
+                        SendMessagesHelper.SendMessageParams params2 = SendMessagesHelper.SendMessageParams.of(sendingText[num], key, replyTopMsg, replyTopMsg, null, true, null, null, null, withSound, scheduleDate, null, false);
+                        params2.payStars = price == null ? 0 : price;
+                        SendMessagesHelper.getInstance(currentAccount).sendMessage(params2);
+                    }
+                }
+                onSend(selectedDialogs, 1, selectedDialogTopics.get(selectedDialogs.valueAt(0)), !hadPaid);
+            }
+            if (delegate != null) {
+                delegate.didShare();
+            }
+            dismiss();
+        });
     }
 
     protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic, boolean showToast) {
@@ -2727,7 +2777,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
             animators.add(ObjectAnimator.ofFloat(shadow[1], View.ALPHA, show ? 1.0f : 0.0f));
         }
         if (pickerBottomLayout != null) {
-            animators.add(ObjectAnimator.ofFloat(pickerBottomLayout, View.TRANSLATION_Y, darkTheme ? (show ? dp(timestampLayout != null ? 5 : 16) : 0.0f) : 0));
+            animators.add(ObjectAnimator.ofFloat(pickerBottomLayout, View.TRANSLATION_Y, (darkTheme || this.useNewShareLink) ? (show ? dp(timestampLayout != null ? 5 : 16) : 0.0f) : 0));
         }
 
         animatorSet.playTogether(animators);

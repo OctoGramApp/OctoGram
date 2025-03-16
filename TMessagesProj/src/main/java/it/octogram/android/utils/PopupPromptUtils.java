@@ -8,10 +8,11 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.app.Activity;
 import android.app.Dialog;
 
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
 
@@ -20,10 +21,10 @@ import it.octogram.android.PromptBeforeSendMedia;
 public class PopupPromptUtils {
     public static Dialog createAlertDialog(Activity parentActivity, PromptBeforeSendMedia media, OnPromptConfirmed callback) {
         AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
-        builder.setTitle(LocaleController.getString(R.string.Warning));
-        builder.setMessage(LocaleController.getString(getString(media)));
-        builder.setPositiveButton(LocaleController.getString(R.string.PromptBeforeSendingConfirm), (dialog1, which1) -> callback.onPromptConfirmed());
-        builder.setNeutralButton(LocaleController.getString(R.string.Cancel), null);
+        builder.setTitle(getString(R.string.Warning));
+        builder.setMessage(getString(getStrings(media)));
+        builder.setPositiveButton(getString(R.string.PromptBeforeSendingConfirm), (dialog1, which1) -> callback.onPromptConfirmed());
+        builder.setNeutralButton(getString(R.string.Cancel), null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -31,7 +32,7 @@ public class PopupPromptUtils {
         return builder.create();
     }
 
-    private static int getString(PromptBeforeSendMedia media) {
+    private static int getStrings(PromptBeforeSendMedia media) {
         if (media.getId() == PromptBeforeSendMedia.STICKERS.getId()) {
             return R.string.PromptBeforeSendingSticker;
         } else {

@@ -79,7 +79,7 @@ public class YandexTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (IOException | JSONException e) {
-                    OctoLogging.e(e);
+                    OctoLogging.e("YandexTranslator", e);
                     callback.onResponseReceived();
                     callback.onError();
                 }

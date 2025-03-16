@@ -26,6 +26,7 @@ import java.io.File;
 import it.octogram.android.logs.OctoLogging;
 
 public class MessageHelper {
+    private static final String TAG = "MessageHelper";
 
     public static void addMessageToClipboard(MessageObject selectedObject, Runnable callback) {
         String path = getPathToMessage(selectedObject);
@@ -43,7 +44,7 @@ public class MessageHelper {
             clipboard.setPrimaryClip(clip);
             callback.run();
         } catch (Exception e) {
-            OctoLogging.e(e);
+            OctoLogging.e(TAG, e);
         }
     }
 

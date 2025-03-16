@@ -8,6 +8,10 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
@@ -22,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -76,8 +81,8 @@ public class EmojiSet extends FrameLayout {
         radialProgress.setNoProgress(false);
         radialProgress.setProgressColor(Theme.getColor(Theme.key_featuredStickers_addedIcon));
         radialProgress.setStrokeWidth(2.8F);
-        radialProgress.setSize(AndroidUtilities.dp(30));
-        radialProgress.setLayoutParams(new LinearLayout.LayoutParams(AndroidUtilities.dp(40), AndroidUtilities.dp(40)));
+        radialProgress.setSize(dp(30));
+        radialProgress.setLayoutParams(new LinearLayout.LayoutParams(dp(40), dp(40)));
         radialProgress.setVisibility(INVISIBLE);
         addView(radialProgress, LayoutHelper.createFrame(40, 40, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, (LocaleController.isRTL ? 10 : 0), 9, (LocaleController.isRTL ? 0 : 10), 0));
 
@@ -102,7 +107,7 @@ public class EmojiSet extends FrameLayout {
         valueTextView = new AnimatedTextView(context);
         valueTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
         valueTextView.setAnimationProperties(.55f, 0, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
-        valueTextView.setTextSize(AndroidUtilities.dp(13));
+        valueTextView.setTextSize(dp(13));
         valueTextView.setGravity(LayoutHelper.getAbsoluteGravityStart());
         addView(valueTextView, LayoutHelper.createFrameRelatively(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.START, 71, 25, 70, 0));
 
@@ -125,13 +130,13 @@ public class EmojiSet extends FrameLayout {
         }
         packFileLink = emojiPackInfo.getFileLocation();
         if (Objects.equals(packId, "default")) {
-            valueTextView.setText(LocaleController.getString(R.string.Default), animated);
+            valueTextView.setText(getString(R.string.Default), animated);
         } else if (CustomEmojiController.emojiDir(packId, versionWithMD5).exists() || TextUtils.isEmpty(versionWithMD5)) {
-            valueTextView.setText(LocaleController.getString(R.string.InstalledEmojiSet), animated);
+            valueTextView.setText(getString(R.string.InstalledEmojiSet), animated);
         } else {
-            String status = LocaleController.getString(R.string.DownloadUpdate);
+            String status = getString(R.string.DownloadUpdate);
             if (CustomEmojiController.isInstalledOldVersion(packId, versionWithMD5)) {
-                status = LocaleController.getString(R.string.UpdateEmojiSet);
+                status = getString(R.string.UpdateEmojiSet);
             }
             valueTextView.setText(String.format(
                     "%s %s",
@@ -179,15 +184,15 @@ public class EmojiSet extends FrameLayout {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         if (needDivider) {
-            canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(71), getHeight() - 1, getWidth() - getPaddingRight() - (LocaleController.isRTL ? AndroidUtilities.dp(71) : 0), getHeight() - 1, Theme.dividerPaint);
+            canvas.drawLine(LocaleController.isRTL ? 0 : dp(71), getHeight() - 1, getWidth() - getPaddingRight() - (LocaleController.isRTL ? dp(71) : 0), getHeight() - 1, Theme.dividerPaint);
         }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(58) + (needDivider ? 1 : 0), MeasureSpec.EXACTLY));
+        super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(58) + (needDivider ? 1 : 0), MeasureSpec.EXACTLY));
     }
 
     public void setProgress(boolean visible, boolean animated) {
@@ -215,8 +220,7 @@ public class EmojiSet extends FrameLayout {
 
     public void setProgress(float percentage, long downBytes, boolean animated) {
         radialProgress.setProgress(percentage / 100f);
-        valueTextView.setText(LocaleController.formatString(
-                "AccDescrDownloadProgress",
+        valueTextView.setText(formatString(
                 R.string.AccDescrDownloadProgress,
                 AndroidUtilities.formatFileSize(downBytes),
                 AndroidUtilities.formatFileSize(packFileSize)
@@ -228,9 +232,9 @@ public class EmojiSet extends FrameLayout {
         if (CustomEmojiController.emojiTmpDownloaded(packId) || CustomEmojiController.emojiDir(packId, versionWithMD5).exists() || TextUtils.isEmpty(versionWithMD5)) {
             setProgress(false, animated);
             if (FileUnzip.isRunningUnzip(packId)) {
-                valueTextView.setText(LocaleController.getString(R.string.InstallingEmojiSet), animated);
+                valueTextView.setText(getString(R.string.InstallingEmojiSet), animated);
             } else {
-                valueTextView.setText(LocaleController.getString(R.string.InstalledEmojiSet), animated);
+                valueTextView.setText(getString(R.string.InstalledEmojiSet), animated);
             }
         } else if (FileDownloader.isRunningDownload(packId)) {
             setProgress(true, animated);
@@ -239,9 +243,9 @@ public class EmojiSet extends FrameLayout {
         } else {
             setProgress(false, animated);
             setChecked(false, animated);
-            String status = LocaleController.getString(R.string.DownloadUpdate);
+            String status = getString(R.string.DownloadUpdate);
             if (CustomEmojiController.isInstalledOldVersion(packId, versionWithMD5)) {
-                status = LocaleController.getString(R.string.UpdateEmojiSet);
+                status = getString(R.string.UpdateEmojiSet);
             }
             valueTextView.setText(String.format(
                     "%s %s",

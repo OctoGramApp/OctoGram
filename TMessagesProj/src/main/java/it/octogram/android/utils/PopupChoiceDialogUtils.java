@@ -9,6 +9,7 @@
 package it.octogram.android.utils;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -123,7 +124,7 @@ public class PopupChoiceDialogUtils {
             }
         }
 
-        builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+        builder.setNegativeButton(getString(R.string.Cancel), null);
 
         return builder.create();
     }

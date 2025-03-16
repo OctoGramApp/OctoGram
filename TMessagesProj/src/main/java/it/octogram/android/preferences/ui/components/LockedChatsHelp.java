@@ -1,6 +1,7 @@
 package it.octogram.android.preferences.ui.components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -19,7 +20,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.ColoredImageSpan;
@@ -49,14 +49,14 @@ public class LockedChatsHelp extends FrameLayout {
         titleTextView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
         titleTextView.setTypeface(AndroidUtilities.bold());
         titleTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-        titleTextView.setText(LocaleController.getString(R.string.LockedChatsHelpTitle));
+        titleTextView.setText(getString(R.string.LockedChatsHelpTitle));
         layout.addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 0, 32, 9));
 
         subtitleTextView = new LinkSpanDrawable.LinksTextView(context);
         subtitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         subtitleTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider));
         subtitleTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-        SpannableStringBuilder linkedSubtitle = AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.LockedChatsHelpDescription), Theme.key_chat_messageLinkIn, 0, linkCallback);
+        SpannableStringBuilder linkedSubtitle = AndroidUtilities.replaceSingleTag(getString(R.string.LockedChatsHelpDescription), Theme.key_chat_messageLinkIn, 0, linkCallback);
         SpannableString arrow = new SpannableString(">");
         Drawable imageDrawable = getContext().getResources().getDrawable(R.drawable.msg_arrowright).mutate();
         imageDrawable.setColorFilter(new PorterDuffColorFilter(Theme.key_chat_messageLinkIn, PorterDuff.Mode.SRC_IN));
@@ -70,31 +70,31 @@ public class LockedChatsHelp extends FrameLayout {
         layout.addView(subtitleTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 0, 32, 25));
 
         layout.addView(
-                makeHint(R.drawable.edit_passcode, LocaleController.getString(R.string.LockedChatsHelpHint1Title), LocaleController.getString(R.string.LockedChatsHelpHint1Description), resourcesProvider),
+                makeHint(R.drawable.edit_passcode, getString(R.string.LockedChatsHelpHint1Title), getString(R.string.LockedChatsHelpHint1Description), resourcesProvider),
                 LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
         );
         layout.addView(
-                makeHint(R.drawable.msg_archive_hide, LocaleController.getString(R.string.LockedChatsHelpHint2Title), LocaleController.getString(R.string.LockedChatsHelpHint2Description), resourcesProvider),
+                makeHint(R.drawable.msg_archive_hide, getString(R.string.LockedChatsHelpHint2Title), getString(R.string.LockedChatsHelpHint2Description), resourcesProvider),
                 LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
         );
         layout.addView(
-                makeHint(R.drawable.menu_devices, LocaleController.getString(R.string.LockedChatsHelpHint3Title), LocaleController.getString(R.string.LockedChatsHelpHint3Description), resourcesProvider),
+                makeHint(R.drawable.menu_devices, getString(R.string.LockedChatsHelpHint3Title), getString(R.string.LockedChatsHelpHint3Description), resourcesProvider),
                 LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
         );
 
         if (buttonCallback != null) {
             button = new ButtonWithCounterView(context, resourcesProvider);
-            button.setText(LocaleController.getString(R.string.GotIt), false);
+            button.setText(getString(R.string.GotIt), false);
             button.setOnClickListener(e -> buttonCallback.run());
             layout.addView(button, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, 14, 18, 14, 0));
         }
     }
 
     public void asSettingsUI() {
-        subtitleTextView.setText(LocaleController.getString(R.string.LockedChatsHelpDescription_Settings));
+        subtitleTextView.setText(getString(R.string.LockedChatsHelpDescription_Settings));
         if (button != null) {
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-            spannableStringBuilder.append(LocaleController.getString(R.string.LockedChatsHelpHintEditList)).append(" >");
+            spannableStringBuilder.append(getString(R.string.LockedChatsHelpHintEditList)).append(" >");
             ColoredImageSpan span = new ColoredImageSpan(R.drawable.msg_arrowright);
             spannableStringBuilder.setSpan(span, spannableStringBuilder.length() - 1, spannableStringBuilder.length(), 0);
             button.setText(spannableStringBuilder, false);
@@ -103,7 +103,7 @@ public class LockedChatsHelp extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(MeasureSpec.makeMeasureSpec(Math.min(AndroidUtilities.dp(400), MeasureSpec.getSize(widthMeasureSpec)), MeasureSpec.EXACTLY), heightMeasureSpec);
+        super.onMeasure(MeasureSpec.makeMeasureSpec(Math.min(dp(400), MeasureSpec.getSize(widthMeasureSpec)), MeasureSpec.EXACTLY), heightMeasureSpec);
     }
 
     private FrameLayout makeHint(int resId, CharSequence title, CharSequence subtitle, Theme.ResourcesProvider resourcesProvider) {

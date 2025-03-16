@@ -29,6 +29,7 @@ import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.ReactionsContainerLayout;
 import org.telegram.ui.Stories.recorder.StoryEntry;
 
+@SuppressLint({"ViewConstructor", "ClickableViewAccessibility"})
 public class ReactionsContainerPreview extends LinearLayout {
 
     private BackgroundGradientDrawable.Disposable backgroundGradientDisposable;
@@ -54,10 +55,10 @@ public class ReactionsContainerPreview extends LinearLayout {
         shadowDrawable = Theme.getThemedDrawableByKey(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow, resourcesProvider);
 
         tagSelector = new ReactionsContainerLayout(ReactionsContainerLayout.TYPE_DEFAULT, fragment, getContext(), currentAccount, null);
-        tagSelector.setDelegate((view, visibleReaction, longpress, addToRecent) -> {
+        tagSelector.setDelegate((view, visibleReaction, longPress, addToRecent) -> {
 
         });
-        tagSelector.setPadding(AndroidUtilities.dp(4), AndroidUtilities.dp(24), AndroidUtilities.dp(4), AndroidUtilities.dp(24));
+        tagSelector.setPadding(dp(4), dp(24), dp(4), dp(24));
         tagSelector.setShowExpandableReactions(true);
         tagSelector.setTop(false);
         tagSelector.setClipChildren(false);

@@ -31,8 +31,9 @@ public class ExpandableRows extends BaseRow implements Clickable {
     private final ArrayList<ExpandableRowsOption> itemsList;
     private final Runnable onSingleStateChange;
     private final boolean hideMainSwitch;
+    private final boolean isLocked;
 
-    private ExpandableRows(int id, int icon, @Nullable CharSequence title, ArrayList<ExpandableRowsOption> itemsList, Runnable onSingleStateChange, boolean hideMainSwitch, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+    private ExpandableRows(int id, int icon, @Nullable CharSequence title, ArrayList<ExpandableRowsOption> itemsList, Runnable onSingleStateChange, boolean hideMainSwitch, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean isLocked) {
         super(PreferenceType.EXPANDABLE_ROWS, showIf, showIfReverse);
         this.id = id;
         this.icon = icon;
@@ -40,6 +41,7 @@ public class ExpandableRows extends BaseRow implements Clickable {
         this.itemsList = itemsList;
         this.onSingleStateChange = onSingleStateChange;
         this.hideMainSwitch = hideMainSwitch;
+        this.isLocked = isLocked;
     }
 
     public int getId() {
@@ -66,6 +68,10 @@ public class ExpandableRows extends BaseRow implements Clickable {
         return hideMainSwitch;
     }
 
+    public boolean isLocked() {
+        return isLocked;
+    }
+
     @Override
     public boolean onClick(BaseFragment fragment, Activity activity, View view, int position, float x, float y) {
         return true;
@@ -78,6 +84,7 @@ public class ExpandableRows extends BaseRow implements Clickable {
         private final ArrayList<ExpandableRowsOption> itemsList = new ArrayList<>();
         private Runnable onSingleStateChange;
         private boolean hideMainSwitch = false;
+        private boolean isLocked = false;
 
         public ExpandableRowsBuilder setId(int id) {
             this.id = id;
@@ -120,8 +127,13 @@ public class ExpandableRows extends BaseRow implements Clickable {
             return this;
         }
 
+        public ExpandableRowsBuilder isLocked(boolean locked) {
+            isLocked = locked;
+            return this;
+        }
+
         public ExpandableRows build() {
-            return new ExpandableRows(id, icon, mainItemTitle, itemsList, onSingleStateChange, hideMainSwitch, showIf, showIfReverse);
+            return new ExpandableRows(id, icon, mainItemTitle, itemsList, onSingleStateChange, hideMainSwitch, showIf, showIfReverse, isLocked);
         }
     }
 }

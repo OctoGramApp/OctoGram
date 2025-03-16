@@ -8,6 +8,9 @@
 
 package it.octogram.android.preferences.ui.components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
@@ -18,9 +21,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
@@ -56,8 +57,8 @@ public class CustomMediaFilterDialog extends LinearLayout {
             }
 
             ActionBarMenuSubItem filterItem = new ActionBarMenuSubItem(getContext(), true, id == 0, id == filtersList.length - 1, resourcesProvider);
-            filterItem.setTextAndIcon(LocaleController.getString(getTitleByMediaFilterId(id)), currentSelectedId == id ? 0 : getIconByMediaFilterId(id));
-            filterItem.setMinimumWidth(AndroidUtilities.dp(196));
+            filterItem.setTextAndIcon(getString(getTitleByMediaFilterId(id)), currentSelectedId == id ? 0 : getIconByMediaFilterId(id));
+            filterItem.setMinimumWidth(dp(196));
             filterItem.setOnClickListener(v -> {
                 selectPopupWindow.dismiss();
                 OctoConfig.INSTANCE.mediaFiltering.updateValue(id);

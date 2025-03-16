@@ -41,7 +41,7 @@ public class BuildVars {
     public static String HUAWEI_APP_ID = "101184875";
 
     // You can use this flag to disable Google Play Billing (If you're making fork and want it to be in Google Play)
-    public static boolean IS_BILLING_UNAVAILABLE = StoreUtils.INSTANCE.isFromPlayStore();
+    public static boolean IS_BILLING_UNAVAILABLE = StoreUtils.isFromPlayStore();
 
     static {
         if (ApplicationLoader.applicationContext != null) {

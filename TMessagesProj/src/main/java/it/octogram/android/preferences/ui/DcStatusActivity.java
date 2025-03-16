@@ -1,6 +1,7 @@
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.Manifest;
@@ -102,7 +103,7 @@ public class DcStatusActivity extends BaseFragment {
         private WebPingController webPingController;
 
         private boolean waitingForUserStart = true;
-
+        private long lastActivityStart = 0;
         public Page(@NonNull Context context, int type) {
             super(context);
 
@@ -170,7 +171,7 @@ public class DcStatusActivity extends BaseFragment {
                 contentLayout.addView(reloadStateCell = new ReloadStateCell(context));
             }
 
-            var htmlParsed = new SpannableString(MessageStringHelper.fromHtml(LocaleController.formatString(R.string.DatacenterStatusSection_TermsAccept, OctoUtils.getDomain())));
+            var htmlParsed = new SpannableString(MessageStringHelper.fromHtml(formatString(R.string.DatacenterStatusSection_TermsAccept, OctoUtils.getDomain())));
             TextInfoPrivacyCell textInfo = new TextInfoPrivacyCell(context);
             textInfo.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
             textInfo.setText(MessageStringHelper.getUrlNoUnderlineText(htmlParsed));
@@ -271,6 +272,16 @@ public class DcStatusActivity extends BaseFragment {
                     builder.show();
                     return;
                 }
+
+                if (((System.currentTimeMillis() - lastActivityStart) / 1000) < (type == PAGE_MEDIA ? 5 : 1)) {
+                    if (type == PAGE_MEDIA) {
+                        builder.setTitle(getString(R.string.AppName));
+                        builder.setMessage(getString(R.string.DatacenterStatusSection_WaitPlease_Desc));
+                        builder.setPositiveButton(getString(R.string.OK), null);
+                        builder.show();
+                    }
+                    return;
+                }
             }
 
             if (type == PAGE_NETWORK) {
@@ -308,6 +319,10 @@ public class DcStatusActivity extends BaseFragment {
 
             waitingForUserStart = !waitingForUserStart;
             datacenterHeader.updateStatus(waitingForUserStart);
+
+            if (!waitingForUserStart) {
+                lastActivityStart = System.currentTimeMillis();
+            }
         }
 
         private boolean needsPermissions() {
@@ -405,7 +420,7 @@ public class DcStatusActivity extends BaseFragment {
             startedAt = System.currentTimeMillis();
             lastUpdatedSeconds = 60;
             titleView.setText(LocaleController.getInstance().getFormatterDayWithSeconds().format(startedAt + lastUpdatedSeconds*1000L), true);
-            subtitleView.setText(LocaleController.formatString(R.string.DatacenterStatusSection_NextUpdate_InSeconds, lastUpdatedSeconds), true);
+            subtitleView.setText(formatString(R.string.DatacenterStatusSection_NextUpdate_InSeconds, lastUpdatedSeconds), true);
             invalidate();
         }
 
@@ -427,7 +442,7 @@ public class DcStatusActivity extends BaseFragment {
             if (timerRunning) {
                 if (lastUpdatedSeconds != secondsLeft) {
                     lastUpdatedSeconds = secondsLeft;
-                    subtitleView.setText(LocaleController.formatString(R.string.DatacenterStatusSection_NextUpdate_InSeconds, lastUpdatedSeconds), true);
+                    subtitleView.setText(formatString(R.string.DatacenterStatusSection_NextUpdate_InSeconds, lastUpdatedSeconds), true);
                 }
 
                 if (expandableState != 1f) {
@@ -597,10 +612,10 @@ public class DcStatusActivity extends BaseFragment {
 
             if (resIdDrawable != null) {
                 resIdDrawable.setBounds(
-                        (int) centerX - AndroidUtilities.dp(13),
-                        (int) centerY - AndroidUtilities.dp(13),
-                        (int) centerX + AndroidUtilities.dp(13),
-                        (int) centerY + AndroidUtilities.dp(13)
+                        (int) centerX - dp(13),
+                        (int) centerY - dp(13),
+                        (int) centerX + dp(13),
+                        (int) centerY + dp(13)
                 );
                 resIdDrawable.setAlpha(255 - (int) (255 * loadingT));
                 resIdDrawable.draw(canvas);
@@ -608,7 +623,7 @@ public class DcStatusActivity extends BaseFragment {
 
             if (loadingT > 0) {
                 if (loadingDrawable == null) {
-                    loadingDrawable = new CircularProgressDrawable(AndroidUtilities.dp(13), AndroidUtilities.dp(1.5f), Theme.getColor(Theme.key_featuredStickers_addButton));
+                    loadingDrawable = new CircularProgressDrawable(dp(13), dp(1.5f), Theme.getColor(Theme.key_featuredStickers_addButton));
                 }
                 loadingDrawable.setBounds(
                         (int) (centerX - loadingDrawable.getIntrinsicWidth() / 2f),
@@ -705,7 +720,7 @@ public class DcStatusActivity extends BaseFragment {
             if (viewPager.getCurrentPosition() != PAGE_NETWORK) {
                 link += viewPager.getCurrentPosition() == PAGE_MEDIA ? "?t=media" : "?t=web";
             }
-            showDialog(new ShareAlert(context, null, link, false, link, false));
+            showDialog(new ShareAlert(context, null, link, false, link, false, true));
             return true;
         });
 
@@ -774,9 +789,6 @@ public class DcStatusActivity extends BaseFragment {
         super.onTransitionAnimationEnd(isOpen, backward);
         if (isOpen) {
             networkPage.datacenterHeader.invalidate();
-//            if (parameter == null || (!parameter.equalsIgnoreCase("web") && !parameter.equalsIgnoreCase("media"))) {
-//                networkPage.startMonitor();
-//            }
         }
     }
 

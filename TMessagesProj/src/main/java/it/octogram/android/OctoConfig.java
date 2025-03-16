@@ -8,6 +8,7 @@
 package it.octogram.android;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
 
@@ -21,7 +22,10 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.UserConfig;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
+import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +40,8 @@ import java.util.Map;
 import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.preferences.ui.custom.DoubleBottomMigrationBottomSheet;
+import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 
 @SuppressWarnings("unchecked")
@@ -91,14 +97,16 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> warningBeforeDeletingChatHistory = newConfigProperty("warningBeforeDeletingChatHistory", true);
     public final ConfigProperty<Boolean> biometricOpenArchive = newConfigProperty("biometricOpenArchive", false);
     public final ConfigProperty<Boolean> biometricOpenCallsLog = newConfigProperty("biometricOpenCallsLog", false);
-    public final ConfigProperty<Boolean> biometricOpenSavedMessages = newConfigProperty("biometricOpenSavedMessages", false);
     public final ConfigProperty<Boolean> biometricOpenSecretChats = newConfigProperty("biometricOpenSecretChats", false);
+    public final ConfigProperty<Boolean> biometricOpenSettings = newConfigProperty("biometricOpenSettings", false);
     public final ConfigProperty<Boolean> shownHiddenChatsHint = newConfigProperty("shownHiddenChatsHint", false);
     public final ConfigProperty<String> hiddenChats = newConfigProperty("hiddenChats", "[]");
     public final ConfigProperty<String> hiddenAccounts = newConfigProperty("hiddenAccounts", "[]");
+    public final ConfigProperty<Boolean> hideHiddenAccounts = newConfigProperty("hideHiddenAccounts", false);
     public final ConfigProperty<Boolean> allowUsingDevicePIN = newConfigProperty("allowUsingDevicePIN", false);
     public final ConfigProperty<Boolean> allowUsingFaceUnlock = newConfigProperty("allowUsingFaceUnlock", false);
     public final ConfigProperty<Integer> biometricAskEvery = newConfigProperty("biometricAskEvery", 10);
+    public final ConfigProperty<Boolean> advancedBiometricUnlock = newConfigProperty("advancedBiometricUnlock", true);
 
     /*Hidden folders*/
     public final ConfigProperty<String> hiddenFolderAssoc = newConfigProperty("hiddenFolderAssoc", "{}");
@@ -213,6 +221,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> alwaysExpandBlockQuotes = newConfigProperty("alwaysExpandBlockQuotes", false);
     public final ConfigProperty<Boolean> profileBubbleHideBorder = newConfigProperty("profileBubbleHideBorder", false);
     public final ConfigProperty<Boolean> profileBubbleMoreTopPadding = newConfigProperty("profileBubbleMoreTopPadding", false);
+    public final ConfigProperty<Boolean> enableQuickShare = newConfigProperty("enableQuickShare", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -580,7 +589,7 @@ public class OctoConfig {
         return switch (fieldName) {
             case "blurEffectStrength" -> isValidInRange(value, 0, 255);
             case "cameraXResolution" ->
-                    isValidInRange(value, CameraXResolution.SD, CameraXResolution.UHD);
+                    isValidInRange(value, CameraXResolution.SD, CameraXResolution.MAX);
             case "dcIdStyle" ->
                     isValidInRange(value, DcIdStyle.NONE.getValue(), DcIdStyle.MINIMAL.getValue());
             case "dcIdType" ->
@@ -645,6 +654,7 @@ public class OctoConfig {
                     isValidInRange(value, CameraPreview.DEFAULT, CameraPreview.HIDDEN);
             case "useQualityPreset" ->
                     isValidInRange(value, QualityPreset.AUTO.getValue(), QualityPreset.DYNAMIC.getValue());
+            case "biometricAskEvery" -> isValidInRange(value, 0, 300);
             default -> false;
         };
     }
@@ -676,6 +686,25 @@ public class OctoConfig {
 
     public void setDrawerItems(String drawerItemsList) {
         drawerItems.updateValue(drawerItemsList);
+    }
+
+    public void handleDoubleBottomMigration() {
+        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("OwlPasscode", Context.MODE_PRIVATE);
+        boolean hasInvolvedAccounts = false;
+        for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
+            long id = UserConfig.getInstance(a).clientUserId;
+            if (id > 0 && (preferences.contains("passcodeHash"+id) || preferences.contains("passcodeSalt"+id))) {
+                hasInvolvedAccounts = true;
+                break;
+            }
+        }
+        preferences.edit().clear().apply();
+        if (hasInvolvedAccounts && !FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprint()) {
+            BaseFragment lastFragment = LaunchActivity.getLastFragment();
+            if (lastFragment != null) {
+                new DoubleBottomMigrationBottomSheet(lastFragment).show();
+            }
+        }
     }
 
     public boolean isNewIdVisible(String newID) {

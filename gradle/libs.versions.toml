@@ -1,15 +1,15 @@
 [versions]
 # Gradle plugins
-android-application = "8.8.0"
+android-application = "8.9.0"
 google-services = "4.4.2"
 secrets-gradle-plugin = "2.0.1"
 kotlin-android = "2.0.21"
 
 # AndroidX dependencies
-androidx_fragment = "1.8.5"
+androidx_fragment = "1.8.6"
 androidx_core = "1.15.0"
 androidx_palette = "1.0.0"
-androidx_exifinterface = "1.3.7"
+androidx_exifinterface = "1.4.0"
 androidx_dynamicanimation = "1.0.0"
 androidx_sharetarget = "1.2.0"
 androidx_interpolator = "1.0.0"
@@ -34,7 +34,7 @@ firebase_datatransport = "19.0.0"
 firebase_appindexing = "20.0.0"
 
 # Google Play Services dependencies
-play_services_maps = "19.0.0"
+play_services_maps = "19.1.0"
 play_services_auth = "21.3.0"
 play_services_vision = "20.1.3"
 play_services_wearable = "19.0.0"
@@ -50,12 +50,12 @@ stripe_android = "2.0.2" # NOT YET SUPPORTED BY TELEGRAM
 mlkit_language_id = "17.0.6"
 billing = "7.1.1"
 commons_text = "1.10.0"
-gson = "2.11.0"
+gson = "2.12.1"
 guava = "33.4.0-android"
 nanohttpd = "2.3.1" # Aggiunto per nanohttpd
 
 # CameraX Implementation
-camerax_version = "1.5.0-alpha06"
+camerax_version = "1.5.0-alpha04"
 
 # Native libs e ML Kit
 relinker = "1.4.5"

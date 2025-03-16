@@ -8,6 +8,10 @@
 
 package it.octogram.android.tgastandaloneexport;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -37,7 +41,6 @@ import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageLocation;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -113,7 +116,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                     textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                 }
                 textView[a].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                textView[a].setPadding(0, 0, 0, hasBackground ? 0 : AndroidUtilities.dp(13));
+                textView[a].setPadding(0, 0, 0, hasBackground ? 0 : dp(13));
                 addView(textView[a], LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
                 if (a == 1) {
                     textView[a].setAlpha(0.0f);
@@ -123,7 +126,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(hasBackground ? 80 : 50), MeasureSpec.EXACTLY));
+            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(dp(hasBackground ? 80 : 50), MeasureSpec.EXACTLY));
         }
 
         public void updateState(int state, float loadProgress) {
@@ -139,7 +142,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                     }
-                    setText(LocaleController.getString(R.string.AppUpdateRemindMeLater), !isFirstUpdate);
+                    setText(getString(R.string.AppUpdateRemindMeLater), !isFirstUpdate);
                 } else if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
@@ -154,13 +157,13 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
             } else {
                 switch (state) {
                     case CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
-                        setText(LocaleController.formatString(R.string.AppUpdateDownloadNow), !isFirstUpdate);
+                        setText(formatString(R.string.AppUpdateDownloadNow), !isFirstUpdate);
                         break;
                     case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING:
-                        setText(LocaleController.formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)), !isFirstUpdate);
+                        setText(formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)), !isFirstUpdate);
                         break;
                     case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY:
-                        setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonInstall), !isFirstUpdate);
+                        setText(getString(R.string.UpdatesSettingsCheckButtonInstall), !isFirstUpdate);
                         break;
                 }
 
@@ -197,9 +200,9 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                 animatorSet.setInterpolator(CubicBezierInterpolator.EASE_OUT);
                 animatorSet.playTogether(
                         ObjectAnimator.ofFloat(textView[0], View.ALPHA, 1.0f, 0.0f),
-                        ObjectAnimator.ofFloat(textView[0], View.TRANSLATION_Y, 0, -AndroidUtilities.dp(10)),
+                        ObjectAnimator.ofFloat(textView[0], View.TRANSLATION_Y, 0, -dp(10)),
                         ObjectAnimator.ofFloat(textView[1], View.ALPHA, 0.0f, 1.0f),
-                        ObjectAnimator.ofFloat(textView[1], View.TRANSLATION_Y, AndroidUtilities.dp(10), 0)
+                        ObjectAnimator.ofFloat(textView[1], View.TRANSLATION_Y, dp(10), 0)
                 );
                 animatorSet.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -247,7 +250,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                 int contentHeight = linearLayout.getMeasuredHeight();
                 int padding = (height / 5 * 2);
                 int visiblePart = height - padding;
-                if (contentHeight - visiblePart < AndroidUtilities.dp(90) || contentHeight < height / 2 + AndroidUtilities.dp(90)) {
+                if (contentHeight - visiblePart < dp(90) || contentHeight < height / 2 + dp(90)) {
                     padding = height - contentHeight;
                 }
                 if (padding < 0) {
@@ -311,7 +314,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
         textView.setSingleLine(true);
         textView.setEllipsize(TextUtils.TruncateAt.END);
-        textView.setText(LocaleController.getString(R.string.AppUpdateCustomTitle));
+        textView.setText(getString(R.string.AppUpdateCustomTitle));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 23, 16, 23, 0));
 
         TextView messageTextView = new TextView(getContext());
@@ -319,7 +322,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         messageTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
         messageTextView.setLinkTextColor(Theme.getColor(Theme.key_dialogTextLink));
-        messageTextView.setText(LocaleController.formatString("AppUpdateVersionAndSize", R.string.AppUpdateVersionAndSize, appUpdate.version, AndroidUtilities.formatFileSize(appUpdate.document.size)));
+        messageTextView.setText(formatString(R.string.AppUpdateVersionAndSize, appUpdate.version, AndroidUtilities.formatFileSize(appUpdate.document.size)));
         messageTextView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP);
         linearLayout.addView(messageTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 23, 0, 23, 5));
 
@@ -329,7 +332,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         changelogTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
         changelogTextView.setLinkTextColor(Theme.getColor(Theme.key_dialogTextLink));
         if (TextUtils.isEmpty(appUpdate.text)) {
-            changelogTextView.setText(AndroidUtilities.replaceTags(LocaleController.getString(R.string.AppUpdateChangelogEmpty)));
+            changelogTextView.setText(AndroidUtilities.replaceTags(getString(R.string.AppUpdateChangelogEmpty)));
         } else {
             SpannableStringBuilder builder = new SpannableStringBuilder(appUpdate.text);
             MessageObject.addEntitiesToText(builder, update.entities, false, false, false, false);
@@ -339,7 +342,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         linearLayout.addView(changelogTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 23, 15, 23, 0));
 
         FrameLayout.LayoutParams frameLayoutParams = new FrameLayout.LayoutParams(LayoutHelper.MATCH_PARENT, AndroidUtilities.getShadowHeight(), Gravity.BOTTOM | Gravity.LEFT);
-        frameLayoutParams.bottomMargin = AndroidUtilities.dp(130);
+        frameLayoutParams.bottomMargin = dp(130);
         shadow = new View(context);
         shadow.setBackgroundColor(Theme.getColor(Theme.key_dialogShadowLine));
         shadow.setAlpha(0.0f);
@@ -502,9 +505,9 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
     private void updateLayout() {
         View child = linearLayout.getChildAt(0);
         child.getLocationInWindow(location);
-        int top = location[1] - AndroidUtilities.dp(24);
+        int top = location[1] - dp(24);
         int newOffset = Math.max(top, 0);
-        runShadowAnimation(!(location[1] + linearLayout.getMeasuredHeight() <= container.getMeasuredHeight() - AndroidUtilities.dp(113) + containerView.getTranslationY()));
+        runShadowAnimation(!(location[1] + linearLayout.getMeasuredHeight() <= container.getMeasuredHeight() - dp(113) + containerView.getTranslationY()));
         if (scrollOffsetY != newOffset) {
             scrollOffsetY = newOffset;
             scrollView.invalidate();

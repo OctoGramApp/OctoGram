@@ -8,6 +8,8 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.graphics.drawable.Drawable;
 import android.text.SpannableStringBuilder;
 
@@ -42,7 +44,7 @@ public class MessageResourceHelper {
         //builder.append(' ');
 
         if (edited) {
-            builder.append(OctoConfig.INSTANCE.pencilIconForEditedMessages.getValue() ? editedSpan : LocaleController.getString(R.string.EditedMessage));
+            builder.append(OctoConfig.INSTANCE.pencilIconForEditedMessages.getValue() ? editedSpan : getString(R.string.EditedMessage));
         }
 
         if (canShowTranslatedItem(messageObject)) {
@@ -57,7 +59,7 @@ public class MessageResourceHelper {
                 builder.append(' ');
                 builder.append(Locale.forLanguageTag(messageObject.messageOwner.translatedToLanguage).getDisplayName());
             } else {
-                builder.append(LocaleController.getString(R.string.TranslatorInMessageBadge));
+                builder.append(getString(R.string.TranslatorInMessageBadge));
             }
         }
 

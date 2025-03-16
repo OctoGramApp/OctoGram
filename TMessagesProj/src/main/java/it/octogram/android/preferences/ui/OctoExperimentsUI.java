@@ -8,12 +8,15 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 import android.os.Build;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
@@ -30,6 +33,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.PhotoResolution;
 import it.octogram.android.QualityPreset;
 import it.octogram.android.StickerUi;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -47,47 +51,48 @@ public class OctoExperimentsUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> canShowMonetIconSwitch = new ConfigProperty<>(null, Build.VERSION.SDK_INT == Build.VERSION_CODES.S || Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2);
     private final ConfigProperty<Boolean> isMonetSelected = new ConfigProperty<>(null, MonetIconController.INSTANCE.isSelectedMonet());
 
+    @NonNull
     @Override
-    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
-        return OctoPreferences.builder(LocaleController.getString(R.string.Experiments))
-                .deepLink("tg://experimental")
-                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_reset, LocaleController.getString(R.string.ResetSettings), () -> OctoMainSettingsUI.openResetSettingsProcedure(context, true)).asDanger())
-                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, LocaleController.getString(R.string.OctoExperimentsSettingsHeader))
-                .category(LocaleController.getString(R.string.ExperimentalSettings), category -> {
+    public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
+        return OctoPreferences.builder(getString(R.string.Experiments))
+                .deepLink(DeepLinkDef.EXPERIMENTAL)
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_reset, getString(R.string.ResetSettings), () -> OctoMainSettingsUI.openResetSettingsProcedure(context, true)).asDanger())
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, getString(R.string.OctoExperimentsSettingsHeader))
+                .category(getString(R.string.ExperimentalSettings), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
-                            .title(LocaleController.getString(R.string.MediaStream))
+                            .title(getString(R.string.MediaStream))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.showRPCErrors)
-                            .title(LocaleController.getString(R.string.ShowRPCErrors))
+                            .title(getString(R.string.ShowRPCErrors))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(AudioType.MONO.getValue()).setItemTitle(LocaleController.getString(R.string.AudioTypeMono)),
-                                    new PopupChoiceDialogOption().setId(AudioType.STEREO.getValue()).setItemTitle(LocaleController.getString(R.string.AudioTypeStereo))
+                                    new PopupChoiceDialogOption().setId(AudioType.MONO.getValue()).setItemTitle(getString(R.string.AudioTypeMono)),
+                                    new PopupChoiceDialogOption().setId(AudioType.STEREO.getValue()).setItemTitle(getString(R.string.AudioTypeStereo))
                             ))
                             .currentValue(OctoConfig.INSTANCE.gcOutputType)
-                            .title(LocaleController.getString(R.string.AudioTypeInCall))
+                            .title(getString(R.string.AudioTypeInCall))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(PhotoResolution.LOW.getValue()).setItemTitle(LocaleController.getString(R.string.ResolutionLow)),
-                                    new PopupChoiceDialogOption().setId(PhotoResolution.DEFAULT.getValue()).setItemTitle(LocaleController.getString(R.string.ResolutionMedium)),
-                                    new PopupChoiceDialogOption().setId(PhotoResolution.HIGH.getValue()).setItemTitle(LocaleController.getString(R.string.ResolutionHigh))
+                                    new PopupChoiceDialogOption().setId(PhotoResolution.LOW.getValue()).setItemTitle(getString(R.string.ResolutionLow)),
+                                    new PopupChoiceDialogOption().setId(PhotoResolution.DEFAULT.getValue()).setItemTitle(getString(R.string.ResolutionMedium)),
+                                    new PopupChoiceDialogOption().setId(PhotoResolution.HIGH.getValue()).setItemTitle(getString(R.string.ResolutionHigh))
                             ))
                             .currentValue(OctoConfig.INSTANCE.photoResolution)
-                            .title(LocaleController.getString(R.string.PhotoResolution))
+                            .title(getString(R.string.PhotoResolution))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .currentValue(OctoConfig.INSTANCE.maxRecentStickers)
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(0).setItemTitle(LocaleController.getString(R.string.MaxStickerSizeDefault)),
+                                    new PopupChoiceDialogOption().setId(0).setItemTitle(getString(R.string.MaxStickerSizeDefault)),
                                     new PopupChoiceDialogOption().setId(1).setItemTitle("30"),
                                     new PopupChoiceDialogOption().setId(2).setItemTitle("40"),
                                     new PopupChoiceDialogOption().setId(3).setItemTitle("50"),
@@ -99,7 +104,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption().setId(9).setItemTitle("200"),
                                     new PopupChoiceDialogOption().setId(10).setItemTitle(R.string.MaxRecentSticker_Unlimited)
                             ))
-                            .title(LocaleController.getString(R.string.MaxRecentStickers))
+                            .title(getString(R.string.MaxRecentStickers))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> {
@@ -113,7 +118,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                 return true;
                             })
                             .preferenceValue(OctoConfig.INSTANCE.forceUseIpV6)
-                            .title(LocaleController.getString(R.string.TryConnectWithIPV6))
+                            .title(getString(R.string.TryConnectWithIPV6))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
@@ -122,18 +127,18 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(DeviceIdentifyState.DEFAULT.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.DeviceIdentifyDefault)),
+                                            .setItemTitle(getString(R.string.DeviceIdentifyDefault)),
                                     new PopupChoiceDialogOption()
                                             .setId(DeviceIdentifyState.FORCE_TABLET.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.DeviceIdentifyTablet))
-                                            .setItemDescription(LocaleController.getString(R.string.DeviceIdentifyTabletDesc)),
+                                            .setItemTitle(getString(R.string.DeviceIdentifyTablet))
+                                            .setItemDescription(getString(R.string.DeviceIdentifyTabletDesc)),
                                     new PopupChoiceDialogOption()
                                             .setId(DeviceIdentifyState.FORCE_SMARTPHONE.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.DeviceIdentifySmartphone))
-                                            .setItemDescription(LocaleController.getString(R.string.DeviceIdentifySmartphoneDesc))
+                                            .setItemTitle(getString(R.string.DeviceIdentifySmartphone))
+                                            .setItemDescription(getString(R.string.DeviceIdentifySmartphoneDesc))
 
                             ))
-                            .title(LocaleController.getString(R.string.DeviceIdentifyStatus))
+                            .title(getString(R.string.DeviceIdentifyStatus))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
@@ -141,8 +146,8 @@ public class OctoExperimentsUI implements PreferencesEntry {
                                     fragment.presentFragment(new NavigationSettingsUI());
                                 }
                             })
-                            .value(LocaleController.getString(OctoConfig.INSTANCE.alternativeNavigation.getValue() ? R.string.NotificationsOn : R.string.NotificationsOff))
-                            .title(LocaleController.getString(R.string.AlternativeNavigation))
+                            .value(getString(OctoConfig.INSTANCE.alternativeNavigation.getValue() ? R.string.NotificationsOn : R.string.NotificationsOff))
+                            .title(getString(R.string.AlternativeNavigation))
                             .build()
                     );
                 })
@@ -157,83 +162,89 @@ public class OctoExperimentsUI implements PreferencesEntry {
                         })
                         .preferenceValue(isMonetSelected)
                         .showIf(canShowMonetIconSwitch)
-                        .title(LocaleController.getString(R.string.MonetIcon))
-                        .description(LocaleController.getString(R.string.MonetIconDesc))
+                        .title(getString(R.string.MonetIcon))
+                        .description(getString(R.string.MonetIconDesc))
                         .build())
                 .row(new ShadowRow(canShowMonetIconSwitch))
-                .category(LocaleController.getString(R.string.Chats), category -> {
+                .category(getString(R.string.Chats), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.hideBottomBarChannels)
-                            .title(LocaleController.getString(R.string.HideBottomBarChannels))
+                            .title(getString(R.string.HideBottomBarChannels))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .onPostUpdate(fragment::rebuildAllFragmentsWithLast)
                             .preferenceValue(OctoConfig.INSTANCE.hideOpenButtonChatsList)
-                            .title(LocaleController.getString(R.string.HideOpenButtonChatsList))
+                            .title(getString(R.string.HideOpenButtonChatsList))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.alwaysExpandBlockQuotes)
-                            .title(LocaleController.getString(R.string.AlwaysExpandBlockQuotes))
+                            .title(getString(R.string.AlwaysExpandBlockQuotes))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.enableQuickShare)
+                            .title(getString(R.string.QuickShareEnabled))
+                            .description(getString(R.string.QuickShareEnabled_Desc))
                             .build());
                 })
-                .category(LocaleController.getString(R.string.DrawerHeaderAsBubble), OctoConfig.INSTANCE.drawerProfileAsBubble, category -> {
+                .category(getString(R.string.DrawerHeaderAsBubble), OctoConfig.INSTANCE.drawerProfileAsBubble, category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> AndroidUtilities.runOnUIThread(() -> LaunchActivity.instance.reloadDrawerHeader()))
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.profileBubbleHideBorder)
-                            .title(LocaleController.getString(R.string.ProfileBubbleHideBorder))
+                            .title(getString(R.string.ProfileBubbleHideBorder))
                             .showIf(OctoConfig.INSTANCE.drawerProfileAsBubble)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> AndroidUtilities.runOnUIThread(() -> LaunchActivity.instance.reloadDrawerHeader()))
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.profileBubbleMoreTopPadding)
-                            .title(LocaleController.getString(R.string.ProfileBubbleMoreTopPadding))
+                            .title(getString(R.string.ProfileBubbleMoreTopPadding))
                             .showIf(OctoConfig.INSTANCE.drawerProfileAsBubble)
                             .build());
                 })
-                .category(LocaleController.getString(R.string.DownloadAndUploadBoost), category -> {
+                .category(getString(R.string.DownloadAndUploadBoost), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .currentValue(OctoConfig.INSTANCE.useQualityPreset)
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(QualityPreset.AUTO.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_Default)),
+                                            .setItemTitle(getString(R.string.UseQualityPreset_Default)),
                                     new PopupChoiceDialogOption()
                                             .setId(QualityPreset.HIGHEST.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_HighQuality))
-                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_HighQuality_Desc)),
+                                            .setItemTitle(getString(R.string.UseQualityPreset_HighQuality))
+                                            .setItemDescription(getString(R.string.UseQualityPreset_HighQuality_Desc)),
                                     new PopupChoiceDialogOption()
                                             .setId(QualityPreset.LOWEST.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_LowQuality))
-                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_LowQuality_Desc)),
+                                            .setItemTitle(getString(R.string.UseQualityPreset_LowQuality))
+                                            .setItemDescription(getString(R.string.UseQualityPreset_LowQuality_Desc)),
                                     new PopupChoiceDialogOption()
                                             .setId(QualityPreset.DYNAMIC.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.UseQualityPreset_Dynamic))
-                                            .setItemDescription(LocaleController.getString(R.string.UseQualityPreset_Dynamic_Desc))
+                                            .setItemTitle(getString(R.string.UseQualityPreset_Dynamic))
+                                            .setItemDescription(getString(R.string.UseQualityPreset_Dynamic_Desc))
                             ))
-                            .title(LocaleController.getString(R.string.UseQualityPreset))
+                            .title(getString(R.string.UseQualityPreset))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.uploadBoost)
-                            .title(LocaleController.getString(R.string.UploadBoost))
+                            .title(getString(R.string.UploadBoost))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.downloadBoost)
-                            .title(LocaleController.getString(R.string.DownloadBoost))
+                            .title(getString(R.string.DownloadBoost))
                             .build());
-                    category.row(new HeaderRow(LocaleController.getString(R.string.DownloadBoostType), OctoConfig.INSTANCE.downloadBoost).headerStyle(false));
+                    category.row(new HeaderRow(getString(R.string.DownloadBoostType), OctoConfig.INSTANCE.downloadBoost).headerStyle(false));
                     category.row(new SliderChooseRow.SliderChooseRowBuilder()
                             .options(new ArrayList<>() {{
-                                add(new Pair<>(0, LocaleController.getString(R.string.Default)));
-                                add(new Pair<>(1, LocaleController.getString(R.string.Fast)));
-                                add(new Pair<>(2, LocaleController.getString(R.string.Extreme)));
+                                add(new Pair<>(0, getString(R.string.Default)));
+                                add(new Pair<>(1, getString(R.string.Fast)));
+                                add(new Pair<>(2, getString(R.string.Extreme)));
                             }})
                             .preferenceValue(OctoConfig.INSTANCE.downloadBoostValue)
                             .showIf(OctoConfig.INSTANCE.downloadBoost)
@@ -262,6 +273,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
         OctoConfig.INSTANCE.uploadBoost.clear();
         OctoConfig.INSTANCE.downloadBoost.clear();
         OctoConfig.INSTANCE.downloadBoostValue.clear();
+        OctoConfig.INSTANCE.enableQuickShare.clear();
     }
 
     public static boolean checkExperimentsEnabled(Context context) {

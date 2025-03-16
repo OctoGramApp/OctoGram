@@ -809,7 +809,7 @@ public class PinnedReactionsActivity extends BaseFragment {
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
             String link = "tg://pinned_reactions";
-            showDialog(new ShareAlert(context, null, link, false, link, false));
+            showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;
         });

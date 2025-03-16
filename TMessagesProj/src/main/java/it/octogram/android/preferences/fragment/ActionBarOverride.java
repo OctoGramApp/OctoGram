@@ -3,6 +3,7 @@ package it.octogram.android.preferences.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.ActionBarLayout;
@@ -18,11 +19,13 @@ import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.TelegramSettingsHelper;
 
 @SuppressLint("ViewConstructor")
 public class ActionBarOverride extends ActionBarLayout {
     private long lastUnlockedAccount = 0;
     private BlockingAccountDialog accountView;
+    private BlockingAccountDialog pageView;
 
     public ActionBarOverride(Context context, boolean main) {
         super(context, main);
@@ -33,6 +36,7 @@ public class ActionBarOverride extends ActionBarLayout {
         BaseFragment fragment = params.fragment;
 
         boolean mustRequireFingerprint = false;
+        boolean ignoreAskEvery = false;
         if (fragment instanceof CallLogActivity && OctoConfig.INSTANCE.biometricOpenCallsLog.getValue() && FingerprintUtils.hasFingerprint()) {
             mustRequireFingerprint = true;
         } else if (fragment instanceof DialogsActivity f2 && FingerprintUtils.hasFingerprint() && f2.getArguments() != null) {
@@ -44,37 +48,33 @@ public class ActionBarOverride extends ActionBarLayout {
         } else if (fragment instanceof ChatActivity f2 && FingerprintUtils.hasFingerprint() && f2.getArguments() != null) {
             if (f2.getArguments().containsKey("enc_id")) {
                 mustRequireFingerprint = OctoConfig.INSTANCE.biometricOpenSecretChats.getValue();
-            } else if (Objects.equals(f2.getArguments().getLong("user_id", -1L), UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId())) {
-                mustRequireFingerprint = OctoConfig.INSTANCE.biometricOpenSavedMessages.getValue();
             } else {
                 boolean isCurrentChatLocked = FingerprintUtils.isChatLocked(f2.getArguments());
-                if (isCurrentChatLocked && isThereVisibleChatsPage()) {
+                if (isCurrentChatLocked && needToUnlockAfterDialogsActivity(f2)) {
                     mustRequireFingerprint = true;
                 }
             }
         } else if (fragment instanceof PreferencesFragment f2 && f2.isLockedContent() && FingerprintUtils.hasFingerprint()) {
-            mustRequireFingerprint = isThereVisibleChatsPage();
+            mustRequireFingerprint = needToUnlockAfterDialogsActivity(f2);
         } else if (fragment instanceof UsersSelectActivity f2 && f2.isLockedContent() && FingerprintUtils.hasFingerprint()) {
             mustRequireFingerprint = true;
+            ignoreAskEvery = true;
+        } else if (fragment instanceof BaseFragment f2 && TelegramSettingsHelper.isSettingsPage(f2) && OctoConfig.INSTANCE.biometricOpenSettings.getValue() && FingerprintUtils.hasFingerprintCached()) {
+            mustRequireFingerprint = needToUnlockAfterSettingsActivity(f2);
         }
 
         if (mustRequireFingerprint) {
-            boolean[] status = {false};
-
-            FingerprintUtils.checkFingerprint(ApplicationLoader.applicationContext, FingerprintUtils.OPEN_PAGE, new FingerprintUtils.FingerprintResult() {
-                @Override
-                public void onSuccess() {
-                    ActionBarOverride.super.presentFragment(params);
-                    status[0] = true;
+            if (OctoConfig.INSTANCE.advancedBiometricUnlock.getValue()) {
+                if (pageView == null || !pageView.isShowing()) {
+                    getBlockingPageDialog(fragment);
+                    pageView.show();
                 }
+                return super.presentFragment(params);
+            }
 
-                @Override
-                public void onFailed() {
+            FingerprintUtils.checkFingerprint(ApplicationLoader.applicationContext, FingerprintUtils.FingerprintAction.OPEN_PAGE, ignoreAskEvery, () -> ActionBarOverride.super.presentFragment(params));
 
-                }
-            });
-
-            return status[0];
+            return false;
         } else {
             handleAccountState();
         }
@@ -112,50 +112,93 @@ public class ActionBarOverride extends ActionBarLayout {
         return super.addFragmentToStack(fragment, position);
     }
 
+    public void lock() {
+        lastUnlockedAccount = -1;
+        handleAccountState();
+    }
+
     public void unlock(long id) {
         lastUnlockedAccount = id;
         if (accountView != null) {
             accountView.onForcedDismiss();
             accountView = null;
-            LaunchActivity.instance.drawerLayoutContainer.setAllowOpenDrawer(true, false);
         }
     }
 
     public void handleAccountState() {
         long currentId = UserConfig.getInstance(UserConfig.selectedAccount).clientUserId;
-        if (FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(currentId)) {
+        if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(currentId)) {
             if ((accountView == null || !accountView.isShowing()) && lastUnlockedAccount != currentId) {
                 getBlockingAccountDialog(currentId);
                 accountView.show();
-                LaunchActivity.instance.drawerLayoutContainer.setAllowOpenDrawer(false, false);
             }
         } else {
-            lastUnlockedAccount = currentId;
+            unlock(currentId);
         }
     }
 
-    private void getBlockingAccountDialog(long currentId) {
-        accountView = new BlockingAccountDialog(LaunchActivity.instance);
-        accountView.setDelegate(new BlockingAccountView.BlockingViewDelegate() {
+    private void getBlockingAccountDialog(long currentId, BaseFragment relatedPage) {
+        BlockingAccountDialog view = new BlockingAccountDialog(LaunchActivity.instance, relatedPage != null);
+        view.setDelegate(new BlockingAccountView.BlockingViewDelegate() {
             @Override
             public void onUnlock() {
-                destroy();
-                lastUnlockedAccount = currentId;
+                destroy(true);
+                if (relatedPage == null) {
+                    lastUnlockedAccount = currentId;
+                }
+            }
+
+            public void destroy(boolean authorized) {
+                if ((relatedPage == null && accountView == null) || (relatedPage != null && pageView == null)) {
+                    return;
+                }
+
+                if (relatedPage != null && !authorized) {
+                    LaunchActivity.instance.getActionBarLayout().removeFragmentFromStack(relatedPage, true);
+                    AndroidUtilities.runOnUIThread(pageView::onForcedDismiss, 150);
+                } else {
+                    (relatedPage != null ? pageView : accountView).onForcedDismiss();
+                }
+
+                accountView = null;
+                pageView = null;
             }
 
             @Override
             public void destroy() {
-                accountView.onForcedDismiss();
-                accountView = null;
-                LaunchActivity.instance.drawerLayoutContainer.setAllowOpenDrawer(true, false);
+                destroy(false);
             }
         });
+
+        if (relatedPage != null) {
+            pageView = view;
+        } else {
+            accountView = view;
+        }
     }
 
-    private static boolean isThereVisibleChatsPage() {
+    private void getBlockingAccountDialog(long currentId) {
+        getBlockingAccountDialog(currentId, null);
+    }
+
+    private void getBlockingPageDialog(BaseFragment page) {
+        getBlockingAccountDialog(0, page);
+    }
+
+    private static boolean needToUnlockAfterDialogsActivity(BaseFragment ignored) {
         List<BaseFragment> lastFragment = LaunchActivity.instance.getActionBarLayout().getFragmentStack();
         for (BaseFragment f : lastFragment) {
-            if (f instanceof DialogsActivity f3 && f3.getArguments() != null && Objects.equals(f3.getArguments().getInt("dialogsType", -1), DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS)) {
+            if (f != ignored && f instanceof DialogsActivity f3 && f3.getArguments() != null && Objects.equals(f3.getArguments().getInt("dialogsType", -1), DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean needToUnlockAfterSettingsActivity(BaseFragment ignored) {
+        List<BaseFragment> lastFragment = LaunchActivity.instance.getActionBarLayout().getFragmentStack();
+        for (BaseFragment f : lastFragment) {
+            if (f != ignored && TelegramSettingsHelper.isSettingsPage(f)) {
                 return false;
             }
         }

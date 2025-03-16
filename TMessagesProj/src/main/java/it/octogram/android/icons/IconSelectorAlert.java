@@ -9,6 +9,7 @@ package it.octogram.android.icons;
 
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -95,7 +96,7 @@ public class IconSelectorAlert extends BottomSheet {
                 int contentHeight = linearLayout.getMeasuredHeight();
                 int padding = (height / 5 * 2);
                 int visiblePart = height - padding;
-                if (contentHeight - visiblePart < AndroidUtilities.dp(90) || contentHeight < height / 2 + AndroidUtilities.dp(90)) {
+                if (contentHeight - visiblePart < dp(90) || contentHeight < height / 2 + dp(90)) {
                     padding = height - contentHeight;
                 }
                 if (padding < 0) {
@@ -147,7 +148,7 @@ public class IconSelectorAlert extends BottomSheet {
         titleView.setPivotX(LocaleController.isRTL ? titleView.getWidth() : 0);
         titleView.setPivotY(0);
         titleView.setLines(1);
-        titleView.setText(LocaleController.getString(R.string.ChooseFolderIcon));
+        titleView.setText(getString(R.string.ChooseFolderIcon));
         titleView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         titleView.setTypeface(AndroidUtilities.bold());
         titleView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
@@ -170,7 +171,7 @@ public class IconSelectorAlert extends BottomSheet {
         recyclerListView.setLayoutParams(new LinearLayout.LayoutParams(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         recyclerListView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         recyclerListView.setLayoutManager(new ExtendedGridLayoutManager(recyclerListView.getContext(), 6));
-        var padding = AndroidUtilities.dp(10);
+        var padding = dp(10);
         recyclerListView.setPadding(padding, padding, padding, padding);
         recyclerListView.setAdapter(gridAdapter);
         recyclerListView.setSelectorType(3);
@@ -272,7 +273,7 @@ public class IconSelectorAlert extends BottomSheet {
         child.getLocationInWindow(location);
         int top = location[1];
         int newOffset = Math.max(top, 0);
-        runShadowAnimation(!(location[1] + linearLayout.getMeasuredHeight() <= container.getMeasuredHeight() - AndroidUtilities.dp(113) + containerView.getTranslationY()));
+        runShadowAnimation(!(location[1] + linearLayout.getMeasuredHeight() <= container.getMeasuredHeight() - dp(113) + containerView.getTranslationY()));
         if (scrollOffsetY != newOffset) {
             scrollOffsetY = newOffset;
             scrollView.invalidate();
@@ -295,7 +296,7 @@ public class IconSelectorAlert extends BottomSheet {
             int iconSize = (int) (containerWidth / 6.0f * 0.9f);
             imageView.setLayoutParams(new RecyclerView.LayoutParams(iconSize, iconSize));
             imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
-            imageView.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
+            imageView.setPadding(dp(10), dp(10), dp(10), dp(10));
             return new RecyclerListView.Holder(imageView);
         }
 

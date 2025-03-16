@@ -560,7 +560,7 @@ public class MessageObject {
                 TLRPC.RestrictionReason reason = messageOwner.restriction_reason.get(i);
                 if (
                     "sensitive".equals(reason.reason) &&
-                    ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore())
+                    ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.isDownloadedFromAnyStore())
                 ) {
                     return isSensitiveCached = true;
                 }
@@ -573,7 +573,7 @@ public class MessageObject {
                     TLRPC.RestrictionReason reason = chat.restriction_reason.get(i);
                     if (
                         "sensitive".equals(reason.reason) &&
-                        ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.INSTANCE.isDownloadedFromAnyStore())
+                        ("all".equals(reason.platform) || (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && "android".equals(reason.platform) && StoreUtils.isDownloadedFromAnyStore())
                     ) {
                         return isSensitiveCached = true;
                     }

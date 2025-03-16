@@ -186,7 +186,7 @@ public class DrawerUserCell extends FrameLayout implements NotificationCenter.No
         imageView.setForUserOrChat(user, avatarDrawable);
         checkBox.setVisibility(account == UserConfig.selectedAccount ? VISIBLE : INVISIBLE);
 
-        if (FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(user.id)) {
+        if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLocked(user.id)) {
             AndroidUtilities.runOnUIThread(() -> {
                 SpannableString spoileredText = new SpannableString(user.first_name);
                 TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();

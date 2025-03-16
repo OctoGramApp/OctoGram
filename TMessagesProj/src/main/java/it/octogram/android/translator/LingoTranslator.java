@@ -67,7 +67,7 @@ public class LingoTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (IOException | JSONException e) {
-                    OctoLogging.e(e);
+                    OctoLogging.e("LingoTranslator", e);
                     callback.onResponseReceived();
                     callback.onError();
                 }

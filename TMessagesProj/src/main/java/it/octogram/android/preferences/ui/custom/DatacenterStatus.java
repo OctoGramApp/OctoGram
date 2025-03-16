@@ -9,6 +9,8 @@
 package it.octogram.android.preferences.ui.custom;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -93,7 +95,7 @@ public class DatacenterStatus extends LinearLayout {
         this.isMediaPage = isMediaPage;
 
         setGravity(Gravity.CENTER_VERTICAL);
-        setPadding(AndroidUtilities.dp(13), AndroidUtilities.dp(5), AndroidUtilities.dp(13), AndroidUtilities.dp(5));
+        setPadding(dp(13), dp(5), dp(13), dp(5));
         relativeLayout = new RelativeLayout(context);
         radialProgressView = new RadialProgressView(context, Color.TRANSPARENT);
         imageView = new AppCompatImageView(context);
@@ -140,18 +142,18 @@ public class DatacenterStatus extends LinearLayout {
             }
 
             ItemOptions options = ItemOptions.makeOptions(fragment, cell);
-            options.addIf(isMediaPage && !wasWaiting, R.drawable.menu_browser_refresh, LocaleController.getString(R.string.Refresh), () -> fragment.mediaPage.datacenterMediaController.startFetching(dcInfo.getDcId()));
-            options.addIf(isMediaPage && wasWaiting, R.drawable.media_photo_flash_on2, LocaleController.getString(R.string.DatacenterStatusSection_Start_Media), () -> fragment.mediaPage.datacenterMediaController.startFetching(dcInfo.getDcId()));
-            options.add(R.drawable.msg_copy, LocaleController.getString(R.string.DatacenterStatusSection_CopyIP), () -> {
+            options.addIf(isMediaPage && !wasWaiting, R.drawable.menu_browser_refresh, getString(R.string.Refresh), () -> fragment.mediaPage.datacenterMediaController.startFetching(dcInfo.getDcId()));
+            options.addIf(isMediaPage && wasWaiting, R.drawable.media_photo_flash_on2, getString(R.string.DatacenterStatusSection_Start_Media), () -> fragment.mediaPage.datacenterMediaController.startFetching(dcInfo.getDcId()));
+            options.add(R.drawable.msg_copy, getString(R.string.DatacenterStatusSection_CopyIP), () -> {
                 AndroidUtilities.addToClipboard(dcInfo.getIp());
-                BulletinFactory.of(fragment).createCopyBulletin(LocaleController.getString(R.string.DatacenterStatusSection_CopyIP_Text)).show();
+                BulletinFactory.of(fragment).createCopyBulletin(getString(R.string.DatacenterStatusSection_CopyIP_Text)).show();
             });
             if (isMediaPage) {
                 options.addGap();
                 if (_status == DOWNLOAD_FAILED_TRY_LATER) {
-                    options.addText(LocaleController.getString(R.string.DatacenterStatusSection_DwFailed_DiscoverMode_Text), 13, dp(250));
+                    options.addText(getString(R.string.DatacenterStatusSection_DwFailed_DiscoverMode_Text), 13, dp(250));
                 } else {
-                    options.addText(LocaleController.formatString(R.string.DatacenterStatusSection_Status_Downloads, dcInfo.getDcId() == 3 ? 1 : 10), 13, dp(200));
+                    options.addText(formatString(R.string.DatacenterStatusSection_Status_Downloads, dcInfo.getDcId() == 3 ? 1 : 10), 13, dp(200));
                 }
             }
             if (LocaleController.isRTL) {
@@ -213,29 +215,29 @@ public class DatacenterStatus extends LinearLayout {
         String statusText = null;
         int colorKey = 0;
         if (status == UNAVAILABLE && !isMediaPage) {
-            statusText = LocaleController.getString(R.string.Unavailable);
+            statusText = getString(R.string.Unavailable);
             colorKey = Theme.key_windowBackgroundWhiteGrayText;
         } else if (status == AVAILABLE && !isMediaPage) {
-            statusText = LocaleController.getString(R.string.Available);
+            statusText = getString(R.string.Available);
             colorKey = Theme.key_windowBackgroundWhiteGreenText;
         } else if (status == SLOW && !isMediaPage) {
-            statusText = LocaleController.getString(R.string.SpeedSlow);
+            statusText = getString(R.string.SpeedSlow);
             colorKey = Theme.key_statisticChartLine_orange;
         } else if (status == DOWNLOADING && isMediaPage) {
-            statusText = LocaleController.getString(R.string.Downloading);
+            statusText = getString(R.string.Downloading);
             colorKey = Theme.key_windowBackgroundWhiteGrayText;
         } else if (status == DOWNLOAD_END && isMediaPage) {
-            statusText = LocaleController.getString(R.string.DatacenterStatusSection_DwCompleted);
+            statusText = getString(R.string.DatacenterStatusSection_DwCompleted);
             colorKey = Theme.key_windowBackgroundWhiteGreenText;
         } else if ((status == DOWNLOAD_FAILED || status == DOWNLOAD_FAILED_TRY_LATER) && isMediaPage) {
-            statusText = LocaleController.getString(R.string.DatacenterStatusSection_DwFailed);
+            statusText = getString(R.string.DatacenterStatusSection_DwFailed);
             colorKey = Theme.key_windowBackgroundWhiteGrayText;
 
             if (status == DOWNLOAD_FAILED_TRY_LATER) {
-                statusText += " — "+LocaleController.getString(R.string.DatacenterStatusSection_DwFailed_DiscoverMode);
+                statusText += " — "+getString(R.string.DatacenterStatusSection_DwFailed_DiscoverMode);
             }
         } else if (status == INTERRUPTED && isMediaPage) {
-            statusText = LocaleController.getString(R.string.DatacenterStatusSection_Interrupted);
+            statusText = getString(R.string.DatacenterStatusSection_Interrupted);
             colorKey = Theme.key_windowBackgroundWhiteGrayText;
         }
 
@@ -243,7 +245,7 @@ public class DatacenterStatus extends LinearLayout {
 
         if (statusText != null && colorKey != 0) {
             if ((status == AVAILABLE || status == SLOW) && !isMediaPage) {
-                statusText += ", " + LocaleController.formatString(R.string.Ping, parameter);
+                statusText += ", " + formatString(R.string.Ping, parameter);
             }
             if (status == DOWNLOADING && isMediaPage) {
                 statusText += ", " + parameter + "%";
@@ -283,9 +285,9 @@ public class DatacenterStatus extends LinearLayout {
     protected void onDraw(Canvas canvas) {
         if (needDivider) {
             canvas.drawLine(
-                    LocaleController.isRTL ? 0 : AndroidUtilities.dp(20),
+                    LocaleController.isRTL ? 0 : dp(20),
                     getMeasuredHeight() - 1,
-                    getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(20) : 0),
+                    getMeasuredWidth() - (LocaleController.isRTL ? dp(20) : 0),
                     getMeasuredHeight() - 1,
                     Theme.dividerPaint
             );
@@ -297,8 +299,8 @@ public class DatacenterStatus extends LinearLayout {
 
             if (loadingDrawable == null) {
                 loadingDrawable = new CircularProgressDrawable(
-                        AndroidUtilities.dp((relativeLayout.getRight() - relativeLayout.getLeft()) / 3f),
-                        AndroidUtilities.dp(2.5f),
+                        dp((relativeLayout.getRight() - relativeLayout.getLeft()) / 3f),
+                        dp(2.5f),
                         Theme.getColor(Theme.key_windowBackgroundWhiteBlackText)
                 );
             }
@@ -330,7 +332,8 @@ public class DatacenterStatus extends LinearLayout {
                 loadingAnimator.cancel();
                 loadingAnimator = null;
             }
-            loadingAnimator = ValueAnimator.ofFloat(loadingT, (this.loading = loading) ? 1 : 0);
+            var _loading = this.loading = loading;
+            loadingAnimator = ValueAnimator.ofFloat(loadingT, _loading ? 1 : 0);
             loadingAnimator.addUpdateListener(anm -> {
                 loadingT = (float) anm.getAnimatedValue();
                 invalidate();

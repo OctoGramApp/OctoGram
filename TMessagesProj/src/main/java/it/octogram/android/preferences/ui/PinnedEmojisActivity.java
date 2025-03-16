@@ -30,7 +30,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -98,7 +97,7 @@ public class PinnedEmojisActivity extends BaseFragment {
         checked = OctoConfig.INSTANCE.usePinnedEmojisFeature.getValue();
         hideRecentEmojis = OctoConfig.INSTANCE.hideRecentEmojis.getValue();
 
-        actionBar.setTitle(LocaleController.getString(R.string.PinnedEmojisList));
+        actionBar.setTitle(getString(R.string.PinnedEmojisList));
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
 
@@ -116,7 +115,7 @@ public class PinnedEmojisActivity extends BaseFragment {
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
             String link = "tg://pinned_emojis";
-            showDialog(new ShareAlert(context, null, link, false, link, false));
+            showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;
         });
@@ -170,7 +169,7 @@ public class PinnedEmojisActivity extends BaseFragment {
         enableReactionsCell.setHeight(56);
         enableReactionsCell.setBackgroundColor(Theme.getColor(enableReactionsCell.isChecked() ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked));
         enableReactionsCell.setTypeface(AndroidUtilities.bold());
-        enableReactionsCell.setTextAndCheck(LocaleController.getString(R.string.PinnedEmojisList_Status), false, false);
+        enableReactionsCell.setTextAndCheck(getString(R.string.PinnedEmojisList_Status), false, false);
         enableReactionsCell.setColors(Theme.key_windowBackgroundCheckText, Theme.key_switchTrackBlue, Theme.key_switchTrackBlueChecked, Theme.key_switchTrackBlueThumb, Theme.key_switchTrackBlueThumbChecked);
         enableReactionsCell.setOnClickListener(v -> setCheckedEnableReactionCell(!enableReactionsCell.isChecked(), true, false));
         contentLayout.addView(enableReactionsCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
@@ -179,11 +178,11 @@ public class PinnedEmojisActivity extends BaseFragment {
         infoCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
         infoCell.setTopPadding(12);
         infoCell.setBottomPadding(16);
-        infoCell.setText(LocaleController.getString(R.string.PinnedEmojisList_Description));
+        infoCell.setText(getString(R.string.PinnedEmojisList_Description));
         contentLayout.addView(infoCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         HeaderCell headerCell = new HeaderCell(context);
-        headerCell.setText(LocaleController.getString(R.string.PinnedEmojisList));
+        headerCell.setText(getString(R.string.PinnedEmojisList));
         headerCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
         headerCell.setTextSize(15);
         headerCell.setTopMargin(14);
@@ -230,7 +229,7 @@ public class PinnedEmojisActivity extends BaseFragment {
 
         hideRecentEmojisCell = new TextCheckCell(context);
         hideRecentEmojisCell.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
-        hideRecentEmojisCell.setTextAndCheck(LocaleController.getString(R.string.PinnedEmojisList_HideRecent), false, false);
+        hideRecentEmojisCell.setTextAndCheck(getString(R.string.PinnedEmojisList_HideRecent), false, false);
         switchLayout.addView(hideRecentEmojisCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         hideRecentEmojisCell.setOnClickListener(v -> {
             hideRecentEmojis = !hideRecentEmojis;
@@ -241,11 +240,11 @@ public class PinnedEmojisActivity extends BaseFragment {
         infoCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
         infoCell.setTopPadding(12);
         infoCell.setBottomPadding(70);
-        infoCell.setText(LocaleController.getString(R.string.PinnedEmojisList_HideRecent_Desc));
+        infoCell.setText(getString(R.string.PinnedEmojisList_HideRecent_Desc));
         switchLayout.addView(infoCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         actionButton = new ButtonWithCounterView(context, getResourceProvider());
-        actionButton.setText(new SpannableStringBuilder(LocaleController.getString(R.string.PinnedEmojisList_Apply)), false);
+        actionButton.setText(new SpannableStringBuilder(getString(R.string.PinnedEmojisList_Apply)), false);
         actionButton.setOnClickListener(v -> {
             JSONArray reactionsList = grabReactions();
 
@@ -376,7 +375,7 @@ public class PinnedEmojisActivity extends BaseFragment {
                     editText.setSelection(i + spannable.length());
                 } else {
                     BulletinFactory.of(fragment)
-                            .createSimpleBulletin(R.raw.ic_pin, LocaleController.getString(R.string.PinnedEmojisList_Pinned))
+                            .createSimpleBulletin(R.raw.ic_pin, getString(R.string.PinnedEmojisList_Pinned))
                             .show();
                 }
             }
@@ -406,7 +405,7 @@ public class PinnedEmojisActivity extends BaseFragment {
                     } catch (Exception ignored) { }
                 } else {
                     BulletinFactory.of(fragment)
-                            .createSimpleBulletin(document, LocaleController.getString(R.string.PinnedEmojisList_Pinned))
+                            .createSimpleBulletin(document, getString(R.string.PinnedEmojisList_Pinned))
                             .show();
                 }
             }
@@ -504,7 +503,7 @@ public class PinnedEmojisActivity extends BaseFragment {
     private boolean checkMaxNumberNotReached() {
         if (grabReactions().length() > 25) {
             BulletinFactory.of(this)
-                    .createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString(R.string.PinnedEmojisList_Limit))
+                    .createSimpleBulletin(R.raw.chats_infotip, getString(R.string.PinnedEmojisList_Limit))
                     .show();
             return true;
         }
@@ -560,10 +559,10 @@ public class PinnedEmojisActivity extends BaseFragment {
 
         if (hasChanges) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), getResourceProvider());
-            builder.setTitle(LocaleController.getString(R.string.UnsavedChanges));
-            String text = LocaleController.getString(R.string.ReactionApplyChangesDialog);
+            builder.setTitle(getString(R.string.UnsavedChanges));
+            String text = getString(R.string.ReactionApplyChangesDialog);
             builder.setMessage(text);
-            builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> actionButton.performClick());
+            builder.setPositiveButton(getString(R.string.ApplyTheme), (dialogInterface, i) -> actionButton.performClick());
             builder.setNegativeButton(getString(R.string.Discard), (dialogInterface, i) -> finishFragment());
 
             AlertDialog dialog = builder.show();
@@ -739,14 +738,14 @@ public class PinnedEmojisActivity extends BaseFragment {
 
     public static String getRowDescription() {
         if (!OctoConfig.INSTANCE.usePinnedEmojisFeature.getValue()) {
-            return LocaleController.getString(R.string.PasswordOff);
+            return getString(R.string.PasswordOff);
         }
 
         try {
             JSONArray jsonArray = new JSONArray(new JSONTokener(OctoConfig.INSTANCE.pinnedEmojisList.getValue()));
-            return jsonArray.length() > 0 ? (""+jsonArray.length()) : LocaleController.getString(R.string.PasswordOff);
+            return jsonArray.length() > 0 ? (""+jsonArray.length()) : getString(R.string.PasswordOff);
         } catch (JSONException ignored) {}
 
-        return LocaleController.getString(R.string.PasswordOff);
+        return getString(R.string.PasswordOff);
     }
 }

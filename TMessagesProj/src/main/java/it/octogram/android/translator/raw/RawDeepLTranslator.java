@@ -161,7 +161,7 @@ public class RawDeepLTranslator {
                     throw var9;
                 }
             } catch (IOException var10) {
-                OctoLogging.e(var10);
+                OctoLogging.e("RawDeepLTranslator", var10);
                 if (Objects.requireNonNull(var10.getMessage()).contains("429")) {
                     needToRetryFail = true;
                     if (var5-- <= 0) {
@@ -171,7 +171,7 @@ public class RawDeepLTranslator {
                     try {
                         Thread.sleep(sleepTime_429);
                     } catch (InterruptedException var8) {
-                        OctoLogging.e(var8);
+                        OctoLogging.e("RawDeepLTranslator", var8);
                     }
                 }
             }

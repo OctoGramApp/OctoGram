@@ -8,6 +8,8 @@
 
 package it.octogram.android.preferences.rows.cells;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -15,7 +17,6 @@ import android.text.TextPaint;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.SeekBarView;
@@ -37,11 +38,11 @@ public class SliderCell extends FrameLayout {
         setWillNotDraw(false);
 
         textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setTextSize(AndroidUtilities.dp(16));
+        textPaint.setTextSize(dp(16));
 
         sizeBar = new SeekBarView(context);
         sizeBar.setReportChanges(true);
-        setSlidable(true);
+        setSlideable(true);
         addView(sizeBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 38, Gravity.START | Gravity.TOP, 5, 5, 39, 0));
     }
 
@@ -52,8 +53,8 @@ public class SliderCell extends FrameLayout {
         sizeBar.setSeparatorsCount(endRadius - startRadius + 1);
     }
 
-    public void setSlidable(boolean isSlidable) {
-        sizeBar.setDelegate(isSlidable ? (stop, progress) -> {
+    public void setSlideable(boolean isSlideable) {
+        sizeBar.setDelegate(isSlideable ? (stop, progress) -> {
             sliderRow.getPreferenceValue().updateValue(Math.round(startRadius + (endRadius - startRadius) * progress));
 
             Runnable runnable = sliderRow.getRunnable();
@@ -68,7 +69,7 @@ public class SliderCell extends FrameLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         textPaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteValueText));
-        canvas.drawText(String.valueOf(sliderRow.getPreferenceValue().getValue()), getMeasuredWidth() - AndroidUtilities.dp(39), AndroidUtilities.dp(28), textPaint);
+        canvas.drawText(String.valueOf(sliderRow.getPreferenceValue().getValue()), getMeasuredWidth() - dp(39), dp(28), textPaint);
     }
 
     @Override

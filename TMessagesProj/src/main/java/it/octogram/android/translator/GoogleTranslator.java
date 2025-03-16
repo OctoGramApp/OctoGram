@@ -103,7 +103,7 @@ public class GoogleTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (IOException | JSONException e) {
-                    OctoLogging.e(e);
+                    OctoLogging.e("GoogleTranslator", e);
                     callback.onResponseReceived();
                     callback.onError();
                 }

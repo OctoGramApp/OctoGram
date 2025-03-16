@@ -33,7 +33,7 @@ import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 
 public class BaiduTranslator {
-
+    private static final String TAG = "BaiduTranslator";
     private static final HashMap<String, String> targetLanguages = new HashMap<>();
     private static final String uuid = UUID.randomUUID().toString().replace("-", "");
 
@@ -105,7 +105,7 @@ public class BaiduTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (IOException | JSONException e) {
-                    OctoLogging.e(e);
+                    OctoLogging.e(TAG, e);
                     callback.onResponseReceived();
                     callback.onError();
                 }

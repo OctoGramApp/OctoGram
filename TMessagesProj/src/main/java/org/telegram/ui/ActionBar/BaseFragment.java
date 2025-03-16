@@ -61,6 +61,9 @@ import org.telegram.ui.bots.BotWebViewAttachedSheet;
 
 import java.util.ArrayList;
 
+import it.octogram.android.preferences.fragment.ActionBarOverride;
+import it.octogram.android.utils.OctoUtils;
+
 public abstract class BaseFragment {
 
     protected boolean isFinished;
@@ -454,6 +457,10 @@ public abstract class BaseFragment {
     }
 
     public boolean onFragmentCreate() {
+        var launchActivity = LaunchActivity.instance;
+        if (launchActivity != null && launchActivity.getActionBarLayout() instanceof ActionBarOverride actionBarOverride) {
+            actionBarOverride.handleAccountState();
+        }
         return true;
     }
 
@@ -1078,7 +1085,8 @@ public abstract class BaseFragment {
         return color;
     }
 
-    public void setNavigationBarColor(int color) {
+    public void setNavigationBarColor(int colors) {
+        var color = OctoUtils.getNavBarColor(resourceProvider);
         Activity activity = getParentActivity();
         if (activity instanceof LaunchActivity) {
             LaunchActivity launchActivity = (LaunchActivity) activity;

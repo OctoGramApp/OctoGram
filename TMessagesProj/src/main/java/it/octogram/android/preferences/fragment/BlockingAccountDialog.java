@@ -34,7 +34,7 @@ public class BlockingAccountDialog extends Dialog {
     private final FrameLayout windowView;
     public final BlockingAccountView blockingView;
 
-    public BlockingAccountDialog(@NonNull Context context) {
+    public BlockingAccountDialog(@NonNull Context context, boolean isPageView) {
         super(context, R.style.TransparentDialog);
         this.context = context;
 
@@ -47,12 +47,13 @@ public class BlockingAccountDialog extends Dialog {
                 if (Build.VERSION.SDK_INT >= 30) {
                     return WindowInsets.CONSUMED;
                 } else {
+                    //noinspection deprecation
                     return insets.consumeSystemWindowInsets();
                 }
             }
         });
 
-        blockingView = new BlockingAccountView(context);
+        blockingView = new BlockingAccountView(context, isPageView);
         windowView.addView(blockingView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL));
     }
 

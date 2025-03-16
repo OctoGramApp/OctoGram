@@ -8,6 +8,8 @@
 
 package it.octogram.android.camerax.components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -144,7 +146,7 @@ public class LockAnimationView extends LinearLayout {
                 invalidate();
             }
         };
-        addView(imageView, LayoutHelper.createLinear(AndroidUtilities.dp(50), LayoutHelper.MATCH_PARENT));
+        addView(imageView, LayoutHelper.createLinear(dp(50), LayoutHelper.MATCH_PARENT));
     }
 
     public void setCurrentMove(float value) {

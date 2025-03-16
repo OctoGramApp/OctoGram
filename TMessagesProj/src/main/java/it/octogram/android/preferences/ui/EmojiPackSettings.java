@@ -12,6 +12,10 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,7 +43,6 @@ import org.jetbrains.annotations.NotNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -149,8 +152,8 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         selectedCountTextView.setTypeface(AndroidUtilities.bold());
         selectedCountTextView.setTextColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon));
         actionMode.addView(selectedCountTextView, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1.0f, 72, 0, 0, 0));
-        actionMode.addItemWithWidth(MENU_SHARE, R.drawable.msg_share, AndroidUtilities.dp(54));
-        actionMode.addItemWithWidth(MENU_DELETE, R.drawable.msg_delete, AndroidUtilities.dp(54));
+        actionMode.addItemWithWidth(MENU_SHARE, R.drawable.msg_share, dp(54));
+        actionMode.addItemWithWidth(MENU_DELETE, R.drawable.msg_delete, dp(54));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -280,7 +283,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                         CustomEmojiController.emojiTmp(cell.packId).delete();
                         listAdapter.notifyEmojiSetsChanged();
                         if (isFailed)
-                            BulletinFactory.of(EmojiPackSettings.this).createErrorBulletin(LocaleController.getString(R.string.EmojiSetErrorDownloading)).show();
+                            BulletinFactory.of(EmojiPackSettings.this).createErrorBulletin(getString(R.string.EmojiSetErrorDownloading)).show();
                     }
                 }
                 cell.checkDownloaded(true);
@@ -319,7 +322,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
     }
 
     protected String getActionBarTitle() {
-        return LocaleController.getString(R.string.EmojiSets);
+        return getString(R.string.EmojiSets);
     }
 
     protected void updateRowsId() {
@@ -374,7 +377,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
     }
 
     @Override
-    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fMessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fMessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia, long payStars) {
         ArrayList<File> filesToUpload = new ArrayList<>();
         for (String file : files) {
             File f = new File(file);
@@ -407,11 +410,11 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 case HEADER:
                     HeaderCell headerViewHolder = (HeaderCell) holder.itemView;
                     if (position == emojiPackHeaderRow) {
-                        headerViewHolder.setText(LocaleController.getString(R.string.EmojiSets));
+                        headerViewHolder.setText(getString(R.string.EmojiSets));
                     } else if (position == generalHeaderRow) {
-                        headerViewHolder.setText(LocaleController.getString(R.string.General));
+                        headerViewHolder.setText(getString(R.string.General));
                     } else if (position == useCustomEmojiHeaderRow) {
-                        headerViewHolder.setText(LocaleController.getString(R.string.MyEmojiSets));
+                        headerViewHolder.setText(getString(R.string.MyEmojiSets));
                     }
                     break;
 
@@ -440,9 +443,9 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                 case TEXT_HINT_WITH_PADDING:
                     TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) holder.itemView;
                     if (position == emojiHintRow) {
-                        textInfoPrivacyCell.setText(LocaleController.getString(R.string.EmojiSetHint));
+                        textInfoPrivacyCell.setText(getString(R.string.EmojiSetHint));
                     } else if (position == customEmojiHintRow) {
-                        textInfoPrivacyCell.setText(LocaleController.getString(R.string.CustomEmojiSetHint));
+                        textInfoPrivacyCell.setText(getString(R.string.CustomEmojiSetHint));
                     }
                     break;
 
@@ -450,7 +453,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                     TextCheckCell textCheckCell = (TextCheckCell) holder.itemView;
                     if (position == useSystemEmojiRow) {
                         if (!partial) {
-                            textCheckCell.setTextAndValueAndCheck(LocaleController.getString(R.string.UseSystemEmojis), LocaleController.getString(R.string.UseSystemEmojisDesc),
+                            textCheckCell.setTextAndValueAndCheck(getString(R.string.UseSystemEmojis), getString(R.string.UseSystemEmojisDesc),
                                     OctoConfig.INSTANCE.useSystemEmoji.getValue(), true, false);
                         }
                         if (partial) {
@@ -473,7 +476,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                         }
 
                         CombinedDrawable combinedDrawable = new CombinedDrawable(drawable1, drawable2);
-                        creationTextCell.setTextAndIcon(LocaleController.getString(R.string.AddEmojiSet), combinedDrawable, false);
+                        creationTextCell.setTextAndIcon(getString(R.string.AddEmojiSet), combinedDrawable, false);
                     }
                     break;
 
@@ -606,9 +609,9 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                             }
                         } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                            builder.setTitle(LocaleController.formatString(R.string.DeleteStickerSetsAlertTitle, LocaleController.formatString(R.string.DeleteEmojiSets, count)));
-                            builder.setMessage(LocaleController.getString(R.string.DeleteEmojiSetsMessage));
-                            builder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialog, which1) -> {
+                            builder.setTitle(formatString(R.string.DeleteStickerSetsAlertTitle, formatString(R.string.DeleteEmojiSets, count)));
+                            builder.setMessage(getString(R.string.DeleteEmojiSetsMessage));
+                            builder.setPositiveButton(getString(R.string.Delete), (dialog, which1) -> {
                                 AlertDialog progressDialog = new AlertDialog(getParentActivity(), 3);
                                 new Thread() {
                                     @Override
@@ -628,7 +631,7 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
                                 progressDialog.setCanCancel(false);
                                 progressDialog.showDelayed(300);
                             });
-                            builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+                            builder.setNegativeButton(getString(R.string.Cancel), null);
                             AlertDialog dialog = builder.create();
                             showDialog(dialog);
                             TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);

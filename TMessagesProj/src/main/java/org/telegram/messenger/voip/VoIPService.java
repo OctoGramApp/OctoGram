@@ -88,7 +88,6 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 import org.json.JSONObject;
 import org.telegram.messenger.AccountInstance;
@@ -154,7 +153,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.CustomNotificationStyle;
 import it.octogram.android.utils.OctoUtils;
 
 @SuppressLint("NewApi")
@@ -3017,12 +3015,11 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void showNotification(String name, Bitmap photo) {
-		//var builder = CustomNotificationStyle.showNotification(this, name, photo);
 		Intent intent = new Intent(this, LaunchActivity.class).setAction(groupCall != null ? "voip_chat" : "voip");
 		if (groupCall != null) {
 			intent.putExtra("currentAccount", currentAccount);
 		}
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NotificationsController.OTHER_NOTIFICATIONS_CHANNEL)
+		Notification.Builder builder = new Notification.Builder(this)
 				.setContentText(name)
 				.setContentIntent(PendingIntent.getActivity(this, 50, intent, PendingIntent.FLAG_MUTABLE));
 		if (groupCall != null) {
@@ -3033,8 +3030,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			builder.setSmallIcon(R.drawable.ic_call);
             builder.setOngoing(true);
 		}
-        CustomNotificationStyle.customShowNotificationBuild(this, builder, name, photo);
-		/*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			Intent endIntent = new Intent(this, VoIPActionsReceiver.class);
 			endIntent.setAction(getPackageName() + ".END_CALL");
 			if (groupCall != null) {
@@ -3052,7 +3048,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			builder.setColorized(true);
 		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			builder.setColor(0xff2ca5e0);
-		}*/
+		}
 		if (Build.VERSION.SDK_INT >= 26) {
 			NotificationsController.checkOtherNotificationsChannel();
 			builder.setChannelId(NotificationsController.OTHER_NOTIFICATIONS_CHANNEL);
@@ -3077,8 +3073,6 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		} catch (Exception e) {
 			if (photo != null && e instanceof IllegalArgumentException) {
 				showNotification(name, null);
-			} else if (e instanceof NullPointerException) {
-				FileLog.e(e);
 			}
 		}
 	}
@@ -4182,17 +4176,23 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			} else {
 				placeholder = new AvatarDrawable((TLRPC.Chat) userOrChat);
 			}
-			placeholder.setRoundRadius(0);
 			bitmap = Bitmap.createBitmap(AndroidUtilities.dp(42), AndroidUtilities.dp(42), Bitmap.Config.ARGB_8888);
 			placeholder.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
 			placeholder.draw(new Canvas(bitmap));
 		}
+
+		Canvas canvas = new Canvas(bitmap);
+		Path circlePath = new Path();
+		circlePath.addCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, Path.Direction.CW);
+		circlePath.toggleInverseFillType();
+		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+		canvas.drawPath(circlePath, paint);
 		return bitmap;
 	}
 
 	private void showIncomingNotification(String name, TLObject userOrChat, boolean video, int additionalMemberCount) {
-		var incomingNotification = new CustomNotificationStyle().showIncomingNotification(name, null, userOrChat, video, currentAccount);
-		/*Intent intent = new Intent(this, LaunchActivity.class);
+		Intent intent = new Intent(this, LaunchActivity.class);
 		intent.setAction("voip");
 
 		Notification.Builder builder = new Notification.Builder(this)
@@ -4331,7 +4331,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			builder.addAction(R.drawable.ic_call_end_white_24dp, endTitle, endPendingIntent);
 			builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
 			incomingNotification = builder.getNotification();
-		}*/
+		}
 		foregroundStarted = true;
 		if (Build.VERSION.SDK_INT >= 33) {
 			startForeground(foregroundId = ID_INCOMING_CALL_NOTIFICATION, foregroundNotification = incomingNotification, lastForegroundType = getCurrentForegroundType());

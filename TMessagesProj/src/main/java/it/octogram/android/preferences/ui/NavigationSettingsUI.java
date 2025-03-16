@@ -9,6 +9,7 @@
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
@@ -26,7 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -90,7 +90,7 @@ public class NavigationSettingsUI extends BaseFragment {
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle(LocaleController.getString(R.string.Navigation));
+        actionBar.setTitle(getString(R.string.Navigation));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -106,7 +106,7 @@ public class NavigationSettingsUI extends BaseFragment {
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
             String link = "tg://experimental/navigation";
-            showDialog(new ShareAlert(context, null, link, false, link, false));
+            showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;
         });
@@ -115,7 +115,7 @@ public class NavigationSettingsUI extends BaseFragment {
         if (checkmark != null) {
             checkmark.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.MULTIPLY));
             Drawable doneButtonDrawable = new CrossfadeDrawable(checkmark, new CircularProgressDrawable(Theme.getColor(Theme.key_actionBarDefaultIcon)));
-            doneButton = actionBar.createMenu().addItemWithWidth(1, doneButtonDrawable, dp(56), LocaleController.getString(R.string.Done));
+            doneButton = actionBar.createMenu().addItemWithWidth(1, doneButtonDrawable, dp(56), getString(R.string.Done));
             checkDone(false);
         }
 
@@ -230,7 +230,7 @@ public class NavigationSettingsUI extends BaseFragment {
         alternativeNavigationCell.setDrawCheckRipple(true);
         alternativeNavigationCell.setHeight(56);
         alternativeNavigationCell.setTag(Theme.key_windowBackgroundUnchecked);
-        alternativeNavigationCell.setTextAndCheck(LocaleController.getString(R.string.AlternativeNavigation), false, false);
+        alternativeNavigationCell.setTextAndCheck(getString(R.string.AlternativeNavigation), false, false);
         alternativeNavigationCell.setTypeface(AndroidUtilities.bold());
         alternativeNavigationCell.setOnClickListener(view -> {
             TextCheckCell cell = (TextCheckCell) view;
@@ -245,11 +245,11 @@ public class NavigationSettingsUI extends BaseFragment {
 
         TextInfoPrivacyCell hintCell = new TextInfoPrivacyCell(context);
         hintCell.setBackground(Theme.getThemedDrawableByKey(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-        hintCell.setText(LocaleController.getString(R.string.AlternativeNavigation_Desc));
+        hintCell.setText(getString(R.string.AlternativeNavigation_Desc));
         linearLayout.addView(hintCell);
 
         smootherHeaderCell = new HeaderCell(context);
-        smootherHeaderCell.setText(LocaleController.getString(R.string.SmootherNavigation));
+        smootherHeaderCell.setText(getString(R.string.SmootherNavigation));
         linearLayout.addView(smootherHeaderCell);
         smoothLevelChooseView = new SlideChooseView(context);
         linearLayout.addView(smoothLevelChooseView);
@@ -266,11 +266,11 @@ public class NavigationSettingsUI extends BaseFragment {
         linearLayout.addView(smoothnessAnimationCell = new SmoothnessAnimationCell(context), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, SmoothnessAnimationCell.height));
 
         divider = new TextInfoPrivacyCell(context);
-        divider.setText(LocaleController.getString(R.string.SmootherNavigation_Desc));
+        divider.setText(getString(R.string.SmootherNavigation_Desc));
         linearLayout.addView(divider);
 
         optionsHeaderCell = new HeaderCell(context);
-        optionsHeaderCell.setText(LocaleController.getString(R.string.NavigationSettings));
+        optionsHeaderCell.setText(getString(R.string.NavigationSettings));
         linearLayout.addView(optionsHeaderCell);
         optionsCheckCell = new TextCheckCell(context);
         optionsCheckCell.setOnClickListener(view -> {
@@ -280,11 +280,11 @@ public class NavigationSettingsUI extends BaseFragment {
 
             checkDone(true);
         });
-        optionsCheckCell.setTextAndCheck(LocaleController.getString(R.string.AnimatedActionBar), false, false);
+        optionsCheckCell.setTextAndCheck(getString(R.string.AnimatedActionBar), false, false);
         linearLayout.addView(optionsCheckCell);
 
         dividerActionBarAnimation = new TextInfoPrivacyCell(context);
-        dividerActionBarAnimation.setText(LocaleController.getString(R.string.AnimatedActionBarn_Desc));
+        dividerActionBarAnimation.setText(getString(R.string.AnimatedActionBarn_Desc));
         linearLayout.addView(dividerActionBarAnimation);
 
         contentView.addView(scrollView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
@@ -387,10 +387,10 @@ public class NavigationSettingsUI extends BaseFragment {
                 applyAndFinish();
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                builder.setTitle(LocaleController.getString(R.string.UserRestrictionsApplyChanges));
-                builder.setMessage(LocaleController.getString(R.string.NavigationDiscardReload));
-                builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> applyAndFinish());
-                builder.setNegativeButton(LocaleController.getString(R.string.PassportDiscard), (dialog, which) -> finishFragment());
+                builder.setTitle(getString(R.string.UserRestrictionsApplyChanges));
+                builder.setMessage(getString(R.string.NavigationDiscardReload));
+                builder.setPositiveButton(getString(R.string.ApplyTheme), (dialogInterface, i) -> applyAndFinish());
+                builder.setNegativeButton(getString(R.string.PassportDiscard), (dialog, which) -> finishFragment());
 
                 AlertDialog dialog;
                 showDialog(dialog = builder.create());

@@ -8,12 +8,13 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.browser.Browser;
@@ -32,9 +33,9 @@ public class BrowserUtils {
         }
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(LaunchActivity.instance);
-        alertBuilder.setTitle(LocaleController.getString(R.string.OctoTgBrowserOpenFail));
-        alertBuilder.setMessage(LocaleController.getString(R.string.OctoTgBrowserOpenFail_Desc));
-        alertBuilder.setPositiveButton(LocaleController.getString(R.string.OK), null);
+        alertBuilder.setTitle(getString(R.string.OctoTgBrowserOpenFail));
+        alertBuilder.setMessage(getString(R.string.OctoTgBrowserOpenFail_Desc));
+        alertBuilder.setPositiveButton(getString(R.string.OK), null);
         alertBuilder.show();
     }
 
@@ -48,7 +49,7 @@ public class BrowserUtils {
 
     public static String getDefaultBrowserHome() {
         int engineType = SharedConfig.searchEngineType + 1;
-        String searchUrl = LocaleController.getString("SearchEngine" + engineType + "SearchURL");
+        String searchUrl = getString("SearchEngine" + engineType + "SearchURL");
         String host = AndroidUtilities.getHostAuthority(searchUrl);
         return "https://"+host;
     }

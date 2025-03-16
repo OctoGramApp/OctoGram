@@ -10,10 +10,13 @@ package it.octogram.android.theme
 
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
+import it.octogram.android.logs.OctoLogging
 import org.telegram.ui.LauncherIconController
 
-
 object MonetIconController {
+
+    private const val TAG = "MonetIconController"
+
     fun isSelectedMonet(): Boolean {
         return LauncherIconController.isEnabled(LauncherIconController.LauncherIcon.MONET)
     }
@@ -24,10 +27,15 @@ object MonetIconController {
     }
 
     fun switchToMonet() {
-        if (isSelectedMonet()) {
-            LauncherIconController.setIcon(LauncherIconController.LauncherIcon.DEFAULT)
+        val targetIcon = if (isSelectedMonet()) {
+            LauncherIconController.LauncherIcon.DEFAULT
         } else {
-            LauncherIconController.setIcon(LauncherIconController.LauncherIcon.MONET)
+            LauncherIconController.LauncherIcon.MONET
+        }
+        try {
+            LauncherIconController.setIcon(targetIcon)
+        } catch (e: Exception) {
+            OctoLogging.e(TAG, "Error switching launcher icon to $targetIcon", e)
         }
     }
 }

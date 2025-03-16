@@ -49,6 +49,7 @@ android {
         pbeta {
             minifyEnabled = true
             shrinkResources = true
+            vcsInfo.include = false
             if (signingProperties.size() > 0) {
                 signingConfig = signingConfigs.sign
             }
@@ -60,6 +61,7 @@ android {
         release {
             minifyEnabled = true
             shrinkResources = true
+            vcsInfo.include = false
             if (signingProperties.size() > 0) {
                 signingConfig = signingConfigs.sign
             }

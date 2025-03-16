@@ -14,10 +14,10 @@ import android.content.Context;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 
@@ -30,6 +30,7 @@ import it.octogram.android.ExpandableRowsIds;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StickerUi;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -46,8 +47,9 @@ import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.PopupChoiceDialogOption;
 
 public class OctoAppearanceUI implements PreferencesEntry {
+    @NonNull
     @Override
-    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
+    public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         ConfigProperty<Boolean> showCustomTitleRow = new ConfigProperty<>(null, OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
 
         ConfigProperty<Boolean> areShortcutsEnabled = new ConfigProperty<>(null, false);
@@ -59,9 +61,9 @@ public class OctoAppearanceUI implements PreferencesEntry {
         };
         updateShortcutsState.run();
 
-        return OctoPreferences.builder(LocaleController.getString(R.string.Appearance))
-                .deepLink("tg://appearance")
-                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, LocaleController.getString(R.string.OctoAppearanceSettingsHeader))
+        return OctoPreferences.builder(getString(R.string.Appearance))
+                .deepLink(DeepLinkDef.APPEARANCE)
+                .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, getString(R.string.OctoAppearanceSettingsHeader))
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI())))
                         .icon(R.drawable.msg_groups)
@@ -173,7 +175,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .build());
                 })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.getString(R.string.AdminShortcutsPositionChatInfo_Alert))
+                        .title(getString(R.string.AdminShortcutsPositionChatInfo_Alert))
                         .showIf(showTooManyOptionsAlert)
                         .build())
                 .category(getString(R.string.FontEmojisHeader), category -> {
@@ -198,7 +200,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .requiresRestart(true)
                             .build());
                 })
-                .category(LocaleController.getString(R.string.InterfaceHeader), category -> {
+                .category(getString(R.string.InterfaceHeader), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.showUserIconsInChatsList)
                             .title(getString(R.string.ShowUserIconsInChatsList))
@@ -262,7 +264,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                                     layoutManager.onRestoreInstanceState(recyclerViewState);
                             })
                             .preferenceValue(OctoConfig.INSTANCE.disableDividers)
-                            .title(LocaleController.getString(R.string.HideDividers))
+                            .title(getString(R.string.HideDividers))
                             .build());
                 })
                 .category(getString(R.string.LocalOther), category -> {

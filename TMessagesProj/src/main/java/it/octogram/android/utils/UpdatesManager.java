@@ -8,6 +8,8 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.text.TextUtils;
 
 import org.json.JSONArray;
@@ -40,6 +42,7 @@ import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
 
 public class UpdatesManager {
+    private static final String TAG = "UpdatesManager";
     private static final long privateChatId = -1733655252L;
     private static final long privateBotId = 6563667131L;
 
@@ -91,14 +94,14 @@ public class UpdatesManager {
 
         boolean hasPrivateBetaAccessC = chat != null;
         if (!hasPrivateBetaAccessC) {
-            OctoLogging.d("ACCESS HAS BEEN FORBIDDEN - STATE: chat empty");
+            OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE: chat empty");
         }
 
         if (hasPrivateBetaAccessC) {
             hasPrivateBetaAccessC = chat.id != 0;
             hasPrivateBetaAccessC &= chat.access_hash != 0;
             if (!hasPrivateBetaAccessC) {
-                OctoLogging.d("ACCESS HAS BEEN FORBIDDEN - STATE:" + chat.id + " - " + chat.access_hash);
+                OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + chat.id + " - " + chat.access_hash);
             }
         }
 
@@ -107,7 +110,7 @@ public class UpdatesManager {
             hasPrivateBetaAccessC &= ChatObject.isChannel(chat);
             hasPrivateBetaAccessC &= !ChatObject.isPublic(chat);
             if (!hasPrivateBetaAccessC) {
-                OctoLogging.d("ACCESS HAS BEEN FORBIDDEN - STATE:" + ChatObject.isInChat(chat) + ChatObject.isChannel(chat) + ChatObject.isPublic(chat));
+                OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + ChatObject.isInChat(chat) + ChatObject.isChannel(chat) + ChatObject.isPublic(chat));
             }
         }
 
@@ -149,7 +152,7 @@ public class UpdatesManager {
 
             checkPrivateBetaData(callback);
         } catch (JSONException e) {
-            OctoLogging.e(UpdatesManager.class.getName(), "Update check failed due to invalid data!", e);
+            OctoLogging.e(TAG, "Update check failed due to invalid data!", e);
             callback.onError();
         }
     }
@@ -381,7 +384,7 @@ public class UpdatesManager {
                             break;
                         }
 
-                        StringBuilder finalUpdate = new StringBuilder(String.format("%s\n%s", LocaleController.getString(R.string.UpdatesPbetaWarning), commitText));
+                        StringBuilder finalUpdate = new StringBuilder(String.format("%s\n%s", getString(R.string.UpdatesPbetaWarning), commitText));
 
                         TLRPC.Document currentMediaDocument = message.media.document;
                         String currentAbiRelease = OctoUtils.getCurrentAbi(false);
@@ -655,7 +658,7 @@ public class UpdatesManager {
             OctoConfig.INSTANCE.updateSignalingCommitID.clear();
             OctoConfig.INSTANCE.updateSignalingChangelog.clear();
         } else {
-            OctoLogging.e("OctoConfig", "OctoConfig INSTANCE or properties are not initialized");
+            OctoLogging.e(TAG, "OctoConfig INSTANCE or properties are not initialized");
         }
     }
 

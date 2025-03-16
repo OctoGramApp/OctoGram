@@ -9,6 +9,8 @@
 package it.octogram.android.preferences.ui.components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -20,7 +22,6 @@ import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarLayout;
@@ -109,7 +110,7 @@ public class SmoothnessAnimationCell extends FrameLayout {
             final int[] clicksCount = {0};
 
             actionBar.setAllowOverlayTitle(true);
-            actionBar.setTitle(LocaleController.formatString(R.string.NavigationPreviewTitle, isFirstPage ? 1 : 2));
+            actionBar.setTitle(formatString(R.string.NavigationPreviewTitle, isFirstPage ? 1 : 2));
             actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
                 @Override
                 public void onItemClick(int clickId) {
@@ -119,7 +120,7 @@ public class SmoothnessAnimationCell extends FrameLayout {
 
                             if (clicksCount[0] > 10 && !OctoConfig.INSTANCE.unlockedConfetti.getValue()) {
                                 AppIconBulletinLayout layout = new AppIconBulletinLayout(getParentActivity(), LauncherIconController.LauncherIcon.CONFETTI, null);
-                                layout.textView.setText(LocaleController.getString(R.string.UnlockedHiddenConfettiIcon));
+                                layout.textView.setText(getString(R.string.UnlockedHiddenConfettiIcon));
                                 layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                                 Bulletin.make(Objects.requireNonNull(LaunchActivity.getLastFragment()), layout, Bulletin.DURATION_SHORT).show();
                                 OctoConfig.INSTANCE.unlockedConfetti.updateValue(true);
@@ -141,7 +142,7 @@ public class SmoothnessAnimationCell extends FrameLayout {
             textView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText4));
             textView.setLinkTextColor(getThemedColor(Theme.key_windowBackgroundWhiteLinkText));
             textView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-            textView.setText(LocaleController.getString(isFirstPage ? R.string.NavigationPreviewPage1 : R.string.NavigationPreviewPage2));
+            textView.setText(getString(isFirstPage ? R.string.NavigationPreviewPage1 : R.string.NavigationPreviewPage2));
             contentView.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, dp(15), 0, dp(15), 0));
 
             if (isFirstPage) {

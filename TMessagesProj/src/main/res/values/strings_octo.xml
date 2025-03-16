@@ -116,6 +116,7 @@
     <string name="UpdatesSettingsLinks">Other sources</string>
     <string name="UpdatesSettingsPbetaDescription">Your main account is part of OctoGram\'s private beta program.\n\nBy activating this option, you can receive updates from the private beta program directly via OTA like other stable and beta updates, but some updates settings (like "%s") will be forcibly activated.</string>
     <string name="UpdatesPbetaWarning">Please note that the update you are installing is part of the private beta program you joined and may have instabilities. If so, please report it in our official internal testing group.</string>
+    <string name="UpdatesOptions">Options</string>
 
     <!--Emoji Sets-->
     <string name="MyEmojiSets">My Emoji Sets</string>
@@ -230,14 +231,15 @@
     <string name="UnlockToOpenPage">Unlock to open</string>
     <string name="UnlockToImportSettings">Unlock to import privacy settings</string>
     <string name="UnlockToSwitchAccount">Unlock to switch account</string>
+    <string name="UnlockToExpand">Unlock to expand</string>
     <string name="LockedChats">Locked chats</string>
     <string name="LockedChats_Lock">Lock a new chat</string>
     <string name="LockedChats_Lock_Destination">to update the locked list</string>
     <string name="LockedChats_Lock_Destination_Sure">will be locked</string>
     <string name="LockedChats_Empty">No locked chats found</string>
     <string name="LockedChatsHelpTitle">These are your locked chats</string>
-    <string name="LockedChatsHelpDescription">You can hide a chat so that you can only open it with your fingerprint. **Tap to config >**</string>
-    <string name="LockedChatsHelpDescription_Settings">You can lock chats using the 3 dots in-chat, in the chat list, or by pressing the button below.</string>
+    <string name="LockedChatsHelpDescription">Lock chats using the three-dot menu in-chat or in the chat list to view them here. **Tap to config >**</string>
+    <string name="LockedChatsHelpDescription_Settings">You can lock chats using the three-dot menu in-chat, in the chat list, or by pressing the button below. To view locked chats, long press on the action bar in the dialogs page.</string>
     <string name="LockedChatsHelpHint1Title">Hidden chats</string>
     <string name="LockedChatsHelpHint1Description">You can choose to hide or show each chat individually.</string>
     <string name="LockedChatsHelpHint2Title">Unlock with biometric</string>
@@ -253,16 +255,22 @@
     <string name="BiometricSettingsAllowFaceUnlock">Allow using Face Unlock</string>
     <string name="BiometricSettingsAllowDevicePIN">Allow using device PIN</string>
     <string name="BiometricSettingsOpenArchive">Request auth to open archive</string>
-    <string name="BiometricSettingsOpenSavedMessages">Request auth to open saved messages</string>
     <string name="BiometricSettingsOpenSecretChats">Request auth to open secret chats</string>
+    <string name="BiometricSettingsOpenSettings">Request auth to open settings</string>
     <string name="BiometricSettingsOpenCallsLog">Request auth to open calls log</string>
     <string name="BiometricAskEvery">Ask for authentication every…</string>
+    <string name="BiometricAskEvery_Always">Always</string>
     <string name="BiometricAskEvery_Desc">Biometric authentication will only be required once every %1$s.</string>
     <string name="BiometricUnavailable">Many security settings aren\'t available because the device doesn\'t support biometric unlocking. If it\'s enabled, check the system settings.</string>
     <string name="LockedActions">Locked actions</string>
     <string name="LockedAccounts">Locked accounts</string>
+    <string name="LockedAccounts_HideFromList">Hide locked accounts</string>
+    <string name="LockedAccounts_HideFromList_Desc">You can access hidden chats by long pressing on your profile in the drawer.</string>
+    <string name="LockedAccounts_Migration_Title">Double bottom has been updated</string>
+    <string name="LockedAccounts_Migration_Desc">All your accounts can now be secured effortlessly with your fingerprint — fast, safe, and seamless. Double Bottom is now Locked Accounts, integrated into the all-new privacy settings. Tap below to learn more!</string>
     <string name="ThisAccountLocked">Locked account</string>
-    <string name="ThisAccountLocked_Desc">Unlock the account with biometric unlocking or switch accounts.</string>
+    <string name="ThisAccountLocked_Desc">Unlock your account with biometrics or switch to a different account.</string>
+    <string name="ThisAccountLocked_Logout_Desc">Logging out of the account is the only way if you can\'t remember the password.</string>
     <string name="ThisAccountLocked_Unlock">Unlock</string>
     <string name="ThisAccountLocked_Switch">Switch accounts</string>
 
@@ -481,6 +489,8 @@
     <string name="HideOpenButtonChatsList">Hide open button in chats list</string>
     <string name="ProfileBubbleHideBorder">Hide dashed border</string>
     <string name="ProfileBubbleMoreTopPadding">Add more top padding</string>
+    <string name="QuickShareEnabled">Enable Quick Share</string>
+    <string name="QuickShareEnabled_Desc">Tap and hold the share button to quickly share messages from any chat.</string>
 
     <!-- Telegram Browser -->
     <string name="OctoTgBrowser">Telegram Browser</string>
@@ -672,20 +682,6 @@
     <string name="DeleteAccountLastPopup">Wait, let\'s talk seriously. This is the last popup that appears. Once you confirm this, you will no longer be able to do anything. Are you sure you want to continue?</string>
     <string name="DeleteAccountLastPopupFailed">In order to verify your identity, you need to set up two-factor authentication.</string>
 
-    <!-- Double Bottom -->
-    <string name="AccountProtection">Account Protection</string>
-    <string name="AccountProtectionDesc">Protect your accounts with a unique passcode. Tap the lock icon above your chat list to access them.</string>
-    <string name="CreatePasscodeInfoPIN2">Please enter any 4 digits that you will use to unlock your Telegram account.</string>
-    <string name="CreatePasscodeInfoPassword2">Please enter the password you will use to unlock your Telegram account.</string>
-    <string name="SelectAccountDesc">Choose the account to lock with the passcode.</string>
-    <string name="PasscodeAlreadyUsed">Passcode already used. Please choose another one.</string>
-    <string name="DisableAccountProtection">Disable Account Protection</string>
-    <string name="DisableAccountProtectionAlert">Are you sure you want to disable the account protection feature?</string>
-    <string name="AutoLockInstant">Instant</string>
-    <string name="EnableAccountProtection">Enable Account Protection</string>
-    <string name="AccountProtectionHint1">Tap the lock icon above your chat list to access your hidden accounts.</string>
-    <string name="AccountProtectionHint2">When an account is protected with a passcode, it will be hidden from the side menu.</string>
-
     <string name="AreYouSureDeleteXMessages">Are you sure you want to delete the chat history for this user?</string>
     <string name="AreYouSureDeleteXMessagesMultiple">Are you sure you want to delete the chat history for %d users?</string>
 
@@ -744,6 +740,7 @@
     <string name="DatacenterStatusSection_InternetIssue_Desc">It seems that your network connection isn\'t stable. Do you want to proceed anyway?</string>
     <string name="DatacenterStatusSection_TestBackend">Test backend</string>
     <string name="DatacenterStatusSection_TestBackend_Desc">Downloads tests aren\'t available in test backends.</string>
+    <string name="DatacenterStatusSection_WaitPlease_Desc">Please wait some seconds before restarting the activity.</string>
     <string name="DatacenterStatusSection_TermsAccept">By proceeding, you agree to the DC Status <![CDATA[<a href="https://%s/dcterms">Terms of Service</a>]]>.</string>
 
     <string name="DownloadMenuItem">Downloads</string>
@@ -848,5 +845,6 @@
     <string name="DontAskAgain">Don\'t ask again</string>
     <string name="AppLinkNotVerifiedTitle">App links not verified</string>
     <string name="AppLinkNotVerifiedMessage">For Android 12 and newer, you need to manually add link to verified links in order to open t.me links in OctoGram.</string>
+    <string name="MaxDragAndDropFileCount">You cannot add more than %s photos/video!</string>
 
 </resources>

@@ -89,6 +89,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import it.octogram.android.ConfigProperty;
@@ -113,6 +114,7 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.utils.ExpandableRowsOption;
+import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class PreferencesFragment extends BaseFragment {
@@ -124,9 +126,12 @@ public class PreferencesFragment extends BaseFragment {
     private ListAdapter listAdapter;
     private RecyclerListView listView;
     private Context context;
+    /** @noinspection deprecation*/
     private UndoView restartTooltip;
     private FireworksOverlay fireworksOverlay;
     private LinearLayoutManager linearLayoutManager;
+
+    private boolean hasUnlockedWithAuth = false;
 
     private boolean isSelectingItems = false;
     private FrameLayout buttonContainer;
@@ -333,6 +338,7 @@ public class PreferencesFragment extends BaseFragment {
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT));
         listView.setAdapter(listAdapter);
 
+        //noinspection deprecation
         restartTooltip = new UndoView(context);
         frameLayout.addView(restartTooltip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT, 8, 0, 8, 8));
 
@@ -341,8 +347,8 @@ public class PreferencesFragment extends BaseFragment {
 
             if (isSelectingItems && !(row instanceof ExpandableRows)) {
                 if (canCopyItem(row)) {
-                    String link = preferences.deepLink()+"?t="+getItemLink(row);
-                    showDialog(new ShareAlert(context, null, link, false, link, false));
+                    String link = String.format(Locale.US, "tg://%s?t=%s", preferences.deepLink(), getItemLink(row));
+                    showDialog(new ShareAlert(context, null, link, false, link, false, true));
                 }
 
                 return;
@@ -350,6 +356,15 @@ public class PreferencesFragment extends BaseFragment {
 
             if (row instanceof ExpandableRows expandableRow) {
                 SwitchCell switchCell = (SwitchCell) view;
+
+                if (isExpandableRowsLocked(expandableRow)) {
+                    FingerprintUtils.checkFingerprint(context, FingerprintUtils.FingerprintAction.EXPAND_SETTINGS, true, () -> {
+                        hasUnlockedWithAuth = true;
+                        listView.clickItem(view, position);
+                    });
+                    return;
+                }
+
                 if (expandableRow.isMainSwitchHidden() || isSelectingItems || (LocaleController.isRTL ? x > dp(19 + 37 + 19) : x < view.getMeasuredWidth() - dp(19 + 37 + 19))) {
                     int expRowID = expandableRow.getId();
                     if (expandedRowIds.contains(expRowID)) {
@@ -458,8 +473,9 @@ public class PreferencesFragment extends BaseFragment {
             if (!isThereCopyNeedItem) {
                 isSelectingItems = false;
                 _isSelectingItems = false;
+                var _deepLink = String.format(Locale.US, "tg://%s", preferences.deepLink());
                 AndroidUtilities.setLightStatusBar(getParentActivity().getWindow(), isLightStatusBar());
-                showDialog(new ShareAlert(context, null, preferences.deepLink(), false, preferences.deepLink(), false));
+                showDialog(new ShareAlert(context, null, _deepLink, false, _deepLink, false, true));
                 return;
             }
         }
@@ -489,7 +505,8 @@ public class PreferencesFragment extends BaseFragment {
             button.setOnClickListener(v -> {
                 isSelectingItems = false;
                 updateIsSelectingItems();
-                showDialog(new ShareAlert(context, null, preferences.deepLink(), false, preferences.deepLink(), false));
+                var _deepLink = String.format(Locale.US, "tg://%s", preferences.deepLink());
+                showDialog(new ShareAlert(context, null, _deepLink, false, _deepLink, false, true));
             });
         }
 
@@ -497,7 +514,8 @@ public class PreferencesFragment extends BaseFragment {
             ((FrameLayout) fragmentView).addView(buttonContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48 + 25 + 10 + 10, Gravity.FILL_HORIZONTAL | Gravity.BOTTOM));
         }
 
-        ValueAnimator animator = ValueAnimator.ofFloat(isSelectingItems ? 0f : 100f, isSelectingItems ? 100f : 0f);
+        float destination = isSelectingItems ? 100f : 0f;
+        ValueAnimator animator = ValueAnimator.ofFloat(isSelectingItems ? 0f : 100f, destination);
         animator.setDuration(250);
         animator.addUpdateListener(animation -> {
             float animatedValue = (float) animation.getAnimatedValue() / 100f;
@@ -511,7 +529,7 @@ public class PreferencesFragment extends BaseFragment {
                 actionBar.menu.setAlpha(1f - animatedValue);
             }
 
-            if (animatedValue == 0f || animatedValue == 1f) {
+            if (animatedValue == (destination / 100f)) {
                 AndroidUtilities.setLightStatusBar(getParentActivity().getWindow(), isLightStatusBar());
             }
         });
@@ -549,6 +567,13 @@ public class PreferencesFragment extends BaseFragment {
 
     private boolean canShowItemDuringCopy(BaseRow row) {
         if (!visibleTypesDuringCopy.contains(row.viewType)) {
+            return false;
+        } else if (row instanceof ExpandableRows expandableRows) {
+            for (ExpandableRowsOption option : expandableRows.getItemsList()) {
+                if (!getItemLink(option).isEmpty()) {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -605,7 +630,12 @@ public class PreferencesFragment extends BaseFragment {
         return copiedLink;
     }
 
+    private boolean isExpandableRowsLocked(ExpandableRows expandableRow) {
+        return expandableRow.isLocked() && FingerprintUtils.hasFingerprintCached() && !hasUnlockedWithAuth;
+    }
+
     public void showRestartTooltip() {
+        //noinspection deprecation
         restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
     }
 
@@ -633,6 +663,7 @@ public class PreferencesFragment extends BaseFragment {
         int focusElement = -1;
         BaseRow skipElement = null;
 
+        //ArrayList<Integer> lockedExpandableRowsToIgnore = new ArrayList<>();
         for (int i = 0; i < reorderedPreferences.size(); i++) {
             BaseRow category = reorderedPreferences.get(i);
 
@@ -652,10 +683,12 @@ public class PreferencesFragment extends BaseFragment {
                     }
                 }
                 if (containsFocused) {
-                    expandedRowIds.add(expandableRows.getId());
+                    if (isExpandableRowsLocked(expandableRows)) {
+                        isFocused = true;
+                    } else {
+                        expandedRowIds.add(expandableRows.getId());
+                    }
                 }
-            } else if (isFocused && category instanceof ExpandableRowsChild expandableRowChild && !canShowItem(category) && !expandedRowIds.contains(expandableRowChild.getRefersToId())) {
-                expandedRowIds.add(expandableRowChild.getRefersToId());
             }
 
             if (!canShowItem(category)) {
@@ -784,7 +817,6 @@ public class PreferencesFragment extends BaseFragment {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onResume() {
         super.onResume();
@@ -794,13 +826,17 @@ public class PreferencesFragment extends BaseFragment {
         return listView;
     }
 
+    public boolean hasUnlockedWithAuth() {
+        return hasUnlockedWithAuth;
+    }
+
     private class ListAdapter extends AdapterWithDiffUtils {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             final Context context = parent.getContext();
             View view;
-            PreferenceType type = PreferenceType.Companion.fromAdapterType(viewType);
+            PreferenceType type = PreferenceType.fromAdapterType(viewType);
             if (type == null) {
                 throw new RuntimeException("No type found for " + viewType);
             }
@@ -900,7 +936,7 @@ public class PreferencesFragment extends BaseFragment {
                 return;
             }
 
-            PreferenceType type = PreferenceType.Companion.fromAdapterType(holder.getItemViewType());
+            PreferenceType type = PreferenceType.fromAdapterType(holder.getItemViewType());
             if (type == null) {
                 throw new RuntimeException("No type found for " + holder.getItemViewType());
             }
@@ -984,7 +1020,7 @@ public class PreferencesFragment extends BaseFragment {
                     break;
                 case SLIDER:
                     ((SliderCell) holder.itemView).setSliderRow((SliderRow) currentShownItems.get(position));
-                    ((SliderCell) holder.itemView).setSlidable(!isSelectingItems);
+                    ((SliderCell) holder.itemView).setSlideable(!isSelectingItems);
                     break;
                 case LIST:
                     TextSettingsCell listCell = (TextSettingsCell) holder.itemView;
@@ -1116,7 +1152,7 @@ public class PreferencesFragment extends BaseFragment {
         }
     }
 
-    private static class SwitchCell extends FrameLayout {
+    private class SwitchCell extends FrameLayout {
 
         private final ImageView imageView;
         private final AvatarDrawable avatarDrawable;
@@ -1181,7 +1217,7 @@ public class PreferencesFragment extends BaseFragment {
             backupImageView.setRoundRadius(dp(18));
 
             boolean isRTL = LocaleController.isRTL;
-            textViewLayout.addView(backupImageView, createLinear(36, 36, Gravity.CENTER_VERTICAL, 25, 0, 0, 0));
+            textViewLayout.addView(backupImageView, createLinear(36, 36, Gravity.CENTER_VERTICAL, 0, 0, 0, 0));
             textViewLayout.addView(textView, createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
             textViewLayout.addView(countTextView, createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER_VERTICAL, isRTL ? 6 : 0, 0, isRTL ? 0 : 6, 0));
             textViewLayout.addView(arrowView, createLinear(16, 16, 0, Gravity.CENTER_VERTICAL, isRTL ? 0 : 2, 0, 0, 0));
@@ -1219,6 +1255,7 @@ public class PreferencesFragment extends BaseFragment {
         private ExpandableRowsChild _item;
         private boolean isSelectingItems = false;
         private boolean hasAddedUserData = false;
+        private boolean _isLocked = false;
 
         public void setAsSwitch(ExpandableRows expandableRows) {
             isSwitch = true;
@@ -1255,6 +1292,16 @@ public class PreferencesFragment extends BaseFragment {
             needLine = !expandableRows.getItemsList().isEmpty() && !expandableRows.isMainSwitchHidden();
             needDivider = expandableRows.hasDivider();
             setWillNotDraw(false);
+
+            boolean isLocked = isExpandableRowsLocked(expandableRows);
+            if (_isLocked != isLocked) {
+                _isLocked = isLocked;
+                arrowView.setScaleX(isLocked ? 0.8f : 1f);
+                arrowView.setScaleY(isLocked ? 0.8f : 1f);
+                arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(isLocked ? Theme.key_stickers_menu : Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
+                arrowView.setImageResource(isLocked ? R.drawable.other_lockedfolders2 : R.drawable.arrow_more);
+                arrowView.setTranslationX(isLocked ? dp(2) : 0);
+            }
         }
 
         public void setAsCheckbox(ExpandableRowsChild expandableRow) {
@@ -1284,7 +1331,9 @@ public class PreferencesFragment extends BaseFragment {
                         text = Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), false);
                     } catch (Exception ignore) {}
                     textView.setText(text);
-                    textView.setTranslationX(dp(15) * (LocaleController.isRTL ? -2.2f : 1));
+
+                    backupImageView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));
+                    textView.setTranslationX(dp(55) * (LocaleController.isRTL ? -2.2f : 1));
                 }
             } else {
                 backupImageView.setVisibility(GONE);
@@ -1319,7 +1368,7 @@ public class PreferencesFragment extends BaseFragment {
                     canvas.drawRect(x - dp(0.66f), (getMeasuredHeight() - dp(20)) / 2f, x, (getMeasuredHeight() + dp(20)) / 2f, Theme.dividerPaint);
                 }
                 if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
-                    canvas.drawLine(getMeasuredWidth() - dp(64) + (textView.getTranslationX() < 0 ? dp(-32) : 0), getMeasuredHeight() - 1, 0, getMeasuredHeight() - 1, Theme.dividerPaint);
+                    canvas.drawLine(getMeasuredWidth() - dp(64) + ((hasAddedUserData ? backupImageView : textView).getTranslationX() < 0 ? dp(-32) : 0), getMeasuredHeight() - 1, 0, getMeasuredHeight() - 1, Theme.dividerPaint);
                 }
             } else {
                 if (needLine && !isSelectingItems) {
@@ -1327,7 +1376,7 @@ public class PreferencesFragment extends BaseFragment {
                     canvas.drawRect(x - dp(0.66f), (getMeasuredHeight() - dp(20)) / 2f, x, (getMeasuredHeight() + dp(20)) / 2f, Theme.dividerPaint);
                 }
                 if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
-                    canvas.drawLine(dp(64) + textView.getTranslationX(), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight() - 1, Theme.dividerPaint);
+                    canvas.drawLine(dp(64) + (hasAddedUserData ? backupImageView : textView).getTranslationX(), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight() - 1, Theme.dividerPaint);
                 }
             }
         }

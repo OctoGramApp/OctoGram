@@ -92,7 +92,8 @@ public class MessageCustomParamsHelper {
             flags |= message.translatedText != null ? 16 : 0;
             flags |= message.translatedProviderId != -1 ? 32 : 0;
 
-            flags |= message.translatedPoll != null ? 32 : 0;
+            //flags |= message.translatedPoll != null ? 32 : 0;
+            flags |= message.translatedPoll != null ? 256 : 0;
 
             flags |= message.errorAllowedPriceStars != 0 ? 64 : 0;
             flags |= message.errorNewPriceStars != 0 ? 128 : 0;
@@ -123,8 +124,8 @@ public class MessageCustomParamsHelper {
                 message.translatedText.serializeToStream(stream);
             }
             if ((flags & 32) != 0) {
+                // message.translatedPoll.serializeToStream(stream);
                 stream.writeInt32(message.translatedProviderId);
-                message.translatedPoll.serializeToStream(stream);
             }
 
             if ((flags & 64) != 0) {
@@ -132,6 +133,9 @@ public class MessageCustomParamsHelper {
             }
             if ((flags & 128) != 0) {
                 stream.writeInt64(message.errorNewPriceStars);
+            }
+            if ((flags & 256) != 0) {
+                message.translatedPoll.serializeToStream(stream);
             }
         }
 
@@ -159,14 +163,17 @@ public class MessageCustomParamsHelper {
                 message.translatedText = TLRPC.TL_textWithEntities.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             if ((flags & 32) != 0) {
+                // message.translatedPoll = TranslateController.PollText.TLdeserialize(stream, stream.readInt32(exception), exception);
                 message.translatedProviderId = stream.readInt32(exception);
-                message.translatedPoll = TranslateController.PollText.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             if ((flags & 64) != 0) {
                 message.errorAllowedPriceStars = stream.readInt64(exception);
             }
             if ((flags & 128) != 0) {
                 message.errorNewPriceStars = stream.readInt64(exception);
+            }
+            if ((flags & 256) != 0) {
+                message.translatedPoll = TranslateController.PollText.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
         }
 

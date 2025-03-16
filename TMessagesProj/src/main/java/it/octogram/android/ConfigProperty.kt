@@ -8,7 +8,8 @@
 
 package it.octogram.android
 
-import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import org.telegram.messenger.ApplicationLoader
 
@@ -19,25 +20,21 @@ import org.telegram.messenger.ApplicationLoader
  *
  * @param T The type of the configuration property value.
  * @param key The key used to identify the property in shared preferences. Can be null if not stored persistently.
- * @param value The initial value of the property.
+ * @param initialValue The initial value of the property.
  */
 class ConfigProperty<T>(
-    private val key: String?,
-    private var value: T
+    var key: String?,
+    initialValue: T
 ) {
-    private val octoPreferences = ApplicationLoader.applicationContext.getSharedPreferences(
-        "octoconfig",
-        Activity.MODE_PRIVATE
-    )
-    private val defaultValue = value
+    private val octoPreferences: SharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Context.MODE_PRIVATE)
+    private var _value: T = initialValue
+    private val defaultValue: T = initialValue
 
-    fun getKey(): String? = key
-
-    fun getValue(): T = value
-
-    fun setValue(newValue: T) {
-        value = newValue
-    }
+    var value: T
+        get() = _value
+        set(newValue) {
+            updateValue(newValue)
+        }
 
     /**
      * Updates the value of the preference and persists it to SharedPreferences.
@@ -52,43 +49,48 @@ class ConfigProperty<T>(
      */
     @Throws(IllegalArgumentException::class)
     fun updateValue(newValue: T) {
-        if (value != newValue) {
-            if (key != null) {
+        if (_value != newValue) {
+            _value = newValue
+            key?.let { k ->
                 octoPreferences.edit {
                     when (newValue) {
-                        is String? -> putString(key, newValue)
-                        is Int -> putInt(key, newValue)
-                        is Boolean -> putBoolean(key, newValue)
-                        is Float -> putFloat(key, newValue)
-                        is Long -> putLong(key, newValue)
+                        is String? -> putString(k, newValue)
+                        is Int -> putInt(k, newValue)
+                        is Boolean -> putBoolean(k, newValue)
+                        is Float -> putFloat(k, newValue)
+                        is Long -> putLong(k, newValue)
                         else -> throw IllegalArgumentException("Unsupported type")
                     }
                 }
             }
-            value = newValue
         }
     }
 
     /**
-     * Removes the key value from preferences
+     * Removes the key value from preferences and resets to default value.
      */
     fun clear() {
-        if (key != null) {
-            octoPreferences.edit { remove(key) }
-            value = defaultValue
+        key?.let { k ->
+            octoPreferences.edit {
+                remove(k)
+            }
+            _value = defaultValue
         }
     }
 
-    /**
-     * Updates the value of a given configuration property.
-     *
-     * This function takes a [ConfigProperty] and a new value, and updates the property's value to the new value.
-     *
-     * @param T The type of the configuration property.
-     * @param property The configuration property to update.
-     * @param value The new value to set for the property.
-     */
-    fun <T> updateValue(property: ConfigProperty<T>, value: T) {
-        property.updateValue(value)
+    companion object {
+        /**
+         * Utility function to update the value of a given configuration property.
+         *
+         * This function takes a [ConfigProperty] and a new value, and updates the property's value to the new value.
+         *
+         * @param property The configuration property to update.
+         * @param value The new value to set for the property.
+         * @param <T> The type of the configuration property.
+         */
+        @JvmStatic
+        fun <T> updateValue(property: ConfigProperty<T>, value: T) {
+            property.updateValue(value)
+        }
     }
 }

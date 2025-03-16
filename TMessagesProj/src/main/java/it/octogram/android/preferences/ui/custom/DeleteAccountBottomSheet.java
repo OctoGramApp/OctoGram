@@ -8,6 +8,10 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,7 +33,6 @@ import androidx.viewpager.widget.ViewPager;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -136,13 +139,13 @@ public class DeleteAccountBottomSheet extends BottomSheet {
         linearLayout.addView(frameLayout);
 
         TextView buttonTextView = new TextView(context);
-        buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+        buttonTextView.setPadding(dp(34), 0, dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         buttonTextView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(LocaleController.getString(R.string.DeleteAccountMainButton));
+        buttonTextView.setText(getString(R.string.DeleteAccountMainButton));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> {
             dismiss();
             callback.onDismiss();
@@ -152,7 +155,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
         textView = new TextView(context);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(LocaleController.getString(R.string.DeleteAccountContinue));
+        textView.setText(getString(R.string.DeleteAccountContinue));
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setOnClickListener(view -> {
             if (selectedPosition == CurrentStep.MESSAGE_HISTORY) {
@@ -202,7 +205,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
 
                 if (position == CurrentStep.MESSAGE_HISTORY) {
                     textView.setEnabled(false);
-                    String defaultText = LocaleController.getString(R.string.DeleteAccountContinueDelete);
+                    String defaultText = getString(R.string.DeleteAccountContinueDelete);
 
                     new CountDownTimer(30000, 100) {
                         @Override
@@ -241,22 +244,22 @@ public class DeleteAccountBottomSheet extends BottomSheet {
     private String getTitleForStepId(int stepId) {
         return switch (stepId) {
             case CurrentStep.FREE_CLOUD_STORAGE ->
-                    LocaleController.getString(R.string.DeleteAccountStep1Title);
+                    getString(R.string.DeleteAccountStep1Title);
             case CurrentStep.GROUPS_AND_CHANNELS ->
-                    LocaleController.getString(R.string.DeleteAccountStep2Title);
+                    getString(R.string.DeleteAccountStep2Title);
             default ->
-                    LocaleController.getString(R.string.DeleteAccountStep3Title);
+                    getString(R.string.DeleteAccountStep3Title);
         };
     }
 
     private String getDescriptionForStepId(int stepId) {
         return switch (stepId) {
             case CurrentStep.FREE_CLOUD_STORAGE ->
-                    LocaleController.getString(R.string.DeleteAccountStep1Description);
+                    getString(R.string.DeleteAccountStep1Description);
             case CurrentStep.GROUPS_AND_CHANNELS ->
-                    LocaleController.getString(R.string.DeleteAccountStep2Description);
+                    getString(R.string.DeleteAccountStep2Description);
             default ->
-                    LocaleController.getString(R.string.DeleteAccountStep3Description);
+                    getString(R.string.DeleteAccountStep3Description);
         };
     }
 
@@ -267,9 +270,9 @@ public class DeleteAccountBottomSheet extends BottomSheet {
             twoStepFragment.finishFragment();
 
             AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
-            warningBuilder.setTitle(LocaleController.getString(R.string.DeleteAccount));
-            warningBuilder.setMessage(LocaleController.getString(R.string.DeleteAccountLastPopup));
-            warningBuilder.setPositiveButton(LocaleController.getString(R.string.DeleteAccount), (dialog1, which1) -> {
+            warningBuilder.setTitle(getString(R.string.DeleteAccount));
+            warningBuilder.setMessage(getString(R.string.DeleteAccountLastPopup));
+            warningBuilder.setPositiveButton(getString(R.string.DeleteAccount), (dialog1, which1) -> {
                 AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
                 progressDialog.setCanCancel(false);
 
@@ -283,19 +286,19 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                             accountInstance.getMessagesController().performLogout(0);
                         }
                     } else if (error == null || error.code != -1000) {
-                        String errorText = LocaleController.getString(R.string.ErrorOccurred);
+                        String errorText = getString(R.string.ErrorOccurred);
                         if (error != null) {
                             errorText += "\n" + error.text;
                         }
                         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setTitle(LocaleController.getString(R.string.AppName));
+                        builder.setTitle(getString(R.string.AppName));
                         builder.setMessage(errorText);
-                        builder.setPositiveButton(LocaleController.getString(R.string.OK), null);
+                        builder.setPositiveButton(getString(R.string.OK), null);
                         builder.show();
                     }
                 }));
             });
-            warningBuilder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+            warningBuilder.setNegativeButton(getString(R.string.Cancel), null);
             AlertDialog warningDialog = warningBuilder.create();
 
             warningDialog.setOnShowListener(dialog1 -> {
@@ -355,7 +358,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
             textView.setText(getTitleForStepId(p));
-            textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
+            textView.setPadding(dp(30), 0, dp(30), 0);
             linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             textView = new TextView(context);
@@ -363,7 +366,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
             textView.setText(getDescriptionForStepId(p));
-            textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
+            textView.setPadding(dp(30), dp(10), dp(30), dp(21));
             linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             if (p == CurrentStep.GROUPS_AND_CHANNELS || p == CurrentStep.MESSAGE_HISTORY) {
@@ -403,8 +406,8 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                     float factor = 0.65f;
                     int avatarSize = 38;
                     AvatarsImageView avatarsImageView = new AvatarsImageView(context, false);
-                    avatarsImageView.setAvatarsTextSize(AndroidUtilities.dp(20));
-                    avatarsImageView.setSize(AndroidUtilities.dp(avatarSize));
+                    avatarsImageView.setAvatarsTextSize(dp(20));
+                    avatarsImageView.setSize(dp(avatarSize));
                     avatarsImageView.setStepFactor(factor);
 
                     int i = 0;
@@ -439,9 +442,9 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                     textView.setGravity(Gravity.CENTER);
 
                     if (useUsersList) {
-                        textView.setText(LocaleController.formatString(R.string.DeleteAccountStep3Counter, currentItemCounter));
+                        textView.setText(formatString(R.string.DeleteAccountStep3Counter, currentItemCounter));
                     } else {
-                        textView.setText(LocaleController.formatString(R.string.DeleteAccountStep2Counter, currentItemCounter));
+                        textView.setText(formatString(R.string.DeleteAccountStep2Counter, currentItemCounter));
                     }
 
                     linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 10, 0, 10, 24));

@@ -19,6 +19,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 
 public class LogsMigrator {
+    private static final String TAG = "LogsMigrator";
     public static void migrateOldLogs() {
         if (OctoConfig.INSTANCE.isMigrateOldLogs.getValue()) {
             return;
@@ -26,29 +27,29 @@ public class LogsMigrator {
 
         File oldLogsDir = ApplicationLoader.applicationContext.getFilesDir();
         if (oldLogsDir == null) {
-            OctoLogging.e("Migration: Failed to retrieve old logs directory.");
+            OctoLogging.e(TAG, "Migration: Failed to retrieve old logs directory.");
             return;
         }
 
         File[] oldLogs = oldLogsDir.listFiles((dir, name) -> name.endsWith(".log"));
         if (oldLogs == null || oldLogs.length == 0) {
-            OctoLogging.e("Crashlytics","No old logs to migrate");
+            OctoLogging.e(TAG, "No old logs to migrate");
             return;
         }
 
-        OctoLogging.e("Crashlytics","Migrating old logs");
+        OctoLogging.e(TAG, "Migrating old logs");
         for (File oldLog : oldLogs) {
             File newLog = new File(OctoUtils.getLogsDir(), oldLog.getName());
             File parentFile = newLog.getParentFile();
             try {
                 if (parentFile != null && (parentFile.exists() || parentFile.mkdirs())) {
                     copyFile(oldLog, newLog);
-                    OctoLogging.e("Crashlytics: Copied log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath());
+                    OctoLogging.e(TAG, "Crashlytics: Copied log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath());
                 } else {
-                    OctoLogging.e("Failed to create directories");
+                    OctoLogging.e(TAG, "Failed to create directories");
                 }
             } catch (IOException e) {
-                OctoLogging.e("Crashlytics: Failed to migrate log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath(), e);
+                OctoLogging.e(TAG, "Crashlytics: Failed to migrate log: " + oldLog.getAbsolutePath() + " to " + newLog.getAbsolutePath(), e);
             }
         }
         OctoConfig.INSTANCE.isMigrateOldLogs.updateValue(true);

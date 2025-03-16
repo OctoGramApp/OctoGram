@@ -4346,7 +4346,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 getString("DebugMenuClearMediaCache", R.string.DebugMenuClearMediaCache),
                                 getString("DebugMenuCallSettings", R.string.DebugMenuCallSettings),
                                 null,
-                                BuildVars.DEBUG_PRIVATE_VERSION || ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore() ? getString("DebugMenuCheckAppUpdate", R.string.DebugMenuCheckAppUpdate) : null,
+                                BuildVars.DEBUG_PRIVATE_VERSION || ApplicationLoader.isStandaloneBuild() && !StoreUtils.isDownloadedFromAnyStore() ? getString("DebugMenuCheckAppUpdate", R.string.DebugMenuCheckAppUpdate) : null,
                                 getString("DebugMenuReadAllDialogs", R.string.DebugMenuReadAllDialogs),
                                 BuildVars.DEBUG_PRIVATE_VERSION ? (SharedConfig.disableVoiceAudioEffects ? "Enable voip audio effects" : "Disable voip audio effects") : null,
                                 BuildVars.DEBUG_PRIVATE_VERSION ? "Clean app update" : null,
@@ -6734,10 +6734,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 AndroidUtilities.addToClipboard("" + UserAccountInfoController.getNiceId(chat, chat.id));
             }
-            BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
+            BulletinFactory.of(this).createCopyBulletin(LocaleController.getString(R.string.TextCopied)).show();
         } else if (position == registrationDataRow && (userId != 0)) {
             try {
-                String date = RegistrationDateController.getRegistrationDate(userId);
+                var date = RegistrationDateController.getRegistrationDate(userId);
                 AndroidUtilities.addToClipboard(date);
                 BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
             } catch (Exception e) {
@@ -11811,9 +11811,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         String abi = "";
                         if (BuildVars.DEBUG_PRIVATE_VERSION) {
                             abi = "pbeta ";
-                        } else if (!StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
+                        } else if (!StoreUtils.isDownloadedFromAnyStore()) {
                             abi = "direct ";
-                        } else if (StoreUtils.INSTANCE.isFromHuaweiStore()) {
+                        } else if (StoreUtils.isFromHuaweiStore()) {
                             abi = "huawei ";
                         }
                         abi += OctoUtils.getCurrentAbi();

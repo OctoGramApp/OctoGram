@@ -252,12 +252,12 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
 import it.octogram.android.preferences.OctoPreferences;
+import it.octogram.android.preferences.fragment.ActionBarOverride;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
 import it.octogram.android.preferences.ui.components.LockedChatsHelp;
 import it.octogram.android.preferences.ui.custom.AppLinkVerifyBottomSheet;
 import it.octogram.android.preferences.ui.custom.MonetAndroidFixDialog;
-import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.theme.MonetIconController;
 import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.FolderUtils;
@@ -676,6 +676,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable statusDrawable;
     private DrawerProfileCell.AnimatedStatusView animatedStatusView;
     public RightSlidingDialogContainer rightSlidingDialogContainer;
+
+    public DialogsActivityDelegate getDelegate() {
+        return delegate;
+    }
 
     public final Property<DialogsActivity, Float> SCROLL_Y = new AnimationProperties.FloatProperty<DialogsActivity>("animationValue") {
         @Override
@@ -3768,7 +3772,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
                 TLRPC.User u = AccountInstance.getInstance(a).getUserConfig().getCurrentUser();
                 if (u != null) {
-                    if (PasscodeController.isProtectedAccount(u.id)) continue;
                     AccountSelectCell cell = new AccountSelectCell(context, false);
                     cell.setAccount(a, true);
                     switchItem.addSubItem(10 + a, cell, dp(230), dp(48));
@@ -3825,6 +3828,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     if (getParentActivity() == null) {
                         return;
                     }
+
+                    if (SharedConfig.passcodeHash.length() == 0) {
+                        if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLockedByNumber(UserConfig.selectedAccount)) {
+                            ((ActionBarOverride) LaunchActivity.instance.getActionBarLayout()).lock();
+                        }
+                        return;
+                    }
+
                     SharedConfig.appLocked = true;
                     SharedConfig.saveConfig();
                     int[] position = new int[2];
@@ -11362,7 +11373,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (passcodeItem == null) {
             return;
         }
-        if (SharedConfig.passcodeHash.length() != 0 && !searching) {
+        boolean hasLockedAccount = FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLockedByNumber(UserConfig.selectedAccount);
+        if ((SharedConfig.passcodeHash.length() != 0 || hasLockedAccount) && !searching) {
             if (doneItem == null || doneItem.getVisibility() != View.VISIBLE) {
                 passcodeItem.setVisibility(View.VISIBLE);
             }

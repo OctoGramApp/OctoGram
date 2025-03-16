@@ -8,6 +8,10 @@
 
 package it.octogram.android.tgastandaloneexport;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -31,7 +35,6 @@ import androidx.annotation.NonNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLoader;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.SimpleTextView;
@@ -77,7 +80,7 @@ public class UpdateLayout extends IUpdateLayout {
                 float loadProgress = loadedSize / (float) totalSize;
                 updateLayoutIcon.setIcon(MediaActionDrawable.ICON_CANCEL, true, true);
                 updateLayoutIcon.setProgress(loadProgress, true);
-                updateTextViews[0].setText(LocaleController.formatString("AppUpdateDownloading", R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
+                updateTextViews[0].setText(formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
             }
         }
     }
@@ -118,7 +121,7 @@ public class UpdateLayout extends IUpdateLayout {
         };
         updateLayout.setWillNotDraw(false);
         updateLayout.setVisibility(View.INVISIBLE);
-        updateLayout.setTranslationY(AndroidUtilities.dp(44));
+        updateLayout.setTranslationY(dp(44));
         updateLayout.setBackground(Theme.getSelectorDrawable(0x40ffffff, false));
         sideMenuContainer.addView(updateLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44, Gravity.LEFT | Gravity.BOTTOM));
         updateLayout.setOnClickListener(v -> {
@@ -139,8 +142,8 @@ public class UpdateLayout extends IUpdateLayout {
         });
         updateLayoutIcon = new RadialProgress2(updateLayout);
         updateLayoutIcon.setColors(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
-        updateLayoutIcon.setProgressRect(AndroidUtilities.dp(22), AndroidUtilities.dp(11), AndroidUtilities.dp(22 + 22), AndroidUtilities.dp(11 + 22));
-        updateLayoutIcon.setCircleRadius(AndroidUtilities.dp(11));
+        updateLayoutIcon.setProgressRect(dp(22), dp(11), dp(22 + 22), dp(11 + 22));
+        updateLayoutIcon.setCircleRadius(dp(11));
         updateLayoutIcon.setAsMini();
 
         updateTextViews = new SimpleTextView[2];
@@ -152,7 +155,7 @@ public class UpdateLayout extends IUpdateLayout {
             updateTextViews[i].setGravity(Gravity.LEFT);
             updateLayout.addView(updateTextViews[i], LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 74, 0, 0, 0));
         }
-        updateTextViews[0].setText(LocaleController.getString(R.string.AppUpdate));
+        updateTextViews[0].setText(getString(R.string.AppUpdate));
         updateTextViews[1].setAlpha(0f);
         updateTextViews[1].setVisibility(View.GONE);
 
@@ -191,18 +194,18 @@ public class UpdateLayout extends IUpdateLayout {
             boolean showSize;
             if (path.exists()) {
                 updateLayoutIcon.setIcon(MediaActionDrawable.ICON_UPDATE, true, animated);
-                setUpdateText(LocaleController.getString(R.string.AppUpdateNow), animated);
+                setUpdateText(getString(R.string.AppUpdateNow), animated);
                 showSize = false;
             } else {
                 if (FileLoader.getInstance(currentAccount).isLoadingFile(fileName)) {
                     updateLayoutIcon.setIcon(MediaActionDrawable.ICON_CANCEL, true, animated);
                     //updateLayoutIcon.setProgress(0, false);
                     Float p = ImageLoader.getInstance().getFileProgress(fileName);
-                    setUpdateText(LocaleController.formatString(R.string.AppUpdateDownloading, (int) ((p != null ? p : 0.0f) * 100)), animated);
+                    setUpdateText(formatString(R.string.AppUpdateDownloading, (int) ((p != null ? p : 0.0f) * 100)), animated);
                     showSize = false;
                 } else {
                     updateLayoutIcon.setIcon(MediaActionDrawable.ICON_DOWNLOAD, true, animated);
-                    setUpdateText(LocaleController.getString(R.string.AppUpdate), animated);
+                    setUpdateText(getString(R.string.AppUpdate), animated);
                     showSize = true;
                 }
             }
@@ -239,14 +242,14 @@ public class UpdateLayout extends IUpdateLayout {
             } else {
                 updateLayout.setTranslationY(0);
             }
-            sideMenu.setPadding(0, 0, 0, AndroidUtilities.dp(44));
+            sideMenu.setPadding(0, 0, 0, dp(44));
         } else {
             if (updateLayout == null || updateLayout.getTag() == null) {
                 return;
             }
             updateLayout.setTag(null);
             if (animated) {
-                updateLayout.animate().translationY(AndroidUtilities.dp(44)).setInterpolator(CubicBezierInterpolator.EASE_OUT).setListener(new AnimatorListenerAdapter() {
+                updateLayout.animate().translationY(dp(44)).setInterpolator(CubicBezierInterpolator.EASE_OUT).setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         if (updateLayout.getTag() == null) {
@@ -255,7 +258,7 @@ public class UpdateLayout extends IUpdateLayout {
                     }
                 }).setDuration(180).start();
             } else {
-                updateLayout.setTranslationY(AndroidUtilities.dp(44));
+                updateLayout.setTranslationY(dp(44));
                 updateLayout.setVisibility(View.INVISIBLE);
             }
             sideMenu.setPadding(0, 0, 0, 0);

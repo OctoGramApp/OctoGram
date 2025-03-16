@@ -55,7 +55,7 @@ public class DeepLTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (JSONException | IOException e) {
-                    OctoLogging.e(e);
+                    OctoLogging.e("DeepLTranslator", e);
                     callback.onResponseReceived();
                     callback.onError();
                 } catch (Exception e) {

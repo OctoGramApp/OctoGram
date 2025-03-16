@@ -8,6 +8,8 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -15,42 +17,49 @@ import android.text.TextUtils;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
+import org.telegram.ui.Cells.ShadowSectionCell;
+import org.telegram.ui.Components.CubicBezierInterpolator;
+import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.RecyclerListView;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ViewType;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.BaseCustomActivity;
 import it.octogram.android.preferences.ui.components.AddItem;
 import it.octogram.android.preferences.ui.components.HintHeader;
 import it.octogram.android.preferences.ui.components.SwapOrder;
 
-public class DrawerOrderSettings extends BaseCustomActivity {
-    
-    enum SubItem {
-        TREE_DOTS, 
-        ADD_DIVIDER, 
-        RESET_ORDER, 
-    }
-    
-    private ItemTouchHelper itemTouchHelper;
+public class DrawerOrderSettings extends BaseFragment {
 
+    private final static String TAG = "DrawerOrderSettings";
+    private ItemTouchHelper itemTouchHelper;
+    private RecyclerListView listView;
+    private ListAdapter listAdapter;
+    private ActionBarMenuItem menuItem;
+    private Context context;
     private int headerHintRow;
     private int headerSuggestedOptionsRow;
     private int headerMenuRow;
@@ -60,11 +69,16 @@ public class DrawerOrderSettings extends BaseCustomActivity {
     private int menuItemsStartRow;
     private int menuItemsEndRow;
     private int menuItemsDividerRow;
+    private int rowCount;
 
-    @SuppressLint("NotifyDataSetChanged")
     @Override
+    public boolean onFragmentCreate() {
+        super.onFragmentCreate();
+        updateRowsId();
+        return true;
+    }
+
     protected void onMenuItemClick(int id) {
-        super.onMenuItemClick(id);
         if (menuItem == null) {
             menuItem = createMenuItem();
         }
@@ -76,20 +90,19 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                 menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
             }
             updateListAnimated(() -> MenuOrderController.addItem(MenuOrderController.DIVIDER_ITEM));
-        } else if (id == 2) {
+        } else if (id == SubItem.RESET_ORDER.ordinal()) {
             updateListAnimated(MenuOrderController::resetToDefaultPosition);
             menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
         }
         reloadMainInfo();
     }
 
-    @Override
     protected ActionBarMenuItem createMenuItem() {
         ActionBarMenu menu = actionBar.createMenu();
         ActionBarMenuItem menuItem = menu.addItem(SubItem.TREE_DOTS.ordinal(), R.drawable.ic_ab_other);
-        menuItem.setContentDescription(LocaleController.getString(R.string.AccDescrMoreOptions));
-        menuItem.addSubItem(SubItem.ADD_DIVIDER.ordinal(), R.drawable.msg_new_filter, LocaleController.getString(R.string.AddDivider));
-        menuItem.addSubItem(SubItem.RESET_ORDER.ordinal(), R.drawable.msg_reset, LocaleController.getString(R.string.ResetItemsOrder));
+        menuItem.setContentDescription(getString(R.string.AccDescrMoreOptions));
+        menuItem.addSubItem(SubItem.ADD_DIVIDER.ordinal(), R.drawable.msg_new_filter, getString(R.string.AddDivider));
+        menuItem.addSubItem(SubItem.RESET_ORDER.ordinal(), R.drawable.msg_reset, getString(R.string.ResetItemsOrder));
 
         if (!MenuOrderController.isDefaultPosition()) {
             menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
@@ -101,19 +114,73 @@ public class DrawerOrderSettings extends BaseCustomActivity {
 
     @Override
     public View createView(Context context) {
-        View res = super.createView(context);
+        this.context = context;
+        FrameLayout frameLayout = new FrameLayout(context);
+        frameLayout.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
+
+        actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+        actionBar.setAllowOverlayTitle(true);
+        actionBar.setTitle(getString(R.string.MenuItems));
+        actionBar.setBackgroundColor(getThemedColor(Theme.key_actionBarDefault));
+        actionBar.setItemsColor(getThemedColor(Theme.key_actionBarDefaultIcon), false);
+        actionBar.setItemsBackgroundColor(getThemedColor(Theme.key_actionBarDefaultSelector), false);
+        actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
+            @Override
+            public void onItemClick(int id) {
+                if (id == -1) {
+                    finishFragment();
+                } else if (
+                        id == SubItem.TREE_DOTS.ordinal() ||
+                                id == SubItem.RESET_ORDER.ordinal() ||
+                                id == SubItem.ADD_DIVIDER.ordinal()
+                ) {
+                    onMenuItemClick(id);
+                }
+            }
+        });
+
+        menuItem = createMenuItem();
+
+        listAdapter = new ListAdapter();
+        listView = new RecyclerListView(context);
+        listView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+        listView.setAdapter(listAdapter);
+        listView.setVerticalScrollBarEnabled(false);
+
+        DefaultItemAnimator itemAnimator = new DefaultItemAnimator();
+        itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+        itemAnimator.setDelayAnimations(false);
+        listView.setItemAnimator(itemAnimator);
+
+        frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+
         itemTouchHelper = new ItemTouchHelper(new TouchHelperCallback());
         itemTouchHelper.attachToRecyclerView(listView);
-        return res;
+
+        fragmentView = frameLayout;
+        return fragmentView;
     }
 
     @Override
-    protected String getActionBarTitle() {
-        return LocaleController.getString(R.string.MenuItems);
+    public void onResume() {
+        super.onResume();
+        if (listAdapter != null && listView != null) {
+            listView.post(() -> listAdapter.notifyItemRangeChanged(0, listAdapter.getItemCount()));
+        }
+    }
+
+    @Override
+    public void clearViews() {
+        super.clearViews();
+        if (listView != null) {
+            listView.setAdapter(null);
+            listView = null;
+        }
+        listAdapter = null;
     }
 
     protected void updateRowsId() {
-        super.updateRowsId();
+        rowCount = 0;
         headerSuggestedOptionsRow = -1;
         hintsDividerRow = -1;
 
@@ -137,62 +204,104 @@ public class DrawerOrderSettings extends BaseCustomActivity {
         menuItemsDividerRow = rowCount++;
     }
 
-    @Override
-    protected BaseCustomViewAdapter createAdapter() {
-        return new ListAdapter();
-    }
+    public void updateListAnimated(@Nullable Runnable callback) {
+        if (listAdapter == null) {
+            updateRowsId();
+            return;
+        }
 
-    private class ListAdapter extends BaseCustomViewAdapter {
-        @Override
-        protected void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, boolean partial) {
-            switch (ViewType.Companion.fromInt(holder.getItemViewType())) {
-                case HINT_HEADER -> {}
-                case SHADOW -> holder.itemView.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-                case HEADER -> {
-                    HeaderCell headerCell = (HeaderCell) holder.itemView;
-                    if (position == headerSuggestedOptionsRow) {
-                        headerCell.setText(LocaleController.getString(R.string.RecommendedItems));
-                    } else if (position == headerMenuRow) {
-                        headerCell.setText(LocaleController.getString(R.string.MenuItems));
-                    }
-                }
-                case MENU_ITEM -> {
-                    SwapOrder swapOrderCell = (SwapOrder) holder.itemView;
-                    MenuOrderController.EditableMenuItem menuItem = MenuOrderController.getSingleAvailableMenuItem(position - menuItemsStartRow);
-                    if (menuItem != null) {
-                        swapOrderCell.setData(menuItem.text, menuItem.isDefault, menuItem.isPremium, menuItem.id, position != menuItemsEndRow - 1);
-                    }
-                }
-                case SUGGESTED_OPTIONS -> {
-                    AddItem addItemCell = (AddItem) holder.itemView;
-                    MenuOrderController.EditableMenuItem notData = MenuOrderController.getSingleNotAvailableMenuItem(position - menuHintsStartRow);
-                    if (notData != null) {
-                        addItemCell.setData(notData.text, notData.id, notData.isPremium, true);
-                    }
-                }
-                default -> throw new IllegalArgumentException("Invalid view type");
+        DiffCallback diffCallback = new DiffCallback();
+        diffCallback.oldRowCount = rowCount;
+        diffCallback.fillPositions(diffCallback.oldPositionToItem);
+        diffCallback.oldMenuHints.clear();
+        diffCallback.oldMenuItems.clear();
+
+        diffCallback.oldMenuHints.add(null);
+        for (int i = 0; i < MenuOrderController.sizeHints(); i++) {
+            diffCallback.oldMenuHints.add(MenuOrderController.getSingleNotAvailableMenuItem(i));
+        }
+        diffCallback.oldMenuHints.add(null);
+        for (int i = 0; i < MenuOrderController.sizeAvailable(); i++) {
+            diffCallback.oldMenuItems.add(MenuOrderController.getSingleAvailableMenuItem(i));
+        }
+
+        diffCallback.oldMenuHintsStartRow = headerSuggestedOptionsRow;
+        diffCallback.oldMenuHintsEndRow = hintsDividerRow;
+        diffCallback.oldMenuItemsStartRow = menuItemsStartRow;
+        diffCallback.oldMenuItemsEndRow = menuItemsEndRow;
+
+        if (callback != null) {
+            callback.run();
+        }
+
+        updateRowsId();
+        diffCallback.fillPositions(diffCallback.newPositionToItem);
+
+        try {
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+            diffResult.dispatchUpdatesTo(listAdapter);
+        } catch (Exception e) {
+            OctoLogging.e(TAG, e);
+            if (listAdapter != null && listView != null) {
+                listView.post(() -> listAdapter.notifyItemRangeChanged(0, listAdapter.getItemCount()));
             }
         }
 
+        if (listView != null) {
+            AndroidUtilities.updateVisibleRows(listView);
+        }
+    }
+
+    private void reloadMainInfo() {
+        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
+    }
+
+
+    enum SubItem {
+        TREE_DOTS,
+        ADD_DIVIDER,
+        RESET_ORDER,
+    }
+
+    enum ViewType {
+        HINT_HEADER, HEADER, MENU_ITEM, SUGGESTED_OPTIONS, SHADOW;
+        static ViewType fromInt(int i) {
+            return values()[i];
+        }
+    }
+
+    private class ListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
         @Override
-        protected boolean isEnabled(ViewType viewType, int position) {
-            return viewType == ViewType.MENU_ITEM;
+        public int getItemViewType(int position) {
+            if (position == hintsDividerRow || position == menuItemsDividerRow) {
+                return ViewType.SHADOW.ordinal();
+            } else if (position == headerHintRow) {
+                return ViewType.HINT_HEADER.ordinal();
+            } else if (position == headerSuggestedOptionsRow || position == headerMenuRow) {
+                return ViewType.HEADER.ordinal();
+            } else if (position >= menuItemsStartRow && position < menuItemsEndRow) {
+                return ViewType.MENU_ITEM.ordinal();
+            } else if (position >= menuHintsStartRow && position < menuHintsEndRow) {
+                return ViewType.SUGGESTED_OPTIONS.ordinal();
+            }
+            return -1;
         }
 
         @SuppressLint("ClickableViewAccessibility")
         @NonNull
         @Override
-        protected View onCreateViewHolder(ViewType viewType) {
-            View view = new View(context);
-            switch (viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view;
+            switch (ViewType.fromInt(viewType)) {
                 case HINT_HEADER -> {
-                    view = new HintHeader(context, LocaleController.getString(R.string.MenuItemsOrderDesc));
+                    view = new HintHeader(context, getString(R.string.MenuItemsOrderDesc));
                     view.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                 }
                 case MENU_ITEM -> {
                     SwapOrder swapOrderCell = new SwapOrder(context);
-                    swapOrderCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    swapOrderCell.setOnReorderButtonTouchListener((v, event) -> {
+                    swapOrderCell.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+                    swapOrderCell.setOnReorderButtonTouchListener((View v, MotionEvent event) -> {
                         if (event.getAction() == MotionEvent.ACTION_DOWN) {
                             itemTouchHelper.startDrag(listView.getChildViewHolder(swapOrderCell));
                         }
@@ -203,10 +312,13 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                         int position = index - menuItemsStartRow;
                         if (MenuOrderController.isAvailable(swapOrderCell.menuId, position)) {
                             updateListAnimated(() -> MenuOrderController.removeItem(position));
-                            if (MenuOrderController.isDefaultPosition()) {
-                                menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
-                            } else {
-                                menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
+
+                            if (menuItem != null) {
+                                if (MenuOrderController.isDefaultPosition()) {
+                                    menuItem.hideSubItem(SubItem.RESET_ORDER.ordinal());
+                                } else {
+                                    menuItem.showSubItem(SubItem.RESET_ORDER.ordinal());
+                                }
                             }
                             reloadMainInfo();
                         }
@@ -234,24 +346,53 @@ public class DrawerOrderSettings extends BaseCustomActivity {
                     });
                     view = addItemCell;
                 }
+                case SHADOW -> view = new ShadowSectionCell(context);
+                case HEADER -> {
+                    view = new HeaderCell(context);
+                    view.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+                }
+                default -> view = new View(context);
             }
-            return view;
+            return new RecyclerView.ViewHolder(view) {
+            };
         }
 
         @Override
-        public ViewType getViewType(int position) {
-            if (position == hintsDividerRow || position == menuItemsDividerRow) {
-                return ViewType.SHADOW;
-            } else if (position == headerHintRow) {
-                return ViewType.HINT_HEADER;
-            } else if (position == headerSuggestedOptionsRow || position == headerMenuRow) {
-                return ViewType.HEADER;
-            } else if (position >= menuItemsStartRow && position < menuItemsEndRow) {
-                return ViewType.MENU_ITEM;
-            } else if (position >= menuHintsStartRow && position < menuHintsEndRow) {
-                return ViewType.SUGGESTED_OPTIONS;
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            switch (ViewType.fromInt(holder.getItemViewType())) {
+                case ViewType.HINT_HEADER -> {
+                }
+                case ViewType.SHADOW ->
+                        holder.itemView.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
+                case ViewType.HEADER -> {
+                    HeaderCell headerCell = (HeaderCell) holder.itemView;
+                    if (position == headerSuggestedOptionsRow) {
+                        headerCell.setText(getString(R.string.RecommendedItems));
+                    } else if (position == headerMenuRow) {
+                        headerCell.setText(getString(R.string.MenuItems));
+                    }
+                }
+                case ViewType.MENU_ITEM -> {
+                    SwapOrder swapOrderCell = (SwapOrder) holder.itemView;
+                    MenuOrderController.EditableMenuItem menuItem = MenuOrderController.getSingleAvailableMenuItem(position - menuItemsStartRow);
+                    if (menuItem != null) {
+                        swapOrderCell.setData(menuItem.text, menuItem.isDefault, menuItem.isPremium, menuItem.id, position != menuItemsEndRow - 1);
+                    }
+                }
+                case ViewType.SUGGESTED_OPTIONS -> {
+                    AddItem addItemCell = (AddItem) holder.itemView;
+                    MenuOrderController.EditableMenuItem notData = MenuOrderController.getSingleNotAvailableMenuItem(position - menuHintsStartRow);
+                    if (notData != null) {
+                        addItemCell.setData(notData.text, notData.id, notData.isPremium, true);
+                    }
+                }
+                default -> throw new IllegalArgumentException("Invalid view type");
             }
-            throw new IllegalArgumentException("Invalid position");
+        }
+
+        @Override
+        public int getItemCount() {
+            return rowCount;
         }
 
         public void swapElements(int fromIndex, int toIndex) {
@@ -281,7 +422,7 @@ public class DrawerOrderSettings extends BaseCustomActivity {
 
         @Override
         public int getMovementFlags(@NonNull RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-            if (viewHolder.getItemViewType() != ViewType.MENU_ITEM.toInt()) {
+            if (viewHolder.getItemViewType() != ViewType.MENU_ITEM.ordinal()) {
                 return makeMovementFlags(0, 0);
             }
             return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
@@ -319,41 +460,6 @@ public class DrawerOrderSettings extends BaseCustomActivity {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setPressed(false);
         }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    public void updateListAnimated(Runnable callback) {
-        if (listAdapter == null) {
-            updateRowsId();
-            return;
-        }
-        DiffCallback diffCallback = new DiffCallback();
-        diffCallback.oldRowCount = rowCount;
-        diffCallback.fillPositions(diffCallback.oldPositionToItem);
-        diffCallback.oldMenuHints.clear();
-        diffCallback.oldMenuItems.clear();
-        diffCallback.oldMenuHints.add(null); // header
-        for (int i = 0; i < MenuOrderController.sizeHints(); i++) {
-            diffCallback.oldMenuHints.add(MenuOrderController.getSingleNotAvailableMenuItem(i));
-        }
-        diffCallback.oldMenuHints.add(null); // divider
-        for (int i = 0; i < MenuOrderController.sizeAvailable(); i++) {
-            diffCallback.oldMenuItems.add(MenuOrderController.getSingleAvailableMenuItem(i));
-        }
-        diffCallback.oldMenuHintsStartRow = headerSuggestedOptionsRow;
-        diffCallback.oldMenuHintsEndRow = hintsDividerRow;
-        diffCallback.oldMenuItemsStartRow = menuItemsStartRow;
-        diffCallback.oldMenuItemsEndRow = menuItemsEndRow;
-        callback.run();
-        updateRowsId();
-        diffCallback.fillPositions(diffCallback.newPositionToItem);
-        try {
-            DiffUtil.calculateDiff(diffCallback).dispatchUpdatesTo(listAdapter);
-        } catch (Exception e) {
-            OctoLogging.e(e);
-            listAdapter.notifyDataSetChanged();
-        }
-        AndroidUtilities.updateVisibleRows(listView);
     }
 
     private class DiffCallback extends DiffUtil.Callback {

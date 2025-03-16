@@ -8,6 +8,7 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
@@ -537,11 +538,11 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == messageDateRow) {
                         long date = (long) messageObject.messageOwner.date * 1000;
                         CharSequence title = messageObject.scheduled ? getString(R.string.MessageScheduledDate) : getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.messageOwner.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == forwardMessageDateRow) {
                         long date = (long) messageObject.messageOwner.fwd_from.date * 1000;
                         CharSequence title = messageObject.scheduled ? getString(R.string.MessageScheduledDate) : getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.messageOwner.fwd_from.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.fwd_from.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == forwardUserNameRow) {
                         String full_name = fromForwardedUser.first_name;
                         if (fromForwardedUser.last_name != null) {
@@ -563,7 +564,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == repliedMessageDateRow) {
                         long date = (long) messageObject.replyMessageObject.messageOwner.date * 1000;
                         CharSequence title = messageObject.scheduled ? getString(R.string.MessageScheduledDate) : getString(R.string.MessageDate);
-                        textDetailCell.setTextAndValue(messageObject.replyMessageObject.messageOwner.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
+                        textDetailCell.setTextAndValue(messageObject.replyMessageObject.messageOwner.date == 0x7ffffffe ? getString(R.string.MessageScheduledWhenOnline) : formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), OctoUtils.safeToString(title), false);
                     } else if (position == repliedUserIdRow) {
                         textDetailCell.setTextAndValue(String.valueOf(fromRepliedUserInfo.userId), "ID", false);
                     } else if (position == repliedUserNameRow) {
@@ -603,16 +604,16 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                         textDetailCell.setTextAndValue(String.valueOf(messageObject.messageOwner.forwards), getString(R.string.ForwardsNumber), true);
                     } else if (position == messageDateEditedRow) {
                         long date = (long) messageObject.messageOwner.edit_date * 1000;
-                        textDetailCell.setTextAndValue(LocaleController.formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), getString(R.string.EditedDate), true);
+                        textDetailCell.setTextAndValue(formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), getString(R.string.EditedDate), true);
                     } else if (position == fileDuration) {
                         textDetailCell.setTextAndValue(durationString, getString(R.string.UserRestrictionsDuration), true);
 //                    } else if (position == fileFrameRate) {
-//                        textDetailCell.setTextAndValue(String.valueOf(videoInfo.getFrameRate()), LocaleController.getString(R.string.fileFrameRate), true);
-                    } else if (position == fileResolution) {
-                        textDetailCell.setTextAndValue(videoInfo.getResolution(), getString(R.string.FileResolution), true);
-                    } else if (position == fileCodec) {
+//                        textDetailCell.setTextAndValue(String.valueOf(videoInfo.getFrameRate()), getString(R.string.fileFrameRate), true);
+                    } else if (position == fileResolution && videoInfo.getFileResolutionRow() != -1) {
+                        textDetailCell.setTextAndValue(TextUtils.isEmpty(videoInfo.getResolution()) ? videoInfo.getImageResolution() : videoInfo.getResolution(), getString(R.string.FileResolution), true);
+                    } else if (position == fileCodec && videoInfo.getFileCodecRow() != -1) {
                         textDetailCell.setTextAndValue(videoInfo.getCodec(), getString(R.string.FileCodec), true);
-                    } else if (position == fileBitrate) {
+                    } else if (position == fileBitrate && videoInfo.getFileBitrateRow() != -1) {
                         textDetailCell.setTextAndValue(OctoUtils.formatBitrate(videoInfo.getBitrate()), getString(R.string.FileBitrate), true);
                     } else if (position == fileEmojiRow) {
                         textDetailCell.setTextWithEmojiAndValue(emoji, getString(R.string.AssociatedEmoji), true);
@@ -683,7 +684,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     position == repliedUserIdRow || position == groupNameRow || position == groupIdRow || position == groupUsernameRow ||
                     position == fileNameRow || position == filePathRow || position == fileSizeRow || position == fileDCRow ||
                     position == messageForwardsRow || position == messageDateEditedRow || position == fileDuration || position == fileFrameRate ||
-                    position == fileResolution || position == fileBitrate || position == fileEmojiRow || position == fileMimeType || position == fileCodec ||
+                    (position == fileResolution && videoInfo.getFileResolutionRow() != -1) || (position == fileBitrate && videoInfo.getFileBitrateRow() != -1) || (position == fileCodec && videoInfo.getFileCodecRow() != -1) || fileEmojiRow == position || position == fileMimeType ||
                     position == groupDatacenterRow || position == repliedUserDatacenterRow || position == forwardUserDatacenterRow || position == dcRow ||
                     position == messageTextLengthRow || position == repliedMessageTextLengthRow) {
                 return 3;
@@ -789,6 +790,11 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         private double fileBitrateCachedValue;
         private String resolution;
         private String codec;
+        private String imageResolution;
+        private int fileBitrate = -1;
+        private int fileResolution = -1;
+        private int fileCodec = -1;
+
 
         public VideoInfo(MessageObject messageObject, int attributeIndex) {
             if (messageObject.messageOwner.media.document.attributes.get(attributeIndex) instanceof TLRPC.TL_documentAttributeVideo) {
@@ -798,22 +804,24 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                 if (attribute.duration > 0 && messageObject.messageOwner.media.document.size > 0) {
                     fileBitrate = rowCount++;
                     fileBitrateCachedValue = (double) messageObject.messageOwner.media.document.size / attribute.duration;
-                } else {
-                    fileBitrate = -1;
                 }
 
                 if (attribute.w > 0 && attribute.h > 0) {
                     fileResolution = rowCount++;
                     resolution = String.format("%sx%s", attribute.w, attribute.h);
-                } else {
-                    fileResolution = -1;
                 }
 
                 if (attribute.video_codec != null && !attribute.video_codec.isEmpty()) {
                     fileCodec = rowCount++;
                     codec = attribute.video_codec;
-                } else {
-                    fileCodec = -1;
+                }
+            } else if (messageObject.messageOwner.media.document.attributes.get(attributeIndex) instanceof TLRPC.TL_documentAttributeImageSize) {
+                TLRPC.TL_documentAttributeImageSize attribute;
+                attribute = (TLRPC.TL_documentAttributeImageSize) messageObject.messageOwner.media.document.attributes.get(attributeIndex);
+
+                if (attribute.w > 0 && attribute.h > 0) {
+                    fileResolution = rowCount++;
+                    imageResolution = String.format("%sx%s", attribute.w, attribute.h);
                 }
             }
         }
@@ -828,6 +836,22 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
 
         public String getCodec() {
             return codec;
+        }
+
+        public String getImageResolution() {
+            return imageResolution;
+        }
+
+        public int getFileBitrateRow() {
+            return fileBitrate;
+        }
+
+        public int getFileResolutionRow() {
+            return fileResolution;
+        }
+
+        public int getFileCodecRow() {
+            return fileCodec;
         }
     }
 }

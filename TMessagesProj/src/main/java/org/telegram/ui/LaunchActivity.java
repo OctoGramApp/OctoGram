@@ -71,6 +71,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.arch.core.util.Function;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
@@ -214,6 +215,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -235,8 +237,10 @@ import it.octogram.android.icons.IconsResources;
 import it.octogram.android.preferences.fragment.ActionBarOverride;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.theme.MonetThemeController;
+import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.ForwardContext;
 import it.octogram.android.utils.LanguageController;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UpdatesManager;
 
 @SuppressLint({"RestrictedApi", "MissingSuperCall"})
@@ -420,7 +424,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
             }
             try {
-                getWindow().setNavigationBarColor(0xff000000);
+                // getWindow().setNavigationBarColor(0xff000000);
+                getWindow().setNavigationBarColor(OctoUtils.getNavBarColor());
             } catch (Throwable ignore) {
 
             }
@@ -785,6 +790,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 if (accountNumber == currentAccount || AndroidUtilities.isTablet()) {
                     sideMenuTouchHelper.startDrag(sideMenu.getChildViewHolder(view));
                 } else {
+                    if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLockedByNumber(accountNumber)) {
+                        return false;
+                    }
                     final BaseFragment fragment = new DialogsActivity(null) {
                         @Override
                         public void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
@@ -815,6 +823,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 TLRPC.TL_attachMenuBot attachMenuBot = drawerLayoutAdapter.getAttachMenuBot(position);
                 if (attachMenuBot != null) {
                     BotWebViewSheet.deleteBot(currentAccount, attachMenuBot.bot_id, null);
+                    return true;
+                }
+            }
+            if (position == 0 && (view instanceof DrawerProfileCell || view instanceof DrawerPreviewCell)) {
+                if (!drawerLayoutAdapter.areHiddenAccountsShown() && FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached()) {
+                    FingerprintUtils.checkFingerprint(this, FingerprintUtils.FingerprintAction.UNLOCK_ACCOUNT, true, drawerLayoutAdapter::showHiddenAccounts);
                     return true;
                 }
             }
@@ -1457,7 +1471,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 AndroidUtilities.setLightStatusBar(getWindow(), enable, forceLightStatusBar);
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && checkNavigationBar && (!useCurrentFragment || currentFragment == null || !currentFragment.isInPreviewMode())) {
-                int color = currentFragment != null && useCurrentFragment ? currentFragment.getNavigationBarColor() : Theme.getColor(Theme.key_windowBackgroundGray, null, true);
+                // int color = currentFragment != null && useCurrentFragment ? currentFragment.getNavigationBarColor() : Theme.getColor(Theme.key_windowBackgroundGray, null, true);
+                int color = OctoUtils.getNavBarColor(); // currentFragment != null && useCurrentFragment ? currentFragment.getNavigationBarColor() : Theme.getColor(Theme.key_windowBackgroundGray, null, true);
                 if (actionBarLayout.getSheetFragment(false) != null) {
                     BaseFragment sheetFragment = actionBarLayout.getSheetFragment(false);
                     if (sheetFragment.sheetsStack != null) {
@@ -6009,7 +6024,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             AndroidUtilities.runOnUIThread(() -> {
                 if (res.can_not_skip) {
                     showUpdateActivity(currentAccount, res, false);
-                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
+                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION && !StoreUtils.isDownloadedFromAnyStore()) {
                     drawerLayoutAdapter.notifyDataSetChanged();
 
                     File updateFile = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
@@ -6818,7 +6833,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
             checkAppUpdate(false, null);
         }
-        AndroidUtilities.runOnUIThread(() -> UpdatesManager.handleUpdateSignaling(), 3000);
+        AndroidUtilities.runOnUIThread(() -> {
+            UpdatesManager.handleUpdateSignaling();
+            OctoConfig.INSTANCE.handleDoubleBottomMigration();
+        }, 3000);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ApplicationLoader.canDrawOverlays = Settings.canDrawOverlays(this);
@@ -8537,7 +8555,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         return 0;
     }
 
-    public void setNavigationBarColor(int color, boolean checkButtons) {
+    public void setNavigationBarColor(int colors, boolean checkButtons) {
+        var color = OctoUtils.getNavBarColor();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             final Window window = getWindow();
             if (customNavigationBar != null) {

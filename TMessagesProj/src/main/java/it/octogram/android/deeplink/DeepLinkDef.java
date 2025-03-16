@@ -20,9 +20,9 @@ public class DeepLinkDef {
     public static final String GENERAL = "general";
     public static final String OCTOSETTINGS = "octosettings";
     public static final String APPEARANCE = "appearance";
-    public static final String APPEARANCE_APP = "appearance_app";
-    public static final String APPEARANCE_CHAT = "appearance_chat";
-    public static final String APPEARANCE_DRAWER = "appearance_drawer";
+    public static final String APPEARANCE_APP = "appearance/app";
+    public static final String APPEARANCE_CHAT = "appearance/chat";
+    public static final String APPEARANCE_DRAWER = "appearance/drawer";
     public static final String UPDATE = "update";
     public static final String USER = "user";
     public static final String PINNED_EMOJIS = "pinned_emojis";

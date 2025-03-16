@@ -7,6 +7,9 @@
  */
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.TypedValue;
@@ -19,7 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
@@ -46,7 +48,7 @@ public class CrashLogCell extends LinearLayout {
         super(context);
         setWillNotDraw(false);
         setGravity(Gravity.CENTER_VERTICAL);
-        setPadding(AndroidUtilities.dp(13), AndroidUtilities.dp(5), AndroidUtilities.dp(13), AndroidUtilities.dp(5));
+        setPadding(dp(13), dp(5), dp(13), dp(5));
         RelativeLayout relativeLayout = new RelativeLayout(context);
 
         var imageView = new AppCompatImageView(context);
@@ -89,7 +91,7 @@ public class CrashLogCell extends LinearLayout {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.ENGLISH);
         String date = dateFormat.format(crashLog.lastModified());
-        crashDateTextView.setText(LocaleController.formatString(R.string.CrashedOnDate, date));
+        crashDateTextView.setText(formatString(R.string.CrashedOnDate, date));
 
         needDivider = divider;
         setWillNotDraw(!needDivider);
@@ -102,7 +104,7 @@ public class CrashLogCell extends LinearLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
-            canvas.drawLine(AndroidUtilities.dp(16), getMeasuredHeight() - 1, getMeasuredWidth() - AndroidUtilities.dp(16), getMeasuredHeight() - 1, Theme.dividerPaint);
+            canvas.drawLine(dp(16), getMeasuredHeight() - 1, getMeasuredWidth() - dp(16), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
     }
 

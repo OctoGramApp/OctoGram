@@ -11,15 +11,16 @@ package it.octogram.android.preferences;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 
 public interface PreferencesEntry {
+    @NonNull
+    OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context);
 
-    OctoPreferences getPreferences(PreferencesFragment fragment, Context context);
-
-    default void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-    }
+    default void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {}
 
     default boolean isLockedContent() {
         return false;

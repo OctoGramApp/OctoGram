@@ -10447,18 +10447,20 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     handled = delegate.didLongPressChannelAvatar(this, currentChat, id, lastTouchX, lastTouchY);
                 }
             } else if (sideButtonPressed) {
-//                if (pressedSideButton != SIDE_BUTTON_SPONSORED_CLOSE
-//                        && pressedSideButton != SIDE_BUTTON_SPONSORED_MORE
-//                        && pressedSideButton != 3 && pressedSideButton != 2
-//                ) {
-//                    delegate.didQuickShareStart(this, lastTouchX, lastTouchY);
-//                    sideButtonPressed = false;
-//                    pressedSideButton = 0;
-//                    inQuickShareMode = true;
-//                    handled = true;
-//
-//                    return false;
-//                }
+                if (OctoConfig.INSTANCE.enableQuickShare.getValue()) {
+                    if (pressedSideButton != SIDE_BUTTON_SPONSORED_CLOSE
+                            && pressedSideButton != SIDE_BUTTON_SPONSORED_MORE
+                            && pressedSideButton != 3 && pressedSideButton != 2
+                    ) {
+                        delegate.didQuickShareStart(this, lastTouchX, lastTouchY);
+                        sideButtonPressed = false;
+                        pressedSideButton = 0;
+                        inQuickShareMode = true;
+                        handled = true;
+
+                        return false;
+                    }
+                }
             }
 
             if (!handled) {

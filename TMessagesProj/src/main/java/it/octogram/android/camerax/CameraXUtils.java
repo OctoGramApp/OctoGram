@@ -13,6 +13,7 @@ import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
 import android.util.Size;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.camera.camera2.interop.Camera2CameraInfo;
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
@@ -32,20 +33,21 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.SharedConfig;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import it.octogram.android.CameraXResolution;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 
 public class CameraXUtils {
-
+    private static final String TAG = "CameraXUtils";
     private static Map<Quality, Size> qualityToSize;
     private static Exception qualityException;
     private static int cameraResolution = -1;
@@ -59,41 +61,39 @@ public class CameraXUtils {
     }
 
     public static boolean isWideAngleAvailable(ProcessCameraProvider provider) {
-        OctoLogging.d("CameraXUtils", "isWideAngleAvailable" + getWideCameraId(provider));
+        OctoLogging.d(TAG, "isWideAngleAvailable" + getWideCameraId(provider));
         return getWideCameraId(provider) != null;
     }
 
     @OptIn(markerClass = ExperimentalCamera2Interop.class)
-    public static CameraSelector getDefaultWideAngleCamera(ProcessCameraProvider provider) {
-        final String tag = "CameraUtils";
-        OctoLogging.d(tag, "getDefaultWideAngleCamera invoked.");
+    @NonNull
+    public static CameraSelector getDefaultWideAngleCamera(@NonNull ProcessCameraProvider provider) {
+        OctoLogging.d(TAG, "getDefaultWideAngleCamera invoked.");
 
-        String wideCamera = getWideCameraId(provider);
-        OctoLogging.d(tag, "Wide camera ID retrieved: " + (wideCamera != null ? wideCamera : "null"));
+        String wideCameraId = getWideCameraId(provider);
+        OctoLogging.d(TAG, "Wide camera ID retrieved: " + (wideCameraId != null ? wideCameraId : "null"));
 
-        if (wideCamera != null) {
-            return new CameraSelector.Builder().addCameraFilter(cameraInfo -> {
-                List<CameraInfo> cameraFiltered = new ArrayList<>();
-                OctoLogging.d(tag, "Applying filter to available cameras.");
-
-                for (int i = 0; i < cameraInfo.size(); i++) {
-                    CameraInfo c = cameraInfo.get(i);
-                    String id = Camera2CameraInfo.from(c).getCameraId();
-                    OctoLogging.d(tag, "Checking camera with ID: " + id);
-
-                    if (id.equals(wideCamera)) {
-                        OctoLogging.d(tag, "Wide-angle camera found: " + id);
-                        cameraFiltered.add(c);
-                    }
-                }
-
-                OctoLogging.d(tag, "Number of filtered cameras: " + cameraFiltered.size());
-                return cameraFiltered;
-            }).build();
+        if (wideCameraId != null) {
+            return new CameraSelector.Builder()
+                    .addCameraFilter(cameraInfoList -> {
+                        OctoLogging.d(TAG, "Applying CameraIdFilter for wide-angle camera.");
+                        for (CameraInfo cameraInfo : cameraInfoList) {
+                            String id = Camera2CameraInfo.from(cameraInfo).getCameraId();
+                            if (id.equals(wideCameraId)) {
+                                OctoLogging.d(TAG, "Wide-angle camera found with ID: " + id);
+                                return Collections.singletonList(cameraInfo);
+                            }
+                            OctoLogging.d(TAG, "Camera ID " + id + " is not the wide-angle camera.");
+                        }
+                        OctoLogging.d(TAG, "No wide-angle camera found in the filter (should not happen if getWideCameraId is correct).");
+                        return Collections.emptyList();
+                    })
+                    .build();
+        } else {
+            throw new IllegalArgumentException("This device doesn't support wide camera! "
+                    + "isWideAngleAvailable should be checked first before calling "
+                    + "getDefaultWideAngleCamera.");
         }
-        throw new IllegalArgumentException("This device doesn't support wide camera! "
-                + "isWideAngleAvailable should be checked first before calling "
-                + "getDefaultWideAngleCamera.");
     }
 
     public static Map<Quality, Size> getAvailableVideoSizes() throws IllegalStateException {
@@ -103,49 +103,58 @@ public class CameraXUtils {
         return qualityToSize == null ? new HashMap<>() : qualityToSize;
     }
 
-    public static void loadCameraXSizes() {
-        final String tag = "CameraUtils";
-        OctoLogging.d(tag, "loadCameraXSizes invoked.");
 
-        if (qualityToSize != null || qualityException != null) {
-            OctoLogging.d(tag, "Sizes already loaded or an exception occurred previously.");
+    public static void loadCameraXSizes() {
+        OctoLogging.d(TAG, "loadCameraXSizes invoked.");
+
+        if (qualityToSize != null) {
+            OctoLogging.d(TAG, "CameraX sizes already loaded.");
+            return;
+        }
+        if (qualityException != null) {
+            OctoLogging.d(TAG, "CameraX sizes loading skipped due to previous exception.");
             return;
         }
 
         Context context = ApplicationLoader.applicationContext;
-        ListenableFuture<ProcessCameraProvider> providerFtr = ProcessCameraProvider.getInstance(context);
+        ListenableFuture<ProcessCameraProvider> providerFuture = ProcessCameraProvider.getInstance(context);
 
-        OctoLogging.d(tag, "Fetching ProcessCameraProvider instance.");
+        OctoLogging.d(TAG, "Fetching ProcessCameraProvider instance.");
 
-        providerFtr.addListener(() -> {
+        providerFuture.addListener(() -> {
             ProcessCameraProvider provider = null;
             try {
-                OctoLogging.d(tag, "Camera provider future listener invoked.");
+                OctoLogging.d(TAG, "Camera provider future listener invoked.");
+                provider = providerFuture.get();
+                OctoLogging.d(TAG, "Camera provider obtained successfully.");
 
-                CameraSelector.Builder cameraBuilder = new CameraSelector.Builder();
-                provider = providerFtr.get();
-                OctoLogging.d(tag, "Camera provider obtained successfully.");
+                CameraSelector cameraSelector = new CameraSelector.Builder().build();
+                OctoLogging.d(TAG, "CameraSelector built successfully.");
 
-                CameraSelector camera = cameraBuilder.build();
-                OctoLogging.d(tag, "CameraSelector built successfully.");
-
-                qualityToSize = getAvailableVideoSizes(camera, provider);
-                OctoLogging.d(tag, "Video sizes loaded successfully: " + qualityToSize);
+                qualityToSize = getAvailableVideoSizes(cameraSelector, provider);
+                OctoLogging.d(TAG, "Video sizes loaded successfully: " + qualityToSize);
 
                 loadSuggestedResolution();
-                OctoLogging.d(tag, "Suggested resolutions loaded.");
+                OctoLogging.d(TAG, "Suggested resolutions loaded.");
+
+            } catch (InterruptedException e) {
+                qualityException = e;
+                OctoLogging.e(TAG, "Interrupted while loading camera sizes.", e);
+            } catch (ExecutionException e) {
+                qualityException = e;
+                OctoLogging.e(TAG, "Exception getting CameraProvider.", e);
             } catch (Exception e) {
                 qualityException = e;
-                OctoLogging.d(tag, "Exception occurred while loading camera sizes: " + e.getMessage());
+                OctoLogging.e(TAG, "Unexpected exception occurred while loading camera sizes.", e);
             } finally {
                 if (provider != null) {
                     provider.unbindAll();
-                    OctoLogging.d(tag, "Camera provider unbound.");
+                    OctoLogging.d(TAG, "Camera provider unbound.");
                 }
             }
         }, ContextCompat.getMainExecutor(context));
 
-        OctoLogging.d(tag, "Added listener for ProcessCameraProvider.");
+        OctoLogging.d(TAG, "Added listener for ProcessCameraProvider.");
     }
 
     @SuppressLint("RestrictedApi")
@@ -161,29 +170,50 @@ public class CameraXUtils {
     }
 
     public static void loadSuggestedResolution() {
+        OctoLogging.d(TAG, "loadSuggestedResolution: Starting to load suggested resolution.");
         int suggestedRes = getSuggestedResolution(false);
-        Map<Quality, Size> sizes = getAvailableVideoSizes();
+        OctoLogging.d(TAG, "loadSuggestedResolution: Suggested resolution from getSuggestedResolution: " + suggestedRes);
+        Collection<Size> sizes = getAvailableVideoSizes().values();
 
-        int min = sizes.values().stream()
-                .mapToInt(Size::getHeight)
-                .min().orElse(0);
+        if (sizes.isEmpty()) {
+            OctoLogging.w(TAG, "loadSuggestedResolution: No available video sizes found. Cannot set resolution.");
+            return;
+        }
+        OctoLogging.d(TAG, "loadSuggestedResolution: Available video sizes found: " + sizes);
 
-        int max = sizes.values().stream()
-                .mapToInt(Size::getHeight)
-                .max().orElse(0);
+        int minHeight = Integer.MAX_VALUE;
+        int maxHeight = Integer.MIN_VALUE;
+        Size bestSize = null;
 
-        getAvailableVideoSizes().values().stream()
-                .sorted(Comparator.comparingInt(Size::getHeight).reversed())
-                .mapToInt(Size::getHeight)
-                .filter(height -> height <= suggestedRes)
-                .findFirst()
-                .ifPresent(height -> {
-                    cameraResolution = height;
-                    int current = getResolutionFromConfig();
-                    if (current == -1 || current > max || current < min) {
-                        OctoConfig.INSTANCE.cameraXResolution.updateValue(height);
-                    }
-                });
+        for (Size size : sizes) {
+            int height = size.getHeight();
+            if (height <= suggestedRes) {
+                if (bestSize == null || height > bestSize.getHeight()) {
+                    bestSize = size;
+                }
+            }
+            minHeight = Math.min(minHeight, height);
+            maxHeight = Math.max(maxHeight, height);
+        }
+        OctoLogging.d(TAG, "loadSuggestedResolution: Minimum available height: " + minHeight + ", Maximum available height: " + maxHeight);
+
+        if (bestSize != null) {
+            int height = bestSize.getHeight();
+            OctoLogging.d(TAG, "loadSuggestedResolution: Best resolution size found matching suggested resolution: " + bestSize + ", Height: " + height);
+            cameraResolution = height;
+            OctoLogging.d(TAG, "loadSuggestedResolution: Setting cameraResolution to: " + height);
+            int current = getResolutionFromConfig();
+            OctoLogging.d(TAG, "loadSuggestedResolution: Current resolution from config: " + current);
+            if (current == -1 || current > maxHeight || current < minHeight) {
+                OctoLogging.d(TAG, "loadSuggestedResolution: Current config resolution is invalid or not set. Updating OctoConfig to: " + height);
+                OctoConfig.INSTANCE.cameraXResolution.updateValue(height);
+            } else {
+                OctoLogging.d(TAG, "loadSuggestedResolution: Current config resolution is valid and within range, no update needed.");
+            }
+        } else {
+            OctoLogging.w(TAG, "loadSuggestedResolution: No suitable resolution found within suggested resolution limit (" + suggestedRes + ").");
+        }
+        OctoLogging.d(TAG, "loadSuggestedResolution: Finished loading suggested resolution.");
     }
 
     public static int getCameraResolution() {
@@ -193,7 +223,7 @@ public class CameraXUtils {
     private static int getResolutionFromConfig() {
         int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            OctoLogging.e("CameraXUtils", String.format(Locale.ROOT, "getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
+            OctoLogging.e(TAG, String.format(Locale.ROOT, "getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
         }
         if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD)) {
             return 480;
@@ -237,62 +267,47 @@ public class CameraXUtils {
 
     @OptIn(markerClass = ExperimentalCamera2Interop.class)
     @SuppressLint("RestrictedApi")
-    public static String getWideCameraId(ProcessCameraProvider provider) {
-        final String tag = "CameraUtils";
-        OctoLogging.d(tag, "getWideCameraId invoked.");
+    public static String getWideCameraId(@NonNull ProcessCameraProvider provider) {
+        float minFocalLength = Float.MAX_VALUE;
+        String wideCameraId = null;
+        int availableBackCameraCount = 0;
+        boolean primaryCameraHasWideZoom = false;
 
-        float lowestAngledCamera = Integer.MAX_VALUE;
         List<CameraInfo> cameraInfoList = provider.getAvailableCameraInfos();
-        OctoLogging.d(tag, "Number of available camera infos: " + cameraInfoList.size());
 
-        String cameraId = null;
-        int availableBackCamera = 0;
-        boolean foundWideAngleOnPrimaryCamera = false;
+        for (CameraInfo cameraInfo : cameraInfoList) {
+            Camera2CameraInfo camera2CameraInfo = Camera2CameraInfo.from(cameraInfo);
+            String cameraId = camera2CameraInfo.getCameraId();
 
-        for (int i = 0; i < cameraInfoList.size(); i++) {
-            CameraInfo cameraInfo = cameraInfoList.get(i);
-            String id = Camera2CameraInfo.from(cameraInfo).getCameraId();
-            OctoLogging.d(tag, "Processing camera ID: " + id);
             try {
-                CameraCharacteristics cameraCharacteristics = Camera2CameraInfo.from(cameraInfo).getCameraCharacteristicsMap().get(id);
+                CameraCharacteristics cameraCharacteristics = Camera2CameraInfo.from(cameraInfo).getCameraCharacteristicsMap().get(cameraId);
                 if (cameraCharacteristics != null) {
                     Integer lensFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
                     if (lensFacing != null && lensFacing == CameraCharacteristics.LENS_FACING_BACK) {
-                        availableBackCamera++;
-                        OctoLogging.d(tag, "Found a back-facing camera. Total: " + availableBackCamera);
+                        availableBackCameraCount++;
 
-                        ZoomState zoomState = cameraInfo.getZoomState().getValue();
-                        if (zoomState != null) {
-                            OctoLogging.d(tag, "Zoom state for camera ID " + id + ": MinZoomRatio = " + zoomState.getMinZoomRatio());
-                            if (zoomState.getMinZoomRatio() < 1.0F && zoomState.getMinZoomRatio() > 0) {
-                                foundWideAngleOnPrimaryCamera = true;
-                                OctoLogging.d(tag, "Wide-angle capability detected on primary back camera: " + id);
+                        if (availableBackCameraCount == 1) {
+                            ZoomState zoomState = cameraInfo.getZoomState().getValue();
+                            if (zoomState != null && zoomState.getMinZoomRatio() < 1.0F && zoomState.getMinZoomRatio() > 0) {
+                                primaryCameraHasWideZoom = true;
                             }
                         }
 
-                        float[] listLensAngle = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
-                        if (listLensAngle != null && listLensAngle.length > 0) {
-                            OctoLogging.d(tag, "Focal lengths for camera ID " + id + ": " + Arrays.toString(listLensAngle));
-                            if (listLensAngle[0] < 3.0f && listLensAngle[0] < lowestAngledCamera) {
-                                lowestAngledCamera = listLensAngle[0];
-                                cameraId = id;
-                                OctoLogging.d(tag, "New lowest angled camera ID: " + cameraId + " with angle " + lowestAngledCamera);
+                        float[] focalLengths = cameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+                        if (focalLengths != null && focalLengths.length > 0) {
+                            float focalLength = focalLengths[0];
+                            if (focalLength < 3.0f && focalLength < minFocalLength) {
+                                minFocalLength = focalLength;
+                                wideCameraId = cameraId;
                             }
                         }
                     }
                 }
             } catch (Exception e) {
-                OctoLogging.e(tag, "Error processing camera ID: " + id, e);
+                OctoLogging.e(TAG, "Error processing camera info for ID: " + cameraId, e);
             }
         }
 
-        OctoLogging.d(tag, "Total back-facing cameras found: " + availableBackCamera);
-        if (availableBackCamera >= 2 && !foundWideAngleOnPrimaryCamera) {
-            OctoLogging.d(tag, "Returning wide-angle camera ID: " + cameraId);
-            return cameraId;
-        } else {
-            OctoLogging.d(tag, "No wide-angle camera available. Returning null.");
-            return null;
-        }
+        return (availableBackCameraCount >= 2 && !primaryCameraHasWideZoom) ? wideCameraId : null;
     }
 }

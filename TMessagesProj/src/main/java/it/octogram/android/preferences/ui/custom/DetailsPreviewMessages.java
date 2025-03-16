@@ -8,6 +8,8 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -19,6 +21,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
+
+import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
@@ -56,7 +60,7 @@ public class DetailsPreviewMessages extends LinearLayout {
 
         setWillNotDraw(false);
         setOrientation(LinearLayout.VERTICAL);
-        setPadding(0, AndroidUtilities.dp(11), 0, AndroidUtilities.dp(11));
+        setPadding(0, dp(11), 0, dp(11));
 
         shadowDrawable = Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
     }
@@ -76,20 +80,7 @@ public class DetailsPreviewMessages extends LinearLayout {
 
         for (MessageObject obj : messageObjects) {
             if (obj.type == 10 || obj.type == MessageObject.TYPE_ACTION_PHOTO || obj.type == MessageObject.TYPE_PHONE_CALL) {
-                ChatActionCell cell = new ChatActionCell(getContext()) {
-                    @Override
-                    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-                        super.onInitializeAccessibilityNodeInfo(info);
-                        info.setVisibleToUser(true);
-                    }
-                };
-                cell.setDelegate(new ChatActionCell.ChatActionCellDelegate() {
-                    @Override
-                    public long getDialogId() {
-                        return obj.getDialogId();
-                    }
-                });
-                cell.setMessageObject(obj);
+                ChatActionCell cell = getChatActionCell(obj);
                 addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
                 cells.add(cell);
             } else {
@@ -112,6 +103,25 @@ public class DetailsPreviewMessages extends LinearLayout {
                 cells.add(cell);
             }
         }
+    }
+
+    @NonNull
+    private ChatActionCell getChatActionCell(MessageObject obj) {
+        ChatActionCell cell = new ChatActionCell(getContext()) {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(info);
+                info.setVisibleToUser(true);
+            }
+        };
+        cell.setDelegate(new ChatActionCell.ChatActionCellDelegate() {
+            @Override
+            public long getDialogId() {
+                return obj.getDialogId();
+            }
+        });
+        cell.setMessageObject(obj);
+        return cell;
     }
 
 
@@ -155,14 +165,12 @@ public class DetailsPreviewMessages extends LinearLayout {
             }
             if (drawable instanceof ColorDrawable || drawable instanceof GradientDrawable || drawable instanceof MotionBackgroundDrawable) {
                 drawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
-                if (drawable instanceof BackgroundGradientDrawable) {
-                    final BackgroundGradientDrawable backgroundGradientDrawable = (BackgroundGradientDrawable) drawable;
+                if (drawable instanceof BackgroundGradientDrawable backgroundGradientDrawable) {
                     backgroundGradientDisposable = backgroundGradientDrawable.drawExactBoundsSize(canvas, this);
                 } else {
                     drawable.draw(canvas);
                 }
-            } else if (drawable instanceof BitmapDrawable) {
-                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            } else if (drawable instanceof BitmapDrawable bitmapDrawable) {
                 if (bitmapDrawable.getTileModeX() == Shader.TileMode.REPEAT) {
                     canvas.save();
                     float scale = 2.0f / AndroidUtilities.density;
@@ -196,21 +204,20 @@ public class DetailsPreviewMessages extends LinearLayout {
         shadowDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
         shadowDrawable.draw(canvas);
         for (View view : cells) {
-            if (view instanceof ChatMessageCell) {
-                ChatMessageCell cell = (ChatMessageCell) view;
+            if (view instanceof ChatMessageCell cell) {
                 ImageReceiver imageReceiver = cell.getAvatarImage();
                 if (imageReceiver != null) {
                     int top = cell.getTop();
                     float tx = cell.getTranslationX();
                     int y = cell.getTop() + cell.getLayoutHeight();
-                    if (y - AndroidUtilities.dp(48) < top) {
-                        y = top + AndroidUtilities.dp(48);
+                    if (y - dp(48) < top) {
+                        y = top + dp(48);
                     }
                     if (tx != 0) {
                         canvas.save();
                         canvas.translate(tx, 0);
                     }
-                    imageReceiver.setImageY(y - AndroidUtilities.dp(44));
+                    imageReceiver.setImageY(y - dp(44));
                     imageReceiver.draw(canvas);
                     if (tx != 0) {
                         canvas.restore();

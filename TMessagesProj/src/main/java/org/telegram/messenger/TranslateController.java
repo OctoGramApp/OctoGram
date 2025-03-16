@@ -11,18 +11,15 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import androidx.annotation.Nullable;
 
-import org.telegram.messenger.TranslateController.PollText;
 import org.telegram.tgnet.InputSerializedData;
 import org.telegram.tgnet.OutputSerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_stories;
-import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
-import org.telegram.ui.Components.Paint.Views.PhotoView;
 import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.PhotoViewer;
 import org.telegram.ui.RestrictedLanguagesSelectActivity;
@@ -39,8 +36,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.swing.text.Utilities;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TranslatorProvider;
@@ -645,7 +640,6 @@ public class TranslateController extends BaseController {
                         finalMessageObject.messageOwner.translatedToLanguage = lang;
                         finalMessageObject.messageOwner.translatedText = null;
                         finalMessageObject.messageOwner.translatedPoll = poll;
-                        finalMessageObject.messageOwner.translatedProviderId = OctoConfig.INSTANCE.translatorProvider.getValue();
                         if (keepReply) {
                             keepReplyMessage(finalMessageObject);
                         }
@@ -661,7 +655,6 @@ public class TranslateController extends BaseController {
                                     dialogMessage.messageOwner.translatedToLanguage = lang;
                                     dialogMessage.messageOwner.translatedText = null;
                                     dialogMessage.messageOwner.translatedPoll = poll;
-                                    dialogMessage.messageOwner.translatedProviderId = OctoConfig.INSTANCE.translatorProvider.getValue();
                                     if (dialogMessage.updateTranslation()) {
                                         NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.updateInterfaces, 0);
                                     }
@@ -677,14 +670,15 @@ public class TranslateController extends BaseController {
                         }
                         finalMessageObject.messageOwner.translatedToLanguage = lang;
                         finalMessageObject.messageOwner.translatedText = text;
-                        finalMessageObject.messageOwner.translatedPoll = null;
                         finalMessageObject.messageOwner.translatedProviderId = OctoConfig.INSTANCE.translatorProvider.getValue();
+                        finalMessageObject.messageOwner.translatedPoll = null;
                         if (keepReply) {
                             keepReplyMessage(finalMessageObject);
                         }
 
                         getMessagesStorage().updateMessageCustomParams(dialogId, finalMessageObject.messageOwner);
-                        NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.messageTranslated, finalMessageObject);
+                        // NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.messageTranslated, finalMessageObject);
+                        AndroidUtilities.runOnUIThread(() ->  NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.messageTranslated, finalMessageObject));
 
                         ArrayList<MessageObject> dialogMessages = messagesController.dialogMessage.get(dialogId);
                         if (dialogMessages != null) {
@@ -1618,7 +1612,7 @@ public class TranslateController extends BaseController {
             detectedLanguage = messageObject.messageOwner.originalLanguage;
         }
         return messageObject != null && messageObject.messageOwner != null && !TextUtils.isEmpty(messageObject.messageOwner.message) && (
-            //detectedLanguage == null && messageObject.messageOwner.translatedText != null && TextUtils.equals(messageObject.messageOwner.translatedToLanguage, TranslateAlert2.getToLanguage()) ||
+            /*detectedLanguage == null && messageObject.messageOwner.translatedText != null && TextUtils.equals(messageObject.messageOwner.translatedToLanguage, TranslateAlert2.getToLanguage()) ||*/
             detectedLanguage == null && messageObject.messageOwner.translatedText != null && messageObject.messageOwner.translatedProviderId == OctoConfig.INSTANCE.translatorProvider.getValue() && TextUtils.equals(messageObject.messageOwner.translatedToLanguage, TranslateAlert2.getToLanguage()) ||
             detectedLanguage != null && !RestrictedLanguagesSelectActivity.getRestrictedLanguages().contains(messageObject.messageOwner.originalLanguage)
         ) && !messageObject.translated;
@@ -1633,7 +1627,7 @@ public class TranslateController extends BaseController {
 
         String toLang = TranslateAlert2.getToLanguage();
 
-        //if (messageObject.messageOwner.translatedText != null && TextUtils.equals(messageObject.messageOwner.translatedToLanguage, toLang)) {
+        /*if (messageObject.messageOwner.translatedText != null && TextUtils.equals(messageObject.messageOwner.translatedToLanguage, toLang)) {*/
         if (messageObject.messageOwner.translatedText != null && TextUtils.equals(messageObject.messageOwner.translatedToLanguage, toLang) && messageObject.messageOwner.translatedProviderId == OctoConfig.INSTANCE.translatorProvider.getValue()) {
             if (done != null) {
                 done.run();
@@ -1682,7 +1676,7 @@ public class TranslateController extends BaseController {
                 if (done != null) {
                     AndroidUtilities.runOnUIThread(done, Math.max(0, 400L - (System.currentTimeMillis() - start)));
                 }
-                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorFailed", R.string.TranslatorFailed)).show();
+                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorFailed)).show();
             }
 
             @Override
@@ -1694,7 +1688,7 @@ public class TranslateController extends BaseController {
                 if (done != null) {
                     AndroidUtilities.runOnUIThread(done, Math.max(0, 400L - (System.currentTimeMillis() - start)));
                 }
-                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage)).show();
+                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)).show();
             }
         });
 
@@ -1716,7 +1710,6 @@ public class TranslateController extends BaseController {
                     AndroidUtilities.runOnUIThread(() -> {
                         messageObject.messageOwner.translatedToLanguage = toLang;
                         messageObject.messageOwner.translatedText = null;
-                        messageObject.messageOwner.translatedProviderId = -1;
                         getMessagesStorage().updateMessageCustomParams(key.dialogId, messageObject.messageOwner);
                         translatingPhotos.remove(key);
                         if (done != null) {
@@ -1729,7 +1722,6 @@ public class TranslateController extends BaseController {
                 AndroidUtilities.runOnUIThread(() -> {
                     messageObject.messageOwner.translatedToLanguage = toLang;
                     messageObject.messageOwner.translatedText = TranslateAlert2.preprocess(text, textWithEntities);
-                    messageObject.messageOwner.translatedProviderId = OctoConfig.INSTANCE.translatorProvider.getValue();
                     getMessagesStorage().updateMessageCustomParams(key.dialogId, messageObject.messageOwner);
                     translatingPhotos.remove(key);
                     if (done != null) {
@@ -1740,7 +1732,6 @@ public class TranslateController extends BaseController {
                 AndroidUtilities.runOnUIThread(() -> {
                     messageObject.messageOwner.translatedToLanguage = toLang;
                     messageObject.messageOwner.translatedText = null;
-                    messageObject.messageOwner.translatedProviderId = -1;
                     getMessagesStorage().updateMessageCustomParams(key.dialogId, messageObject.messageOwner);
                     translatingPhotos.remove(key);
                     if (done != null) {

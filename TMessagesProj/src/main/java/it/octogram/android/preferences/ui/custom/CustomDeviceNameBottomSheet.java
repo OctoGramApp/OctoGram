@@ -8,6 +8,9 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 import android.os.Build;
 import android.os.Vibrator;
@@ -65,23 +68,22 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString(R.string.UseCustomDeviceNameTitle));
-        textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
+        textView.setText(getString(R.string.UseCustomDeviceNameTitle));
+        textView.setPadding(dp(30), 0, dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         textView = new TextView(context);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString(R.string.UseCustomDeviceNameDescription));
-        textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
+        textView.setText(getString(R.string.UseCustomDeviceNameDescription));
+        textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         editText = new EditTextBoldCursor(context);
         editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         editText.setHintTextColor(getThemedColor(Theme.key_windowBackgroundWhiteHintText));
         editText.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setBackgroundDrawable(null);
         editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
         editText.setMaxLines(1);
         editText.setLines(1);
@@ -92,14 +94,14 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         editText.setHint(getDeviceDefaultName());
         editText.setCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setCursorSize(AndroidUtilities.dp(20));
+        editText.setCursorSize(dp(20));
         editText.setCursorWidth(1.5f);
         editText.setText(currentDeviceModel);
         InputFilter[] inputFilters = new InputFilter[1];
         inputFilters[0] = new CodepointsLengthInputFilter(40) {
             @Override
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                if (source != null && source.length() > 0 && TextUtils.indexOf(source, '\n') == source.length() - 1) {
+                if (source != null && !TextUtils.isEmpty(source) && TextUtils.indexOf(source, '\n') == source.length() - 1) {
                     setCustomName(editText.getText().toString().trim());
                     return "";
                 }
@@ -125,20 +127,20 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
         linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 17, 15, 17, 0));
 
         TextView buttonTextView = new TextView(context);
-        buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+        buttonTextView.setPadding(dp(34), 0, dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         buttonTextView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(LocaleController.getString(R.string.UseCustomDeviceNameRename));
+        buttonTextView.setText(getString(R.string.UseCustomDeviceNameRename));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> setCustomName(editText.getText().toString().trim()));
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         textView = new TextView(context);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(LocaleController.getString(R.string.UseCustomDeviceNameRenameDefault));
+        textView.setText(getString(R.string.UseCustomDeviceNameRenameDefault));
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setOnClickListener(view -> setCustomName(""));
         linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 0));

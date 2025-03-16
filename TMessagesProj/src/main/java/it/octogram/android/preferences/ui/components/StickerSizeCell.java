@@ -10,6 +10,7 @@ package it.octogram.android.preferences.ui.components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -23,6 +24,7 @@ import org.telegram.ui.Components.LayoutHelper;
 
 import java.util.ArrayList;
 
+@SuppressLint("ClickableViewAccessibility")
 public class StickerSizeCell extends FrameLayout {
     private final ActionBarLayout navigationLayout;
     private StickerSizeUI messagesCell;

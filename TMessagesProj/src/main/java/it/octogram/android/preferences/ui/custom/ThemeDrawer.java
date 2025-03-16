@@ -8,6 +8,8 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -37,9 +39,9 @@ import org.telegram.ui.Components.RLottieImageView;
 
 public class ThemeDrawer extends FrameLayout {
 
-    private final float STROKE_RADIUS = AndroidUtilities.dp(8);
-    private final float INNER_RADIUS = AndroidUtilities.dp(6);
-    private final float INNER_RECT_SPACE = AndroidUtilities.dp(4);
+    private final float STROKE_RADIUS = dp(8);
+    private final float INNER_RADIUS = dp(6);
+    private final float INNER_RECT_SPACE = dp(4);
     private final RLottieImageView lottieImageView;
     private final Paint outlineBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final EventThemeDrawable themeDrawable = new EventThemeDrawable();
@@ -60,7 +62,7 @@ public class ThemeDrawer extends FrameLayout {
 
         EventThemeDrawable() {
             strokePaint.setStyle(Paint.Style.STROKE);
-            strokePaint.setStrokeWidth(AndroidUtilities.dp(2));
+            strokePaint.setStrokeWidth(dp(2));
         }
 
         public void drawBackground(Canvas canvas) {
@@ -131,7 +133,7 @@ public class ThemeDrawer extends FrameLayout {
             if (isSelected || strokeAlphaAnimator != null) {
                 strokePaint.setColor(Theme.getColor(Theme.key_dialogTextBlue));
                 strokePaint.setAlpha((int) (selectionProgress * alpha * 255));
-                float rectSpace = strokePaint.getStrokeWidth() * 0.5f + AndroidUtilities.dp(4) * (1f - selectionProgress);
+                float rectSpace = strokePaint.getStrokeWidth() * 0.5f + dp(4) * (1f - selectionProgress);
                 rectF.set(rectSpace, rectSpace, getWidth() - rectSpace, getHeight() - rectSpace);
                 canvas.drawRoundRect(rectF, STROKE_RADIUS, STROKE_RADIUS, strokePaint);
             }
@@ -166,7 +168,7 @@ public class ThemeDrawer extends FrameLayout {
         lottieImageView = new RLottieImageView(context);
         lottieImageView.setScaleType(ImageView.ScaleType.CENTER);
         addView(lottieImageView, LayoutHelper.createFrame(32, 32, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0, 0, 12));
-        outlineBackgroundPaint.setStrokeWidth(AndroidUtilities.dp(2));
+        outlineBackgroundPaint.setStrokeWidth(dp(2));
         outlineBackgroundPaint.setStyle(Paint.Style.STROKE);
         outlineBackgroundPaint.setColor(Theme.getColor(Theme.key_switchTrack));
     }
@@ -174,7 +176,7 @@ public class ThemeDrawer extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int height = MeasureSpec.getSize(heightMeasureSpec);
-        int width = AndroidUtilities.dp(90);
+        int width = dp(90);
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 
         lottieImageView.setPivotY(lottieImageView.getMeasuredHeight());

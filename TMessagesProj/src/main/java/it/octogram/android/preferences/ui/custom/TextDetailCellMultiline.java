@@ -8,6 +8,8 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -18,7 +20,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
@@ -106,9 +107,9 @@ public class TextDetailCellMultiline extends LinearLayout {
     protected void onDraw(Canvas canvas) {
         if (needDivider) {
             canvas.drawLine(
-                    LocaleController.isRTL ? 0 : AndroidUtilities.dp(20),
+                    LocaleController.isRTL ? 0 : dp(20),
                     getMeasuredHeight() - 1,
-                    getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(20) : 0),
+                    getMeasuredWidth() - (LocaleController.isRTL ? dp(20) : 0),
                     getMeasuredHeight() - 1,
                     Theme.dividerPaint
             );

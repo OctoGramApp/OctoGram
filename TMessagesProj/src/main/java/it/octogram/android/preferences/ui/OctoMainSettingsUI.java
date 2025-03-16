@@ -19,6 +19,8 @@ import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
@@ -46,6 +48,7 @@ import it.octogram.android.ConfigProperty;
 import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
@@ -67,12 +70,13 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
     private PreferencesFragment fragment;
     private ChatAttachAlert chatAttachAlert;
 
+    @NonNull
     @Override
-    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
+    public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         updateConfigs();
         this.fragment = fragment;
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
-                .deepLink("tg://octosettings")
+                .deepLink(DeepLinkDef.OCTOSETTINGS)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.MAIN_SETTINGS, true, getString(R.string.OctoMainSettingsHeader))
                 .category(getString(R.string.Settings), category -> {
                     if ("it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName())) {
@@ -119,6 +123,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI())))
                             .icon(R.drawable.menu_privacy)
+                            .isNew(NewFeaturesBadgeId.PRIVACY_BADGE.getId())
                             .title(getString(R.string.PrivacySettings))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -153,6 +158,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DcStatusActivity()))
                             .icon(R.drawable.datacenter_status)
+                            .isNew(NewFeaturesBadgeId.DC_STATUS_BADGE.getId())
                             .title(getString(R.string.DatacenterStatus))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -167,8 +173,8 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new OctoLogsActivity()))
                             .icon(R.drawable.msg_log)
-                            .title(getString(R.string.CrashHistory)+ " (PBETA)")
-                            .description(getString(R.string.CrashHistory_Desc))
+                            .title("Debug Logs (PBETA only)")
+                            .description("View debug logs")
                             .showIf(logsOnlyPbeta)
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -226,7 +232,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
     }
 
     @Override
-    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fMessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fMessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia, long payStars) {
         File firstFile = new File(files.get(0));
 
         if (chatAttachAlert != null) {

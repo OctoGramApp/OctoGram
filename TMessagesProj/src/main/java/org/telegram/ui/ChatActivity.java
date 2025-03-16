@@ -9717,12 +9717,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     private boolean _isBottomOverlayHidden = false;
     private boolean isBottomOverlayHidden() {
-        _isBottomOverlayHidden = OctoConfig.INSTANCE.hideBottomBarChannels.getValue() && isChannelBottomMuteView && !currentChat.creator && !ChatObject.canWriteToChat(currentChat) && !actionBar.isActionModeShowed() && !searchItem.isSearchFieldVisible();
+        _isBottomOverlayHidden = shouldIgnoreBottomOverlayConditions() && !actionBar.isActionModeShowed() && !searchItem.isSearchFieldVisible();
         return _isBottomOverlayHidden;
     }
 
     private boolean shouldIgnoreBottomOverlayConditions() {
-        return OctoConfig.INSTANCE.hideBottomBarChannels.getValue() && isChannelBottomMuteView && !currentChat.creator && !ChatObject.canWriteToChat(currentChat);
+        return !isInPreviewMode() && OctoConfig.INSTANCE.hideBottomBarChannels.getValue() && isChannelBottomMuteView && !currentChat.creator && !ChatObject.canWriteToChat(currentChat);
     }
 
     @Override
@@ -39043,7 +39043,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 };
                 BoostDialogs.openGiveAwayStatusDialog(messageObject, progressDialogCurrent, getContext(), getResourceProvider());
             } else if (type == 21) {
-                if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
+                if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.isDownloadedFromAnyStore()) {
                     if (LaunchActivity.instance != null) {
                         if (progressDialogCurrent != null) {
                             progressDialogCurrent.cancel(true);

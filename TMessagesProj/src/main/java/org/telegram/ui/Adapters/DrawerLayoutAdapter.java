@@ -45,7 +45,7 @@ import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
-import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
+import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
@@ -57,6 +57,8 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
     private boolean accountsShown;
     public DrawerProfileCell profileCell;
     private SideMenultItemAnimator itemAnimator;
+
+    private boolean showHiddenAccounts = false;
 
     public DrawerLayoutAdapter(Context context, SideMenultItemAnimator animator, DrawerLayoutContainer drawerLayoutContainer) {
         mContext = context;
@@ -89,8 +91,12 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
             return;
         }
         accountsShown = value;
+        showHiddenAccounts = false;
         if (profileCell != null) {
             profileCell.setAccountsShown(accountsShown, animated);
+        }
+        if (accountsShown && OctoConfig.INSTANCE.hideHiddenAccounts.getValue() && FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached()) {
+            accountNumbers.removeIf(FingerprintUtils::isAccountLockedByNumber);
         }
         MessagesController.getGlobalMainSettings().edit().putBoolean("accountsShown", accountsShown).apply();
         if (animated) {
@@ -107,6 +113,49 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
 
     public boolean isAccountsShown() {
         return accountsShown;
+    }
+
+    public void showHiddenAccounts() {
+        if (showHiddenAccounts || itemAnimator.isRunning()) {
+            return;
+        }
+
+        boolean wasTotallyHidden = false;
+        if (!accountsShown) {
+            wasTotallyHidden = true;
+            accountsShown = true;
+            profileCell.setAccountsShown(accountsShown, true);
+        }
+        showHiddenAccounts = true;
+
+        int currentPosition = 1;
+        ArrayList<Integer> newAccountsList = new ArrayList<>();
+        ArrayList<Integer> insertedRanges = new ArrayList<>();
+        for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
+            UserConfig instance = UserConfig.getInstance(a);
+            if (instance.isClientActivated()) {
+                currentPosition++;
+                if (!accountNumbers.contains(a) && !wasTotallyHidden) {
+                    insertedRanges.add(currentPosition);
+                }
+                newAccountsList.add(a);
+            }
+        }
+
+        accountNumbers.clear();
+        accountNumbers.addAll(newAccountsList);
+        itemAnimator.setShouldClipChildren(false);
+        if (wasTotallyHidden) {
+            notifyItemRangeInserted(2, getAccountRowsCount());
+        } else {
+            for (int i : insertedRanges) {
+                notifyItemRangeInserted(i, 1);
+            }
+        }
+    }
+
+    public boolean areHiddenAccountsShown() {
+        return showHiddenAccounts;
     }
 
     private View.OnClickListener onPremiumDrawableClick;
@@ -242,8 +291,14 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
 
     private void resetItems() {
         accountNumbers.clear();
+        boolean mayHideAccounts = OctoConfig.INSTANCE.hideHiddenAccounts.getValue() && FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
-            if (UserConfig.getInstance(a).isClientActivated()) {
+            UserConfig instance = UserConfig.getInstance(a);
+            if (instance.isClientActivated()) {
+                if (mayHideAccounts && FingerprintUtils.isAccountLocked(instance.clientUserId)) {
+                    continue;
+                }
+
                 accountNumbers.add(a);
             }
         }

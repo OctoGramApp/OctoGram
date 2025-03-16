@@ -8,6 +8,10 @@
 
 package it.octogram.android.preferences.ui.components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,7 +21,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LocaleController;
@@ -61,9 +64,9 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
 
         leftTextView = new AnimatedTextView(context);
         leftTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-        leftTextView.setTextSize(AndroidUtilities.dp(16));
+        leftTextView.setTextSize(dp(16));
         leftTextView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
-        leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheck));
+        leftTextView.setText(getString(R.string.UpdatesSettingsCheck));
         leftTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         addView(leftTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL ? 70 : padding, 0, LocaleController.isRTL ? padding : 70, 0));
 
@@ -76,15 +79,15 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
         layoutRight.setGravity(LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT);
 
         checkAvailableUpdatesView = new TextView(context);
-        checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButton));
+        checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButton));
         checkAvailableUpdatesView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         checkAvailableUpdatesView.setTextSize(16);
-        checkAvailableUpdatesView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(16), Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed)));
+        checkAvailableUpdatesView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(16), Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed)));
         checkAvailableUpdatesView.setGravity(Gravity.CENTER_VERTICAL);
         checkAvailableUpdatesView.setSingleLine(true);
         checkAvailableUpdatesView.setEllipsize(TextUtils.TruncateAt.END);
         checkAvailableUpdatesView.setOnClickListener(view -> callback.onClick());
-        checkAvailableUpdatesView.setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(16), 0);
+        checkAvailableUpdatesView.setPadding(dp(16), 0, dp(16), 0);
         layoutRight.addView(checkAvailableUpdatesView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 35));
 
         addView(layoutRight, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, 22, 0, 22, 0));
@@ -101,27 +104,27 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
     public void updateState(int state, float loadProgress) {
         switch (state) {
             case CheckCellState.NO_UPDATE_AVAILABLE:
-                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheck));
-                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButton));
+                leftTextView.setText(getString(R.string.UpdatesSettingsCheck));
+                checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButton));
                 resetButtonState();
             break;
             case CheckCellState.CHECKING_UPDATES:
-                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheck));
-                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonChecking));
+                leftTextView.setText(getString(R.string.UpdatesSettingsCheck));
+                checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButtonChecking));
                 disableButtonClick();
             break;
             case CheckCellState.UPDATE_NEED_DOWNLOAD:
-                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckAvailable));
-                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonDownload));
+                leftTextView.setText(getString(R.string.UpdatesSettingsCheckAvailable));
+                checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButtonDownload));
                 resetButtonState();
             break;
             case CheckCellState.UPDATE_IS_DOWNLOADING:
-                leftTextView.setText(LocaleController.formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
+                leftTextView.setText(formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
                 hideButton();
             break;
             case CheckCellState.UPDATE_IS_READY:
-                leftTextView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckReady));
-                checkAvailableUpdatesView.setText(LocaleController.getString(R.string.UpdatesSettingsCheckButtonInstall));
+                leftTextView.setText(getString(R.string.UpdatesSettingsCheckReady));
+                checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButtonInstall));
                 resetButtonState();
         }
 

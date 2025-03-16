@@ -8,7 +8,7 @@
 
 package it.octogram.android.utils;
 
-import org.telegram.messenger.LocaleController;
+import static org.telegram.messenger.LocaleController.getString;
 
 import it.octogram.android.InterfaceCheckboxUI;
 import it.octogram.android.InterfaceSliderUI;
@@ -39,7 +39,7 @@ public class PopupChoiceDialogOption {
     }
 
     public PopupChoiceDialogOption setItemTitle(int itemTitle) {
-        this.itemTitle = LocaleController.getString(itemTitle);
+        this.itemTitle = getString(itemTitle);
         return this;
     }
 
@@ -49,7 +49,7 @@ public class PopupChoiceDialogOption {
     }
 
     public PopupChoiceDialogOption setItemDescription(int itemDescription) {
-        this.itemDescription = LocaleController.getString(itemDescription);
+        this.itemDescription = getString(itemDescription);
         return this;
     }
 

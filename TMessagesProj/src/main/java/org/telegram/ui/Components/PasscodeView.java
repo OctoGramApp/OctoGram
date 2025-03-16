@@ -80,7 +80,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.utils.FingerprintUtils;
 
 public class PasscodeView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {

@@ -9,7 +9,9 @@
 package it.octogram.android.preferences.ui.components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatPluralString;
 import static org.telegram.messenger.LocaleController.formatShortNumber;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -27,7 +29,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -107,8 +108,8 @@ public class StickerSizeUI extends BaseFragment {
         }
 
         avatarContainer.getAvatarImageView().setImageResource(R.drawable.ic_unsized_octo);
-        avatarContainer.setTitle(LocaleController.getString(R.string.StickersSizeChannelTitle), false, false, true, false, null, false, slidingTitle);
-        avatarContainer.setSubtitle(LocaleController.formatPluralString("Members", result[0]).replace(String.format(Locale.getDefault(), "%d", result[0]), shortNumber));
+        avatarContainer.setTitle(getString(R.string.StickersSizeChannelTitle), false, false, true, false, null, false, slidingTitle);
+        avatarContainer.setSubtitle(formatPluralString("Members", result[0]).replace(String.format(Locale.getDefault(), "%d", result[0]), shortNumber));
         ((ViewGroup.MarginLayoutParams) avatarContainer.getLayoutParams()).rightMargin = isCenteredTitle() ? 0 : dp(OctoConfig.INSTANCE.searchIconInHeader.getValue() ? 96 : 40);
     }
 
@@ -166,9 +167,15 @@ public class StickerSizeUI extends BaseFragment {
             messageObjects[0].useCustomPhoto = true;
 
             message = new TLRPC.TL_message();
-            String[] messageReply = {"StickerSizePreviewMessage1", "StickerSizePreviewMessage2", "StickerSizePreviewMessage3", "StickerSizePreviewMessage5"};
+            String[] messageReply = {
+                    "StickerSizePreviewMessage1",
+                    "StickerSizePreviewMessage2",
+                    "StickerSizePreviewMessage3",
+                    "StickerSizePreviewMessage5"
+            };
             String x = messageReply[new Random().nextInt(messageReply.length)];
-            message.message = LocaleController.getString(x);
+            //noinspection deprecation
+            message.message = getString(x);
 
             message.date = date + 1270;
             message.dialog_id = -1;
@@ -179,7 +186,12 @@ public class StickerSizeUI extends BaseFragment {
             message.peer_id = new TLRPC.TL_peerUser();
             message.peer_id.user_id = 1;
 
-            String[] messageRead = {"StickerSizePreviewMessage1", "StickerSizePreviewMessage2", "StickerSizePreviewMessage3", "StickerSizePreviewMessage5"};
+            String[] messageRead = {
+                    "StickerSizePreviewMessage1",
+                    "StickerSizePreviewMessage2",
+                    "StickerSizePreviewMessage3",
+                    "StickerSizePreviewMessage5"
+            };
             String y = messageRead[new Random().nextInt(messageRead.length)];
             String cool = "";
 
@@ -195,7 +207,8 @@ public class StickerSizeUI extends BaseFragment {
                 default -> 0;
             };
 
-            message.message = LocaleController.getString(y);
+            //noinspection deprecation
+            message.message = getString(y);
 
 
             int index1 = message.message.indexOf(cool);
@@ -227,7 +240,7 @@ public class StickerSizeUI extends BaseFragment {
             //String[] strings = {"Nick", "OctoGram Dev"};
             messageObjects[1].overrideLinkEmoji = 5258073068852485953L;
             messageObjects[1].overrideLinkColor = 9;
-            messageObjects[1].customReplyName = LocaleController.getString(R.string.StickersSizeChannelTitleMini);
+            messageObjects[1].customReplyName = getString(R.string.StickersSizeChannelTitleMini);
             messageObjects[1].replyMessageObject = messageObjects[0];
 
             for (int a = 0; a < cells.length; a++) {

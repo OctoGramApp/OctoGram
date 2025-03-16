@@ -139,7 +139,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
             String link = "tg://pinned_hashtags";
-            showDialog(new ShareAlert(context, null, link, false, link, false));
+            showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;
         });
@@ -148,22 +148,10 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
         scrollView.setFillViewport(true);
         FrameLayout rootLayout = new FrameLayout(context) {
             final AdjustPanLayoutHelper adjustPanLayoutHelper = new AdjustPanLayoutHelper(this) {
-
-                @Override
-                protected void onTransitionStart(boolean keyboardVisible, int contentHeight) {
-                    /*actionButton.setVisibility(View.VISIBLE);
-                    actionButton.animate().alpha(!keyboardVisible ? 1.0f : 0.0f).withEndAction(() -> {
-                        if (keyboardVisible) {
-                            actionButton.setVisibility(View.INVISIBLE);
-                        }
-                    }).start();*/
-                }
-
                 @Override
                 protected boolean applyTranslation() {
                     return false;
                 }
-
                 @Override
                 protected boolean heightAnimationEnabled() {
                     return !AndroidUtilities.isInMultiwindow;
@@ -677,30 +665,30 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             int count = getChildCount();
             int width = MeasureSpec.getSize(widthMeasureSpec);
-            int maxWidth = width - AndroidUtilities.dp(26);
+            int maxWidth = width - dp(26);
             int currentLineWidth = 0;
-            int y = AndroidUtilities.dp(10);
+            int y = dp(10);
             int allCurrentLineWidth = 0;
-            int allY = AndroidUtilities.dp(10);
+            int allY = dp(10);
             int x;
             for (int a = 0; a < count; a++) {
                 View child = getChildAt(a);
                 if (!(child instanceof HashtagSpan)) {
                     continue;
                 }
-                child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(32), MeasureSpec.EXACTLY));
+                child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(dp(32), MeasureSpec.EXACTLY));
                 if (child != removingSpan && currentLineWidth + child.getMeasuredWidth() > maxWidth) {
-                    y += child.getMeasuredHeight() + AndroidUtilities.dp(8);
+                    y += child.getMeasuredHeight() + dp(8);
                     currentLineWidth = 0;
                 }
                 if (allCurrentLineWidth + child.getMeasuredWidth() > maxWidth) {
-                    allY += child.getMeasuredHeight() + AndroidUtilities.dp(8);
+                    allY += child.getMeasuredHeight() + dp(8);
                     allCurrentLineWidth = 0;
                 }
-                x = AndroidUtilities.dp(16) + currentLineWidth;
+                x = dp(16) + currentLineWidth;
                 if (!animationStarted) {
                     if (child == removingSpan) {
-                        child.setTranslationX(AndroidUtilities.dp(16) + allCurrentLineWidth);
+                        child.setTranslationX(dp(16) + allCurrentLineWidth);
                         child.setTranslationY(allY);
                     } else if (removingSpan != null) {
                         if (child.getTranslationX() != x) {
@@ -715,29 +703,29 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
                     }
                 }
                 if (child != removingSpan) {
-                    currentLineWidth += child.getMeasuredWidth() + AndroidUtilities.dp(9);
+                    currentLineWidth += child.getMeasuredWidth() + dp(9);
                 }
-                allCurrentLineWidth += child.getMeasuredWidth() + AndroidUtilities.dp(9);
+                allCurrentLineWidth += child.getMeasuredWidth() + dp(9);
             }
             int minWidth;
             if (AndroidUtilities.isTablet()) {
-                minWidth = AndroidUtilities.dp(530 - 26 - 18 - 57 * 2) / 3;
+                minWidth = dp(530 - 26 - 18 - 57 * 2) / 3;
             } else {
-                minWidth = (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - AndroidUtilities.dp(26 + 18 + 57 * 2)) / 3;
+                minWidth = (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - dp(26 + 18 + 57 * 2)) / 3;
             }
             if (maxWidth - currentLineWidth < minWidth) {
                 currentLineWidth = 0;
-                y += AndroidUtilities.dp(32 + 8);
+                y += dp(32 + 8);
             }
             if (maxWidth - allCurrentLineWidth < minWidth) {
-                allY += AndroidUtilities.dp(32 + 8);
+                allY += dp(32 + 8);
             }
-            editText.measure(MeasureSpec.makeMeasureSpec(maxWidth - currentLineWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(32), MeasureSpec.EXACTLY));
+            editText.measure(MeasureSpec.makeMeasureSpec(maxWidth - currentLineWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(32), MeasureSpec.EXACTLY));
             if (!animationStarted) {
-                int currentHeight = allY + AndroidUtilities.dp(32 + 10);
-                int fieldX = currentLineWidth + AndroidUtilities.dp(23);
+                int currentHeight = allY + dp(32 + 10);
+                int fieldX = currentLineWidth + dp(23);
                 if (currentAnimation != null) {
-                    int resultHeight = y + AndroidUtilities.dp(32 + 10);
+                    int resultHeight = y + dp(32 + 10);
                     if (containerHeight != resultHeight) {
                         animators.add(ObjectAnimator.ofInt(PinnedHashtagsActivity.this, "containerHeight", resultHeight));
                     }
@@ -870,24 +858,24 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
             this.small = small;
 
             deleteDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.delete, context.getTheme());
-            textPaint.setTextSize(AndroidUtilities.dp(small ? 13 : 14));
+            textPaint.setTextSize(dp(small ? 13 : 14));
 
             avatarDrawable = new AvatarDrawable();
-            avatarDrawable.setTextSize(AndroidUtilities.dp(20));
+            avatarDrawable.setTextSize(dp(20));
             avatarDrawable.setAvatarType(AvatarDrawable.AVATAR_TYPE_HASHTAGS);
             uid = hashtag;
 
             imageReceiver = new ImageReceiver();
-            imageReceiver.setRoundRadius(AndroidUtilities.dp(16));
+            imageReceiver.setRoundRadius(dp(16));
             imageReceiver.setParentView(this);
-            imageReceiver.setImageCoords(0, 0, AndroidUtilities.dp(small ? 28 : 32), AndroidUtilities.dp(small ? 28 : 32));
+            imageReceiver.setImageCoords(0, 0, dp(small ? 28 : 32), dp(small ? 28 : 32));
             imageReceiver.setImage(null, "50_50", avatarDrawable, 0, null, null, 1);
 
             int maxNameWidth;
             if (AndroidUtilities.isTablet()) {
-                maxNameWidth = AndroidUtilities.dp(530 - (small ? 28 : 32) - 18 - 57 * 2) / 2;
+                maxNameWidth = dp(530 - (small ? 28 : 32) - 18 - 57 * 2) / 2;
             } else {
-                maxNameWidth = (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - AndroidUtilities.dp((small ? 28 : 32) + 18 + 57 * 2)) / 2;
+                maxNameWidth = (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - dp((small ? 28 : 32) + 18 + 57 * 2)) / 2;
             }
 
             hashtag = hashtag.replace('\n', ' ');
@@ -948,7 +936,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(AndroidUtilities.dp((small ? 28 - 8 : 32) + 25) + textWidth, AndroidUtilities.dp(small ? 28 : 32));
+            setMeasuredDimension(dp((small ? 28 - 8 : 32) + 25) + textWidth, dp(small ? 28 : 32));
         }
 
         @Override
@@ -973,9 +961,9 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
                 invalidate();
             }
             canvas.save();
-            rect.set(0, 0, getMeasuredWidth(), AndroidUtilities.dp(small ? 28 : 32));
+            rect.set(0, 0, getMeasuredWidth(), dp(small ? 28 : 32));
             backPaint.setColor(Color.argb(colors[6] + (int) ((colors[7] - colors[6]) * progress), colors[0] + (int) ((colors[1] - colors[0]) * progress), colors[2] + (int) ((colors[3] - colors[2]) * progress), colors[4] + (int) ((colors[5] - colors[4]) * progress)));
-            canvas.drawRoundRect(rect, AndroidUtilities.dp(small ? 14 : 16), AndroidUtilities.dp(small ? 14 : 16), backPaint);
+            canvas.drawRoundRect(rect, dp(small ? 14 : 16), dp(small ? 14 : 16), backPaint);
             if (progress != 1f) {
                 imageReceiver.draw(canvas);
             }
@@ -984,15 +972,15 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
                 float alpha = Color.alpha(color) / 255.0f;
                 backPaint.setColor(color);
                 backPaint.setAlpha((int) (255 * progress * alpha));
-                canvas.drawCircle(AndroidUtilities.dp(small ? 14 : 16), AndroidUtilities.dp(small ? 14 : 16), AndroidUtilities.dp(small ? 14 : 16), backPaint);
+                canvas.drawCircle(dp(small ? 14 : 16), dp(small ? 14 : 16), dp(small ? 14 : 16), backPaint);
                 canvas.save();
-                canvas.rotate(45 * (1.0f - progress), AndroidUtilities.dp(16), AndroidUtilities.dp(16));
-                deleteDrawable.setBounds(AndroidUtilities.dp(small ? 9 : 11), AndroidUtilities.dp(small ? 9 : 11), AndroidUtilities.dp(small ? 19 : 21), AndroidUtilities.dp(small ? 19 : 21));
+                canvas.rotate(45 * (1.0f - progress), dp(16), dp(16));
+                deleteDrawable.setBounds(dp(small ? 9 : 11), dp(small ? 9 : 11), dp(small ? 19 : 21), dp(small ? 19 : 21));
                 deleteDrawable.setAlpha((int) (255 * progress));
                 deleteDrawable.draw(canvas);
                 canvas.restore();
             }
-            canvas.translate(textX + AndroidUtilities.dp((small ? 26 : 32) + 9), AndroidUtilities.dp(small ? 6 : 8));
+            canvas.translate(textX + dp((small ? 26 : 32) + 9), dp(small ? 6 : 8));
             int text = Theme.getColor(Theme.key_groupcreate_spanText, resourcesProvider);
             int textSelected = Theme.getColor(Theme.key_avatar_text, resourcesProvider);
             textPaint.setColor(ColorUtils.blendARGB(text, textSelected, progress));
@@ -1080,7 +1068,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
             addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), 22, 0, 22, 0));
 
             addButton = new ProgressButton(context);
-            addButton.setText(LocaleController.getString(R.string.Add));
+            addButton.setText(getString(R.string.Add));
             addButton.setOnClickListener(v -> {
                 if (!hashtag.isEmpty()) {
                     addHashtag(formatHashtag(hashtag));

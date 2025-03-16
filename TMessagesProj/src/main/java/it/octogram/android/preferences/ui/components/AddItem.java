@@ -9,6 +9,7 @@
 package it.octogram.android.preferences.ui.components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -48,7 +49,7 @@ public class AddItem extends FrameLayout {
         addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, 22, 0, 22, 0));
 
         addButton = new ProgressButton(context);
-        addButton.setText(LocaleController.getString(R.string.Add));
+        addButton.setText(getString(R.string.Add));
         addButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         addButton.setProgressColor(Theme.getColor(Theme.key_featuredStickers_buttonProgress));
         addButton.setBackgroundRoundRect(Theme.getColor(Theme.key_featuredStickers_addButton), Theme.getColor(Theme.key_featuredStickers_addButtonPressed));

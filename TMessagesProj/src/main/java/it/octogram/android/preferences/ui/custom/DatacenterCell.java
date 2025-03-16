@@ -60,7 +60,7 @@ public class DatacenterCell extends LinearLayout {
         super(context);
         this.resourcesProvider = resourcesProvider;
         setWillNotDraw(false);
-        setPadding(AndroidUtilities.dp(23), AndroidUtilities.dp(8), AndroidUtilities.dp(23), AndroidUtilities.dp(8));
+        setPadding(dp(23), dp(8), dp(23), dp(8));
         setGravity(Gravity.CENTER_VERTICAL);
 
         int colorText = Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider);
@@ -69,12 +69,12 @@ public class DatacenterCell extends LinearLayout {
         mainCardView = new CardView(context);
         mainCardView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         mainCardView.setCardElevation(0);
-        mainCardView.setRadius(AndroidUtilities.dp(10.0f));
+        mainCardView.setRadius(dp(10.0f));
         mainCardView.setCardBackgroundColor(AndroidUtilities.getTransparentColor(getBackColor(), getBackgroundAlpha()));
 
         LinearLayout ll = new LinearLayout(context);
         ll.setLayoutParams(new CardView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        ll.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10), AndroidUtilities.dp(10));
+        ll.setPadding(dp(10), dp(10), dp(10), dp(10));
 
         dcIconView = new AppCompatImageView(context) {
             @Override
@@ -86,13 +86,13 @@ public class DatacenterCell extends LinearLayout {
                 }
             }
         };
-        LayoutParams layoutParams2 = new LayoutParams(AndroidUtilities.dp(30), AndroidUtilities.dp(30));
+        LayoutParams layoutParams2 = new LayoutParams(dp(30), dp(30));
         dcIconView.setLayoutParams(layoutParams2);
         dcIconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         LinearLayout textLayout = new LinearLayout(context);
         textLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        textLayout.setPadding(AndroidUtilities.dp(16), 0, 0, 0);
+        textLayout.setPadding(dp(16), 0, 0, 0);
         textLayout.setOrientation(LinearLayout.VERTICAL);
         textLayout.setGravity(Gravity.LEFT);
 
@@ -197,7 +197,7 @@ public class DatacenterCell extends LinearLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
-            canvas.drawLine(AndroidUtilities.dp(16), getMeasuredHeight() - 1, getMeasuredWidth() - AndroidUtilities.dp(16), getMeasuredHeight() - 1, Theme.dividerPaint);
+            canvas.drawLine(dp(16), getMeasuredHeight() - 1, getMeasuredWidth() - dp(16), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
     }
 }

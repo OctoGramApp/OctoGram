@@ -8,6 +8,10 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 import android.os.Vibrator;
 import android.text.InputFilter;
@@ -61,24 +65,23 @@ public class CustomActionBarTitleBottomSheet extends BottomSheet {
         textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString(R.string.ActionBarTitleCustom));
-        textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
+        textView.setText(getString(R.string.ActionBarTitleCustom));
+        textView.setPadding(dp(30), 0, dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        String appName = LocaleController.getString(R.string.BuildAppName);
+        String appName = getString(R.string.BuildAppName);
         textView = new TextView(context);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.formatString(R.string.ActionBarTitleCustomDescription, appName));
-        textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
+        textView.setText(formatString(R.string.ActionBarTitleCustomDescription, appName));
+        textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         editText = new EditTextBoldCursor(context);
         editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         editText.setHintTextColor(getThemedColor(Theme.key_windowBackgroundWhiteHintText));
         editText.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setBackgroundDrawable(null);
         editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
         editText.setMaxLines(1);
         editText.setLines(1);
@@ -89,18 +92,18 @@ public class CustomActionBarTitleBottomSheet extends BottomSheet {
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         editText.setHint(appName);
         editText.setCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setCursorSize(AndroidUtilities.dp(20));
+        editText.setCursorSize(dp(20));
         editText.setCursorWidth(1.5f);
         editText.setText(OctoConfig.INSTANCE.actionBarCustomTitle.getValue());
         InputFilter[] inputFilters = new InputFilter[1];
         inputFilters[0] = new CodepointsLengthInputFilter(40) {
             @Override
-            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                if (source != null && source.length() > 0 && TextUtils.indexOf(source, '\n') == source.length() - 1) {
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dStart, int dEnd) {
+                if (source != null && !TextUtils.isEmpty(source) && TextUtils.indexOf(source, '\n') == source.length() - 1) {
                     setCustomTitle(editText.getText().toString().trim());
                     return "";
                 }
-                CharSequence result = super.filter(source, start, end, dest, dstart, dend);
+                CharSequence result = super.filter(source, start, end, dest, dStart, dEnd);
                 if (result != null && source != null && result.length() != source.length()) {
                     Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
                     if (v != null) {
@@ -122,20 +125,20 @@ public class CustomActionBarTitleBottomSheet extends BottomSheet {
         linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 17, 15, 17, 0));
 
         TextView buttonTextView = new TextView(context);
-        buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+        buttonTextView.setPadding(dp(34), 0, dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         buttonTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
-        buttonTextView.setText(LocaleController.getString(R.string.ActionBarTitleCustomSet));
+        buttonTextView.setText(getString(R.string.ActionBarTitleCustomSet));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> setCustomTitle(editText.getText().toString().trim()));
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         textView = new TextView(context);
         textView.setGravity(Gravity.CENTER);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(LocaleController.getString(R.string.UseCustomDeviceNameRenameDefault));
+        textView.setText(getString(R.string.UseCustomDeviceNameRenameDefault));
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setOnClickListener(view -> setCustomTitle(""));
         linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 0));

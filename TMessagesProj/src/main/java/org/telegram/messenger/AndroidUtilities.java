@@ -137,6 +137,7 @@ import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.FontType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.TypeFaceSupportChecker;
 
 import org.telegram.PhoneFormat.PhoneFormat;
@@ -5321,7 +5322,8 @@ public class AndroidUtilities {
         setNavigationBarColor(window, color, animated, null);
     }
 
-    public static void setNavigationBarColor(Window window, int color, boolean animated, IntColorCallback onUpdate) {
+    public static void setNavigationBarColor(Window window, int colors, boolean animated, IntColorCallback onUpdate) {
+        var color = OctoUtils.getNavBarColor();
         if (window == null) {
             return;
         }

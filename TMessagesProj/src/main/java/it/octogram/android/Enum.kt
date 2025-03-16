@@ -13,7 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IntDef
 import androidx.annotation.StringDef
 import androidx.core.graphics.toColorInt
-import org.telegram.messenger.LocaleController
+import org.telegram.messenger.LocaleController.getString
 import org.telegram.messenger.R
 
 enum class EmojiStatus(val value: Int) {
@@ -341,7 +341,10 @@ enum class NewFeaturesBadgeId(val id: String) {
     DRAWER_BADGE("db"),
 
     EXPERIMENTAL_BADGE("eb"),
-    ALTERNATIVE_NAVIGATION_BADGE("anb")
+    ALTERNATIVE_NAVIGATION_BADGE("anb"),
+
+    PRIVACY_BADGE("Pbs"),
+    DC_STATUS_BADGE("dcst")
 }
 
 enum class StickerUi(val value: Int) {
@@ -453,55 +456,6 @@ enum class InterfaceSliderUI(val value: Int) {
     ANDROID(2)
 }
 
-enum class ViewType {
-    ACCOUNT,
-    ADD_EXCEPTION,
-    BLUR_INTENSITY,
-    CAMERA_SELECTOR,
-    CHAT,
-    CHECKBOX,
-    CHECKBOX_CELL,
-    CREATION_TEXT_CELL,
-    DC_STYLE_SELECTOR,
-    DETAILED_SETTINGS,
-    DYNAMIC_BUTTON_SELECTOR,
-    EDIT_TOPIC,
-    EMOJI_PACK_SET_CELL,
-    HEADER,
-    HEADER_NO_SHADOW,
-    HINT_HEADER,
-    IMAGE_HEADER,
-    MANAGE_CHAT,
-    MENU_ITEM,
-    PLACEHOLDER,
-    PROFILE_PREVIEW,
-    RADIO,
-    SETTINGS,
-    SHADOW,
-    SLIDE_CHOOSE,
-    STICKER_HOLDER,
-    STICKER_SIZE,
-    SUGGESTED_OPTIONS,
-    SWITCH,
-    TEXT_CELL,
-    TEXT_CHECK_CELL2,
-    TEXT_HINT,
-    TEXT_HINT_WITH_PADDING,
-    TEXT_RADIO,
-    THEME_SELECTOR,
-    UPDATE,
-    UPDATE_CHECK;
-
-    fun toInt(): Int {
-        return ordinal
-    }
-
-    companion object {
-        fun fromInt(value: Int): ViewType = ViewType.entries[value]
-    }
-
-}
-
 enum class Datacenter(
     val dcId: Int,
     val dcName: String,
@@ -546,7 +500,7 @@ enum class Datacenter(
     ),
     UNKNOWN(
         -1,
-        LocaleController.getString(R.string.NumberUnknown),
+        getString(R.string.NumberUnknown),
         R.drawable.msg_secret_hw,
         Color.TRANSPARENT,
         ""
@@ -580,9 +534,9 @@ enum class WebPages(
 }
 
 enum class WebPagesCategory(val id: Int, var text: String) {
-    WEBSITES(1, LocaleController.getString(R.string.DatacenterStatus_Web)),
-    PLATFORMS(2, LocaleController.getString(R.string.DatacenterStatus_WebPlatforms)),
-    SERVICES(3, LocaleController.getString(R.string.DatacenterStatus_WebServices));
+    WEBSITES(1, getString(R.string.DatacenterStatus_Web)),
+    PLATFORMS(2, getString(R.string.DatacenterStatus_WebPlatforms)),
+    SERVICES(3, getString(R.string.DatacenterStatus_WebServices));
 
     companion object {
         fun getPageInfo(pageId: Int): WebPagesCategory {

@@ -8,12 +8,13 @@
 
 package it.octogram.android.preferences;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 
 import androidx.core.util.Consumer;
 
-import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.StickerImageView;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.StickerUi;
+import it.octogram.android.deeplink.DeepLinkType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.impl.EmptyCellRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
@@ -55,7 +57,7 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
 
     public static class OctoPreferencesBuilder {
         private final String name;
-        private String deepLink = "";
+        private @DeepLinkType String deepLink = null;
         private final List<OctoContextMenuElement> elements = new ArrayList<>();
         private final List<BaseRow> preferences = new ArrayList<>();
 
@@ -63,7 +65,7 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
             this.name = name;
         }
 
-        public OctoPreferencesBuilder deepLink(String deepLink) {
+        public OctoPreferencesBuilder deepLink(@DeepLinkType String deepLink) {
             this.deepLink = deepLink;
             return this;
         }
@@ -81,7 +83,7 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
         }
 
         public OctoPreferencesBuilder category(int title, Consumer<OctoPreferencesBuilder> consumer) {
-            return category(LocaleController.getString(title), consumer);
+            return category(getString(title), consumer);
         }
 
         public OctoPreferencesBuilder category(CharSequence title, ConfigProperty<Boolean> showIfHeader, ConfigProperty<Boolean> showIfShadow, Consumer<OctoPreferencesBuilder> consumer) {
@@ -138,7 +140,7 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
         private RLottieImageView createRLottieImageView(Context context, int packName, boolean autoRepeat) {
             RLottieImageView rlottieImageView = new RLottieImageView(context);
             rlottieImageView.setAutoRepeat(autoRepeat);
-            rlottieImageView.setAnimation(packName, AndroidUtilities.dp(130), AndroidUtilities.dp(130));
+            rlottieImageView.setAnimation(packName, dp(130), dp(130));
             rlottieImageView.playAnimation();
             return rlottieImageView;
         }

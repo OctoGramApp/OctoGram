@@ -191,7 +191,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.octogram.android.preferences.ui.custom.doublebottom.PasscodeController;
 import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 

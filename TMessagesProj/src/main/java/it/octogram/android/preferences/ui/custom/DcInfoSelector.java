@@ -24,7 +24,6 @@ import android.widget.LinearLayout;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AccountInstance;
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.UserConfig;
@@ -139,7 +138,7 @@ public class DcInfoSelector extends FrameLayout {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setGravity(Gravity.CENTER);
-        linearLayout.setPadding(AndroidUtilities.dp(23), 0, AndroidUtilities.dp(23), 0);
+        linearLayout.setPadding(dp(23), 0, dp(23), 0);
         linearLayout.setLayoutParams(LayoutHelper.createLinear(LayoutParams.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         int colorText = Theme.getColor(Theme.key_windowBackgroundWhiteBlackText);

@@ -8,6 +8,8 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
@@ -22,7 +24,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -180,7 +181,7 @@ public class SendMessageOptions extends LinearLayout {
         if (showSchedule) {
             ActionBarMenuSubItem scheduleButton = new ActionBarMenuSubItem(getContext(), true, !showNotify && !showTranslateButton, resourcesProvider);
             scheduleButton.setTextAndIcon(getString(R.string.ScheduleMessage), R.drawable.msg_calendar2);
-            scheduleButton.setMinimumWidth(AndroidUtilities.dp(196));
+            scheduleButton.setMinimumWidth(dp(196));
             scheduleButton.setOnClickListener(v -> {
                 if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
                     sendPopupWindow.dismiss();
@@ -196,7 +197,7 @@ public class SendMessageOptions extends LinearLayout {
         if (showNotify) {
             ActionBarMenuSubItem sendWithoutSoundButton = new ActionBarMenuSubItem(getContext(), !showSchedule, !showTranslateButton, resourcesProvider);
             sendWithoutSoundButton.setTextAndIcon(getString(R.string.SendWithoutSound), R.drawable.input_notify_off);
-            sendWithoutSoundButton.setMinimumWidth(AndroidUtilities.dp(196));
+            sendWithoutSoundButton.setMinimumWidth(dp(196));
             sendWithoutSoundButton.setOnClickListener(v -> {
                 if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
                     sendPopupWindow.dismiss();
@@ -211,8 +212,8 @@ public class SendMessageOptions extends LinearLayout {
             String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
             String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
             ActionBarMenuSubItem sendWithoutSoundButton = new ActionBarMenuSubItem(getContext(), !showSchedule && !showNotify, true, resourcesProvider);
-            sendWithoutSoundButton.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
-            sendWithoutSoundButton.setMinimumWidth(AndroidUtilities.dp(196));
+            sendWithoutSoundButton.setTextAndIcon(formatString(R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
+            sendWithoutSoundButton.setMinimumWidth(dp(196));
             sendWithoutSoundButton.setOnClickListener(v -> executeMessageTranslation(destinationLanguage));
             if (!(fragment instanceof SizeNotifierFrameLayout)) {
                 sendWithoutSoundButton.setOnLongClickListener(v -> {
@@ -225,7 +226,7 @@ public class SendMessageOptions extends LinearLayout {
 
         ActionBarMenuSubItem sendMessage = new ActionBarMenuSubItem(getContext(), !showNotify || !showSchedule, true, resourcesProvider);
         sendMessage.setTextAndIcon(getString(R.string.SendMessage), R.drawable.msg_send);
-        sendMessage.setMinimumWidth(AndroidUtilities.dp(196));
+        sendMessage.setMinimumWidth(dp(196));
         sendMessage.setOnClickListener(v -> {
             if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
                 sendPopupWindow.dismiss();
@@ -407,7 +408,7 @@ public class SendMessageOptions extends LinearLayout {
             @Override
             public void onUnavailableLanguage() {
                 if (finalFactory != null) {
-                    finalFactory.createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)).show();
+                    finalFactory.createSimpleBulletin(R.raw.info, getString(R.string.TranslatorUnsupportedLanguage)).show();
                 }
             }
         });

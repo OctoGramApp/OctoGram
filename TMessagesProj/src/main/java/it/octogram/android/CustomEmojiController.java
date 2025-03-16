@@ -8,6 +8,9 @@
 
 package it.octogram.android;
 
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Intent;
@@ -32,7 +35,6 @@ import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -706,8 +708,8 @@ public class CustomEmojiController {
         }
         EmojiSetBulletinLayout bulletinLayout = new EmojiSetBulletinLayout(
                 fragment.getParentActivity(),
-                LocaleController.getString(R.string.EmojiSetRemoved),
-                LocaleController.formatString(R.string.EmojiSetRemovedInfo, emojiPackBase.getPackName()),
+                getString(R.string.EmojiSetRemoved),
+                formatString(R.string.EmojiSetRemovedInfo, emojiPackBase.getPackName()),
                 emojiPackBase,
                 null
         );

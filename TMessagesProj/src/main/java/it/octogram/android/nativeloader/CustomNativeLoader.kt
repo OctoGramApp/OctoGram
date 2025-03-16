@@ -27,7 +27,7 @@ object CustomNativeLoader {
             nativeLoaded = true
             return true
         } catch (e: Error) {
-            OctoLogging.e(e)
+            OctoLogging.e("CustomNativeLoader", e)
             return false
         }
     }

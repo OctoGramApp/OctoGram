@@ -8,7 +8,7 @@
 
 package it.octogram.android.preferences.rows;
 
-import org.telegram.messenger.LocaleController;
+import static org.telegram.messenger.LocaleController.getString;
 
 import it.octogram.android.ConfigProperty;
 
@@ -28,7 +28,7 @@ public abstract class BaseRowBuilder<T> {
     }
 
     public BaseRowBuilder<T> title(int val) {
-        title = LocaleController.getString(val);
+        title = getString(val);
         return this;
     }
 
@@ -43,7 +43,7 @@ public abstract class BaseRowBuilder<T> {
     }
 
     public BaseRowBuilder<T> description(int val) {
-        description = LocaleController.getString(val);
+        description = getString(val);
         return this;
     }
 

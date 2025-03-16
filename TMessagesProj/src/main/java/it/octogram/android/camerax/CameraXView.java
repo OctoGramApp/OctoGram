@@ -8,6 +8,8 @@
 
 package it.octogram.android.camerax;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -149,7 +151,7 @@ public class CameraXView extends BaseCameraView {
         blurredStubView.setVisibility(View.GONE);
         outerPaint.setColor(0xffffffff);
         outerPaint.setStyle(Paint.Style.STROKE);
-        outerPaint.setStrokeWidth(AndroidUtilities.dp(2));
+        outerPaint.setStrokeWidth(dp(2));
         innerPaint.setColor(0x7fffffff);
         ((DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE)).registerDisplayListener(displayOrientationListener, null);
         worldOrientationListener.enable();
@@ -511,7 +513,7 @@ public class CameraXView extends BaseCameraView {
     protected boolean drawChild(@NonNull Canvas canvas, View child, long drawingTime) {
         boolean result = super.drawChild(canvas, child, drawingTime);
         if (focusProgress != 1.0f || innerAlpha != 0.0f || outerAlpha != 0.0f) {
-            int baseRad = AndroidUtilities.dp(30);
+            int baseRad = dp(30);
             long newTime = System.currentTimeMillis();
             long dt = newTime - lastDrawTime;
             if (dt < 0 || dt > 17) {

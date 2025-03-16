@@ -110,26 +110,29 @@ public final class ShimmerDrawable extends Drawable {
         final float dy;
         final float animatedValue =
                 mValueAnimator != null ? (float) mValueAnimator.getAnimatedValue() : 0f;
-        //noinspection EnhancedSwitchMigration
-        switch (mShimmer.direction) {
-            default:
-            case Shimmer.Direction.LEFT_TO_RIGHT:
+
+        dy = switch (mShimmer.direction) {
+            case Shimmer.Direction.LEFT_TO_RIGHT -> {
                 dx = offset(-translateWidth, translateWidth, animatedValue);
-                dy = 0;
-                break;
-            case Shimmer.Direction.RIGHT_TO_LEFT:
+                yield 0;
+            }
+            case Shimmer.Direction.RIGHT_TO_LEFT -> {
                 dx = offset(translateWidth, -translateWidth, animatedValue);
-                dy = 0f;
-                break;
-            case Shimmer.Direction.TOP_TO_BOTTOM:
+                yield 0f;
+            }
+            case Shimmer.Direction.TOP_TO_BOTTOM -> {
                 dx = 0f;
-                dy = offset(-translateHeight, translateHeight, animatedValue);
-                break;
-            case Shimmer.Direction.BOTTOM_TO_TOP:
+                yield offset(-translateHeight, translateHeight, animatedValue);
+            }
+            case Shimmer.Direction.BOTTOM_TO_TOP -> {
                 dx = 0f;
-                dy = offset(translateHeight, -translateHeight, animatedValue);
-                break;
-        }
+                yield offset(translateHeight, -translateHeight, animatedValue);
+            }
+            default -> {
+                dx = offset(-translateWidth, translateWidth, animatedValue); // Fallback to LEFT_TO_RIGHT
+                yield 0;
+            }
+        };
 
         mShaderMatrix.reset();
         if (mShimmer != null) {
@@ -157,6 +160,14 @@ public final class ShimmerDrawable extends Drawable {
                 : PixelFormat.OPAQUE;
     }
 
+    /**
+     * Linearly interpolates between start and end based on percent.
+     *
+     * @param start   Start value.
+     * @param end     End value.
+     * @param percent Percentage value between 0.0 and 1.0.
+     * @return Interpolated value.
+     */
     private float offset(float start, float end, float percent) {
         return start + (end - start) * percent;
     }
@@ -210,7 +221,6 @@ public final class ShimmerDrawable extends Drawable {
 
         final Shader shader;
         switch (mShimmer.shape) {
-            default:
             case Shimmer.Shape.LINEAR:
                 boolean vertical =
                         mShimmer.direction == Shimmer.Direction.TOP_TO_BOTTOM
@@ -230,6 +240,16 @@ public final class ShimmerDrawable extends Drawable {
                                 mShimmer.colors,
                                 mShimmer.positions,
                                 Shader.TileMode.CLAMP);
+                break;
+            default:
+                boolean defaultVertical =
+                        mShimmer.direction == Shimmer.Direction.TOP_TO_BOTTOM
+                                || mShimmer.direction == Shimmer.Direction.BOTTOM_TO_TOP;
+                int defaultEndX = defaultVertical ? 0 : width;
+                int defaultEndY = defaultVertical ? height : 0;
+                shader =
+                        new LinearGradient(
+                                0, 0, defaultEndX, defaultEndY, mShimmer.colors, mShimmer.positions, Shader.TileMode.CLAMP); // Fallback to LINEAR
                 break;
         }
 

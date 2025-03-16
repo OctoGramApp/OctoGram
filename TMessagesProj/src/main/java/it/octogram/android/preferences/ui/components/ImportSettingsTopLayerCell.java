@@ -8,6 +8,9 @@
 
 package it.octogram.android.preferences.ui.components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.TypedValue;
@@ -16,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.Theme;
@@ -43,15 +45,15 @@ public class ImportSettingsTopLayerCell extends LinearLayout {
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString(R.string.ImportReady));
-        textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
+        textView.setText(getString(R.string.ImportReady));
+        textView.setPadding(dp(30), 0, dp(30), 0);
 
         TextView captionView = new TextView(context);
         captionView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         captionView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         captionView.setGravity(Gravity.CENTER_HORIZONTAL);
-        captionView.setText(LocaleController.getString(isOut ? R.string.ImportReadyDescription : R.string.ImportReadyDescriptionFromExternal));
-        captionView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
+        captionView.setText(getString(isOut ? R.string.ImportReadyDescription : R.string.ImportReadyDescriptionFromExternal));
+        captionView.setPadding(dp(30), dp(10), dp(30), dp(21));
 
         addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER, 0, 16, 0, 16));
         addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));

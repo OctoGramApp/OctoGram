@@ -8,6 +8,8 @@
 
 package it.octogram.android.translator;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Build;
@@ -15,7 +17,6 @@ import android.text.style.URLSpan;
 
 import androidx.annotation.ChecksSdkIntAtLeast;
 
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -102,18 +103,18 @@ public class TranslationsWrapper {
 
     public static void suggestProviderUpdate(Context context, BaseFragment fragment, Runnable providerChanged) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        alertDialogBuilder.setTitle(LocaleController.getString(R.string.Warning));
-        alertDialogBuilder.setMessage(LocaleController.getString(R.string.TranslatorUnsupportedLanguage));
-        alertDialogBuilder.setPositiveButton(LocaleController.getString(R.string.TranslatorUnsupportedLanguageChange), (dialog, which1) -> {
+        alertDialogBuilder.setTitle(getString(R.string.Warning));
+        alertDialogBuilder.setMessage(getString(R.string.TranslatorUnsupportedLanguage));
+        alertDialogBuilder.setPositiveButton(getString(R.string.TranslatorUnsupportedLanguageChange), (dialog, which1) -> {
             dialog.dismiss();
             Dialog selectNewProviderDialog = PopupChoiceDialogUtils.createChoiceDialog(
                     fragment.getParentActivity(),
                     OctoTranslatorUI.getProvidersPopupOptions(),
-                    LocaleController.getString(R.string.TranslatorProvider),
+                    getString(R.string.TranslatorProvider),
                     OctoConfig.INSTANCE.translatorProvider.getValue(),
                     (dialogInterface, sel) -> {
                         OctoConfig.INSTANCE.translatorProvider.updateValue(sel);
-                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_SUCCESS, LocaleController.getString(R.string.TranslatorUnsupportedLanguageChangeDone));
+                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_SUCCESS, getString(R.string.TranslatorUnsupportedLanguageChangeDone));
 
                         if (providerChanged != null) {
                             providerChanged.run();
@@ -124,7 +125,7 @@ public class TranslationsWrapper {
             fragment.setVisibleDialog(selectNewProviderDialog);
             selectNewProviderDialog.show();
         });
-        alertDialogBuilder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+        alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }

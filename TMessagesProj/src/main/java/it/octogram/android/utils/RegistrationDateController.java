@@ -11,6 +11,7 @@ package it.octogram.android.utils;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,93 +28,164 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import it.octogram.android.logs.OctoLogging;
+
 public class RegistrationDateController {
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance();
-    private static final JSONObject REGISTRATION_JSON;
+    private static final String TAG = "RegistrationDateCtrl";
+    private static final DateFormat dateFormat = DateFormat.getDateInstance();
+    private static final JSONObject registrationData;
 
-    private static final String[] IDS;
-    private static final String FILE_NAME = "registration_id.json";
-    private static final Long[] AGES;
+    private static final String[] idKeys;
+    private static final String REGISTRATION_FILE_NAME = "registration_id.json";
+    private static final Long[] sortedIds;
 
-    private static final long MIN_ID;
-    private static final long MAX_ID;
+    private static final long minSortedId;
+    private static final long maxSortedId;
 
     static {
-        try {
-            REGISTRATION_JSON = loadAgesFromJson(ApplicationLoader.applicationContext);
-            Iterator<String> keysIterator = REGISTRATION_JSON.keys();
-            List<String> idList = new ArrayList<>();
-            while (keysIterator.hasNext()) {
-                String key = keysIterator.next();
-                idList.add(key);
-            }
-            IDS = idList.toArray(new String[0]);
+        JSONObject loadedRegistrationData = null;
+        String[] loadedIdKeys = new String[0];
+        Long[] loadedSortedIds = new Long[0];
+        long loadedMinSortedId = 0;
+        long loadedMaxSortedId = 0;
 
-            AGES = new Long[IDS.length];
-            for (int i = 0; i < IDS.length; i++) {
-                AGES[i] = Long.parseLong(IDS[i]);
-            }
+        Context context = ApplicationLoader.applicationContext;
+        if (context == null) {
+            OctoLogging.e(TAG, "Application context is null, RegistrationDateController will not be initialized properly.");
+            registrationData = new JSONObject();
+            idKeys = loadedIdKeys;
+            sortedIds = loadedSortedIds;
+            minSortedId = loadedMinSortedId;
+            maxSortedId = loadedMaxSortedId;
+        } else {
+            try {
+                loadedRegistrationData = loadRegistrationDataFromJson(context);
+                Iterator<String> keysIterator = loadedRegistrationData.keys();
+                List<String> idKeyList = new ArrayList<>();
+                while (keysIterator.hasNext()) {
+                    idKeyList.add(keysIterator.next());
+                }
+                loadedIdKeys = idKeyList.toArray(new String[0]);
 
-            MIN_ID = AGES[0];
-            MAX_ID = AGES[AGES.length - 1];
-        } catch (IOException | JSONException e) {
-            throw new RuntimeException(e);
+                loadedSortedIds = new Long[loadedIdKeys.length];
+                for (int i = 0; i < loadedIdKeys.length; i++) {
+                    loadedSortedIds[i] = Long.parseLong(loadedIdKeys[i]);
+                }
+                Arrays.sort(loadedSortedIds);
+
+                if (loadedSortedIds.length > 0) {
+                    loadedMinSortedId = loadedSortedIds[0];
+                    loadedMaxSortedId = loadedSortedIds[loadedSortedIds.length - 1];
+                } else {
+                    OctoLogging.w(TAG, "No registration IDs found in JSON file.");
+                }
+
+
+            } catch (IOException | JSONException e) {
+                OctoLogging.e(TAG, "Error loading registration data from JSON", e);
+                loadedRegistrationData = new JSONObject();
+                loadedIdKeys = new String[0];
+                loadedSortedIds = new Long[0];
+            } finally {
+                registrationData = loadedRegistrationData != null ? loadedRegistrationData : new JSONObject();
+                idKeys = loadedIdKeys;
+                sortedIds = loadedSortedIds;
+                minSortedId = loadedMinSortedId;
+                maxSortedId = loadedMaxSortedId;
+            }
         }
     }
 
     @NonNull
     public static String getRegistrationDate(long id) {
-        Date dateResult = getRegistration(id);
-        if (dateResult == null) {
+        Date registrationDateResult = getRegistration(id);
+        if (registrationDateResult == null) {
             return "Unknown";
         }
-        return String.format("~ %s", DATE_FORMAT.format(dateResult));
-    }
-
-    private static JSONObject loadAgesFromJson(Context context) throws IOException, JSONException {
-        InputStream inputStream = context.getAssets().open(FILE_NAME);
-        int size = inputStream.available();
-        byte[] buffer = new byte[size];
-        inputStream.read(buffer);
-        inputStream.close();
-        return new JSONObject(new String(buffer, StandardCharsets.UTF_8));
+        return String.format("~ %s", dateFormat.format(registrationDateResult));
     }
 
     @NonNull
-    private static Date getRegistration(long id) {
-        try {
-            if (id < MIN_ID) {
-                return new Date((Long) REGISTRATION_JSON.get(IDS[0]));
-            } else if (id > MAX_ID) {
-                return new Date((Long) REGISTRATION_JSON.get(IDS[IDS.length - 1]));
-            } else {
-                int index = Arrays.binarySearch(AGES, id);
-                if (index >= 0) {
-                    long dateInMillis = (Long) REGISTRATION_JSON.get(IDS[index]);
-                    String formattedDate = DATE_FORMAT.format(new Date(dateInMillis));
-                    Date parseDate = DATE_FORMAT.parse(formattedDate);
-                    if (parseDate == null) {
-                        throw new ParseException("Failed to parse date", 0);
-                    }
-                    return parseDate;
-                } else {
-                    int insertionPoint = -(index + 1);
-                    int lowerId = insertionPoint - 1;
-                    long LOW_AGE = (Long) REGISTRATION_JSON.get(IDS[lowerId]);
-                    long MAX_AGE = (Long) REGISTRATION_JSON.get(IDS[insertionPoint]);
+    private static JSONObject loadRegistrationDataFromJson(Context context) throws IOException, JSONException {
+        try (InputStream inputStream = context.getAssets().open(REGISTRATION_FILE_NAME)) {
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            var ignore = inputStream.read(buffer);
+            return new JSONObject(new String(buffer, StandardCharsets.UTF_8));
+        }
+    }
 
-                    double ID_RATIO = (double) (id - AGES[lowerId]) / (AGES[insertionPoint] - AGES[lowerId]);
-                    long MID_DATE = (long) (ID_RATIO * (MAX_AGE - LOW_AGE) + LOW_AGE);
-                    String formattedDate = DATE_FORMAT.format(new Date(MID_DATE));
-                    Date parsedDate = DATE_FORMAT.parse(formattedDate);
-                    if (parsedDate == null) {
-                        throw new ParseException("Failed to parse date", 0);
+    @Nullable
+    private static Date getRegistration(long id) {
+        if (registrationData == null || idKeys == null || sortedIds == null || sortedIds.length == 0) {
+            return null;
+        }
+
+        try {
+            if (id < minSortedId) {
+                if (idKeys.length > 0 && registrationData.has(idKeys[0])) {
+                    return getDateFromMillis(registrationData.optLong(idKeys[0]));
+                } else {
+                    return null;
+                }
+            } else if (id > maxSortedId) {
+                if (idKeys.length > 0 && registrationData.has(idKeys[idKeys.length - 1])) {
+                    return getDateFromMillis(registrationData.optLong(idKeys[idKeys.length - 1]));
+                } else {
+                    return null;
+                }
+            } else {
+                int searchIndex = Arrays.binarySearch(sortedIds, id);
+                if (searchIndex >= 0) {
+                    if (registrationData.has(idKeys[searchIndex])) {
+                        return getDateFromMillis(registrationData.optLong(idKeys[searchIndex]));
+                    } else {
+                        return null;
                     }
-                    return parsedDate;
+                } else {
+                    int insertionIndex = -(searchIndex + 1);
+                    if (insertionIndex <= 0 || insertionIndex >= sortedIds.length) {
+                        return null;
+                    }
+                    int lowerIndex = insertionIndex - 1;
+
+                    if (!registrationData.has(idKeys[lowerIndex]) || !registrationData.has(idKeys[insertionIndex])) {
+                        return null;
+                    }
+
+                    long lowerDateInMillis = registrationData.optLong(idKeys[lowerIndex]);
+                    long upperDateInMillis = registrationData.optLong(idKeys[insertionIndex]);
+
+                    long lowerSortedId = sortedIds[lowerIndex];
+                    long upperSortedId = sortedIds[insertionIndex];
+
+                    if (upperSortedId - lowerSortedId == 0) {
+                        return getDateFromMillis(lowerDateInMillis);
+                    }
+
+                    double idRatio = (double) (id - lowerSortedId) / (upperSortedId - lowerSortedId);
+                    long interpolatedDateInMillis = (long) (idRatio * (upperDateInMillis - lowerDateInMillis) + lowerDateInMillis);
+                    return getDateFromMillis(interpolatedDateInMillis);
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            OctoLogging.e(TAG, "Error getting registration date for id: " + id, e);
+            return null;
+        }
+    }
+
+    @Nullable
+    private static Date getDateFromMillis(long milliseconds) {
+        if (milliseconds <= 0) {
+            return null;
+        }
+        Date date = new Date(milliseconds);
+        String formattedDate = dateFormat.format(date);
+        try {
+            return dateFormat.parse(formattedDate);
+        } catch (ParseException e) {
+            OctoLogging.e(TAG, "Error parsing formatted date: " + formattedDate, e);
+            return date;
         }
     }
 }

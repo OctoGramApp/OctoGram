@@ -9,6 +9,8 @@
 package it.octogram.android.preferences.ui.custom;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.app.Activity;
 import android.content.Context;
@@ -152,7 +154,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             TextView textView = new TextView(context);
             textView.setGravity(Gravity.CENTER);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            textView.setText(LocaleController.getString(R.string.ImportReadyOpenFile));
+            textView.setText(getString(R.string.ImportReadyOpenFile));
             textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
             textView.setOnClickListener(view -> {
                 dismiss();
@@ -250,8 +252,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private void executeFileImport() {
         if (dataToImport.isEmpty()) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
-            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
+            alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportFailedZeroTitle));
+            alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportFailedZeroCaption));
             alertDialogBuilder.setPositiveButton("OK", null);
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
@@ -274,8 +276,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         if (changedOptions > 0) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-            alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportDonePopup));
-            alertDialogBuilder.setMessage(LocaleController.formatString(R.string.ImportReadyImportDone, changedOptions));
+            alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportDonePopup));
+            alertDialogBuilder.setMessage(formatString(R.string.ImportReadyImportDone, changedOptions));
             alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.setCanceledOnTouchOutside(false);
@@ -288,7 +290,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
     @Override
     protected CharSequence getTitle() {
-        return LocaleController.getString(R.string.ImportReady);
+        return getString(R.string.ImportReady);
     }
 
     @Override
@@ -303,21 +305,13 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private void handleOnClickPosition(View view, Item item, float x) {
         if (!hasAuthorizedBiometric && secureContexts.contains(item.itemRelationId)) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-            alertDialogBuilder.setTitle(LocaleController.getString(R.string.Warning));
-            alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportSecureContext));
-            alertDialogBuilder.setPositiveButton(LocaleController.getString(R.string.Proceed), (dialog, which) -> FingerprintUtils.checkFingerprint(getContext(), FingerprintUtils.IMPORT_SETTINGS, true, new FingerprintUtils.FingerprintResult() {
-                @Override
-                public void onSuccess() {
-                    hasAuthorizedBiometric = true;
-                    handleOnClickPosition(view, item, x);
-                }
-
-                @Override
-                public void onFailed() {
-
-                }
+            alertDialogBuilder.setTitle(getString(R.string.Warning));
+            alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportSecureContext));
+            alertDialogBuilder.setPositiveButton(getString(R.string.Proceed), (dialog, which) -> FingerprintUtils.checkFingerprint(getContext(), FingerprintUtils.FingerprintAction.IMPORT_SETTINGS, true, () -> {
+                hasAuthorizedBiometric = true;
+                handleOnClickPosition(view, item, x);
             }));
-            alertDialogBuilder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+            alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
             return;
@@ -426,7 +420,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         if (externalKeysUnavailableInScan > 0) {
-            items.add(Item.asInfo(LocaleController.formatString(R.string.ImportReadyOtherOptions, externalKeysUnavailableInScan)));
+            items.add(Item.asInfo(formatString(R.string.ImportReadyOtherOptions, externalKeysUnavailableInScan)));
         }
 
         adapter.setItems(oldItems, items);
@@ -823,7 +817,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
             if (LocaleController.isRTL) {
                 rtlTextView = new TextView(context);
-                rtlTextView.setText(LocaleController.getString(R.string.ImportReadyImport));
+                rtlTextView.setText(getString(R.string.ImportReadyImport));
                 rtlTextView.setGravity(Gravity.CENTER);
                 rtlTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
                 rtlTextView.setTypeface(AndroidUtilities.bold());
@@ -835,7 +829,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             textView.setAnimationProperties(.25f, 0, 300, CubicBezierInterpolator.EASE_OUT_QUINT);
             textView.setCallback(button);
             textView.setTextSize(dp(14));
-            textView.setText(LocaleController.getString(R.string.ImportReadyImport));
+            textView.setText(getString(R.string.ImportReadyImport));
             textView.setGravity(Gravity.RIGHT);
             textView.setTypeface(AndroidUtilities.bold());
             textView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
@@ -870,8 +864,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         public void setSize(boolean allSelected, long size, long total) {
             textView.setText((
                     allSelected ?
-                            LocaleController.getString(R.string.ImportReadyImport) :
-                            LocaleController.getString(R.string.ImportReadyImportSelected)
+                            getString(R.string.ImportReadyImport) :
+                            getString(R.string.ImportReadyImportSelected)
             ));
             valueTextView.setText(size <= 0 || allSelected ? "" : (size + "/" + total));
             setDisabled(size <= 0);

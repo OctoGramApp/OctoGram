@@ -8,9 +8,10 @@
 
 package it.octogram.android.drawer;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
 import java.util.ArrayList;
@@ -419,7 +420,7 @@ public class MenuOrderController {
 
         public EditableMenuItem(String menu_id, int menu_text, boolean menu_default, boolean is_premium) {
             id = menu_id;
-            text = LocaleController.getString(menu_text);
+            text = getString(menu_text);
             isDefault = menu_default;
             isPremium = is_premium;
         }

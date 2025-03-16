@@ -80,6 +80,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
+import it.octogram.android.CameraPreview;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.JpegImageUtils;
@@ -91,7 +92,7 @@ public class CameraXController {
     private final CameraLifecycle lifecycle;
     private final MeteringPointFactory meteringPointFactory;
     private final Preview.SurfaceProvider surfaceProvider;
-    public float oldZoomSelection = 0F; // TODO: fix for UW Lens
+    public float oldZoomSelection = OctoConfig.INSTANCE.cameraPreview.getValue() != CameraPreview.BOTTOM_BAR ? 0F : 5F;
     private boolean isFrontface;
     private boolean isInitiated = false;
     private ProcessCameraProvider provider;
@@ -146,12 +147,6 @@ public class CameraXController {
     public void setTorchEnabled(boolean b) {
         if (camera != null) {
             camera.getCameraControl().enableTorch(b);
-        }
-    }
-
-    public void setLowLightBoostEnabled(boolean b) {
-        if (camera != null) {
-            camera.getCameraControl().enableLowLightBoostAsync(b);
         }
     }
 
@@ -351,11 +346,6 @@ public class CameraXController {
         if (camera != null) {
             camera.getCameraControl().setLinearZoom(oldZoomSelection);
         }
-    }
-
-    public boolean isLowLightBoostSupported() {
-        if (camera == null) return false;
-        return camera.getCameraInfo().isLowLightBoostSupported();
     }
 
     public float getMaxZoom() {

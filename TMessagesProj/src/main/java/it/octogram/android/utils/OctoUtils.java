@@ -451,5 +451,13 @@ public class OctoUtils {
         }
         return spoiledName.toString();
     }
+
+    public static int getNavBarColor(Theme.ResourcesProvider resourcesProvider) {
+        return Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider);
+    }
+
+    public static int getNavBarColor() {
+        return Theme.getColor(Theme.key_windowBackgroundWhite);
+    }
 }
 

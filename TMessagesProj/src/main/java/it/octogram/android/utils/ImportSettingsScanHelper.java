@@ -8,8 +8,9 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -134,6 +135,9 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.verifyLinkTip.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.shownHiddenChatsHint.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.hiddenChats.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.hiddenAccounts.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.hideHiddenAccounts.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.advancedBiometricUnlock.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {
@@ -241,8 +245,8 @@ public class ImportSettingsScanHelper {
         category.isSecureContext = true;
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenArchive.getKey(), R.string.BiometricSettingsOpenArchive));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenCallsLog.getKey(), R.string.BiometricSettingsOpenCallsLog));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenSavedMessages.getKey(), R.string.BiometricSettingsOpenSavedMessages));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenSecretChats.getKey(), R.string.BiometricSettingsOpenSecretChats));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricOpenSettings.getKey(), R.string.BiometricSettingsOpenSettings));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.allowUsingDevicePIN.getKey(), composeName(R.string.BiometricSettings, R.string.BiometricSettingsAllowDevicePIN)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.allowUsingFaceUnlock.getKey(), composeName(R.string.BiometricSettings, R.string.BiometricSettingsAllowFaceUnlock)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.biometricAskEvery.getKey(), composeName(R.string.BiometricSettings, R.string.BiometricAskEvery)));
@@ -273,6 +277,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost.getKey(), R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost.getKey(), R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue.getKey(), R.string.DownloadBoostType));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.enableQuickShare.getKey(), R.string.QuickShareEnabled));
     }
 
     private void fillUpdatesOptions(SettingsScanCategory category) {
@@ -339,7 +344,7 @@ public class ImportSettingsScanHelper {
     }
 
     private String composeName(int string1, int string2, boolean isCategory) {
-        return String.format("%s%s%s", LocaleController.getString(string1), isCategory ? " — " : ": ", LocaleController.getString(string2).toLowerCase());
+        return String.format("%s%s%s", getString(string1), isCategory ? " — " : ": ", getString(string2).toLowerCase());
     }
 
     private String composeName(int string1, int string2) {
@@ -375,7 +380,7 @@ public class ImportSettingsScanHelper {
                 return categoryName;
             }
 
-            return LocaleController.getString(categoryResourceName);
+            return getString(categoryResourceName);
         }
 
         public void setCanShow(Utilities.CallbackVoidReturn<Boolean> callback) {
@@ -418,7 +423,7 @@ public class ImportSettingsScanHelper {
                 return optionName;
             }
 
-            return LocaleController.getString(optionResourceName);
+            return getString(optionResourceName);
         }
     }
 }

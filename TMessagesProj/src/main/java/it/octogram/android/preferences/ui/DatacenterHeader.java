@@ -40,7 +40,6 @@ import it.octogram.android.utils.OctoUtils;
 @SuppressLint("ViewConstructor")
 public class DatacenterHeader extends LinearLayout {
     private final ButtonWithCounterView buttonWithCounterView;
-    private boolean firstTime = true;
     private boolean _isWaiting = false;
     private final int pageType;
     private final ColoredImageSpan startMonitorSpan;
@@ -50,9 +49,7 @@ public class DatacenterHeader extends LinearLayout {
         super(context);
 
         startMonitorSpan = new ColoredImageSpan(R.drawable.media_photo_flash_on2);
-        //startMonitorSpan.setOverrideColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         stopMonitorSpan = new ColoredImageSpan(R.drawable.msg_pollstop);
-        //stopMonitorSpan.setOverrideColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
 
         this.pageType = pageType;
 
@@ -121,7 +118,6 @@ public class DatacenterHeader extends LinearLayout {
         spannableStringBuilder.setSpan((isWaiting || pageType != DcStatusActivity.PAGE_NETWORK) ? startMonitorSpan : stopMonitorSpan, 0, 1, 0);
         buttonWithCounterView.setText(spannableStringBuilder, pageType == DcStatusActivity.PAGE_NETWORK);
 
-        firstTime = false;
     }
 
     private int getText(boolean isWaiting) {

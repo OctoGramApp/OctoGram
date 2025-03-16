@@ -72,6 +72,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeColors;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.TextColorThemeCell;
+import org.telegram.ui.Components.Paint.ColorPickerBottomSheet;
 import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
@@ -972,7 +973,78 @@ public class ThemeEditorView {
             }
         }
 
+        private final boolean USE_CUSTOM_SHEET = true;
+        private ColorPickerBottomSheet customBottomSheet;
         private void setColorPickerVisible(boolean visible) {
+            if (USE_CUSTOM_SHEET) {
+                if (visible) {
+                    if (customBottomSheet == null) {
+                        customBottomSheet = new ColorPickerBottomSheet(getContext(), this.resourcesProvider) {
+                            @Override
+                            public void onSetColor(int color, int from) {
+                                super.onSetColor(color, from);
+                                for (int a = 0; a < currentThemeDesription.size(); a++) {
+                                    currentThemeDesription.get(a).setColor(color, false);
+                                }
+                            }
+                        };
+                    }
+                    customBottomSheet.setColor(colorPicker.getColor());
+                    customBottomSheet.setColorListener((color) -> {
+                        if (parentActivity != null) {
+                            ((LaunchActivity) parentActivity).rebuildAllFragments(false);
+                        }
+                        Theme.saveCurrentTheme(themeInfo, false, false, false);
+                    });
+                    customBottomSheet.setPipetteDelegate(new ColorPickerBottomSheet.PipetteDelegate() {
+
+                        @Override
+                        public void onStartColorPipette() {
+
+                        }
+
+                        @Override
+                        public void onStopColorPipette() {
+
+                        }
+
+                        @Override
+                        public ViewGroup getContainerView() {
+                            return null;
+                        }
+
+                        @Override
+                        public View getSnapshotDrawingView() {
+                            return null;
+                        }
+
+                        @Override
+                        public void onDrawImageOverCanvas(Bitmap bitmap, Canvas canvas) {
+
+                        }
+
+                        @Override
+                        public boolean isPipetteVisible() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isPipetteAvailable() {
+                            return false;
+                        }
+
+                        @Override
+                        public void onColorSelected(int color) {
+
+                        }
+                    });
+                    customBottomSheet.show();
+                } else if (customBottomSheet != null) {
+                    customBottomSheet.dismiss();
+                }
+                return;
+            }
+
             if (visible) {
                 animationInProgress = true;
                 colorPicker.setVisibility(View.VISIBLE);

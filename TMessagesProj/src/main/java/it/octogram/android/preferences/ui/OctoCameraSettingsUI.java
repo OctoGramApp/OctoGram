@@ -14,6 +14,8 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.util.Size;
 
+import androidx.annotation.NonNull;
+
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 
@@ -30,6 +32,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.camerax.CameraXController;
 import it.octogram.android.camerax.CameraXUtils;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -76,11 +79,12 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
         return MessageStringHelper.getUrlNoUnderlineText(htmlParsed);
     }
 
+    @NonNull
     @Override
-    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
+    public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         updateConfigs();
         return OctoPreferences.builder(getString(R.string.OctoCameraSettings))
-                .deepLink("tg://camera")
+                .deepLink(DeepLinkDef.CAMERA)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.CAMERA, true, getString(R.string.OctoCameraSettingsHeader))
                 .category(R.string.CameraType, category -> category.row(new CustomCellRow.CustomCellRowBuilder()
                         .propertySelectionTag("cameraType")

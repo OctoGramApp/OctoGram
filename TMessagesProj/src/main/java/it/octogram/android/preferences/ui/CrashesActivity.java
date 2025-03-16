@@ -8,6 +8,7 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
@@ -68,6 +69,7 @@ import it.octogram.android.crashlytics.CrashOption;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.CrashLogCell;
+import it.octogram.android.utils.OctoUtils;
 
 @SuppressWarnings("rawtypes")
 public class CrashesActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
@@ -93,20 +95,33 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
     private String sharingFullLocation;
     private String sharingFileName;
+    private CharSequence sharingFileLastModified;
     private LongSparseArray<TLRPC.Dialog> sharingDialogs;
+    private final File[] archivedCrashFile = Crashlytics.getArchivedCrashFiles();
+    private List<File> sortedArchivedCrashFiles;
 
     private final int MENU_DELETE = 1;
     private final int MENU_DELETE_ALL = 2;
 
     @Override
     public boolean onFragmentCreate() {
+        OctoLogging.d(TAG, "onFragmentCreate");
         super.onFragmentCreate();
+        if (archivedCrashFile != null && archivedCrashFile.length > 0) {
+            sortedArchivedCrashFiles = Arrays.stream(archivedCrashFile)
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                    .collect(Collectors.toList());
+        } else {
+            sortedArchivedCrashFiles = new ArrayList<>();
+        }
         updateRowsId();
         return true;
     }
 
     @Override
     public View createView(Context context) {
+        OctoLogging.d(TAG, "createView");
         this.context = context;
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setTitle(getString(R.string.CrashHistory));
@@ -140,7 +155,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
         });
         actionBar.setBackButtonDrawable(new BackDrawable(false));
 
-        if (Crashlytics.getArchivedCrashFiles().length > 0) {
+        if (archivedCrashFile != null && archivedCrashFile.length > 0) {
             var actionNoSelectMenu = actionBar.createMenu();
             actionNoSelectMenu.addItem(MENU_DELETE_ALL, R.drawable.msg_delete);
         }
@@ -151,10 +166,11 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
         selectedCountTextView.setTypeface(AndroidUtilities.bold());
         selectedCountTextView.setTextColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon));
         actionMode.addView(selectedCountTextView, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1.0f, 72, 0, 0, 0));
-        actionMode.addItemWithWidth(MENU_DELETE, R.drawable.msg_delete, AndroidUtilities.dp(54));
+        actionMode.addItemWithWidth(MENU_DELETE, R.drawable.msg_delete, dp(54));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
+                OctoLogging.d(TAG, "ActionBar item clicked: " + id);
                 if (id == -1) {
                     if (onBackPressed()) {
                         finishFragment();
@@ -169,28 +185,39 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
         return fragmentView;
     }
 
+
     private void showWarningDialog(String text) {
+        if (getContext() == null) {
+            OctoLogging.w(TAG, "Context is null, cannot show warning dialog");
+            return;
+        }
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(getContext());
         warningBuilder.setTitle(getString(R.string.Warning));
         warningBuilder.setPositiveButton(getString(R.string.OK), (dialog1, which1) -> dialog1.dismiss());
         warningBuilder.setMessage(text);
         showDialog(warningBuilder.create());
+        OctoLogging.d(TAG, "Warning dialog shown: " + text);
 
     }
 
-    private void copyShowBulletin (CharSequence text) {
+    private void copyShowBulletin(CharSequence text) {
         if (AndroidUtilities.addToClipboard(text)) {
             BulletinFactory.of(CrashesActivity.this).createCopyBulletin(getString(R.string.CrashLogCopied)).show();
+            OctoLogging.d(TAG, "Crash log copied to clipboard and bulletin shown");
+        } else {
+            OctoLogging.w(TAG, "Failed to copy text to clipboard");
         }
     }
 
 
     private void onItemClick(View view, int position, float x, float y) {
+        OctoLogging.d(TAG, "onItemClick at position: " + position);
         if (position == copyInfoRow) {
             try {
-                String configuration = Crashlytics.getSystemInfo();
+                var configuration = Crashlytics.getSystemInfo();
                 copyShowBulletin(configuration);
             } catch (IllegalAccessException e) {
+                OctoLogging.e(TAG, "Error getting system info", e);
                 throw new RuntimeException(e);
             }
         } else if (position == copyLatestCrashRow) {
@@ -199,11 +226,16 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 copyCrashLine(file);
             } else {
                 BulletinFactory.of(CrashesActivity.this).createErrorBulletin(getString(R.string.NoCrashLogFound)).show();
+                OctoLogging.w(TAG, "No crash log file found for 'Copy Latest Crash Log'");
             }
         } else if (position >= crashesStartRow && position < crashesEndRow) {
             if (listAdapter.hasSelected()) {
                 listAdapter.toggleSelected(position);
             } else {
+                if (getParentActivity() == null) {
+                    OctoLogging.w(TAG, "Parent activity is null, cannot show crash settings dialog");
+                    return;
+                }
                 AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), getResourceProvider());
                 builder.setTitle("Crash settings");
                 var items = new CharSequence[]{
@@ -219,38 +251,51 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                         R.drawable.msg_report,
                 };
                 builder.setItems(items, icons, (dialog, which) -> {
-                    var file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
+                    if (sortedArchivedCrashFiles == null) {
+                        OctoLogging.w(TAG, "sortedArchivedCrashFiles is null, cannot process crash option");
+                        return;
+                    }
+                    var file = sortedArchivedCrashFiles.get(position - crashesStartRow);
                     switch (CrashOption.Companion.fromValue(which)) {
                         case CrashOption.OPEN_LOG -> {
-                            if (!openLog(file)) {
+                            if (file != null && !openLog(file)) {
                                 showWarningDialog(getString(R.string.ErrorSendingCrashContent));
                             }
                         }
                         case CrashOption.SEND_LOG -> {
-                            if (!sendLog(file)) {
+                            if (file != null && !sendLog(file)) {
                                 showWarningDialog(getString(R.string.ErrorSendingCrashContent));
                             }
                         }
-                        case CrashOption.COPY_CRASH_LINE ->
-                                copyCrashLine(position);
+                        case CrashOption.COPY_CRASH_LINE -> copyCrashLine(position);
                         case CrashOption.OPEN_REPORT_URL -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Utilities.uriParseSafe(REPORT_URL));
-                            context.startActivity(browserIntent);
+                            if (context != null)
+                                context.startActivity(browserIntent);
                         }
                     }
                 });
                 builder.setNegativeButton(getString(R.string.Cancel), null);
                 showDialog(builder.create());
+                OctoLogging.d(TAG, "Crash settings dialog shown for position: " + position);
             }
         }
     }
 
     private void copyCrashLine(int position) {
-        File file = Crashlytics.getArchivedCrashFiles()[crashesEndRow - position - 1];
+        if (sortedArchivedCrashFiles == null || position < crashesStartRow || position >= crashesEndRow) {
+            OctoLogging.w(TAG, "Invalid position or sortedArchivedCrashFiles is null for copyCrashLine: " + position);
+            return;
+        }
+        File file = sortedArchivedCrashFiles.get(position - crashesStartRow);
         copyCrashLine(file);
     }
 
     private void copyCrashLine(File file) {
+        if (file == null) {
+            OctoLogging.w(TAG, "File is null, cannot copy crash line");
+            return;
+        }
         List<String> lines = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -259,7 +304,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 lines.add(line);
             }
         } catch (IOException e) {
-            OctoLogging.e(e);
+            OctoLogging.e(TAG, "IO error reading crash file for copy", e);
             BulletinFactory.of(CrashesActivity.this).createErrorBulletin(getString(R.string.CouldNotCopyFile)).show();
         }
 
@@ -267,32 +312,33 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
     }
 
     protected void updateRowsId() {
+        OctoLogging.d(TAG, "updateRowsId");
         rowCount = 0;
         crashesHeaderRow = -1;
         crashesEndRow = -1;
-        crashesInfoRow = -1;
 
         settingsHeaderRow = rowCount++;
         copyInfoRow = rowCount++;
         copyLatestCrashRow = rowCount++;
         settingsShadowRow = rowCount++;
 
-        if (Crashlytics.getArchivedCrashFiles().length > 0) {
+        if (sortedArchivedCrashFiles != null && !sortedArchivedCrashFiles.isEmpty()) { // Check sorted list
             crashesHeaderRow = rowCount++;
             crashesStartRow = rowCount;
 
-            File[] archivedCrashFiles = Crashlytics.getArchivedCrashFiles();
-            for (int i = 0; i < archivedCrashFiles.length; i++) {
+            for (int i = 0; i < sortedArchivedCrashFiles.size(); i++) {
                 rowCount++;
                 crashesEndRow = rowCount;
             }
         }
 
         crashesInfoRow = rowCount++;
+        OctoLogging.d(TAG, "Rows IDs updated. Row count: " + rowCount + ", Crashes end row: " + crashesEndRow);
     }
 
     @Override
     public boolean onBackPressed() {
+        OctoLogging.d(TAG, "onBackPressed");
         if (listAdapter.hasSelected()) {
             listAdapter.clearSelected();
             return false;
@@ -301,39 +347,54 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
     }
 
     private boolean openLog(File file) {
+        if (file == null) {
+            OctoLogging.w(TAG, "File is null, cannot open log");
+            return false;
+        }
         try {
             File cacheFile = Crashlytics.shareLog(file.getAbsoluteFile());
-            AndroidUtilities.openForView(cacheFile, cacheFile.getName(), OctoConfig.CRASH_MIME_TYPE, getParentActivity(), getResourceProvider(), false);
+            if (getParentActivity() != null)
+                AndroidUtilities.openForView(cacheFile, cacheFile.getName(), OctoConfig.CRASH_MIME_TYPE, getParentActivity(), getResourceProvider(), false);
+            OctoLogging.d(TAG, "Crash log opened for viewing: " + file.getName());
             return true;
         } catch (IOException e) {
-            OctoLogging.e(TAG, "Error opening crash content", e);
+            OctoLogging.e(TAG, "IO error opening crash log", e);
             return false;
         }
     }
 
     private boolean sendLog(File file) {
+        if (file == null || getParentActivity() == null) {
+            OctoLogging.w(TAG, "File or Parent activity is null, cannot send log");
+            return false;
+        }
         try {
             File cacheFile = Crashlytics.shareLog(file);
 
-            ShareAlert shAlert = new ShareAlert(getParentActivity(), null, null, false, null, false) {
+            ShareAlert shAlert = new ShareAlert(getParentActivity(), null, null, false, null, false, true) {
 
                 @Override
-                protected void onSend(LongSparseArray<TLRPC.Dialog> didS, int count, TLRPC.TL_forumTopic topic) {
+                protected void onSend(LongSparseArray<TLRPC.Dialog> didS, int count, TLRPC.TL_forumTopic topic, boolean showToast) {
                     sharingFileName = cacheFile.getName();
                     sharingFullLocation = cacheFile.getAbsolutePath();
+                    sharingFileLastModified = cacheFile.getName().replace("_", " ").replace(".log", "").trim();
                     sharingDialogs = didS;
+                    if (!showToast) return;
+                    super.onSend(sharingDialogs, count, topic, showToast);
 
                     var instance = FileLoader.getInstance(getCurrentAccount());
 
                     initUpdateReceiver();
                     instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
+                    OctoLogging.d(TAG, "File upload initiated for sharing crash log: " + sharingFileName);
                 }
             };
             shAlert.show();
+            OctoLogging.d(TAG, "Share alert shown for sending crash log");
 
             return true;
         } catch (IOException e) {
-            OctoLogging.e(TAG, "Error sending crash content", e);
+            OctoLogging.e(TAG, "IO error preparing crash log for sending", e);
             return false;
         }
     }
@@ -350,6 +411,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
         public ListAdapter(Context context) {
             mContext = context;
+            OctoLogging.d(TAG, "ListAdapter created");
         }
 
         @Override
@@ -382,13 +444,17 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                     view = new TextInfoPrivacyCell(context);
                     break;
             }
-            if (view == null) throw new IllegalArgumentException("Invalid viewType " + viewType);
+            if (view == null) {
+                OctoLogging.e(TAG, "onCreateViewHolder: Invalid viewType " + viewType);
+                throw new IllegalArgumentException("Invalid viewType " + viewType);
+            }
             view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
             return new RecyclerListView.Holder(view);
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, @NonNull List payloads) {
+            //noinspection SequencedCollectionMethodCanBeUsed
             Object payload = payloads.isEmpty() ? null : payloads.get(0);
             boolean partial = PARTIAL.equals(payload);
 
@@ -419,18 +485,11 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                     if (position >= crashesStartRow && position < crashesEndRow) {
                         CrashLogCell crashLogCell = (CrashLogCell) holder.itemView;
 
-                        var sorted = Arrays.stream(Crashlytics.getArchivedCrashFiles())
-                                .sorted(Comparator.comparingLong(File::lastModified))
-                                .collect(Collectors.toList());
-                        for (int i = 0; i < sorted.size(); i++) {
-                            var file = sorted.get(i);
-                            if (crashesEndRow - position - 1 == i) {
-                                crashLogCell.setData(file, true);
-                                crashLogCell.setSelected(selectedItems.get(position, false), partial);
-                                break;
-                            }
+                        if (sortedArchivedCrashFiles != null) {
+                            File file = sortedArchivedCrashFiles.get(position - crashesStartRow);
+                            crashLogCell.setData(file, true);
+                            crashLogCell.setSelected(selectedItems.get(position, false), partial);
                         }
-
                     }
                     break;
             }
@@ -438,7 +497,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
 
         @Override
         public void onBindViewHolder(@NonNull @NotNull RecyclerView.ViewHolder holder, int position) {
-
+            OctoLogging.d(TAG, "onBindViewHolder at position: " + position);
         }
 
         @Override
@@ -454,6 +513,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             } else if (position == crashesInfoRow) {
                 return TEXT_HINT_WITH_PADDING;
             }
+            OctoLogging.e(TAG, "getItemViewType: Invalid position " + position);
             throw new IllegalArgumentException("Invalid position " + position);
         }
 
@@ -466,6 +526,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             selectedItems.put(position, !selectedItems.get(position, false));
             notifyItemRangeChanged(crashesStartRow, crashesEndRow - crashesStartRow, PARTIAL);
             checkActionMode();
+            OctoLogging.d(TAG, "Item at position " + position + " selection toggled. Selected: " + selectedItems.get(position, false));
         }
 
         public boolean hasSelected() {
@@ -476,6 +537,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             selectedItems.clear();
             notifyItemRangeChanged(crashesStartRow, crashesEndRow - crashesStartRow, PARTIAL);
             checkActionMode();
+            OctoLogging.d(TAG, "Selection cleared");
         }
 
         private void checkActionMode() {
@@ -485,33 +547,44 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 selectedCountTextView.setNumber(selectedCount, actionModeShowed);
                 if (!actionModeShowed) {
                     actionBar.showActionMode();
+                    OctoLogging.d(TAG, "Action mode shown with selected count: " + selectedCount);
                 }
             } else if (actionModeShowed) {
                 actionBar.hideActionMode();
+                OctoLogging.d(TAG, "Action mode hidden");
             }
         }
 
         @SuppressLint("NotifyDataSetChanged")
         private void processSelectionMenu(int id) {
+            OctoLogging.d(TAG, "processSelectionMenu with id: " + id);
             switch (id) {
                 case MENU_DELETE:
                     List<File> toDelete = new ArrayList<>();
                     for (int i = 0; i < selectedItems.size(); i++) {
                         if (selectedItems.valueAt(i)) {
                             RecyclerView.ViewHolder viewHolder = listView.findViewHolderForAdapterPosition(selectedItems.keyAt(i));
-                            if (viewHolder == null) continue;
+                            if (viewHolder == null) {
+                                OctoLogging.w(TAG, "ViewHolder is null for position: " + selectedItems.keyAt(i));
+                                continue;
+                            }
                             CrashLogCell crashLogCell = (CrashLogCell) viewHolder.itemView;
                             File file = crashLogCell.getCrashLog();
-                            toDelete.add(file);
+                            if (file != null)
+                                toDelete.add(file);
                         }
                     }
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    if (getContext() == null) {
+                        OctoLogging.w(TAG, "Context is null, cannot show delete confirmation dialog");
+                        return;
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle(getString(R.string.BuildAppName));
                     builder.setPositiveButton(getString(R.string.OK), (dialog, which) -> {
                         int unableToDeleteCount = 0;
                         for (File file : toDelete) {
-                            if (!file.delete()) {
-                                OctoLogging.e("Could not delete file " + file);
+                            if (file != null && !file.delete()) {
+                                OctoLogging.e(TAG, "Could not delete file " + file);
                                 unableToDeleteCount++;
                             }
                         }
@@ -528,12 +601,13 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                         }
                         if (unableToDeleteCount > 0) {
                             message = formatString(R.string.CrashesUnableToDelete, unableToDeleteCount);
-                            AlertDialog.Builder unableToDeleteBuilder = new AlertDialog.Builder(context);
+                            AlertDialog.Builder unableToDeleteBuilder = new AlertDialog.Builder(getContext());
                             unableToDeleteBuilder.setTitle(getString(R.string.BuildAppName));
                             unableToDeleteBuilder.setMessage(message);
                             unableToDeleteBuilder.setPositiveButton(getString(R.string.OK), (dialog1, which1) -> dialog1.dismiss());
                         }
                         BulletinFactory.of(CrashesActivity.this).createErrorBulletin(message).show();
+                        OctoLogging.w(TAG, "Crash logs deleted. Message: " + message);
                     });
                     builder.setNegativeButton(getString(R.string.Cancel), (dialog, which) -> dialog.dismiss());
 
@@ -545,35 +619,42 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                     }
                     builder.setMessage(message);
                     showDialog(builder.create());
+                    OctoLogging.d(TAG, "Delete confirmation dialog shown for selected crashes");
                     break;
                 case MENU_DELETE_ALL:
-                    AlertDialog.Builder allBuilder = new AlertDialog.Builder(context);
+                    if (getContext() == null) {
+                        OctoLogging.w(TAG, "Context is null, cannot show delete all confirmation dialog");
+                        return;
+                    }
+                    AlertDialog.Builder allBuilder = new AlertDialog.Builder(getContext());
                     allBuilder.setTitle(getString(R.string.BuildAppName));
                     allBuilder.setPositiveButton(getString(R.string.OK), (dialog, which) -> {
                         Crashlytics.deleteCrashLogs();
                         updateRowsId();
                         notifyDataSetChanged();
 
-                        var filesToDelete = Crashlytics.getArchivedCrashFiles();
+                        File[] filesToDelete = archivedCrashFile;
                         String message1;
-                        if (filesToDelete.length > 1) {
+                        if (filesToDelete != null && filesToDelete.length > 1) {
                             message1 = formatString(R.string.CrashesDeleted, filesToDelete.length);
                         } else {
                             message1 = getString(R.string.CrashDeleted);
                         }
                         BulletinFactory.of(CrashesActivity.this).createErrorBulletin(message1).show();
+                        OctoLogging.w(TAG, "All crash logs deleted. Message: " + message1);
                     });
                     allBuilder.setNegativeButton(getString(R.string.Cancel), (dialog, which) -> dialog.dismiss());
 
-                    File[] filesToDelete = Crashlytics.getArchivedCrashFiles();
+                    File[] filesToDeleteAll = archivedCrashFile;
                     String allMessage;
-                    if (filesToDelete.length > 1) {
-                        allMessage = formatString(R.string.CrashesDeleteConfirmation, filesToDelete.length);
+                    if (filesToDeleteAll != null && filesToDeleteAll.length > 1) {
+                        allMessage = formatString(R.string.CrashesDeleteConfirmation, filesToDeleteAll.length);
                     } else {
                         allMessage = getString(R.string.CrashDeleteConfirmation);
                     }
                     allBuilder.setMessage(allMessage);
                     showDialog(allBuilder.create());
+                    OctoLogging.d(TAG, "Delete all confirmation dialog shown");
                     break;
             }
         }
@@ -596,6 +677,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyDataSetChanged();
+            OctoLogging.d(TAG, "notifyDataSetChanged");
         }
 
         @Override
@@ -605,6 +687,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemChanged(position);
+            OctoLogging.d(TAG, "notifyItemChanged at position: " + position);
         }
 
         @Override
@@ -614,6 +697,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemChanged(position, payload);
+            OctoLogging.d(TAG, "notifyItemChanged at position: " + position + " with payload: " + payload);
         }
 
         @Override
@@ -623,6 +707,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemRangeChanged(positionStart, itemCount);
+            OctoLogging.d(TAG, "notifyItemRangeChanged from: " + positionStart + ", count: " + itemCount);
         }
 
         @Override
@@ -632,6 +717,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemRangeChanged(positionStart, itemCount, payload);
+            OctoLogging.d(TAG, "notifyItemRangeChanged from: " + positionStart + ", count: " + itemCount + " with payload: " + payload);
         }
 
         @Override
@@ -641,6 +727,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemInserted(position);
+            OctoLogging.d(TAG, "notifyItemInserted at position: " + position);
         }
 
         @Override
@@ -650,6 +737,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemMoved(fromPosition, toPosition);
+            OctoLogging.d(TAG, "notifyItemMoved from: " + fromPosition + " to: " + toPosition);
         }
 
         @Override
@@ -659,6 +747,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemRangeInserted(positionStart, itemCount);
+            OctoLogging.d(TAG, "notifyItemRangeInserted from: " + positionStart + ", count: " + itemCount);
         }
 
         @Override
@@ -668,6 +757,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemRangeRemoved(positionStart, itemCount);
+            OctoLogging.d(TAG, "notifyItemRangeRemoved from: " + positionStart + ", count: " + itemCount);
         }
 
         @Override
@@ -677,37 +767,44 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 return;
             }
             super.notifyItemRemoved(position);
+            OctoLogging.d(TAG, "notifyItemRemoved at position: " + position);
         }
     }
 
 
     private void initUpdateReceiver() {
-        NotificationCenter.getInstance(getCurrentAccount()).addObserver(this, NotificationCenter.fileUploaded);
-        NotificationCenter.getInstance(getCurrentAccount()).addObserver(this, NotificationCenter.fileUploadFailed);
+        getNotificationCenter().addObserver(this, NotificationCenter.fileUploaded);
+        getNotificationCenter().addObserver(this, NotificationCenter.fileUploadFailed);
+        OctoLogging.d(TAG, "Update receiver initialized");
     }
 
     private void stopUpdateReceiver() {
-        NotificationCenter.getInstance(getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploaded);
-        NotificationCenter.getInstance(getCurrentAccount()).removeObserver(this, NotificationCenter.fileUploadFailed);
+        getNotificationCenter().removeObserver(this, NotificationCenter.fileUploaded);
+        getNotificationCenter().removeObserver(this, NotificationCenter.fileUploadFailed);
+        OctoLogging.d(TAG, "Update receiver stopped");
     }
 
     @Override
     public void didReceivedNotification(int id, int account, Object... args) {
+        OctoLogging.d(TAG, "didReceivedNotification with id: " + id + ", account: " + account);
         if (id == NotificationCenter.fileUploaded) {
             String location = (String) args[0];
             TLRPC.InputFile inputFile = (TLRPC.InputFile) args[1];
 
             if (inputFile == null) {
+                OctoLogging.w(TAG, "inputFile is null in fileUploaded notification");
                 return;
             }
 
             if (!Objects.equals(location, sharingFullLocation)) {
+                OctoLogging.w(TAG, "Uploaded file location does not match sharing location");
                 return;
             }
 
             stopUpdateReceiver();
 
             AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(CrashesActivity.this).createSimpleBulletin(R.raw.forward, getString(R.string.SendCrashLogDone)).show());
+            OctoLogging.d(TAG, "Crash log sent successfully bulletin shown");
 
             TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
             attr.file_name = sharingFileName;
@@ -722,9 +819,10 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                 req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDialogs.keyAt(i));
                 req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
                 try {
-                    req.message = Crashlytics.getSystemInfo(false);
-                } catch (IllegalAccessException ignore) {
+                    req.message = OctoUtils.safeToString(Crashlytics.getSystemInfo(false, sharingFileLastModified));
+                } catch (IllegalAccessException e) {
                     req.message = "";
+                    OctoLogging.w(TAG, "IllegalAccessException getting system info for message", e);
                 }
                 req.silent = true;
                 req.media = inputMediaDocument;
@@ -734,10 +832,12 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
             String location = (String) args[0];
 
             if (!Objects.equals(location, sharingFullLocation)) {
+                OctoLogging.w(TAG, "Failed upload file location does not match sharing location");
                 return;
             }
 
             stopUpdateReceiver();
+            OctoLogging.w(TAG, "File upload failed for sharing crash log");
         }
     }
 }

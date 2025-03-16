@@ -5,17 +5,23 @@ import android.util.Log;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.DispatchQueue;
+import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.time.FastDateFormat;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Locale;
 
 import it.octogram.android.utils.OctoUtils;
 
 /**
- *  @noinspection CallToPrintStackTrace, ResultOfMethodCallIgnored, SizeReplaceableByIsEmpty
+ * @noinspection CallToPrintStackTrace, ResultOfMethodCallIgnored, SizeReplaceableByIsEmpty
  */
 public class OctoLogging {
 
@@ -47,9 +53,11 @@ public class OctoLogging {
     public static void w(String message) {
         log(Log.WARN, TAG, message, null);
     }
+
     public static void w(String tag, String message) {
         log(Log.WARN, tag, message, null);
     }
+
     public static void d(String message) {
         log(Log.DEBUG, TAG, message, null);
     }
@@ -61,12 +69,19 @@ public class OctoLogging {
     public static void d(String tag, String message, Exception throwable) {
         log(Log.DEBUG, tag, message, throwable);
     }
+
+    public static void d(String tag, String message, Throwable throwable) {
+        log(Log.DEBUG, tag, message, throwable);
+    }
+
     public static void e(String message) {
         log(Log.ERROR, TAG, message, null);
     }
+
     public static void e(Throwable throwable) {
         log(Log.ERROR, TAG, null, throwable);
     }
+
     public static void e(String message, Throwable throwable) {
         log(Log.ERROR, TAG, message, throwable);
     }
@@ -86,9 +101,9 @@ public class OctoLogging {
      * if file logging is enabled. The message is formatted with a timestamp and
      * log level. If a throwable is provided, its stack trace is also logged.
      *
-     * @param level The priority/severity of the log message (e.g., Log.DEBUG, Log.ERROR).
-     * @param tag The tag to associate with the log message.
-     * @param message The log message to be recorded.
+     * @param level     The priority/severity of the log message (e.g., Log.DEBUG, Log.ERROR).
+     * @param tag       The tag to associate with the log message.
+     * @param message   The log message to be recorded.
      * @param throwable An optional throwable associated with the log message. May be null.
      */
     private static void log(int level, String tag, String message, Throwable throwable) {
@@ -169,8 +184,7 @@ public class OctoLogging {
         if (isInitialized) return;
 
         dateFormat = FastDateFormat.getInstance("dd_MM_yyyy_HH_mm_ss.SSS", Locale.US);
-        String logFileName = FastDateFormat.getInstance("dd_MM_yyyy_HH_mm_ss", Locale.US)
-                .format(System.currentTimeMillis()) + FILE_EXTENSION;
+        String logFileName = FastDateFormat.getInstance("dd_MM_yyyy", Locale.US).format(System.currentTimeMillis()) + FILE_EXTENSION;
 
         try {
             File logFile = new File(filesDir, logFileName);
@@ -189,30 +203,40 @@ public class OctoLogging {
     }
 
     public static File[] getLogFiles() {
-                return filesDir.listFiles((dir, name) -> name.endsWith(FILE_EXTENSION));
+        return filesDir.listFiles((dir, name) -> name.endsWith(FILE_EXTENSION));
     }
 
     public static void deleteLogs() {
         File[] logFiles = getLogFiles();
         if (logFiles.length == 0) {
-            d("No crash logs to delete.");
+            d(TAG, "No crash logs to delete.");
             return;
         }
 
         for (File file : logFiles) {
             if (file.delete()) {
-                d("Deleted log file: " + file.getAbsolutePath());
+                d(TAG, "Deleted log file: " + file.getAbsolutePath());
             } else {
-                e("Failed to delete file: " + file.getAbsolutePath());
+                e(TAG, "Failed to delete file: " + file.getAbsolutePath());
             }
         }
     }
 
-    public static File shareLogFile(File logFile) {
-        if (logFile.exists() && logFile.isFile()) {
-            return logFile;
+    public static File shareLogFile(File logFile) throws IOException {
+        d(TAG, "shareLog: Sharing log file: " + logFile.getAbsolutePath());
+        File sharedLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), logFile.getName());
+        try (BufferedReader logFileReader = new BufferedReader(new FileReader(logFile));
+             BufferedWriter sharedLogFileWriter = new BufferedWriter(new FileWriter(sharedLogFile))) {
+
+            StringBuilder logContent = new StringBuilder();
+            String logLine;
+            while ((logLine = logFileReader.readLine()) != null) {
+                logContent.append(logLine).append("\n");
+            }
+            sharedLogFileWriter.write(logContent.toString());
+
         }
-        e("Log file does not exist or is invalid.");
-        return null;
+        d(TAG, "shareLog: Log file shared to: " + sharedLogFile.getAbsolutePath());
+        return sharedLogFile;
     }
 }

@@ -8,6 +8,9 @@
 
 package it.octogram.android.preferences.ui.custom;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -62,8 +65,8 @@ import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.ImportSettingsScanHelper;
 
 public class ExportDoneReadyBottomSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
+    private static final String TAG = "ExportDoneReadyBottomSheet";
     public static final int CREATE_FILE_REQ = 300;
-
     private final Activity originalActivity;
     private final BaseFragment baseFragment;
     private final EditTextBoldCursor editText;
@@ -71,7 +74,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
 
     private String sharingFullLocation;
     private String sharingFileName;
-    private LongSparseArray<TLRPC.Dialog> sharingDids = new LongSparseArray<>();
+    private LongSparseArray<TLRPC.Dialog> sharingDid = new LongSparseArray<>();
 
     private Runnable onCompletedRunnable;
     private Runnable onFailedRunnable;
@@ -98,23 +101,22 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString(R.string.ExportDataReady));
-        textView.setPadding(AndroidUtilities.dp(30), 0, AndroidUtilities.dp(30), 0);
+        textView.setText(getString(R.string.ExportDataReady));
+        textView.setPadding(dp(30), 0, dp(30), 0);
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         textView = new TextView(context);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(LocaleController.getString(R.string.ExportDataDescription));
-        textView.setPadding(AndroidUtilities.dp(30), AndroidUtilities.dp(10), AndroidUtilities.dp(30), AndroidUtilities.dp(21));
+        textView.setText(getString(R.string.ExportDataDescription));
+        textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         editText = new EditTextBoldCursor(context);
         editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         editText.setHintTextColor(getThemedColor(Theme.key_windowBackgroundWhiteHintText));
         editText.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setBackgroundDrawable(null);
         editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
         editText.setMaxLines(1);
         editText.setLines(1);
@@ -123,19 +125,19 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         editText.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        editText.setHint(LocaleController.getString(R.string.ExportDataFilename));
+        editText.setHint(getString(R.string.ExportDataFilename));
         editText.setCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setCursorSize(AndroidUtilities.dp(20));
+        editText.setCursorSize(dp(20));
         editText.setCursorWidth(1.5f);
         InputFilter[] inputFilters = new InputFilter[1];
         inputFilters[0] = new CodepointsLengthInputFilter(40) {
             @Override
-            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                if (source != null && source.length() > 0 && TextUtils.indexOf(source, '\n') == source.length() - 1) {
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dStart, int dEnd) {
+                if (source != null && !TextUtils.isEmpty(source) && TextUtils.indexOf(source, '\n') == source.length() - 1) {
                     shareExport(editText.getText().toString().trim());
                     return "";
                 }
-                CharSequence result = super.filter(source, start, end, dest, dstart, dend);
+                CharSequence result = super.filter(source, start, end, dest, dStart, dEnd);
                 if (result != null && source != null && result.length() != source.length()) {
                     Vibrator v = (Vibrator) originalActivity.getSystemService(Context.VIBRATOR_SERVICE);
                     if (v != null) {
@@ -157,20 +159,20 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 17, 15, 17, 0));
 
         TextView buttonTextView = new TextView(context);
-        buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
+        buttonTextView.setPadding(dp(34), 0, dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         buttonTextView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(LocaleController.getString(R.string.ExportDataShare));
+        buttonTextView.setText(getString(R.string.ExportDataShare));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> shareExport(editText.getText().toString().trim()));
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         TextView saveTextView = new TextView(context);
         saveTextView.setGravity(Gravity.CENTER);
         saveTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        saveTextView.setText(LocaleController.getString(R.string.ExportDataSave));
+        saveTextView.setText(getString(R.string.ExportDataSave));
         saveTextView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         saveTextView.setOnClickListener(view -> {
             dismiss();
@@ -208,7 +210,9 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
 
             File cacheFile = new File(cacheDir.getPath(), fileNameText + ".octoexport");
             if (cacheFile.exists()) {
-                cacheFile.delete();
+                if(cacheFile.delete()) {
+                    OctoLogging.d(TAG, "Deleted existing file");
+                }
             }
 
             FileOutputStream fos = new FileOutputStream(cacheFile);
@@ -226,15 +230,17 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             if (baseFragment == null) {
                 long userID = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
                 TLRPC.Dialog dialog = MessagesController.getInstance(UserConfig.selectedAccount).getDialog(userID);
-                sharingDids.append(userID, dialog);
+                sharingDid.append(userID, dialog);
                 initUpdateReceiver();
                 instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
             } else {
-                ShareAlert shAlert = new ShareAlert(baseFragment.getParentActivity(), null, null, false, null, false) {
+                ShareAlert shAlert = new ShareAlert(baseFragment.getParentActivity(), null, null, false, null, false, true) {
 
                     @Override
-                    protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
-                        sharingDids = dids;
+                    protected void onSend(LongSparseArray<TLRPC.Dialog> did, int count, TLRPC.TL_forumTopic topic, boolean showToast) {
+                        sharingDid = did;
+                        if (!showToast) return;
+                        super.onSend(sharingDid, count, topic, showToast);
 
                         initUpdateReceiver();
                         instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
@@ -269,8 +275,8 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         if (fileNameText.contains("/") || fileNameText.length() > 40) {
             if (baseFragment != null) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-                alertDialogBuilder.setTitle(LocaleController.getString(R.string.ImportReadyImportFailedZeroTitle));
-                alertDialogBuilder.setMessage(LocaleController.getString(R.string.ImportReadyImportFailedZeroCaption));
+                alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportFailedZeroTitle));
+                alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportFailedZeroCaption));
                 alertDialogBuilder.setPositiveButton("OK", null);
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
@@ -296,9 +302,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
 
                         mainObject.put(configProperty.getKey(), configProperty.getValue());
                     }
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalAccessException e) {
+                } catch (JSONException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -334,7 +338,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             stopUpdateReceiver();
 
             if (baseFragment != null) {
-                AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, LocaleController.getString(R.string.ExportDataShareDone)).show());
+                AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, getString(R.string.ExportDataShareDone)).show());
             }
 
             TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
@@ -348,11 +352,11 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
             StringBuilder baseInfo = new StringBuilder();
             baseInfo.append(LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()));
             baseInfo.append("\n");
-            baseInfo.append(LocaleController.getString(R.string.ExportDataShareFileComment));
+            baseInfo.append(getString(R.string.ExportDataShareFileComment));
 
-            for (int i = 0; i < sharingDids.size(); i++) {
+            for (int i = 0; i < sharingDid.size(); i++) {
                 TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
-                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDids.keyAt(i));
+                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDid.keyAt(i));
                 req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
                 req.message = baseInfo.toString();
                 req.silent = false;

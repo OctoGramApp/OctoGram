@@ -9,6 +9,7 @@
 package it.octogram.android.preferences.ui.custom;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,7 +19,6 @@ import android.widget.FrameLayout;
 
 import androidx.core.graphics.ColorUtils;
 
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -171,7 +171,7 @@ public class FolderTypeSelector extends FrameLayout {
                 if (filters.get(a).isDefault()) {
                     if (!OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getValue()) {
                         addedTab++;
-                        filterTabsView.addTab(a, 0, LocaleController.getString(R.string.FilterAllChats), filters.get(a).emoticon, null, false, true, filters.get(a).locked);
+                        filterTabsView.addTab(a, 0, getString(R.string.FilterAllChats), filters.get(a).emoticon, null, false, true, filters.get(a).locked);
                     }
                 } else {
                     if (hiddenFolders.contains(filters.get(a).id)) {

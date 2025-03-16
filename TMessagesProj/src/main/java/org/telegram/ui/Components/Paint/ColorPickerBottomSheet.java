@@ -189,7 +189,7 @@ public class ColorPickerBottomSheet extends BottomSheet {
         return this;
     }
 
-    private void onSetColor(int color, int from) {
+    public void onSetColor(int color, int from) {
         if (!initialized) {
             if (from != FROM_INIT) {
                 return;

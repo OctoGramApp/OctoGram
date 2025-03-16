@@ -201,6 +201,7 @@ import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PromptBeforeSendMedia;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
+import it.octogram.android.utils.DragAndDropImageHandler;
 import it.octogram.android.utils.PopupPromptUtils;
 import it.octogram.android.translator.SingleTranslationManager;
 import it.octogram.android.translator.TranslationsWrapper;
@@ -381,7 +382,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     private final static int POPUP_CONTENT_BOT_KEYBOARD = 1;
 
     private int currentAccount = UserConfig.selectedAccount;
-    private AccountInstance accountInstance = AccountInstance.getInstance(UserConfig.selectedAccount);
+    public AccountInstance accountInstance = AccountInstance.getInstance(UserConfig.selectedAccount);
 
     private SeekBarWaveform seekBarWaveform;
     private boolean isInitLineCount;
@@ -735,12 +736,12 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
     private Activity parentActivity;
     private ChatActivity parentFragment;
-    private long dialog_id;
+    public long dialog_id;
     private boolean ignoreTextChange;
     private int innerTextChange;
     private MessageObject replyingMessageObject;
     private MessageObject replyingTopMessage;
-    private ChatActivity.ReplyQuote replyingQuote;
+    public ChatActivity.ReplyQuote replyingQuote;
     private MessageObject botMessageObject;
     private TLRPC.WebPage messageWebPage;
     private boolean messageWebPageSearch = true;
@@ -4322,13 +4323,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         };
     };
 
-    private final Runnable dismissSendPreviewWithoutSend = () -> {
-        if (messageSendPreview != null) {
-            messageSendPreview.dismiss(false);
-            messageSendPreview = null;
-        };
-    };
-
     @Override
     public boolean hasOverlappingRendering() {
         return false;
@@ -4906,12 +4900,14 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     private ArrayList<TextWatcher> messageEditTextWatchers;
     private boolean messageEditTextEnabled = true;
 
-    private class ChatActivityEditTextCaption extends EditTextCaption {
+    public class ChatActivityEditTextCaption extends EditTextCaption {
         public ChatActivityEditTextCaption(Context context, Theme.ResourcesProvider resourcesProvider) {
             super(context, resourcesProvider);
+            dragAndDropHandler = new DragAndDropImageHandler(ChatActivityEnterView.this, this, parentFragment, resourcesProvider, context, delegate, getStarsPrice());
         }
 
         CanvasButton canvasButton;
+        private DragAndDropImageHandler dragAndDropHandler;
 
         @Override
         protected void onScrollChanged(int horiz, int vert, int oldHoriz, int oldVert) {
@@ -5078,21 +5074,11 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
         @Override
         public boolean onDragEvent(DragEvent event) {
-            if (event.getAction() == DragEvent.ACTION_DROP && !isEditingBusinessLink() && !isEditingCaption() && !isEditingMessage()) {
-                ClipData d = event.getClipData();
-                if (d != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    LaunchActivity.instance.requestDragAndDropPermissions(event);
-                    if (d.getItemCount() == 1 && (d.getDescription().hasMimeType("image/*") || d.getDescription().hasMimeType("video/mp4"))) {
-                        editPhoto(d.getItemAt(0).getUri(), d.getDescription().getMimeType(0), d.getDescription().hasMimeType("video/mp4"));
-                        return true;
-                    }
-                }
+            if (dragAndDropHandler.handleDragEvent(event)) {
+                return true;
             }
-
             return super.onDragEvent(event);
         }
-
-        private final int MAX_DRAG_AND_DROP_FILE_COUNT = 1;
 
         @Override
         public boolean onTextContextMenuItem(int id) {
@@ -5106,7 +5092,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                         editPhoto(clipData.getItemAt(0).getUri(), clipData.getDescription().getMimeType(0));
                     }
                 }
-                BulletinFactory.of(parentFragment).createSimpleBulletin(R.raw.error, "Failed to access the clipboard.");
             }
             return super.onTextContextMenuItem(id);
         }
@@ -5228,6 +5213,10 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             if (sizeNotifierLayout.getForeground() != null) {
                 sizeNotifierLayout.invalidateDrawable(sizeNotifierLayout.getForeground());
             }
+        }
+
+        public String getQuickReplyShortcut() {
+            return parentFragment.quickReplyShortcut;
         }
     }
 
@@ -10997,7 +10986,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         return parentFragment != null && parentFragment.isInScheduleMode();
     }
 
-    private boolean isEditingBusinessLink() {
+    public boolean isEditingBusinessLink() {
         return editingBusinessLink != null;
     }
 
@@ -11637,7 +11626,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         return emojiViewVisible ? emojiPadding : 0;
     }
 
-    private MessageObject getThreadMessage() {
+    public MessageObject getThreadMessage() {
         return parentFragment != null ? parentFragment.getThreadMessage() : null;
     }
 

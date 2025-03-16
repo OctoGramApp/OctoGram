@@ -4,12 +4,7 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.verify.domain.DomainVerificationManager;
-import android.content.pm.verify.domain.DomainVerificationUserState;
 import android.os.Build;
-import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.FrameLayout;
@@ -22,22 +17,20 @@ import androidx.annotation.RequiresApi;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.OneUIUtilities;
 import org.telegram.messenger.R;
-import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.StickerImageView;
 
-import java.util.Map;
-
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
 import it.octogram.android.preferences.ui.components.CustomBottomSheet;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
-public class AppLinkVerifyBottomSheet extends CustomBottomSheet {
+public class DoubleBottomMigrationBottomSheet extends CustomBottomSheet {
 
     @Override
     protected boolean canDismissWithSwipe() {
@@ -49,41 +42,7 @@ public class AppLinkVerifyBottomSheet extends CustomBottomSheet {
         return false;
     }
 
-    public static void checkBottomSheet(BaseFragment fragment) {
-        if (OctoConfig.INSTANCE.verifyLinkTip.getValue()) {
-            return;
-        }
-        Context context = fragment.getParentActivity();
-        DomainVerificationManager manager = context.getSystemService(DomainVerificationManager.class);
-        DomainVerificationUserState userState = null;
-        try {
-            userState = manager.getDomainVerificationUserState(context.getPackageName());
-        } catch (PackageManager.NameNotFoundException ignored) {
-        }
-
-        if (userState == null) {
-            return;
-        }
-
-        boolean hasUnverified = false;
-        Map<String, Integer> hostToStateMap = userState.getHostToStateMap();
-        for (String key : hostToStateMap.keySet()) {
-            Integer stateValue = hostToStateMap.get(key);
-            if (stateValue == null || stateValue == DomainVerificationUserState.DOMAIN_STATE_VERIFIED || stateValue == DomainVerificationUserState.DOMAIN_STATE_SELECTED) {
-                continue;
-            }
-            hasUnverified = true;
-            break;
-        }
-        if (hasUnverified) {
-            try {
-                new AppLinkVerifyBottomSheet(fragment).show();
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
-    public AppLinkVerifyBottomSheet(BaseFragment fragment) {
+    public DoubleBottomMigrationBottomSheet(BaseFragment fragment) {
         super(fragment.getParentActivity(), false);
         setCanceledOnTouchOutside(false);
         Context context = fragment.getParentActivity();
@@ -105,7 +64,7 @@ public class AppLinkVerifyBottomSheet extends CustomBottomSheet {
 
         StickerImageView imageView = new StickerImageView(context, currentAccount);
         imageView.setStickerPackName(OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME);
-        imageView.setStickerNum(StickerUi.LINK_VERIFY.getValue());
+        imageView.setStickerNum(StickerUi.PRIVACY.getValue());
         imageView.getImageReceiver().setAutoRepeat(1);
         linearLayout.addView(imageView, LayoutHelper.createLinear(144, 144, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 0));
 
@@ -114,14 +73,14 @@ public class AppLinkVerifyBottomSheet extends CustomBottomSheet {
         title.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
         title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         title.setTypeface(AndroidUtilities.bold());
-        title.setText(getString(R.string.AppLinkNotVerifiedTitle));
+        title.setText(getString(R.string.LockedAccounts_Migration_Title));
         linearLayout.addView(title, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 21, 30, 21, 0));
 
         TextView description = new TextView(context);
         description.setGravity(Gravity.CENTER);
         description.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         description.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
-        description.setText(AndroidUtilities.replaceTags(getString(R.string.AppLinkNotVerifiedMessage)));
+        description.setText(AndroidUtilities.replaceTags(getString(R.string.LockedAccounts_Migration_Desc)));
         linearLayout.addView(description, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 21, 15, 21, 16));
 
         TextView buttonTextView = new TextView(context);
@@ -137,26 +96,8 @@ public class AppLinkVerifyBottomSheet extends CustomBottomSheet {
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         buttonTextView.setOnClickListener(view -> {
-            Intent intent;
-            if (OneUIUtilities.isOneUI()) {
-                intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Utilities.uriParseSafe("package:" + context.getPackageName()));
-            } else {
-                intent = new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, Utilities.uriParseSafe("package:" + context.getPackageName()));
-            }
-            context.startActivity(intent);
-        });
-
-        TextView textView = new TextView(context);
-        textView.setGravity(Gravity.CENTER);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        textView.setText(getString(R.string.DontAskAgain));
-        textView.setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
-
-        linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 0));
-
-        textView.setOnClickListener(view -> {
+            fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), "lockedAccounts"));
             dismiss();
-            OctoConfig.INSTANCE.verifyLinkTip.updateValue(true);
         });
 
         ScrollView scrollView = new ScrollView(context);

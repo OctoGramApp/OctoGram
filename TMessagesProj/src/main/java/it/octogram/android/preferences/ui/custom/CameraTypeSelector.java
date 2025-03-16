@@ -10,6 +10,7 @@ package it.octogram.android.preferences.ui.custom;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.getTransparentColor;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -27,7 +28,6 @@ import android.widget.LinearLayout;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
 
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -40,10 +40,10 @@ public abstract class CameraTypeSelector extends LinearLayout {
     private final NumberPicker picker1;
     Paint pickerDividersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     String[] strings = new String[]{
-            LocaleController.getString(R.string.CameraTypeDefault),
-            LocaleController.getString(R.string.CameraTypeX),
-            LocaleController.getString(R.string.CameraType2),
-            LocaleController.getString(R.string.CameraTypeSystem),
+            getString(R.string.CameraTypeDefault),
+            getString(R.string.CameraTypeX),
+            getString(R.string.CameraType2),
+            getString(R.string.CameraTypeSystem),
     };
 
     public CameraTypeSelector(Context context) {

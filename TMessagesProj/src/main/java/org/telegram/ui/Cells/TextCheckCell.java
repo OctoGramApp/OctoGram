@@ -229,7 +229,7 @@ public class TextCheckCell extends FrameLayout {
         textView.setText(text);
         valueTextView.setText(value);
         checkBox.setVisibility(View.VISIBLE);
-        checkBox.setChecked(checked, false);
+        checkBox.setChecked(checked, attached);
         needDivider = divider;
         valueTextView.setVisibility(VISIBLE);
         isMultiline = multiline;

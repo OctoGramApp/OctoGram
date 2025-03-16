@@ -8,11 +8,15 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONException;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -49,14 +53,15 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> canUseDarken = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectDarkLevel = new ConfigProperty<>(null, false);
 
+    @NonNull
     @Override
-    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
+    public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         updateItemsVisibility();
 
-        return OctoPreferences.builder(LocaleController.formatString(R.string.DrawerTitle))
+        return OctoPreferences.builder(getString(R.string.DrawerTitle))
                 .deepLink("tg://appearance/drawer")
-                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_openin, LocaleController.getString(R.string.Drawer_Test), () -> LaunchActivity.instance.drawerLayoutContainer.openDrawer(true)))
-                .category(LocaleController.formatString(R.string.DrawerTitle), category -> {
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_openin, getString(R.string.Drawer_Test), () -> LaunchActivity.instance.drawerLayoutContainer.openDrawer(true)))
+                .category(getString(R.string.DrawerTitle), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(drawerPreviewCell = new DrawerPreviewCell(context))
                             .build());
@@ -66,32 +71,32 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerBackgroundState.TRANSPARENT.getValue())
                                             .setItemIcon(R.drawable.msg_cancel)
-                                            .setItemTitle(LocaleController.getString(R.string.DrawerBackgroundTransparent)),
+                                            .setItemTitle(getString(R.string.DrawerBackgroundTransparent)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerBackgroundState.WALLPAPER.getValue())
                                             .setItemIcon(R.drawable.msg_background)
-                                            .setItemTitle(LocaleController.getString(R.string.DrawerBackgroundWallpaper)),
+                                            .setItemTitle(getString(R.string.DrawerBackgroundWallpaper)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerBackgroundState.PROFILE_PIC.getValue())
                                             .setItemIcon(R.drawable.msg_view_file)
-                                            .setItemTitle(LocaleController.getString(R.string.DrawerBackgroundProfilePhoto)),
+                                            .setItemTitle(getString(R.string.DrawerBackgroundProfilePhoto)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerBackgroundState.COLOR.getValue())
                                             .setItemIcon(R.drawable.msg_colors)
-                                            .setItemTitle(LocaleController.getString(R.string.DrawerBackgroundColor))
+                                            .setItemTitle(getString(R.string.DrawerBackgroundColor))
                             ))
                             .onSelected(this::reloadDrawerPreviewInstance)
-                            .title(LocaleController.getString(R.string.DrawerBackground))
+                            .title(getString(R.string.DrawerBackground))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(this::reloadDrawerPreviewInstance)
                             .preferenceValue(OctoConfig.INSTANCE.drawerShowProfilePic)
-                            .title(LocaleController.getString(R.string.DrawerShowProfilePic))
+                            .title(getString(R.string.DrawerShowProfilePic))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(this::reloadDrawerPreviewInstance)
                             .preferenceValue(OctoConfig.INSTANCE.drawerGradientBackground)
-                            .title(LocaleController.getString(R.string.DrawerGradientBackground))
+                            .title(getString(R.string.DrawerGradientBackground))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.drawerFavoriteOption)
@@ -105,57 +110,57 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.NONE.getValue())
                                             .setItemIcon(R.drawable.msg_cancel)
-                                            .setItemTitle(LocaleController.getString(R.string.DrawerFavoriteOptionNone)),
+                                            .setItemTitle(getString(R.string.DrawerFavoriteOptionNone)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.DEFAULT.getValue())
                                             .setItemIcon(R.drawable.msg_forward_replace)
-                                            .setItemTitle(LocaleController.getString(R.string.DrawerFavoriteOptionDefault)),
+                                            .setItemTitle(getString(R.string.DrawerFavoriteOptionDefault)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.SAVED_MESSAGES.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.SAVED_MESSAGES.getValue()))
-                                            .setItemTitle(LocaleController.getString(R.string.SavedMessages)),
+                                            .setItemTitle(getString(R.string.SavedMessages)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.SETTINGS.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.SETTINGS.getValue()))
-                                            .setItemTitle(LocaleController.getString(R.string.Settings)),
+                                            .setItemTitle(getString(R.string.Settings)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.CONTACTS.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.CONTACTS.getValue()))
-                                            .setItemTitle(LocaleController.getString(R.string.Contacts)),
+                                            .setItemTitle(getString(R.string.Contacts)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.CALLS.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.CALLS.getValue()))
-                                            .setItemTitle(LocaleController.getString(R.string.Calls)),
+                                            .setItemTitle(getString(R.string.Calls)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.DOWNLOADS.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.DOWNLOADS.getValue()))
-                                            .setItemTitle(LocaleController.getString(R.string.DownloadsTabs)),
+                                            .setItemTitle(getString(R.string.DownloadsTabs)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.ARCHIVED_CHATS.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.ARCHIVED_CHATS.getValue()))
-                                            .setItemTitle(LocaleController.getString(R.string.ArchivedChats)),
+                                            .setItemTitle(getString(R.string.ArchivedChats)),
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerFavoriteOption.TELEGRAM_BROWSER.getValue())
                                             .setItemIcon(IconsUtils.getIconWithEventType(DrawerFavoriteOption.TELEGRAM_BROWSER.getValue()))
                                             .setItemTitle("Telegram Browser")
                             ))
-                            .title(LocaleController.getString(R.string.DrawerFavoriteOption))
+                            .title(getString(R.string.DrawerFavoriteOption))
                             .build());
                     category.row(new TextDetailRow.TextDetailRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DrawerOrderSettings()))
                             .icon(R.drawable.msg_new_filter)
                             .propertySelectionTag("drawerElements")
-                            .title(LocaleController.getString(R.string.DrawerElements))
-                            .description(LocaleController.getString(R.string.DrawerElements_Desc))
+                            .title(getString(R.string.DrawerElements))
+                            .description(getString(R.string.DrawerElements_Desc))
                             .build());
                 })
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onPostUpdate(this::reloadDrawerPreviewInstance)
                         .preferenceValue(OctoConfig.INSTANCE.drawerDarkenBackground)
-                        .title(LocaleController.formatString(R.string.DrawerDarkenBackground))
+                        .title(formatString(R.string.DrawerDarkenBackground))
                         .showIf(canUseDarken)
                         .build())
-                .category(LocaleController.getString(R.string.DrawerDarkenBackgroundLevel), canSelectDarkLevel, canUseDarken, category -> category.row(new SliderRow.SliderRowBuilder()
+                .category(getString(R.string.DrawerDarkenBackgroundLevel), canSelectDarkLevel, canUseDarken, category -> category.row(new SliderRow.SliderRowBuilder()
                         .min(1)
                         .max(255)
                         .onSelected(() -> drawerPreviewCell.updateDarkerBackgroundLevel(OctoConfig.INSTANCE.drawerDarkenBackgroundLevel.getValue()))
@@ -165,17 +170,17 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onPostUpdate(this::reloadDrawerPreviewInstance)
                         .preferenceValue(OctoConfig.INSTANCE.drawerBlurBackground)
-                        .title(LocaleController.getString(R.string.DrawerBlurBackground))
+                        .title(getString(R.string.DrawerBlurBackground))
                         .showIf(canSelectBlur)
                         .build())
-                .category(LocaleController.getString(R.string.DrawerBlurBackgroundLevel), canSelectBlurLevel, canSelectBlur, category -> category.row(new SliderRow.SliderRowBuilder()
+                .category(getString(R.string.DrawerBlurBackgroundLevel), canSelectBlurLevel, canSelectBlur, category -> category.row(new SliderRow.SliderRowBuilder()
                         .min(1)
                         .max(100)
                         .onSelected(() -> drawerPreviewCell.updateImageReceiver())
                         .preferenceValue(OctoConfig.INSTANCE.drawerBlurBackgroundLevel)
                         .showIf(canSelectBlurLevel)
                         .build()))
-                .category(LocaleController.getString(R.string.Style), category -> {
+                .category(getString(R.string.Style), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .propertySelectionTag("eventType")
                             .layout(new ThemeSelectorCell(context, OctoConfig.INSTANCE.eventType.getValue()) {
@@ -198,8 +203,8 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> AndroidUtilities.runOnUIThread(() -> LaunchActivity.instance.reloadDrawerHeader()))
                             .preferenceValue(OctoConfig.INSTANCE.drawerProfileAsBubble)
-                            .title(LocaleController.getString(R.string.DrawerHeaderAsBubble))
-                            .description(LocaleController.getString(R.string.DrawerHeaderAsBubble_Desc))
+                            .title(getString(R.string.DrawerHeaderAsBubble))
+                            .description(getString(R.string.DrawerHeaderAsBubble_Desc))
                             .build());
                 })
                 .build();
@@ -220,9 +225,9 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
 
         if (!hasSettingsDrawerButton && OctoConfig.INSTANCE.drawerFavoriteOption.getValue() == DrawerFavoriteOption.SETTINGS.getValue()) {
             AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
-            warningBuilder.setTitle(LocaleController.getString(R.string.Warning));
-            warningBuilder.setMessage(LocaleController.getString(R.string.DrawerFavoriteOptionUnavailable));
-            warningBuilder.setPositiveButton(LocaleController.getString(R.string.OK), null);
+            warningBuilder.setTitle(getString(R.string.Warning));
+            warningBuilder.setMessage(getString(R.string.DrawerFavoriteOptionUnavailable));
+            warningBuilder.setPositiveButton(getString(R.string.OK), null);
             AlertDialog dialog = warningBuilder.create();
             dialog.show();
 

@@ -8,6 +8,7 @@
 
 package it.octogram.android.translator;
 
+import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.ui.Components.TranslateAlert2.preprocess;
 
 import android.content.Context;
@@ -15,7 +16,6 @@ import android.content.Intent;
 import android.text.style.URLSpan;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
@@ -146,12 +146,12 @@ public class SingleTranslationManager {
 
             @Override
             public void onError() {
-                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString(R.string.TranslatorFailed)));
+                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, getString(R.string.TranslatorFailed)));
             }
 
             @Override
             public void onUnavailableLanguage() {
-                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)));
+                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, getString(R.string.TranslatorUnsupportedLanguage)));
             }
         });
     }

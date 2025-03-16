@@ -283,7 +283,7 @@ public class ApplicationLoader extends Application {
                         break;
                     default:
                     case 9:
-                        if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.INSTANCE.isDownloadedFromAnyStore()) {
+                        if (ApplicationLoader.isStandaloneBuild() && !StoreUtils.isDownloadedFromAnyStore()) {
                             abi = "direct " + Build.CPU_ABI + " " + Build.CPU_ABI2;
                         } else {
                             abi = "universal " + Build.CPU_ABI + " " + Build.CPU_ABI2;

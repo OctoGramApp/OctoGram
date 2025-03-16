@@ -196,7 +196,7 @@ public class CustomDevicePerformanceManager {
      */
     private static void logPerformanceInfo(int performanceClass, int cpuCount, int maxCpuFreq, int memoryClass, int androidVersion, long ram) {
         if (BuildVars.LOGS_ENABLED) {
-            OctoLogging.d(MessageFormat.format("Device performance info selected_class = {0} (cpu_count = {1}, freq = {2}, memoryClass = {3}, android version {4}, RAM = {5} GB)", performanceClass, cpuCount, maxCpuFreq, memoryClass, androidVersion, ram / (1024L * 1024L * 1024L)));
+            OctoLogging.d("CustomDevicePerformanceManager", MessageFormat.format("Device performance info selected_class = {0} (cpu_count = {1}, freq = {2}, memoryClass = {3}, android version {4}, RAM = {5} GB)", performanceClass, cpuCount, maxCpuFreq, memoryClass, androidVersion, ram / (1024L * 1024L * 1024L)));
         }
     }
 }

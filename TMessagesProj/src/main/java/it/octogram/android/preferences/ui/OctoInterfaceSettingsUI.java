@@ -8,17 +8,21 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.os.Parcelable;
 import android.text.SpannableString;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -38,6 +42,7 @@ import it.octogram.android.InterfaceSwitchUI;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TabMode;
 import it.octogram.android.TabStyle;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -63,102 +68,103 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
     private boolean wasCenteredAtBeginning = false;
     private float _centeredMeasure = -1;
 
+    @NonNull
     @Override
-    public OctoPreferences getPreferences(PreferencesFragment fragment, Context context) {
+    public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         updateConfig();
 
         wasCentered = isTitleCentered();
         wasCenteredAtBeginning = wasCentered;
 
-        return OctoPreferences.builder(LocaleController.getString(R.string.AppTitleSettings))
-                .deepLink("tg://appearance/app")
-                .category(LocaleController.getString(R.string.ImproveInterface), category -> {
+        return OctoPreferences.builder(getString(R.string.AppTitleSettings))
+                .deepLink(DeepLinkDef.APPEARANCE_APP)
+                .category(getString(R.string.ImproveInterface), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.uiTitleCenteredState)
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarCenteredTitle.ALWAYS.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceTitleCenteredAlways)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredAlways)),
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarCenteredTitle.JUST_IN_CHATS.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceTitleCenteredChats)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredChats)),
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarCenteredTitle.JUST_IN_SETTINGS.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceTitleCenteredSettings)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredSettings)),
                                     new PopupChoiceDialogOption()
                                             .setId(ActionBarCenteredTitle.NEVER.getValue())
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceTitleCenteredNever))
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredNever))
                             ))
                             .onSelected(() -> animateActionBarUpdate(fragment))
-                            .title(LocaleController.getString(R.string.ImproveInterfaceTitleCentered))
+                            .title(getString(R.string.ImproveInterfaceTitleCentered))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.uiImmersivePopups)
-                            .title(LocaleController.getString(R.string.ImproveInterfaceImmersivePopups))
-                            .description(LocaleController.getString(R.string.ImproveInterfaceImmersivePopups_Desc))
+                            .title(getString(R.string.ImproveInterfaceImmersivePopups))
+                            .description(getString(R.string.ImproveInterfaceImmersivePopups_Desc))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSwitchUI.DEFAULT.getValue())
                                             .setItemSwitchIconUI(InterfaceSwitchUI.DEFAULT)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceSwitchDefault)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchDefault)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSwitchUI.ONEUIOLD.getValue())
                                             .setItemSwitchIconUI(InterfaceSwitchUI.ONEUIOLD)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceSwitchOneUIOld)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchOneUIOld)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSwitchUI.ONEUINEW.getValue())
                                             .setItemSwitchIconUI(InterfaceSwitchUI.ONEUINEW)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceSwitchOneUINew)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchOneUINew)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSwitchUI.GOOGLE.getValue())
                                             .setItemSwitchIconUI(InterfaceSwitchUI.GOOGLE)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceSwitchGoogle))
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchGoogle))
                             ))
                             .onSelected(() -> reloadUI(fragment))
                             .currentValue(OctoConfig.INSTANCE.interfaceSwitchUI)
-                            .title(LocaleController.getString(R.string.ImproveInterfaceSwitch))
+                            .title(getString(R.string.ImproveInterfaceSwitch))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceCheckboxUI.DEFAULT.getValue())
                                             .setItemCheckboxIconUI(InterfaceCheckboxUI.DEFAULT)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceCheckboxDefault)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxDefault)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceCheckboxUI.ROUNDED.getValue())
                                             .setItemCheckboxIconUI(InterfaceCheckboxUI.ROUNDED)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceCheckboxRounded)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxRounded)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED.getValue())
                                             .setItemCheckboxIconUI(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceCheckboxSemiTransparent)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxSemiTransparent)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue())
                                             .setItemCheckboxIconUI(InterfaceCheckboxUI.ALWAYS_TRANSPARENT)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceCheckboxAlwaysTransparent1))
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxAlwaysTransparent1))
                             ))
                             .currentValue(OctoConfig.INSTANCE.interfaceCheckboxUI)
-                            .title(LocaleController.getString(R.string.ImproveInterfaceCheckbox))
+                            .title(getString(R.string.ImproveInterfaceCheckbox))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSliderUI.DEFAULT.getValue())
                                             .setItemSliderIconUI(InterfaceSliderUI.DEFAULT)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceSliderDefault)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSliderDefault)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSliderUI.MODERN.getValue())
                                             .setItemSliderIconUI(InterfaceSliderUI.MODERN)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceSliderModern)),
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSliderModern)),
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSliderUI.ANDROID.getValue())
                                             .setItemSliderIconUI(InterfaceSliderUI.ANDROID)
-                                            .setItemTitle(LocaleController.getString(R.string.ImproveInterfaceSliderAndroid))
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSliderAndroid))
                             ))
                             .currentValue(OctoConfig.INSTANCE.interfaceSliderUI)
-                            .title(LocaleController.getString(R.string.ImproveInterfaceSlider))
+                            .title(getString(R.string.ImproveInterfaceSlider))
                             .build());
                 })
                 .category(R.string.ManageFolders, category -> {
@@ -219,7 +225,7 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                             .showIf(OctoConfig.INSTANCE.hideUnreadCounterOnFolder, true)
                             .build());
                 })
-                .category(LocaleController.getString(R.string.ImproveIcons), category -> {
+                .category(getString(R.string.ImproveIcons), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(iconsSelector = new IconsSelector(context) {
                                 @Override
@@ -238,11 +244,11 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                             .showIf(canShowMemeModeRow)
                             .title("Meme Mode")
                             .requiresRestart(true)
-                            .description(LocaleController.getString(R.string.ImproveIconsMeme_Desc))
+                            .description(getString(R.string.ImproveIconsMeme_Desc))
                             .build());
                 })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(LocaleController.getString(R.string.ImproveIconsDefault_Desc))
+                        .title(getString(R.string.ImproveIconsDefault_Desc))
                         .showIf(isUsingDefault)
                         .build())
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
@@ -261,14 +267,14 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                 new SpannableString(
                         MessageStringHelper.fromHtml(
                                 isSolar ?
-                                        LocaleController.formatString(
+                                        formatString(
                                                 R.string.ImproveIconsSolar_Desc,
                                                 "<a href='tg://resolve?domain=TierOhneNation'>@TierOhneNation</a>",
                                                 "<a href='tg://resolve?domain=design480'>@Design480</a>"
                                         ) :
-                                        LocaleController.formatString(
+                                        formatString(
                                                 R.string.ImproveIconsMaterialDesign3_Desc,
-                                                MessageFormat.format("<a href=''https://m3.material.io/styles/icons''>{0}</a>", LocaleController.getString(R.string.ImproveIconsMaterialDesign3_DescHere))
+                                                MessageFormat.format("<a href=''https://m3.material.io/styles/icons''>{0}</a>", getString(R.string.ImproveIconsMaterialDesign3_DescHere))
                                         )
                         )
                 )
@@ -297,7 +303,7 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
             SimpleTextView titleTextView = actionBar.getTitleTextView();
 
             if (_centeredMeasure == -1) {
-                _centeredMeasure = actionBar.getMeasuredWidth() / 2f - titleTextView.getTextWidth() / 2f - AndroidUtilities.dp((AndroidUtilities.isTablet() ? 80 : 72));
+                _centeredMeasure = actionBar.getMeasuredWidth() / 2f - titleTextView.getTextWidth() / 2f - dp((AndroidUtilities.isTablet() ? 80 : 72));
             }
 
             titleTextView.animate().translationX(_centeredMeasure * (centered ? 1 : 0) - (wasCenteredAtBeginning ? Math.abs(_centeredMeasure) : 0)).setDuration(150).setListener(new AnimatorListenerAdapter() {
