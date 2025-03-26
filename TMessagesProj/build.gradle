@@ -215,7 +215,7 @@ android {
         }
         vectorDrawables {
             generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
-            useSupportLibrary = true
+            // useSupportLibrary = true
         }
     }
 }
@@ -245,7 +245,7 @@ task checkVisibility {
     }
     doLast {
         if (project.gradle.startParameter.taskNames.find { it.contains("HA_public") }) {
-            def privateBuild = file("${projectDir}_AppHockeyApp/afat/HA_private/app.apk")
+            def privateBuild = file("${projectDir}_AppHockeyApp/afat/HA_private/Telegram-Beta.apk")
             if (privateBuild.exists()) {
                 privateBuild.delete()
             }

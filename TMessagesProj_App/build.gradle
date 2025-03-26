@@ -43,6 +43,9 @@ android {
                 signingConfig = signingConfigs.sign
             }
             jniDebuggable true
+            minifyEnabled = false
+            shrinkResources false
+            multiDexEnabled true
             applicationIdSuffix ".beta"
         }
 

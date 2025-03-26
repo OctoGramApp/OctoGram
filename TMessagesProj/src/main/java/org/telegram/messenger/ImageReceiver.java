@@ -1851,7 +1851,6 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     public void skipDraw() {
 //        RLottieDrawable lottieDrawable = getLottieAnimation();
 //        if (lottieDrawable != null) {
-//            lottieDrawable.setCurrentParentView(parentView);
 //            lottieDrawable.updateCurrentFrame();
 //        }
     }
@@ -1939,9 +1938,6 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
 
             if (animation != null) {
                 animation.setRoundRadius(roundRadius);
-            }
-            if (lottieDrawable != null && !drawInBackground) {
-                lottieDrawable.setCurrentParentView(parentView);
             }
             if ((animation != null || lottieDrawable != null) && !animationNotReady && !animationReadySent && !drawInBackground) {
                 animationReadySent = true;
@@ -2690,6 +2686,9 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     }
 
     public void startAnimation() {
+        startAnimation(false);
+    }
+    public void startAnimation(boolean force) {
         AnimatedFileDrawable animation = getAnimation();
         if (animation != null) {
             animation.setUseSharedQueue(useSharedAnimationQueue);
@@ -2697,7 +2696,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         } else {
             RLottieDrawable rLottieDrawable = getLottieAnimation();
             if (rLottieDrawable != null && !rLottieDrawable.isRunning()) {
-                rLottieDrawable.restart();
+                rLottieDrawable.restart(force);
             }
         }
     }
@@ -2731,6 +2730,11 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
 
     public boolean isAnimationRunning() {
         AnimatedFileDrawable animation = getAnimation();
+        return animation != null && animation.isRunning();
+    }
+
+    public boolean isLottieRunning() {
+        RLottieDrawable animation = getLottieAnimation();
         return animation != null && animation.isRunning();
     }
 

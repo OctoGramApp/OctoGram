@@ -256,7 +256,7 @@ public class CrashesActivity extends BaseFragment implements NotificationCenter.
                         return;
                     }
                     var file = sortedArchivedCrashFiles.get(position - crashesStartRow);
-                    switch (CrashOption.Companion.fromValue(which)) {
+                    switch (CrashOption.fromValue(which)) {
                         case CrashOption.OPEN_LOG -> {
                             if (file != null && !openLog(file)) {
                                 showWarningDialog(getString(R.string.ErrorSendingCrashContent));
