@@ -16,11 +16,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -58,12 +60,15 @@ import org.telegram.ui.Components.ThemePreviewDrawable;
 import org.telegram.ui.PhotoViewer;
 import org.telegram.ui.web.WebInstantView;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -135,8 +140,8 @@ public class ImageLoader {
     private ConcurrentHashMap<String, long[]> fileProgresses = new ConcurrentHashMap<>();
     private HashMap<String, ThumbGenerateTask> thumbGenerateTasks = new HashMap<>();
     private HashMap<String, Integer> forceLoadingImages = new HashMap<>();
-    private static ThreadLocal<byte[]> bytesLocal = new ThreadLocal<>();
-    private static ThreadLocal<byte[]> bytesThumbLocal = new ThreadLocal<>();
+    //private static ThreadLocal<byte[]> bytesLocal = new ThreadLocal<>();
+    //private static ThreadLocal<byte[]> bytesThumbLocal = new ThreadLocal<>();
     private static byte[] header = new byte[12];
     private static byte[] headerThumb = new byte[12];
     private int currentHttpTasksCount = 0;
@@ -1239,7 +1244,7 @@ public class ImageLoader {
                                     MediaStore.Images.Thumbnails.getThumbnail(ApplicationLoader.applicationContext.getContentResolver(), mediaId, MediaStore.Images.Thumbnails.MINI_KIND, opts);
                                 }
                             } else {
-                                if (secureDocumentKey != null) {
+                                /*if (secureDocumentKey != null) {
                                     RandomAccessFile f = new RandomAccessFile(cacheFileFinal, "r");
                                     int len = (int) f.length();
                                     byte[] bytes = bytesLocal.get();
@@ -1270,7 +1275,19 @@ public class ImageLoader {
                                     }
                                     BitmapFactory.decodeStream(is, null, opts);
                                     is.close();
+                                }*/
+
+                                try (InputStream inputStream = secureDocumentKey != null
+                                        ? new EncryptedFileInputStream(cacheFileFinal, secureDocumentKey)
+                                        : new FileInputStream(cacheFileFinal);
+                                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
+
+                                    image = BitmapFactory.decodeStream(bufferedInputStream);
+
+                                } catch (Exception e) {
+                                    FileLog.e(e);
                                 }
+
                             }
 
                             float photoW = opts.outWidth;
@@ -1336,7 +1353,7 @@ public class ImageLoader {
                             }
                         }
 
-                        if (opts.inPurgeable || secureDocumentKey != null) {
+                        /*if (opts.inPurgeable || secureDocumentKey != null) {
                             RandomAccessFile f = new RandomAccessFile(cacheFileFinal, "r");
                             int len = (int) f.length();
                             int offset = 0;
@@ -1372,7 +1389,19 @@ public class ImageLoader {
                             }
                             image = BitmapFactory.decodeStream(is, null, opts);
                             is.close();
+                        }*/
+
+                        try (InputStream inputStream = secureDocumentKey != null
+                                ? new EncryptedFileInputStream(cacheFileFinal, secureDocumentKey)
+                                : new FileInputStream(cacheFileFinal);
+                             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
+
+                            image = BitmapFactory.decodeStream(bufferedInputStream, null, opts);
+
+                        } catch (Exception e) {
+                            FileLog.e(e);
                         }
+
 
                         if (image == null) {
                             if (cacheFileFinal.length() == 0 || cacheImage.filter == null) {
@@ -1496,7 +1525,7 @@ public class ImageLoader {
                             }
 
                             if (image == null) {
-                                try {
+                                /*try {
                                     RandomAccessFile f = new RandomAccessFile(cacheFileFinal, "r");
                                     int len = (int) f.length();
                                     int offset = 0;
@@ -1524,6 +1553,12 @@ public class ImageLoader {
                                         image = BitmapFactory.decodeByteArray(data, offset, len, opts);
                                     }
                                 } catch (Throwable e) {
+                                    FileLog.e(e);
+                                }*/
+                                try (InputStream inputStream = new EncryptedFileInputStream(cacheFileFinal, secureDocumentKey);
+                                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
+                                     image = BitmapFactory.decodeStream(bufferedInputStream);
+                                } catch (Exception e) {
                                     FileLog.e(e);
                                 }
                             }
@@ -1787,7 +1822,7 @@ public class ImageLoader {
         return drawable;
     }
 
-    public static Bitmap getStrippedPhotoBitmap(byte[] photoBytes, String filter) {
+    /*public static Bitmap getStrippedPhotoBitmap(byte[] photoBytes, String filter) {
         int len = photoBytes.length - 3 + Bitmaps.header.length + Bitmaps.footer.length;
         byte[] bytes = bytesLocal.get();
         byte[] data = bytes != null && bytes.length >= len ? bytes : null;
@@ -1825,7 +1860,60 @@ public class ImageLoader {
             Utilities.blurBitmap(bitmap, 3, 1, bitmap.getWidth(), bitmap.getHeight(), bitmap.getRowBytes());
         }
         return bitmap;
+    }*/
+
+    public static Bitmap getStrippedPhotoBitmap(byte[] photoBytes, String filter) {
+        int len = photoBytes.length - 3 + Bitmaps.header.length + Bitmaps.footer.length;
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(len);
+        try {
+            outputStream.write(Bitmaps.header);
+            outputStream.write(photoBytes, 3, photoBytes.length - 3);
+            outputStream.write(Bitmaps.footer);
+        } catch (IOException e) {
+            FileLog.e(e);
+            return null;
+        }
+
+        byte[] imageData = outputStream.toByteArray();
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        boolean isRound = !TextUtils.isEmpty(filter) && filter.contains("r");
+        options.inPreferredConfig = SharedConfig.deviceIsHigh() || isRound ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+        if (bitmap == null) {
+            return null;
+        }
+
+        if (isRound) {
+            bitmap = makeRoundBitmap(bitmap);
+        }
+
+        if (!TextUtils.isEmpty(filter) && filter.contains("b")) {
+            Utilities.blurBitmap(bitmap, 3, 1, bitmap.getWidth(), bitmap.getHeight(), bitmap.getRowBytes());
+        }
+
+        return bitmap;
     }
+
+    private static Bitmap makeRoundBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final Paint paint = new Paint();
+
+        paint.setAntiAlias(true);
+        paint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+
+        float radius = Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2f;
+        canvas.drawCircle(bitmap.getWidth() / 2f, bitmap.getHeight() / 2f, radius, paint);
+
+        bitmap.recycle();
+        return output;
+    }
+
 
     private class CacheImage {
 

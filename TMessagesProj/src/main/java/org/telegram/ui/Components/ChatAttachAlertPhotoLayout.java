@@ -2227,8 +2227,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             updatePhotosCounter(false);
             if (cameraView != null) {
                 evControlView.setSliderValue(0.5f, true);
-                cameraZoom = 0.0f;
-                cameraView.setZoom(0.0f);
+                cameraZoom = cameraView.resetZoom();
                 zoomControlView.setSliderValue(cameraZoom, false);
                 if (!CameraXUtils.isCameraXSupported() || OctoConfig.INSTANCE.getCameraType() != CameraType.CAMERA_X) {
                     CameraController.getInstance().startPreview(((CameraView) cameraView).getCameraSession());
@@ -2361,9 +2360,9 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
 
             @Override
             public void sendButtonPressed(int index, VideoEditedInfo videoEditedInfo, boolean notify, int scheduleDate, boolean forceDocument) {
-                // parentAlert.sent = true;
-                // if (cameraPhotos.isEmpty() || parentAlert.baseFragment == null) {
-                if (cameraPhotos.isEmpty() || parentAlert.destroyed) {
+                parentAlert.sent = true;
+                // if (cameraPhotos.isEmpty() || parentAlert.destroyed) {
+                if (cameraPhotos.isEmpty() || parentAlert.baseFragment == null) {
                     return;
                 }
                 if (videoEditedInfo != null && index >= 0 && index < cameraPhotos.size()) {
