@@ -215,7 +215,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.utils.OctoUtils;
 
 @SuppressLint("HardwareIds")
@@ -709,13 +711,14 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonIcon, "translationZ", AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonIcon, "translationZ", AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
             floatingButtonContainer.setStateListAnimator(animator);
-            floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+            floatingButtonContainer.setOutlineProvider(new OutlineProvider());
+            /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                 }
-            });
+            });*/
         }
         floatingAutoAnimator = VerticalPositionAutoAnimator.attach(floatingButtonContainer);
         sizeNotifierFrameLayout.addView(floatingButtonContainer, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 56 : 60, Build.VERSION.SDK_INT >= 21 ? 56 : 60, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 24, 16));
@@ -2521,7 +2524,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 privacyView.setGravity(Gravity.CENTER_VERTICAL);
                 privacyView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText6));
                 privacyView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
-                String str = LocaleController.getString("PrivacyPolicyLogin", R.string.PrivacyPolicyLogin);
+                String str = LocaleController.getString(R.string.PrivacyPolicyLogin);
                 SpannableStringBuilder text = new SpannableStringBuilder(str);
                 int index1 = str.indexOf('*');
                 int index2 = str.lastIndexOf('*');
@@ -8314,7 +8317,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     private void updateColors() {
         fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
 
-        Context context = getParentActivity();
+        var drawable = CustomFab.createFabBackground();
+       /* Context context = getParentActivity();
         Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
         if (Build.VERSION.SDK_INT < 21) {
             Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow).mutate();
@@ -8322,7 +8326,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
             combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
             drawable = combinedDrawable;
-        }
+        }*/
         floatingButtonContainer.setBackground(drawable);
 
         backButtonView.setColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
@@ -8521,7 +8525,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             numberView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
             editTextView.setTextColor(Theme.getColor(Theme.key_changephoneinfo_image2));
             confirmTextView.setTextColor(Theme.getColor(Theme.key_changephoneinfo_image2));
-            popupFabContainer.setBackground(Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground)));
+            //popupFabContainer.setBackground(Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground)));
+            popupFabContainer.setBackground(CustomFab.createFabBackground());
             floatingProgressView.setProgressColor(Theme.getColor(Theme.key_chats_actionIcon));
         }
 

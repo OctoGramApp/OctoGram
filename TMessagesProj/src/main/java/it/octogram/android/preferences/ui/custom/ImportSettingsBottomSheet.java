@@ -70,8 +70,8 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.components.ImportSettingsTopLayerCell;
 import it.octogram.android.utils.AppRestartHelper;
-import it.octogram.android.utils.FingerprintUtils;
-import it.octogram.android.utils.ImportSettingsScanHelper;
+import it.octogram.android.utils.account.FingerprintUtils;
+import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
 public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     private Activity originalActivity;

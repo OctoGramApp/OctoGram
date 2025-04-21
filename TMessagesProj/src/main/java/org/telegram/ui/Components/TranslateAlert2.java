@@ -24,16 +24,19 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.math.MathUtils;
+import androidx.core.util.Supplier;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,6 +54,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -95,6 +99,8 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
     private BaseFragment fragment;
     private Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress;
     private boolean firstTranslation = true;
+
+    private ImageView configButton;
 
     public TranslateAlert2(
         Context context,
@@ -255,7 +261,20 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         buttonTextView.setText(LocaleController.getString(R.string.CloseTranslation));
         buttonTextView.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
         buttonTextView.setOnClickListener(e -> dismiss());
-        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16, 16));
+        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16+48+8, 16));
+
+        configButton = new ImageView(context);
+        configButton.setScaleType(ImageView.ScaleType.CENTER);
+        configButton.setImageResource(R.drawable.msg_copy);
+        configButton.setAlpha(0.5f);
+        configButton.setClickable(false);
+        configButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
+        configButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
+        configButton.setOnClickListener(v -> {
+            AndroidUtilities.addToClipboard(textView.getText());
+            BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createCopyBulletin(LocaleController.getString(R.string.TextCopied)).show();
+        });
+        buttonView.addView(configButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16, 16));
 
         containerView.addView(buttonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
 
@@ -280,6 +299,8 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
 
         if (messageObject != null && messageObject.messageOwner.translatedText != null && Objects.equals(messageObject.messageOwner.translatedToLanguage, toLanguage)) {
             firstTranslation = false;
+            updateCopyEnabled(true);
+            textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
             CharSequence translated = SpannableStringBuilder.valueOf(messageObject.messageOwner.translatedText.text);
             MessageObject.addEntitiesToText(translated, messageObject.messageOwner.translatedText.entities, false, true, false, false);
             translated = preprocessText(translated);
@@ -291,6 +312,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             return;
         }
 
+        updateCopyEnabled(false);
         TranslationsWrapper.translate(currentAccount, reqPeer, reqMessageId, toLanguage, reqText, reqMessageEntities, new SingleTranslationManager.OnTranslationResultCallback() {
             @Override
             public void onGotReqId(int reqId2) {
@@ -313,14 +335,20 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
                 textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
                 textView.setText(translated);
 
-                AndroidUtilities.runOnUIThread(() -> adapter.updateMainView(textViewContainer));
+                AndroidUtilities.runOnUIThread(() -> {
+                    updateCopyEnabled(true);
+                    adapter.updateMainView(textViewContainer);
+                });
             }
 
             @Override
             public void onError() {
                 textView.setTextColor(getThemedColor(Theme.key_dialogTextGray3));
                 textView.setText(LocaleController.getString("TranslationFailedAlert2", R.string.TranslationFailedAlert2));
-                AndroidUtilities.runOnUIThread(() -> adapter.updateMainView(textViewContainer));
+                AndroidUtilities.runOnUIThread(() -> {
+                    updateCopyEnabled(false);
+                    adapter.updateMainView(textViewContainer);
+                });
             }
 
             @Override
@@ -328,7 +356,10 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
                 textView.setTextColor(getThemedColor(Theme.key_dialogTextGray3));
                 textView.setText(LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage));
                 headerView.toLanguageTextView.setText(languageName(toLanguage));
-                AndroidUtilities.runOnUIThread(() -> adapter.updateMainView(textViewContainer));
+                AndroidUtilities.runOnUIThread(() -> {
+                    updateCopyEnabled(false);
+                    adapter.updateMainView(textViewContainer);
+                });
             }
         });
 
@@ -574,6 +605,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
     }
 
     public void setNoforwards(boolean noforwards) {
+        this.noforwards = noforwards;
         if (textView != null) {
             textView.setTextIsSelectable(!noforwards);
         }
@@ -589,7 +621,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         return false;
     }
 
-    private class LoadingTextView extends TextView {
+    public static class LoadingTextView extends TextView {
 
         private final LinkPath path = new LinkPath(true);
         private final LoadingDrawable loadingDrawable = new LoadingDrawable();
@@ -645,7 +677,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         }
     }
 
-    private static class PaddedAdapter extends RecyclerListView.Adapter {
+    public static class PaddedAdapter extends RecyclerListView.Adapter {
 
         private Context mContext;
         private View mMainView;
@@ -722,6 +754,27 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         return top;
     }
 
+    private boolean _isCopyEnabled = false;
+    private ViewPropertyAnimator copyAnimator;
+    private boolean noforwards = false;
+
+    private void updateCopyEnabled(boolean isEnabled) {
+        if (noforwards) {
+            isEnabled = false;
+        }
+        if (_isCopyEnabled == isEnabled) {
+            return;
+        }
+        _isCopyEnabled = isEnabled;
+        if (copyAnimator != null) {
+            copyAnimator.cancel();
+        }
+        configButton.setClickable(isEnabled);
+        configButton.setAlpha(isEnabled ? 0.5f : 1f);
+        copyAnimator = configButton.animate().alpha(isEnabled ? 1f : 0.5f).setDuration(250);
+        copyAnimator.start();
+    }
+
     private class HeaderView extends FrameLayout {
 
         private ImageView backButton;
@@ -730,6 +783,8 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         private TextView fromLanguageTextView;
         private ImageView arrowView;
         private AnimatedTextView toLanguageTextView;
+
+        private ImageView copyButton;
 
         private View backgroundView;
 
@@ -851,7 +906,9 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             toLanguageTextView.setTextSize(dp(14));
             toLanguageTextView.setText(capitalFirst(languageName(toLanguage)));
             toLanguageTextView.setPadding(dp(4), dp(2), dp(4), dp(2));
-            toLanguageTextView.setOnClickListener(e -> openLanguagesSelect());
+            toLanguageTextView.setOnClickListener(e -> {
+                openLanguagesSelect();
+            });
 
             if (LocaleController.isRTL) {
                 subtitleView.addView(toLanguageTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 0, 0, fromLanguageTextView != null ? 3 : 0, 0));
@@ -875,21 +932,71 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             addView(shadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, AndroidUtilities.getShadowHeight() / dpf2(1), Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 56, 0, 0));
         }
 
-        public void openLanguagesSelect() {
-            ActionBarPopupWindow.ActionBarPopupWindowLayout layout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(getContext()) {
+        public ActionBarPopupWindow.ActionBarPopupWindowLayout getLanguageSelectLayout(Supplier<Runnable> dismiss, ActionBarPopupWindow.ActionBarPopupWindowLayout originalLayout) {
+            ActionBarPopupWindow.ActionBarPopupWindowLayout layout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(getContext(), 0, null) {
                 @Override
                 protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    super.onMeasure(widthMeasureSpec,
-                        MeasureSpec.makeMeasureSpec(Math.min((int) (AndroidUtilities.displaySize.y * .33f), MeasureSpec.getSize(heightMeasureSpec)), MeasureSpec.EXACTLY)
+                    super.onMeasure(
+                            widthMeasureSpec,
+                            MeasureSpec.makeMeasureSpec(originalLayout != null ? dp(300 + 48) : Math.min((int) (AndroidUtilities.displaySize.y * .33f), MeasureSpec.getSize(heightMeasureSpec)), MeasureSpec.EXACTLY)
                     );
                 }
             };
+            layout.swipeBackGravityBottom = true;
 
-            Drawable shadowDrawable2 = ContextCompat.getDrawable(getContext(), R.drawable.popup_fixed_alert).mutate();
-            shadowDrawable2.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefaultSubmenuBackground), PorterDuff.Mode.MULTIPLY));
-            layout.setBackground(shadowDrawable2);
+            ScrollView swipeBackScrollView = new ScrollView(getContext()) {
+                Drawable topShadowDrawable;
+                final AnimatedFloat alphaFloat = new AnimatedFloat(this, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
+                private boolean wasCanScrollVertically;
 
-            final Runnable[] dismiss = new Runnable[1];
+                @Override
+                public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
+                    super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed);
+                    boolean canScrollVertically = canScrollVertically(-1);
+                    if (wasCanScrollVertically != canScrollVertically) {
+                        invalidate();
+                        wasCanScrollVertically = canScrollVertically;
+                    }
+                }
+
+                @Override
+                protected void dispatchDraw(Canvas canvas) {
+                    super.dispatchDraw(canvas);
+
+                    float alpha = .5f * alphaFloat.set(canScrollVertically(-1) ? 1 : 0);
+                    if (alpha > 0) {
+                        if (topShadowDrawable == null) {
+                            topShadowDrawable = getContext().getResources().getDrawable(R.drawable.header_shadow);
+                        }
+                        topShadowDrawable.setBounds(
+                                0, getScrollY(), getWidth(), getScrollY() + topShadowDrawable.getIntrinsicHeight()
+                        );
+                        topShadowDrawable.setAlpha((int) (0xFF * alpha));
+                        topShadowDrawable.draw(canvas);
+                    }
+                }
+            };
+            LinearLayout swipeBackScroll = new LinearLayout(getContext());
+            swipeBackScroll.setOrientation(LinearLayout.VERTICAL);
+            swipeBackScrollView.addView(swipeBackScroll);
+
+            if (originalLayout != null) {
+                LinearLayout swipeBack = new LinearLayout(getContext());
+                swipeBack.setOrientation(LinearLayout.VERTICAL);
+
+                ActionBarMenuSubItem currentBackItem = ActionBarMenuItem.addItem(swipeBack, R.drawable.msg_arrow_back, LocaleController.getString(R.string.Back), false, null);
+                currentBackItem.setOnClickListener(z -> {
+                    if (originalLayout.getSwipeBack() != null) {
+                        originalLayout.getSwipeBack().closeForeground();
+                    }
+                });
+                swipeBack.addView(swipeBackScrollView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 300));
+                layout.addView(swipeBack);
+            } else {
+                Drawable shadowDrawable2 = ContextCompat.getDrawable(getContext(), R.drawable.popup_fixed_alert).mutate();
+                shadowDrawable2.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefaultSubmenuBackground), PorterDuff.Mode.MULTIPLY));
+                layout.setBackground(shadowDrawable2);
+            }
 
             ArrayList<LocaleController.LocaleInfo> locales = TranslateController.getLocales();
             boolean first = true;
@@ -897,18 +1004,18 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
                 LocaleController.LocaleInfo localeInfo = locales.get(i);
 
                 if (
-                    localeInfo.pluralLangCode.equals(fromLanguage) ||
-                    !"remote".equals(localeInfo.pathToFile)
+                        localeInfo.pluralLangCode.equals(fromLanguage) ||
+                                !"remote".equals(localeInfo.pathToFile)
                 ) {
                     continue;
                 }
 
-                ActionBarMenuSubItem button = new ActionBarMenuSubItem(getContext(), 2, first, i == locales.size() - 1, resourcesProvider);
+                ActionBarMenuSubItem button = new ActionBarMenuSubItem(getContext(), 2, originalLayout == null && first, i == locales.size() - 1, resourcesProvider);
                 button.setText(capitalFirst(languageName(localeInfo.pluralLangCode)));
                 button.setChecked(TextUtils.equals(toLanguage, localeInfo.pluralLangCode));
                 button.setOnClickListener(e -> {
-                    if (dismiss[0] != null) {
-                        dismiss[0].run();
+                    if (dismiss != null) {
+                        dismiss.get().run();
                     }
 
                     if (TextUtils.equals(toLanguage, localeInfo.pluralLangCode)) {
@@ -923,13 +1030,23 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
                     setToLanguage(toLanguage);
                     translate();
                 });
-                layout.addView(button);
+                if (originalLayout != null) {
+                    swipeBackScroll.addView(button);
+                } else {
+                    layout.addView(button);
+                }
 
                 first = false;
             }
+            return layout;
+        }
 
+        public void openLanguagesSelect() {
+            final Runnable[] dismiss = new Runnable[1];
+
+            ActionBarPopupWindow.ActionBarPopupWindowLayout layout = getLanguageSelectLayout(() -> dismiss[0], null);
             ActionBarPopupWindow window = new ActionBarPopupWindow(layout, LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT);
-            dismiss[0] = () -> window.dismiss();
+            dismiss[0] = window::dismiss;
             window.setPauseNotifications(true);
             window.setDismissAnimationDuration(220);
             window.setOutsideTouchable(true);
@@ -980,7 +1097,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         }
     }
 
-    private class ContainerView extends FrameLayout {
+    public class ContainerView extends FrameLayout {
         public ContainerView(Context context) {
             super(context);
 

@@ -32,33 +32,54 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.StarParticlesView;
 
+import it.octogram.android.logs.OctoLogging;
+
 @SuppressLint("ViewConstructor")
 public class OctoAnimationFragment extends FrameLayout  {
     private boolean isAnimating = false;
     private boolean isDownscaled = false;
     private boolean upscaleAfterAnimation = false;
     private boolean easterEggEnabled = false;
+    private boolean disableEffect = false;
 
     private final StarParticlesView particlesView;
     private final ImageView octoImageView;
     private final EasterEggAnimation easterEggAnimation = new EasterEggAnimation();
 
     public static int sz = 240;
+    public static int sz_no_text = 180;
+    static final String TAG = "OctoAnimationFragment";
+
+    public static class OctoAnimationScopes {
+        public static int OCTO = 1;
+        public static int GEMINI = 2;
+        public static int CHATGPT = 3;
+        public static int OPENROUTER = 4;
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     public OctoAnimationFragment(Context context, TextView textView) {
+        this(context, textView, OctoAnimationScopes.OCTO);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    public OctoAnimationFragment(Context context, TextView textView, int scope) {
         super(context);
 
         setLayoutParams(LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
-        particlesView = new StarParticlesView(context);
+        particlesView = new StarParticlesView(context) {
+            @Override
+            protected int getStarsRectWidth() {
+                return getMeasuredWidth() - dp(40);
+            }
+        };
         particlesView.setClipWithGradient();
-        particlesView.drawable.colorKey = Color.parseColor(Theme.isCurrentThemeDark() ? "#3d348b" : "#594bcc");
-        particlesView.drawable.isCircle = true;
+        particlesView.drawable.colorKey = Color.parseColor(scope != OctoAnimationScopes.OCTO ? "#8d3067" : Theme.isCurrentThemeDark() ? "#3d348b" : "#594bcc");
+        particlesView.drawable.isCircle = scope == OctoAnimationScopes.OCTO;
         particlesView.drawable.centerOffsetY = dp(25);
-        particlesView.drawable.minLifeTime = 2000;
-        particlesView.drawable.randLifeTime = 3000;
-        particlesView.drawable.size1 = 16;
+        particlesView.drawable.minLifeTime = scope != OctoAnimationScopes.OCTO ? 1000 : 2000;
+        particlesView.drawable.randLifeTime = scope != OctoAnimationScopes.OCTO ? 500 : 5000;
         particlesView.drawable.useRotate = false;
         particlesView.drawable.updateColorsWithoutTheme();
         addView(particlesView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
@@ -67,7 +88,7 @@ public class OctoAnimationFragment extends FrameLayout  {
         octoImageView = new ImageView(context);
         octoImageView.setVisibility(GONE);
         octoImageView.setOnTouchListener((view, motionEvent) -> {
-            if (easterEggEnabled) {
+            if (easterEggEnabled || disableEffect) {
                 return true;
             }
 
@@ -90,7 +111,23 @@ public class OctoAnimationFragment extends FrameLayout  {
 
             return true;
         });
-        octoImageView.setImageResource(R.drawable.ic_unsized_octo);
+
+        int animationIcon;
+
+        if (scope == OctoAnimationScopes.OCTO) {
+            animationIcon = R.drawable.ic_unsized_octo;
+        } else if (scope == OctoAnimationScopes.CHATGPT) {
+            animationIcon = R.drawable.chatgpt;
+        } else if (scope == OctoAnimationScopes.GEMINI) {
+            animationIcon = R.drawable.gemini;
+        } else if (scope == OctoAnimationScopes.OPENROUTER) {
+            animationIcon = R.drawable.openrouter;
+        } else {
+            OctoLogging.e(TAG, "Unknown scope: " + scope);
+            animationIcon = -1;
+        }
+        octoImageView.setImageResource(animationIcon);
+
         addView(octoImageView, LayoutHelper.createFrame(140, 140, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 25, 0, 0));
 
         if (textView != null) {
@@ -98,6 +135,10 @@ public class OctoAnimationFragment extends FrameLayout  {
         }
 
         AndroidUtilities.runOnUIThread(this::firstIconAppear, 200);
+    }
+
+    public void setDisableEffect(boolean disableEffect) {
+        this.disableEffect = disableEffect;
     }
 
     public void setEasterEggCallback(OnEasterEggEnabledCallback callback) {

@@ -31,14 +31,18 @@ public class SwitchRow extends BaseRow implements Clickable {
     private final Runnable runnablePostUpdate;
     private final boolean locked;
     private final Runnable lockedAction;
+    private final boolean isMainPageAction;
 
-    private SwitchRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, Runnable runnablePostUpdate, boolean premium, boolean autoShowPremiumAlert, boolean locked, Runnable lockedAction, int... posts) {
+    private CachedState cachedState;
+
+    private SwitchRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, Runnable runnablePostUpdate, boolean premium, boolean autoShowPremiumAlert, boolean locked, Runnable lockedAction, boolean isMainPageAction, int... posts) {
         super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.SWITCH, premium, autoShowPremiumAlert, posts);
         this.preferenceValue = preferenceValue;
         this.supplierClickable = supplierClickable;
         this.runnablePostUpdate = runnablePostUpdate;
         this.locked = locked;
         this.lockedAction = lockedAction;
+        this.isMainPageAction = isMainPageAction;
     }
 
     public ConfigProperty<Boolean> getPreferenceValueConfig() {
@@ -51,6 +55,17 @@ public class SwitchRow extends BaseRow implements Clickable {
 
     public boolean isLocked() {
         return locked;
+    }
+
+    public boolean isMainPageAction() {
+        return isMainPageAction;
+    }
+
+    public CachedState getCachedState() {
+        if (cachedState == null) {
+            cachedState = new CachedState();
+        }
+        return cachedState;
     }
 
     @Override
@@ -82,6 +97,7 @@ public class SwitchRow extends BaseRow implements Clickable {
         private Runnable runnablePostUpdate;
         private boolean locked;
         private Runnable lockedAction;
+        private boolean isMainPageAction;
 
         public SwitchRowBuilder onClick(Supplier<Boolean> clickable) {
             this.supplierClickable = clickable;
@@ -103,8 +119,34 @@ public class SwitchRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public SwitchRowBuilder isMainPageAction(boolean isMainPageAction) {
+            this.isMainPageAction = isMainPageAction;
+            return this;
+        }
+
         public SwitchRow build() {
-            return new SwitchRow(title, description, requiresRestart, showIf, showIfReverse, divider, preferenceValue, supplierClickable, runnablePostUpdate, premium, autoShowPremiumAlert, locked, lockedAction, postNotificationName);
+            return new SwitchRow(title, description, requiresRestart, showIf, showIfReverse, divider, preferenceValue, supplierClickable, runnablePostUpdate, premium, autoShowPremiumAlert, locked, lockedAction, isMainPageAction, postNotificationName);
+        }
+    }
+
+    public class CachedState {
+        private boolean hasInitData = false;
+        private boolean lastState;
+
+        public boolean isHasInitData() {
+            return hasInitData;
+        }
+
+        public void setHasInitData(boolean hasInitData) {
+            this.hasInitData = hasInitData;
+        }
+
+        public boolean getLastState() {
+            return lastState;
+        }
+
+        public void setLastState(boolean lastState) {
+            this.lastState = lastState;
         }
     }
 }

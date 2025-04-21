@@ -10,6 +10,7 @@ package it.octogram.android.preferences.rows.impl;
 
 import androidx.annotation.Nullable;
 
+import it.octogram.android.ConfigProperty;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
@@ -19,8 +20,8 @@ public class StickerHeaderRow extends BaseRow {
     private final Object stickerView;
     private final boolean useOctoAnimation;
 
-    private StickerHeaderRow(Object stickerView, @Nullable String description, boolean useOctoAnimation) {
-        super(null, description, false, null, false, PreferenceType.STICKER_HEADER);
+    private StickerHeaderRow(Object stickerView, @Nullable String description, boolean useOctoAnimation, ConfigProperty<Boolean> showIf) {
+        super(null, description, false, showIf, false, PreferenceType.STICKER_HEADER);
         this.stickerView = stickerView;
         this.useOctoAnimation = useOctoAnimation;
     }
@@ -50,7 +51,7 @@ public class StickerHeaderRow extends BaseRow {
 
         @Override
         public StickerHeaderRow build() {
-            return new StickerHeaderRow(stickerView, description, useOctoAnimation);
+            return new StickerHeaderRow(stickerView, description, useOctoAnimation, showIf);
         }
     }
 

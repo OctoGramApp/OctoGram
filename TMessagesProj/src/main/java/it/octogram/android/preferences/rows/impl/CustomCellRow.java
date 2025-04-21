@@ -26,12 +26,16 @@ public class CustomCellRow extends BaseRow implements Clickable {
     private final Runnable onClick;
     private final View layout;
     private final String propertySelectionTag;
+    private final boolean avoidReDraw;
+    private final boolean isEnabled;
 
-    private CustomCellRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, String propertySelectionTag, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, Runnable onClick, View layout) {
+    private CustomCellRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, boolean avoidReDraw, boolean isEnabled, String propertySelectionTag, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, Runnable onClick, View layout) {
         super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.CUSTOM);
         this.onClick = onClick;
         this.layout = layout;
         this.propertySelectionTag = propertySelectionTag;
+        this.avoidReDraw = avoidReDraw;
+        this.isEnabled = isEnabled;
     }
 
     @Override
@@ -39,6 +43,10 @@ public class CustomCellRow extends BaseRow implements Clickable {
         if (onClick != null)
             onClick.run();
         return true;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     public View getLayout() {
@@ -49,11 +57,17 @@ public class CustomCellRow extends BaseRow implements Clickable {
         return propertySelectionTag;
     }
 
+    public boolean avoidReDraw() {
+        return avoidReDraw;
+    }
+
     public static class CustomCellRowBuilder extends BaseRowBuilder<CustomCellRow> {
 
         private Runnable onClick;
         private View layout;
         private String propertySelectionTag;
+        private boolean avoidReDraw = false;
+        private boolean isEnabled = false;
 
         public CustomCellRowBuilder layout(View layout) {
             this.layout = layout;
@@ -65,14 +79,24 @@ public class CustomCellRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public CustomCellRowBuilder avoidReDraw(boolean avoidReDraw) {
+            this.avoidReDraw = avoidReDraw;
+            return this;
+        }
+
         public CustomCellRowBuilder propertySelectionTag(String propertySelectionTag) {
             this.propertySelectionTag = propertySelectionTag;
             return this;
         }
 
+        public CustomCellRowBuilder isEnabled(boolean isEnabled) {
+            this.isEnabled = isEnabled;
+            return this;
+        }
+
         @Override
         public CustomCellRow build() {
-            return new CustomCellRow(title, description, requiresRestart, propertySelectionTag, showIf, showIfReverse, divider, onClick, layout);
+            return new CustomCellRow(title, description, requiresRestart, avoidReDraw, isEnabled, propertySelectionTag, showIf, showIfReverse, divider, onClick, layout);
         }
     }
 }

@@ -52,6 +52,7 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +63,7 @@ import it.octogram.android.http.FileDownloader;
 import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
-import it.octogram.android.utils.FileUnzip;
+import it.octogram.android.utils.data.FileUnzip;
 
 public class CustomEmojiController {
     private static Typeface systemEmojiTypeface;
@@ -216,7 +217,7 @@ public class CustomEmojiController {
                     emojiPacksInfo.addAll(tmp);
                     AndroidUtilities.runOnUIThread(listener::onLoaded);
                     try {
-                        String json = new StandardHTTPRequest("https://raw.githubusercontent.com/OctoGramApp/assets/emojiPacks/EmojiPacks/emoji_packs.json").request();
+                        String json = new StandardHTTPRequest.Builder("https://raw.githubusercontent.com/OctoGramApp/assets/emojiPacks/EmojiPacks/emoji_packs.json").build().request();
                         preferences.edit().putString("emoji_packs", json).apply();
                         invalidateCache(true);
                         emojiPacksInfo.addAll(loadFromJson(json));
@@ -343,7 +344,7 @@ public class CustomEmojiController {
 
         public EmojiPackInfo(String packName, String fileLink, String previewLink, String packId, Long packSize, Integer packVersion, int emojiCount, String md5) {
             super(packName, Objects.equals(packId, "apple") ? "default" : packId, fileLink, previewLink, emojiCount, packSize);
-            this.versionWithMd5 = String.format("%s_%s", packVersion, md5);
+            this.versionWithMd5 = String.format(Locale.US, "%s_%s", packVersion, md5);
         }
 
         public String getVersionWithMd5() {

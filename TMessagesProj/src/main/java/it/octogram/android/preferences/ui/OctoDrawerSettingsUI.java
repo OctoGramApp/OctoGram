@@ -30,6 +30,7 @@ import it.octogram.android.DrawerBackgroundState;
 import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.DrawerItem;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.preferences.OctoPreferences;
@@ -43,7 +44,8 @@ import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.preferences.ui.custom.DrawerOrderSettings;
 import it.octogram.android.preferences.ui.custom.ThemeSelectorCell;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
+
 
 public class OctoDrawerSettingsUI implements PreferencesEntry {
     private DrawerPreviewCell drawerPreviewCell;
@@ -59,7 +61,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
         updateItemsVisibility();
 
         return OctoPreferences.builder(getString(R.string.DrawerTitle))
-                .deepLink("tg://appearance/drawer")
+                .deepLink(DeepLinkDef.APPEARANCE_DRAWER)
                 .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_openin, getString(R.string.Drawer_Test), () -> LaunchActivity.instance.drawerLayoutContainer.openDrawer(true)))
                 .category(getString(R.string.DrawerTitle), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
@@ -83,7 +85,12 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(DrawerBackgroundState.COLOR.getValue())
                                             .setItemIcon(R.drawable.msg_colors)
-                                            .setItemTitle(getString(R.string.DrawerBackgroundColor))
+                                            .setItemTitle(getString(R.string.DrawerBackgroundColor)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DrawerBackgroundState.PREMIUM_DETAILS.getValue())
+                                            .setItemIcon(R.drawable.menu_feature_premium)
+                                            .setItemTitle(getString(R.string.DrawerPremiumDetails))
+                                            .setItemDescription(getString(R.string.DrawerPremiumDetails_Desc))
                             ))
                             .onSelected(this::reloadDrawerPreviewInstance)
                             .title(getString(R.string.DrawerBackground))

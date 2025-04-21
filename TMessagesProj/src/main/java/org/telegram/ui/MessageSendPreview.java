@@ -79,6 +79,8 @@ import org.telegram.ui.Stories.recorder.KeyboardNotifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import it.octogram.android.OctoConfig;
+
 public class MessageSendPreview extends Dialog implements NotificationCenter.NotificationCenterDelegate {
 
     public final Context context;
@@ -1226,6 +1228,7 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                 return sendButton.getFillColor();
             }
         };
+        this.sendButton.setUseSquaredFab(OctoConfig.INSTANCE.useSquaredFab.getValue());
         this.anchorSendButton.copyTo(this.sendButton);
         this.sendButton.center = sendButton.center;
         this.sendButton.open.set(sendButton.open.get(), true);

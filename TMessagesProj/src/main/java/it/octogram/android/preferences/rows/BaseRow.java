@@ -17,6 +17,8 @@ import java.util.Objects;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
+import it.octogram.android.preferences.rows.impl.CustomAIModelRow;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
@@ -158,6 +160,12 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
         }
         if (getType() != item.getType()) {
             return false;
+        }
+        if (item instanceof CustomCellRow v2) {
+            return this instanceof CustomCellRow v3 && Objects.equals(v2.getLayout(), v3.getLayout());
+        }
+        if (item instanceof CustomAIModelRow v2) {
+            return this instanceof CustomAIModelRow v3 && Objects.equals(v2.getModelID(), v3.getModelID());
         }
         if (item instanceof HeaderRow || item instanceof SwitchRow || item instanceof FooterInformativeRow) {
             return Objects.equals(item.getTitle(), getTitle());

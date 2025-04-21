@@ -20,7 +20,8 @@ import androidx.annotation.IntDef;
         MenuActionDef.LITE_MODE_ID,
         MenuActionDef.PROXY_LIST_ID,
         MenuActionDef.BROWSER_HOME_ID,
-        MenuActionDef.DATA_AND_STORAGE
+        MenuActionDef.DATA_AND_STORAGE,
+        MenuActionDef.AI_FEATURE
 })
 public @interface MenuAction {
 }

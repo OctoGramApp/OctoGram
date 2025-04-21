@@ -53,6 +53,7 @@ import it.octogram.android.MediaFilter;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.logs.OctoLogging;
+import kotlin.uuid.Uuid;
 
 
 public class OctoUtils {
@@ -159,6 +160,13 @@ public class OctoUtils {
     }
 
     public static File getFileContentFromMessage(MessageObject message) {
+        if (!TextUtils.isEmpty(message.messageOwner.attachPath)) {
+            File file = new File(message.messageOwner.attachPath);
+            if (file.exists()) {
+                return file;
+            }
+        }
+
         File file = FileLoader.getInstance(UserConfig.selectedAccount).getPathToMessage(message.messageOwner);
         return file.exists() ? file : null; // TODO: handle cache
     }
@@ -409,7 +417,7 @@ public class OctoUtils {
     }
 
     public static CharSequence hidePhoneNumber(@NonNull TLRPC.User user) {
-        android.util.Log.d("OctoUtils", "hidePhoneNumber: " + user);
+        OctoLogging.d("OctoUtils", "hidePhoneNumber: " + user);
         var phone = user.phone;
         String text = PhoneFormat.getInstance().format("+" + phone);
 
@@ -420,7 +428,7 @@ public class OctoUtils {
                 case PhoneNumberAlternative.SHOW_FAKE_PHONE_NUMBER -> {
                     CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phone);
                     String phoneCountry = info != null ? info.callingCode : "";
-                    return String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
+                    return String.format(Locale.US, "+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
                 }
                 case PhoneNumberAlternative.SHOW_USERNAME -> {
                     if (user.username != null && !user.username.isEmpty()) {
@@ -441,10 +449,10 @@ public class OctoUtils {
         var phone = user.phone;
         CallingCodeInfo info = PhoneFormat.getInstance().findCallingCodeInfo(phone);
         String phoneCountry = info != null ? info.callingCode : "";
-        return String.format("+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
+        return String.format(Locale.US, "+%s %s", phoneCountry, OctoUtils.phoneNumberReplacer(phone, phoneCountry));
     }
 
-    static char[] SPOILER_CHARS = new char[] {
+    static char[] SPOILER_CHARS = new char[]{
             '⠌', '⡢', '⢑', '⠨', '⠥', '⠮', '⡑'
     };
 
@@ -467,6 +475,10 @@ public class OctoUtils {
 
     public static int getNavBarColor() {
         return Theme.getColor(Theme.key_windowBackgroundWhite);
+    }
+
+    public static String generateRandomString() {
+        return safeToString(Uuid.Companion.random()).replace("-", "");
     }
 }
 

@@ -44,6 +44,7 @@ import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.DcStatusActivity;
 import it.octogram.android.preferences.ui.NavigationSettingsUI;
+import it.octogram.android.preferences.ui.OctoAiFeaturesUI;
 import it.octogram.android.preferences.ui.OctoAppearanceUI;
 import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
 import it.octogram.android.preferences.ui.OctoChatsSettingsUI;
@@ -53,12 +54,13 @@ import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
 import it.octogram.android.preferences.ui.OctoInfoSettingsUI;
 import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+import it.octogram.android.preferences.ui.OctoPrivacyLockedChatsSettingsUI;
 import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
 import it.octogram.android.preferences.ui.OctoTranslatorUI;
 import it.octogram.android.preferences.ui.PinnedEmojisActivity;
 import it.octogram.android.preferences.ui.PinnedHashtagsActivity;
 import it.octogram.android.preferences.ui.PinnedReactionsActivity;
-import it.octogram.android.utils.BrowserUtils;
+import it.octogram.android.utils.network.BrowserUtils;
 
 /**
  * Manages deep links and navigation actions within the application.
@@ -75,8 +77,8 @@ import it.octogram.android.utils.BrowserUtils;
  * @noinspection deprecation, SequencedCollectionMethodCanBeUsed
  */
 public class DeepLinkManager extends LaunchActivity {
-    private static final String TAG = "DeepLinkManager";
-    private static long profileUserId = 0;
+    static final String TAG = "DeepLinkManager";
+    static long profileUserId = 0;
 
     /**
      * Handles deep links received by the application.
@@ -162,12 +164,20 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new PreferencesFragment(new OctoTranslatorUI(), parameter));
                 return true;
             }
+            case DeepLinkDef.AI_FEATURES -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI(), parameter));
+                return true;
+            }
             case DeepLinkDef.INFO -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoInfoSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.PRIVACY -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), parameter));
+                return true;
+            }
+            case DeepLinkDef.PRIVACY_CHATS -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoPrivacyLockedChatsSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.LOCKED_CHATS -> {
@@ -226,7 +236,7 @@ public class DeepLinkManager extends LaunchActivity {
      *
      * @param fragment The fragment associated with the Francesco deep link event.
      */
-    private static void handleFrancesco(BaseFragment fragment) {
+    static void handleFrancesco(BaseFragment fragment) {
         var bulletinText = "";
         if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
             bulletinText = "Broken name fix has been disabled.";
@@ -245,7 +255,7 @@ public class DeepLinkManager extends LaunchActivity {
      *
      * @param fragment The fragment associated with the Ximi deep link event.
      */
-    private static void handleXimi(BaseFragment fragment) {
+    static void handleXimi(BaseFragment fragment) {
         final String bulletinText = OctoConfig.INSTANCE.forceHideLockScreenPopup.getValue()
                 ? "Force hide lock screen popup has been disabled."
                 : "Force hide lock screen popup has been enabled.";
@@ -265,7 +275,7 @@ public class DeepLinkManager extends LaunchActivity {
      * This method triggers the app update checker to verify if a new version is available.
      * If a new version is found, the user is prompted to update the app.
      */
-    private static void handleUpdateChecker() {
+    static void handleUpdateChecker() {
         if (LaunchActivity.instance != null) {
             LaunchActivity.instance.checkAppUpdate(true, null);
         }
@@ -286,7 +296,7 @@ public class DeepLinkManager extends LaunchActivity {
      * @param icon          The LauncherIcon object representing the unlocked icon.
      * @param iconStringRes The resource ID of the string to display in the unlock notification.
      */
-    private static void handleIconUnlock(BaseFragment fragment, ConfigProperty<Boolean> configValue, LauncherIconController.LauncherIcon icon, int iconStringRes) {
+    static void handleIconUnlock(BaseFragment fragment, ConfigProperty<Boolean> configValue, LauncherIconController.LauncherIcon icon, int iconStringRes) {
         if (LaunchActivity.instance != null) {
             if (!configValue.getValue()) {
                 AppIconBulletinLayout layout = new AppIconBulletinLayout(fragment.getParentActivity(), icon, null);
@@ -316,7 +326,7 @@ public class DeepLinkManager extends LaunchActivity {
      *
      * @param deepLink The deep link string to handle.
      */
-    private static void handleUserDeepLink(String deepLink) {
+    static void handleUserDeepLink(String deepLink) {
         deepLink = deepLink.replace("tg:user", "tg://telegram.org").replace("tg://user", "tg://telegram.org");
         Uri data = Utilities.uriParseSafe(deepLink);
         if (data != null) {
@@ -345,7 +355,7 @@ public class DeepLinkManager extends LaunchActivity {
      * @return The deep link type as a String, or null if the deep link is not recognized.
      */
     @DeepLinkType
-    private static String getDeepLinkType(Uri uri) {
+    static String getDeepLinkType(Uri uri) {
         if (uri == null) {
             return null;
         }
@@ -390,7 +400,13 @@ public class DeepLinkManager extends LaunchActivity {
             case "pinned_hashtags" -> DeepLinkDef.PINNED_HASHTAGS;
             case "octogram" -> DeepLinkDef.INFO;
             case "dc" -> DeepLinkDef.DC_STATUS;
-            case "privacy" -> DeepLinkDef.PRIVACY;
+            case "ai" -> DeepLinkDef.AI_FEATURES;
+            case "privacy" -> {
+                if (uri.getPath() != null) {
+                    if (uri.getPath().equalsIgnoreCase("/chats")) yield DeepLinkDef.PRIVACY_CHATS;
+                }
+                yield DeepLinkDef.PRIVACY;
+            }
             case "locked_chats" -> DeepLinkDef.LOCKED_CHATS;
             default -> {
                 if (authority.startsWith("user")) {
@@ -409,7 +425,7 @@ public class DeepLinkManager extends LaunchActivity {
      *
      * @return The currently active fragment, or null if no fragment is active.
      */
-    private static BaseFragment getCurrentFragment() {
+    static BaseFragment getCurrentFragment() {
         if (mainFragmentsStack.isEmpty()) return null;
         return mainFragmentsStack.get(mainFragmentsStack.size() - 1);
     }
@@ -484,6 +500,10 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new DataSettingsActivity());
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
+            case MenuActionDef.AI_FEATURE:
+                fragment.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI()));
+                drawerLayoutContainer.closeDrawer(false);
+                return true;
             case MenuActionDef.QR_LOGIN_ID:
                 var fg = getQrActivity(currentAccount, launchActivity);
                 actionBarLayout.presentFragment(fg, false, true, true, false);
@@ -526,7 +546,7 @@ public class DeepLinkManager extends LaunchActivity {
      * @return The configured ActionIntroActivity instance for QR code login.
      */
     @NonNull
-    private static ActionIntroActivity getQrActivity(int currentAccount, LaunchActivity launchActivity) {
+    static ActionIntroActivity getQrActivity(int currentAccount, LaunchActivity launchActivity) {
         var fg = new ActionIntroActivity(ActionIntroActivity.ACTION_TYPE_QR_LOGIN);
         fg.setQrLoginDelegate(code -> {
             AlertDialog progressDialog = new AlertDialog(launchActivity, 3);

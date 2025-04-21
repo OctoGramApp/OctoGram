@@ -24,13 +24,13 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoUtils;
 
 public class YandexTranslator {
-    private static final String uuid = UUID.randomUUID().toString().replace("-", "");
+    private static final String uuid = OctoUtils.generateRandomString().replace("-", "");
     private static final String contentType = "application/x-www-form-urlencoded";
     private static final String userAgent = "ru.yandex.translate/21.15.4.21402814 (Xiaomi Redmi K20 Pro; Android 11)";
 
@@ -54,10 +54,12 @@ public class YandexTranslator {
                     originalText.entities = entities;
 
                     String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
-                    StandardHTTPRequest request = new StandardHTTPRequest(composeUrl());
-                    request.header("User-Agent", userAgent);
-                    request.header("Content-Type", contentType);
-                    request.data(composeData(text2, toLanguage));
+                    StandardHTTPRequest request = new StandardHTTPRequest.Builder(composeUrl())
+                            .header("User-Agent", userAgent)
+                            .header("Content-Type", contentType)
+                            .data(composeData(text2, toLanguage))
+                            .build();
+
                     String response = request.request();
 
                     if (TextUtils.isEmpty(response)) {

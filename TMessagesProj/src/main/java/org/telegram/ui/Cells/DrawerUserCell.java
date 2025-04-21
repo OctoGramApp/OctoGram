@@ -43,7 +43,7 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.Components.TextStyleSpan;
 
-import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 
 public class DrawerUserCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 

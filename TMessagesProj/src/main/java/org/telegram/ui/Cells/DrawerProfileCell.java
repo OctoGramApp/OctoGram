@@ -8,6 +8,9 @@
 
 package org.telegram.ui.Cells;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.ui.PeerColorActivity.adaptProfileEmojiColor;
+
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -40,6 +43,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import org.telegram.PhoneFormat.PhoneFormat;
+import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.DialogObject;
@@ -64,6 +68,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.CallLogActivity;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
+import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -81,6 +86,7 @@ import org.telegram.ui.ContactsActivity;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.ProfileActivity;
+import org.telegram.ui.Stars.StarGiftPatterns;
 import org.telegram.ui.ThemeActivity;
 
 import java.util.ArrayList;
@@ -89,11 +95,11 @@ import it.octogram.android.DrawerBackgroundState;
 import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
+import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
-import it.octogram.android.utils.BrowserUtils;
-import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.network.BrowserUtils;
 
 public class DrawerProfileCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -142,6 +148,8 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     private boolean lastStateDarkenBackground = true;
     private int lastStateFavoriteIcon = -1;
     private ViewPropertyAnimator favoriteIconAnimator;
+
+    private final PremiumDetailsInterface premiumDetailsInterface;
 
     public DrawerProfileCell(Context context, DrawerLayoutContainer drawerLayoutContainer) {
         super(context);
@@ -198,6 +206,9 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         gradientBackground = new ImageView(context);
         addView(gradientBackground, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.BOTTOM));
 
+        premiumDetailsInterface = new PremiumDetailsInterface(context);
+        addView(premiumDetailsInterface, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+
         shadowView = new ImageView(context);
         shadowView.setVisibility(INVISIBLE);
         shadowView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -207,7 +218,6 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         avatarImageView = new BackupImageView(context);
         avatarImageView.getImageReceiver().setRoundRadius(AndroidUtilities.dp(32));
         addView(avatarImageView, LayoutHelper.createFrame(64, 64, Gravity.LEFT | Gravity.BOTTOM, 16, 0, 0, 67));
-
         nameTextView = new SimpleTextView(context) {
             @Override
             protected void onDraw(Canvas canvas) {
@@ -991,7 +1001,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         //boolean useImageBackground = backgroundKey != Theme.key_chats_menuTopBackground && Theme.isCustomTheme() && !Theme.isPatternWallpaper() && backgroundDrawable != null && !(backgroundDrawable instanceof ColorDrawable) && !(backgroundDrawable instanceof GradientDrawable);
         boolean useImageBackground = backgroundDrawable != null;
 
-        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.COLOR.getValue() || OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.TRANSPARENT.getValue()) {
+        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.COLOR.getValue() || OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.TRANSPARENT.getValue() || OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.PREMIUM_DETAILS.getValue()) {
             useImageBackground = false;
         }
 
@@ -1303,14 +1313,46 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
     public Integer applyBackground(boolean force) {
         Integer currentTag = (Integer) getTag();
         int backgroundKey = Theme.hasThemeKey(Theme.key_chats_menuTopBackground) && Theme.getColor(Theme.key_chats_menuTopBackground) != 0 ? Theme.key_chats_menuTopBackground : Theme.key_chats_menuTopBackgroundCats;
+        boolean appliedColors = false;
 
-        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.TRANSPARENT.getValue()) {
+        if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.PREMIUM_DETAILS.getValue()) {
+            backgroundKey = Theme.key_avatar_backgroundActionBarBlue;
+
+            if (UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+                TLRPC.User user = AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().getCurrentUser();
+                MessagesController.PeerColors peerColors = MessagesController.getInstance(UserConfig.selectedAccount).profilePeerColors;
+                MessagesController.PeerColor peerColor = peerColors == null ? null : peerColors.getColor(UserObject.getProfileColorId(user));
+
+                premiumDetailsInterface.set(UserObject.getProfileEmojiId(user), user != null && user.emoji_status instanceof TLRPC.TL_emojiStatusCollectible);
+
+                if (peerColor != null) {
+                    appliedColors = true;
+                    backgroundKey = Theme.key_checkbox;
+                    setTag(backgroundKey);
+                    setBackground(new GradientDrawable(
+                            GradientDrawable.Orientation.BOTTOM_TOP,
+                            new int[]{
+                                    peerColor.getBgColor1(Theme.isCurrentThemeDark()),
+                                    peerColor.getBgColor2(Theme.isCurrentThemeDark())
+                            }
+                    ));
+
+                    if (peerColor.patternColor != 0) {
+                        premiumDetailsInterface.setColor(peerColor.patternColor);
+                    } else {
+                        premiumDetailsInterface.setColor(adaptProfileEmojiColor(peerColor.getBgColor1(Theme.isCurrentThemeDark())));
+                    }
+                } else {
+                    premiumDetailsInterface.setColor(adaptProfileEmojiColor(Theme.getColor(Theme.key_actionBarDefault)));
+                }
+            }
+        } else if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.TRANSPARENT.getValue()) {
             backgroundKey = Theme.key_chats_menuBackground;
         } else if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.COLOR.getValue()) {
             backgroundKey = Theme.key_switchTrackChecked;
         }
 
-        if (force || currentTag == null || backgroundKey != currentTag) {
+        if ((force || currentTag == null || backgroundKey != currentTag) && !appliedColors) {
             setBackgroundColor(Theme.getColor(backgroundKey));
             setTag(backgroundKey);
         }
@@ -1380,6 +1422,70 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         }
         if (darkThemeView != null) {
             darkThemeView.playAnimation();
+        }
+    }
+
+    private static class PremiumDetailsInterface extends FrameLayout {
+        public PremiumDetailsInterface(@NonNull Context context) {
+            super(context);
+            setWillNotDraw(false);
+        }
+
+        public final AnimatedFloat emojiLoadedT = new AnimatedFloat(this, 0, 440, CubicBezierInterpolator.EASE_OUT_QUINT);
+        public final AnimatedFloat emojiFullT = new AnimatedFloat(this, 0, 440, CubicBezierInterpolator.EASE_OUT_QUINT);
+
+        private AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable emoji = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(this, false, dp(20), AnimatedEmojiDrawable.CACHE_TYPE_ALERT_PREVIEW_STATIC);
+        private long _documentId = 0;
+        private boolean emojiIsCollectible;
+
+        public void set(long documentId, boolean isCollectible) {
+            if (_documentId == documentId) {
+                return;
+            }
+
+            emoji.set(documentId, true);
+            emojiIsCollectible = isCollectible;
+            _documentId = documentId;
+        }
+
+        public void setColor(int color) {
+            emoji.setColor(color);
+        }
+
+        @Override
+        protected void onAttachedToWindow() {
+            super.onAttachedToWindow();
+            emoji.attach();
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            emoji.detach();
+        }
+
+        private boolean emojiLoaded;
+        private boolean isEmojiLoaded() {
+            if (emojiLoaded) {
+                return true;
+            }
+            if (emoji != null && emoji.getDrawable() instanceof AnimatedEmojiDrawable drawable && drawable.getImageReceiver() != null && drawable.getImageReceiver().hasImageLoaded()) {
+                return emojiLoaded = true;
+            }
+            return false;
+        }
+
+        @Override
+        protected void onDraw(@NonNull Canvas canvas) {
+            super.onDraw(canvas);
+
+            if (OctoConfig.INSTANCE.drawerBackground.getValue() == DrawerBackgroundState.PREMIUM_DETAILS.getValue()) {
+                float loadedState = emojiLoadedT.set(isEmojiLoaded());
+                float full = emojiFullT.set(emojiIsCollectible);
+                if (loadedState > 0) {
+                    StarGiftPatterns.drawProfilePattern(canvas, emoji, getWidth(), getHeight(), 1.0f, full);
+                }
+            }
         }
     }
 }

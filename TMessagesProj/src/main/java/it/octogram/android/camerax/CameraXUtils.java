@@ -223,7 +223,7 @@ public class CameraXUtils {
     private static int getResolutionFromConfig() {
         int current = OctoConfig.INSTANCE.cameraXResolution.getValue();
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-            OctoLogging.e(TAG, String.format(Locale.ROOT, "getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
+            OctoLogging.e(TAG, String.format(Locale.US, "getResolutionFromConfig: %d, enumToValue: %d", current, CameraXResolution.INSTANCE.enumToValue(CameraXResolution.HD)));
         }
         if (current == CameraXResolution.INSTANCE.enumToValue(CameraXResolution.SD)) {
             return 480;

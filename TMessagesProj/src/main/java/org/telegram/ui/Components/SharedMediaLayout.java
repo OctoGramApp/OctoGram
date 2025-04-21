@@ -150,7 +150,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.ForwardContext;
+import it.octogram.android.utils.chat.ForwardContext;
 
 @SuppressWarnings("unchecked")
 public class SharedMediaLayout extends FrameLayout implements NotificationCenter.NotificationCenterDelegate, DialogCell.DialogCellDelegate {

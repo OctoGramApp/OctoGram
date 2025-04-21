@@ -46,7 +46,7 @@ import java.util.Objects;
 
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.http.FileDownloader;
-import it.octogram.android.utils.FileUnzip;
+import it.octogram.android.utils.data.FileUnzip;
 
 public class EmojiSet extends FrameLayout {
     private final TextView textView;

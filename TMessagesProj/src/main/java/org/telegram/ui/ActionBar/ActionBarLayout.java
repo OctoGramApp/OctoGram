@@ -532,7 +532,6 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     private Runnable onFragmentStackChangedListener;
 
     private int overrideWidthOffset = -1;
-    private String d = UUID.randomUUID().toString().replace("-", "");
 
     public ActionBarLayout(Context context, boolean main) {
         super(context);

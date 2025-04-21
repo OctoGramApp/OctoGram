@@ -23,10 +23,12 @@ import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
@@ -42,12 +44,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.UUID;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
+import it.octogram.android.StoreUtils;
 import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.OctoPreferences;
@@ -55,26 +57,26 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.preferences.ui.components.CrashManagementComponent;
 import it.octogram.android.preferences.ui.custom.ExportDoneReadyBottomSheet;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 import it.octogram.android.utils.AppRestartHelper;
-import it.octogram.android.utils.LogsMigrator;
+import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.data.LogsMigrator;
 
 /** @noinspection SequencedCollectionMethodCanBeUsed*/
 public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
-    private final ConfigProperty<Boolean> logsOnlyPbeta = new ConfigProperty<>(null, false);
-    private void updateConfigs() {
-        logsOnlyPbeta.updateValue(BuildVars.DEBUG_PRIVATE_VERSION);
-    }
-
     private PreferencesFragment fragment;
     private ChatAttachAlert chatAttachAlert;
 
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
-        updateConfigs();
         this.fragment = fragment;
+
+        ConfigProperty<Boolean> logsOnlyPbeta = new ConfigProperty<>(null, BuildVars.DEBUG_PRIVATE_VERSION);
+        ConfigProperty<Boolean> canShowUpdatesPolicy = new ConfigProperty<>(null, !StoreUtils.isDownloadedFromAnyStore() || StoreUtils.isFromPlayStore());
+
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
                 .deepLink(DeepLinkDef.OCTOSETTINGS)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.MAIN_SETTINGS, true, getString(R.string.OctoMainSettingsHeader))
@@ -116,6 +118,11 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                             .title(getString(R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI())))
+                            .icon(R.drawable.cup_star_solar)
+                            .title(getString(R.string.AiFeatures_Brief))
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoCameraSettingsUI())))
                             .icon(R.drawable.msg_camera)
                             .title(getString(R.string.ChatCamera))
@@ -132,8 +139,16 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                             .title(getString(R.string.Experiments))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoUpdatesUI())))
+                            .onClick(() -> {
+                                if (StoreUtils.isFromPlayStore()) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Utilities.uriParseSafe("https://play.google.com/store/apps/details?id="+ApplicationLoader.applicationContext.getPackageName()));
+                                    context.startActivity(browserIntent);
+                                } else {
+                                    fragment.presentFragment(new PreferencesFragment(new OctoUpdatesUI()));
+                                }
+                            })
                             .icon(R.drawable.round_update_white_28)
+                            .showIf(canShowUpdatesPolicy)
                             .title(getString(R.string.Updates))
                             .build());
                 })
@@ -211,7 +226,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
     }
 
     private void startImportActivity(File firstFile) {
-        if (firstFile.getName().endsWith(".octoexport") && OctoConfig.isValidExport(firstFile)) {
+        if (firstFile.getName().endsWith(OctoConfig.OCTOEXPORT_EXTENSION) && OctoConfig.isValidExport(firstFile)) {
             ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(fragment, firstFile);
             sheet.setOriginalActivity(fragment.getParentActivity());
             sheet.show();
@@ -270,7 +285,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
             Uri uri = data.getData();
             if (uri != null) {
                 File cacheDir = AndroidUtilities.getCacheDir();
-                String tempFile = UUID.randomUUID().toString().replace("-", "") + ".octoexport";
+                String tempFile = OctoUtils.generateRandomString().replace("-", "") + OctoConfig.OCTOEXPORT_EXTENSION;
                 File file = new File(cacheDir.getPath(), tempFile);
                 try {
                     final InputStream inputStream = ApplicationLoader.applicationContext.getContentResolver().openInputStream(uri);

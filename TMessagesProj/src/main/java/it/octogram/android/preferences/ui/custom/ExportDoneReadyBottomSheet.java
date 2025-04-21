@@ -62,7 +62,7 @@ import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.utils.ImportSettingsScanHelper;
+import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
 public class ExportDoneReadyBottomSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
     private static final String TAG = "ExportDoneReadyBottomSheet";
@@ -183,6 +183,11 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         setCustomView(linearLayout);
     }
 
+    @Override
+    public void onDismissAnimationStart() {
+        stopUpdateReceiver();
+    }
+
     public void setOnCompletedRunnable(Runnable onCompletedRunnable) {
         this.onCompletedRunnable = onCompletedRunnable;
     }
@@ -208,7 +213,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
                 fileNameText = "my-octogram-export";
             }
 
-            File cacheFile = new File(cacheDir.getPath(), fileNameText + ".octoexport");
+            File cacheFile = new File(cacheDir.getPath(), fileNameText + OctoConfig.OCTOEXPORT_EXTENSION);
             if (cacheFile.exists()) {
                 if(cacheFile.delete()) {
                     OctoLogging.d(TAG, "Deleted existing file");
@@ -267,7 +272,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
-        intent.putExtra(Intent.EXTRA_TITLE, fileNameText+".octoexport");
+        intent.putExtra(Intent.EXTRA_TITLE, fileNameText+OctoConfig.OCTOEXPORT_EXTENSION);
         baseFragment.startActivityForResult(intent, CREATE_FILE_REQ);
     }
 
@@ -277,7 +282,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
                 alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportFailedZeroTitle));
                 alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportFailedZeroCaption));
-                alertDialogBuilder.setPositiveButton("OK", null);
+                alertDialogBuilder.setPositiveButton(getString(R.string.OK), null);
                 AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
             }

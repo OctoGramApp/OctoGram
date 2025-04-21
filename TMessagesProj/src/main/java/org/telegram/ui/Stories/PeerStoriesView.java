@@ -195,7 +195,7 @@ import java.util.concurrent.CountDownLatch;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.QualityPreset;
 import it.octogram.android.StoreUtils;
-import it.octogram.android.utils.BrowserUtils;
+import it.octogram.android.utils.network.BrowserUtils;
 
 public class PeerStoriesView extends SizeNotifierFrameLayout implements NotificationCenter.NotificationCenterDelegate {
 

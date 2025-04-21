@@ -19,7 +19,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -36,7 +35,6 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.widget.TextView;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 
@@ -47,10 +45,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.util.Consumer;
-
-import it.octogram.android.OctoConfig;
-import it.octogram.android.StoreUtils;
-import it.octogram.android.utils.FolderUtils;
 
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
@@ -127,6 +121,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
+import it.octogram.android.utils.config.FolderUtils;
 
 public class MessagesController extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 

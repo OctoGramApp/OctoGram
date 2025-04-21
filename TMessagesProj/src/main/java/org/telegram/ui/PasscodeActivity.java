@@ -93,6 +93,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
+
 public class PasscodeActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
     public final static int TYPE_MANAGE_CODE_SETTINGS = 0,
             TYPE_SETUP_CODE = 1,
@@ -646,13 +649,14 @@ public class PasscodeActivity extends BaseFragment implements NotificationCenter
                     animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonIcon, "translationZ", AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
                     animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonIcon, "translationZ", AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
                     floatingButtonContainer.setStateListAnimator(animator);
-                    floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+                    floatingButtonContainer.setOutlineProvider(new OutlineProvider());
+                    /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                         @SuppressLint("NewApi")
                         @Override
                         public void getOutline(View view, Outline outline) {
                             outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                         }
-                    });
+                    });*/
                 }
                 floatingAutoAnimator = VerticalPositionAutoAnimator.attach(floatingButtonContainer);
                 frameLayout.addView(floatingButtonContainer, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 56 : 60, Build.VERSION.SDK_INT >= 21 ? 56 : 60, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 24, 16));
@@ -676,15 +680,15 @@ public class PasscodeActivity extends BaseFragment implements NotificationCenter
                 floatingButtonContainer.setContentDescription(LocaleController.getString(R.string.Next));
                 floatingButtonContainer.addView(floatingButtonIcon, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 56 : 60, Build.VERSION.SDK_INT >= 21 ? 56 : 60));
 
-                Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
+                /*Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
                 if (Build.VERSION.SDK_INT < 21) {
                     Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow).mutate();
                     shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
                     CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                     combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                     drawable = combinedDrawable;
-                }
-                floatingButtonContainer.setBackground(drawable);
+                }*/
+                floatingButtonContainer.setBackground(CustomFab.createFabBackground());
 
                 updateFields();
                 break;
@@ -878,8 +882,8 @@ public class PasscodeActivity extends BaseFragment implements NotificationCenter
         try {
             if (Build.VERSION.SDK_INT >= 23) {
                 if (
-                        BiometricManager.from(ApplicationLoader.applicationContext).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS &&
-                                AndroidUtilities.isKeyguardSecure()
+                    BiometricManager.from(ApplicationLoader.applicationContext).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS &&
+                    AndroidUtilities.isKeyguardSecure()
                 ) {
                     fingerprintRow = rowCount++;
                 }

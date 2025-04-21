@@ -41,8 +41,8 @@ import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.custom.CameraTypeSelector;
-import it.octogram.android.utils.MessageStringHelper;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.utils.appearance.MessageStringHelper;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 
 public class OctoCameraSettingsUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> usingSystemCamera = new ConfigProperty<>(null, false);

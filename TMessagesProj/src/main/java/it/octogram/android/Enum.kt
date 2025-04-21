@@ -55,7 +55,8 @@ enum class DoubleTapAction(val value: Int) {
     REPLY(4),
     DELETE(5),
     SAVE(6),
-    EDIT(7);
+    EDIT(7),
+    TRANSLATE(8);
 
     companion object {
         fun fromInt(value: Int): DoubleTapAction {
@@ -297,6 +298,7 @@ object DrawerItem {
     const val DOWNLOADS_ID = "downloads"
     const val TELEGRAM_BROWSER_ID = "tg_browser"
     const val DATA_AND_STORAGE_ID = "data_and_storage"
+    const val AI_FEATURES_ID = "ai_features"
 
     enum class Id(@DrawerItemDef val id: String, val itemId: Int) {
         MY_PROFILE(MY_PROFILE_ID, 16),
@@ -321,7 +323,8 @@ object DrawerItem {
         ATTACH_MENU_BOT(ATTACH_MENU_BOT_ID, 205),
         DOWNLOADS(DOWNLOADS_ID, 912),
         TELEGRAM_BROWSER(TELEGRAM_BROWSER_ID, 914),
-        DATA_AND_STORAGE(DATA_AND_STORAGE_ID, 915);
+        DATA_AND_STORAGE(DATA_AND_STORAGE_ID, 915),
+        AI_FEATURES(AI_FEATURES_ID, 916);
 
         companion object INSTANCE {
             fun getById(id: String): Id? {
@@ -377,14 +380,19 @@ enum class StickerUi(val value: Int) {
     MEDIA_LOADING(26),
     WEB_SEARCH(27),
     OLD_PRIVACY(28),
-    PRIVACY(29)
+    PRIVACY(29),
+    CHATS_PRIVACY(30),
+    TRANSLATOR_GEMINI(31),
+    DUCK_OK(32),
+    NEW_MODEL_GENERATION(33)
 }
 
 enum class DrawerBackgroundState(val value: Int) {
     TRANSPARENT(0),
     WALLPAPER(1),
     PROFILE_PIC(2),
-    COLOR(3)
+    COLOR(3),
+    PREMIUM_DETAILS(4)
 }
 
 enum class DrawerFavoriteOption(val value: Int) {
@@ -427,7 +435,42 @@ enum class ExpandableRowsIds(val id: Int) {
     CONTEXT_MENU_ELEMENTS(3),
     ADMIN_SHORTCUTS(4),
     LOCKED_ELEMENTS(5),
-    LOCKED_ACCOUNTS(6)
+    LOCKED_ACCOUNTS(6),
+    AI_MODEL_OPTIONS_MESSAGES(7)
+}
+
+enum class AiModelType(val id: Int) {
+    RELATED_TO_MESSAGES(0),
+    RELATED_TO_INPUT(1),
+    RELATED_TO_CHATS(2);
+
+    companion object {
+        fun hasState(value: Int): Boolean {
+            return AiModelType.entries.any { it.id == value }
+        }
+        fun find(value: Int): AiModelType {
+            return AiModelType.entries.find { it.id == value } ?: RELATED_TO_MESSAGES
+        }
+    }
+}
+
+enum class AiModelMessagesState(val id: String, val stateName: String) {
+    TEXT_MESSAGES("msg", getString(R.string.AiFeatures_CustomModels_Create_OptionsHeader_MessagesTexts)),
+    PHOTOS("pts", getString(R.string.SendMediaPermissionPhotos)),
+    STICKERS("sts", getString(R.string.AccDescrStickers)),
+    MUSIC("msc", getString(R.string.SendMediaPermissionMusic)),
+    VOICE_MESSAGES("vms", getString(R.string.SendMediaPermissionVoice)),
+    VIDEOS("vid", getString(R.string.SendMediaPermissionVideos)),
+    GIFS("gif", getString(R.string.AccDescrGIFs));
+
+    companion object {
+        fun hasState(value: String): Boolean {
+            return AiModelMessagesState.entries.any { it.id == value }
+        }
+        fun find(value: String): AiModelMessagesState {
+            return AiModelMessagesState.entries.find { it.id == value } ?: TEXT_MESSAGES
+        }
+    }
 }
 
 enum class ShortcutsPosition(val id: Int) {
@@ -454,6 +497,24 @@ enum class InterfaceSliderUI(val value: Int) {
     DEFAULT(0),
     MODERN(1),
     ANDROID(2)
+}
+
+enum class InterfaceRapidButtonsActions(val value: Int) {
+    HIDDEN(0),
+    POST_STORY(1),
+    SEND_MESSAGE(2),
+    SAVED_MESSAGES(3),
+    ARCHIVED_CHATS(4),
+    SETTINGS(5),
+    LOCKED_CHATS(6),
+    PROXY(7),
+    SEARCH(8);
+
+    companion object {
+        fun getState(value: Int): InterfaceRapidButtonsActions {
+            return InterfaceRapidButtonsActions.entries.find { it.value == value } ?: POST_STORY
+        }
+    }
 }
 
 enum class Datacenter(
@@ -522,7 +583,7 @@ enum class WebPages(
 ) {
     TELEGRAM(1, "Telegram",  R.drawable.telegram_camera_icon, "https://telegram.org", 1),
     FAQ(2, "FAQ", R.drawable.msg_emoji_question, "https://telegram.org/faq", 1),
-    DOCUMENTATION(3, "Documentation", R.drawable.msg_bot, "https://core.telegram.org/", 1),
+    DOCUMENTATION(3, "Documentation", R.drawable.msg_bot, "https://core.telegram.org", 1),
     TG_CORE(4, "Telegram Core", R.drawable.left_status_profile, "https://my.telegram.org", 2),
     TRANSLATIONS(5, "Translations", R.drawable.msg_translate, "https://translations.telegram.org", 2),
     CONTEST(6, "Contest", R.drawable.gift_unpack, "https://contest.com", 2),

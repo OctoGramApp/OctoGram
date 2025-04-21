@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TranslatorProvider;
 import it.octogram.android.preferences.ui.OctoTranslatorUI;
-import it.octogram.android.utils.PopupChoiceDialogUtils;
+import it.octogram.android.utils.appearance.PopupChoiceDialogUtils;
 
 public class TranslationsWrapper {
     public static void initTranslationItem(Context context, BaseFragment fragment, MessageObject selectedMessage, int currentAccount, TLRPC.InputPeer peer, int msgId, String fromLanguage, String toLanguage, CharSequence text, ArrayList<TLRPC.MessageEntity> entities, boolean noforwards, Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress, Runnable onDismiss) {
@@ -99,6 +99,26 @@ public class TranslationsWrapper {
         } else if (translationProvider == TranslatorProvider.EMOJIS.getValue()) {
             return EmojisTranslator.isUnsupportedLanguage(currentLanguage);
         } else return translationProvider != TranslatorProvider.DEFAULT.getValue();
+    }
+
+    public static String getProviderName() {
+        return getProviderName(OctoConfig.INSTANCE.translatorProvider.getValue());
+    }
+
+    public static String getProviderName(int translationProvider) {
+        if (translationProvider == TranslatorProvider.GOOGLE.getValue()) {
+            return "Google";
+        } else if (translationProvider == TranslatorProvider.YANDEX.getValue()) {
+            return "Yandex";
+        } else if (translationProvider == TranslatorProvider.DEEPL.getValue()) {
+            return "Deepl";
+        } else if (translationProvider == TranslatorProvider.BAIDU.getValue()) {
+            return "Baidu";
+        } else if (translationProvider == TranslatorProvider.LINGO.getValue()) {
+            return "Lingo";
+        } else if (translationProvider == TranslatorProvider.EMOJIS.getValue()) {
+            return "Emojis";
+        } else return "Telegram";
     }
 
     public static void suggestProviderUpdate(Context context, BaseFragment fragment, Runnable providerChanged) {

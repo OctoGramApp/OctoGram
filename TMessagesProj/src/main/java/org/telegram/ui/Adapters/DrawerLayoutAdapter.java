@@ -45,7 +45,7 @@ import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.icons.IconsUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
-import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
@@ -433,6 +433,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                         case DATACENTER_STATUS -> icon = datacenterIcon;
                         case DATA_AND_STORAGE -> icon = R.drawable.msg2_data;
                         case QR_LOGIN -> icon = R.drawable.msg_qrcode;
+                        case AI_FEATURES -> icon = R.drawable.cup_star_solar;
                         case ATTACH_MENU_BOT -> {
                             TLRPC.TL_attachMenuBots menuBots = MediaDataController.getInstance(UserConfig.selectedAccount).getAttachMenuBots();
                             if (menuBots != null && menuBots.bots != null) {

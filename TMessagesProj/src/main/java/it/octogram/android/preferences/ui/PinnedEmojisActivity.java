@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -55,14 +63,17 @@ import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 
 
-
-/** @noinspection UnnecessaryUnicodeEscape*/
+/**
+ * @noinspection UnnecessaryUnicodeEscape
+ */
 public class PinnedEmojisActivity extends BaseFragment {
 
     private EmojiView emojiView;
@@ -114,7 +125,7 @@ public class PinnedEmojisActivity extends BaseFragment {
 
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
-            String link = "tg://pinned_emojis";
+            String link = String.format(Locale.US, "tg://%s", DeepLinkDef.PINNED_EMOJIS);
             showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;
@@ -298,13 +309,15 @@ public class PinnedEmojisActivity extends BaseFragment {
                         editText.append(spannable);
                         successHandled++;
                     }
-                } catch (JSONException ignored) { }
+                } catch (JSONException ignored) {
+                }
 
                 if (successHandled > 25) {
                     break;
                 }
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         editText.setSelection(editText.getText().length());
         hideRecentEmojisCell.setChecked(hideRecentEmojis);
@@ -402,7 +415,8 @@ public class PinnedEmojisActivity extends BaseFragment {
                         selectedCustomEmojisList.add(documentId);
                         editText.setText(editText.getText().insert(i, spannable));
                         editText.setSelection(i + spannable.length());
-                    } catch (Exception ignored) { }
+                    } catch (Exception ignored) {
+                    }
                 } else {
                     BulletinFactory.of(fragment)
                             .createSimpleBulletin(document, getString(R.string.PinnedEmojisList_Pinned))
@@ -589,13 +603,15 @@ public class PinnedEmojisActivity extends BaseFragment {
                     } else if (jsonObject.has("document_id")) {
                         savedDocumentIds.add(jsonObject.getLong("document_id"));
                     }
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
 
                 if (i > 25) {
                     break;
                 }
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         JSONArray currentReactions = grabReactions();
         ArrayList<String> currentEmoticons = new ArrayList<>();
@@ -608,7 +624,8 @@ public class PinnedEmojisActivity extends BaseFragment {
                 } else if (object.has("emoticon")) {
                     currentEmoticons.add(object.getString("emoticon").replace("\uFE0F", ""));
                 }
-            } catch (JSONException ignored) {}
+            } catch (JSONException ignored) {
+            }
         }
 
         if (currentEmoticons.size() != savedEmoticons.size() || currentDocumentIds.size() != savedDocumentIds.size()) {
@@ -663,7 +680,8 @@ public class PinnedEmojisActivity extends BaseFragment {
                         object.put("document_id", span2.documentId);
                     }
                     selectedCustomEmojisList.add(span2.documentId);
-                } catch (JSONException ignored) { }
+                } catch (JSONException ignored) {
+                }
             } else if (span instanceof CharSequence span2) {
                 try {
                     if (!justReload) {
@@ -671,7 +689,8 @@ public class PinnedEmojisActivity extends BaseFragment {
                     }
 
                     selectedEmoticonsList.add(span2.toString());
-                } catch (JSONException ignored) { }
+                } catch (JSONException ignored) {
+                }
             }
 
             if (!justReload && (object.has("document_id") || object.has("emoticon"))) {
@@ -743,8 +762,9 @@ public class PinnedEmojisActivity extends BaseFragment {
 
         try {
             JSONArray jsonArray = new JSONArray(new JSONTokener(OctoConfig.INSTANCE.pinnedEmojisList.getValue()));
-            return jsonArray.length() > 0 ? (""+jsonArray.length()) : getString(R.string.PasswordOff);
-        } catch (JSONException ignored) {}
+            return jsonArray.length() > 0 ? ("" + jsonArray.length()) : getString(R.string.PasswordOff);
+        } catch (JSONException ignored) {
+        }
 
         return getString(R.string.PasswordOff);
     }

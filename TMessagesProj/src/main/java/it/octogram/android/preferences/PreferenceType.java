@@ -26,7 +26,8 @@ public enum PreferenceType {
     STICKER_HEADER(15, false),
     CHECKBOX(16, true),
     EXPANDABLE_ROWS(17, true),
-    EXPANDABLE_ROWS_CHILD(18, true);
+    EXPANDABLE_ROWS_CHILD(18, true),
+    CUSTOM_AI_MODEL(19, true);
 
     private final int adapterType;
     private final boolean isEnabled;

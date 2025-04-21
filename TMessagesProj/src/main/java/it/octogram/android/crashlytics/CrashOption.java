@@ -33,7 +33,12 @@ public enum CrashOption {
     /**
      * Option to open a URL related to the crash report, potentially for more detailed information online.
      */
-    OPEN_REPORT_URL(3);
+    OPEN_REPORT_URL(3),
+
+    /**
+     * Option to save the crash log file for later reference.
+     */
+    SAVE_LOG(4);
 
     private final int value;
 

@@ -151,6 +151,8 @@ import java.util.Objects;
 
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 

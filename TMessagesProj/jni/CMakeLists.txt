@@ -344,6 +344,8 @@ target_include_directories(breakpad PUBLIC
         third_party/breakpad/src/common/android/include
         third_party/breakpad/src)
 
+#ping
+include(ping/CMakeLists.txt)
 
 #voip
 include(${CMAKE_HOME_DIRECTORY}/voip/CMakeLists.txt)
@@ -650,6 +652,7 @@ target_link_libraries(${NATIVE_LIB}
         EGL
         android
         OpenSLES
+        ping
         cpufeatures
         breakpad)
 

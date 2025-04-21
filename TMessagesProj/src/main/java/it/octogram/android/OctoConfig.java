@@ -37,24 +37,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import it.octogram.android.ai.openrouter.OpenRouterModels;
 import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.drawer.MenuOrderController;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.DoubleBottomMigrationBottomSheet;
-import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 
 @SuppressWarnings("unchecked")
 public class OctoConfig {
     public static final OctoConfig INSTANCE = new OctoConfig();
     public static final String TAG = "OctoConfig";
     public static final int ROUND_MESSAGE_BITRATE = 512;
+    public static final String OCTOMODEL_EXTENSION = ".octomodel";
+    public static final String OCTOEXPORT_EXTENSION = ".octoexport";
     private final List<ConfigProperty<?>> properties = new ArrayList<>();
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
     public static final String STICKERS_PLACEHOLDER_PACK_NAME = "octo_placeholders_android";
     public static final String PRIVATE_BETA_GROUP_HASH = "61-fnrres2ExNWFk";
     public static final String CRASH_MIME_TYPE = "message/rfc822";
     public static final String EXPORT_BACKUP_MIME_TYPE = "text/json";
+    public static final String AI_EXAMPLE_CHANNEL_TAG = "OctoGramAIModels";
 
     /*General*/
     public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM.getValue());
@@ -107,6 +111,11 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> allowUsingFaceUnlock = newConfigProperty("allowUsingFaceUnlock", false);
     public final ConfigProperty<Integer> biometricAskEvery = newConfigProperty("biometricAskEvery", 10);
     public final ConfigProperty<Boolean> advancedBiometricUnlock = newConfigProperty("advancedBiometricUnlock", true);
+    public final ConfigProperty<Boolean> hasShownLockedChatsTip = newConfigProperty("hasShownLockedChatsTip", false);
+    public final ConfigProperty<Boolean> lockedChatsHideChats = newConfigProperty("lockedChatsHideChats", true);
+    public final ConfigProperty<Boolean> lockedChatsLockScreenshots = newConfigProperty("lockedChatsLockScreenshots", false);
+    public final ConfigProperty<Boolean> lockedChatsShowNotifications = newConfigProperty("lockedChatsShowNotifications", true);
+    public final ConfigProperty<Boolean> lockedChatsSpoilerNotifications = newConfigProperty("lockedChatsSpoilerNotifications", true);
 
     /*Hidden folders*/
     public final ConfigProperty<String> hiddenFolderAssoc = newConfigProperty("hiddenFolderAssoc", "{}");
@@ -216,12 +225,17 @@ public class OctoConfig {
     public final ConfigProperty<Integer> interfaceSliderUI = newConfigProperty("interfaceSliderUI", InterfaceSliderUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> uiIconsType = newConfigProperty("uiIconsType", IconsUIType.DEFAULT.getValue());
     public final ConfigProperty<Boolean> uiRandomMemeIcons = newConfigProperty("uiRandomMemeIcons", false);
+    public final ConfigProperty<Boolean> useSquaredFab = newConfigProperty("useSquaredFab", false);
     public final ConfigProperty<Boolean> hideBottomBarChannels = newConfigProperty("hideBottomBarChannels", false);
     public final ConfigProperty<Boolean> hideOpenButtonChatsList = newConfigProperty("hideOpenButtonChatsList", false);
     public final ConfigProperty<Boolean> alwaysExpandBlockQuotes = newConfigProperty("alwaysExpandBlockQuotes", false);
     public final ConfigProperty<Boolean> profileBubbleHideBorder = newConfigProperty("profileBubbleHideBorder", false);
     public final ConfigProperty<Boolean> profileBubbleMoreTopPadding = newConfigProperty("profileBubbleMoreTopPadding", false);
     public final ConfigProperty<Boolean> enableQuickShare = newConfigProperty("enableQuickShare", false);
+    public final ConfigProperty<Boolean> rapidActionsDefaultConfig = newConfigProperty("rapidActionsDefaultConfig", true);
+    public final ConfigProperty<Integer> rapidActionsMainButtonAction = newConfigProperty("rapidActionsMainButtonAction", InterfaceRapidButtonsActions.POST_STORY.getValue());
+    public final ConfigProperty<Integer> rapidActionsMainButtonActionLongPress = newConfigProperty("rapidActionsMainButtonActionLongPress", InterfaceRapidButtonsActions.SAVED_MESSAGES.getValue());
+    public final ConfigProperty<Integer> rapidActionsSecondaryButtonAction = newConfigProperty("rapidActionsSecondaryButtonAction", InterfaceRapidButtonsActions.SEND_MESSAGE.getValue());
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -239,6 +253,25 @@ public class OctoConfig {
     public final ConfigProperty<Integer> translatorFormality = newConfigProperty("translatorFormality", TranslatorFormality.DEFAULT.getValue());
     public final ConfigProperty<Boolean> translatorKeepMarkdown = newConfigProperty("translatorKeepMarkdown", true);
     public final ConfigProperty<String> lastTranslatePreSendLanguage = newConfigProperty("lastTranslatePreSendLanguage", null);
+
+    /*AI Features */
+    public final ConfigProperty<Boolean> aiFeatures = newConfigProperty("aiFeatures", false);
+    public final ConfigProperty<Boolean> translatorAcceptedTerms = newConfigProperty("translatorAcceptedTerms", false);
+    public final ConfigProperty<Boolean> aiFeaturesUseGoogleAPIs = newConfigProperty("aiFeaturesUseGoogleAPIs", false);
+    public final ConfigProperty<String> aiFeaturesUseGoogleAPIKey = newConfigProperty("aiFeaturesUseGoogleAPIKey", "");
+    public final ConfigProperty<Boolean> aiFeaturesUseChatGPTAPIs = newConfigProperty("aiFeaturesUseChatGPTAPIs", false);
+    public final ConfigProperty<String> aiFeaturesUseChatGPTAPIKey = newConfigProperty("aiFeaturesUseChatGPTAPIKey", "");
+    public final ConfigProperty<Boolean> aiFeaturesUseOpenRouterAPIs = newConfigProperty("aiFeaturesUseOpenRouterAPIs", false);
+    public final ConfigProperty<String> aiFeaturesOpenRouterAPIKey = newConfigProperty("aiFeaturesOpenRouterAPIKey", "");
+    public final ConfigProperty<String> aiFeaturesOpenRouterSelectedModel = newConfigProperty("aiFeaturesOpenRouterSelectedModel", OpenRouterModels.GOOGLE_GEMINI_2_0_FLASH_EXP);
+    public final ConfigProperty<Integer> aiFeaturesRecentProvider = newConfigProperty("aiFeaturesRecentProvider", -1);
+    public final ConfigProperty<Boolean> aiFeaturesTranslateMessages = newConfigProperty("aiFeaturesTranslateMessages", true);
+    public final ConfigProperty<Boolean> aiFeaturesChatContext = newConfigProperty("aiFeaturesChatContext", true);
+    public final ConfigProperty<String> aiFeaturesCustomModels = newConfigProperty("aiFeaturesCustomModels", "[]");
+
+    public final ConfigProperty<String> aiFeaturesLastUsedLanguage = newConfigProperty("aiFeaturesLastUsedLanguage", "");
+    public final ConfigProperty<Integer> aiFeaturesLastUsedFormality = newConfigProperty("aiFeaturesLastUsedFormality", 0);
+    public final ConfigProperty<Integer> aiFeaturesLastUsedLength = newConfigProperty("aiFeaturesLastUsedLength", 0);
 
     /*Lite Mode: sync power saver with device settings*/
     public final ConfigProperty<Boolean> syncPowerSaver = newConfigProperty("syncPowerSaver", false);
@@ -501,7 +534,7 @@ public class OctoConfig {
     public int importFileExport(File file, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
         int changed = 0;
 
-        if (file.exists() && file.isFile() && file.getName().endsWith(".octoexport") && file.length() <= 1024 * 30) {
+        if (file.exists() && file.isFile() && file.getName().endsWith(OctoConfig.OCTOEXPORT_EXTENSION) && file.length() <= 1024 * 30) {
             changed = completeMessageExport(file, dataToImport, excludedOptionsByConfig);
         }
 
@@ -550,21 +583,21 @@ public class OctoConfig {
                                 var exportFileSettingsValue = result.get(fieldName);
                                 //noinspection IfCanBeSwitch
                                 if (exportFileSettingsValue instanceof Boolean b) {
-                                    configProperty.updateValue((ConfigProperty<Boolean>) configProperty, b);
+                                    ConfigProperty.updateValue((ConfigProperty<Boolean>) configProperty, b);
                                 } else if (exportFileSettingsValue instanceof Integer i) {
                                     if (!isValueValid(fieldName, i)) {
                                         OctoLogging.d(TAG, "failed to import " + fieldName + " as integer value is invalid");
                                         continue;
                                     }
 
-                                    configProperty.updateValue((ConfigProperty<Integer>) configProperty, i);
+                                    ConfigProperty.updateValue((ConfigProperty<Integer>) configProperty, i);
                                 } else if (exportFileSettingsValue instanceof String s) {
                                     if (!isValueValid(fieldName, s)) {
                                         OctoLogging.d(TAG, "failed to import " + fieldName + " as string value is invalid");
                                         continue;
                                     }
 
-                                    configProperty.updateValue((ConfigProperty<String>) configProperty, reparseStringValue(fieldName, s));
+                                    ConfigProperty.updateValue((ConfigProperty<String>) configProperty, reparseStringValue(fieldName, s));
                                 }
                             }
                         } catch (JSONException e) {

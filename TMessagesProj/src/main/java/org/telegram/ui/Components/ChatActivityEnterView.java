@@ -200,11 +200,13 @@ import java.util.Locale;
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PromptBeforeSendMedia;
+import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.MessagesModelsWrapper;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.utils.DragAndDropImageHandler;
 import it.octogram.android.utils.PopupPromptUtils;
 import it.octogram.android.translator.SingleTranslationManager;
 import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.chat.DragAndDropImageHandler;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate, SuggestEmojiView.AnchorViewDelegate {
 
@@ -4647,6 +4649,38 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             });
 
             options.addView(subItem, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        }
+
+        if (MainAiHelper.canUseAiFeatures()) {
+            ActionBarMenuSubItem aiFeaturesButton = new ActionBarMenuSubItem(getContext(), !scheduleButtonValue, true, resourcesProvider);
+            aiFeaturesButton.setTextAndIcon(LocaleController.getString(R.string.AiFeatures_Brief), R.drawable.aifeatures_solar);
+            aiFeaturesButton.setMinimumWidth(dp(196));
+            options.addView(aiFeaturesButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+
+            MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+            data.context = getContext();
+            data.onSheetOpen = () -> {
+                if (messageSendPreview != null) {
+                    messageSendPreview.dismiss(false);
+                    messageSendPreview = null;
+                }
+                AndroidUtilities.hideKeyboard(messageEditText);
+            };
+            data.originalSubItem = aiFeaturesButton;
+            data.popupWindowLayout = options.getLastLayout();
+            data.messageText = messageEditText.getText().toString().trim();
+            data.useSwipeBack = false;
+            data.isInputBox = true;
+            data.setInputBoxText = (v) -> {
+                AndroidUtilities.runOnUIThread(() -> {
+                    messageEditText.setText(v);
+                    messageEditText.selectAll();
+                });
+            };
+            if (replyingMessageObject != null) {
+                data.replyMessageObject = replyingMessageObject;
+            }
+            MessagesModelsWrapper.initState(data);
         }
         options.setupSelectors();
         if (sendWhenOnlineButton != null) {
@@ -13031,6 +13065,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Paint countClearPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
+        private boolean squaredFab = false;
+
         public SendButton(Context context, int resId, Theme.ResourcesProvider resourcesProvider) {
             super(context);
 
@@ -13062,6 +13098,18 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             count.setTextSize(dp(14));
             count.setTypeface(AndroidUtilities.getTypeface("fonts/num.otf"));
             count.setGravity(Gravity.CENTER);
+        }
+
+        public boolean useSquaredFab() {
+            return squaredFab;
+        }
+
+
+        public void setUseSquaredFab(boolean value) {
+            if (this.squaredFab != value) {
+                this.squaredFab = value;
+                invalidate();
+            }
         }
 
         public void setResourceId(int resId) {
@@ -13206,9 +13254,15 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             if (openProgress > 0) {
                 canvas.save();
                 path.rewind();
-                final float r = Math.min(w, h) / 2.0f;
-                AndroidUtilities.rectTmp.set(right - w, cy - h / 2.0f, right, cy + h / 2.0f);
-                path.addRoundRect(AndroidUtilities.rectTmp, r, r, Path.Direction.CW);
+                if (useSquaredFab()) {
+                    float rx = dp(12);
+                    AndroidUtilities.rectTmp.set(right - w, cy - h / 2.0f, right, cy + h / 2.0f);
+                    path.addRoundRect(AndroidUtilities.rectTmp, rx, rx, Path.Direction.CW);
+                } else {
+                    final float r = Math.min(w, h) / 2.0f;
+                    AndroidUtilities.rectTmp.set(right - w, cy - h / 2.0f, right, cy + h / 2.0f);
+                    path.addRoundRect(AndroidUtilities.rectTmp, r, r, Path.Direction.CW);
+                }
                 canvas.drawPath(path, backgroundPaint);
                 canvas.clipPath(path);
                 if (loadingShown > 0) {
@@ -13357,6 +13411,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             btn.animatedPriceVisible.force(animatedPriceVisible.get());
             btn.setCircleSize(circleSize);
             btn.setCirclePadding(circlePadX, circlePadY);
+            btn.setUseSquaredFab(useSquaredFab());
         }
 
         private ValueAnimator bounceCountAnimator;

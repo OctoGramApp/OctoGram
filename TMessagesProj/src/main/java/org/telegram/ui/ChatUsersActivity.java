@@ -138,6 +138,7 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
     private int sendMediaRow;
     private int sendMediaPhotosRow;
     private int sendMediaVideosRow;
+//  private int sendMediaStickerGifsRow;
     private int sendMediaMusicRow;
     private int sendMediaFilesRow;
     private int sendMediaVoiceMessagesRow;
@@ -373,6 +374,7 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
         loadingHeaderRow = -1;
         sendMediaPhotosRow = -1;
         sendMediaVideosRow = -1;
+//      sendMediaStickerGifsRow = -1;
         sendMediaMusicRow = -1;
         sendMediaFilesRow = -1;
         sendMediaVoiceMessagesRow = -1;
@@ -392,6 +394,7 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
             if (sendMediaExpanded) {
                 sendMediaPhotosRow = rowCount++;
                 sendMediaVideosRow = rowCount++;
+                // sendMediaStickerGifsRow = rowCount++;
                 sendStickersRow = rowCount++;
                 sendGifsRow = rowCount++;
                 sendGamesRow = rowCount++;
@@ -1213,6 +1216,8 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
                             sendMediaExpanded = !sendMediaExpanded;
                             AndroidUtilities.updateVisibleRows(listView);
                             updateListAnimated(diffCallback);
+                        //} else if (position == sendStickersRow) {
+                        //    defaultBannedRights.send_stickers = defaultBannedRights.send_games = defaultBannedRights.send_gifs = defaultBannedRights.send_inline = !defaultBannedRights.send_stickers;
                         } else if (position == useInlineBotRow) {
                             defaultBannedRights.send_inline = !defaultBannedRights.send_inline;
                         } else if (position == embedLinksRow) {
@@ -2181,22 +2186,22 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
             builder.append(getString("UserRestrictionsNoSendStickers", R.string.UserRestrictionsNoSendStickers));
         }
         if (rights.send_gifs && defaultBannedRights.send_gifs != rights.send_gifs) {
-            if (builder.length() != 0) {
+            if (!TextUtils.isEmpty(builder)) {
                 builder.append(", ");
             }
-            builder.append(getString("UserRestrictionsNoSendGifs", R.string.UserRestrictionsNoSendGifs));
+            builder.append(getString(R.string.UserRestrictionsNoSendGifs));
         }
         if (rights.send_games && defaultBannedRights.send_games != rights.send_games) {
-            if (builder.length() != 0) {
+            if (!TextUtils.isEmpty(builder)) {
                 builder.append(", ");
             }
-            builder.append(getString("UserRestrictionsNoSendGames", R.string.UserRestrictionsNoSendGames));
+            builder.append(getString(R.string.UserRestrictionsNoSendGames));
         }
         if (rights.send_inline && defaultBannedRights.send_inline != rights.send_inline) {
-            if (builder.length() != 0) {
+            if (!TextUtils.isEmpty(builder)) {
                 builder.append(", ");
             }
-            builder.append(getString("UserRestrictionsNoSendInlineBots", R.string.UserRestrictionsNoSendInlineBots));
+            builder.append(getString(R.string.UserRestrictionsNoSendInlineBots));
         }
         if (rights.send_polls && defaultBannedRights.send_polls != rights.send_polls) {
             if (builder.length() != 0) {
@@ -3702,6 +3707,8 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
                         checkBoxCell.setText(getString("SendMediaPermissionPhotos", R.string.SendMediaPermissionPhotos), "", !defaultBannedRights.send_photos, divider, animated);
                     } else if (position == sendMediaVideosRow) {
                         checkBoxCell.setText(getString("SendMediaPermissionVideos", R.string.SendMediaPermissionVideos), "", !defaultBannedRights.send_videos, divider, animated);
+                    //} else if (position == sendMediaStickerGifsRow) {
+                    //    checkBoxCell.setText(getString("SendMediaPermissionStickersGifs", R.string.SendMediaPermissionStickersGifs), "", !defaultBannedRights.send_stickers, true, animated);
                     } else if (position == sendStickersRow) {
                         checkBoxCell.setText(getString("SendMediaPermissionStickers", R.string.SendMediaPermissionStickers), "", !defaultBannedRights.send_stickers, divider, animated);
                     } else if (position == sendMediaMusicRow) {
@@ -3775,7 +3782,7 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
             } else if (position == removedUsersRow) {
                 return 6;
             } else if (position == changeInfoRow || position == addUsersRow || position == pinMessagesRow || position == sendMessagesRow ||
-                    position == embedLinksRow || position == manageTopicsRow || position == dontRestrictBoostersRow) {
+                   /* position == sendStickersRow ||*/ position == embedLinksRow || position == manageTopicsRow || position == dontRestrictBoostersRow) {
                 return 7;
             } else if (position == membersHeaderRow || position == contactsHeaderRow || position == botHeaderRow || position == loadingHeaderRow) {
                 return 8;
@@ -3837,7 +3844,7 @@ public class ChatUsersActivity extends BaseFragment implements NotificationCente
     }
 
     private boolean isExpandableSendMediaRow(int position) {
-        return position == sendMediaPhotosRow || position == sendMediaVideosRow || position == sendStickersRow ||
+        return position == sendMediaPhotosRow || position == sendMediaVideosRow /*|| position == sendMediaStickerGifsRow*/ || position == sendStickersRow ||
                 position == sendMediaMusicRow || position == sendMediaFilesRow || position == sendMediaVoiceMessagesRow ||
                 position == sendMediaVideoMessagesRow || position == sendMediaEmbededLinksRow || position == sendPollsRow ||
                 position == sendGifsRow || position == sendGamesRow || position == useInlineBotRow;

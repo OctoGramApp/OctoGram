@@ -14,22 +14,17 @@ import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
 import android.util.Pair;
-import android.view.Gravity;
 
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AccountInstance;
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.BottomSheet;
-import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.LaunchActivity;
-import org.telegram.ui.UsersSelectActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,16 +49,17 @@ import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
-import it.octogram.android.preferences.ui.components.LockedChatsHelp;
-import it.octogram.android.utils.ExpandableRowsOption;
-import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.utils.account.FingerprintUtils;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
+import it.octogram.android.utils.config.ExpandableRowsOption;
+
 
 public class OctoPrivacySettingsUI implements PreferencesEntry {
     private Context context;
     private PreferencesFragment fragment;
     private boolean isFirstFingerprintAsk = true;
+    private boolean fromLockedChatsSettingsUI = false;
     private final ConfigProperty<Boolean> canShowBiometricOptions = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canShowBiometricAskAfter = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canShowLockedAccountsOptions = new ConfigProperty<>(null, false);
@@ -104,7 +100,13 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.PRIVACY, true, getString(R.string.OctoPrivacySettingsHeader))
                 .category(getString(R.string.ActionsSettingsBiometric), canShowBiometricOptions, category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> showLockedHelp(context, fragment.getResourceProvider(), fragment))
+                            .onClick(() -> {
+                                if (fromLockedChatsSettingsUI) {
+                                    fragment.finishFragment();
+                                } else {
+                                    fragment.presentFragment(new PreferencesFragment(new OctoPrivacyLockedChatsSettingsUI()));
+                                }
+                            })
                             .propertySelectionTag("lockedChats")
                             .icon(R.drawable.msg_viewchats)
                             .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
@@ -267,49 +269,8 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                 .build();
     }
 
-    private void showLockedHelp(Context context, Theme.ResourcesProvider resourcesProvider, PreferencesFragment fragment) {
-        BottomSheet[] bottomSheet = new BottomSheet[1];
-        LockedChatsHelp lockedChatsHelp = new LockedChatsHelp(context, resourcesProvider, () -> {
-            if (bottomSheet[0] != null) {
-                bottomSheet[0].dismiss();
-                bottomSheet[0] = null;
-            }
-        }, () -> {
-            if (bottomSheet[0] != null) {
-                bottomSheet[0].dismiss();
-                bottomSheet[0] = null;
-            }
-            AndroidUtilities.runOnUIThread(() -> {
-                UsersSelectActivity activity = getUsersSelectActivity();
-                activity.setDelegate((ids, flags) -> {
-                    FingerprintUtils.clearLockedChats();
-                    FingerprintUtils.lockChatsMultiFromIDs(ids, true);
-                    fragment.notifyItemChanged(PreferenceType.TEXT_ICON.getAdapterType());
-                });
-                fragment.presentFragment(activity);
-            }, 300);
-        });
-        lockedChatsHelp.asSettingsUI();
-        bottomSheet[0] = new BottomSheet.Builder(context, false, resourcesProvider)
-                .setCustomView(lockedChatsHelp, Gravity.TOP | Gravity.CENTER_HORIZONTAL)
-                .show();
-        bottomSheet[0].fixNavigationBar(Theme.getColor(Theme.key_dialogBackground));
-    }
-
-    @NonNull
-    private static UsersSelectActivity getUsersSelectActivity() {
-        ArrayList<Long> chatsList = new ArrayList<>();
-        for (FingerprintUtils.LockedChat chat : FingerprintUtils.getLockedChats()) {
-            if (chat.chat() != null) {
-                chatsList.add(-chat.chat().id);
-            } else if (chat.user() != null) {
-                chatsList.add(chat.user().id);
-            }
-        }
-
-        UsersSelectActivity activity = new UsersSelectActivity(true, chatsList, 0);
-        activity.asLockedChats();
-        return activity;
+    public void setFromLockedChatsSettingsUI(boolean fromLockedChatsSettingsUI) {
+        this.fromLockedChatsSettingsUI = fromLockedChatsSettingsUI;
     }
 
     private String composeBiometricCaptionForSeconds() {

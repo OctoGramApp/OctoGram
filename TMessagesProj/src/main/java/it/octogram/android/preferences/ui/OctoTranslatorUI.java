@@ -12,19 +12,33 @@ import static org.telegram.messenger.LocaleController.getPluralString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.AlertDialog;
-import org.telegram.ui.ActionBar.INavigationLayout;
+import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.ColoredImageSpan;
+import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
+import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.TranslateAlert2;
+import org.telegram.ui.Components.spoilers.SpoilersTextView;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
@@ -42,12 +56,14 @@ import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.translator.TranslationsWrapper;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
+
 
 public class OctoTranslatorUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> showButtonBool = new ConfigProperty<>("showTranslateButton", false);
@@ -78,7 +94,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                     .setItemTitle(getString(R.string.TranslatorModeExternal)));
         } else if (OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.EXTERNAL.getValue()) {
             OctoConfig.INSTANCE.translatorMode.updateValue(TranslatorMode.DEFAULT.getValue());
-            canSelectProvider.setValue(showButtonBool.getValue());
+            canSelectProvider.updateValue(showButtonBool.getValue());
         }
 
         return OctoPreferences.builder(getString(R.string.Translator))
@@ -163,7 +179,7 @@ public class OctoTranslatorUI implements PreferencesEntry {
                                 checkProviderAvailability(context);
 
                                 if (needEntireChatReload) {
-                                    fragment.getParentLayout().rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+                                    fragment.reloadUIAfterValueUpdate();
                                 }
                             })
                             .showIf(canSelectProvider)
@@ -193,7 +209,62 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             .title(getString(R.string.TranslatorKeepMarkdown))
                             .build()
                     );
-                }).build();
+                })
+                .row(new CustomCellRow.CustomCellRowBuilder()
+                        .layout(getGeminiSuggestion(context, fragment))
+                        .build())
+                .build();
+    }
+
+    private LinearLayout getGeminiSuggestion(Context context, PreferencesFragment fragment) {
+        Theme.ResourcesProvider resourcesProvider = fragment.getResourceProvider();
+
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        SpoilersTextView textView = new SpoilersTextView(context);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        textView.setTypeface(AndroidUtilities.bold());
+        textView.setEllipsize(TextUtils.TruncateAt.END);
+        textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
+        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader, resourcesProvider));
+        layout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 21, 15, 21, 0));
+
+        LinkSpanDrawable.LinksTextView detailTextView = new LinkSpanDrawable.LinksTextView(context, resourcesProvider);
+        detailTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
+        detailTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        detailTextView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText, resourcesProvider));
+        detailTextView.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection, resourcesProvider));
+        detailTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
+        detailTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
+        layout.addView(detailTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 21, 14, 21, 0));
+
+        TextView textViewButton = new TextView(context);
+        textViewButton.setBackground(Theme.AdaptiveRipple.filledRectByKey(Theme.key_featuredStickers_addButton, 8));
+        ScaleStateListAnimator.apply(textViewButton, 0.02f, 1.5f);
+        textViewButton.setLines(1);
+        textViewButton.setSingleLine(true);
+        textViewButton.setGravity(Gravity.CENTER_HORIZONTAL);
+        textViewButton.setEllipsize(TextUtils.TruncateAt.END);
+        textViewButton.setGravity(Gravity.CENTER);
+        textViewButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText, resourcesProvider));
+        textViewButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        textViewButton.setTypeface(AndroidUtilities.bold());
+        layout.addView(textViewButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 21, 16, 21, 15));
+
+        textView.setText(getString(R.string.AiFeatures_Brief));
+        detailTextView.setText(getString(R.string.AiFeatures_Desc));
+        textViewButton.setText(getString(R.string.AiFeatures));
+
+        final SpannableStringBuilder sb = new SpannableStringBuilder("G ");
+        final ColoredImageSpan span = new ColoredImageSpan(R.drawable.cup_star_solar);
+        sb.setSpan(span, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.append(new SpannableStringBuilder(getString(R.string.AiFeatures)));
+        textViewButton.setText(sb);
+
+        textViewButton.setOnClickListener(v -> fragment.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI(), "aiFeaturesTranslateMessages")));
+
+        return layout;
     }
 
     public static List<PopupChoiceDialogOption> getProvidersPopupOptions() {
@@ -249,27 +320,27 @@ public class OctoTranslatorUI implements PreferencesEntry {
         boolean canShowOtherOptions = isSingleMessageTranslationEnabled || isTranslateEntireChatEnabled;
 
         if (except != showButtonBool) {
-            showButtonBool.setValue(isSingleMessageTranslationEnabled);
+            showButtonBool.updateValue(isSingleMessageTranslationEnabled);
         }
 
         if (except != translateEntireChat) {
-            translateEntireChat.setValue(isTranslateEntireChatEnabled);
+            translateEntireChat.updateValue(isTranslateEntireChatEnabled);
         }
 
         if (except != canSelectDoNotTranslate) {
-            canSelectDoNotTranslate.setValue(canShowOtherOptions);
+            canSelectDoNotTranslate.updateValue(canShowOtherOptions);
         }
 
         if (except != canSelectProvider) {
-            canSelectProvider.setValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.EXTERNAL.getValue());
+            canSelectProvider.updateValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.EXTERNAL.getValue());
         }
 
         if (except != canSelectFormality) {
-            canSelectFormality.setValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEEPL.getValue());
+            canSelectFormality.updateValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEEPL.getValue());
         }
 
         if (except != canSelectKeepMarkdown) {
-            canSelectKeepMarkdown.setValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.LINGO.getValue() && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue());
+            canSelectKeepMarkdown.updateValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.LINGO.getValue() && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue());
         }
     }
 

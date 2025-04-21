@@ -61,7 +61,6 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -71,12 +70,10 @@ import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.EditEmojiTextCell;
 import org.telegram.ui.Cells.HeaderCell;
-import org.telegram.ui.Cells.PollEditTextCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextCheckCell;
@@ -91,7 +88,6 @@ import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
-import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.EditTextCaption;
 import org.telegram.ui.Components.EditTextEmoji;
 import org.telegram.ui.Components.EditTextSuggestionsFix;
@@ -116,8 +112,8 @@ import java.util.Collections;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.icons.IconSelectorAlert;
-import it.octogram.android.utils.FolderIconController;
-import it.octogram.android.utils.FolderUtils;
+import it.octogram.android.utils.appearance.FolderIconController;
+import it.octogram.android.utils.config.FolderUtils;
 
 public class FilterCreateActivity extends BaseFragment {
 
@@ -1330,24 +1326,6 @@ public class FilterCreateActivity extends BaseFragment {
 
         return _isFolderVisible;
     }
-
-    private void setTextLeft(View cell) {
-        if (cell instanceof PollEditTextCell) {
-            PollEditTextCell textCell = (PollEditTextCell) cell;
-            int left = MAX_NAME_LENGTH - (newFilterName != null ? newFilterName.length() : 0);
-            if (left <= MAX_NAME_LENGTH - MAX_NAME_LENGTH * 0.7f) {
-                textCell.setText2(String.format("%d", left));
-                SimpleTextView textView = textCell.getTextView2();
-                int key = left < 0 ? Theme.key_text_RedRegular : Theme.key_windowBackgroundWhiteGrayText3;
-                textView.setTextColor(Theme.getColor(key));
-                textView.setTag(key);
-                textView.setAlpha(((PollEditTextCell) cell).getTextView().isFocused() || left < 0 ? 1.0f : 0.0f);
-            } else {
-                textCell.setText2("");
-            }
-        }
-    }
-
 
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_CHAT = 1;

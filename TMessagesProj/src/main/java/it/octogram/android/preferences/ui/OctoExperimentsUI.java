@@ -45,7 +45,8 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.AllowExperimentalBottomSheet;
 import it.octogram.android.theme.MonetIconController;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
+
 
 public class OctoExperimentsUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> canShowMonetIconSwitch = new ConfigProperty<>(null, Build.VERSION.SDK_INT == Build.VERSION_CODES.S || Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2);

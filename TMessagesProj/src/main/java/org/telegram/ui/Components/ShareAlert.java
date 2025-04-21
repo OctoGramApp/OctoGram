@@ -122,8 +122,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.octogram.android.utils.ForwardContext;
-import it.octogram.android.utils.SendMessageOptions;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.chat.ForwardContext;
+import it.octogram.android.utils.chat.SendMessageOptions;
 
 public class ShareAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
@@ -1758,7 +1759,8 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
                 return getThemedColor(Theme.key_dialogFloatingButton);
             }
         };
-        writeButton.setCircleSize(dp(64));
+        writeButton.setCircleSize(dp(OctoConfig.INSTANCE.useSquaredFab.getValue() ? 64 : 56));
+        writeButton.setUseSquaredFab(OctoConfig.INSTANCE.useSquaredFab.getValue());
         writeButtonContainer.addView(writeButton, LayoutHelper.createFrame(100, 100, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 0, 0));
         writeButton.setOnClickListener(v -> sendInternal(true));
         writeButton.setOnLongClickListener(v -> {

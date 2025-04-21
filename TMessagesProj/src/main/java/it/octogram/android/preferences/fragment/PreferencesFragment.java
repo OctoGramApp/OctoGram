@@ -8,48 +8,37 @@
 
 package it.octogram.android.preferences.fragment;
 
-import static android.widget.LinearLayout.VERTICAL;
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.getString;
-import static org.telegram.ui.Components.LayoutHelper.createLinear;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ContactsController;
-import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -57,34 +46,20 @@ import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.CheckBoxCell;
-import org.telegram.ui.Cells.HeaderCell;
-import org.telegram.ui.Cells.ShadowSectionCell;
-import org.telegram.ui.Cells.TextCell;
-import org.telegram.ui.Cells.TextCheckCell;
-import org.telegram.ui.Cells.TextDetailSettingsCell;
-import org.telegram.ui.Cells.TextInfoPrivacyCell;
-import org.telegram.ui.Cells.TextSettingsCell;
-import org.telegram.ui.Components.AnimatedTextView;
-import org.telegram.ui.Components.AvatarDrawable;
-import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.Bulletin;
-import org.telegram.ui.Components.CheckBox2;
+import org.telegram.ui.Components.CircularProgressDrawable;
 import org.telegram.ui.Components.ColoredImageSpan;
+import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.FireworksOverlay;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.ShareAlert;
-import org.telegram.ui.Components.SlideChooseView;
-import org.telegram.ui.Components.Switch;
 import org.telegram.ui.Components.UndoView;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -100,30 +75,34 @@ import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
-import it.octogram.android.preferences.rows.cells.SliderCell;
-import it.octogram.android.preferences.rows.impl.CheckboxRow;
 import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.ExpandableRows;
 import it.octogram.android.preferences.rows.impl.ExpandableRowsChild;
-import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SliderRow;
-import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
-import it.octogram.android.utils.ExpandableRowsOption;
-import it.octogram.android.utils.FingerprintUtils;
-import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.preferences.ui.components.ExpandableRowIndex;
+import it.octogram.android.preferences.ui.components.SwitchCell;
+import it.octogram.android.utils.account.FingerprintUtils;
+import it.octogram.android.utils.config.ExpandableRowsOption;
 
 public class PreferencesFragment extends BaseFragment {
 
-    private OctoPreferences preferences;
+    private static final ArrayList<Integer> expandedRowIds = new ArrayList<>();
+    private static final Map<Integer, ExpandableRowIndex> expandableIndexes = new HashMap<>();
     private final PreferencesEntry entry;
+    private final ArrayList<BaseRow> oldItems = new ArrayList<>();
+    private final ArrayList<BaseRow> currentShownItems = new ArrayList<>();
+    private final List<BaseRow> reorderedPreferences = new ArrayList<>();
+    private final HashSet<PreferenceType> typesWithDividerSupport = new HashSet<>();
+    private final HashSet<Integer> typesWithCopySupport = new HashSet<>();
+    private final HashSet<Integer> visibleTypesDuringCopy = new HashSet<>();
+    private OctoPreferences preferences;
     private String focusOnKey;
-
     private ListAdapter listAdapter;
     private RecyclerListView listView;
     private Context context;
@@ -131,21 +110,13 @@ public class PreferencesFragment extends BaseFragment {
     private UndoView restartTooltip;
     private FireworksOverlay fireworksOverlay;
     private LinearLayoutManager linearLayoutManager;
-
     private boolean hasUnlockedWithAuth = false;
-
     private boolean isSelectingItems = false;
     private FrameLayout buttonContainer;
+    private ActionBarMenuItem doneButton;
+    private boolean _isSelectingItems = false;
+    private boolean _isDoneButtonVisible = false;
 
-    private static final ArrayList<Integer> expandedRowIds = new ArrayList<>();
-    private static final Map<Integer, ExpandableRowIndex> expandableIndexes = new HashMap<>();
-    private final ArrayList<BaseRow> oldItems = new ArrayList<>();
-    private final ArrayList<BaseRow> currentShownItems = new ArrayList<>();
-    private final List<BaseRow> reorderedPreferences = new ArrayList<>();
-
-    private final HashSet<PreferenceType> typesWithDividerSupport = new HashSet<>();
-    private final HashSet<Integer> typesWithCopySupport = new HashSet<>();
-    private final HashSet<Integer> visibleTypesDuringCopy = new HashSet<>();
     {
         typesWithDividerSupport.add(PreferenceType.SWITCH);
         typesWithDividerSupport.add(PreferenceType.CHECKBOX);
@@ -154,6 +125,7 @@ public class PreferencesFragment extends BaseFragment {
         typesWithDividerSupport.add(PreferenceType.TEXT_ICON);
         typesWithDividerSupport.add(PreferenceType.EXPANDABLE_ROWS);
         typesWithDividerSupport.add(PreferenceType.EXPANDABLE_ROWS_CHILD);
+        typesWithDividerSupport.add(PreferenceType.CUSTOM_AI_MODEL);
 
         typesWithCopySupport.add(PreferenceType.SWITCH.getAdapterType());
         typesWithCopySupport.add(PreferenceType.LIST.getAdapterType());
@@ -206,6 +178,25 @@ public class PreferencesFragment extends BaseFragment {
         this.preferences = preferences;
     }
 
+    public void insertRow(BaseRow baseRow, BaseRow refer, boolean insertBefore) {
+        if (reorderedPreferences.contains(refer)) {
+            int index = reorderedPreferences.indexOf(refer);
+            reorderedPreferences.add(index + (insertBefore ? 0 : 1), baseRow);
+            AndroidUtilities.runOnUIThread(this::reloadUIAfterValueUpdate, 100);
+        }
+    }
+
+    public void deleteRow(BaseRow baseRow) {
+        int index = reorderedPreferences.indexOf(baseRow);
+        if (index != -1) {
+            reorderedPreferences.remove(baseRow);
+            if (baseRow instanceof ExpandableRows expandableRows) {
+                reorderedPreferences.removeIf(x -> x instanceof ExpandableRowsChild r2 && r2.getRefersToId() == expandableRows.getId());
+            }
+            reloadUIAfterValueUpdate();
+        }
+    }
+
     private void loadContextMenu() {
         if (!preferences.elements().isEmpty()) {
             ActionBarMenu menu = actionBar.createMenu();
@@ -255,7 +246,7 @@ public class PreferencesFragment extends BaseFragment {
 
     @Override
     public boolean canBeginSlide() {
-        return !isSelectingItems;
+        return !isSelectingItems && entry.canBeginSlide();
     }
 
     @Override
@@ -266,7 +257,7 @@ public class PreferencesFragment extends BaseFragment {
             return false;
         }
 
-        return true;
+        return entry.canBeginSlide();
     }
 
     @Override
@@ -287,7 +278,7 @@ public class PreferencesFragment extends BaseFragment {
             actionBar.setOccupyStatusBar(false);
         }
 
-        if (!preferences.deepLink().isEmpty()) {
+        if (preferences.deepLink() != null && !preferences.deepLink().isEmpty() && !preferences.hasSaveButton()) {
             actionBar.setLongClickable(true);
             actionBar.setOnLongClickListener(v -> {
                 if (!isSelectingItems) {
@@ -310,8 +301,17 @@ public class PreferencesFragment extends BaseFragment {
                         return;
                     }
 
+                    if (!canBeginSlide()) {
+                        return;
+                    }
+
                     finishFragment();
                 } else if (id > 0 && !isSelectingItems) {
+                    if (id == 1 && preferences.hasSaveButton() && doneButton != null) {
+                        entry.onSaveButtonPressed();
+                        return;
+                    }
+
                     OctoPreferences.OctoContextMenuElement element = preferences.elements().get(id - 1);
                     if (element != null) {
                         element.run.run();
@@ -320,9 +320,19 @@ public class PreferencesFragment extends BaseFragment {
             }
         });
 
-        loadContextMenu();
+        if (preferences.hasSaveButton()) {
+            Drawable checkmark = ContextCompat.getDrawable(context, R.drawable.ic_ab_done);
+            if (checkmark != null) {
+                checkmark.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.MULTIPLY));
+                Drawable doneButtonDrawable = new CrossfadeDrawable(checkmark, new CircularProgressDrawable(Theme.getColor(Theme.key_actionBarDefaultIcon)));
+                doneButton = actionBar.createMenu().addItemWithWidth(1, doneButtonDrawable, dp(56), getString(R.string.Done));
+                updateDoneButtonVisibility(false, false);
+            }
+        } else {
+            loadContextMenu();
+        }
 
-        listAdapter = new ListAdapter();
+        listAdapter = new ListAdapter(PreferencesFragment.this);
 
         fragmentView = new FrameLayout(context);
         fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
@@ -456,7 +466,12 @@ public class PreferencesFragment extends BaseFragment {
         return itemAnimator;
     }
 
-    private boolean _isSelectingItems = false;
+    @Override
+    public void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
+        super.onTransitionAnimationEnd(isOpen, backward);
+        entry.onTransitionAnimationEnd(isOpen, backward);
+    }
+
     private void updateIsSelectingItems() {
         if (isSelectingItems == _isSelectingItems) {
             return;
@@ -673,6 +688,26 @@ public class PreferencesFragment extends BaseFragment {
         }
     }
 
+    public void updateDoneButtonVisibility(boolean hasChanges, boolean animated) {
+        if (preferences == null || !preferences.hasSaveButton() || doneButton == null) {
+            return;
+        }
+
+        if (animated && _isDoneButtonVisible == hasChanges) {
+            return;
+        }
+        _isDoneButtonVisible = hasChanges;
+
+        doneButton.setEnabled(hasChanges);
+        if (animated) {
+            doneButton.animate().alpha(hasChanges ? 1.0f : 0.0f).scaleX(hasChanges ? 1.0f : 0.0f).scaleY(hasChanges ? 1.0f : 0.0f).setDuration(180).start();
+        } else {
+            doneButton.setAlpha(hasChanges ? 1.0f : 0.0f);
+            doneButton.setScaleX(hasChanges ? 1.0f : 0.0f);
+            doneButton.setScaleY(hasChanges ? 1.0f : 0.0f);
+        }
+    }
+
     public void reloadUIAfterValueUpdate() {
         oldItems.clear();
         oldItems.addAll(currentShownItems);
@@ -783,7 +818,7 @@ public class PreferencesFragment extends BaseFragment {
         return null;
     }
 
-    private void animateFireworksOverlay() {
+    void animateFireworksOverlay() {
         if (fireworksOverlay == null) {
             fireworksOverlay = new FireworksOverlay(getContext());
             ((FrameLayout) fragmentView).addView(fireworksOverlay, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
@@ -812,8 +847,8 @@ public class PreferencesFragment extends BaseFragment {
 
     private void reloadSecondaryCellFromMain(SwitchCell mainCell) {
         for (ExpandableRowIndex index : expandableIndexes.values()) {
-            if (index.mainCell == mainCell) {
-                for (SwitchCell secondaryCell : index.secondaryCell) {
+            if (index.getMainCell() == mainCell) {
+                for (SwitchCell secondaryCell : index.getSecondaryCell()) {
                     secondaryCell.reload();
                 }
                 break;
@@ -823,8 +858,8 @@ public class PreferencesFragment extends BaseFragment {
 
     private void reloadMainCellFromSecondary(SwitchCell secondaryCell) {
         for (ExpandableRowIndex index : expandableIndexes.values()) {
-            if (index.secondaryCell.contains(secondaryCell)) {
-                index.mainCell.reload();
+            if (index.getSecondaryCell().contains(secondaryCell)) {
+                index.getMainCell().reload();
 
                 if (index.getOnSingleStateChange() != null) {
                     index.getOnSingleStateChange().run();
@@ -848,579 +883,36 @@ public class PreferencesFragment extends BaseFragment {
         return hasUnlockedWithAuth;
     }
 
-    private class ListAdapter extends AdapterWithDiffUtils {
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            final Context context = parent.getContext();
-            View view;
-            PreferenceType type = PreferenceType.fromAdapterType(viewType);
-            if (type == null) {
-                throw new RuntimeException("No type found for " + viewType);
-            }
-
-            switch (type) {
-                case CUSTOM:
-                case TEXT_ICON:
-                    view = new FrameLayout(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case SHADOW:
-                    view = new ShadowSectionCell(context);
-                    break;
-                case EMPTY_CELL:
-                case HEADER:
-                    view = new HeaderCell(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case SWITCH:
-                    view = new TextCheckCell(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case TEXT_DETAIL:
-                    view = new TextDetailSettingsCell(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case SLIDER:
-                    view = new SliderCell(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case LIST:
-                    view = new TextSettingsCell(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case SLIDER_CHOOSE:
-                    view = new SlideChooseView(context) {
-                        @SuppressLint("ClickableViewAccessibility")
-                        @Override
-                        public boolean onTouchEvent(MotionEvent event) {
-                            if (isSelectingItems) {
-                                return false;
-                            }
-
-                            return super.onTouchEvent(event);
-                        }
-
-                        @Override
-                        public boolean isSlidable() {
-                            return !isSelectingItems && super.isSlidable();
-                        }
-                    };
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case FOOTER:
-                    TextInfoPrivacyCell cell = new TextInfoPrivacyCell(context, 10);
-                    cell.getTextView().setGravity(Gravity.CENTER_HORIZONTAL);
-                    cell.getTextView().setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
-                    cell.getTextView().setMovementMethod(null);
-                    cell.getTextView().setPadding(0, dp(14), 0, dp(14));
-                    view = cell;
-                    view.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
-                    break;
-                case FOOTER_INFORMATIVE:
-                    view = new TextInfoPrivacyCell(context);
-                    view.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
-                    break;
-                case STICKER_HEADER:
-                    LinearLayout layout = new LinearLayout(context);
-                    layout.setOrientation(VERTICAL);
-                    view = layout;
-                    //view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case CHECKBOX:
-                    CheckBoxCell checkBoxCell = new CheckBoxCell(context, 4, 21, getResourceProvider());
-                    checkBoxCell.getCheckBoxRound().setDrawBackgroundAsArc(14);
-                    checkBoxCell.getCheckBoxRound().setColor(Theme.key_switch2TrackChecked, Theme.key_radioBackground, Theme.key_checkboxCheck);
-                    checkBoxCell.setEnabled(true);
-                    view = checkBoxCell;
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case EXPANDABLE_ROWS:
-                case EXPANDABLE_ROWS_CHILD:
-                    view = new SwitchCell(context);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                default:
-                    throw new RuntimeException("No view found for " + type);
-            }
-
-            view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
-            return new RecyclerListView.Holder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            if (position < 0 || position >= currentShownItems.size()) {
-                return;
-            }
-
-            PreferenceType type = PreferenceType.fromAdapterType(holder.getItemViewType());
-            if (type == null) {
-                throw new RuntimeException("No type found for " + holder.getItemViewType());
-            }
-
-            ArrayList<View> additionalItems = new ArrayList<>();
-
-            switch (type) {
-                case CUSTOM:
-                    FrameLayout frameLayout = (FrameLayout) holder.itemView;
-                    // remove the current view if it exists
-                    if (frameLayout.getChildCount() > 0) {
-                        frameLayout.removeAllViews();
-                    }
-
-                    // add custom view
-                    CustomCellRow row = (CustomCellRow) currentShownItems.get(position);
-                    if (row.getLayout() != null) {
-                        View customView = row.getLayout();
-                        ViewGroup parent = (ViewGroup) customView.getParent();
-                        if (parent != null) {
-                            parent.removeView(customView);
-                        }
-                        frameLayout.addView(customView);
-                        customView.setEnabled(false);
-                    }
-
-                    break;
-                case SHADOW:
-                    holder.itemView.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-                    break;
-                case EMPTY_CELL:
-                case HEADER:
-                    HeaderRow headerRow = (HeaderRow) currentShownItems.get(position);
-                    HeaderCell headerCell = (HeaderCell) holder.itemView;
-                    headerCell.setText(headerRow.getTitle());
-                    if (!headerRow.getUseHeaderStyle()) {
-                        headerCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-                        headerCell.setTextSize(16);
-                        headerCell.getTextView().setTypeface(null);
-                        headerCell.setTopMargin(10);
-                    }
-                    break;
-                case SWITCH:
-                    TextCheckCell checkCell = (TextCheckCell) holder.itemView;
-                    SwitchRow switchRow = (SwitchRow) currentShownItems.get(position);
-                    if (switchRow.getSummary() != null) {
-                        checkCell.setTextAndValueAndCheck(OctoUtils.safeToString(switchRow.getTitle()), switchRow.getSummary(), switchRow.getPreferenceValue(), true, switchRow.hasDivider());
-                    } else {
-                        checkCell.setTextAndCheck(switchRow.getTitle(), switchRow.getPreferenceValue(), switchRow.hasDivider());
-                    }
-                    checkCell.setCheckBoxIcon(switchRow.isPremium() || switchRow.isLocked() ? R.drawable.permission_locked : 0);
-                    additionalItems.add(checkCell.getCheckBox());
-                    break;
-                case TEXT_DETAIL:
-                    TextDetailRow textDetailRow = (TextDetailRow) currentShownItems.get(position);
-                    textDetailRow.bindCell((TextDetailSettingsCell) holder.itemView);
-                    TextDetailSettingsCell settingsCell = (TextDetailSettingsCell) holder.itemView;
-                    settingsCell.setMultilineDetail(true);
-                    textDetailRow.bindCell(settingsCell);
-                    if (!settingsCell.isMultiline()) {
-                        additionalItems.add(settingsCell.getValueTextView());
-                    }
-                    break;
-                case TEXT_ICON:
-                    FrameLayout l = ((FrameLayout) holder.itemView);
-                    // remove the current view if it exists
-                    if (l.getChildCount() > 0) {
-                        l.removeAllViews();
-                    }
-                    // add custom view
-                    TextIconRow textIconRow = (TextIconRow) currentShownItems.get(position);
-                    TextCell v = new TextCell(context, 23, false, textIconRow.getPreference() != null, getResourceProvider());
-                    l.addView(v);
-
-                    if (textIconRow.isBlue()) {
-                        v.setBackground(Theme.createSelectorWithBackgroundDrawable(Theme.getColor(Theme.key_windowBackgroundWhite), Theme.getColor(Theme.key_listSelector)));
-                        v.setColors(Theme.key_windowBackgroundWhiteBlueText4, Theme.key_windowBackgroundWhiteBlueText4);
-                    }
-
-                    textIconRow.bindCell(v);
-                    break;
-                case SLIDER:
-                    ((SliderCell) holder.itemView).setSliderRow((SliderRow) currentShownItems.get(position));
-                    ((SliderCell) holder.itemView).setSlideable(!isSelectingItems);
-                    break;
-                case LIST:
-                    TextSettingsCell listCell = (TextSettingsCell) holder.itemView;
-                    ListRow listRow = (ListRow) currentShownItems.get(position);
-                    listCell.setTextAndValue(listRow.getTitle(), listRow.getTextFromInteger(listRow.getCurrentValue().getValue()), true, listRow.hasDivider());
-                    additionalItems.add(listCell.getValueTextView());
-                    break;
-                case SLIDER_CHOOSE:
-                    SlideChooseView slideChooseView = (SlideChooseView) holder.itemView;
-                    SliderChooseRow sliderRow = (SliderChooseRow) currentShownItems.get(position);
-                    slideChooseView.setCallback(new SlideChooseView.Callback() {
-                        @Override
-                        public void onOptionSelected(int index) {
-                            sliderRow.getPreferenceValue().updateValue(sliderRow.getOptions().get(index).first);
-
-                            if (sliderRow.getOnUpdate() != null) {
-                                sliderRow.getOnUpdate().run();
-                            }
-                        }
-
-                        @Override
-                        public void onTouchEnd() {
-                            if (sliderRow.getOnTouchEnd() != null) {
-                                sliderRow.getOnTouchEnd().run();
-                            }
-                        }
-                    });
-                    slideChooseView.setOptions(sliderRow.getIntValue(), sliderRow.getValues());
-                    break;
-                case FOOTER_INFORMATIVE:
-                    ((TextInfoPrivacyCell) holder.itemView).setText(((FooterInformativeRow) currentShownItems.get(position)).getDynamicTitle());
-                    break;
-                case FOOTER:
-                    ((TextInfoPrivacyCell) holder.itemView).setText(currentShownItems.get(position).getTitle());
-                    break;
-                case STICKER_HEADER:
-                    StickerHeaderRow pref = (StickerHeaderRow) currentShownItems.get(position);
-                    LinearLayout linearLayout = (LinearLayout) holder.itemView;
-
-                    if (linearLayout.getChildCount() == 0) {
-                        if (!pref.getUseOctoAnimation()) {
-                            View stickerView = (View) pref.getStickerView();
-                            linearLayout.addView(stickerView, createLinear(104, 104, Gravity.CENTER_HORIZONTAL, 0, 14, 0, 0));
-                        }
-
-                        TextView messageTextView = null;
-                        if (pref.getSummary() != null) {
-                            messageTextView = new TextView(context);
-                            messageTextView.setTextColor(Theme.getColor(Theme.key_chats_message));
-                            messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                            messageTextView.setGravity(Gravity.CENTER);
-                            messageTextView.setText(pref.getSummary());
-                            messageTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
-
-                            if (!pref.getUseOctoAnimation()) {
-                                linearLayout.addView(messageTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT, 52, 25, 52, 18));
-                            }
-                        }
-
-                        if (pref.getUseOctoAnimation()) {
-                            OctoAnimationFragment octoFragment = new OctoAnimationFragment(context, messageTextView);
-                            octoFragment.setEasterEggCallback(PreferencesFragment.this::animateFireworksOverlay);
-                            linearLayout.addView(octoFragment, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, OctoAnimationFragment.sz, Gravity.CENTER_HORIZONTAL));
-                        }
-                    }
-
-                    break;
-                case CHECKBOX:
-                    CheckBoxCell checkboxCell = (CheckBoxCell) holder.itemView;
-                    CheckboxRow checkboxRow = (CheckboxRow) currentShownItems.get(position);
-                    checkboxCell.setText(checkboxRow.getTitle(), checkboxRow.getSummary(), checkboxRow.getPreferenceValue(), checkboxRow.hasDivider(), true);
-                    checkboxCell.setIcon(checkboxRow.isPremium() ? R.drawable.permission_locked : 0);
-                    break;
-                case EXPANDABLE_ROWS:
-                    SwitchCell switchCell = (SwitchCell) holder.itemView;
-                    ExpandableRows expandableRows = (ExpandableRows) currentShownItems.get(position);
-
-                    if (expandableIndexes.get(expandableRows.getId()) == null) {
-                        expandableIndexes.put(expandableRows.getId(), new ExpandableRowIndex(switchCell, expandableRows.getOnSingleStateChange()));
-                    }
-
-                    switchCell.setAsSwitch(expandableRows);
-                    switchCell.setIsSelectingItems(isSelectingItems);
-                    if (expandableRows.isMainSwitchHidden()) {
-                        switchCell.switchView.setVisibility(View.GONE);
-                    } else {
-                        additionalItems.add(switchCell.switchView);
-                    }
-                    break;
-                case EXPANDABLE_ROWS_CHILD:
-                    SwitchCell switchCellChild = (SwitchCell) holder.itemView;
-                    ExpandableRowsChild expandableRowsChild = (ExpandableRowsChild) currentShownItems.get(position);
-
-                    ExpandableRowIndex index = expandableIndexes.get(expandableRowsChild.getRefersToId());
-                    if (index != null) {
-                        index.addSecondaryCell(switchCellChild);
-                    }
-
-                    switchCellChild.setAsCheckbox(expandableRowsChild);
-                    switchCellChild.setIsSelectingItems(isSelectingItems);
-                    additionalItems.add(switchCellChild.checkBoxView);
-                    break;
-                default:
-                    throw new RuntimeException("No view found for " + type);
-            }
-
-            for (View view : additionalItems) {
-                if (view != null) {
-                    view.setVisibility(isSelectingItems ? View.INVISIBLE : View.VISIBLE);
-                }
-            }
-
-            additionalItems.clear();
-        }
-
-        @Override
-        public int getItemCount() {
-            return currentShownItems.size();
-        }
-
-        @Override
-        public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            return currentShownItems.get(holder.getAdapterPosition()).getType().isEnabled();
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return currentShownItems.get(position).getType().getAdapterType();
-        }
+    public boolean isSelectingItems() {
+        return isSelectingItems;
     }
 
-    private class SwitchCell extends FrameLayout {
-
-        private final ImageView imageView;
-        private final AvatarDrawable avatarDrawable;
-        private final BackupImageView backupImageView;
-        private final TextView textView;
-        private final AnimatedTextView countTextView;
-        private final ImageView arrowView;
-        private final Switch switchView;
-        private final CheckBox2 checkBoxView;
-        private final LinearLayout textViewLayout;
-
-        private boolean needDivider, needLine;
-
-        public SwitchCell(Context context) {
-            super(context);
-
-            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-            setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-
-            imageView = new ImageView(context);
-            imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
-            imageView.setVisibility(View.GONE);
-            addView(imageView, LayoutHelper.createFrame(24, 24, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), 20, 0, 20, 0));
-
-            textView = new AppCompatTextView(context) {
-                @Override
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
-                        widthMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec) - dp(52), MeasureSpec.AT_MOST);
-                    }
-                    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-                }
-            };
-            textView.setLines(1);
-            textView.setSingleLine(true);
-            textView.setEllipsize(TextUtils.TruncateAt.END);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-            textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-            textView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-            textView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-
-            countTextView = new AnimatedTextView(context, false, true, true);
-            countTextView.setAnimationProperties(.35f, 0, 200, CubicBezierInterpolator.EASE_OUT_QUINT);
-            countTextView.setTypeface(AndroidUtilities.bold());
-            countTextView.setTextSize(dp(14));
-            countTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-            countTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-
-            arrowView = new ImageView(context);
-            arrowView.setVisibility(GONE);
-            arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
-            arrowView.setImageResource(R.drawable.arrow_more);
-
-            textViewLayout = new LinearLayout(context);
-            textViewLayout.setOrientation(LinearLayout.HORIZONTAL);
-            textViewLayout.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-
-            avatarDrawable = new AvatarDrawable();
-            avatarDrawable.setTextSize(dp(12));
-
-            backupImageView = new BackupImageView(context);
-            backupImageView.setRoundRadius(dp(18));
-
-            boolean isRTL = LocaleController.isRTL;
-            textViewLayout.addView(backupImageView, createLinear(36, 36, Gravity.CENTER_VERTICAL, 0, 0, 0, 0));
-            textViewLayout.addView(textView, createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
-            textViewLayout.addView(countTextView, createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER_VERTICAL, isRTL ? 6 : 0, 0, isRTL ? 0 : 6, 0));
-            textViewLayout.addView(arrowView, createLinear(16, 16, 0, Gravity.CENTER_VERTICAL, isRTL ? 0 : 2, 0, 0, 0));
-
-            addView(textViewLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), 73, 0, 8, 0));
-
-            switchView = new Switch(context);
-            switchView.setVisibility(GONE);
-            switchView.setColors(Theme.key_switchTrack, Theme.key_switchTrackChecked, Theme.key_windowBackgroundWhite, Theme.key_windowBackgroundWhite);
-            switchView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-            addView(switchView, LayoutHelper.createFrame(37, 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT), 19, 0, 19, 0));
-
-            checkBoxView = new CheckBox2(context, 21);
-            checkBoxView.setColor(Theme.key_radioBackgroundChecked, Theme.key_checkboxDisabled, Theme.key_checkboxCheck);
-            checkBoxView.setDrawUnchecked(true);
-            checkBoxView.setChecked(true, false);
-            checkBoxView.setDrawBackgroundAsArc(10);
-            checkBoxView.setVisibility(GONE);
-            checkBoxView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-            addView(checkBoxView, LayoutHelper.createFrame(21, 21, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), LocaleController.isRTL ? 0 : 64, 0, LocaleController.isRTL ? 64 : 0, 0));
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            super.onMeasure(
-                    MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(dp(50), MeasureSpec.EXACTLY)
-            );
-        }
-
-        private boolean isExpanded;
-
-        private boolean isSwitch;
-        private ExpandableRows _expandableRows;
-        private ExpandableRowsChild _item;
-        private boolean isSelectingItems = false;
-        private boolean hasAddedUserData = false;
-        private boolean _isLocked = false;
-
-        public void setAsSwitch(ExpandableRows expandableRows) {
-            isSwitch = true;
-            _expandableRows = expandableRows;
-
-            int selectedOptions = 0;
-            for (ExpandableRowsOption item : expandableRows.getItemsList()) {
-                if (item.property.getValue()) {
-                    selectedOptions++;
-                }
-            }
-
-            checkBoxView.setVisibility(GONE);
-            imageView.setVisibility(VISIBLE);
-            imageView.setImageResource(expandableRows.getIcon());
-            textView.setText(expandableRows.getMainItemTitle());
-            countTextView.setVisibility(VISIBLE);
-            arrowView.setVisibility(VISIBLE);
-            textView.setTranslationX(0);
-            switchView.setVisibility(VISIBLE);
-            backupImageView.setVisibility(GONE);
-            switchView.setChecked(selectedOptions > 0, true);
-
-            boolean currentExpanded = expandedRowIds.contains(expandableRows.getId());
-            if (isExpanded != currentExpanded) {
-                isExpanded = currentExpanded;
-                arrowView.animate().rotation(isExpanded ? 180 : 0).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).setDuration(240).start();
-            }
-
-            countTextView.setText(MessageFormat.format(" {0}/{1}", selectedOptions, expandableRows.getItemsList().size()));
-
-            ((MarginLayoutParams) textViewLayout.getLayoutParams()).rightMargin = dp((LocaleController.isRTL ? 64 : 75) + 4);
-
-            needLine = !expandableRows.getItemsList().isEmpty() && !expandableRows.isMainSwitchHidden();
-            needDivider = expandableRows.hasDivider();
-            setWillNotDraw(false);
-
-            boolean isLocked = isExpandableRowsLocked(expandableRows);
-            if (_isLocked != isLocked) {
-                _isLocked = isLocked;
-                arrowView.setScaleX(isLocked ? 0.8f : 1f);
-                arrowView.setScaleY(isLocked ? 0.8f : 1f);
-                arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(isLocked ? Theme.key_stickers_menu : Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
-                arrowView.setImageResource(isLocked ? R.drawable.other_lockedfolders2 : R.drawable.arrow_more);
-                arrowView.setTranslationX(isLocked ? dp(2) : 0);
-            }
-        }
-
-        public void setAsCheckbox(ExpandableRowsChild expandableRow) {
-            isSwitch = false;
-            _item = expandableRow;
-
-            imageView.setVisibility(GONE);
-            switchView.setVisibility(GONE);
-            countTextView.setVisibility(GONE);
-            arrowView.setVisibility(GONE);
-            checkBoxView.setVisibility(VISIBLE);
-            checkBoxView.setChecked(expandableRow.getItem().property.getValue(), true);
-
-            if (expandableRow.getItem().hasAccount()) {
-                if (!hasAddedUserData) {
-                    int account = expandableRow.getItem().accountId;
-                    TLRPC.User user = UserConfig.getInstance(account).getCurrentUser();
-                    avatarDrawable.setInfo(account, user);
-                    textView.setText(ContactsController.formatName(user.first_name, user.last_name));
-                    backupImageView.getImageReceiver().setCurrentAccount(account);
-                    backupImageView.setForUserOrChat(user, avatarDrawable);
-                    backupImageView.setVisibility(VISIBLE);
-                    hasAddedUserData = true;
-
-                    CharSequence text = user.first_name;
-                    try {
-                        text = Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), false);
-                    } catch (Exception ignore) {}
-                    textView.setText(text);
-
-                    backupImageView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));
-                    textView.setTranslationX(dp(55) * (LocaleController.isRTL ? -2.2f : 1));
-                }
-            } else {
-                backupImageView.setVisibility(GONE);
-                textView.setText(expandableRow.getItem().optionTitle);
-                textView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));
-            }
-
-            needLine = false;
-            needDivider = expandableRow.hasDivider();
-            setWillNotDraw(!expandableRow.hasDivider());
-        }
-
-        public void reload() {
-            if (isSwitch) {
-                setAsSwitch(_expandableRows);
-            } else {
-                setAsCheckbox(_item);
-            }
-        }
-
-        public void setIsSelectingItems(boolean isSelectingItems) {
-            this.isSelectingItems = isSelectingItems;
-            invalidate();
-        }
-
-        @Override
-        protected void onDraw(@NonNull Canvas canvas) {
-            super.onDraw(canvas);
-            if (LocaleController.isRTL) {
-                if (needLine && !isSelectingItems) {
-                    float x = dp(19 + 37 + 19);
-                    canvas.drawRect(x - dp(0.66f), (getMeasuredHeight() - dp(20)) / 2f, x, (getMeasuredHeight() + dp(20)) / 2f, Theme.dividerPaint);
-                }
-                if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
-                    canvas.drawLine(getMeasuredWidth() - dp(64) + ((hasAddedUserData ? backupImageView : textView).getTranslationX() < 0 ? dp(-32) : 0), getMeasuredHeight() - 1, 0, getMeasuredHeight() - 1, Theme.dividerPaint);
-                }
-            } else {
-                if (needLine && !isSelectingItems) {
-                    float x = getMeasuredWidth() - dp(19 + 37 + 19);
-                    canvas.drawRect(x - dp(0.66f), (getMeasuredHeight() - dp(20)) / 2f, x, (getMeasuredHeight() + dp(20)) / 2f, Theme.dividerPaint);
-                }
-                if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
-                    canvas.drawLine(dp(64) + (hasAddedUserData ? backupImageView : textView).getTranslationX(), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight() - 1, Theme.dividerPaint);
-                }
-            }
-        }
+    public Map<Integer, ExpandableRowIndex> getExpandableIndexes() {
+        return expandableIndexes;
     }
 
-    private static class ExpandableRowIndex {
-        private final SwitchCell mainCell;
-        private final Runnable onSingleStateChange;
-        private final ArrayList<SwitchCell> secondaryCell = new ArrayList<>();
+    public ArrayList<Integer> getExpandedRowIds() {
+        return expandedRowIds;
+    }
 
-        public ExpandableRowIndex(SwitchCell mainCell, Runnable onSingleStateChange) {
-            this.mainCell = mainCell;
-            this.onSingleStateChange = onSingleStateChange;
-        }
+    public FireworksOverlay getFireworksOverlay() {
+        return fireworksOverlay;
+    }
 
-        public Runnable getOnSingleStateChange() {
-            return onSingleStateChange;
-        }
+    public FrameLayout getFragmentView() {
+        return (FrameLayout) fragmentView;
+    }
 
-        public void addSecondaryCell(SwitchCell cell) {
-            if (secondaryCell.contains(cell)) {
-                return;
-            }
+    public Context getContext() {
+        return context;
+    }
 
-            secondaryCell.add(cell);
-        }
+    public LinearLayoutManager getLinearLayoutManager() {
+        return linearLayoutManager;
+    }
+
+    public boolean isExpandableRowsLockedInternal(ExpandableRows expandableRow) {
+        return isExpandableRowsLocked(expandableRow);
     }
 
     public void rebuildAllFragmentsWithLast() {

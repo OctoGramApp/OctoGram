@@ -146,6 +146,8 @@ import java.util.Objects;
 import it.octogram.android.CameraPreview;
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.ai.MessagesModelsWrapper;
+import it.octogram.android.ai.helper.MainAiHelper;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.translator.SingleTranslationManager;
 import it.octogram.android.translator.TranslationsWrapper;
@@ -3062,11 +3064,12 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 return getThemedColor(Theme.key_dialogFloatingButton);
             }
         };
+        writeButton.setUseSquaredFab(OctoConfig.INSTANCE.useSquaredFab.getValue());
         writeButton.center = true;
         writeButton.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         writeButtonContainer.addView(writeButton, LayoutHelper.createFrame(110, 110, Gravity.FILL));
         writeButton.setTranslationX(backgroundPaddingLeft);
-        writeButton.setCircleSize(dp(64));
+        writeButton.setCircleSize(dp(OctoConfig.INSTANCE.useSquaredFab.getValue() ? 64 : 56));
         writeButton.setCirclePadding(dp(8), dp(8));
         writeButton.setOnClickListener(v -> {
             if (currentLimit - codepointCount < 0) {
@@ -3499,6 +3502,32 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 });
 
                 options.addView(subItem, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+            }
+
+            if (MainAiHelper.canUseAiFeatures()) {
+                ActionBarMenuSubItem aiFeaturesButton = new ActionBarMenuSubItem(getContext(), false, false, resourcesProvider);
+                aiFeaturesButton.setTextAndIcon(LocaleController.getString(R.string.AiFeatures_Brief), R.drawable.aifeatures_solar);
+                aiFeaturesButton.setMinimumWidth(dp(196));
+                options.addView(aiFeaturesButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+
+                MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+                data.context = getContext();
+                data.onSheetOpen = () -> AndroidUtilities.hideKeyboard(commentTextView);
+                data.originalSubItem = aiFeaturesButton;
+                data.popupWindowLayout = options.getLastLayout();
+                data.messageText = commentTextView.getText().toString().trim();
+                data.useSwipeBack = false;
+                data.isInputBox = true;
+                data.setInputBoxText = (v) -> AndroidUtilities.runOnUIThread(() -> {
+                    if (messageSendPreview != null) {
+                        messageSendPreview.dismiss(false);
+                        messageSendPreview = null;
+                    }
+
+                    commentTextView.setText(v);
+                    commentTextView.setSelection(0, v.length());
+                });
+                MessagesModelsWrapper.initState(data);
             }
 
             if (editingMessageObject == null && canHaveStars && chatActivity != null && ChatObject.isChannelAndNotMegaGroup(chatActivity.getCurrentChat()) && chatActivity.getCurrentChatInfo() != null && chatActivity.getCurrentChatInfo().paid_media_allowed) {

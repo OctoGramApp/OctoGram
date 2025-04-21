@@ -17,6 +17,7 @@ import com.android.billingclient.api.ProductDetails;
 import java.util.Objects;
 
 import it.octogram.android.StoreUtils;
+import it.octogram.android.logs.OctoLogging;
 
 public class BuildVars {
 
@@ -51,6 +52,7 @@ public class BuildVars {
                 final Thread.UncaughtExceptionHandler pastHandler = Thread.getDefaultUncaughtExceptionHandler();
                 Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
                     FileLog.fatal(exception, false);
+                    //OctoLogging.fatal(exception);
                     if (pastHandler != null) {
                         pastHandler.uncaughtException(thread, exception);
                     }

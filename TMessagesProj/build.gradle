@@ -90,6 +90,9 @@ dependencies {
     implementation libs.google.play.integrity
     implementation libs.androidx.recyclerview
 
+    // Generative Ai
+    implementation libs.generativeai
+
     compileOnly libs.findbugs.jsr305
     compileOnly libs.checker.qual
     compileOnly libs.checker.compat.qual

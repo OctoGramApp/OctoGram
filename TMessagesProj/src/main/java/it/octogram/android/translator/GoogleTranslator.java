@@ -77,8 +77,9 @@ public class GoogleTranslator {
                     ArrayList<String> parts = OctoUtils.getStringParts(text2, 2500);
 
                     for (String part : parts) {
-                        StandardHTTPRequest request = new StandardHTTPRequest(composeUrl(part, toLanguage));
-                        request.header("User-Agent", getUserAgent());
+                        StandardHTTPRequest request = new StandardHTTPRequest.Builder(composeUrl(part, toLanguage))
+                                .header("User-Agent", getUserAgent())
+                                .build();
                         String response = request.request();
 
                         if (TextUtils.isEmpty(response)) {

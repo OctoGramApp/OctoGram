@@ -71,7 +71,7 @@ import org.telegram.ui.Components.UndoView;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.FolderUtils;
+import it.octogram.android.utils.config.FolderUtils;
 
 public class FiltersSetupActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 

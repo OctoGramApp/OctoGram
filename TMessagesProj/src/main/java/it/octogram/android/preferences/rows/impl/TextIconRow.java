@@ -26,7 +26,7 @@ import it.octogram.android.preferences.rows.ToggleableBaseRowBuilder;
 
 public class TextIconRow extends BaseRow implements Clickable {
 
-    private final int icon;
+    private int icon;
     private final Runnable onClick;
     private final ConfigProperty<Boolean> preference;
     private final String propertySelectionTag;
@@ -39,6 +39,10 @@ public class TextIconRow extends BaseRow implements Clickable {
     public interface OnDynamicDataUpdate {
         String getTitle();
         String getValue();
+
+        default int getIcon() {
+            return -1;
+        }
     }
 
     private TextIconRow(CharSequence title,
@@ -69,6 +73,9 @@ public class TextIconRow extends BaseRow implements Clickable {
         if (dynamicDataUpdate != null) {
             setTitle(dynamicDataUpdate.getTitle());
             value = dynamicDataUpdate.getValue();
+            if (dynamicDataUpdate.getIcon() != -1) {
+                icon = dynamicDataUpdate.getIcon();
+            }
         }
 
         if (preference != null) {

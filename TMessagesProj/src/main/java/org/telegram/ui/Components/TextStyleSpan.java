@@ -17,7 +17,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 
-import it.octogram.android.utils.TypeFaceSupportChecker;
+import it.octogram.android.utils.appearance.TypeFaceSupportChecker;
 
 public class TextStyleSpan extends MetricAffectingSpan {
 

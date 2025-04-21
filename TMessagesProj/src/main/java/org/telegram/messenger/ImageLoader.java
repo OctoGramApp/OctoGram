@@ -16,13 +16,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -62,13 +60,11 @@ import org.telegram.ui.web.WebInstantView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -95,6 +91,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
+
+import it.octogram.android.logs.OctoLogging;
 
 /**
  * image filter types
@@ -1864,56 +1862,75 @@ public class ImageLoader {
 
     public static Bitmap getStrippedPhotoBitmap(byte[] photoBytes, String filter) {
         int len = photoBytes.length - 3 + Bitmaps.header.length + Bitmaps.footer.length;
+        byte[] data = new byte[len];
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(len);
+        System.arraycopy(Bitmaps.header, 0, data, 0, Bitmaps.header.length);
+        System.arraycopy(photoBytes, 3, data, Bitmaps.header.length, photoBytes.length - 3);
+        System.arraycopy(Bitmaps.footer, 0, data, Bitmaps.header.length + photoBytes.length - 3, Bitmaps.footer.length);
+
+        data[164] = photoBytes[1];
+        data[166] = photoBytes[2];
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(data, 0, len, options);
+
+        int imageHeight = options.outHeight;
+        int imageWidth = options.outWidth;
+
+        final int maxDimension = 1024;
+
+        int sampleSize = 1;
+
+        if (imageHeight > maxDimension || imageWidth > maxDimension) {
+            sampleSize = Math.min(imageWidth / maxDimension, imageHeight / maxDimension);
+        }
+
+        options = new BitmapFactory.Options();
+        options.inSampleSize = sampleSize;
+        options.inPreferredConfig = SharedConfig.deviceIsHigh() || (!TextUtils.isEmpty(filter) && filter.contains("r")) ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+        Bitmap bitmap = null;
+
         try {
-            outputStream.write(Bitmaps.header);
-            outputStream.write(photoBytes, 3, photoBytes.length - 3);
-            outputStream.write(Bitmaps.footer);
-        } catch (IOException e) {
-            FileLog.e(e);
+            bitmap = BitmapFactory.decodeByteArray(data, 0, len, options);
+        } catch (OutOfMemoryError e) {
+            OctoLogging.e("ImageLoader", "OutOfMemoryError decoding bitmap with sampleSize=" + sampleSize, e);
+            return null;
+        } catch (Exception e) {
+            OctoLogging.e("ImageLoader", "Error decoding bitmap", e);
             return null;
         }
 
-        byte[] imageData = outputStream.toByteArray();
-
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        boolean isRound = !TextUtils.isEmpty(filter) && filter.contains("r");
-        options.inPreferredConfig = SharedConfig.deviceIsHigh() || isRound ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
         if (bitmap == null) {
             return null;
         }
 
-        if (isRound) {
-            bitmap = makeRoundBitmap(bitmap);
-        }
 
-        if (!TextUtils.isEmpty(filter) && filter.contains("b")) {
+        final boolean isRound = !TextUtils.isEmpty(filter) && filter.contains("r");
+        if (isRound) {
+            Bitmap.Config config = bitmap.getConfig();
+            if (config == null) {
+                config = Bitmap.Config.ARGB_8888;
+            }
+            Bitmap nbitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), config);
+            Canvas canvas = new Canvas(nbitmap);
+            canvas.save();
+            final float s = 1.2f;
+            canvas.scale(s, s, bitmap.getWidth() / 2f, bitmap.getHeight() / 2f);
+            canvas.drawBitmap(bitmap, 0, 0, null);
+            canvas.restore();
+            android.graphics.Path path = new android.graphics.Path();
+            path.addCircle(bitmap.getWidth() / 2f, bitmap.getHeight() / 2f, Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2f, android.graphics.Path.Direction.CW);
+            canvas.clipPath(path);
+            canvas.drawBitmap(bitmap, 0, 0, null);
+            bitmap.recycle();
+            bitmap = nbitmap;
+        }
+        if (bitmap != null && !TextUtils.isEmpty(filter) && filter.contains("b")) {
             Utilities.blurBitmap(bitmap, 3, 1, bitmap.getWidth(), bitmap.getHeight(), bitmap.getRowBytes());
         }
-
         return bitmap;
     }
-
-    private static Bitmap makeRoundBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final Paint paint = new Paint();
-
-        paint.setAntiAlias(true);
-        paint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-
-        float radius = Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2f;
-        canvas.drawCircle(bitmap.getWidth() / 2f, bitmap.getHeight() / 2f, radius, paint);
-
-        bitmap.recycle();
-        return output;
-    }
-
 
     private class CacheImage {
 

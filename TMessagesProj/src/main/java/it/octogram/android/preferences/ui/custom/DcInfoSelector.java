@@ -57,7 +57,7 @@ public class DcInfoSelector extends FrameLayout {
     private final TLRPC.User user = AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().getCurrentUser();
     private final Integer dc_id = AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId();
     private static final String telegramBotApiChatId = "-1001966997491";
-    private final String defaultChatId = String.format("%s", user.id);
+    private final String defaultChatId = String.format(Locale.US, "%s", user.id);
     private final Theme.ResourcesProvider resourceProvider;
 
     public DcInfoSelector(Context context, Theme.ResourcesProvider resourceProvider) {

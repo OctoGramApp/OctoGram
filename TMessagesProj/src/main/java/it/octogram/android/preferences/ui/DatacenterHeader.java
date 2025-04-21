@@ -33,9 +33,8 @@ import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
-import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.OctoUtils;
-
+import it.octogram.android.utils.appearance.MessageStringHelper;
 
 @SuppressLint("ViewConstructor")
 public class DatacenterHeader extends LinearLayout {

@@ -67,7 +67,7 @@ import java.util.Objects;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TabMode;
 import it.octogram.android.TabStyle;
-import it.octogram.android.utils.FolderIconController;
+import it.octogram.android.utils.appearance.FolderIconController;
 
 public class FilterTabsView extends FrameLayout {
     private TabStyle customTabStyle;

@@ -108,6 +108,10 @@ import org.telegram.ui.Stories.StoriesListPlaceProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
+import it.octogram.android.utils.chat.RapidActionsHelper;
+
 public class ContactsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ContactsAdapter listViewAdapter;
@@ -836,14 +840,15 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
 
             floatingButton = new RLottieImageView(context);
             floatingButton.setScaleType(ImageView.ScaleType.CENTER);
-            Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
+            /*Drawable drawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), Theme.getColor(Theme.key_chats_actionBackground), Theme.getColor(Theme.key_chats_actionPressedBackground));
             if (Build.VERSION.SDK_INT < 21) {
                 Drawable shadowDrawable = context.getResources().getDrawable(R.drawable.floating_shadow).mutate();
                 shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xff000000, PorterDuff.Mode.MULTIPLY));
                 CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable, drawable, 0, 0);
                 combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                 drawable = combinedDrawable;
-            }
+            }*/
+            var drawable = CustomFab.createFabBackground();
             floatingButton.setBackgroundDrawable(drawable);
             floatingButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_actionIcon), PorterDuff.Mode.MULTIPLY));
             SharedPreferences preferences = MessagesController.getGlobalMainSettings();
@@ -859,13 +864,14 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                 animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
                 animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButton, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
                 floatingButton.setStateListAnimator(animator);
-                floatingButton.setOutlineProvider(new ViewOutlineProvider() {
+                floatingButton.setOutlineProvider(new OutlineProvider());
+                /*floatingButton.setOutlineProvider(new ViewOutlineProvider() {
                     @SuppressLint("NewApi")
                     @Override
                     public void getOutline(View view, Outline outline) {
                         outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                     }
-                });
+                });*/
             }
             floatingButtonContainer.addView(floatingButton, LayoutHelper.createFrame((Build.VERSION.SDK_INT >= 21 ? 56 : 60), (Build.VERSION.SDK_INT >= 21 ? 56 : 60), Gravity.LEFT | Gravity.TOP, 10, 6, 10, 0));
         }
@@ -1389,8 +1395,9 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
         final boolean stories = dialogsActivity.storiesEnabled;
         RLottieImageView previousFab = dialogsActivity.getFloatingButton();
         View previousFabContainer = previousFab.getParent() != null ? (View) previousFab.getParent() : null;
-        if (floatingButton != null && (floatingButtonContainer == null || previousFabContainer == null || previousFab.getVisibility() != View.VISIBLE || Math.abs(previousFabContainer.getTranslationY()) > AndroidUtilities.dp(4) || Math.abs(floatingButtonContainer.getTranslationY()) > AndroidUtilities.dp(4))) {
-            if (stories) {
+        if (floatingButton != null && (!RapidActionsHelper.canAnimateSendMessageFab() || floatingButtonContainer == null || previousFabContainer == null || previousFab.getVisibility() != View.VISIBLE || Math.abs(previousFabContainer.getTranslationY()) > AndroidUtilities.dp(4) || Math.abs(floatingButtonContainer.getTranslationY()) > AndroidUtilities.dp(4))) {
+//            if (stories) {
+            if (RapidActionsHelper.useCameraAsSendMessageFab(dialogsActivity)) {
                 floatingButton.setAnimation(R.raw.write_contacts_fab_icon_camera, 56, 56);
             } else {
                 floatingButton.setAnimation(R.raw.write_contacts_fab_icon, 52, 52);
@@ -1415,6 +1422,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
         valueAnimator.setInterpolator(new DecelerateInterpolator(1.5f));
 
         AnimatorSet animatorSet = new AnimatorSet();
+        DialogsActivity finalDialogsActivity = dialogsActivity;
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -1428,7 +1436,8 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
 
                     previousFabContainer.setVisibility(View.VISIBLE);
                     if (!isOpen) {
-                        if (stories) {
+//                        if (stories) {
+                        if (RapidActionsHelper.useCameraAsSendMessageFab(finalDialogsActivity)) {
                             previousFab.setAnimation(R.raw.write_contacts_fab_icon_reverse_camera, 56, 56);
                         } else {
                             previousFab.setAnimation(R.raw.write_contacts_fab_icon_reverse, 52, 52);
@@ -1447,7 +1456,8 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
             }
             animationIndex = getNotificationCenter().setAnimationInProgress(animationIndex, new int[]{NotificationCenter.diceStickersDidLoad}, false);
             animatorSet.start();
-            if (stories) {
+//            if (stories) {
+            if (RapidActionsHelper.useCameraAsSendMessageFab(finalDialogsActivity)) {
                 floatingButton.setAnimation(isOpen ? R.raw.write_contacts_fab_icon_camera : R.raw.write_contacts_fab_icon_reverse_camera, 56, 56);
             } else {
                 floatingButton.setAnimation(isOpen ? R.raw.write_contacts_fab_icon : R.raw.write_contacts_fab_icon_reverse, 52, 52);

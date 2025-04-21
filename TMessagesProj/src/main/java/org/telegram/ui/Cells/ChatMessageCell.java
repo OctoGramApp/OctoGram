@@ -220,7 +220,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerShape;
-import it.octogram.android.utils.MessageResourceHelper;
+import it.octogram.android.utils.appearance.MessageResourceHelper;
 
 public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate, ImageReceiver.ImageReceiverDelegate, DownloadController.FileDownloadProgressListener, TextSelectionHelper.SelectableView, NotificationCenter.NotificationCenterDelegate {
     private final static int TIME_APPEAR_MS = 200;

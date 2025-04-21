@@ -15,7 +15,7 @@ public class DeepLinkDef {
     public static final String CHUPAGRAM = "chupagram";
     public static final String YUKIGRAM = "yukigram";
     public static final String EXPERIMENTAL = "experimental";
-    public static final String EXPERIMENTAL_NAVIGATION = "experimental_navigation";
+    public static final String EXPERIMENTAL_NAVIGATION = "experimental/navigation";
     public static final String CAMERA = "camera";
     public static final String GENERAL = "general";
     public static final String OCTOSETTINGS = "octosettings";
@@ -29,8 +29,10 @@ public class DeepLinkDef {
     public static final String PINNED_REACTIONS = "pinned_reactions";
     public static final String PINNED_HASHTAGS = "pinned_hashtags";
     public static final String TRANSLATOR = "translator";
+    public static final String AI_FEATURES = "ai";
     public static final String INFO = "octogram";
     public static final String DC_STATUS = "dc";
     public static final String PRIVACY = "privacy";
+    public static final String PRIVACY_CHATS = "privacy/chats";
     public static final String LOCKED_CHATS = "locked_chats";
 }

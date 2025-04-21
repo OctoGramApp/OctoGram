@@ -61,8 +61,8 @@ import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.LogoutActivity;
 
-import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 
 public class BlockingAccountView extends ViewGroup {
     private final TextView buttonTextView;

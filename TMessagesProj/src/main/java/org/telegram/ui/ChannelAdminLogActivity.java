@@ -155,6 +155,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.OctoAiNewModelUI;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 
 public class ChannelAdminLogActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
@@ -346,6 +349,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.messagePlayingProgressDidChanged);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.didSetNewWallpapper);
         notificationsLocker.unlock();
+        Bulletin.removeDelegate(this);
     }
 
     private void updateEmptyPlaceholder() {
@@ -3212,6 +3216,15 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                                     ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(ChannelAdminLogActivity.this, message);
                                     sheet.setOriginalActivity(getParentActivity());
                                     sheet.show();
+                                    handled = true;
+                                }
+                            }
+                            if (message.getDocumentName().toLowerCase().endsWith(OctoConfig.OCTOMODEL_EXTENSION)) {
+                                CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelFromMessage(message);
+                                if (model != null) {
+                                    OctoAiNewModelUI newModelUI = new OctoAiNewModelUI();
+                                    newModelUI.setCurrentModel(model);
+                                    ChannelAdminLogActivity.this.presentFragment(new PreferencesFragment(newModelUI));
                                     handled = true;
                                 }
                             }

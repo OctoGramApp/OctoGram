@@ -16,7 +16,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.Clickable;
-import it.octogram.android.utils.ExpandableRowsOption;
+import it.octogram.android.utils.config.ExpandableRowsOption;
 
 public class ExpandableRowsChild extends BaseRow implements Clickable {
     private final ExpandableRowsOption item;

@@ -50,7 +50,8 @@ public class MenuOrderController {
             DrawerItem.Id.PROXY_SETTINGS.getId(),
             DrawerItem.Id.ATTACH_MENU_BOT.getId(),
             DrawerItem.Id.TELEGRAM_BROWSER.getId(),
-            DrawerItem.Id.DATA_AND_STORAGE.getId()
+            DrawerItem.Id.DATA_AND_STORAGE.getId(),
+            DrawerItem.Id.AI_FEATURES.getId()
     };
 
     static {
@@ -302,6 +303,7 @@ public class MenuOrderController {
             case 18 -> R.string.AttachedMenuBot;
             case 19 -> R.string.OctoTgBrowser;
             case 20 -> R.string.DataSettings;
+            case 21 -> R.string.AiFeatures_Brief;
             default -> throw new IllegalArgumentException("Invalid index: " + index);
         };
     }

@@ -45,6 +45,8 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import it.octogram.android.CustomEmojiController;
+import it.octogram.android.OctoConfig;
+
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -893,7 +895,7 @@ public class ChatAttachAlertDocumentLayout extends ChatAttachAlert.AttachAlertLa
     }
 
     public boolean isExportFile(File file) {
-        boolean isValidEmojiFont = file.getName().endsWith(".octoexport");
+        boolean isValidEmojiFont = file.getName().endsWith(OctoConfig.OCTOEXPORT_EXTENSION);
         if (!isValidEmojiFont) BulletinFactory.of(parentAlert.getContainer(), null).createErrorBulletinSubtitle(LocaleController.formatString("ImportReadyImportFailedPickerTitle", R.string.ImportReadyImportFailedPickerTitle), LocaleController.formatString("ImportReadyImportFailedPickerDescription", R.string.ImportReadyImportFailedPickerDescription), null).show();
         return isValidEmojiFont;
     }

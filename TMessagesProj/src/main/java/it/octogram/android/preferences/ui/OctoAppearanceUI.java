@@ -42,9 +42,9 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.CustomActionBarTitleBottomSheet;
-import it.octogram.android.utils.ExpandableRowsOption;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
+import it.octogram.android.utils.config.ExpandableRowsOption;
 
 public class OctoAppearanceUI implements PreferencesEntry {
     @NonNull

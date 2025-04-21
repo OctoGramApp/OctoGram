@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -72,9 +80,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.custom.ReactionsContainerPreview;
@@ -807,7 +817,7 @@ public class PinnedReactionsActivity extends BaseFragment {
 
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
-            String link = "tg://pinned_reactions";
+            String link = String.format(Locale.US, "tg://%s", DeepLinkDef.PINNED_REACTIONS);
             showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;

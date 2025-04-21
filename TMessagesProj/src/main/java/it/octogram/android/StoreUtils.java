@@ -10,11 +10,12 @@ package it.octogram.android;
 
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import org.telegram.messenger.ApplicationLoader;
+
+import it.octogram.android.logs.OctoLogging;
 
 public class StoreUtils {
 
@@ -45,13 +46,13 @@ public class StoreUtils {
         try {
             return getPackageName();
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Package name not found: " + ApplicationLoader.applicationContext.getPackageName(), e);
+            OctoLogging.e(TAG, "Package name not found: " + ApplicationLoader.applicationContext.getPackageName(), e);
             return null;
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Invalid package name: " + ApplicationLoader.applicationContext.getPackageName(), e);
+            OctoLogging.e(TAG, "Invalid package name: " + ApplicationLoader.applicationContext.getPackageName(), e);
             return null;
         } catch (Exception e) {
-            Log.e(TAG, "Error retrieving installer package name for: " + ApplicationLoader.applicationContext.getPackageName(), e);
+            OctoLogging.e(TAG, "Error retrieving installer package name for: " + ApplicationLoader.applicationContext.getPackageName(), e);
             return null;
         }
     }

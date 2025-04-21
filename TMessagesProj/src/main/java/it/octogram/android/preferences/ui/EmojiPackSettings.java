@@ -79,7 +79,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.http.FileDownloader;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.EmojiSet;
-import it.octogram.android.utils.FileUnzip;
+import it.octogram.android.utils.data.FileUnzip;
 
 public class EmojiPackSettings extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
 

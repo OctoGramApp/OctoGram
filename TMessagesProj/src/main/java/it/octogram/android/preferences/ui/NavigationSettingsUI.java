@@ -47,8 +47,10 @@ import org.telegram.ui.Components.SlideChooseView;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.ui.components.SmoothnessAnimationCell;
 
 public class NavigationSettingsUI extends BaseFragment {
@@ -105,7 +107,7 @@ public class NavigationSettingsUI extends BaseFragment {
 
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
-            String link = "tg://experimental/navigation";
+            String link = String.format(Locale.US, "tg://%s", DeepLinkDef.EXPERIMENTAL_NAVIGATION);
             showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;

@@ -20,4 +20,8 @@ public class ShadowRow extends BaseRow {
     public ShadowRow(ConfigProperty<Boolean> showIf) {
         super(PreferenceType.SHADOW, showIf);
     }
+
+    public ShadowRow(ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+        super(PreferenceType.SHADOW, showIf, showIfReverse);
+    }
 }

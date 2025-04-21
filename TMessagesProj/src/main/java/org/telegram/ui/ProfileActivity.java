@@ -326,12 +326,14 @@ import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+import it.octogram.android.preferences.ui.components.CustomFab;
+import it.octogram.android.preferences.ui.components.OutlineProvider;
 import it.octogram.android.preferences.ui.custom.DatacenterCell;
 import it.octogram.android.utils.CustomDevicePerformanceManager;
-import it.octogram.android.utils.ImportSettingsScanHelper;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.RegistrationDateController;
-import it.octogram.android.utils.UserAccountInfoController;
+import it.octogram.android.utils.account.UserAccountInfoController;
+import it.octogram.android.utils.config.ImportSettingsScanHelper;
+import it.octogram.android.utils.data.RegistrationDateController;
 
 public class ProfileActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, SharedMediaLayout.SharedMediaPreloaderDelegate, ImageUpdater.ImageUpdaterDelegate, SharedMediaLayout.Delegate {
     private final static int PHONE_OPTION_CALL = 0,
@@ -2150,6 +2152,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             applyBulletin = null;
             AndroidUtilities.runOnUIThread(runnable);
         }
+        Bulletin.removeDelegate(this);
     }
 
     @Override
@@ -5692,13 +5695,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(2), AndroidUtilities.dp(4)).setDuration(200));
             animator.addState(new int[]{}, ObjectAnimator.ofFloat(floatingButtonContainer, View.TRANSLATION_Z, AndroidUtilities.dp(4), AndroidUtilities.dp(2)).setDuration(200));
             floatingButtonContainer.setStateListAnimator(animator);
-            floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
+            floatingButtonContainer.setOutlineProvider(new OutlineProvider());
+            /*floatingButtonContainer.setOutlineProvider(new ViewOutlineProvider() {
                 @SuppressLint("NewApi")
                 @Override
                 public void getOutline(View view, Outline outline) {
                     outline.setOval(0, 0, AndroidUtilities.dp(56), AndroidUtilities.dp(56));
                 }
-            });
+            });*/
         }
         floatingButtonContainer.addView(floatingButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         floatingButton.setAnimation(R.raw.write_contacts_fab_icon_camera, 56, 56);
@@ -5724,7 +5728,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void updateFloatingButtonColor() {
-        if (getParentActivity() == null) {
+        updateCustomFloatingButtonColor();
+        /*if (getParentActivity() == null) {
             return;
         }
         Drawable drawable;
@@ -5738,7 +5743,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 drawable = combinedDrawable;
             }
             floatingButtonContainer.setBackground(drawable);
+        }*/
+    }
+
+    private void updateCustomFloatingButtonColor() {
+        if (getParentActivity() == null || floatingButtonContainer == null) {
+            return;
         }
+        var defaultBackgroundColor = applyPeerColor(Theme.getColor(Theme.key_chats_actionBackground), false, false);
+        var pressedBackgroundColor = applyPeerColor(Theme.getColor(Theme.key_chats_actionPressedBackground), false, false);
+        this.floatingButtonContainer.setBackground(CustomFab.createFabBackground(56, defaultBackgroundColor, pressedBackgroundColor));
     }
 
     private void hideFloatingButton(boolean hide) {
@@ -6754,7 +6768,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             BulletinFactory.of(this).createCopyBulletin(LocaleController.getString(R.string.TextCopied)).show();
         } else if (position == registrationDataRow && (userId != 0)) {
             try {
-                var date = RegistrationDateController.getRegistrationDate(userId);
+                var date = RegistrationDateController.getRegistrationDate(userId, getMessagesController().getPeerSettings(userId));
                 AndroidUtilities.addToClipboard(date);
                 BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
             } catch (Exception e) {
@@ -12103,7 +12117,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == registrationDataRow) {
                         if (!isChat() && userId != 0) {
                             boolean isSelfSettings = userId == UserConfig.getInstance(currentAccount).getClientUserId();
-                            detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId), LocaleController.getString(R.string.RegistrationDate), isSelfSettings);
+                            detailCell.setTextAndValue(RegistrationDateController.getRegistrationDate(userId, getMessagesController().getPeerSettings(userId)), LocaleController.getString(R.string.RegistrationDate), isSelfSettings);
                         }
                     } else if (position == restrictionReasonRow) {
                         ArrayList<TLRPC.RestrictionReason> reasons = new ArrayList<>();
@@ -14038,7 +14052,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 iconColor = Color.WHITE;
             }
             CombinedDrawable combinedDrawable = new CombinedDrawable(shadowDrawable,
-                    Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), color1, color2),
+                    CustomFab.createFabBackground(56, color1, color2),
+                    //Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(56), color1, color2),
                     0, 0);
             combinedDrawable.setIconSize(AndroidUtilities.dp(56), AndroidUtilities.dp(56));
             writeButton.setBackground(combinedDrawable);

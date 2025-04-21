@@ -82,8 +82,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.components.LockedChatsHelp;
-import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 
 public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements DialogCell.DialogCellDelegate {
     public final static int VIEW_TYPE_DIALOG = 0,
@@ -1445,7 +1446,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             array = new ArrayList<>();
         }
 
-        if ((FingerprintUtils.hasLockedChats() || dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS) && FingerprintUtils.hasFingerprintCached()) {
+        if (OctoConfig.INSTANCE.lockedChatsHideChats.getValue() && (FingerprintUtils.hasLockedChats() || dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS) && FingerprintUtils.hasFingerprintCached()) {
             boolean state = dialogsType == DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS;
             array.removeIf((dialog) -> FingerprintUtils.isChatLocked(dialog) != state);
         }

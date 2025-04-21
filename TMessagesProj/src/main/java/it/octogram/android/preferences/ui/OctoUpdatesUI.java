@@ -43,8 +43,8 @@ import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.components.CustomUpdatesCheckCell;
-import it.octogram.android.utils.PopupChoiceDialogOption;
 import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 
 public class OctoUpdatesUI implements PreferencesEntry {
     private CustomUpdatesCheckCell checkCell;

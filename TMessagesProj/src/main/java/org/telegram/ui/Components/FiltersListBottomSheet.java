@@ -40,7 +40,7 @@ import org.telegram.ui.DialogsActivity;
 
 import java.util.ArrayList;
 
-import it.octogram.android.utils.FolderIconController;
+import it.octogram.android.utils.appearance.FolderIconController;
 
 public class FiltersListBottomSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 

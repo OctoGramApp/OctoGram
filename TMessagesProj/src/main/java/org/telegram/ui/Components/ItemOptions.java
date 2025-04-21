@@ -67,7 +67,7 @@ import org.telegram.ui.Stories.recorder.ToggleButton;
 import java.util.Arrays;
 import java.util.Collections;
 
-import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 
 public class ItemOptions {
@@ -862,6 +862,10 @@ public class ItemOptions {
 
     public ViewGroup getLayout() {
         return layout;
+    }
+
+    public ActionBarPopupWindow.ActionBarPopupWindowLayout getLastLayout() {
+        return lastLayout;
     }
 
     public ItemOptions setBlurBackground(BlurringShader.BlurManager blurManager, float ox, float oy) {

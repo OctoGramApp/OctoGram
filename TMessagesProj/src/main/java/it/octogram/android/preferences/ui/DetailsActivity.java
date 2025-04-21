@@ -45,13 +45,15 @@ import org.telegram.ui.Components.RecyclerListView;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Locale;
 
 import it.octogram.android.Datacenter;
 import it.octogram.android.preferences.ui.custom.DetailsPreviewMessages;
 import it.octogram.android.preferences.ui.custom.TextDetailCellMultiline;
-import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.UserAccountInfoController;
+import it.octogram.android.utils.account.UserAccountInfoController;
+import it.octogram.android.utils.appearance.MessageStringHelper;
+
 
 public class DetailsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
     private final MessageObject messageObject;
@@ -808,7 +810,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
 
                 if (attribute.w > 0 && attribute.h > 0) {
                     fileResolution = rowCount++;
-                    resolution = String.format("%sx%s", attribute.w, attribute.h);
+                    resolution = String.format(Locale.US, "%sx%s", attribute.w, attribute.h);
                 }
 
                 if (attribute.video_codec != null && !attribute.video_codec.isEmpty()) {
@@ -821,7 +823,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
 
                 if (attribute.w > 0 && attribute.h > 0) {
                     fileResolution = rowCount++;
-                    imageResolution = String.format("%sx%s", attribute.w, attribute.h);
+                    imageResolution = String.format(Locale.US, "%sx%s", attribute.w, attribute.h);
                 }
             }
         }

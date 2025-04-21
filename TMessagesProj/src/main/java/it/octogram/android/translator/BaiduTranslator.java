@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
@@ -35,7 +34,7 @@ import it.octogram.android.utils.OctoUtils;
 public class BaiduTranslator {
     private static final String TAG = "BaiduTranslator";
     private static final HashMap<String, String> targetLanguages = new HashMap<>();
-    private static final String uuid = UUID.randomUUID().toString().replace("-", "");
+    private static final String uuid = OctoUtils.generateRandomString().replace("-", "");
 
     static {
         List<String> standardLanguages = List.of("zh", "en", "th", "ru", "pt", "de", "it", "el", "nl", "pl", "cs", "hu");
@@ -75,11 +74,12 @@ public class BaiduTranslator {
                     ArrayList<String> parts = OctoUtils.getStringParts(text2, 2500);
 
                     for (String part : parts) {
-                        StandardHTTPRequest request = new StandardHTTPRequest(composeUrl());
-                        request.getHttpURLConnection().setRequestMethod("POST");
-                        request.header("Content-Type", contentType);
-                        request.header("User-Agent", userAgent);
-                        request.data(composeBody(part, finalToLanguage));
+                        StandardHTTPRequest request = new StandardHTTPRequest.Builder(composeUrl())
+                                .method("POST")
+                                .header("Content-Type", contentType)
+                                .header("User-Agent", userAgent)
+                                .data(composeBody(part, finalToLanguage))
+                                .build();
 
                         String response = request.request();
 
@@ -120,14 +120,14 @@ public class BaiduTranslator {
         url += "&version=153";
         url += "&plat=android";
         url += "&req=v2trans";
-        url += "&cuid="+uuid;
+        url += "&cuid=" + uuid;
 
         return url;
     }
 
     private static String composeBody(String part, String toTranslate) {
         String currentTime = String.valueOf(System.currentTimeMillis());
-        String sign = Utilities.MD5("query"+part+"imeiversion153timestamp"+currentTime+"fromautoto"+toTranslate+"reqv2transtextimage607e34f0fb3bf7895c102dacf9e9b0d7");
+        String sign = Utilities.MD5("query" + part + "imeiversion153timestamp" + currentTime + "fromautoto" + toTranslate + "reqv2transtextimage607e34f0fb3bf7895c102dacf9e9b0d7");
 
         String url = "sign=" + sign;
         url += "&sofireId=";
@@ -163,7 +163,8 @@ public class BaiduTranslator {
                     if (i != list.length() - 1) {
                         translation.append("\n");
                     }
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
             }
 
             if (!translation.toString().isEmpty()) {

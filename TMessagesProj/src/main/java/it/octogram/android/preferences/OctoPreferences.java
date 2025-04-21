@@ -31,7 +31,7 @@ import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 
-public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
+public record OctoPreferences(CharSequence title, String deepLink, boolean hasSaveButton, List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
 
     public static OctoPreferencesBuilder builder(String name) {
         return new OctoPreferencesBuilder(name);
@@ -58,6 +58,7 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
     public static class OctoPreferencesBuilder {
         private final String name;
         private @DeepLinkType String deepLink = null;
+        private boolean saveButtonAvailable = false;
         private final List<OctoContextMenuElement> elements = new ArrayList<>();
         private final List<BaseRow> preferences = new ArrayList<>();
 
@@ -67,6 +68,11 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
 
         public OctoPreferencesBuilder deepLink(@DeepLinkType String deepLink) {
             this.deepLink = deepLink;
+            return this;
+        }
+
+        public OctoPreferencesBuilder saveButtonAvailable(boolean saveButtonAvailable) {
+            this.saveButtonAvailable = saveButtonAvailable;
             return this;
         }
 
@@ -100,6 +106,18 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
             return this;
         }
 
+        public OctoPreferencesBuilder categoryWithoutShadow(CharSequence title, Consumer<OctoPreferencesBuilder> consumer) {
+            preferences.add(new HeaderRow(title));
+            consumer.accept(this);
+            return this;
+        }
+
+        public OctoPreferencesBuilder categoryWithoutShadow(CharSequence title, ConfigProperty<Boolean> showIf, Consumer<OctoPreferencesBuilder> consumer) {
+            preferences.add(new HeaderRow(title, showIf));
+            consumer.accept(this);
+            return this;
+        }
+
         public OctoPreferencesBuilder row(BaseRow row) {
             preferences.add(row);
             return this;
@@ -113,6 +131,17 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
                     .build()
             );
             preferences.add(new ShadowRow());
+            return this;
+        }
+        public OctoPreferencesBuilder sticker(Context context, String packName, StickerUi stickerNum, boolean autoRepeat, String description, ConfigProperty<Boolean> showIf) {
+            StickerImageView stickerImageView = createStickerImageView(context, packName, stickerNum.getValue(), autoRepeat);
+            preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
+                    .stickerView(stickerImageView)
+                    .description(description)
+                    .showIf(showIf)
+                    .build()
+            );
+            preferences.add(new ShadowRow(showIf));
             return this;
         }
 
@@ -156,7 +185,7 @@ public record OctoPreferences(CharSequence title, String deepLink, List<BaseRow>
         }
 
         public OctoPreferences build() {
-            return new OctoPreferences(name, deepLink, preferences, elements);
+            return new OctoPreferences(name, deepLink, saveButtonAvailable, preferences, elements);
         }
     }
 }

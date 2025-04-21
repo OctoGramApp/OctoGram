@@ -77,6 +77,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLException;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.CustomDevicePerformanceManager;
 import it.octogram.android.utils.OctoUtils;
 
@@ -378,6 +379,7 @@ public class ConnectionsManager extends BaseController {
                                 throw e2;
                             }
                             FileLog.fatal(e2);
+                            //OctoLogging.fatal(e2);
                             return;
                         }
                     } else if (errorText != null) {

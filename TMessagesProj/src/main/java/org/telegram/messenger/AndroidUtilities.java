@@ -37,7 +37,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -133,13 +132,6 @@ import com.google.android.gms.auth.api.phone.SmsRetriever;
 import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
 import com.google.android.gms.tasks.Task;
 
-import it.octogram.android.DeviceIdentifyState;
-import it.octogram.android.FontType;
-import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
-import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.TypeFaceSupportChecker;
-
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.utils.CustomHtml;
@@ -223,6 +215,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import it.octogram.android.DeviceIdentifyState;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.OctoAiNewModelUI;
+import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
+import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.appearance.TypeFaceSupportChecker;
 
 public class AndroidUtilities {
     public final static int LIGHT_STATUS_BAR_OVERLAY = 0x0f000000, DARK_STATUS_BAR_OVERLAY = 0x33000000;
@@ -4120,6 +4121,16 @@ public class AndroidUtilities {
                     ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(parentFragment, message);
                     sheet.setOriginalActivity(parentFragment.getParentActivity());
                     sheet.show();
+                    return;
+                }
+            }
+
+            if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith(OctoConfig.OCTOMODEL_EXTENSION)) {
+                CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelFromMessage(message);
+                if (model != null) {
+                    OctoAiNewModelUI newModelUI = new OctoAiNewModelUI();
+                    newModelUI.setCurrentModel(model);
+                    parentFragment.presentFragment(new PreferencesFragment(newModelUI));
                     return;
                 }
             }

@@ -40,7 +40,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.UserAccountInfoController;
+import it.octogram.android.utils.account.UserAccountInfoController;
 
 @SuppressLint("ViewConstructor")
 public class DatacenterCell extends LinearLayout {

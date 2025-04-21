@@ -105,7 +105,7 @@ import java.util.zip.ZipInputStream;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhotoResolution;
-import it.octogram.android.utils.VideoUtils;
+import it.octogram.android.utils.media.VideoUtils;
 
 public class SendMessagesHelper extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 

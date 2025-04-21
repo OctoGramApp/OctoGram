@@ -43,12 +43,13 @@ public class LingoTranslator {
                     ArrayList<String> parts = OctoUtils.getStringParts(text, 2500);
 
                     for (String part : parts) {
-                        StandardHTTPRequest request = new StandardHTTPRequest(url);
-                        request.getHttpURLConnection().setRequestMethod("POST");
-                        request.header("Content-Type", contentType);
-                        request.header("User-Agent", userAgent);
-                        request.header("X-Authorization", authorization);
-                        request.data(composeBody(part, toLanguage));
+                        StandardHTTPRequest request = new StandardHTTPRequest.Builder(url)
+                                .method("POST")
+                                .header("Content-Type", contentType)
+                                .header("User-Agent", userAgent)
+                                .header("X-Authorization", authorization)
+                                .data(composeBody(part, toLanguage))
+                                .build();
 
                         String response = request.request();
 
@@ -79,7 +80,7 @@ public class LingoTranslator {
         JSONObject object = new JSONObject();
 
         try {
-            object.put("trans_type", "auto2"+toTranslate);
+            object.put("trans_type", "auto2" + toTranslate);
             object.put("source", URLEncoder.encode(part, StandardCharsets.UTF_8.name()));
             object.put("request_id", String.valueOf(System.currentTimeMillis()));
             object.put("detect", true);
@@ -98,7 +99,8 @@ public class LingoTranslator {
         if (object.has("target")) {
             try {
                 return object.getString("target");
-            } catch (JSONException ignored) {}
+            } catch (JSONException ignored) {
+            }
         }
 
         throw new IOException("empty translation message");

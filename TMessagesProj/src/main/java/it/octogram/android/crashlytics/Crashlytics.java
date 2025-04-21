@@ -44,8 +44,8 @@ import java.lang.reflect.Field;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.utils.NotificationColorize;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.appearance.NotificationColorize;
 
 public class Crashlytics {
 
@@ -61,6 +61,7 @@ public class Crashlytics {
 
     public static void init() {
         OctoLogging.d(TAG, "init: Initializing Crashlytics");
+        //OctoLogging.dumpHprofMemory();
         createNotificationChannel();
 
         Thread.UncaughtExceptionHandler exceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
@@ -110,7 +111,7 @@ public class Crashlytics {
     private static void saveCrashLogs(String stacktrace) throws IOException, IllegalAccessException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(getLatestCrashFile()));
         OctoLogging.d(TAG, "saveCrashLogs: Saving crash logs to: " + getLatestCrashFile().getAbsolutePath());
-        writer.write(getSystemInfo());
+        writer.write(getSystemInfo(false));
         writer.write(stacktrace);
         writer.flush();
         writer.close();
@@ -136,6 +137,11 @@ public class Crashlytics {
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
         notificationManagerCompat.notify(CRASH_NOTIFICATION_ID, builder.build());
         OctoLogging.d(TAG, "showCrashNotification: Crash notification displayed");
+    }
+
+
+    public static String getSystemInfo(boolean includeConfiguration) throws IllegalAccessException {
+        return getSystemInfo(includeConfiguration, null);
     }
 
     public static String getSystemInfo() throws IllegalAccessException {

@@ -32,7 +32,7 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.TabMode;
 import it.octogram.android.TabStyle;
 import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.utils.FolderUtils;
+import it.octogram.android.utils.config.FolderUtils;
 
 @SuppressLint("UseCompatLoadingForDrawables")
 public class FolderTypeSelector extends FrameLayout {

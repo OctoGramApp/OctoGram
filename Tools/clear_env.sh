@@ -1,1 +1,1 @@
-ccache -c -C && rm -rf .kotlin .gradle .idea TMessagesProj/.cxx/ TMessagesProj/build
+ccache -c -C && rm -rf .kotlin .gradle .idea TMessagesProj_App/build build TMessagesProj/.cxx/ TMessagesProj/build

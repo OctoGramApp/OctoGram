@@ -76,7 +76,7 @@ import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 
 public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
 

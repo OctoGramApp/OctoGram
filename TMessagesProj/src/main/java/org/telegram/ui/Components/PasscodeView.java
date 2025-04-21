@@ -80,7 +80,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.FingerprintUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 
 public class PasscodeView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
     private final static float BACKGROUND_SPRING_STIFFNESS = 300f;

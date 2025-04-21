@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.preferences.fragment;
 
 import android.annotation.SuppressLint;
@@ -18,8 +26,8 @@ import java.util.List;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.FingerprintUtils;
-import it.octogram.android.utils.TelegramSettingsHelper;
+import it.octogram.android.utils.account.FingerprintUtils;
+import it.octogram.android.utils.account.TelegramSettingsHelper;
 
 @SuppressLint("ViewConstructor")
 public class ActionBarOverride extends ActionBarLayout {

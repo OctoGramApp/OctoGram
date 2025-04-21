@@ -22,6 +22,8 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.core.view.GestureDetectorCompat;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.UserConfig;
@@ -76,6 +78,10 @@ public class PopupSwipeBackLayout extends FrameLayout {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                if (e1 == null || e2 == null) {
+                    android.util.Log.e("PopupSwipeBackLayout", "MotionEvent is null in onScroll: e1=" + e1 + ", e2=" + e2);
+                    return false;
+                }
                 if (!isProcessingSwipe && !isSwipeDisallowed) {
                     if (!isSwipeBackDisallowed && transitionProgress == 1 && distanceX <= -touchSlop && Math.abs(distanceX) >= Math.abs(distanceY * 1.5f) && !isDisallowedView(e2, getChildAt(transitionProgress > 0.5f ? 1 : 0))) {
                         isProcessingSwipe = true;

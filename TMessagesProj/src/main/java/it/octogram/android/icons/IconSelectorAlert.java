@@ -35,6 +35,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -44,13 +46,15 @@ import org.telegram.ui.Components.ExtendedGridLayoutManager;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 
-import it.octogram.android.utils.FolderIconController;
+import it.octogram.android.ai.icons.AiFeatureIcons;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.appearance.FolderIconController;
 
 @SuppressLint("ClickableViewAccessibility")
 public class IconSelectorAlert extends BottomSheet {
 
     private OnItemClickListener onItemClickListener;
+    private boolean isCustomModelSelector = false;
 
     public void setOnItemClick(OnItemClickListener listener) {
         this.onItemClickListener = listener;
@@ -69,11 +73,17 @@ public class IconSelectorAlert extends BottomSheet {
 
     @SuppressLint("NotifyDataSetChanged")
     public IconSelectorAlert(Context context) {
+        this(context, false);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public IconSelectorAlert(Context context, boolean isCustomModelSelector) {
         super(context, false);
         setCanceledOnTouchOutside(false);
         setApplyTopPadding(false);
         setApplyBottomPadding(false);
 
+        this.isCustomModelSelector = isCustomModelSelector;
         int colorBackground = Theme.getColor(Theme.key_dialogBackground);
 
         shadowDrawable = ContextCompat.getDrawable(context, R.drawable.sheet_shadow_round);
@@ -166,11 +176,12 @@ public class IconSelectorAlert extends BottomSheet {
             protected void onMeasure(int widthSpec, int heightSpec) {
                 super.onMeasure(widthSpec, heightSpec);
                 gridAdapter.notifyDataSetChanged();
+                Log.e("a", "dstchang");
             }
         };
         recyclerListView.setLayoutParams(new LinearLayout.LayoutParams(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         recyclerListView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        recyclerListView.setLayoutManager(new ExtendedGridLayoutManager(recyclerListView.getContext(), 6));
+        recyclerListView.setLayoutManager(new ExtendedGridLayoutManager(recyclerListView.getContext(), isCustomModelSelector ? 9 : 6));
         var padding = dp(10);
         recyclerListView.setPadding(padding, padding, padding, padding);
         recyclerListView.setAdapter(gridAdapter);
@@ -285,15 +296,15 @@ public class IconSelectorAlert extends BottomSheet {
         return false;
     }
 
-    private static class GridAdapter extends RecyclerListView.SelectionAdapter {
-        private final String[] icons = FolderIconController.folderIcons.keySet().toArray(new String[0]);
+    private class GridAdapter extends RecyclerListView.SelectionAdapter {
+        private final String[] icons = (isCustomModelSelector ? AiFeatureIcons.getAiIcons() : FolderIconController.folderIcons).keySet().toArray(new String[0]);
 
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             var imageView = new AppCompatImageView(parent.getContext());
             int containerWidth = parent.getMeasuredWidth();
-            int iconSize = (int) (containerWidth / 6.0f * 0.9f);
+            int iconSize = (int) (containerWidth / (isCustomModelSelector ? 9.0f : 6.0f) * 0.9f);
             imageView.setLayoutParams(new RecyclerView.LayoutParams(iconSize, iconSize));
             imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
             imageView.setPadding(dp(10), dp(10), dp(10), dp(10));
@@ -304,7 +315,7 @@ public class IconSelectorAlert extends BottomSheet {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             var imageView = (AppCompatImageView) holder.itemView;
             imageView.setTag(icons[position]);
-            imageView.setImageResource(FolderIconController.getTabIcon(icons[position]));
+            imageView.setImageResource(isCustomModelSelector ? AiFeatureIcons.getModelIcon(icons[position]) : FolderIconController.getTabIcon(icons[position]));
         }
 
         @Override

@@ -83,7 +83,7 @@ import java.util.concurrent.ExecutionException;
 import it.octogram.android.CameraPreview;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.utils.JpegImageUtils;
+import it.octogram.android.utils.media.JpegImageUtils;
 
 public class CameraXController {
 
@@ -261,7 +261,7 @@ public class CameraXController {
                 try {
                     return extensionsManager.isExtensionAvailable(cameraSelector, mode);
                 } catch (Exception e) {
-                    OctoLogging.d("CameraX-Extensions", String.format("Error: %s", e.getMessage()), e);
+                    OctoLogging.d("CameraX-Extensions", String.format(Locale.US, "Error: %s", e.getMessage()), e);
                     OctoLogging.e(MessageFormat.format("CameraX-Extensions: {0}", e.getMessage()), e);
                 }
             }
@@ -429,8 +429,7 @@ public class CameraXController {
                 .prepareRecording(ApplicationLoader.applicationContext, fileOpt)
                 .withAudioEnabled()
                 .start(AsyncTask.THREAD_POOL_EXECUTOR, videoRecordEvent -> {
-                    if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
-                        VideoRecordEvent.Finalize finalize = (VideoRecordEvent.Finalize) videoRecordEvent;
+                    if (videoRecordEvent instanceof VideoRecordEvent.Finalize finalize) {
                         if (finalize.hasError()) {
                             if (noSupportedSurfaceCombinationWorkaround) {
                                 AndroidUtilities.runOnUIThread(() -> {
@@ -669,8 +668,8 @@ public class CameraXController {
             };
 
             boolean isSupported = Arrays.asList(supportedDevices).contains(Build.DEVICE.toLowerCase(Locale.US).trim());
-            OctoLogging.d(TAG, String.format("Device %s ZSL support forced: %s (forced for: %s)", Build.DEVICE, isSupported, Arrays.asList(supportedDevices)));
-            OctoLogging.d(TAG, String.format("Device %s ZSL support forced: %s", Build.DEVICE, isSupported));
+            OctoLogging.d(TAG, String.format(Locale.US, "Device %s ZSL support forced: %s (forced for: %s)", Build.DEVICE, isSupported, Arrays.asList(supportedDevices)));
+            OctoLogging.d(TAG, String.format(Locale.US, "Device %s ZSL support forced: %s", Build.DEVICE, isSupported));
             return isSupported;
         }
     }

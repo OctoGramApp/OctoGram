@@ -14,6 +14,8 @@ import android.util.AttributeSet;
 import android.view.TextureView;
 import android.widget.FrameLayout;
 
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -40,14 +42,14 @@ public abstract class BaseCameraView extends FrameLayout {
 
     public abstract void switchCamera();
 
-    public abstract void setZoom(float value);
+    public abstract void setZoom(@FloatRange(from = 0.0) float value);
 
     public float resetZoom() {
         setZoom(0.0f);
         return 0.0f;
     }
 
-    public abstract void focusToPoint(int x, int y);
+    public abstract void focusToPoint(@IntRange(from = 0) int x, @IntRange(from = 0) int y);
 
     public abstract void runHaptic();
 

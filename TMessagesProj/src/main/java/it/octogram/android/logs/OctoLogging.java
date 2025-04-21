@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.logs;
 
 import android.util.Log;
@@ -16,6 +24,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Locale;
 
 import it.octogram.android.utils.OctoUtils;
@@ -27,6 +37,8 @@ public class OctoLogging {
 
     private static final String TAG = "OctoLogging";
     private static final String FILE_EXTENSION = "_debug_log.txt";
+    private static final String FILE_EXTENSION_HEAP_DUMP = "_heap.hprof";
+
     private static OctoLogging instance;
     private final static File filesDir = OctoUtils.getLogsDir();
 
@@ -94,6 +106,10 @@ public class OctoLogging {
         log(Log.ERROR, tag, message, throwable);
     }
 
+    public static void e(String tag, String message, OutOfMemoryError throwable) {
+        log(Log.ERROR, tag, message, throwable);
+    }
+
     /**
      * Logs a message with the given priority, message, and optional throwable.
      * <p>
@@ -131,7 +147,7 @@ public class OctoLogging {
             instance.logQueue.postRunnable(() -> {
                 try {
                     String timestamp = instance.dateFormat.format(System.currentTimeMillis());
-                    instance.streamWriter.write(String.format("%s %s/%s: %s%n", timestamp, getLogLevel(level), tag, logMessage));
+                    instance.streamWriter.write(String.format(Locale.US, "%s %s/%s: %s%n", timestamp, getLogLevel(level), tag, logMessage));
 
                     if (throwable != null) {
                         writeThrowableToFile(instance.streamWriter, throwable);
@@ -145,6 +161,29 @@ public class OctoLogging {
         }
     }
 
+
+    public static String parseStackTrace(String message, Throwable throwable) {
+        if (throwable != null) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            StackTraceElement[] stackTraceElements = throwable.getStackTrace();
+            StringBuilder stackTraceBuilder = new StringBuilder();
+
+            stackTraceBuilder.append("Exception: ").append(throwable.getClass().getSimpleName()).append(" - ").append(throwable.getMessage()).append("\nStack:\n");
+
+            for (StackTraceElement element : stackTraceElements) {
+                stackTraceBuilder.append("  ")
+                        .append(element.getClassName()).append(".")
+                        .append(element.getMethodName()).append("(")
+                        .append(element.getFileName()).append(":")
+                        .append(element.getLineNumber()).append(")\n");
+            }
+
+            return message + "\n" + stackTraceBuilder;
+        } else {
+            return message;
+        }
+    }
     private static String formatLogMessage(String message, Throwable throwable) {
         StringBuilder builder = new StringBuilder();
         if (message != null) {
@@ -179,6 +218,62 @@ public class OctoLogging {
     public static void w(String tag, String message, Exception e) {
         log(Log.WARN, tag, message, e);
     }
+    /*public static void dumpHprofMemory(){
+        getInstance().dumpMemory();
+    }
+    public static void fatal(Throwable e) {
+        if (!BuildVars.DEBUG_PRIVATE_VERSION) {
+            return;
+        }
+        if (e instanceof OutOfMemoryError) {
+            getInstance().dumpMemory();
+        }
+
+        ensureInitialized();
+        e.printStackTrace();
+        if (getInstance().streamWriter != null) {
+            getInstance().logQueue.postRunnable(() -> {
+                try {
+                    getInstance().streamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " FATAL/octogram: " + e + "\n");
+                    StackTraceElement[] stack = e.getStackTrace();
+                    for (StackTraceElement stackTraceElement : stack) {
+                        getInstance().streamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " FATAL/octogram: \tat " + stackTraceElement + "\n");
+                    }
+                    Throwable cause = e.getCause();
+                    if (cause != null) {
+                        getInstance().streamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/octogram: Caused by " + cause + "\n");
+                        stack = cause.getStackTrace();
+                        for (StackTraceElement stackTraceElement : stack) {
+                            getInstance().streamWriter.write(getInstance().dateFormat.format(System.currentTimeMillis()) + " E/octogram: \tat " + stackTraceElement + "\n");
+                        }
+                    }
+                    getInstance().streamWriter.flush();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+                if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                    System.exit(2);
+                }
+            });
+        } else {
+            e.printStackTrace();
+            if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                System.exit(2);
+            }
+        }
+    }
+
+    private static long dumpedHeap;
+    private void dumpMemory() {
+        if (System.currentTimeMillis() - dumpedHeap < 30_000) return;
+        dumpedHeap = System.currentTimeMillis();
+        try {
+            Debug.dumpHprofData(new File(filesDir, getInstance().dateFormat.format(System.currentTimeMillis()) + FILE_EXTENSION_HEAP_DUMP).getAbsolutePath());
+        } catch (Exception e2) {
+            OctoLogging.e(e2);
+        }
+    }*/
 
     private void initialize() {
         if (isInitialized) return;
@@ -204,6 +299,10 @@ public class OctoLogging {
 
     public static File[] getLogFiles() {
         return filesDir.listFiles((dir, name) -> name.endsWith(FILE_EXTENSION));
+    }
+
+    public static File[] getLogDumpFiles() {
+        return filesDir.listFiles((dir, name) -> name.endsWith(FILE_EXTENSION_HEAP_DUMP));
     }
 
     public static void deleteLogs() {

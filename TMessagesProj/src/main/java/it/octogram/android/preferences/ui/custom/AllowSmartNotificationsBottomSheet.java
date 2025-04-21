@@ -28,6 +28,8 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
 
+import java.util.Locale;
+
 import it.octogram.android.OctoConfig;
 
 public class AllowSmartNotificationsBottomSheet extends BottomSheet {
@@ -60,7 +62,7 @@ public class AllowSmartNotificationsBottomSheet extends BottomSheet {
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        textView.setText(String.format("%s\n\n%s", getString(R.string.SmartNotificationsPvtDialogMessage), getString(R.string.SmartNotificationsPvtDialogMessagePlus)));
+        textView.setText(String.format(Locale.US, "%s\n\n%s", getString(R.string.SmartNotificationsPvtDialogMessage), getString(R.string.SmartNotificationsPvtDialogMessagePlus)));
         textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 

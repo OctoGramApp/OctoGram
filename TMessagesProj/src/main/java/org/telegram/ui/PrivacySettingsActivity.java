@@ -319,7 +319,7 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                     formatPluralString("Months", 12),
                     formatPluralString("Months", 18),
                     formatPluralString("Months", 24),
-                        LocaleController.formatString("DeleteAccountContextButton", R.string.DeleteAccountContextButton),
+                    LocaleController.formatString("DeleteAccountContextButton", R.string.DeleteAccountContextButton),
                 };
                 final LinearLayout linearLayout = new LinearLayout(getParentActivity());
                 linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -1162,12 +1162,21 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                     } else if (position == botsBiometryRow) {
                         textCell.setText(getString(R.string.PrivacyBiometryBotsButton), true);
                     } else if (position == secretMapRow) {
-                        value = switch (SharedConfig.mapPreviewType) {
-                            case 0 -> getString(R.string.MapPreviewProviderTelegram);
-                            case 1 -> getString(R.string.MapPreviewProviderGoogle);
-                            case 2 -> getString(R.string.MapPreviewProviderNobody);
-                            default -> getString(R.string.MapPreviewProviderYandex);
-                        };
+                        switch (SharedConfig.mapPreviewType) {
+                            case 0:
+                                value = getString("MapPreviewProviderTelegram", R.string.MapPreviewProviderTelegram);
+                                break;
+                            case 1:
+                                value = getString("MapPreviewProviderGoogle", R.string.MapPreviewProviderGoogle);
+                                break;
+                            case 2:
+                                value = getString("MapPreviewProviderNobody", R.string.MapPreviewProviderNobody);
+                                break;
+                            case 3:
+                            default:
+                                value = getString("MapPreviewProviderYandex", R.string.MapPreviewProviderYandex);
+                                break;
+                        }
                         textCell.setTextAndValue(getString("MapPreviewProvider", R.string.MapPreviewProvider), value, secretMapUpdate, true);
                         secretMapUpdate = false;
                     } else if (position == contactsDeleteRow) {

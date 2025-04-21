@@ -34,8 +34,8 @@ import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
 
-import it.octogram.android.utils.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.account.FingerprintUtils;
 
 public class AccountSelectCell extends FrameLayout {
 

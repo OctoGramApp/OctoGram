@@ -20,7 +20,10 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ReactionsDoubleTapManageActivity;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.DcIdStyle;
@@ -39,7 +42,8 @@ import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.preferences.ui.custom.DcInfoSelector;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
+
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
     SwitchRow enableSmartNotificationsSwitchRow;
@@ -258,75 +262,13 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .category(getString(R.string.DoubleTapActionsHeader), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapAction)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.DISABLED.getValue())
-                                            .setItemTitle(getString(R.string.Disable))
-                                            .setItemIcon(R.drawable.msg_block),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.REACTION.getValue())
-                                            .setItemTitle(getString(R.string.Reaction))
-                                            .setItemIcon(OctoUtils.getPetIconFixed()),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.COPY.getValue())
-                                            .setItemTitle(getString(R.string.Copy))
-                                            .setItemIcon(R.drawable.msg_copy),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.FORWARD.getValue())
-                                            .setItemTitle(getString(R.string.Forward))
-                                            .setItemIcon(R.drawable.msg_forward),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.REPLY.getValue())
-                                            .setItemTitle(getString(R.string.Reply))
-                                            .setItemIcon(R.drawable.menu_reply),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.DELETE.getValue())
-                                            .setItemTitle(getString(R.string.Delete))
-                                            .setItemIcon(R.drawable.msg_delete),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.SAVE.getValue())
-                                            .setItemTitle(getString(R.string.Save))
-                                            .setItemIcon(R.drawable.msg_saved)
-                            ))
+                            .options(composeDoubleTapOptions(false))
                             .onSelected(() -> canShowSelectReaction.setValue(OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue()))
                             .title(getString(R.string.PreferredActionIncoming))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapActionOut)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.DISABLED.getValue())
-                                            .setItemTitle(getString(R.string.Disable))
-                                            .setItemIcon(R.drawable.msg_block),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.REACTION.getValue())
-                                            .setItemTitle(getString(R.string.Reaction))
-                                            .setItemIcon(OctoUtils.getPetIconFixed()),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.COPY.getValue())
-                                            .setItemTitle(getString(R.string.Copy))
-                                            .setItemIcon(R.drawable.msg_copy),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.FORWARD.getValue())
-                                            .setItemTitle(getString(R.string.Forward))
-                                            .setItemIcon(R.drawable.msg_forward),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.REPLY.getValue())
-                                            .setItemTitle(getString(R.string.Reply))
-                                            .setItemIcon(R.drawable.menu_reply),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.DELETE.getValue())
-                                            .setItemTitle(getString(R.string.Delete))
-                                            .setItemIcon(R.drawable.msg_delete),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.SAVE.getValue())
-                                            .setItemTitle(getString(R.string.Save))
-                                            .setItemIcon(R.drawable.msg_saved),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DoubleTapAction.EDIT.getValue())
-                                            .setItemTitle(getString(R.string.Edit))
-                                            .setItemIcon(R.drawable.msg_edit)
-                            ))
+                            .options(composeDoubleTapOptions(true))
                             .onSelected(() -> canShowSelectReaction.setValue(OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue()))
                             .title(getString(R.string.PreferredActionOutgoing))
                             .build());
@@ -354,6 +296,43 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .build();
     }
 
+    private List<PopupChoiceDialogOption> composeDoubleTapOptions(boolean isOut) {
+        Map<DoubleTapAction, OptionData> baseOptions = new LinkedHashMap<>();
+        baseOptions.put(DoubleTapAction.DISABLED, new OptionData(R.string.Disable, R.drawable.msg_block));
+        baseOptions.put(DoubleTapAction.REACTION, new OptionData(R.string.Reaction, -1));
+        baseOptions.put(DoubleTapAction.COPY, new OptionData(R.string.Copy, R.drawable.msg_copy));
+        baseOptions.put(DoubleTapAction.FORWARD, new OptionData(R.string.Forward, R.drawable.msg_forward));
+        baseOptions.put(DoubleTapAction.REPLY, new OptionData(R.string.Reply, R.drawable.menu_reply));
+        baseOptions.put(DoubleTapAction.DELETE, new OptionData(R.string.Delete, R.drawable.msg_delete));
+        baseOptions.put(DoubleTapAction.SAVE, new OptionData(R.string.Save, R.drawable.msg_saved));
+        baseOptions.put(DoubleTapAction.TRANSLATE, new OptionData(R.string.TranslateMessage, R.drawable.msg_translate));
+
+        List<PopupChoiceDialogOption> options = new ArrayList<>();
+
+        for (Map.Entry<DoubleTapAction, OptionData> entry : baseOptions.entrySet()) {
+            PopupChoiceDialogOption option = new PopupChoiceDialogOption()
+                    .setId(entry.getKey().getValue())
+                    .setItemTitle(getString(entry.getValue().titleResId));
+
+            if (entry.getKey() == DoubleTapAction.REACTION) {
+                option.setItemIcon(OctoUtils.getPetIconFixed());
+            } else {
+                option.setItemIcon(entry.getValue().iconResId);
+            }
+
+            options.add(option);
+        }
+
+        if (isOut) {
+            options.add(new PopupChoiceDialogOption()
+                    .setId(DoubleTapAction.EDIT.getValue())
+                    .setItemTitle(getString(R.string.Edit))
+                    .setItemIcon(R.drawable.msg_edit));
+        }
+
+        return options;
+    }
+
     private void checkSmartNotificationsEnabled(PreferencesFragment fragment) {
         if (OctoConfig.INSTANCE.enableSmartNotificationsForPrivateChats.getValue()) {
             return;
@@ -366,4 +345,5 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .show();
     }
 
+    private record OptionData(int titleResId, int iconResId) {}
 }

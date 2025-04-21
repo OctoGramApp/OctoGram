@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -31,12 +32,15 @@ import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.LaunchActivity;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.IconsUIType;
 import it.octogram.android.InterfaceCheckboxUI;
+import it.octogram.android.InterfaceRapidButtonsActions;
 import it.octogram.android.InterfaceSliderUI;
 import it.octogram.android.InterfaceSwitchUI;
 import it.octogram.android.OctoConfig;
@@ -52,11 +56,13 @@ import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.ui.custom.FolderTypeSelector;
 import it.octogram.android.preferences.ui.custom.IconsSelector;
-import it.octogram.android.utils.MessageStringHelper;
-import it.octogram.android.utils.PopupChoiceDialogOption;
+import it.octogram.android.preferences.ui.custom.RapidActionsPreviewLayout;
+import it.octogram.android.utils.appearance.MessageStringHelper;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 
 public class OctoInterfaceSettingsUI implements PreferencesEntry {
     private IconsSelector iconsSelector;
+    private RapidActionsPreviewLayout rapidActionsPreviewLayout;
     private FolderTypeSelector folderTypeSelector;
 
     private final ConfigProperty<Boolean> isUsingDefault = new ConfigProperty<>(null, false);
@@ -75,6 +81,10 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
 
         wasCentered = isTitleCentered();
         wasCenteredAtBeginning = wasCentered;
+        ConfigProperty<Boolean> canChooseSecondaryButtonAction = new ConfigProperty<>(null, false);
+
+        Runnable restartStates = () -> canChooseSecondaryButtonAction.updateValue(!OctoConfig.INSTANCE.rapidActionsDefaultConfig.getValue() && OctoConfig.INSTANCE.rapidActionsMainButtonAction.getValue() != InterfaceRapidButtonsActions.HIDDEN.getValue());
+        restartStates.run();
 
         return OctoPreferences.builder(getString(R.string.AppTitleSettings))
                 .deepLink(DeepLinkDef.APPEARANCE_APP)
@@ -165,6 +175,55 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                             ))
                             .currentValue(OctoConfig.INSTANCE.interfaceSliderUI)
                             .title(getString(R.string.ImproveInterfaceSlider))
+                            .build());
+                })
+                .category(R.string.ImproveRapidActions, category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(rapidActionsPreviewLayout = new RapidActionsPreviewLayout(context))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> {
+                                restartStates.run();
+                                rapidActionsPreviewLayout.restart();
+                                NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.storiesEnabledUpdate);
+                            })
+                            .preferenceValue(OctoConfig.INSTANCE.rapidActionsDefaultConfig)
+                            .title(getString(R.string.ImproveRapidActionsDefault))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .supplierOptions(composeOptions(true, false))
+                            .onSelected(() -> {
+                                restartStates.run();
+                                rapidActionsPreviewLayout.restart();
+                                NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.storiesEnabledUpdate);
+                            })
+                            .currentValue(OctoConfig.INSTANCE.rapidActionsMainButtonAction)
+                            .title(getString(R.string.ImproveRapidActionsMainButtonAction))
+                            .showIf(OctoConfig.INSTANCE.rapidActionsDefaultConfig, true)
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .supplierOptions(composeOptions(true, true))
+                            .onSelected(restartStates)
+                            .currentValue(OctoConfig.INSTANCE.rapidActionsMainButtonActionLongPress)
+                            .title(getString(R.string.ImproveRapidActionsMainButtonActionLongPress))
+                            .showIf(canChooseSecondaryButtonAction)
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .supplierOptions(composeOptions(false, false))
+                            .onSelected(() -> {
+                                restartStates.run();
+                                rapidActionsPreviewLayout.restart();
+                                NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.storiesEnabledUpdate);
+                            })
+                            .currentValue(OctoConfig.INSTANCE.rapidActionsSecondaryButtonAction)
+                            .title(getString(R.string.ImproveRapidActionsSecondaryButtonAction))
+                            .showIf(canChooseSecondaryButtonAction)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(rapidActionsPreviewLayout::restart)
+                            .preferenceValue(OctoConfig.INSTANCE.useSquaredFab)
+                            .title(R.string.SquaredFab)
+                            .requiresRestart(true)
                             .build());
                 })
                 .category(R.string.ManageFolders, category -> {
@@ -260,6 +319,86 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                         .showIf(isUsingM3)
                         .build())
                 .build();
+    }
+
+    private Supplier<List<PopupChoiceDialogOption>> composeOptions(boolean isMainButton, boolean isLongPress) {
+        return () -> {
+            ArrayList<PopupChoiceDialogOption> options = new ArrayList<>();
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.HIDDEN.getValue())
+                    .setItemIcon(R.drawable.msg_cancel)
+                    .setItemTitle(getString(isLongPress ? R.string.SlowmodeOff : R.string.CameraButtonPosition_Hidden)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.POST_STORY.getValue())
+                    .setItemIcon(R.drawable.msg_camera)
+                    .setItemTitle(getString(R.string.AccDescrCaptureStory)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SEND_MESSAGE.getValue())
+                    .setItemIcon(R.drawable.msg_message_s)
+                    .setItemTitle(getString(R.string.NewMessageTitle)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SAVED_MESSAGES.getValue())
+                    .setItemIcon(R.drawable.msg_saved)
+                    .setItemTitle(getString(R.string.SavedMessages)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.ARCHIVED_CHATS.getValue())
+                    .setItemIcon(R.drawable.msg_archive)
+                    .setItemTitle(getString(R.string.ArchivedChats)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SETTINGS.getValue())
+                    .setItemIcon(R.drawable.msg_settings)
+                    .setItemTitle(getString(R.string.Settings)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.LOCKED_CHATS.getValue())
+                    .setItemIcon(R.drawable.edit_passcode)
+                    .setItemTitle(getString(R.string.LockedChats)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.PROXY.getValue())
+                    .setItemIcon(R.drawable.msg2_proxy_off)
+                    .setItemTitle(getString(R.string.Proxy)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SEARCH.getValue())
+                    .setItemIcon(R.drawable.msg_search)
+                    .setItemTitle(getString(R.string.Search)));
+
+            for (PopupChoiceDialogOption option : options) {
+                checkButtonActions(isMainButton, isLongPress, option);
+            }
+
+            return options;
+        };
+    }
+
+    private void checkButtonActions(boolean isMainButton, boolean isLongPress, PopupChoiceDialogOption data) {
+        if (data.id == InterfaceRapidButtonsActions.HIDDEN.getValue()) {
+            return;
+        }
+
+        data.setClickable(!(
+                (
+                        isMainButton && OctoConfig.INSTANCE.rapidActionsSecondaryButtonAction.getValue() == data.id
+                ) || (
+                        isMainButton && !isLongPress && OctoConfig.INSTANCE.rapidActionsMainButtonActionLongPress.getValue() == data.id
+                ) || (
+                        isMainButton && isLongPress && OctoConfig.INSTANCE.rapidActionsMainButtonAction.getValue() == data.id
+                ) || (
+                        !isMainButton && OctoConfig.INSTANCE.rapidActionsMainButtonAction.getValue() == data.id
+                )
+        ));
+
+        if (data.id == InterfaceRapidButtonsActions.POST_STORY.getValue()) {
+            for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
+                UserConfig userConfig = UserConfig.getInstance(a);
+                if (!userConfig.isClientActivated()) {
+                    continue;
+                }
+                boolean storiesEnabled = MessagesController.getInstance(a).storiesEnabled();
+                if (!storiesEnabled) {
+                    data.setItemDescription(R.string.ImproveRapidActionsMainButtonActionStoriesUnavailableLong);
+                    break;
+                }
+            }
+        }
     }
 
     private CharSequence composeIconsDescription(boolean isSolar) {

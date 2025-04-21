@@ -93,8 +93,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.NotificationColorize;
+import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.appearance.NotificationColorize;
 
 public class NotificationsController extends BaseController {
 
@@ -1790,7 +1791,7 @@ public class NotificationsController extends BaseController {
             return LocaleController.getString(R.string.NotificationHiddenMessage);
         } else {
             boolean isChannel = ChatObject.isChannel(chat) && !chat.megagroup;
-            if (dialogPreviewEnabled && (chat_id == 0 && fromId != 0 && preferences.getBoolean("EnablePreviewAll", true) || chat_id != 0 && (!isChannel && preferences.getBoolean("EnablePreviewGroup", true) || isChannel && preferences.getBoolean("EnablePreviewChannel", true)))) {
+            if (dialogPreviewEnabled && !mustHideContent(messageObject) && (chat_id == 0 && fromId != 0 && preferences.getBoolean("EnablePreviewAll", true) || chat_id != 0 && (!isChannel && preferences.getBoolean("EnablePreviewGroup", true) || isChannel && preferences.getBoolean("EnablePreviewChannel", true)))) {
                 if (messageObject.messageOwner instanceof TLRPC.TL_messageService) {
                     userName[0] = null;
                     if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionSetSameChatWallPaper) {
@@ -2422,7 +2423,7 @@ public class NotificationsController extends BaseController {
             msg = LocaleController.getString(R.string.YouHaveNewMessage);
         } else {
             if (chatId == 0 && fromId != 0) {
-                if (dialogPreviewEnabled && preferences.getBoolean("EnablePreviewAll", true)) {
+                if (dialogPreviewEnabled && !mustHideContent(messageObject) && preferences.getBoolean("EnablePreviewAll", true)) {
                     if (messageObject.messageOwner instanceof TLRPC.TL_messageService) {
                         if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionSetSameChatWallPaper) {
                             msg = LocaleController.getString(R.string.WallpaperSameNotification);
@@ -2565,7 +2566,7 @@ public class NotificationsController extends BaseController {
                 }
             } else if (chatId != 0) {
                 boolean isChannel = ChatObject.isChannel(chat) && !chat.megagroup;
-                if (dialogPreviewEnabled && (!isChannel && preferences.getBoolean("EnablePreviewGroup", true) || isChannel && preferences.getBoolean("EnablePreviewChannel", true))) {
+                if (dialogPreviewEnabled && !mustHideContent(messageObject) && (!isChannel && preferences.getBoolean("EnablePreviewGroup", true) || isChannel && preferences.getBoolean("EnablePreviewChannel", true))) {
                     if (messageObject.messageOwner instanceof TLRPC.TL_messageService) {
                         if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionChatAddUser) {
                             long singleUserId = messageObject.messageOwner.action.user_id;
@@ -3031,6 +3032,14 @@ public class NotificationsController extends BaseController {
         return msg;
     }
 
+    private boolean mustDisableNotifications(MessageObject messageObject) {
+        return !OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isChatLockedNotifications(messageObject);
+    }
+
+    private boolean mustHideContent(MessageObject messageObject) {
+        return OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue() && OctoConfig.INSTANCE.lockedChatsSpoilerNotifications.getValue() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isChatLockedNotifications(messageObject);
+    }
+
     private void scheduleNotificationRepeat() {
         try {
             Intent intent = new Intent(ApplicationLoader.applicationContext, NotificationRepeat.class);
@@ -3421,8 +3430,10 @@ public class NotificationsController extends BaseController {
             intent.putExtra("currentAccount", currentAccount);
 
             IconCompat icon;
-            if (avatar != null) {
-                icon = IconCompat.createWithAdaptiveBitmap(avatar);
+            /*if (avatar != null) {
+                icon = IconCompat.createWithAdaptiveBitmap(avatar);*/
+            if (person != null && person.getIcon() != null) {
+                icon = person.getIcon();
             } else if (user != null) {
                 icon = IconCompat.createWithResource(ApplicationLoader.applicationContext, user.bot ? R.drawable.book_bot : R.drawable.book_user);
             } else {
@@ -3963,6 +3974,10 @@ public class NotificationsController extends BaseController {
             int dismissDate = preferences.getInt("dismissDate", 0);
             if (!lastMessageObject.isStoryPush && lastMessageObject.messageOwner.date <= dismissDate) {
                 dismissNotification();
+                return;
+            }
+
+            if (mustDisableNotifications(lastMessageObject)) {
                 return;
             }
 
@@ -5550,7 +5565,8 @@ public class NotificationsController extends BaseController {
     public static Person.Builder loadRoundAvatar(File avatar, Person.Builder personBuilder) {
         if (avatar != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
-                Bitmap bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(avatar), (decoder, info, src) -> {
+                Bitmap bitmap = BitmapFactory.decodeFile(avatar.getAbsolutePath());
+                /*Bitmap bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(avatar), (decoder, info, src) -> {
                     decoder.setPostProcessor((canvas) -> {
                         Path path = new Path();
                         path.setFillType(Path.FillType.INVERSE_EVEN_ODD);
@@ -5564,8 +5580,12 @@ public class NotificationsController extends BaseController {
                         canvas.drawPath(path, paint);
                         return PixelFormat.TRANSLUCENT;
                     });
-                });
-                IconCompat icon = IconCompat.createWithBitmap(bitmap);
+                });*/
+                if (bitmap == null) {
+                    return personBuilder;
+                }
+                IconCompat icon = IconCompat.createWithAdaptiveBitmap(MediaDataController.convertBitmapToAdaptive(bitmap));
+                //IconCompat icon = IconCompat.createWithBitmap(bitmap);
                 personBuilder.setIcon(icon);
             } catch (Throwable ignore) {
 

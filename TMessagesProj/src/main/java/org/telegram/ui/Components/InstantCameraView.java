@@ -119,10 +119,14 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -1112,7 +1116,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         }
     }
 
-    public void saveLastCameraBitmap() {
+    /*public void saveLastCameraBitmap() {
         Bitmap bitmap = textureView.getBitmap();
         if (bitmap != null && bitmap.getPixel(0, 0) != 0) {
             lastBitmap = Bitmap.createScaledBitmap(textureView.getBitmap(), 50, 50, true);
@@ -1127,6 +1131,55 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     e.printStackTrace();
 
                 }
+            }
+        }
+    }*/
+
+    public void saveLastCameraBitmap() {
+        Bitmap bitmap = textureView.getBitmap();
+        if (bitmap != null && bitmap.getPixel(0, 0) != 0) {
+            lastBitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, true);
+            if (lastBitmap != null) {
+                Utilities.blurBitmap(lastBitmap, 7, 1, lastBitmap.getWidth(), lastBitmap.getHeight(), lastBitmap.getRowBytes());
+
+                //noinspection resource
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                executor.submit(() -> {
+                    File file = new File(ApplicationLoader.getFilesDirFixed(), "icthumb.jpg");
+                    FileOutputStream stream = null;
+                    try {
+                        stream = new FileOutputStream(file);
+                        lastBitmap.compress(Bitmap.CompressFormat.JPEG, 87, stream);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (stream != null) {
+                            try {
+                                stream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        executor.shutdown();
+                        try {
+                            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                                executor.shutdownNow();
+                            }
+                        } catch (InterruptedException e) {
+                            executor.shutdownNow();
+                            Thread.currentThread().interrupt();
+                        }
+
+                        lastBitmap.recycle();
+                    }
+                });
+            } else {
+                bitmap.recycle();
+            }
+        } else {
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
             }
         }
     }
@@ -2315,6 +2368,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         private AudioRecord audioRecorder;
 
         private ArrayBlockingQueue<AudioBufferInfo> buffers = new ArrayBlockingQueue<>(10);
+        private List<AudioBufferInfo> audioBufferInfoPool = new ArrayList<>();
         private ArrayList<Bitmap> keyframeThumbs = new ArrayList<>();
         private DispatchQueue generateKeyframeThumbsQueue;
         private int frameCount;
@@ -2346,11 +2400,16 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     }
                     AudioBufferInfo buffer;
                     if (buffers.isEmpty()) {
-                        try {
+                        /*try {
                             buffer = new AudioBufferInfo();
                         } catch (OutOfMemoryError error) {
                             System.gc();
                             buffer = new AudioBufferInfo();
+                        }*/
+                        buffer = getAudioBufferFromPool();
+                        if (buffer == null) {
+                            FileLog.e("AudioBufferInfo pool is empty!");
+                            continue;
                         }
                     } else {
                         buffer = buffers.poll();
@@ -2409,6 +2468,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                             done = true;
                         }
                         handler.sendMessage(handler.obtainMessage(MSG_AUDIOFRAME_AVAILABLE, buffer));
+                        returnAudioBufferToPool(buffer);
                     } else {
                         if (!running) {
                             done = true;
@@ -2654,6 +2714,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                                 if (running) {
                                     buffers.put(input);
                                 }
+                                returnAudioBufferToPool(input);
                                 if (!buffersToWrite.isEmpty()) {
                                     input = buffersToWrite.get(0);
                                 } else {
@@ -3699,6 +3760,18 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     }
                 }
             }
+        }
+
+        private synchronized AudioBufferInfo getAudioBufferFromPool() {
+            if (!audioBufferInfoPool.isEmpty()) {
+                //noinspection SequencedCollectionMethodCanBeUsed
+                return audioBufferInfoPool.remove(0);
+            }
+            return null;
+        }
+
+        private synchronized void returnAudioBufferToPool(AudioBufferInfo buffer) {
+            audioBufferInfoPool.add(buffer);
         }
 
 

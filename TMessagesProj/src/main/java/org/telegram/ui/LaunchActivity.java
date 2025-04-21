@@ -9,6 +9,7 @@
 package org.telegram.ui;
 
 import static org.telegram.messenger.LocaleController.formatPluralString;
+import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.ui.Components.Premium.LimitReachedBottomSheet.TYPE_ACCOUNTS;
 import static org.telegram.ui.Components.Premium.LimitReachedBottomSheet.TYPE_BOOSTS_FOR_USERS;
 
@@ -50,7 +51,6 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -72,7 +72,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.arch.core.util.Function;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
@@ -217,10 +216,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -236,14 +235,15 @@ import it.octogram.android.StoreUtils;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.deeplink.DeepLinkManager;
 import it.octogram.android.icons.IconsResources;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.ActionBarOverride;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.theme.MonetThemeController;
-import it.octogram.android.utils.FingerprintUtils;
-import it.octogram.android.utils.ForwardContext;
-import it.octogram.android.utils.LanguageController;
+import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.chat.ForwardContext;
+import it.octogram.android.utils.data.LanguageController;
 
 @SuppressLint({"RestrictedApi", "MissingSuperCall"})
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
@@ -643,7 +643,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     return;
                 }
                 if (DeepLinkManager.handleMenuAction(id, currentAccount, LaunchActivity.this)) {
-                    Log.d("tg", MessageFormat.format("handleMenuId: {0}", id));
+                    OctoLogging.d("LaunchActivity", String.format(Locale.US, "handleMenuId: %s", id));
                 } else if (id == 2) {
                     Bundle args = new Bundle();
                     presentFragment(new GroupCreateActivity(args));
@@ -1019,6 +1019,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            MonetThemeController.INSTANCE.registerReceiver(this);
             getWindow().getDecorView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                         @Override
                         public void onViewAttachedToWindow(View v) {
@@ -1031,12 +1032,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         }
                     });
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            MonetThemeController.INSTANCE.registerReceiver(this);
-        }
         CustomEmojiController.checkEmojiPacks();
         BackupAgent.requestBackup(this);
-
         RestrictedLanguagesSelectActivity.checkRestrictedLanguages(false);
     }
 
@@ -2562,7 +2559,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                     String url = data.toString();
                                     if (DeepLinkManager.handleDeepLink(url)) {
                                         if (BuildVars.DEBUG_PRIVATE_VERSION) {
-                                            Log.d("tg", "handleIntent: " + url);
+                                            OctoLogging.d("LaunchActivity", "handleIntent: " + url);
                                         }
                                         break;
                                     } else if (url.startsWith("tg:premium_offer") || url.startsWith("tg://premium_offer")) {
@@ -5891,6 +5888,17 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     private boolean firstAppUpdateCheck = true;
     public void checkAppUpdate(boolean force, Browser.Progress progress) {
+        if (StoreUtils.isDownloadedFromAnyStore()) {
+            if (StoreUtils.isFromPlayStore() && force) {
+                BaseFragment lastFragment = LaunchActivity.getLastFragment();
+                if (lastFragment != null) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Utilities.uriParseSafe("https://play.google.com/store/apps/details?id="+ApplicationLoader.applicationContext.getPackageName()));
+                    lastFragment.getContext().startActivity(browserIntent);
+                }
+            }
+            return;
+        }
+
         /*if (!force && BuildVars.DEBUG_VERSION || !force && !BuildVars.CHECK_UPDATES) {
             return;
         }*/

@@ -35,6 +35,8 @@ import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.spoilers.SpoilersTextView;
 import org.telegram.ui.LaunchActivity;
 
+import java.util.Locale;
+
 import it.octogram.android.OctoConfig;
 import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
@@ -76,12 +78,12 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
                 })
                 .category(getString(R.string.OctoMainSettingsInfo), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format("https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH))))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH))))
                             .icon(R.drawable.outline_source_white_28)
                             .title(getString(R.string.SourceCode))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format("https://%s/privacy", OctoUtils.getDomain()))))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/privacy", OctoUtils.getDomain()))))
                             .icon(R.drawable.msg2_policy)
                             .title(getString(R.string.PrivacyPolicy))
                             .build());
@@ -91,12 +93,12 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.CodeLicense))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format("https://%s/translate", OctoUtils.getDomain()))))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/translate", OctoUtils.getDomain()))))
                             .icon(R.drawable.msg_translate)
                             .title(getString(R.string.TranslateOcto))
                             .build());
                 })
-                .row(new FooterRow.FooterRowBuilder().title(String.format("OctoGram v%s (%s)", BuildConfig.BUILD_VERSION_STRING, BuildConfig.GIT_COMMIT_HASH)).build())
+                .row(new FooterRow.FooterRowBuilder().title(String.format(Locale.US, "OctoGram v%s (%s)", BuildConfig.BUILD_VERSION_STRING, BuildConfig.GIT_COMMIT_HASH)).build())
                 .build();
     }
 

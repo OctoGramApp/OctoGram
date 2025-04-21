@@ -143,6 +143,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.gms.cast.framework.CastContext;
@@ -313,14 +314,16 @@ import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.QualityPreset;
+import it.octogram.android.ai.MessagesModelsWrapper;
+import it.octogram.android.ai.helper.MainAiHelper;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.utils.BrowserUtils;
-import it.octogram.android.utils.ForwardContext;
-import it.octogram.android.utils.MessageHelper;
-import it.octogram.android.utils.VideoUtils;
 import it.octogram.android.translator.SingleTranslationManager;
 import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.chat.ForwardContext;
+import it.octogram.android.utils.chat.MessageHelper;
+import it.octogram.android.utils.media.VideoUtils;
+import it.octogram.android.utils.network.BrowserUtils;
 
 @SuppressLint("WrongConstant")
 @SuppressWarnings("unchecked")
@@ -952,6 +955,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     public boolean doneButtonPressed;
     boolean keyboardAnimationEnabled;
     private Theme.ResourcesProvider resourcesProvider;
+
+    private ActionBarMenuSubItem aiFeaturesItem;
 
     private Runnable setLoadingRunnable = new Runnable() {
         @Override
@@ -2116,6 +2121,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private final static int ads_report = 103;
     private final static int ads_separator = 104;
     private final static int ads_remove = 105;
+
+    private final static int gallery_ai_features = 999;
 
     private static DecelerateInterpolator decelerateInterpolator;
     private static Paint progressPaint;
@@ -5844,6 +5851,10 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
         });
         menuItem.addSubItem(gallery_menu_copy, R.drawable.msg_copy, getString("CopyPhoto", R.string.CopyPhoto)).setColors(0xfffafafa, 0xfffafafa);
+
+        aiFeaturesItem = menuItem.addSubItem(gallery_ai_features, R.drawable.aifeatures_solar, getString(R.string.AiFeatures_Brief));
+        aiFeaturesItem.setColors(0xfffafafa, 0xfffafafa);
+
         galleryGap = menuItem.addColoredGap();
         galleryGap.setColor(0xff181818);
         menuItem.addSubItem(gallery_menu_openin, R.drawable.msg_openin, getString(R.string.OpenInExternalApp)).setColors(0xfffafafa, 0xfffafafa);
@@ -5865,6 +5876,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         menuItem.redrawPopup(0xf9222222);
         menuItem.hideSubItem(gallery_menu_translate);
         menuItem.hideSubItem(gallery_menu_hide_translation);
+        menuItem.hideSubItem(gallery_ai_features);
         setMenuItemIcon(false, true);
         menuItem.setPopupItemsSelectorColor(0x0fffffff);
 
@@ -7216,7 +7228,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
         };
         pickerViewSendButton.setCircleSize(dp(48));
+        pickerViewSendButton.setUseSquaredFab(OctoConfig.INSTANCE.useSquaredFab.getValue());
         containerView.addView(pickerViewSendButton, LayoutHelper.createFrame(120, 120, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 14, 2.33f));
+
         pickerViewSendButton.setContentDescription(getString("Send", R.string.Send));
         ScaleStateListAnimator.apply(pickerViewSendButton);
         pickerViewSendButton.setOnClickListener(v -> {
@@ -7276,8 +7290,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             final boolean canReplace = placeProvider != null && placeProvider.canReplace(currentIndex);
             String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
             boolean translateButtonValue = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled();
-            final int[] order = {4, 3, 2, 0, 1, 8};
-            for (int i = 0; i < 6; i++) {
+            final int[] order = {4, 3, 2, 0, 1, 8, 15};
+            for (int i = 0; i < 7; i++) {
                 final int a = order[i];
                 if (a != 2 && a != 3 && canEdit && canReplace) {
                     continue;
@@ -7318,8 +7332,10 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     continue;
                 } else if (a == 8 && (!translateButtonValue || TextUtils.isEmpty(captionEdit.getText().toString().trim()))) {
                     continue;
+                } else if (a == 15 && !MainAiHelper.canUseAiFeatures()) {
+                    continue;
                 }
-                ActionBarMenuSubItem cell = new ActionBarMenuSubItem(parentActivity, a == 0, a == 3, resourcesProvider);
+                ActionBarMenuSubItem cell = new ActionBarMenuSubItem(parentActivity, a == 0, false, resourcesProvider);
                 if (a == 0) {
                     if (UserObject.isUserSelf(user)) {
                         cell.setTextAndIcon(getString("SetReminder", R.string.SetReminder), R.drawable.msg_calendar2);
@@ -7341,6 +7357,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 } else if (a == 8) {
                     String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
                     cell.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate);
+                } else if (a == 15) {
+                    cell.setTextAndIcon(LocaleController.getString(R.string.AiFeatures_Brief), R.drawable.aifeatures_solar);
                 }
                 cell.setMinimumWidth(dp(196));
                 cell.setColors(0xffffffff, 0xffffffff);
@@ -7369,6 +7387,25 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         executeTranslationToCustomDestination();
                         return true;
                     });
+                } else if (a == 15) {
+                    MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+                    data.context = parentActivity;
+                    data.onSheetOpen = () -> {
+                        if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                            sendPopupWindow.dismiss();
+                        }
+                        AndroidUtilities.hideKeyboard(captionEdit);
+                    };
+                    data.originalSubItem = cell;
+                    data.popupWindowLayout = sendPopupLayout;
+                    data.messageText = captionEdit.getText().toString().trim();
+                    data.useSwipeBack = false;
+                    data.isInputBox = true;
+                    data.setInputBoxText = (v) -> AndroidUtilities.runOnUIThread(() -> {
+                        captionEdit.setText(v);
+                        applyCaption();
+                    });
+                    MessagesModelsWrapper.initState(data);
                 }
             }
             if (sendPopupLayout.getChildCount() == 0) {
@@ -10363,6 +10400,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity, resourcesProvider);
                     builder.setTitle(getString("AppName", R.string.AppName));
                     builder.setMessage(getString(R.string.CantPlayVideo));
+                    if (e instanceof PlaybackException) {
+                         OctoLogging.d("PhotoViewer", ((PlaybackException) e).getErrorCodeName());
+                    }
                     builder.setPositiveButton(getString("Open", R.string.Open), (dialog, which) -> {
                         try {
                             AndroidUtilities.openForView(currentMessageObject, parentActivity, resourcesProvider, true);
@@ -14289,7 +14329,27 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
 //                captionTextViewSwitcher.setTranslationY(AndroidUtilities.dp(48));
                 menuItem.hideSubItem(gallery_menu_translate);
                 menuItem.hideSubItem(gallery_menu_hide_translation);
+                menuItem.hideSubItem(gallery_ai_features);
             } else {
+                if (!MainAiHelper.canUseAiFeatures()) {
+                    menuItem.hideSubItem(gallery_ai_features);
+                } else {
+                    menuItem.showSubItem(gallery_ai_features);
+                    MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData() {
+                        @Override
+                        public void hideButton() {
+                            menuItem.hideSubItem(gallery_ai_features);
+                        }
+                    };
+                    data.onSheetOpen = () -> menuItem.toggleSubMenu();
+                    data.onNewFragmentOpen = () -> closePhoto(true, false);
+                    data.context = activityContext;
+                    data.originalSubItem = aiFeaturesItem;
+                    data.popupWindowLayout = menuItem.getPopupLayout();
+                    data.messageObject = newMessageObject;
+                    data.messageText = newMessageObject.messageText != null ? newMessageObject.messageText : "";
+                    MessagesModelsWrapper.initState(data);
+                }
                 TranslateController translateController = MessagesController.getInstance(currentAccount).getTranslateController();
                 if (wasIndex != switchingToIndex) {
                     captionTranslated = false;
@@ -14533,6 +14593,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             galleryGap.setVisibility(View.GONE);
             menuItem.hideSubItem(gallery_menu_translate);
             menuItem.hideSubItem(gallery_menu_hide_translation);
+            menuItem.hideSubItem(gallery_ai_features);
             if (countView != null) {
                 countView.updateShow(secureDocuments.size() > 1, true);
                 countView.set(switchingToIndex + 1, secureDocuments.size());
@@ -14546,6 +14607,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             menuItem.hideSubItem(gallery_menu_translate);
             menuItem.hideSubItem(gallery_menu_hide_translation);
+            menuItem.hideSubItem(gallery_ai_features);
             if (canEditAvatar && !avatarsArr.isEmpty()) {
                 menuItem.showSubItem(gallery_menu_edit_avatar);
                 boolean currentSet = isCurrentAvatarSet();
@@ -14622,6 +14684,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             menuItem.hideSubItem(gallery_menu_translate);
             menuItem.hideSubItem(gallery_menu_hide_translation);
+            menuItem.hideSubItem(gallery_ai_features);
             Object object = imagesArrLocals.get(index);
             int ttl = 0;
             boolean isFiltered = false;
@@ -14858,6 +14921,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             menuItem.hideSubItem(gallery_menu_translate);
             menuItem.hideSubItem(gallery_menu_hide_translation);
+            menuItem.hideSubItem(gallery_ai_features);
             allowShare = !MessagesController.getInstance(currentAccount).isChatNoForwards(-currentDialogId) && (currentMessageObject == null || !currentMessageObject.hasRevealedExtendedMedia());
             TLRPC.PageBlock pageBlock = pageBlocksAdapter.get(switchingToIndex);
             caption = pageBlocksAdapter.getCaption(switchingToIndex);
@@ -14916,6 +14980,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         } else {
             menuItem.hideSubItem(gallery_menu_translate);
             menuItem.hideSubItem(gallery_menu_hide_translation);
+            menuItem.hideSubItem(gallery_ai_features);
         }
         fancyShadows = editing && setAvatarFor == null || sendPhotoType == SELECT_TYPE_STICKER;
         actionBar.setBackgroundColor(fancyShadows || setAvatarFor != null ? 0 : Theme.ACTION_BAR_PHOTO_VIEWER_COLOR);

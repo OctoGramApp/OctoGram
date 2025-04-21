@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -59,16 +67,18 @@ import org.telegram.ui.Components.ViewPagerFixed;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.WebPages;
 import it.octogram.android.WebPagesCategory;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.ui.custom.DatacenterStatus;
-import it.octogram.android.utils.DatacenterController;
-import it.octogram.android.utils.DcMediaController;
-import it.octogram.android.utils.MessageStringHelper;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.utils.WebPingController;
+import it.octogram.android.utils.appearance.MessageStringHelper;
+import it.octogram.android.utils.media.DcMediaController;
+import it.octogram.android.utils.network.DatacenterController;
+import it.octogram.android.utils.network.WebPingController;
 
 public class DcStatusActivity extends BaseFragment {
 
@@ -104,6 +114,7 @@ public class DcStatusActivity extends BaseFragment {
 
         private boolean waitingForUserStart = true;
         private long lastActivityStart = 0;
+
         public Page(@NonNull Context context, int type) {
             super(context);
 
@@ -396,9 +407,14 @@ public class DcStatusActivity extends BaseFragment {
             textLayout.addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, dp(5), 0, 2, 0, 0));
 
             updateDrawable = ContextCompat.getDrawable(context, R.drawable.pip_replay_large);
-            updateDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.SRC_IN));
+            if (updateDrawable != null) {
+                updateDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.SRC_IN));
+            }
+
             starDrawable = ContextCompat.getDrawable(context, R.drawable.star_24px);
-            starDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.SRC_IN));
+            if (starDrawable != null) {
+                starDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.SRC_IN));
+            }
 
             setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
             setWillNotDraw(false);
@@ -421,7 +437,7 @@ public class DcStatusActivity extends BaseFragment {
             timerRunning = true;
             startedAt = System.currentTimeMillis();
             lastUpdatedSeconds = 60;
-            titleView.setText(LocaleController.getInstance().getFormatterDayWithSeconds().format(startedAt + lastUpdatedSeconds*1000L), true);
+            titleView.setText(LocaleController.getInstance().getFormatterDayWithSeconds().format(startedAt + lastUpdatedSeconds * 1000L), true);
             subtitleView.setText(formatString(R.string.DatacenterStatusSection_NextUpdate_InSeconds, lastUpdatedSeconds), true);
             invalidate();
         }
@@ -568,7 +584,7 @@ public class DcStatusActivity extends BaseFragment {
             }
 
             if (parameter > 0 && status == WebPingController.CONNECTED) {
-                statusText += " ("+parameter+" ms)";
+                statusText += " (" + parameter + " ms)";
             }
 
             if (parameter > 0 && status == WebPingController.FAILED) {
@@ -718,7 +734,7 @@ public class DcStatusActivity extends BaseFragment {
 
         actionBarContainer.setLongClickable(true);
         actionBarContainer.setOnLongClickListener(v -> {
-            String link = "tg://dc";
+            String link = String.format(Locale.US, "tg://%s", DeepLinkDef.DC_STATUS);
             if (viewPager.getCurrentPosition() != PAGE_NETWORK) {
                 link += viewPager.getCurrentPosition() == PAGE_MEDIA ? "?t=media" : "?t=web";
             }
@@ -768,7 +784,7 @@ public class DcStatusActivity extends BaseFragment {
         termsButton.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarWhiteSelector), Theme.RIPPLE_MASK_CIRCLE_20DP));
         termsButton.setImageResource(R.drawable.msg_info);
         termsButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
-        termsButton.setOnClickListener(v -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format("https://%s/dcterms", OctoUtils.getDomain()))));
+        termsButton.setOnClickListener(v -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/dcterms", OctoUtils.getDomain()))));
         actionBarContainer.addView(termsButton, LayoutHelper.createFrame(54, 54, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
 
         FrameLayout contentView;

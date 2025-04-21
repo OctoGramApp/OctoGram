@@ -36,7 +36,9 @@ import java.lang.annotation.RetentionPolicy;
         DeepLinkDef.INFO,
         DeepLinkDef.DC_STATUS,
         DeepLinkDef.PRIVACY,
-        DeepLinkDef.LOCKED_CHATS
+        DeepLinkDef.LOCKED_CHATS,
+        DeepLinkDef.PRIVACY_CHATS,
+        DeepLinkDef.AI_FEATURES
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface DeepLinkType {

@@ -26,4 +26,16 @@ public interface PreferencesEntry {
         return false;
     }
 
+    default boolean canBeginSlide() {
+        return true;
+    }
+
+    default void onSaveButtonPressed() {
+
+    }
+
+    default void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
+
+    }
+
 }

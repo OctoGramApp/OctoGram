@@ -118,10 +118,16 @@ public class OutlineTextContainerView extends FrameLayout {
     }
 
     public void updateColor() {
-        int textSelectionColor = ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhiteHintText, resourcesProvider), Theme.getColor(Theme.key_windowBackgroundWhiteValueText, resourcesProvider), forceUseCenter && !forceForceUseCenter ? 0f : titleProgress);
+        int textSelectionColor = ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhiteHintText, resourcesProvider), (_enabledBorderColor == -1 ? Theme.getColor(Theme.key_windowBackgroundWhiteValueText, resourcesProvider) : _enabledBorderColor), forceUseCenter && !forceForceUseCenter ? 0f : titleProgress);
         textPaint.setColor(ColorUtils.blendARGB(textSelectionColor, Theme.getColor(Theme.key_text_RedBold, resourcesProvider), errorProgress));
-        int selectionColor = ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhiteInputField, resourcesProvider), Theme.getColor(Theme.key_windowBackgroundWhiteInputFieldActivated, resourcesProvider), forceUseCenter && !forceForceUseCenter ? 0f : selectionProgress);
+        int selectionColor = ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhiteInputField, resourcesProvider), (_enabledBorderColor == -1 ? Theme.getColor(Theme.key_windowBackgroundWhiteInputFieldActivated, resourcesProvider) : _enabledBorderColor), forceUseCenter && !forceForceUseCenter ? 0f : selectionProgress);
         setColor(ColorUtils.blendARGB(selectionColor, Theme.getColor(Theme.key_text_RedBold, resourcesProvider), errorProgress));
+    }
+
+    private int _enabledBorderColor = -1;
+    public void updateColorAsDefined(int enabledBorderColor) {
+        this._enabledBorderColor = enabledBorderColor;
+        updateColor();
     }
 
     public void animateSelection(boolean selected) {

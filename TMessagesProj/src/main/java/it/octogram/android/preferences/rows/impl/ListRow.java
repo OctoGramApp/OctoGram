@@ -26,11 +26,12 @@ import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
 import it.octogram.android.preferences.rows.BaseRowBuilder;
 import it.octogram.android.preferences.rows.Clickable;
-import it.octogram.android.utils.PopupChoiceDialogOption;
-import it.octogram.android.utils.PopupChoiceDialogUtils;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
+import it.octogram.android.utils.appearance.PopupChoiceDialogUtils;
 
 public class ListRow extends BaseRow implements Clickable {
 
+    private int icon;
     private List<PopupChoiceDialogOption> options;
     private final Supplier<List<PopupChoiceDialogOption>> supplierOptions;
     private final ConfigProperty<Integer> currentValue;
@@ -41,6 +42,7 @@ public class ListRow extends BaseRow implements Clickable {
     public ListRow(@Nullable CharSequence title,
                    boolean divider,
                    boolean requiresRestart,
+                   int icon,
                    ConfigProperty<Boolean> showIf,
                    boolean showIfReverse,
                    List<PopupChoiceDialogOption> options,
@@ -50,6 +52,7 @@ public class ListRow extends BaseRow implements Clickable {
                    Runnable supplierClickableSelected
                ) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.LIST);
+        this.icon = icon;
         this.options = options;
         this.supplierOptions = supplierOptions;
         this.currentValue = currentValue;
@@ -100,6 +103,10 @@ public class ListRow extends BaseRow implements Clickable {
         return true;
     }
 
+    public int getIcon() {
+        return icon;
+    }
+
     private PopupChoiceDialogOption getOptionFromId(int id) {
         for (int i = 0; i < options.size(); i++) {
             PopupChoiceDialogOption option = options.get(i);
@@ -137,6 +144,7 @@ public class ListRow extends BaseRow implements Clickable {
 
     public static class ListRowBuilder extends BaseRowBuilder<ListRow> {
 
+        private int icon = -1;
         private final List<PopupChoiceDialogOption> options = new ArrayList<>();
         private Supplier<List<PopupChoiceDialogOption>> supplierOptions = null;
         private Supplier<Boolean> supplierClickable;
@@ -173,9 +181,14 @@ public class ListRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public ListRowBuilder icon(int icon) {
+            this.icon = icon;
+            return this;
+        }
+
         @Override
         public ListRow build() {
-            return new ListRow(title, divider, requiresRestart, showIf, showIfReverse, options, supplierOptions, currentValue, supplierClickable, supplierClickableSelected);
+            return new ListRow(title, divider, requiresRestart, icon, showIf, showIfReverse, options, supplierOptions, currentValue, supplierClickable, supplierClickableSelected);
         }
     }
 }

@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -81,14 +89,18 @@ import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 
 
-/** @noinspection SequencedCollectionMethodCanBeUsed*/
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 public class PinnedHashtagsActivity extends BaseFragment implements View.OnClickListener {
 
     private TextCheckCell enableHashtagsCell;
@@ -138,7 +150,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
 
         actionBar.setLongClickable(true);
         actionBar.setOnLongClickListener(v -> {
-            String link = "tg://pinned_hashtags";
+            String link = String.format(Locale.US, "tg://%s", DeepLinkDef.PINNED_HASHTAGS);
             showDialog(new ShareAlert(context, null, link, false, link, false, true));
 
             return true;
@@ -152,6 +164,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
                 protected boolean applyTranslation() {
                     return false;
                 }
+
                 @Override
                 protected boolean heightAnimationEnabled() {
                     return !AndroidUtilities.isInMultiwindow;
@@ -298,7 +311,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
             }
             return null;
         };
-        editText.setFilters(new InputFilter[] { filter, new InputFilter.LengthFilter(25) });
+        editText.setFilters(new InputFilter[]{filter, new InputFilter.LengthFilter(25)});
 
         infoCell = new TextInfoPrivacyCell(context);
         infoCell.setTopPadding(12);
@@ -321,7 +334,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
         listView.setClipToPadding(true);
         listView.setNestedScrollingEnabled(false);
         listView.setHasFixedSize(false);
-        listView.setPadding(0, 0, 0, dp(48+13+13));
+        listView.setPadding(0, 0, 0, dp(48 + 13 + 13));
         listView.setGlowColor(Theme.getColor(Theme.key_dialogScrollGlow));
         switchLayout.addView(listView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -355,7 +368,7 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
         buttonContainer.addView(actionButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.FILL, 13, 13, 13, 13));
 
         rootLayout.addView(scrollView);
-        rootLayout.addView(buttonContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48+13+13, Gravity.BOTTOM));
+        rootLayout.addView(buttonContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48 + 13 + 13, Gravity.BOTTOM));
         rootLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
 
         try {
@@ -369,13 +382,15 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
                     HashtagSpan span = new HashtagSpan(editText.getContext(), hashtag, false, getResourceProvider());
                     spansContainer.addSpan(span, false);
                     span.setOnClickListener(PinnedHashtagsActivity.this);
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
 
                 if (i > 10) {
                     break;
                 }
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         loadRecentHashtags();
         setCheckedEnableHashtagsCell(checked, false, true);
@@ -565,13 +580,15 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
             for (int i = 0; i < object.length(); i++) {
                 try {
                     currentPinnedHashtags.add(object.getString(i));
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
 
                 if (i > 10) {
                     break;
                 }
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         if (currentPinnedHashtags.size() != selectedHashtags.size()) {
             return true;
@@ -1153,8 +1170,9 @@ public class PinnedHashtagsActivity extends BaseFragment implements View.OnClick
 
         try {
             JSONArray jsonArray = new JSONArray(new JSONTokener(OctoConfig.INSTANCE.pinnedHashtagsList.getValue()));
-            return jsonArray.length() > 0 ? (""+jsonArray.length()) : getString(R.string.PasswordOff);
-        } catch (JSONException ignored) {}
+            return jsonArray.length() > 0 ? ("" + jsonArray.length()) : getString(R.string.PasswordOff);
+        } catch (JSONException ignored) {
+        }
 
         return getString(R.string.PasswordOff);
     }

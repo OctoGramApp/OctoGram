@@ -64,7 +64,7 @@
     <string name="TranslatorProviderUnsuggested">It doesn\'t support the language currently set.</string>
     <string name="TranslatorProviderUnsupported">The currently set language (%s) is not supported by the selected provider.</string>
     <string name="TranslatorProviderUnsupportedDialogs">The translation target language of some chats has been changed because the previously set language is not supported by the selected provider.</string>
-    <string name="TranslatorDestination">Destination</string>
+    <string name="TranslatorDestination">Translate to</string>
     <string name="TranslatorDestinationFollow">Follow app</string>
     <string name="TranslatorDestinationFollowDestination">Follow default destination</string>
     <string name="TranslatorFormality">Formality</string>
@@ -78,6 +78,124 @@
     <string name="TranslatorUnsupportedLanguage">Selected language isn\'t supported by the selected provider.</string>
     <string name="TranslatorUnsupportedLanguageChange">Edit provider</string>
     <string name="TranslatorUnsupportedLanguageChangeDone">Provider has been updated successfully.</string>
+
+    <!--AI Features-->
+    <string name="AiFeatures">Integrate AI features</string>
+    <string name="AiFeatures_Brief">AI Features</string>
+    <string name="AiFeatures_Desc">You can integrate more features through AI to have a more true-to-life result.</string>
+    <string name="AiFeatures_Desc_Brief">You can integrate more features through AI.</string>
+    <string name="AiFeatures_AccessVia">Use AI features via…</string>
+    <string name="AiFeatures_AccessVia_ReqAuth">Requires authentication through API Key</string>
+    <string name="AiFeatures_AccessVia_GoogleAPI">Google API</string>
+    <string name="AiFeatures_AccessVia_ChatGPTAPI">ChatGPT API</string>
+    <string name="AiFeatures_AccessVia_OpenRouterAPI">OpenRouter API</string>
+    <string name="AiFeatures_AccessVia_Empty">At least one provider must be enabled to use AI features.</string>
+    <string name="AiFeatures_AccessVia_Empty_Disable">Disable</string>
+    <string name="AiFeatures_AccessVia_Login_Step1">Log on to the service</string>
+    <string name="AiFeatures_AccessVia_Login_Step1_Desc">Use of %s is allowed only through an API Key, which you can generate by following the steps given here.</string>
+    <string name="AiFeatures_AccessVia_Login_Google_1">Open Google AI Studio</string>
+    <string name="AiFeatures_AccessVia_Login_Google_1_Desc">Access the Google AI Studio Console through this link: <![CDATA[<a href="https://aistudio.google.com/apikey">aistudio.google.com</a>]]>.</string>
+    <string name="AiFeatures_AccessVia_Login_Google_2">Create new key</string>
+    <string name="AiFeatures_AccessVia_Login_Google_2_Desc">If you do not have it, click on the "Generate New Key" button.</string>
+    <string name="AiFeatures_AccessVia_Login_ChatGPT_1">Open OpenAI Platform</string>
+    <string name="AiFeatures_AccessVia_Login_ChatGPT_1_Desc">Access the OpenAI Console through this link: <![CDATA[<a href="https://platform.openai.com/api-keys">platform.openai.com</a>]]>.</string>
+    <string name="AiFeatures_AccessVia_Login_ChatGPT_2">Create new key</string>
+    <string name="AiFeatures_AccessVia_Login_ChatGPT_2_Desc">If you do not have it, click on the "Create new secret key" button.</string>
+    <string name="AiFeatures_AccessVia_Login_OpenRouter_1">Open OpenRouter Platform</string>
+    <string name="AiFeatures_AccessVia_Login_OpenRouter_1_Desc">Access the OpenRouter Console through this link: <![CDATA[<a href="https://openrouter.ai/settings/keys">openrouter.ai</a>]]>.</string>
+    <string name="AiFeatures_AccessVia_Login_OpenRouter_2">Create new key</string>
+    <string name="AiFeatures_AccessVia_Login_OpenRouter_2_Desc">If you do not have it, click on the "Create Key" button.</string>
+    <string name="AiFeatures_AccessVia_Login_3">Copy the key</string>
+    <string name="AiFeatures_AccessVia_Login_3_Desc">Copy the API Key you generated and go to the next step.</string>
+    <string name="AiFeatures_AccessVia_Login_Step2">Insert the API Key</string>
+    <string name="AiFeatures_AccessVia_Login_Step2_Desc">Past the copied API Key in the box below.</string>
+    <string name="AiFeatures_AccessVia_Login_Step2_Hint">Your API Key</string>
+    <string name="AiFeatures_AccessVia_Login_Step2_Model">Selected model</string>
+    <string name="AiFeatures_AccessVia_Login_Step3">%s has been configured successfully.</string>
+    <string name="AiFeatures_AccessVia_Login_NextStep">Next step</string>
+    <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey">Save key</string>
+    <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong">Wrong key</string>
+    <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong_Desc">The indicated API key doesn\'t seem to work. Do you want to save it anyway?</string>
+    <string name="AiFeatures_AccessVia_Login_DisableS">Disable %s integration</string>
+    <string name="AiFeatures_Features">Features</string>
+    <string name="AiFeatures_Features_ChatContext">Chat Context</string>
+    <string name="AiFeatures_Features_TranslateViaGeneric">Translate…</string>
+    <string name="AiFeatures_Features_TranslateVia">Translate via %s</string>
+    <string name="AiFeatures_Features_TranslateAI">Translate using AI</string>
+    <string name="AiFeatures_Features_TranslateAI_Details">Translation by AI is capable of interpreting message context and dialects. You can configure it **here**.</string>
+    <string name="AiFeatures_Features_TranslateAI_MoreProviders">You can configure more AI providers **here**.</string>
+    <string name="AiFeatures_Features_Empty">At least one feature must be enabled to use AI features.</string>
+    <string name="AiFeatures_CustomModels">Custom Models</string>
+    <string name="AiFeatures_CustomModels_Feature_UseMessages">USE LAST %d MESSAGES</string>
+    <string name="AiFeatures_CustomModels_Feature_UseMessages_Defined">USE %1$s</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel">Select model</string>
+    <string name="AiFeatures_CustomModels_Feature_CloseModal">Close AI suggestion</string>
+    <string name="AiFeatures_CustomModels_Feature_UseAsText">Use as text…</string>
+    <string name="AiFeatures_CustomModels_Feature_Language">Language</string>
+    <string name="AiFeatures_CustomModels_Feature_Formality">Formality</string>
+    <string name="AiFeatures_CustomModels_Feature_Length">Length</string>
+    <string name="AiFeatures_CustomModels_Feature_State_Default">Default</string>
+    <string name="AiFeatures_CustomModels_Feature_State_Informal">Informal</string>
+    <string name="AiFeatures_CustomModels_Feature_State_Professional">Formal</string>
+    <string name="AiFeatures_CustomModels_Feature_State_Short">Short</string>
+    <string name="AiFeatures_CustomModels_Feature_State_Medium">Medium</string>
+    <string name="AiFeatures_CustomModels_Feature_State_Long">Long</string>
+    <string name="AiFeatures_CustomModels_Feature_Loading_1">Hold tight… we\'re making magic</string>
+    <string name="AiFeatures_CustomModels_Feature_Loading_2">Just a sec, the spell is being cast…</string>
+    <string name="AiFeatures_CustomModels_Feature_Loading_3">Abracadabra… your content is coming to life!</string>
+    <string name="AiFeatures_CustomModels_Feature_Loading_4">AI wizards at work… the magic is brewing!</string>
+    <string name="AiFeatures_CustomModels_Feature_Loading_5">Something magical is loading… get ready!</string>
+    <string name="AiFeatures_CustomModels_Feature_Failed">Generation failed.</string>
+    <string name="AiFeatures_CustomModels_ModelID">Model #%s</string>
+    <string name="AiFeatures_CustomModels_Model_SelectAvailable">%d models available</string>
+    <string name="AiFeatures_CustomModels_Model_Edit">Edit model</string>
+    <string name="AiFeatures_CustomModels_Model_Clone">Clone model</string>
+    <string name="AiFeatures_CustomModels_Model_Share">Share model</string>
+    <string name="AiFeatures_CustomModels_Model_Delete">Delete model</string>
+    <string name="AiFeatures_CustomModels_Model_Delete_Alert">Are you sure you want to delete the model?</string>
+    <string name="AiFeatures_CustomModels_Model_Delete_Alert_Sure">Delete</string>
+    <string name="AiFeatures_CustomModels_Create">Create a new model</string>
+    <string name="AiFeatures_CustomModels_Generate">Generate a new model</string>
+    <string name="AiFeatures_CustomModels_Generate_Desc">Describe what the model should perform. If possible, specify as many details as possible using English language.</string>
+    <string name="AiFeatures_CustomModels_Generate_Input">Model description</string>
+    <string name="AiFeatures_CustomModels_Generate_Failed">Generation failed. Try later.</string>
+    <string name="AiFeatures_CustomModels_Generate_Button">Generate</string>
+    <string name="AiFeatures_CustomModels_Create_Short">New model</string>
+    <string name="AiFeatures_CustomModels_Create_Short_Import">Import model</string>
+    <string name="AiFeatures_CustomModels_Create_Short_Edit">Edit model</string>
+    <string name="AiFeatures_CustomModels_Create_Details">Details</string>
+    <string name="AiFeatures_CustomModels_Create_Prompt">Prompt</string>
+    <string name="AiFeatures_CustomModels_Create_Title">Title</string>
+    <string name="AiFeatures_CustomModels_Create_YourPrompt">Your prompt</string>
+    <string name="AiFeatures_CustomModels_Create_Importing">You are importing a model created by a third party user. Check the reliability of the prompt before saving it.</string>
+    <string name="AiFeatures_CustomModels_Create_OptionsHeader">Options</string>
+    <string name="AiFeatures_CustomModels_Create_OptionsHeader_MessagesToPass">Messages number</string>
+    <string name="AiFeatures_CustomModels_Create_OptionsHeader_Where">Where does it appear?</string>
+    <string name="AiFeatures_CustomModels_Create_OptionsHeader_MessagesTexts">Text messages</string>
+    <string name="AiFeatures_CustomModels_Create_OptionsHeader_SupportsUpload">Upload media to AI</string>
+    <string name="AiFeatures_CustomModels_Create_OptionsHeader_SupportsUpload_Desc">When executed on a media message, the content is automatically uploaded and passed to the AI for processing.</string>
+    <string name="AiFeatures_CustomModels_Create_AvailableTags">Available tags</string>
+    <string name="AiFeatures_CustomModels_Create_AvailableTags_Special">Special tags</string>
+    <string name="AiFeatures_CustomModels_Create_AvailableTags_Clickable">You can tap on a tag to quickly enter it into the prompt.</string>
+    <string name="AiFeatures_CustomModels_Create_AvailableTags_Clickable_Special">These tags are interactive and allow a choice to the user in generating the prompt.</string>
+    <string name="AiFeatures_CustomModels_Create_AvailableTags_Close">Close list</string>
+    <string name="AiFeatures_CustomModels_Create_ModelIcon">Model Icon</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType">Model Type</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_Messages">Related to Messages</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_Messages_Desc">This action will appear in the message context menu.</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_InputBox">Related to Input Box</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_InputBox_Desc">This action will appear in the input box before sending any message.</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_Chats">Related to Chats</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_Chats_Desc">You can perform this action in chats by passing a specified number of messages to the AI.</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_Chats_Detailed">Chat-related templates will send the content of the last %d chat messages directly to the artificial intelligence, which will be added to the list at the end of the prompt.\n\nYou can find the templates in the context menu of each chat.</string>
+    <string name="AiFeatures_CustomModels_Create_RelatedMessages_Desc">Enable option if this custom template refers to messages and not chat.</string>
+    <string name="AiFeatures_CustomModels_Create_EditedElements">You have edited this model. Apply changes?</string>
+    <string name="AiFeatures_CustomModels_Create_Duplicate">Duplicate found</string>
+    <string name="AiFeatures_CustomModels_Create_Duplicate_Desc">A similar model was found among those already saved. Are you sure you want to import this model?</string>
+    <string name="AiFeatures_CustomModels_Create_Duplicate_Import">Import</string>
+    <string name="AiFeatures_CustomModels_Desc">You can speed up your workflow with custom AI prompts. Check out examples at %s.</string>
+
+    <!--Chat Context-->
 
     <!--Devices: Custom device name-->
     <string name="UseCustomDeviceName">Use custom name</string>
@@ -155,7 +273,7 @@
     <string name="OctoMainSettingsManageCategory">Manage</string>
     <string name="OctoMainSettingsChats">Chats</string>
     <string name="OctoMainSettingsInfo">Info</string>
-    <string name="OctoInfoSettingsHeader">Discover more...</string>
+    <string name="OctoInfoSettingsHeader">Discover more…</string>
     <string name="OfficialChannel">Official Channel</string>
     <string name="OfficialGroup">Official Group</string>
     <string name="OfficialPbetaChat">Private Beta Chat</string>
@@ -247,6 +365,14 @@
     <string name="LockedChatsHelpHint3Title">Applied only locally</string>
     <string name="LockedChatsHelpHint3Description">Hidden chats will be displayed normally on other devices.</string>
     <string name="LockedChatsHelpHintEditList">Edit list</string>
+    <string name="LockedChats_Options_Desc">Here you can customize locked chats options</string>
+    <string name="LockedChats_Options_MoreSettings">Customize more options</string>
+    <string name="LockedChats_Options_HideChats">Hide locked chats</string>
+    <string name="LockedChats_Options_HideChats_Desc">Hide locked chats from the list</string>
+    <string name="LockedChats_Options_LockScreenshots">Lock screenshots</string>
+    <string name="LockedChats_Options_ShowNotifications">Show notifications</string>
+    <string name="LockedChats_Options_SpoilerContent">Hide content</string>
+    <string name="LockedChats_Options_SpoilerContent_Desc">Locked chats notifications will be visible but the message content will be censored.</string>
     <string name="LockChat">Lock chat</string>
     <string name="UnLockChat">Unlock chat</string>
     <string name="LockChat_Brief">Lock</string>
@@ -254,10 +380,10 @@
     <string name="BiometricSettingsHideChats">Hide locked content in search</string>
     <string name="BiometricSettingsAllowFaceUnlock">Allow using Face Unlock</string>
     <string name="BiometricSettingsAllowDevicePIN">Allow using device PIN</string>
-    <string name="BiometricSettingsOpenArchive">Request auth to open archive</string>
-    <string name="BiometricSettingsOpenSecretChats">Request auth to open secret chats</string>
-    <string name="BiometricSettingsOpenSettings">Request auth to open settings</string>
-    <string name="BiometricSettingsOpenCallsLog">Request auth to open calls log</string>
+    <string name="BiometricSettingsOpenArchive">Lock archived chats</string>
+    <string name="BiometricSettingsOpenSecretChats">Lock secret chats</string>
+    <string name="BiometricSettingsOpenSettings">Lock settings</string>
+    <string name="BiometricSettingsOpenCallsLog">Lock calls history</string>
     <string name="BiometricAskEvery">Ask for authentication every…</string>
     <string name="BiometricAskEvery_Always">Always</string>
     <string name="BiometricAskEvery_Desc">Biometric authentication will only be required once every %1$s.</string>
@@ -351,6 +477,8 @@
     <string name="DrawerBackgroundWallpaper">Wallpaper</string>
     <string name="DrawerBackgroundProfilePhoto">Profile Photo</string>
     <string name="DrawerBackgroundColor">Accent Color</string>
+    <string name="DrawerPremiumDetails">Premium Details</string>
+    <string name="DrawerPremiumDetails_Desc">Selected emojis will be shown for premium accounts.</string>
     <string name="DrawerShowProfilePic">Show Profile Photo</string>
     <string name="DrawerGradientBackground">Gradient Background</string>
     <string name="DrawerBlurBackground">Blur Background</string>
@@ -458,6 +586,13 @@
     <string name="ImproveIconsMaterialDesign3_Desc">OctoGram will use the Material Design 3 Icons created by Google (more details %s).</string>
     <string name="ImproveIconsMaterialDesign3_DescHere">here</string>
     <string name="ImproveIconsMeme_Desc">Random icons will be used to create the “Meme” effect. The interface may have errors and inconsistencies. This feature is available just in the BETA version of OctoGram!</string>
+    <string name="ImproveRapidActions">Manage Rapid Actions</string>
+    <string name="ImproveRapidActionsDefault">Use default options</string>
+    <string name="ImproveRapidActionsMainButtonAction">Main button action</string>
+    <string name="ImproveRapidActionsMainButtonActionLongPress">Long press action</string>
+    <string name="ImproveRapidActionsSecondaryButtonAction">Secondary button action</string>
+    <string name="ImproveRapidActionsMainButtonActionStoriesUnavailable">This account doesn\'t support story publishing.</string>
+    <string name="ImproveRapidActionsMainButtonActionStoriesUnavailableLong">One of your accounts doesn\'t support publishing stories. This option may not be working properly.</string>
 
     <!-- PROMPT BEFORE SENDING -->
     <string name="PromptBeforeSendingSticker">Are you sure you want to send this sticker?</string>
@@ -593,7 +728,6 @@
     <string name="CrashHistory_Desc">View crash logs and configuration</string>
     <string name="NoCrashLogFound">No crash log found</string>
     <string name="CouldNotCopyFile">Could not copy file</string>
-    <string name="CopyOctogramConfiguration">Copy OctoGram Configuration</string>
     <string name="CopyLatestCrashLog">Copy Latest Crash Log</string>
     <string name="CrashLogInfo">Crash logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
     <string name="CrashesDeleteConfirmation">Do you want to delete %s crash logs? This action is irreversible</string>
@@ -807,6 +941,9 @@
     <string name="ChatCamera">Camera</string>
     <string name="Style">Style</string>
     <string name="ForwardedMessage">Forwarded Message</string>
+
+    <!-- Squared Fab -->
+    <string name="SquaredFab">Squared FAB (Experimental)</string>
 
     <!-- DC Style desc-->
     <string name="DCStyleNothing_Desc">The indicator will be hidden.</string>

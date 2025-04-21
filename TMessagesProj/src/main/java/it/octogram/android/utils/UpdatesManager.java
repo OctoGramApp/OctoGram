@@ -40,7 +40,9 @@ import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.network.BrowserUtils;
 
+/** @noinspection SequencedCollectionMethodCanBeUsed*/
 public class UpdatesManager {
     private static final String TAG = "UpdatesManager";
     private static final long privateChatId = -1733655252L;
@@ -178,7 +180,7 @@ public class UpdatesManager {
             public void run() {
                 try {
                     String reqUrl = String.format(Locale.getDefault(),"https://raw.githubusercontent.com/OctoGramApp/assets/ota/version_history/history.json?ms=%d", System.currentTimeMillis());
-                    String reqResponse = new StandardHTTPRequest(reqUrl).request();
+                    String reqResponse = new StandardHTTPRequest.Builder(reqUrl).build().request();
                     updatesData = new JSONObject(reqResponse);
 
                     if (!isResponseCorrupted(updatesData)) {
@@ -383,7 +385,7 @@ public class UpdatesManager {
                             break;
                         }
 
-                        StringBuilder finalUpdate = new StringBuilder(String.format("%s\n%s", getString(R.string.UpdatesPbetaWarning), commitText));
+                        StringBuilder finalUpdate = new StringBuilder(String.format(Locale.US, "%s\n%s", getString(R.string.UpdatesPbetaWarning), commitText));
 
                         TLRPC.Document currentMediaDocument = message.media.document;
                         String currentAbiRelease = OctoUtils.getCurrentAbi(false);
@@ -407,7 +409,7 @@ public class UpdatesManager {
                                     }
 
                                     currentMediaDocument = msg2.media.document;
-                                    finalUpdate.append(String.format("\nWe selected the %s BUILD ARCHITECTURE for this update.", currentAbiRelease.toUpperCase()));
+                                    finalUpdate.append(String.format(Locale.US, "\nWe selected the %s BUILD ARCHITECTURE for this update.", currentAbiRelease.toUpperCase()));
                                 }
                             }
                         }
