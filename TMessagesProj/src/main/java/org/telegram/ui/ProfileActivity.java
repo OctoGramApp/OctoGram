@@ -607,8 +607,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int phoneSuggestionRow;
     private int passwordSuggestionSectionRow;
     private int passwordSuggestionRow;
-    private int octoGramShadowRow;
-    private int octoGramSettingsRow; /*OctoGram*/
     private int octoGramMainSettingsRow;
     private int settingsSectionRow;
     private int settingsSectionRow2;
@@ -9258,8 +9256,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         graceSuggestionRow = -1;
         graceSuggestionSectionRow = -1;
         passwordSuggestionRow = -1;
-        octoGramShadowRow = -1;
-        octoGramSettingsRow = -1;
         octoGramMainSettingsRow = -1;
         settingsSectionRow = -1;
         settingsSectionRow2 = -1;
@@ -9412,11 +9408,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     registrationDataRow = rowCount++;
 
                 bioRow = rowCount++;
-
-                octoGramShadowRow = rowCount++;
-                octoGramSettingsRow = rowCount++;
-                octoGramMainSettingsRow = rowCount++;
-
                 settingsSectionRow = rowCount++;
 
                 Set<String> suggestions = getMessagesController().pendingSuggestions;
@@ -9434,6 +9425,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 settingsSectionRow2 = rowCount++;
 
 
+                octoGramMainSettingsRow = rowCount++;
                 chatRow = rowCount++;
                 privacyRow = rowCount++;
                 notificationRow = rowCount++;
@@ -11968,8 +11960,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         headerCell.setText(LocaleController.getString(R.string.ChannelMembers));
                     } else if (position == settingsSectionRow2) {
                         headerCell.setText(LocaleController.getString(R.string.SETTINGS));
-                    } else if (position == octoGramSettingsRow) {
-                        headerCell.setText("OctoGram");
                     } else if (position == numberSectionRow) {
                         headerCell.setText(LocaleController.getString(R.string.Account));
                     } else if (position == helpHeaderRow) {
@@ -12388,7 +12378,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == notificationRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.NotificationsAndSounds), R.drawable.msg2_notifications, true);
                     } else if (position == octoGramMainSettingsRow) {
-                        textCell.setTextAndIcon(LocaleController.getString(R.string.OctoGramSettings), R.drawable.msg_settings, true);
+                        textCell.setTextAndIcon(LocaleController.getString(R.string.OctoGramSettings), R.drawable.settings_octo, true);
                     } else if (position == privacyRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.PrivacySettings), R.drawable.msg2_secret, true);
                     } else if (position == dataRow) {
@@ -12844,7 +12834,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         @Override
         public int getItemViewType(int position) {
             if (position == infoHeaderRow || position == membersHeaderRow || position == settingsSectionRow2 ||
-                    position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == botPermissionsHeader || position == octoGramSettingsRow) {
+                    position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == botPermissionsHeader) {
                 return VIEW_TYPE_HEADER;
             } else if (position == phoneRow || position == locationRow || position == numberRow || position == birthdayRow || position == restrictionReasonRow || position == registrationDataRow
                     || (position == dcIdRow && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue())) {
@@ -12870,7 +12860,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == notificationsSimpleRow) {
                 return VIEW_TYPE_NOTIFICATIONS_CHECK_SIMPLE;
             } else if (position == lastSectionRow || position == membersSectionRow ||
-                    position == secretSettingsSectionRow || position == octoGramShadowRow || position == settingsSectionRow || position == devicesSectionRow ||
+                    position == secretSettingsSectionRow || position == settingsSectionRow || position == devicesSectionRow ||
                     position == helpSectionCell || position == setAvatarSectionRow || position == passwordSuggestionSectionRow ||
                     position == phoneSuggestionSectionRow || position == premiumSectionsRow || position == reportDividerRow ||
                     position == channelDividerRow || position == graceSuggestionSectionRow || position == balanceDividerRow ||
@@ -13053,14 +13043,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             ArrayList<SearchResult> defaultList = new ArrayList<>(Arrays.asList(onCreateSearchArray()));
 
             int minGuid = 1730;
-            ImportSettingsScanHelper helper = new ImportSettingsScanHelper();
-            for (ImportSettingsScanHelper.SettingsScanCategory category : helper.categories) {
+            for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
                 minGuid++;
                 defaultList.add(new SearchResult(minGuid, category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.onCall())));
 
                 for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
                     minGuid++;
-                    defaultList.add(new SearchResult(minGuid, option.getName(), category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.onCall(option.optionKey))));
+                    defaultList.add(new SearchResult(minGuid, option.getName(), category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.onCall(option.property.getKey()))));
                 }
             }
 
@@ -14172,9 +14161,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             put(++pointer, phoneSuggestionSectionRow, sparseIntArray);
             put(++pointer, passwordSuggestionRow, sparseIntArray);
             put(++pointer, passwordSuggestionSectionRow, sparseIntArray);
-            put(++pointer, octoGramShadowRow, sparseIntArray);
-            put(++pointer, octoGramSettingsRow, sparseIntArray);
-            put(++pointer, octoGramMainSettingsRow, sparseIntArray);
             put(++pointer, graceSuggestionRow, sparseIntArray);
             put(++pointer, graceSuggestionSectionRow, sparseIntArray);
             put(++pointer, settingsSectionRow, sparseIntArray);
@@ -14259,6 +14245,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             put(++pointer, botPermissionBiometry, sparseIntArray);
             put(++pointer, botPermissionsDivider, sparseIntArray);
             put(++pointer, channelDividerRow, sparseIntArray);
+            put(++pointer, octoGramMainSettingsRow, sparseIntArray);
         }
 
         private void put(int id, int position, SparseIntArray sparseIntArray) {

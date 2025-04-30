@@ -240,8 +240,14 @@ public class NavigationSettingsUI extends BaseFragment {
 
             reloadUIElements();
 
-            smoothnessAnimationCell.navigationLayout.updateSpringStiffness(navigationSmoothness);
-            smoothnessAnimationCell.navigationLayout.updateUseActionbarCrossfade(animatedActionBar);
+            if (animatedActionBar) {
+                smoothnessAnimationCell.navigationLayout.updateUseActionbarCrossfade(false);
+            }
+
+            AndroidUtilities.runOnUIThread(() -> {
+                smoothnessAnimationCell.navigationLayout.updateSpringStiffness(navigationSmoothness);
+                smoothnessAnimationCell.navigationLayout.updateUseActionbarCrossfade(animatedActionBar);
+            }, 200);
         });
         linearLayout.addView(alternativeNavigationCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 56));
 
@@ -305,6 +311,11 @@ public class NavigationSettingsUI extends BaseFragment {
         linearLayout.setClipChildren(false);
         reloadUIElements(false);
 
+        AndroidUtilities.runOnUIThread(() -> {
+            smoothnessAnimationCell.navigationLayout.updateSpringStiffness(navigationSmoothness);
+            smoothnessAnimationCell.navigationLayout.updateUseActionbarCrossfade(animatedActionBar);
+        }, 100);
+
         return contentView;
     }
 
@@ -323,7 +334,7 @@ public class NavigationSettingsUI extends BaseFragment {
         dividerActionBarAnimation.setVisibility(visibility);
         smoothnessAnimationCell.setVisibility(visibility);
 
-        optionsCheckCell.setChecked(OctoConfig.INSTANCE.animatedActionBar.getValue());
+        optionsCheckCell.setChecked(animatedActionBar);
 
         int alternativeNavigationColorUpdate = Theme.getColor(useAlternativeNavigation ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked);
         if (animate) {
@@ -407,19 +418,24 @@ public class NavigationSettingsUI extends BaseFragment {
     }
 
     private void applyAndFinish() {
-        OctoConfig.INSTANCE.alternativeNavigation.updateValue(useAlternativeNavigation);
-        OctoConfig.INSTANCE.navigationSmoothness.updateValue(navigationSmoothness);
-        OctoConfig.INSTANCE.animatedActionBar.updateValue(animatedActionBar);
+        AndroidUtilities.runOnUIThread(() -> {
+            OctoConfig.INSTANCE.alternativeNavigation.updateValue(useAlternativeNavigation);
+            OctoConfig.INSTANCE.navigationSmoothness.updateValue(navigationSmoothness);
+            OctoConfig.INSTANCE.animatedActionBar.updateValue(animatedActionBar);
 
-        INavigationLayout currentLayout = LaunchActivity.instance.getActionBarLayout();
-        if (currentLayout != null) {
-            currentLayout.updateUseAlternativeNavigation(useAlternativeNavigation);
-            currentLayout.updateSpringStiffness(navigationSmoothness);
-            currentLayout.updateUseActionbarCrossfade(animatedActionBar);
-            currentLayout.rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
-        }
+            INavigationLayout currentLayout = LaunchActivity.instance.getActionBarLayout();
+            if (currentLayout != null) {
+                currentLayout.updateUseAlternativeNavigation(useAlternativeNavigation);
+                currentLayout.updateSpringStiffness(navigationSmoothness);
+                if (animatedActionBar) {
+                    currentLayout.updateUseActionbarCrossfade(false);
+                }
+                currentLayout.updateUseActionbarCrossfade(animatedActionBar);
+                currentLayout.rebuildFragments(INavigationLayout.REBUILD_FLAG_REBUILD_LAST);
+            }
 
-        finishFragment(true);
+            finishFragment(true);
+        });
     }
 
     @Override

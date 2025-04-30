@@ -1053,7 +1053,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setGravity(Gravity.CENTER);
                 textView.setTypeface(AndroidUtilities.bold());
                 textView.setText(positiveButtonText);
-                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(6), getThemedColor(dialogButtonColorKey)));
+                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 12 : 6), getThemedColor(dialogButtonColorKey)));
                 textView.setPadding(dp(12), 0, dp(12), 0);
                 if (verticalButtons) {
                     buttonsLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 36, LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT));
@@ -1094,7 +1094,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
                 textView.setText(negativeButtonText.toString());
-                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(6), getThemedColor(dialogButtonColorKey)));
+                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 12 : 6), getThemedColor(dialogButtonColorKey)));
                 textView.setPadding(dp(12), 0, dp(12), 0);
                 if (verticalButtons) {
                     buttonsLayout.addView(textView, 0, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 36, LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT));
@@ -1135,7 +1135,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
                 textView.setText(neutralButtonText.toString());
-                textView.setBackground(Theme.getRoundRectSelectorDrawable(dp(6), getThemedColor(dialogButtonColorKey)));
+                textView.setBackground(Theme.getRoundRectSelectorDrawable(dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 12 : 6), getThemedColor(dialogButtonColorKey)));
                 textView.setPadding(dp(12), 0, dp(12), 0);
                 if (verticalButtons) {
                     buttonsLayout.addView(textView, 1, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 36, LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT));

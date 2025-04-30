@@ -65,7 +65,7 @@ public class FingerprintUtils {
     }
 
     public static void checkFingerprint(Context context, @FingerprintAction int reason, boolean useCustomAskEvery, int askEvery, FingerprintResult callback) {
-        if (Build.VERSION.SDK_INT < 23 || !hasFingerprint()) {
+        if (Build.VERSION.SDK_INT < 23 || !hasFingerprintCached()) {
             callback.onSuccess();
             return;
         }
@@ -130,10 +130,23 @@ public class FingerprintUtils {
         return OctoConfig.INSTANCE.allowUsingFaceUnlock.getValue() ? BiometricManager.Authenticators.BIOMETRIC_WEAK : BiometricManager.Authenticators.BIOMETRIC_STRONG;
     }
 
-    private static long lastFingerprintCacheTime = 0;
+    private static boolean isFirstCheck = true;
     private static boolean fingerprintCachedState = false;
 
-    public static boolean hasFingerprint() {
+    public static boolean hasFingerprintCached() {
+        if (isFirstCheck) {
+            reloadFingerprintState();
+        }
+
+        return fingerprintCachedState;
+    }
+
+    public static void reloadFingerprintState() {
+        isFirstCheck = false;
+        fingerprintCachedState = hasFingerprintInternal();
+    }
+
+    private static boolean hasFingerprintInternal() {
         if (Build.VERSION.SDK_INT >= 23) {
             try {
                 OctoLogging.d(TAG, "Starting fingerprint check...");
@@ -152,9 +165,6 @@ public class FingerprintUtils {
                 conditions &= !FingerprintController.checkDeviceFingerprintsChanged();
                 OctoLogging.d(TAG, "Device fingerprints changed: " + !FingerprintController.checkDeviceFingerprintsChanged());
 
-                fingerprintCachedState = conditions;
-                lastFingerprintCacheTime = System.currentTimeMillis();
-
                 OctoLogging.d(TAG, "Final fingerprint check result: " + conditions);
                 return conditions;
             } catch (Throwable e) {
@@ -162,18 +172,6 @@ public class FingerprintUtils {
             }
         } else {
             OctoLogging.d(TAG, "Fingerprint check skipped: SDK version < 23");
-        }
-        return false;
-    }
-
-    public static boolean hasFingerprintCached() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if ((System.currentTimeMillis() - lastFingerprintCacheTime) / 1000 > 20) {
-                fingerprintCachedState = hasFingerprint();
-                lastFingerprintCacheTime = System.currentTimeMillis();
-            }
-
-            return fingerprintCachedState;
         }
         return false;
     }

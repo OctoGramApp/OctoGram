@@ -61,6 +61,16 @@ public class GoogleTranslator {
             "Linux; U; Android 12; Pixel 5a",
             "Linux; U; Android 12; Pixel 6",
             "Linux; U; Android 12; Pixel 6 Pro",
+            "Linux; U; Android 13; Pixel 6a",
+            "Linux; U; Android 13; Pixel 7",
+            "Linux; U; Android 13; Pixel 7 Pro",
+            "Linux; U; Android 14; Pixel 8",
+            "Linux; U; Android 14; Pixel 8 Pro",
+            "Linux; U; Android 14; Pixel 8a",
+            "Linux; U; Android 15; Pixel 9",
+            "Linux; U; Android 15; Pixel 9 Pro",
+            "Linux; U; Android 15; Pixel 9 Pro XL",
+            "Linux; U; Android 15; Pixel 9a"
     };
 
     public static void executeTranslation(String text, ArrayList<TLRPC.MessageEntity> entities, String toLanguage, SingleTranslationManager.OnTranslationResultCallback callback) {
@@ -77,10 +87,10 @@ public class GoogleTranslator {
                     ArrayList<String> parts = OctoUtils.getStringParts(text2, 2500);
 
                     for (String part : parts) {
-                        StandardHTTPRequest request = new StandardHTTPRequest.Builder(composeUrl(part, toLanguage))
-                                .header("User-Agent", getUserAgent())
-                                .build();
-                        String response = request.request();
+                        StandardHTTPRequest.Builder requestBuilder = new StandardHTTPRequest.Builder(composeUrl(part, toLanguage));
+                        requestBuilder.header("User-Agent", getUserAgent());
+                        StandardHTTPRequest httpRequest = requestBuilder.build();
+                        String response = httpRequest.request();
 
                         if (TextUtils.isEmpty(response)) {
                             callback.onResponseReceived();

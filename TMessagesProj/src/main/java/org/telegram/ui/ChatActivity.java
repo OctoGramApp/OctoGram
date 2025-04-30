@@ -3691,7 +3691,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         }
                     }, themeDelegate);
                 } else if (id == lock_chat || id == unlock_chat) {
-                    if ((currentUser == null && currentChat == null) || !FingerprintUtils.hasFingerprint() || currentEncryptedChat != null) {
+                    if ((currentUser == null && currentChat == null) || !FingerprintUtils.hasFingerprintCached() || currentEncryptedChat != null) {
                         return;
                     }
                     boolean newStatus = !FingerprintUtils.isChatLocked(currentUser, currentChat);
@@ -4329,7 +4329,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             if (!isTopic) {
                 clearHistoryItem = headerItem.lazilyAddSubItem(clear_history, R.drawable.msg_clear, LocaleController.getString(R.string.ClearHistory));
             }
-            if (FingerprintUtils.hasFingerprint() && currentEncryptedChat == null) {
+            if (FingerprintUtils.hasFingerprintCached() && currentEncryptedChat == null) {
                 boolean isChatLocked = FingerprintUtils.isChatLocked(currentUser, currentChat);
                 headerItem.lazilyAddSubItem(lock_chat, R.drawable.edit_passcode, LocaleController.getString(R.string.LockChat));
                 headerItem.lazilyAddSubItem(unlock_chat, R.drawable.menu_unlock, LocaleController.getString(R.string.UnLockChat));
@@ -36153,7 +36153,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                 });
             } else if (viewType == 2) {
-                view = new ChatUnreadCell(mContext, themeDelegate);
+                view = new ChatUnreadCell(mContext, themeDelegate, newUnreadMessageCount, currentUser, currentChat);
             } else if (viewType == 3) {
                 view = new BotHelpCell(mContext, themeDelegate);
                 ((BotHelpCell) view).setDelegate(url -> {

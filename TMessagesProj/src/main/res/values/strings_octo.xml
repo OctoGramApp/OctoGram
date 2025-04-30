@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!--
-  ~ This is the source code of OctoGram for Android v.2.0.x
-  ~ It is licensed under GNU GPL v. 2 or later.
-  ~ You should have received a copy of the license in this archive (see LICENSE).
-  ~
-  ~ Copyright OctoGram, 2023.
-  -->
-
 <resources>
     <string name="Type">Type</string>
     <string name="Reaction">Reaction</string>
@@ -82,6 +74,7 @@
     <!--AI Features-->
     <string name="AiFeatures">Integrate AI features</string>
     <string name="AiFeatures_Brief">AI Features</string>
+    <string name="AiFeatures_Brief_Settings">AI Settings</string>
     <string name="AiFeatures_Desc">You can integrate more features through AI to have a more true-to-life result.</string>
     <string name="AiFeatures_Desc_Brief">You can integrate more features through AI.</string>
     <string name="AiFeatures_AccessVia">Use AI features via…</string>
@@ -112,13 +105,24 @@
     <string name="AiFeatures_AccessVia_Login_Step2_Hint">Your API Key</string>
     <string name="AiFeatures_AccessVia_Login_Step2_Model">Selected model</string>
     <string name="AiFeatures_AccessVia_Login_Step3">%s has been configured successfully.</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning">Warning</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_Desc">The use of %s API is not recommended as:</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_1">Media support</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_1_Desc">Media loading isn\'t supported with %s due to a technical limitation.</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_2">Limit of requests</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_2_Desc">The number of requests available for %s is very limited compared to Gemini.</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_3">Fee-based service</string>
+    <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_3_Desc">%s has no free uses and any use is subject to a fee.</string>
     <string name="AiFeatures_AccessVia_Login_NextStep">Next step</string>
     <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey">Save key</string>
     <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong">Wrong key</string>
     <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong_Desc">The indicated API key doesn\'t seem to work. Do you want to save it anyway?</string>
+    <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong_Server">A server error occurred. Do you want to save the API key anyway?</string>
     <string name="AiFeatures_AccessVia_Login_DisableS">Disable %s integration</string>
     <string name="AiFeatures_Features">Features</string>
     <string name="AiFeatures_Features_ChatContext">Chat Context</string>
+    <string name="AiFeatures_Features_ChatContext_Available">tap to see chat context</string>
+    <string name="AiFeatures_Features_AskOnPhoto">Ask on Media</string>
     <string name="AiFeatures_Features_TranslateViaGeneric">Translate…</string>
     <string name="AiFeatures_Features_TranslateVia">Translate via %s</string>
     <string name="AiFeatures_Features_TranslateAI">Translate using AI</string>
@@ -126,9 +130,19 @@
     <string name="AiFeatures_Features_TranslateAI_MoreProviders">You can configure more AI providers **here**.</string>
     <string name="AiFeatures_Features_Empty">At least one feature must be enabled to use AI features.</string>
     <string name="AiFeatures_CustomModels">Custom Models</string>
+    <string name="AiFeatures_CustomModels_Full">Custom AI Models</string>
     <string name="AiFeatures_CustomModels_Feature_UseMessages">USE LAST %d MESSAGES</string>
     <string name="AiFeatures_CustomModels_Feature_UseMessages_Defined">USE %1$s</string>
     <string name="AiFeatures_CustomModels_Feature_SelectModel">Select model</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc">Describe your question here</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Brief">Question</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Done">AI replied to your question</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Repeat">Another question</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Done_Brief">Ask to AI</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example">SUGGESTED</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example1">How many people are there?</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example2">Describe the setting</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example3">Can you sum up the content?</string>
     <string name="AiFeatures_CustomModels_Feature_CloseModal">Close AI suggestion</string>
     <string name="AiFeatures_CustomModels_Feature_UseAsText">Use as text…</string>
     <string name="AiFeatures_CustomModels_Feature_Language">Language</string>
@@ -145,12 +159,16 @@
     <string name="AiFeatures_CustomModels_Feature_Loading_3">Abracadabra… your content is coming to life!</string>
     <string name="AiFeatures_CustomModels_Feature_Loading_4">AI wizards at work… the magic is brewing!</string>
     <string name="AiFeatures_CustomModels_Feature_Loading_5">Something magical is loading… get ready!</string>
+    <string name="AiFeatures_CustomModels_Feature_Loading_Easy">Thinking…</string>
     <string name="AiFeatures_CustomModels_Feature_Failed">Generation failed.</string>
+    <string name="AiFeatures_CustomModels_Feature_Failed_Overloaded">The model is overloaded, please try again later</string>
+    <string name="AiFeatures_CustomModels_Feature_Failed_Upload">Media uploading is only supported by Gemini.</string>
     <string name="AiFeatures_CustomModels_ModelID">Model #%s</string>
     <string name="AiFeatures_CustomModels_Model_SelectAvailable">%d models available</string>
     <string name="AiFeatures_CustomModels_Model_Edit">Edit model</string>
     <string name="AiFeatures_CustomModels_Model_Clone">Clone model</string>
     <string name="AiFeatures_CustomModels_Model_Share">Share model</string>
+    <string name="AiFeatures_CustomModels_Model_Share_Text">This file contains my custom model of OctoGram. Press here to import my own configuration.</string>
     <string name="AiFeatures_CustomModels_Model_Delete">Delete model</string>
     <string name="AiFeatures_CustomModels_Model_Delete_Alert">Are you sure you want to delete the model?</string>
     <string name="AiFeatures_CustomModels_Model_Delete_Alert_Sure">Delete</string>
@@ -187,8 +205,8 @@
     <string name="AiFeatures_CustomModels_Create_ModelType_InputBox_Desc">This action will appear in the input box before sending any message.</string>
     <string name="AiFeatures_CustomModels_Create_ModelType_Chats">Related to Chats</string>
     <string name="AiFeatures_CustomModels_Create_ModelType_Chats_Desc">You can perform this action in chats by passing a specified number of messages to the AI.</string>
-    <string name="AiFeatures_CustomModels_Create_ModelType_Chats_Detailed">Chat-related templates will send the content of the last %d chat messages directly to the artificial intelligence, which will be added to the list at the end of the prompt.\n\nYou can find the templates in the context menu of each chat.</string>
-    <string name="AiFeatures_CustomModels_Create_RelatedMessages_Desc">Enable option if this custom template refers to messages and not chat.</string>
+    <string name="AiFeatures_CustomModels_Create_ModelType_Chats_Detailed">Chat-related models will send the content of the last %d messages of the chat directly to the AI, which will be added as a list at the end of the prompt.\n\nYou can find the models in the context menu of each chat.</string>
+    <string name="AiFeatures_CustomModels_Create_RelatedMessages_Desc">Enable option if this custom models refers to messages and not chat.</string>
     <string name="AiFeatures_CustomModels_Create_EditedElements">You have edited this model. Apply changes?</string>
     <string name="AiFeatures_CustomModels_Create_Duplicate">Duplicate found</string>
     <string name="AiFeatures_CustomModels_Create_Duplicate_Desc">A similar model was found among those already saved. Are you sure you want to import this model?</string>
@@ -560,6 +578,7 @@
     <string name="ImproveInterfaceSwitchOneUIOld">OneUI (old)</string>
     <string name="ImproveInterfaceSwitchOneUINew">OneUI (new)</string>
     <string name="ImproveInterfaceSwitchGoogle">Google</string>
+    <string name="ImproveInterfaceSwitchGoogleNew">Google (new)</string>
     <string name="ImproveInterfaceCheckbox">Select checkbox style</string>
     <string name="ImproveInterfaceCheckboxDefault">Default</string>
     <string name="ImproveInterfaceCheckboxRounded">Rounded</string>
@@ -770,19 +789,25 @@
     <string name="ExportDataReady">Export is ready</string>
     <string name="ExportDataDescription">Choose a custom name for the file or press share directly to send it to a trusted chat.</string>
     <string name="ExportDataFilename">Custom file name</string>
-    <string name="ExportDataShare">Share to Telegram</string>
+    <string name="ExportDataShare">Share to another chat</string>
+    <string name="ExportDataShare_SavedMessages">Save in Saved Messages</string>
     <string name="ExportDataSave">Save on this device</string>
+    <string name="ExportDataSettings_SaveData">What do you want to save?</string>
+    <string name="ExportDataSettings_Everything">Save everything</string>
+    <string name="ExportDataSettings_JustSettings">Save settings</string>
+    <string name="ExportDataSettings_JustAiModels">Save AI Models</string>
     <string name="ExportDataShareFileComment">This file contains all the settings of OctoGram. Press here to set up my own configuration.</string>
     <string name="ExportDataShareDone">Export file has been sent successfully.</string>
     <string name="ExportDataShareFailedTitle">Error</string>
     <string name="ExportDataShareFailedCustomFileName">The specified file name cannot be used. Try another name.</string>
+
+    <!-- Import -->
     <string name="ImportReady">Import settings</string>
     <string name="ImportReadyDescription">An OctoGram configuration was detected in this file. Keep in mind that this will overwrite your settings. Do you want to proceed with the import?</string>
     <string name="ImportReadyDescriptionFromExternal">This file, sent by an external user, contains a configuration of OctoGram and may activate unwanted experimental options. Are you sure you want to apply it?</string>
     <string name="ImportReadyImport">Proceed with import</string>
     <string name="ImportReadyImportSecureContext">This option contains some privacy and security settings regarding your app. Some parts, such as saved messages, may be restricted by fingerprint authentication. Do you want to import them?</string>
     <string name="ImportReadyImportSelected">Import selected</string>
-    <string name="ImportReadyOtherOptions">Another %d unspecified options will be imported automatically.</string>
     <string name="ImportReadyImportDone">%d options have been imported successfully. Restart the app to complete the transfer.</string>
     <string name="ImportReadyImportDonePopup">To complete…</string>
     <string name="ImportReadyImportFailedZeroTitle">Error</string>

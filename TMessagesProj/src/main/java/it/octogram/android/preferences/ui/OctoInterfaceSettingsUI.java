@@ -130,7 +130,11 @@ public class OctoInterfaceSettingsUI implements PreferencesEntry {
                                     new PopupChoiceDialogOption()
                                             .setId(InterfaceSwitchUI.GOOGLE.getValue())
                                             .setItemSwitchIconUI(InterfaceSwitchUI.GOOGLE)
-                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchGoogle))
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchGoogle)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.GOOGLE_NEW.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.GOOGLE_NEW)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchGoogleNew))
                             ))
                             .onSelected(() -> reloadUI(fragment))
                             .currentValue(OctoConfig.INSTANCE.interfaceSwitchUI)

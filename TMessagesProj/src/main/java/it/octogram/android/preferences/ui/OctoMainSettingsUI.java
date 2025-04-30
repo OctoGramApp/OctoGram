@@ -23,13 +23,13 @@ import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
 import org.telegram.ui.Components.ChatAttachAlert;
@@ -57,11 +57,11 @@ import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
-import it.octogram.android.preferences.ui.components.CrashManagementComponent;
 import it.octogram.android.preferences.ui.custom.ExportDoneReadyBottomSheet;
 import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.chat.FileShareHelper;
 import it.octogram.android.utils.data.LogsMigrator;
 
 /** @noinspection SequencedCollectionMethodCanBeUsed*/
@@ -164,7 +164,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                             .title(getString(R.string.ImportReady))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> openResetSettingsProcedure(context))
+                            .onClick(() -> openResetSettingsProcedure(fragment, context))
                             .icon(R.drawable.msg_reset)
                             .title(getString(R.string.ResetSettings))
                             .build());
@@ -202,7 +202,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
     }
 
     private void openExportSettingsProcedure(PreferencesFragment fragment, Context context) {
-        var bottomSheet = new ExportDoneReadyBottomSheet(context, fragment.getParentActivity(), fragment);
+        var bottomSheet = new ExportDoneReadyBottomSheet(context, fragment);
         bottomSheet.show();
     }
 
@@ -261,6 +261,11 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
         startImportActivity(firstFile);
     }
 
+    static int saveDataStateCache = ExportDoneReadyBottomSheet.SaveDataState.SAVE_EVERYTHING;
+    public static void setSaveDataStateCache(int saveDataStateCache1) {
+        saveDataStateCache = saveDataStateCache1;
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ExportDoneReadyBottomSheet.CREATE_FILE_REQ && data != null) {
@@ -269,7 +274,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                 try {
                     OutputStream outputStream = ApplicationLoader.applicationContext.getContentResolver().openOutputStream(uri);
                     if (outputStream != null) {
-                        outputStream.write(ExportDoneReadyBottomSheet.createOctoExport().toString().getBytes());
+                        outputStream.write(ExportDoneReadyBottomSheet.createOctoExport(saveDataStateCache).toString().getBytes());
                         outputStream.close();
                     }
                 } catch (IOException e) {
@@ -308,11 +313,11 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
         }
     }
 
-    private void openResetSettingsProcedure(Context context) {
-        openResetSettingsProcedure(context, false);
+    private void openResetSettingsProcedure(BaseFragment fragment, Context context) {
+        openResetSettingsProcedure(fragment, context, false);
     }
 
-    public static void openResetSettingsProcedure(Context context, boolean resetExperimentalSettings) {
+    public static void openResetSettingsProcedure(BaseFragment fragment, Context context, boolean resetExperimentalSettings) {
         boolean[] saveBackup = {false};
 
         FrameLayout frameLayout = new FrameLayout(context);
@@ -337,21 +342,33 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
             progressDialog.show();
 
             if (saveBackup[0]) {
-                ExportDoneReadyBottomSheet instance = new ExportDoneReadyBottomSheet(context, null, null);
-                instance.setOnCompletedRunnable(() -> completeReset(context, resetExperimentalSettings));
-                instance.setOnFailedRunnable(() -> {
-                    progressDialog.dismiss();
-                    warningBuilder.getDismissRunnable().run();
+                FileShareHelper.FileShareData data = new FileShareHelper.FileShareData();
+                data.fileName = "default-config";
+                data.fileExtension = OctoConfig.OCTOEXPORT_EXTENSION;
+                data.fileContent = ExportDoneReadyBottomSheet.createOctoExport(ExportDoneReadyBottomSheet.SaveDataState.SAVE_EVERYTHING);
+                data.fragment = fragment;
+                data.shareToSavedMessages = true;
+                data.caption = getString(R.string.ExportDataShareFileComment);
+                data.delegate = new FileShareHelper.FileShareData.FileShareDelegate() {
+                    @Override
+                    public void onSuccess() {
+                        completeReset(context, resetExperimentalSettings);
+                    }
 
-                    AlertDialog.Builder errorBuilder = new AlertDialog.Builder(context);
-                    errorBuilder.setTitle(getString(R.string.Warning));
-                    errorBuilder.setPositiveButton(getString(R.string.OK), null);
-                    errorBuilder.setMessage(getString(R.string.ResetSettingsBackupFailed));
-                    AlertDialog alertDialog = errorBuilder.create();
-                    alertDialog.show();
-                });
-                instance.shareExport("");
+                    @Override
+                    public void onFailed() {
+                        progressDialog.dismiss();
+                        warningBuilder.getDismissRunnable().run();
 
+                        AlertDialog.Builder errorBuilder = new AlertDialog.Builder(context);
+                        errorBuilder.setTitle(getString(R.string.Warning));
+                        errorBuilder.setPositiveButton(getString(R.string.OK), null);
+                        errorBuilder.setMessage(getString(R.string.ResetSettingsBackupFailed));
+                        AlertDialog alertDialog = errorBuilder.create();
+                        alertDialog.show();
+                    }
+                };
+                FileShareHelper.init(data);
                 return;
             }
 

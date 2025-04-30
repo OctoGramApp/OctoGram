@@ -2,7 +2,7 @@
 
 <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
     android:accountType="it.octogram.android"
-    android:icon="@mipmap/ic_launcher_round"
-    android:smallIcon="@mipmap/ic_launcher_round"
+    android:icon="@mipmap/ic_launcher_new"
+    android:smallIcon="@mipmap/ic_launcher_new"
     android:label="@string/AppName"
     android:accountPreferences="@xml/auth_menu"/>

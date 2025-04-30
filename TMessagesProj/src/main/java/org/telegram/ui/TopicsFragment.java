@@ -751,7 +751,7 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                         break;
                     case lock_chat:
                     case unlock_chat:
-                        if (FingerprintUtils.hasFingerprint()) {
+                        if (FingerprintUtils.hasFingerprintCached()) {
                             FingerprintUtils.lockChat(-chatId, id == lock_chat);
                             lockChatSubMenu.setVisibility(id == lock_chat ? View.GONE : View.VISIBLE);
                             unlockChatSubMenu.setVisibility(id == unlock_chat ? View.GONE : View.VISIBLE);
@@ -2604,7 +2604,7 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
         updateCreateTopicButton(true);
         groupCall = getMessagesController().getGroupCall(chatId, true);
 
-        boolean canLock = FingerprintUtils.hasFingerprint();
+        boolean canLock = FingerprintUtils.hasFingerprintCached();
         boolean isLocked = FingerprintUtils.isChatLocked(-chatId);
         lockChatSubMenu.setVisibility(canLock && !isLocked ? View.VISIBLE : View.GONE);
         unlockChatSubMenu.setVisibility(canLock && isLocked ? View.VISIBLE : View.GONE);

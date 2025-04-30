@@ -11,9 +11,10 @@ package it.octogram.android.preferences.ui.custom;
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.getString;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.os.Vibrator;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -21,70 +22,59 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.collection.LongSparseArray;
 import androidx.core.graphics.ColorUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.ConnectionsManager;
-import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CodepointsLengthInputFilter;
-import org.telegram.ui.Components.EditTextBoldCursor;
+import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.ShareAlert;
+import org.telegram.ui.Components.OutlineEditText;
 import org.telegram.ui.Components.StickerImageView;
+import org.telegram.ui.LaunchActivity;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Objects;
-
-import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.preferences.ui.OctoMainSettingsUI;
+import it.octogram.android.utils.chat.FileShareHelper;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
-public class ExportDoneReadyBottomSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
-    private static final String TAG = "ExportDoneReadyBottomSheet";
+public class ExportDoneReadyBottomSheet extends BottomSheet {
     public static final int CREATE_FILE_REQ = 300;
-    private final Activity originalActivity;
     private final BaseFragment baseFragment;
-    private final EditTextBoldCursor editText;
-    private static final ImportSettingsScanHelper settingsScan = new ImportSettingsScanHelper();
+    private final OutlineEditText inputElement;
+    private final ImageView configButton;
 
-    private String sharingFullLocation;
-    private String sharingFileName;
-    private LongSparseArray<TLRPC.Dialog> sharingDid = new LongSparseArray<>();
+    public interface SaveDataState {
+        int SAVE_EVERYTHING = 0;
+        int SAVE_SETTINGS = 1;
+        int SAVE_MODELS = 2;
+    }
+    private int saveDataState = SaveDataState.SAVE_EVERYTHING;
 
-    private Runnable onCompletedRunnable;
-    private Runnable onFailedRunnable;
-
-    public ExportDoneReadyBottomSheet(Context context, Activity originalActivity, BaseFragment baseFragment) {
+    public ExportDoneReadyBottomSheet(Context context, BaseFragment baseFragment) {
         super(context, true);
         setApplyBottomPadding(false);
         setApplyTopPadding(false);
 
-        this.originalActivity = originalActivity;
         this.baseFragment = baseFragment;
 
         LinearLayout linearLayout = new LinearLayout(context);
@@ -113,161 +103,172 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        editText = new EditTextBoldCursor(context);
-        editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-        editText.setHintTextColor(getThemedColor(Theme.key_windowBackgroundWhiteHintText));
-        editText.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
-        editText.setMaxLines(1);
-        editText.setLines(1);
-        editText.setPadding(0, 0, 0, 0);
-        editText.setSingleLine(true);
-        editText.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
-        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        editText.setHint(getString(R.string.ExportDataFilename));
-        editText.setCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setCursorSize(dp(20));
-        editText.setCursorWidth(1.5f);
+        inputElement = new OutlineEditText(context);
+        inputElement.getEditText().setMinHeight(AndroidUtilities.dp(58));
+        inputElement.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+        inputElement.getEditText().setMaxLines(1);
+        inputElement.setHint(getString(R.string.ExportDataFilename));
+
         InputFilter[] inputFilters = new InputFilter[1];
         inputFilters[0] = new CodepointsLengthInputFilter(40) {
             @Override
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dStart, int dEnd) {
                 if (source != null && !TextUtils.isEmpty(source) && TextUtils.indexOf(source, '\n') == source.length() - 1) {
-                    shareExport(editText.getText().toString().trim());
                     return "";
                 }
                 CharSequence result = super.filter(source, start, end, dest, dStart, dEnd);
                 if (result != null && source != null && result.length() != source.length()) {
-                    Vibrator v = (Vibrator) originalActivity.getSystemService(Context.VIBRATOR_SERVICE);
-                    if (v != null) {
-                        v.vibrate(200);
-                    }
-                    AndroidUtilities.shakeView(editText);
+                    shakeEditText();
                 }
                 return result;
             }
         };
-        editText.setFilters(inputFilters);
-        editText.setOnEditorActionListener((currentTextView, i, keyEvent) -> {
+        inputElement.getEditText().setFilters(inputFilters);
+        inputElement.getEditText().setOnEditorActionListener((currentTextView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_DONE) {
-                shareExport(editText.getText().toString().trim());
+                AndroidUtilities.hideKeyboard(inputElement.getEditText());
                 return true;
             }
             return false;
         });
-        linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 17, 15, 17, 0));
+        linearLayout.addView(inputElement, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 58, Gravity.LEFT | Gravity.TOP, 17, 7, 17, 7));
+
+        FrameLayout buttonView = new FrameLayout(context);
+        buttonView.setBackgroundColor(getThemedColor(Theme.key_dialogBackground));
 
         TextView buttonTextView = new TextView(context);
         buttonTextView.setPadding(dp(34), 0, dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         buttonTextView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(getString(R.string.ExportDataShare));
+        buttonTextView.setText(getString(R.string.ExportDataShare_SavedMessages));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
-        buttonTextView.setOnClickListener(view -> shareExport(editText.getText().toString().trim()));
-        linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
+        buttonTextView.setOnClickListener(view -> shareExport(true));
+        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16+48+8, 16));
 
-        TextView saveTextView = new TextView(context);
-        saveTextView.setGravity(Gravity.CENTER);
-        saveTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        saveTextView.setText(getString(R.string.ExportDataSave));
-        saveTextView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
-        saveTextView.setOnClickListener(view -> {
-            dismiss();
-            saveFileLocally(editText.getText().toString().trim());
-        });
-        linearLayout.addView(saveTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 8));
+        configButton = new ImageView(context);
+        configButton.setScaleType(ImageView.ScaleType.CENTER);
+        configButton.setImageResource(R.drawable.msg_download_settings);
+        configButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
+        configButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
+        configButton.setOnClickListener(v -> openConfig());
+        buttonView.addView(configButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16, 16));
+
+        linearLayout.addView(buttonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
 
         setCustomView(linearLayout);
     }
 
-    @Override
-    public void onDismissAnimationStart() {
-        stopUpdateReceiver();
-    }
-
-    public void setOnCompletedRunnable(Runnable onCompletedRunnable) {
-        this.onCompletedRunnable = onCompletedRunnable;
-    }
-
-    public void setOnFailedRunnable(Runnable onFailedRunnable) {
-        this.onFailedRunnable = onFailedRunnable;
-    }
-
-    public void shareExport(String fileNameText) {
-        if (isFileNameInvalid(fileNameText)) {
-            return;
+    private void shakeEditText() {
+        if (inputElement != null) {
+            AndroidUtilities.shakeView(inputElement);
+            Vibrator v = (Vibrator) LaunchActivity.instance.getSystemService(Context.VIBRATOR_SERVICE);
+            if (v != null) {
+                v.vibrate(200);
+            }
         }
+    }
 
-        if (baseFragment != null) {
-            dismiss();
-        }
+    private void openConfig() {
+        ItemOptions options = ItemOptions.makeOptions(containerView, null, configButton, true);
+        options.setGravity(Gravity.RIGHT);
+        options.forceBottom(true);
 
-        try {
-            JSONObject mainObject = createOctoExport();
+        if (!CustomModelsHelper.getModelsList().isEmpty()) {
+            TextView[] mainSubTextView = {null};
 
-            File cacheDir = AndroidUtilities.getCacheDir();
-            if (fileNameText.isEmpty()) {
-                fileNameText = "my-octogram-export";
+            final ItemOptions whatToSaveScrollback = options.makeSwipeback();
+            whatToSaveScrollback.add(R.drawable.ic_ab_back, getString(R.string.Back), options::closeSwipeback);
+            for (int i = 0; i <= SaveDataState.SAVE_MODELS; i++) {
+                int finalI = i;
+                whatToSaveScrollback.addChecked(saveDataState == i, getString(getCorrespondingSaveDataString(i)), () -> {
+                    saveDataState = finalI;
+                    if (mainSubTextView[0] != null) {
+                        mainSubTextView[0].setText(getString(getCorrespondingSaveDataString(finalI)));
+                        options.closeSwipeback();
+                    } else {
+                        options.dismiss();
+                    }
+                });
             }
 
-            File cacheFile = new File(cacheDir.getPath(), fileNameText + OctoConfig.OCTOEXPORT_EXTENSION);
-            if (cacheFile.exists()) {
-                if(cacheFile.delete()) {
-                    OctoLogging.d(TAG, "Deleted existing file");
+            options.add(getString(R.string.ExportDataSettings_SaveData), getString(getCorrespondingSaveDataString(saveDataState)), () -> options.openSwipeback(whatToSaveScrollback));
+
+            View lastChild = options.getLastLayout().getItemAt(options.getLastLayout().getItemsCount() - 1);
+            if (lastChild instanceof ActionBarMenuSubItem) {
+                TextView subtextView = ((ActionBarMenuSubItem) lastChild).subtextView;
+                if (subtextView != null) {
+                    mainSubTextView[0] = subtextView;
+                    subtextView.setPadding(0, 0, 0, 0);
                 }
             }
 
-            FileOutputStream fos = new FileOutputStream(cacheFile);
-            if (BuildConfig.DEBUG) {
-                fos.write(mainObject.toString(4).getBytes());
-            } else {
-                fos.write(mainObject.toString().getBytes());
-            }
-            fos.close();
-
-            sharingFileName = cacheFile.getName();
-            sharingFullLocation = cacheFile.getAbsolutePath();
-            FileLoader instance = FileLoader.getInstance(UserConfig.selectedAccount);
-
-            if (baseFragment == null) {
-                long userID = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
-                TLRPC.Dialog dialog = MessagesController.getInstance(UserConfig.selectedAccount).getDialog(userID);
-                sharingDid.append(userID, dialog);
-                initUpdateReceiver();
-                instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
-            } else {
-                ShareAlert shAlert = new ShareAlert(baseFragment.getParentActivity(), null, null, false, null, false, true) {
-
-                    @Override
-                    protected void onSend(LongSparseArray<TLRPC.Dialog> did, int count, TLRPC.TL_forumTopic topic, boolean showToast) {
-                        sharingDid = did;
-                        if (!showToast) return;
-                        super.onSend(sharingDid, count, topic, showToast);
-
-                        initUpdateReceiver();
-                        instance.uploadFile(cacheFile.getPath(), false, true, ConnectionsManager.FileTypeFile);
-                    }
-                };
-                baseFragment.showDialog(shAlert);
-            }
-        } catch (JSONException e) {
-            OctoLogging.e(getClass().getName(), "Error sharing settings export", e);
-        } catch (IOException e) {
-            OctoLogging.e(getClass().getName(), "Error generating settings export", e);
+            options.addGap();
         }
+
+        options.add(R.drawable.msg_share, getString(R.string.ExportDataShare), () -> shareExport(false));
+        options.add(R.drawable.media_download, getString(R.string.ExportDataSave), this::saveFileLocally);
+        if (LocaleController.isRTL) {
+            options.setGravity(Gravity.LEFT);
+        }
+        options.setDimAlpha(0);
+        options.show();
     }
 
-    private void saveFileLocally(String fileNameText) {
-        if (isFileNameInvalid(fileNameText)) {
+    private int getCorrespondingSaveDataString(int state) {
+        return switch(state) {
+            case SaveDataState.SAVE_SETTINGS -> R.string.ExportDataSettings_JustSettings;
+            case SaveDataState.SAVE_MODELS -> R.string.ExportDataSettings_JustAiModels;
+            default -> R.string.ExportDataSettings_Everything;
+        };
+    }
+
+    public void shareExport(boolean shareToSavedMessages) {
+        String fileNameText = inputElement.getEditText().getText().toString().trim();
+        if (fileNameText.isEmpty()) {
+            fileNameText = "default-config";
+        }
+
+        FileShareHelper.FileShareData data = new FileShareHelper.FileShareData();
+        data.fileName = fileNameText;
+        data.fileExtension = OctoConfig.OCTOEXPORT_EXTENSION;
+        data.fileContent = createOctoExport(saveDataState);
+        data.fragment = baseFragment;
+        data.caption = getString(R.string.ExportDataShareFileComment);
+        data.delegate = new FileShareHelper.FileShareData.FileShareDelegate() {
+            @Override
+            public void onChatSelectSheetOpen() {
+                dismiss();
+            }
+
+            @Override
+            public void onSuccess() {
+                AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, getString(R.string.ExportDataShareDone)).show());
+            }
+
+            @Override
+            public void onInvalidName() {
+                shakeEditText();
+            }
+        };
+        data.shareToSavedMessages = shareToSavedMessages;
+        FileShareHelper.init(data);
+    }
+
+    private void saveFileLocally() {
+        String fileNameText = inputElement.getEditText().getText().toString().trim();
+        if (fileNameText.isEmpty()) {
+            fileNameText = "default-config";
+        }
+
+        if (FileShareHelper.isInvalidName(fileNameText)) {
+            shakeEditText();
             return;
         }
 
-        if (fileNameText.isEmpty()) {
-            fileNameText = "my-octogram-export";
-        }
+        dismiss();
+        OctoMainSettingsUI.setSaveDataStateCache(saveDataState);
 
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -276,115 +277,33 @@ public class ExportDoneReadyBottomSheet extends BottomSheet implements Notificat
         baseFragment.startActivityForResult(intent, CREATE_FILE_REQ);
     }
 
-    private boolean isFileNameInvalid(String fileNameText) {
-        if (fileNameText.contains("/") || fileNameText.length() > 40) {
-            if (baseFragment != null) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-                alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportFailedZeroTitle));
-                alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportFailedZeroCaption));
-                alertDialogBuilder.setPositiveButton(getString(R.string.OK), null);
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    public static JSONObject createOctoExport() {
+    public static JSONObject createOctoExport(int saveDataState) {
         JSONObject mainObject = new JSONObject();
 
-        for (Field field : OctoConfig.INSTANCE.getClass().getDeclaredFields()) {
-            if (field.getType().equals(ConfigProperty.class)) {
-                try {
-                    ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
-
-                    if (configProperty != null) {
-                        if (settingsScan.excludedOptions.contains(configProperty.getKey())) {
-                            continue;
-                        }
-
-                        mainObject.put(configProperty.getKey(), configProperty.getValue());
+        if (saveDataState <= 1) {
+            for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    if (ImportSettingsScanHelper.INSTANCE.excludedOptions.contains(option.property.getKey())) {
+                        continue;
                     }
-                } catch (JSONException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
+
+                    try {
+                        mainObject.put(option.property.getKey(), option.property.getValue());
+                    } catch (JSONException ignored) {}
                 }
             }
         }
 
-        return mainObject;
-    }
-
-    private void initUpdateReceiver() {
-        NotificationCenter.getInstance(UserConfig.selectedAccount).addObserver(this, NotificationCenter.fileUploaded);
-        NotificationCenter.getInstance(UserConfig.selectedAccount).addObserver(this, NotificationCenter.fileUploadFailed);
-    }
-
-    private void stopUpdateReceiver() {
-        NotificationCenter.getInstance(UserConfig.selectedAccount).removeObserver(this, NotificationCenter.fileUploaded);
-        NotificationCenter.getInstance(UserConfig.selectedAccount).removeObserver(this, NotificationCenter.fileUploadFailed);
-    }
-
-    @Override
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (id == NotificationCenter.fileUploaded) {
-            String location = (String) args[0];
-            TLRPC.InputFile inputFile = (TLRPC.InputFile) args[1];
-
-            if (inputFile == null) {
-                return;
+        if (saveDataState == SaveDataState.SAVE_MODELS || saveDataState == SaveDataState.SAVE_EVERYTHING) {
+            JSONArray array = new JSONArray();
+            for (CustomModelsHelper.CustomModel model : CustomModelsHelper.getModelsList().values()) {
+                array.put(model.convertAsObject());
             }
-
-            if (!Objects.equals(location, sharingFullLocation)) {
-                return;
-            }
-
-            stopUpdateReceiver();
-
-            if (baseFragment != null) {
-                AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(baseFragment).createSimpleBulletin(R.raw.forward, getString(R.string.ExportDataShareDone)).show());
-            }
-
-            TLRPC.TL_documentAttributeFilename attr = new TLRPC.TL_documentAttributeFilename();
-            attr.file_name = sharingFileName;
-
-            TLRPC.TL_inputMediaUploadedDocument inputMediaDocument = new TLRPC.TL_inputMediaUploadedDocument();
-            inputMediaDocument.file = inputFile;
-            inputMediaDocument.attributes.add(attr);
-            inputMediaDocument.mime_type = OctoConfig.EXPORT_BACKUP_MIME_TYPE;
-
-            StringBuilder baseInfo = new StringBuilder();
-            baseInfo.append(LocaleController.getInstance().getFormatterFull().format(System.currentTimeMillis()));
-            baseInfo.append("\n");
-            baseInfo.append(getString(R.string.ExportDataShareFileComment));
-
-            for (int i = 0; i < sharingDid.size(); i++) {
-                TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
-                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(sharingDid.keyAt(i));
-                req.random_id = SendMessagesHelper.getInstance(currentAccount).getNextRandomId();
-                req.message = baseInfo.toString();
-                req.silent = false;
-                req.invert_media = true;
-                req.media = inputMediaDocument;
-                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
-            }
-
-            if (onCompletedRunnable != null) {
-                onCompletedRunnable.run();
-            }
-        } else if (id == NotificationCenter.fileUploadFailed) {
-            String location = (String) args[0];
-
-            if (!Objects.equals(location, sharingFullLocation)) {
-                return;
-            }
-
-            stopUpdateReceiver();
-
-            if (onFailedRunnable != null) {
-                onFailedRunnable.run();
-            }
+            try {
+                mainObject.put("ai_models", array);
+            } catch (JSONException ignored) {}
         }
+
+        return mainObject;
     }
 }

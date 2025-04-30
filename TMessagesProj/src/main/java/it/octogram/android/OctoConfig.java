@@ -30,13 +30,13 @@ import org.telegram.ui.LaunchActivity;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import it.octogram.android.ai.helper.CustomModelsHelper;
 import it.octogram.android.ai.openrouter.OpenRouterModels;
 import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.drawer.MenuOrderController;
@@ -44,6 +44,7 @@ import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.DoubleBottomMigrationBottomSheet;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
+import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
 @SuppressWarnings("unchecked")
 public class OctoConfig {
@@ -256,7 +257,7 @@ public class OctoConfig {
 
     /*AI Features */
     public final ConfigProperty<Boolean> aiFeatures = newConfigProperty("aiFeatures", false);
-    public final ConfigProperty<Boolean> translatorAcceptedTerms = newConfigProperty("translatorAcceptedTerms", false);
+    public final ConfigProperty<Boolean> aiFeaturesAcceptedTerms = newConfigProperty("aiFeaturesAcceptedTerms", false);
     public final ConfigProperty<Boolean> aiFeaturesUseGoogleAPIs = newConfigProperty("aiFeaturesUseGoogleAPIs", false);
     public final ConfigProperty<String> aiFeaturesUseGoogleAPIKey = newConfigProperty("aiFeaturesUseGoogleAPIKey", "");
     public final ConfigProperty<Boolean> aiFeaturesUseChatGPTAPIs = newConfigProperty("aiFeaturesUseChatGPTAPIs", false);
@@ -267,6 +268,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> aiFeaturesRecentProvider = newConfigProperty("aiFeaturesRecentProvider", -1);
     public final ConfigProperty<Boolean> aiFeaturesTranslateMessages = newConfigProperty("aiFeaturesTranslateMessages", true);
     public final ConfigProperty<Boolean> aiFeaturesChatContext = newConfigProperty("aiFeaturesChatContext", true);
+    public final ConfigProperty<Boolean> aiFeaturesAskOnMedia = newConfigProperty("aiFeaturesAskOnMedia", true);
     public final ConfigProperty<String> aiFeaturesCustomModels = newConfigProperty("aiFeaturesCustomModels", "[]");
 
     public final ConfigProperty<String> aiFeaturesLastUsedLanguage = newConfigProperty("aiFeaturesLastUsedLanguage", "");
@@ -504,44 +506,87 @@ public class OctoConfig {
     }
 
     private boolean isJSONArrayValidData(JSONObject result) {
+        ArrayList<ConfigProperty<?>> availableProperties = new ArrayList<>();
+        for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
+            for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                if (option.property.getKey() != null) {
+                    availableProperties.add(option.property);
+                }
+            }
+        }
+
+        boolean hasValidKeys = false;
+
         for (Iterator<String> it = result.keys(); it.hasNext(); ) {
             try {
                 String key = it.next();
                 Object value = result.get(key);
 
-                if (!(value instanceof String || value instanceof Integer || value instanceof Boolean)) {
-                    return false;
+                if (key.equals("ai_models")) {
+                    if (!(value instanceof JSONArray array)) {
+                        return false;
+                    }
+                    if (!isValueValid(key, array)) {
+                        return false;
+                    }
+                    if (array.length() > 0) {
+                        hasValidKeys = true;
+                    }
+                    continue;
                 }
+
+                boolean found = false;
+                for (ConfigProperty<?> property : availableProperties) {
+                    if (property.getKey() != null && property.getKey().equals(key)) {
+                        found = true;
+                        if (!property.getValue().getClass().equals(value.getClass())) {
+                            return false;
+                        }
+                    }
+                }
+
+                if (found) {
+                    if (value instanceof Integer i && !isValueValid(key, i)) {
+                        OctoLogging.d(TAG, "failed to import " + key + " as integer value is invalid");
+                        return false;
+                    }
+                    if (value instanceof String s && !isValueValid(key, s)) {
+                        OctoLogging.d(TAG, "failed to import " + key + " as string value is invalid");
+                        return false;
+                    }
+                    hasValidKeys = true;
+                }
+
             } catch (JSONException e) {
                 OctoLogging.e(TAG, "failed to handle isJSONArrayValidData OctoConfig", e);
             }
         }
 
-        return true;
+        return hasValidKeys;
     }
 
-    public int importMessageExport(MessageObject message, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
+    public int importMessageExport(MessageObject message, ArrayList<String> dataToImport) {
         File downloadedFile = OctoUtils.getFileContentFromMessage(message);
         int changed = 0;
 
         if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
-            changed = completeMessageExport(downloadedFile, dataToImport, excludedOptionsByConfig);
+            changed = completeMessageExport(downloadedFile, dataToImport);
         }
 
         return changed;
     }
 
-    public int importFileExport(File file, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
+    public int importFileExport(File file, ArrayList<String> dataToImport) {
         int changed = 0;
 
         if (file.exists() && file.isFile() && file.getName().endsWith(OctoConfig.OCTOEXPORT_EXTENSION) && file.length() <= 1024 * 30) {
-            changed = completeMessageExport(file, dataToImport, excludedOptionsByConfig);
+            changed = completeMessageExport(file, dataToImport);
         }
 
         return changed;
     }
 
-    private int completeMessageExport(File file, ArrayList<String> dataToImport, ArrayList<String> excludedOptionsByConfig) {
+    private int completeMessageExport(File file, ArrayList<String> dataToImport) {
         int changed = 0;
 
         try (FileInputStream downloadedFileStream = new FileInputStream(file)) {
@@ -556,61 +601,57 @@ public class OctoConfig {
             JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
 
             if (isJSONArrayValidData(result)) {
-                for (Field field : this.getClass().getDeclaredFields()) {
-                    if (field.getType().equals(ConfigProperty.class)) {
-                        try {
-                            ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
-                            if (configProperty == null) {
-                                continue;
-                            }
-
-                            String fieldName = configProperty.getKey();
-                            Object fieldValue = configProperty.getValue();
-
-                            if (fieldName == null || fieldValue == null || !result.has(fieldName) || !dataToImport.contains(fieldName) || excludedOptionsByConfig.contains(fieldName)) {
-                                continue;
-                            }
-
-                            if (result.get(fieldName).getClass().equals(fieldValue.getClass())) {
+                for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
+                    for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                        if (option.property.getKey() != null && dataToImport.contains(option.property.getKey()) && result.has(option.property.getKey())) {
+                            Object value = result.get(option.property.getKey());
+                            if (option.property.getValue() instanceof Boolean && value instanceof Boolean v) {
+                                ((ConfigProperty<Boolean>) option.property).updateValue(v);
                                 changed++;
-
-                                if (fieldValue == result.get(fieldName) && !BuildConfig.DEBUG_PRIVATE_VERSION) {
-                                    // в целях отладки, например, чтобы проверить правильность условий для целого числа/строки,
-                                    // мы принудительно импортируем, даже если текущее установленное значение идентично значению экспорта
+                            } else if (option.property.getValue() instanceof Integer && value instanceof Integer i) {
+                                if (!isValueValid(option.property.getKey(), i)) {
+                                    OctoLogging.d(TAG, "failed to import " + option.property.getKey() + " as integer value is invalid");
                                     continue;
                                 }
 
-                                var exportFileSettingsValue = result.get(fieldName);
-                                //noinspection IfCanBeSwitch
-                                if (exportFileSettingsValue instanceof Boolean b) {
-                                    ConfigProperty.updateValue((ConfigProperty<Boolean>) configProperty, b);
-                                } else if (exportFileSettingsValue instanceof Integer i) {
-                                    if (!isValueValid(fieldName, i)) {
-                                        OctoLogging.d(TAG, "failed to import " + fieldName + " as integer value is invalid");
-                                        continue;
-                                    }
-
-                                    ConfigProperty.updateValue((ConfigProperty<Integer>) configProperty, i);
-                                } else if (exportFileSettingsValue instanceof String s) {
-                                    if (!isValueValid(fieldName, s)) {
-                                        OctoLogging.d(TAG, "failed to import " + fieldName + " as string value is invalid");
-                                        continue;
-                                    }
-
-                                    ConfigProperty.updateValue((ConfigProperty<String>) configProperty, reparseStringValue(fieldName, s));
+                                ((ConfigProperty<Integer>) option.property).updateValue(i);
+                                changed++;
+                            } else if (option.property.getValue() instanceof String && value instanceof String s) {
+                                if (!isValueValid(option.property.getKey(), s)) {
+                                    OctoLogging.d(TAG, "failed to import " + option.property.getKey() + " as string value is invalid");
+                                    continue;
                                 }
+
+                                ((ConfigProperty<String>) option.property).updateValue(reparseStringValue(option.property.getKey(), s));
+                                changed++;
+                            } else if (option.property.getValue() instanceof String && value instanceof JSONArray a) {
+                                OctoLogging.e(TAG, "test parsjsong: "+a);
                             }
-                        } catch (JSONException e) {
-                            OctoLogging.e(TAG, "Error validating put-settings export", e);
-                        } catch (IllegalAccessException e) {
-                            OctoLogging.e(TAG, "Error getting settings export", e);
                         }
                     }
                 }
 
-                if (!OctoConfig.INSTANCE.experimentsEnabled.getValue()) {
-                    OctoConfig.INSTANCE.experimentsEnabled.updateValue(true);
-                    // force enable experiments after import
+                if (dataToImport.contains("ai_models") && result.has("ai_models")) {
+                    try {
+                        JSONArray array = result.getJSONArray("ai_models");
+                        if (isValueValid("ai_models", array)) {
+                            CustomModelsHelper.freezeSaving();
+                            JSONObject object = new JSONObject();
+                            for (int i = 0; i < array.length(); i++) {
+                                try {
+                                    object.put(OctoUtils.generateRandomString().replace("-", ""), array.getJSONObject(i));
+                                } catch (JSONException ignored) {}
+                            }
+                            OctoConfig.INSTANCE.aiFeaturesCustomModels.updateValue(object.toString());
+                        }
+                    } catch (JSONException ignored) {}
+                    changed++;
+                }
+
+                OctoConfig.INSTANCE.experimentsEnabled.updateValue(true);
+
+                if (OctoConfig.INSTANCE.aiFeatures.getValue()) {
+                    OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
                 }
 
                 MenuOrderController.reloadConfig();
@@ -628,13 +669,13 @@ public class OctoConfig {
         return switch (fieldName) {
             case "blurEffectStrength" -> isValidInRange(value, 0, 255);
             case "cameraXResolution" ->
-                    isValidInRange(value, CameraXResolution.SD, CameraXResolution.MAX);
+                    isValidInRange(value, -1, 4096);
             case "dcIdStyle" ->
                     isValidInRange(value, DcIdStyle.NONE.getValue(), DcIdStyle.MINIMAL.getValue());
             case "dcIdType" ->
                     value == DcIdType.BOT_API.getValue() || value == DcIdType.TELEGRAM.getValue();
             case "doubleTapAction", "doubleTapActionOut" ->
-                    isValidInRange(value, DoubleTapAction.DISABLED.getValue(), DoubleTapAction.EDIT.getValue());
+                    isValidInRange(value, DoubleTapAction.DISABLED.getValue(), DoubleTapAction.TRANSLATE.getValue());
             case "downloadBoostValue" ->
                     isValidInRange(value, DownloadBoost.NORMAL.getValue(), DownloadBoost.EXTREME.getValue());
             case "eventType" ->
@@ -658,7 +699,7 @@ public class OctoConfig {
             case "stickerShape" ->
                     isValidInRange(value, StickerShape.DEFAULT.getValue(), StickerShape.MESSAGE.getValue());
             case "drawerBackground" ->
-                    isValidInRange(value, DrawerBackgroundState.WALLPAPER.getValue(), DrawerBackgroundState.COLOR.getValue());
+                    isValidInRange(value, DrawerBackgroundState.WALLPAPER.getValue(), DrawerBackgroundState.PREMIUM_DETAILS.getValue());
             case "drawerFavoriteOption" ->
                     isValidInRange(value, DrawerFavoriteOption.NONE.getValue(), DrawerFavoriteOption.ARCHIVED_CHATS.getValue());
             case "drawerBlurBackgroundLevel" -> isValidInRange(value, 1, 100);
@@ -680,7 +721,7 @@ public class OctoConfig {
             case "interfaceSliderUI" ->
                     isValidInRange(value, InterfaceSliderUI.DEFAULT.getValue(), InterfaceSliderUI.ANDROID.getValue());
             case "interfaceSwitchUI" ->
-                    isValidInRange(value, InterfaceSwitchUI.DEFAULT.getValue(), InterfaceSwitchUI.GOOGLE.getValue());
+                    isValidInRange(value, InterfaceSwitchUI.DEFAULT.getValue(), InterfaceSwitchUI.GOOGLE_NEW.getValue());
             case "tabStyle" ->
                     isValidInRange(value, TabStyle.DEFAULT.getValue(), TabStyle.FULL.getValue());
             case "uiIconsType" ->
@@ -694,6 +735,8 @@ public class OctoConfig {
             case "useQualityPreset" ->
                     isValidInRange(value, QualityPreset.AUTO.getValue(), QualityPreset.DYNAMIC.getValue());
             case "biometricAskEvery" -> isValidInRange(value, 0, 300);
+            case "rapidActionsMainButtonAction", "rapidActionsMainButtonActionLongPress", "rapidActionsSecondaryButtonAction" ->
+                    isValidInRange(value, InterfaceRapidButtonsActions.HIDDEN.getValue(), InterfaceRapidButtonsActions.SEARCH.getValue());
             default -> false;
         };
     }
@@ -702,6 +745,27 @@ public class OctoConfig {
         return switch (fieldName) {
             case "drawerItems" -> MenuOrderController.isMenuItemsImportValid(value);
             case "actionBarCustomTitle" -> value.length() <= 40;
+            default -> false;
+        };
+    }
+
+    private boolean isValueValid(String fieldName, JSONArray value) {
+        return switch (fieldName) {
+            case "ai_models" -> {
+                for (int i = 0; i < value.length(); i++) {
+                    try {
+                        JSONObject keyData = value.getJSONObject(i);
+                        if (!CustomModelsHelper.isValidModel(keyData)) {
+                            OctoLogging.d(TAG, "failed to import backup as an aiModel is invalid");
+                            yield false;
+                        }
+                    } catch (JSONException ignored) {
+                        OctoLogging.d(TAG, "failed to import backup as JSONException occurred during aiModels verify");
+                        yield false;
+                    }
+                }
+                yield true;
+            }
             default -> false;
         };
     }
@@ -738,7 +802,7 @@ public class OctoConfig {
             }
         }
         preferences.edit().clear().apply();
-        if (hasInvolvedAccounts && !FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprint()) {
+        if (hasInvolvedAccounts && !FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached()) {
             BaseFragment lastFragment = LaunchActivity.getLastFragment();
             if (lastFragment != null) {
                 new DoubleBottomMigrationBottomSheet(lastFragment).show();

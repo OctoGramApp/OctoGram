@@ -19,13 +19,15 @@ public class SliderRow extends BaseRow {
     private final int max;
     private final ConfigProperty<Integer> preferenceValue;
     private final Runnable runnable;
+    private final Runnable onTouchEnd;
 
-    protected SliderRow(int min, int max, ConfigProperty<Integer> preferenceValue, Runnable runnable, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
+    protected SliderRow(int min, int max, ConfigProperty<Integer> preferenceValue, Runnable runnable, Runnable onTouchEnd, ConfigProperty<Boolean> showIf, boolean showIfReverse) {
         super(null, null, false, showIf, showIfReverse, PreferenceType.SLIDER);
         this.min = min;
         this.max = max;
         this.preferenceValue = preferenceValue;
         this.runnable = runnable;
+        this.onTouchEnd = onTouchEnd;
     }
 
     public int getMin() {
@@ -35,8 +37,13 @@ public class SliderRow extends BaseRow {
     public int getMax() {
         return max;
     }
+
     public Runnable getRunnable() {
         return runnable;
+    }
+
+    public Runnable getOnTouchEnd() {
+        return onTouchEnd;
     }
 
     public ConfigProperty<Integer> getPreferenceValue() {
@@ -45,6 +52,7 @@ public class SliderRow extends BaseRow {
 
     public static class SliderRowBuilder extends ToggleableBaseRowBuilder<SliderRow, Integer> {
         private Runnable runnable;
+        private Runnable onTouchEnd;
         private int min = 0;
         private int max = 0;
 
@@ -63,8 +71,13 @@ public class SliderRow extends BaseRow {
             return this;
         }
 
+        public SliderRowBuilder onTouchEnd(Runnable onTouchEnd) {
+            this.onTouchEnd = onTouchEnd;
+            return this;
+        }
+
         public SliderRow build() {
-            return new SliderRow(min, max, preferenceValue, runnable, showIf, showIfReverse);
+            return new SliderRow(min, max, preferenceValue, runnable, onTouchEnd, showIf, showIfReverse);
         }
     }
 }

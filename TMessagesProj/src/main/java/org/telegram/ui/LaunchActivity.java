@@ -6800,6 +6800,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         super.onResume();
         Crashlytics.init();
         isResumed = true;
+        FingerprintUtils.reloadFingerprintState();
         if (onResumeStaticCallback != null) {
             onResumeStaticCallback.run();
             onResumeStaticCallback = null;

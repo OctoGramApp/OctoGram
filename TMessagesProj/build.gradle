@@ -1,7 +1,5 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
-import java.nio.file.Paths
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -45,32 +43,29 @@ def isWindows = DefaultNativePlatform.currentOperatingSystem.toFamilyName() == O
 def isMacOs = DefaultNativePlatform.currentOperatingSystem.toFamilyName() == OperatingSystemFamily.MACOS
 
 def getCCacheExecutable = {
-    def pathName
-    if (isWindows) {
-        pathName = "windows"
-    } else {
-        // Check if ccache is installed
-        def ccCacheRes = providers.exec {
-            commandLine 'which', 'ccache'
+    try {
+        def command = isWindows ? ["where", "ccache"] : ["which", "ccache"]
+        def process = new ProcessBuilder(command).redirectErrorStream(true).start()
+
+        def output = process.inputStream.text.trim()
+        def exitCode = process.waitFor()
+
+        if (exitCode == 0 && !output.isBlank()) {
+            logger.lifecycle("Found ccache in system path: ${output}")
+            return file(output)
         }
-        if (ccCacheRes.standardOutput.asText.getOrElse("").isBlank()) {
-            throw new GradleException("Command 'which' failed or command not found.")
-        }
-        if (ccCacheRes.result.get().exitValue == 0) {
-            return Paths.get(ccCacheRes.standardOutput.asText.get().trim()).toFile()
-        }
-        if (isMacOs) {
-            pathName = "macOs"
-        } else {
-            pathName = "linux"
-        }
+    } catch (Exception ignored) {}
+
+    def platformFolder = isWindows ? "windows" : isMacOs ? "macOs" : "linux"
+    def executableName = isWindows ? "ccache.exe" : "ccache"
+    def fallbackPath = file("${rootDir}/Tools/ccache/${platformFolder}/${executableName}")
+
+    if (fallbackPath.exists()) {
+        logger.lifecycle("Using fallback ccache path: ${fallbackPath}")
+        return fallbackPath
     }
-    def executableFile = "ccache"
-    if (isWindows) {
-        executableFile += ".exe"
-    }
-    // Build the path to the local ccache executable
-    return Paths.get(System.getProperty("user.dir"), "Tools", "ccache", pathName, executableFile).toFile()
+
+    throw new GradleException("ccache not found in PATH and fallback not found at: ${fallbackPath}")
 }
 
 dependencies {
@@ -200,7 +195,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                version '3.31.6+'
+                version = '3.31.6+'
             }
         }
 
@@ -218,7 +213,7 @@ android {
         }
         vectorDrawables {
             generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
-            // useSupportLibrary = true
+            useSupportLibrary = true // Fixes for android KitKat
         }
     }
 }

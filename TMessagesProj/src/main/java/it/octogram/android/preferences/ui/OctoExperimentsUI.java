@@ -57,7 +57,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         return OctoPreferences.builder(getString(R.string.Experiments))
                 .deepLink(DeepLinkDef.EXPERIMENTAL)
-                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_reset, getString(R.string.ResetSettings), () -> OctoMainSettingsUI.openResetSettingsProcedure(context, true)).asDanger())
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_reset, getString(R.string.ResetSettings), () -> OctoMainSettingsUI.openResetSettingsProcedure(fragment, context, true)).asDanger())
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, getString(R.string.OctoExperimentsSettingsHeader))
                 .category(getString(R.string.ExperimentalSettings), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()

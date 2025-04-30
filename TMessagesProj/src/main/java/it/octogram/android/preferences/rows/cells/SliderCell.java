@@ -62,6 +62,10 @@ public class SliderCell extends FrameLayout {
                 runnable.run();
             }
 
+            if (stop && sliderRow.getOnTouchEnd() != null) {
+                sliderRow.getOnTouchEnd().run();
+            }
+
             requestLayout();
         } : null);
     }

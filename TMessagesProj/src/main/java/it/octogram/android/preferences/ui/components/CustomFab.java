@@ -10,17 +10,12 @@ package it.octogram.android.preferences.ui.components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.CombinedDrawable;
 
 import it.octogram.android.OctoConfig;
 
@@ -29,23 +24,6 @@ public abstract class CustomFab {
     private static final int DEFAULT_FAB_SIZE_DP = 56;
     private static final int SMALL_FAB_SIZE_DP = 40;
     private static final int CIRCULAR_RADIUS_DP = 100;
-
-    public static CombinedDrawable createCircleDrawableWithIcon(Context context, int iconResId, int size) {
-        Drawable iconDrawable = iconResId != 0 ? ContextCompat.getDrawable(context, iconResId) : null;
-
-        var backgroundShape = new OvalShape();
-        backgroundShape.resize(size, size);
-        ShapeDrawable backgroundDrawable = new ShapeDrawable(backgroundShape);
-        backgroundDrawable.getPaint().setColor(Color.WHITE);
-
-        var iconWithBackground = new CombinedDrawable(backgroundDrawable, iconDrawable);
-        if (iconDrawable != null) {
-            iconDrawable.mutate();
-        }
-        iconWithBackground.setCustomSize(size, size);
-
-        return iconWithBackground;
-    }
 
     public static Drawable createFabBackground() {
         int defaultBackgroundColor = Theme.getColor(Theme.key_chats_actionBackground);

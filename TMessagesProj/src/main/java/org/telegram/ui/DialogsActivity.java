@@ -3404,7 +3404,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         });
         actionBar.setOnLongClickListener((l) -> {
-            if (OctoConfig.INSTANCE.lockedChatsHideChats.getValue() && !isHiddenChats() && folderId == 0 && FingerprintUtils.hasFingerprint()) {
+            if (OctoConfig.INSTANCE.lockedChatsHideChats.getValue() && !isHiddenChats() && folderId == 0 && FingerprintUtils.hasFingerprintCached()) {
                 AndroidUtilities.runOnUIThread(() -> {
                     Bundle args = new Bundle();
                     args.putInt("dialogsType", DIALOGS_TYPE_HIDDEN_CHATS);
@@ -9704,7 +9704,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     }
                 }
             } else if (action == lock_unlock) {
-                if (FingerprintUtils.hasFingerprint()) {
+                if (FingerprintUtils.hasFingerprintCached()) {
                     FingerprintUtils.lockChatsMultiFromIDs(selectedDialogs, !isHiddenChats());
                 }
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
@@ -10172,7 +10172,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         }
         if (lockUnlockItem != null) {
-            lockUnlockItem.setVisibility((FingerprintUtils.hasFingerprint() && canLockCount > 0) ? View.VISIBLE : View.GONE);
+            lockUnlockItem.setVisibility((FingerprintUtils.hasFingerprintCached() && canLockCount > 0) ? View.VISIBLE : View.GONE);
         }
         if (isHiddenChats()) {
             archiveItem.setVisibility(View.GONE);

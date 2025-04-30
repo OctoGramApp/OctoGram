@@ -32,3 +32,4 @@ TMessagesProj_App/play/
 .run/
 *.jks
 move_icon.sh
+/keys/

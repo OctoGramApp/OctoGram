@@ -292,7 +292,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     }
     
     private boolean updateConfigsWithResult() {
-        boolean hasFingerprint = FingerprintUtils.hasFingerprint();
+        boolean hasFingerprint = FingerprintUtils.hasFingerprintCached();
         boolean hasEnabledOptions = OctoConfig.INSTANCE.biometricOpenArchive.getValue() || OctoConfig.INSTANCE.biometricOpenCallsLog.getValue() || OctoConfig.INSTANCE.biometricOpenSecretChats.getValue() || OctoConfig.INSTANCE.biometricOpenSettings.getValue() || FingerprintUtils.hasLockedAccounts();
 
         boolean hasChanged = canShowBiometricOptions.getValue() != hasFingerprint;
@@ -319,7 +319,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     }
 
     private boolean checkAvailability(ConfigProperty<Boolean> option) {
-        if (!option.getValue() || !FingerprintUtils.hasFingerprint()) {
+        if (!option.getValue() || !FingerprintUtils.hasFingerprintCached()) {
             return true;
         } else {
             if (fragment.hasUnlockedWithAuth()) {
@@ -345,7 +345,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
             return;
         }
 
-        if (!FingerprintUtils.hasFingerprint()) {
+        if (!FingerprintUtils.hasFingerprintCached()) {
             OctoConfig.INSTANCE.biometricAskEvery.updateValue(biometricAskEveryTemp.getValue());
             return;
         }

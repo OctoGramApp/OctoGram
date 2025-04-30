@@ -36,6 +36,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.Keep;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.BaseCell;
@@ -92,6 +93,7 @@ public class Switch extends View {
 
     private Paint googleBorderPaint;
     private int forcedUIState = -1;
+    private Drawable checkDrawable;
 
     public interface OnCheckedChangeListener {
         void onCheckedChanged(Switch view, boolean isChecked);
@@ -121,6 +123,11 @@ public class Switch extends View {
         googleBorderPaint.setStyle(Paint.Style.STROKE);
         googleBorderPaint.setStrokeCap(Paint.Cap.ROUND);
         googleBorderPaint.setStrokeWidth(AndroidUtilities.dp(1));
+
+        checkDrawable = getResources().getDrawable(R.drawable.floating_check).mutate();
+        if (checkDrawable != null) {
+            checkDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(trackCheckedColorKey, resourcesProvider), PorterDuff.Mode.MULTIPLY));
+        }
 
         setHapticFeedbackEnabled(true);
     }
@@ -565,8 +572,14 @@ public class Switch extends View {
                 canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dp(circleSize), paint);
             }
 
-            if (a == 0 && getUIState() == InterfaceSwitchUI.DEFAULT.getValue()) {
-                if (iconDrawable != null) {
+            if (a == 0 && (getUIState() == InterfaceSwitchUI.DEFAULT.getValue() || getUIState() == InterfaceSwitchUI.GOOGLE_NEW.getValue())) {
+                if (getUIState() == InterfaceSwitchUI.GOOGLE_NEW.getValue()) {
+                    int iconWidth = checkDrawable.getIntrinsicWidth() / 2;
+                    int iconHeight = checkDrawable.getIntrinsicHeight() / 2;
+                    checkDrawable.setBounds(tx - iconWidth / 2, ty - iconHeight / 2, tx + iconWidth / 2, ty + iconHeight / 2);
+                    checkDrawable.setAlpha((int) (255 * progress));
+                    checkDrawable.draw(canvasToDraw);
+                } else if (iconDrawable != null) {
                     int iconWidth = iconDrawable.getIntrinsicWidth();
                     int iconHeight = iconDrawable.getIntrinsicHeight();
                     iconDrawable.setBounds(tx - iconWidth / 2, ty - iconHeight / 2, tx + iconWidth / 2, ty + iconHeight / 2);
@@ -622,7 +635,7 @@ public class Switch extends View {
     private float getCircleSize() {
         if (getUIState() == InterfaceSwitchUI.ONEUINEW.getValue()) {
             return 9;
-        } else if (getUIState() == InterfaceSwitchUI.GOOGLE.getValue()) {
+        } else if (getUIState() == InterfaceSwitchUI.GOOGLE.getValue() || getUIState() == InterfaceSwitchUI.GOOGLE_NEW.getValue()) {
             return 6 + 2 * progress;
         } else if (getUIState() == InterfaceSwitchUI.ONEUIOLD.getValue()) {
             return 10;
@@ -632,7 +645,7 @@ public class Switch extends View {
     }
 
     private boolean isUsingSeparateView() {
-        return getUIState() == InterfaceSwitchUI.ONEUINEW.getValue() || getUIState() == InterfaceSwitchUI.GOOGLE.getValue();
+        return getUIState() == InterfaceSwitchUI.ONEUINEW.getValue() || getUIState() == InterfaceSwitchUI.GOOGLE.getValue() || getUIState() == InterfaceSwitchUI.GOOGLE_NEW.getValue();
     }
 
     private boolean isUsingOneUI() {
@@ -640,7 +653,7 @@ public class Switch extends View {
     }
 
     private boolean hasTransparentBg() {
-        return getUIState() == InterfaceSwitchUI.GOOGLE.getValue();
+        return getUIState() == InterfaceSwitchUI.GOOGLE.getValue() || getUIState() == InterfaceSwitchUI.GOOGLE_NEW.getValue();
     }
 
     private int getUIState() {

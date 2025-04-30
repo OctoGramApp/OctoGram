@@ -38,8 +38,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
@@ -49,7 +51,6 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.BottomSheetWithRecyclerListView;
-import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -60,16 +61,18 @@ import org.telegram.ui.Components.Switch;
 import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
-import java.lang.reflect.Field;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.components.ImportSettingsTopLayerCell;
 import it.octogram.android.utils.AppRestartHelper;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
@@ -82,15 +85,16 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
     private final ArrayList<Item> items = new ArrayList<>();
     private final ArrayList<Item> oldItems = new ArrayList<>();
-    private static final ArrayList<String> dataToImport = new ArrayList<>();
-    private static final ArrayList<String> secureContexts = new ArrayList<>();
-    private static final ImportSettingsScanHelper settingsScan = new ImportSettingsScanHelper();
+
+    private final ArrayList<String> mainCategoriesSelection = new ArrayList<>();
+    private final ArrayList<String> dataToImport = new ArrayList<>();
+    private final ArrayList<String> secureContexts = new ArrayList<>();
+    private final ArrayList<String> availableKeysInBackup = new ArrayList<>();
 
     private static boolean hasAuthorizedBiometric = false;
 
     private int totalImportableKeysCounter = 0;
-    private int externalKeysUnavailableInScan = 0;
-    private static final List<String> expanded = new ArrayList<>();
+    private final List<String> expanded = new ArrayList<>();
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_CHECKBOX = 1;
     private static final int VIEW_TYPE_SWITCH = 2;
@@ -106,17 +110,13 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
     public ImportSettingsBottomSheet(BaseFragment fragment, MessageObject message1, File file1) {
         super(fragment.getContext(), fragment, false, false, false, true, ActionBarType.FADING, fragment.getResourceProvider());
-
-        items.clear();
-        oldItems.clear();
-        expanded.clear();
-        hasAuthorizedBiometric = false;
-
-        initDataToImportList();
+        hasAuthorizedBiometric = !FingerprintUtils.hasFingerprintCached();
 
         Context context = fragment.getContext();
         message = message1;
         file = file1;
+
+        initDataToImportList();
 
         setShowHandle(true);
         fixNavigationBar();
@@ -200,53 +200,91 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
     }
 
     private void initDataToImportList() {
-        dataToImport.clear();
-        secureContexts.clear();
-        externalKeysUnavailableInScan = 0;
+        fillAvailableKeys();
         totalImportableKeysCounter = 0;
 
-        ArrayList<String> tempIgnoredSecureKeys = new ArrayList<>();
-
-        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
-            if (!category.isSecureContext) {
-                dataToImport.add(category.categoryId);
-            } else {
-                secureContexts.add(category.categoryId);
-            }
+        for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
+            boolean hasAvailableKey = false;
             for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                if (availableKeysInBackup.contains(option.property.getKey())) {
+                    hasAvailableKey = true;
+                    if (!category.isSecureContext) {
+                        dataToImport.add(option.property.getKey());
+                    }
+                    totalImportableKeysCounter++;
+                }
+            }
+            if (hasAvailableKey) {
                 if (!category.isSecureContext) {
-                    dataToImport.add(option.optionKey);
+                    mainCategoriesSelection.add(category.categoryId);
                 } else {
-                    tempIgnoredSecureKeys.add(option.optionKey);
-                }
-                totalImportableKeysCounter++;
-            }
-        }
-
-        for (Field field : OctoConfig.INSTANCE.getClass().getDeclaredFields()) {
-            if (field.getType().equals(ConfigProperty.class)) {
-                try {
-                    ConfigProperty<?> configProperty = (ConfigProperty<?>) field.get(OctoConfig.INSTANCE);
-                    if (configProperty == null) {
-                        continue;
-                    }
-
-                    String fieldName = configProperty.getKey();
-                    // здесь фильтрация является основополагающей, иначе будут показаны дополнительные элементы, которые не следует импортировать.
-                    if (!dataToImport.contains(fieldName) && !tempIgnoredSecureKeys.contains(fieldName) && !settingsScan.excludedOptions.contains(fieldName)) {
-                        dataToImport.add(fieldName);
-                        externalKeysUnavailableInScan++;
-                        totalImportableKeysCounter++;
-
-                        if (BuildConfig.DEBUG) {
-                            OctoLogging.d("ImportSettings", "Unknown dataset option is going to be imported:" + fieldName);
-                        }
-                    }
-                } catch (IllegalAccessException e) {
-                    OctoLogging.e(getClass().getName(), "Error getting settings state during import", e);
+                    secureContexts.add(category.categoryId);
                 }
             }
         }
+
+        if (availableKeysInBackup.contains("ai_models")) {
+            mainCategoriesSelection.add("ai_models");
+            dataToImport.add("ai_models");
+            totalImportableKeysCounter++;
+        }
+    }
+
+    private void fillAvailableKeys() {
+        File file1 = file;
+        if (message != null) {
+            file1 = OctoUtils.getFileContentFromMessage(message);
+        }
+
+        try (FileInputStream downloadedFileStream = new FileInputStream(file1)) {
+            StringBuilder jsonStringBuilder = new StringBuilder();
+            int character;
+            while ((character = downloadedFileStream.read()) != -1) {
+                jsonStringBuilder.append((char) character);
+            }
+
+            downloadedFileStream.close();
+
+            JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
+
+            for (Iterator<String> it = result.keys(); it.hasNext(); ) {
+                String key = it.next();
+                availableKeysInBackup.add(key);
+            }
+        } catch (IOException | JSONException ignored) {}
+    }
+
+    private void updateItems() {
+        oldItems.clear();
+        oldItems.addAll(items);
+        items.clear();
+
+        items.add(Item.asHeader());
+
+        for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
+            Item mainTitleCategory = Item.asSwitch(category.categoryIcon, category.getName(), category.categoryId);
+            items.add(mainTitleCategory);
+
+            boolean hasAvailableKey = false;
+            for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                if (availableKeysInBackup.contains(option.property.getKey())) {
+                    hasAvailableKey = true;
+                    if (expanded.contains(category.categoryId)) {
+                        items.add(Item.asCheckbox(option.getName(), option.property.getKey()));
+                    }
+                }
+            }
+
+            if (!hasAvailableKey) {
+                items.remove(mainTitleCategory);
+            }
+        }
+
+        if (availableKeysInBackup.contains("ai_models")) {
+            items.add(Item.asSwitch(R.drawable.aifeatures_solar, getString(R.string.AiFeatures_CustomModels_Full), "ai_models"));
+        }
+
+        adapter.setItems(oldItems, items);
     }
 
     private void executeFileImport() {
@@ -262,9 +300,9 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         int changedOptions = 0;
         if (message != null) {
-            changedOptions = OctoConfig.INSTANCE.importMessageExport(message, dataToImport, settingsScan.excludedOptions);
+            changedOptions = OctoConfig.INSTANCE.importMessageExport(message, dataToImport);
         } else if (file != null) {
-            changedOptions = OctoConfig.INSTANCE.importFileExport(file, dataToImport, settingsScan.excludedOptions);
+            changedOptions = OctoConfig.INSTANCE.importFileExport(file, dataToImport);
 
             if (file.getAbsolutePath().startsWith(AndroidUtilities.getCacheDir().getAbsolutePath())) {
                 if (file.delete()) {
@@ -275,15 +313,22 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         if (changedOptions > 0) {
+            Runnable restart = () -> {
+                AlertDialog progressDialog = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
+                progressDialog.setCanCancel(false);
+                progressDialog.show();
+                AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
+            };
+
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
             alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportDonePopup));
             alertDialogBuilder.setMessage(formatString(R.string.ImportReadyImportDone, changedOptions));
-            alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
+            alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> restart.run());
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.setCanceledOnTouchOutside(false);
             alertDialog.setCancelDialog(false);
             alertDialog.setCanCancel(false);
-            alertDialog.setOnCancelListener(dialog -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class)));
+            alertDialog.setOnCancelListener(dialog -> restart.run());
             alertDialog.show();
         }
     }
@@ -329,26 +374,36 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 return;
             }
 
-            ImportSettingsScanHelper.SettingsScanCategory category = settingsScan.getCategoryById(item.itemRelationId);
-            if (category != null) {
-                if (dataToImport.contains(item.itemRelationId)) {
-                    dataToImport.remove(item.itemRelationId);
-                } else {
-                    dataToImport.add(item.itemRelationId);
-                }
+            if (mainCategoriesSelection.contains(item.itemRelationId)) {
+                mainCategoriesSelection.remove(item.itemRelationId);
+            } else {
+                mainCategoriesSelection.add(item.itemRelationId);
+            }
 
-                boolean mustBeEnabled = dataToImport.contains(item.itemRelationId);
-                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                    if (mustBeEnabled && !dataToImport.contains(option.optionKey)) {
-                        dataToImport.add(option.optionKey);
-                    } else if (!mustBeEnabled) {
-                        dataToImport.remove(option.optionKey);
+            ImportSettingsScanHelper.SettingsScanCategory category = ImportSettingsScanHelper.INSTANCE.getCategoryById(item.itemRelationId);
+            if (category != null) {
+                if (item.hasInnerData()) {
+                    boolean mustBeEnabled = mainCategoriesSelection.contains(item.itemRelationId);
+                    for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                        if (availableKeysInBackup.contains(option.property.getKey())) {
+                            if (mustBeEnabled && !dataToImport.contains(option.property.getKey())) {
+                                dataToImport.add(option.property.getKey());
+                            } else if (!mustBeEnabled) {
+                                dataToImport.remove(option.property.getKey());
+                            }
+                        }
                     }
                 }
-
-                updateItems();
-                reloadActionButtonSize();
+            } else if (!item.hasInnerData()) {
+                if (mainCategoriesSelection.contains(item.itemRelationId) && !dataToImport.contains(item.itemRelationId)) {
+                    dataToImport.add(item.itemRelationId);
+                } else if (!mainCategoriesSelection.contains(item.itemRelationId)) {
+                    dataToImport.remove(item.itemRelationId);
+                }
             }
+
+            updateItems();
+            reloadActionButtonSize();
         } else if (item.viewType == VIEW_TYPE_CHECKBOX) {
             if (dataToImport.contains(item.itemRelationId)) {
                 dataToImport.remove(item.itemRelationId);
@@ -364,72 +419,34 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
     private void reloadActionButtonSize() {
         int dataToImportSize = dataToImport.size();
-
-        // totalImportableKeysCounter не содержит родительских значений.
-        // поэтому из счетчика dataToImportSize мы должны удалить их перед сравнением.
-
-        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
-            if (dataToImport.contains(category.categoryId)) {
-                dataToImportSize--;
-            }
-        }
-
         actionButton.setSize(dataToImportSize == totalImportableKeysCounter, dataToImportSize, totalImportableKeysCounter);
     }
 
     private void fixItemRelationIdState(String itemRelationId) {
-        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+        for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
             boolean hasSelectedOption = false;
             boolean isOneOptionSelected = false;
             for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                if (option.optionKey.equals(itemRelationId)) {
-                    hasSelectedOption = true;
-                }
-                if (dataToImport.contains(option.optionKey)) {
-                    isOneOptionSelected = true;
+                if (availableKeysInBackup.contains(option.property.getKey())) {
+                    if (Objects.requireNonNull(option.property.getKey()).equals(itemRelationId)) {
+                        hasSelectedOption = true;
+                    }
+                    if (dataToImport.contains(option.property.getKey())) {
+                        isOneOptionSelected = true;
+                    }
                 }
             }
 
             if (hasSelectedOption) {
-                if (isOneOptionSelected && !dataToImport.contains(category.categoryId)) {
-                    dataToImport.add(category.categoryId);
+                if (isOneOptionSelected && !mainCategoriesSelection.contains(category.categoryId)) {
+                    mainCategoriesSelection.add(category.categoryId);
                 } else if (!isOneOptionSelected) {
-                    dataToImport.remove(category.categoryId);
+                    mainCategoriesSelection.remove(category.categoryId);
                 }
 
                 break;
             }
         }
-    }
-
-    private void updateItems() {
-        oldItems.clear();
-        oldItems.addAll(items);
-        items.clear();
-
-        items.add(Item.asHeader());
-
-        for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
-            items.add(Item.asSwitch(category.categoryIcon, category.getName(), category.categoryId));
-
-            if (expanded.contains(category.categoryId)) {
-                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                    items.add(Item.asCheckbox(option.getName(), option.optionKey));
-                }
-            }
-        }
-
-        if (externalKeysUnavailableInScan > 0) {
-            items.add(Item.asInfo(formatString(R.string.ImportReadyOtherOptions, externalKeysUnavailableInScan)));
-        }
-
-        adapter.setItems(oldItems, items);
-    }
-
-    @Override
-    public void show() {
-        super.show();
-        Bulletin.hideVisible();
     }
 
     private class Adapter extends AdapterWithDiffUtils {
@@ -532,7 +549,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         private boolean hasInnerData() {
             boolean hasInnerData = false;
-            for (ImportSettingsScanHelper.SettingsScanCategory category : settingsScan.categories) {
+            for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
                 if (category.categoryId.equals(this.itemRelationId)) {
                     hasInnerData = !category.options.isEmpty();
                     break;
@@ -551,10 +568,6 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         public static Item asSwitch(int iconResId, CharSequence text, String relationId) {
             return new Item(VIEW_TYPE_SWITCH, text, iconResId, relationId);
-        }
-
-        public static Item asInfo(CharSequence text) {
-            return new Item(VIEW_TYPE_INFO, text, 0, "");
         }
 
         @Override
@@ -588,7 +601,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
     }
 
-    private static class SwitchCell extends FrameLayout {
+    private class SwitchCell extends FrameLayout {
 
         private final ImageView imageView;
         private final LinearLayout textViewLayout;
@@ -685,31 +698,36 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
 
         public void set(Item item, boolean divider) {
             if (item.viewType == VIEW_TYPE_SWITCH) {
+                boolean hasInnerData = item.hasInnerData();
+
                 checkBoxView.setVisibility(GONE);
                 imageView.setVisibility(VISIBLE);
                 imageView.setImageResource(item.iconResId);
                 textView.setText(item.text);
-                boolean containing = item.hasInnerData();
-                if (containing) {
-                    countTextView.setVisibility(VISIBLE);
-                    arrowView.setVisibility(VISIBLE);
-                } else {
-                    countTextView.setVisibility(GONE);
-                    arrowView.setVisibility(GONE);
-                }
                 textView.setTranslationX(0);
                 switchView.setVisibility(VISIBLE);
-                switchView.setChecked(dataToImport.contains(item.itemRelationId), true);
-                needLine = containing;
+                switchView.setChecked(mainCategoriesSelection.contains(item.itemRelationId), true);
+                needLine = hasInnerData;
 
-                boolean isLocked = !hasAuthorizedBiometric && secureContexts.contains(item.itemRelationId);
-                if (_isLocked != isLocked) {
-                    _isLocked = isLocked;
+                boolean isLocked = false;
+                if (secureContexts.contains(item.itemRelationId)) {
+                    isLocked = !hasAuthorizedBiometric;
+
+                    arrowView.setVisibility((hasInnerData || isLocked) ? VISIBLE : GONE);
                     arrowView.setScaleX(isLocked ? 0.8f : 1f);
                     arrowView.setScaleY(isLocked ? 0.8f : 1f);
-                    arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(isLocked ? Theme.key_stickers_menu : Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
-                    arrowView.setImageResource(isLocked ? R.drawable.other_lockedfolders2 : R.drawable.arrow_more);
-                    arrowView.setTranslationX(isLocked ? dp(2) : 0);
+
+                    if (_isLocked != isLocked) {
+                        _isLocked = isLocked;
+                        arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor((isLocked || !hasInnerData) ? Theme.key_stickers_menu : Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
+                        arrowView.setImageResource((isLocked || !hasInnerData) ? R.drawable.other_lockedfolders2 : R.drawable.arrow_more);
+                        arrowView.setTranslationX((isLocked || !hasInnerData) ? dp(2) : 0);
+                    }
+                } else {
+                    arrowView.setVisibility(hasInnerData ? VISIBLE : GONE);
+                    arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
+                    arrowView.setImageResource(R.drawable.arrow_more);
+                    arrowView.setTranslationX(0);
                 }
 
                 boolean currentExpanded = expanded.contains(item.itemRelationId) && !isLocked;
@@ -718,16 +736,24 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                     arrowView.animate().rotation(isExpanded ? 180 : 0).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).setDuration(240).start();
                 }
 
-                ImportSettingsScanHelper.SettingsScanCategory category = settingsScan.getCategoryById(item.itemRelationId);
-                int selectedOptionsOnTotal = 0;
-                int totalOptions = category.options.size();
+                if (hasInnerData) {
+                    countTextView.setVisibility(VISIBLE);
+                    ImportSettingsScanHelper.SettingsScanCategory category = ImportSettingsScanHelper.INSTANCE.getCategoryById(item.itemRelationId);
+                    int selectedOptionsOnTotal = 0;
+                    int totalOptions = 0;
 
-                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                    if (dataToImport.contains(option.optionKey)) {
-                        selectedOptionsOnTotal++;
+                    for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                        if (availableKeysInBackup.contains(option.property.getKey())) {
+                            if (dataToImport.contains(option.property.getKey())) {
+                                selectedOptionsOnTotal++;
+                            }
+                            totalOptions++;
+                        }
                     }
+                    countTextView.setText(selectedOptionsOnTotal + "/" + totalOptions);
+                } else {
+                    countTextView.setVisibility(GONE);
                 }
-                countTextView.setText(selectedOptionsOnTotal + "/" + totalOptions);
             } else {
                 checkBoxView.setVisibility(VISIBLE);
                 checkBoxView.setChecked(dataToImport.contains(item.itemRelationId), true);
@@ -768,7 +794,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
     }
 
-    public static class ImportButton extends FrameLayout {
+    private static class ImportButton extends FrameLayout {
         FrameLayout button;
         AnimatedTextView.AnimatedTextDrawable textView;
         AnimatedTextView.AnimatedTextDrawable valueTextView;

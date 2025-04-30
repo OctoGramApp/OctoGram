@@ -775,7 +775,7 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
                 if (a == 0) {
                     setNextFocus(frameLayout, R.id.passcode_btn_backspace);
                 } else if (a == 9) {
-                    if (hasFingerprint()) {
+                    if (hasFingerprintCached()) {
                         setNextFocus(frameLayout, R.id.passcode_btn_fingerprint);
                     } else {
                         setNextFocus(frameLayout, R.id.passcode_btn_0);
@@ -1230,7 +1230,7 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
         onShow(fingerprint, animated, -1, -1, null, null);
     }
 
-    private boolean hasFingerprint() {
+    private boolean hasFingerprintCached() {
         Activity parentActivity = AndroidUtilities.findActivity(getContext());
         if (Build.VERSION.SDK_INT >= 23 && parentActivity != null && SharedConfig.useFingerprintLock) {
             try {

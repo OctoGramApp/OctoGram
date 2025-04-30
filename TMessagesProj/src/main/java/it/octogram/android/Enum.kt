@@ -483,7 +483,8 @@ enum class InterfaceSwitchUI(val value: Int) {
     DEFAULT(0),
     ONEUIOLD(1),
     ONEUINEW(2),
-    GOOGLE(3)
+    GOOGLE(3),
+    GOOGLE_NEW(4)
 }
 
 enum class InterfaceCheckboxUI(val value: Int) {

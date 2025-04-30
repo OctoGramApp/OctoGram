@@ -100,7 +100,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
     private Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress;
     private boolean firstTranslation = true;
 
-    private ImageView configButton;
+    private ImageView copyButton;
 
     public TranslateAlert2(
         Context context,
@@ -263,18 +263,21 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         buttonTextView.setOnClickListener(e -> dismiss());
         buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16+48+8, 16));
 
-        configButton = new ImageView(context);
-        configButton.setScaleType(ImageView.ScaleType.CENTER);
-        configButton.setImageResource(R.drawable.msg_copy);
-        configButton.setAlpha(0.5f);
-        configButton.setClickable(false);
-        configButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
-        configButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
-        configButton.setOnClickListener(v -> {
+        copyButton = new ImageView(context);
+        copyButton.setScaleType(ImageView.ScaleType.CENTER);
+        copyButton.setImageResource(R.drawable.msg_copy);
+        copyButton.setAlpha(0.5f);
+        copyButton.setClickable(false);
+        copyButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
+        copyButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
+        copyButton.setOnClickListener(v -> {
+            if (!_isCopyEnabled) {
+                return;
+            }
             AndroidUtilities.addToClipboard(textView.getText());
             BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createCopyBulletin(LocaleController.getString(R.string.TextCopied)).show();
         });
-        buttonView.addView(configButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16, 16));
+        buttonView.addView(copyButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16, 16));
 
         containerView.addView(buttonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
 
@@ -769,9 +772,8 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         if (copyAnimator != null) {
             copyAnimator.cancel();
         }
-        configButton.setClickable(isEnabled);
-        configButton.setAlpha(isEnabled ? 0.5f : 1f);
-        copyAnimator = configButton.animate().alpha(isEnabled ? 1f : 0.5f).setDuration(250);
+        copyButton.setAlpha(isEnabled ? 0.5f : 1f);
+        copyAnimator = copyButton.animate().alpha(isEnabled ? 1f : 0.5f).setDuration(250);
         copyAnimator.start();
     }
 

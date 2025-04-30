@@ -11,6 +11,17 @@ dependencies {
 
 ext.abiCodes = ['universal': 0, 'armeabi-v7a': 1, 'arm64-v8a': 5, x86: 2, x86_64: 6]
 
+def getProps(String propName) {
+    def propsFile = rootProject.file('local.properties')
+    if (propsFile.exists()) {
+        def props = new Properties()
+        props.load(new FileInputStream(propsFile))
+        return props[propName]
+    } else {
+        return "";
+    }
+}
+
 android {
     namespace = 'org.telegram.messenger.regular'
     defaultConfig.applicationId = APP_PACKAGE
@@ -22,8 +33,17 @@ android {
     }
 
     Properties signingProperties = new Properties()
-    if (project.rootProject.file('signing.properties').size() > 0) {
-        signingProperties.load(project.rootProject.file('signing.properties').newDataInputStream())
+
+    String signFilePath = getProps("sign.file")
+
+    if (signFilePath) {
+        File signFile = new File(signFilePath)
+
+        if (signFile.exists()) {
+            signingProperties.load(signFile.newDataInputStream())
+        } else {
+            throw new FileNotFoundException("Signing file not found at path: $signFilePath")
+        }
     }
 
     signingConfigs {
@@ -44,8 +64,8 @@ android {
             }
             jniDebuggable true
             minifyEnabled = false
-            shrinkResources false
-            multiDexEnabled true
+            shrinkResources = false
+            multiDexEnabled = true
             applicationIdSuffix ".beta"
         }
 

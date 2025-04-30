@@ -45,15 +45,15 @@ public class ActionBarOverride extends ActionBarLayout {
 
         boolean mustRequireFingerprint = false;
         boolean ignoreAskEvery = false;
-        if (fragment instanceof CallLogActivity && OctoConfig.INSTANCE.biometricOpenCallsLog.getValue() && FingerprintUtils.hasFingerprint()) {
+        if (fragment instanceof CallLogActivity && OctoConfig.INSTANCE.biometricOpenCallsLog.getValue() && FingerprintUtils.hasFingerprintCached()) {
             mustRequireFingerprint = true;
-        } else if (fragment instanceof DialogsActivity f2 && FingerprintUtils.hasFingerprint() && f2.getArguments() != null) {
+        } else if (fragment instanceof DialogsActivity f2 && FingerprintUtils.hasFingerprintCached() && f2.getArguments() != null) {
             if (Objects.equals(f2.getArguments().getInt("folderId", -1), 1)) {
                 mustRequireFingerprint = OctoConfig.INSTANCE.biometricOpenArchive.getValue();
             } else if (Objects.equals(f2.getArguments().getInt("dialogsType", -1), DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS)) {
                 mustRequireFingerprint = true;
             }
-        } else if (fragment instanceof ChatActivity f2 && FingerprintUtils.hasFingerprint() && f2.getArguments() != null) {
+        } else if (fragment instanceof ChatActivity f2 && FingerprintUtils.hasFingerprintCached() && f2.getArguments() != null) {
             if (f2.getArguments().containsKey("enc_id")) {
                 mustRequireFingerprint = OctoConfig.INSTANCE.biometricOpenSecretChats.getValue();
             } else {
@@ -62,9 +62,9 @@ public class ActionBarOverride extends ActionBarLayout {
                     mustRequireFingerprint = true;
                 }
             }
-        } else if (fragment instanceof PreferencesFragment f2 && f2.isLockedContent() && FingerprintUtils.hasFingerprint()) {
+        } else if (fragment instanceof PreferencesFragment f2 && f2.isLockedContent() && FingerprintUtils.hasFingerprintCached()) {
             mustRequireFingerprint = needToUnlockAfterDialogsActivity(f2);
-        } else if (fragment instanceof UsersSelectActivity f2 && f2.isLockedContent() && FingerprintUtils.hasFingerprint()) {
+        } else if (fragment instanceof UsersSelectActivity f2 && f2.isLockedContent() && FingerprintUtils.hasFingerprintCached()) {
             mustRequireFingerprint = true;
             ignoreAskEvery = true;
         } else if (fragment instanceof BaseFragment f2 && TelegramSettingsHelper.isSettingsPage(f2) && OctoConfig.INSTANCE.biometricOpenSettings.getValue() && FingerprintUtils.hasFingerprintCached()) {

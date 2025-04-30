@@ -77,7 +77,7 @@ import it.octogram.android.preferences.rows.impl.ExpandableRows;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
-import it.octogram.android.preferences.rows.impl.SliderChooseRow;
+import it.octogram.android.preferences.rows.impl.SliderRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
@@ -248,17 +248,17 @@ public class OctoAiNewModelUI implements PreferencesEntry {
                         .showIf(supportsMediaUpload)
                         .build()
                 )
-                .category(getString(R.string.AiFeatures_CustomModels_Create_OptionsHeader_MessagesToPass), isRelatedToChats, category -> category.row(new SliderChooseRow.SliderChooseRowBuilder()
-                        .options(new ArrayList<>() {{
-                            for (int i = 5; i <= 40; i+=5) {
-                                add(new Pair<>(i, ""+i));
-                            }
-                        }})
-                        .onUpdate(() -> fragment.notifyItemChanged(PreferenceType.FOOTER_INFORMATIVE.getAdapterType()))
-                        .onTouchEnd(this::updateConfig)
-                        .preferenceValue(numberOfMessagesToPass)
-                        .showIf(isRelatedToChats)
-                        .build()))
+                .category(getString(R.string.AiFeatures_CustomModels_Create_OptionsHeader_MessagesToPass), isRelatedToChats, category -> {
+                    category.row(new SliderRow.SliderRowBuilder()
+                            .min(5)
+                            .max(100)
+                            .onSelected(() -> fragment.notifyItemChanged(PreferenceType.FOOTER_INFORMATIVE.getAdapterType()))
+                            .onTouchEnd(this::updateConfig)
+                            .preferenceValue(numberOfMessagesToPass)
+                            .showIf(isRelatedToChats)
+                            .build()
+                    );
+                })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
                         .setDynamicDataUpdate(() -> formatString(R.string.AiFeatures_CustomModels_Create_ModelType_Chats_Detailed, numberOfMessagesToPass.getValue()))
                         .title(formatString(R.string.AiFeatures_CustomModels_Create_ModelType_Chats_Detailed, numberOfMessagesToPass.getValue()))
@@ -336,7 +336,7 @@ public class OctoAiNewModelUI implements PreferencesEntry {
         currentElement.getEditText().setMinHeight(AndroidUtilities.dp(58));
         currentElement.getEditText().setInputType(inputType);
         //currentElement.getEditText().setImeOptions(EditorInfo.IME_ACTION_DONE);
-        currentElement.getEditText().setMaxLines(isTitle ? 1 : 10);
+        //currentElement.getEditText().setMaxLines(isTitle ? 1 : 10);
         currentElement.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

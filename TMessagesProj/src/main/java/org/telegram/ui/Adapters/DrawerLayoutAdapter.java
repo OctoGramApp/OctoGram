@@ -427,7 +427,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                         case PROXY_SETTINGS -> icon = R.drawable.msg2_proxy_off;
                         case DOWNLOADS -> icon = R.drawable.msg_download;
                         case MY_PROFILE -> icon = R.drawable.left_status_profile;
-                        case OCTOGRAM_SETTINGS -> icon = R.drawable.intro_octo;
+                        case OCTOGRAM_SETTINGS -> icon = R.drawable.settings_octo;
                         case TELEGRAM_BROWSER -> icon = R.drawable.msg_link2;
                         case ARCHIVED_MESSAGES -> icon = R.drawable.msg_archive;
                         case DATACENTER_STATUS -> icon = datacenterIcon;

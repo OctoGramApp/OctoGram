@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/OctoGramApp/website/main/assets/readme.images/applogo.png" width="150" align="left"/>
+<img src="images/AppIcon.png" width="150" align="left"/>
 
 # 🐙 OctoGram
 *[Licensed under the GNU General Public License v2.0](https://github.com/OctoGramApp/OctoGram/blob/main/LICENSE)*
@@ -20,14 +20,15 @@ To reproduce the build of OctoGram, you only require the presence of ccache, whi
 5. Please remember to publish **your** code too in order to comply with the licences.
 6. Add your google-services.json file to the [**root of the project**](https://github.com/OctoGramApp/OctoGram/tree/main/TMessagesProj_App).
 7. Add the following to your `local.properties` file:
-```
+```properties
 MAPS_API_KEY=<your-api-key>
+sign.file=/home/octogram/keys/signing.properties
 ```
-8. Add the following to your `signing.properties` file:
-```
+8. Add the following to your `/home/octogram/keys/signing.properties` file:
+```properties
 storePassword=<your-keystore-password>
 keyAlias=<your-keystore-alias>
-keyPath=<your-keystore-file-path>
+keyPath=/home/octogram/keys/octogram-key.jks
 keyPassword=<your-keystore-password>
 ```
 

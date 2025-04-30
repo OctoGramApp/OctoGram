@@ -923,12 +923,23 @@ public class VideoPlayer implements Player.Listener, VideoListener, AnalyticsLis
         return uri;
     }
 
-    public static VideoUri getCachedQuality(ArrayList<Quality> qualities) {
+    /*public static VideoUri getCachedQuality(ArrayList<Quality> qualities) {
         if (qualities == null) return null;
         for (final Quality q : qualities)
         for (final VideoUri v : q.uris)
             if (v.isCached())
                 return v;
+        return null;
+    }*/
+
+    public static VideoUri getCachedQuality(ArrayList<Quality> qualities) {
+        if (qualities == null || qualities.isEmpty()) return null;
+
+        for (Quality quality : qualities) for (VideoUri uri : quality.uris) {
+            if (uri.isCached()) {
+                return uri;
+            }
+        }
         return null;
     }
 
