@@ -33,6 +33,7 @@ import java.util.Objects;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.ExpandableRowsIds;
+import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.StickerUi;
@@ -109,6 +110,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             })
                             .propertySelectionTag("lockedChats")
                             .icon(R.drawable.msg_viewchats)
+                            .isNew(NewFeaturesBadgeId.PRIVACY_LOCKED_CHATS.getId())
                             .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
                                 @Override
                                 public String getTitle() {

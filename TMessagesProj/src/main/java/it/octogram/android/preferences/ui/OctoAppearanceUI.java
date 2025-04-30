@@ -27,6 +27,7 @@ import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.ExpandableRowsIds;
+import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StickerUi;
@@ -81,6 +82,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 .row(new TextDetailRow.TextDetailRowBuilder()
                         .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI())))
                         .icon(R.drawable.media_draw)
+                        .isNew(NewFeaturesBadgeId.APPEARANCE_INTERFACE.getId())
                         .title(getString(R.string.AppTitleSettings))
                         .description(getString(R.string.AppTitle_Desc))
                         .build()

@@ -153,7 +153,7 @@ public class OctoAiFeaturesUI implements PreferencesEntry {
                             .propertySelectionTag("generateModel")
                             .icon(R.drawable.aifeatures_solar)
                             .showIf(OctoConfig.INSTANCE.aiFeatures)
-                            .title(getString(R.string.AiFeatures_CustomModels_Generate))
+                            .title(getString(R.string.AiFeatures_CustomModels_Generate)+" (beta)")
                             .build());
 
                     HashMap<String, CustomModelsHelper.CustomModel> modelsList = CustomModelsHelper.getModelsList();

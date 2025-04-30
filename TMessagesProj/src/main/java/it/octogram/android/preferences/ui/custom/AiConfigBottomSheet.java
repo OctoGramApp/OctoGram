@@ -42,7 +42,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Scroller;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -69,8 +68,6 @@ import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.StickerImageView;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.LaunchActivity;
-
-import java.lang.reflect.Field;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;

@@ -335,19 +335,11 @@ object DrawerItem {
 }
 
 enum class NewFeaturesBadgeId(val id: String) {
-    UPDATES_BADGE("ub"),
-
-    GENERAL_BADGE("gb"),
-
-    APPEARANCE_BADGE("ab"),
-    CHATS_BADGE("cb"),
-    DRAWER_BADGE("db"),
-
-    EXPERIMENTAL_BADGE("eb"),
-    ALTERNATIVE_NAVIGATION_BADGE("anb"),
-
-    PRIVACY_BADGE("Pbs"),
-    DC_STATUS_BADGE("dcst")
+    AI_FEATURES_ID("AFI"),
+    PRIVACY_MAIN("PVL"),
+    PRIVACY_LOCKED_CHATS("PVLS"),
+    APPEARANCE("APLS"),
+    APPEARANCE_INTERFACE("APLSD")
 }
 
 enum class StickerUi(val value: Int) {

@@ -59,7 +59,7 @@ public class OctoConfig {
     public static final String PRIVATE_BETA_GROUP_HASH = "61-fnrres2ExNWFk";
     public static final String CRASH_MIME_TYPE = "message/rfc822";
     public static final String EXPORT_BACKUP_MIME_TYPE = "text/json";
-    public static final String AI_EXAMPLE_CHANNEL_TAG = "OctoGramAIModels";
+    public static final String AI_EXAMPLE_CHANNEL_TAG = "OctoModels";
 
     /*General*/
     public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM.getValue());

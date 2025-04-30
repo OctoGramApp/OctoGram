@@ -114,12 +114,13 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
-                            .isNew(NewFeaturesBadgeId.APPEARANCE_BADGE.getId())
+                            .isNew(NewFeaturesBadgeId.APPEARANCE.getId())
                             .title(getString(R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI())))
                             .icon(R.drawable.cup_star_solar)
+                            .isNew(NewFeaturesBadgeId.AI_FEATURES_ID.getId())
                             .title(getString(R.string.AiFeatures_Brief))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -130,7 +131,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI())))
                             .icon(R.drawable.menu_privacy)
-                            .isNew(NewFeaturesBadgeId.PRIVACY_BADGE.getId())
+                            .isNew(NewFeaturesBadgeId.PRIVACY_MAIN.getId())
                             .title(getString(R.string.PrivacySettings))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -173,7 +174,6 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DcStatusActivity()))
                             .icon(R.drawable.datacenter_status)
-                            .isNew(NewFeaturesBadgeId.DC_STATUS_BADGE.getId())
                             .title(getString(R.string.DatacenterStatus))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
