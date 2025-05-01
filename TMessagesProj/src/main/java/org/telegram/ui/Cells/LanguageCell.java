@@ -96,5 +96,6 @@ public class LanguageCell extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         if (needDivider && !OctoConfig.INSTANCE.disableDividers.getValue()) {
             canvas.drawLine(LocaleController.isRTL ? 0 : dp(marginStartDp - 3), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? dp(marginStartDp - 3) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
+        }
     }
 }
