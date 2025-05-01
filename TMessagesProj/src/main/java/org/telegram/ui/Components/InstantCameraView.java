@@ -142,7 +142,6 @@ import it.octogram.android.camerax.CameraXUtils;
 @TargetApi(18)
 public class InstantCameraView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
-    private static int A = 0;
     public boolean WRITE_TO_FILE_IN_BACKGROUND;
 
     private int currentAccount = UserConfig.selectedAccount;
@@ -2364,6 +2363,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         private int alphaHandle;
         private int zeroTimeStamps;
         private Integer lastCameraId = 0;
+        private InstantCameraVideoEncoderOverlayHelper overlayHelper;
 
         private AudioRecord audioRecorder;
 
@@ -2495,7 +2495,6 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         private boolean started;
 
         public void startRecording(File outputFile, android.opengl.EGLContext sharedContext) {
-            final int a = A++;
             if (started && (handler != null && handler.getLooper() != null && handler.getLooper().getThread() != null && handler.getLooper().getThread().isAlive())) {
                 sharedEglContext = sharedContext;
                 handler.sendMessage(handler.obtainMessage(MSG_START_RECORDING, 1, 0));
@@ -2811,6 +2810,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 return;
             }
 
+            if (overlayHelper != null) {
+                overlayHelper.bind();
+            }
+
             GLES20.glUseProgram(drawProgram);
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 12, vertexBuffer);
@@ -2854,6 +2857,13 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             GLES20.glDisableVertexAttribArray(textureHandle);
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
             GLES20.glUseProgram(0);
+
+            if (overlayHelper != null) {
+                overlayHelper.render();
+                if (blendEnabled) {
+                    GLES20.glEnable(GLES20.GL_BLEND);
+                }
+            }
 
             EGLExt.eglPresentationTimeANDROID(eglDisplay, eglSurface, currentTimestamp);
             EGL14.eglSwapBuffers(eglDisplay, eglSurface);
@@ -3294,6 +3304,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             eglContext = EGL14.EGL_NO_CONTEXT;
             eglConfig = null;
             handler.exit();
+            if (overlayHelper != null) {
+                overlayHelper.destroy();
+                overlayHelper = null;
+            }
             AndroidUtilities.runOnUIThread(() -> {
                 InstantCameraView.this.videoEncoder = null;
             });
@@ -3517,8 +3531,17 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             }
             GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
+            if (overlayHelper != null) {
+                overlayHelper.destroy();
+                overlayHelper = null;
+            }
+            overlayHelper = new InstantCameraVideoEncoderOverlayHelper(videoWidth, videoHeight);
+
             String vertexShaderSource, fragmentShaderSource;
-            if (useCamera2) {
+            if (overlayHelper != null) {
+                vertexShaderSource = VERTEX_SHADER;
+                fragmentShaderSource = FRAGMENT_SCREEN_SHADER;
+            } else if (useCamera2) {
                 vertexShaderSource = AndroidUtilities.readRes(R.raw.instant_lanczos_vert);
                 fragmentShaderSource = AndroidUtilities.readRes(R.raw.instant_lanczos_frag_oes);
             } else {
@@ -3780,6 +3803,10 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             if (fileWriteQueue != null) {
                 fileWriteQueue.recycle();
                 fileWriteQueue = null;
+            }
+            if (overlayHelper != null) {
+                overlayHelper.destroy();
+                overlayHelper = null;
             }
             try {
                 if (eglDisplay != EGL14.EGL_NO_DISPLAY) {

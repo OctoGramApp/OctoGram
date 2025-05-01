@@ -184,12 +184,6 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.alwaysExpandBlockQuotes)
                             .title(getString(R.string.AlwaysExpandBlockQuotes))
                             .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(context))
-                            .preferenceValue(OctoConfig.INSTANCE.enableQuickShare)
-                            .title(getString(R.string.QuickShareEnabled))
-                            .description(getString(R.string.QuickShareEnabled_Desc))
-                            .build());
                 })
                 .category(getString(R.string.DrawerHeaderAsBubble), OctoConfig.INSTANCE.drawerProfileAsBubble, category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -274,7 +268,6 @@ public class OctoExperimentsUI implements PreferencesEntry {
         OctoConfig.INSTANCE.uploadBoost.clear();
         OctoConfig.INSTANCE.downloadBoost.clear();
         OctoConfig.INSTANCE.downloadBoostValue.clear();
-        OctoConfig.INSTANCE.enableQuickShare.clear();
     }
 
     public static boolean checkExperimentsEnabled(Context context) {

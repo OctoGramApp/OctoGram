@@ -643,8 +643,6 @@
     <string name="HideOpenButtonChatsList">Hide open button in chats list</string>
     <string name="ProfileBubbleHideBorder">Hide dashed border</string>
     <string name="ProfileBubbleMoreTopPadding">Add more top padding</string>
-    <string name="QuickShareEnabled">Enable Quick Share</string>
-    <string name="QuickShareEnabled_Desc">Tap and hold the share button to quickly share messages from any chat.</string>
 
     <!-- Telegram Browser -->
     <string name="OctoTgBrowser">Telegram Browser</string>

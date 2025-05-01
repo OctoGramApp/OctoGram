@@ -317,7 +317,6 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost, R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost, R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue, R.string.DownloadBoostType));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.enableQuickShare, R.string.QuickShareEnabled));
     }
 
     private void fillUpdatesOptions(SettingsScanCategory category) {

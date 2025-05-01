@@ -232,7 +232,6 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> alwaysExpandBlockQuotes = newConfigProperty("alwaysExpandBlockQuotes", false);
     public final ConfigProperty<Boolean> profileBubbleHideBorder = newConfigProperty("profileBubbleHideBorder", false);
     public final ConfigProperty<Boolean> profileBubbleMoreTopPadding = newConfigProperty("profileBubbleMoreTopPadding", false);
-    public final ConfigProperty<Boolean> enableQuickShare = newConfigProperty("enableQuickShare", false);
     public final ConfigProperty<Boolean> rapidActionsDefaultConfig = newConfigProperty("rapidActionsDefaultConfig", true);
     public final ConfigProperty<Integer> rapidActionsMainButtonAction = newConfigProperty("rapidActionsMainButtonAction", InterfaceRapidButtonsActions.POST_STORY.getValue());
     public final ConfigProperty<Integer> rapidActionsMainButtonActionLongPress = newConfigProperty("rapidActionsMainButtonActionLongPress", InterfaceRapidButtonsActions.SAVED_MESSAGES.getValue());
