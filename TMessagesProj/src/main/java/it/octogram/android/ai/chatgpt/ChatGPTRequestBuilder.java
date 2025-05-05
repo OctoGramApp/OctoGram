@@ -8,6 +8,8 @@
 
 package it.octogram.android.ai.chatgpt;
 
+import androidx.annotation.NonNull;
+
 public class ChatGPTRequestBuilder {
 
     private String model = ChatGPTModels.GPT_3_5_TURBO;
@@ -17,6 +19,7 @@ public class ChatGPTRequestBuilder {
     private String apiKey;
     private String apiUrl;
     private String developerMessage;
+    private boolean streamOutput = false;
 
     public ChatGPTRequestBuilder setModel(String model) {
         this.model = model;
@@ -43,6 +46,11 @@ public class ChatGPTRequestBuilder {
         return this;
     }
 
+    public ChatGPTRequestBuilder setStreamOutput(boolean streamOutput) {
+        this.streamOutput = streamOutput;
+        return this;
+    }
+
     public ChatGPTRequest build() {
         if (userMessage == null || userMessage.trim().isEmpty()) {
             throw new IllegalArgumentException("User message cannot be null or empty");
@@ -50,7 +58,7 @@ public class ChatGPTRequestBuilder {
         if (apiKey == null || apiKey.trim().isEmpty()) {
             throw new IllegalArgumentException("apiKey cannot be null or empty");
         }
-        return new ChatGPTRequest(model, userMessage, developerMessage, temperature, maxTokens, apiKey, apiUrl);
+        return new ChatGPTRequest(model, userMessage, developerMessage, temperature, maxTokens, streamOutput, apiKey, apiUrl);
     }
 
     public ChatGPTRequestBuilder setDeveloperMessage(String developerMessage) {
@@ -61,5 +69,20 @@ public class ChatGPTRequestBuilder {
     public ChatGPTRequestBuilder setApiUrl(String apiUrl) {
         this.apiUrl = apiUrl;
         return this;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "ChatGPTRequestBuilder{" +
+                "model='" + model + '\'' +
+                ", userMessage='" + userMessage + '\'' +
+                ", temperature=" + temperature +
+                ", maxTokens=" + maxTokens +
+                ", apiKey='" + apiKey + '\'' +
+                ", apiUrl='" + apiUrl + '\'' +
+                ", developerMessage='" + developerMessage + '\'' +
+                ", streamOutput=" + streamOutput +
+                '}';
     }
 }

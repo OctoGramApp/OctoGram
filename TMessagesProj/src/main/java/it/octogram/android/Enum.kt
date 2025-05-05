@@ -376,7 +376,8 @@ enum class StickerUi(val value: Int) {
     CHATS_PRIVACY(30),
     TRANSLATOR_GEMINI(31),
     DUCK_OK(32),
-    NEW_MODEL_GENERATION(33)
+    NEW_MODEL_GENERATION(33),
+    OCTO_LOGS_PLACEHOLDER(34),
 }
 
 enum class DrawerBackgroundState(val value: Int) {

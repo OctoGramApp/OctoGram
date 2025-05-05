@@ -126,12 +126,93 @@ android {
         include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
     }
 
-    dependenciesInfo {
-        includeInApk = false
+    dependenciesInfo.includeInApk = false
+}
+
+def updateProperty(String key, Closure<String> transformer) {
+    def propertiesFile = project.rootProject.file("gradle.properties")
+    if (!propertiesFile.exists()) {
+        throw new GradleException("gradle.properties not found at ${propertiesFile.absolutePath}")
+    }
+
+    def lines = propertiesFile.readLines()
+    def newLines = []
+    def updated = false
+    def keyFound = false
+
+    for (line in lines) {
+        def equalsIndex = line.indexOf('=')
+
+        if (equalsIndex != -1 && line.substring(0, equalsIndex).trim() == key) {
+            keyFound = true
+            def valuePart = line.substring(equalsIndex + 1)
+            def oldValue = valuePart.trim()
+
+            def newValue = transformer(oldValue)
+
+            if (oldValue != newValue) {
+                logger.lifecycle("Property '$key' updated: '$oldValue' → '$newValue'")
+                newLines << line.substring(0, equalsIndex + 1) + newValue
+                updated = true
+            } else {
+                logger.info("Property '$key' value '$oldValue' did not change after transformation.")
+                newLines << line
+            }
+        } else {
+            newLines << line
+        }
+    }
+
+    if (!keyFound) {
+        logger.warn("Property '$key' not found in gradle.properties. No update attempted.")
+    } else if (updated) {
+        propertiesFile.text = newLines.join('\n')
+    } else {
+        logger.lifecycle("Property '$key' found, but value did not change.")
     }
 }
 
-tasks.register('buildRelease') {
+tasks.register('buildStable') {
+    group = "build"
+    description = "Builds the release APK and AAB."
     dependsOn("assembleRelease")
     dependsOn("bundlePlay")
+}
+
+tasks.register('markAsBeta') {
+    group = "versioning"
+    description = "Appends ' Beta' to the APP_VERSION_NAME in gradle.properties if not already present."
+    doLast {
+        updateProperty("APP_VERSION_NAME") { value ->
+            value.endsWith(" Beta") ? value : "$value Beta"
+        }
+    }
+}
+
+tasks.register('unmarkBeta') {
+    group = "versioning"
+    description = "Removes ' Beta' from the APP_VERSION_NAME in gradle.properties if present."
+    doLast {
+        updateProperty("APP_VERSION_NAME") { value ->
+            value.endsWith(" Beta") ? value[0..-6] : value
+        }
+    }
+}
+
+tasks.register('bumpVersionCode') {
+    group = "versioning"
+    description = "Increments the APP_VERSION_CODE in gradle.properties by a configurable amount (default 5)."
+
+    def incrementBy = project.hasProperty('increment') ? project.property('increment').toString().toInteger() : 5
+    logger.info("Incrementing version code by $incrementBy")
+
+    doLast {
+        updateProperty("APP_VERSION_CODE") { value ->
+            try {
+                (value.toInteger() + incrementBy).toString()
+            } catch (NumberFormatException e) {
+                throw new GradleException("APP_VERSION_CODE '$value' in gradle.properties is not a valid integer.", e)
+            }
+        }
+    }
 }

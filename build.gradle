@@ -52,9 +52,7 @@ subprojects {
                     }
                 }
 
-                buildFeatures {
-                    buildConfig = true
-                }
+                buildFeatures.buildConfig = true
             }
 
             dependencies {

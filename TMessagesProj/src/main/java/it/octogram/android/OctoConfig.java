@@ -667,8 +667,7 @@ public class OctoConfig {
     private boolean isValueValid(String fieldName, int value) {
         return switch (fieldName) {
             case "blurEffectStrength" -> isValidInRange(value, 0, 255);
-            case "cameraXResolution" ->
-                    isValidInRange(value, -1, 4096);
+            case "cameraXResolution" -> isValidInRange(value, -1, 4096);
             case "dcIdStyle" ->
                     isValidInRange(value, DcIdStyle.NONE.getValue(), DcIdStyle.MINIMAL.getValue());
             case "dcIdType" ->
@@ -681,7 +680,7 @@ public class OctoConfig {
                     isValidInRange(value, EventType.DEFAULT.getValue(), EventType.NONE.getValue());
             case "gcOutputType" ->
                     value == AudioType.MONO.getValue() || value == AudioType.STEREO.getValue();
-            case "maxRecentStickers" -> isValidInRange(value, 0, 9);
+            case "maxRecentStickers" -> isValidInRange(value, 0, 10);
             case "maxStickerSize" -> isValidInRange(value, 2, 20);
             case "photoResolution" ->
                     isValidInRange(value, PhotoResolution.LOW.getValue(), PhotoResolution.HIGH.getValue());
@@ -709,7 +708,6 @@ public class OctoConfig {
                     isValidInRange(value, DeviceIdentifyState.DEFAULT.getValue(), DeviceIdentifyState.FORCE_SMARTPHONE.getValue());
             case "phoneNumberAlternative" ->
                     isValidInRange(value, PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue(), PhoneNumberAlternative.SHOW_USERNAME.getValue());
-            //case "phoneNavigationAlternative" -> isValidInRange(value, PhoneNumberAlternative.SHOW_HIDDEN_NUMBER_STRING.getValue(), PhoneNumberAlternative.SHOW_USERNAME.getValue());
             case "navigationSmoothness" -> isValidNavigationSmoothness(value);
             case "autoDownloadUpdatesStatus" ->
                     isValidInRange(value, AutoDownloadUpdate.ALWAYS.getValue(), AutoDownloadUpdate.NEVER.getValue());
@@ -734,7 +732,9 @@ public class OctoConfig {
             case "useQualityPreset" ->
                     isValidInRange(value, QualityPreset.AUTO.getValue(), QualityPreset.DYNAMIC.getValue());
             case "biometricAskEvery" -> isValidInRange(value, 0, 300);
-            case "rapidActionsMainButtonAction", "rapidActionsMainButtonActionLongPress", "rapidActionsSecondaryButtonAction" ->
+            case "rapidActionsMainButtonAction",
+                 "rapidActionsMainButtonActionLongPress",
+                 "rapidActionsSecondaryButtonAction" ->
                     isValidInRange(value, InterfaceRapidButtonsActions.HIDDEN.getValue(), InterfaceRapidButtonsActions.SEARCH.getValue());
             default -> false;
         };

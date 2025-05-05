@@ -13754,27 +13754,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (selectedDialogIndex >= 0 && currentDialogIndex >= 0 &&
                     selectedDialogIndex < frozenDialogsList.size() && currentDialogIndex <= frozenDialogsList.size()) {
 
-                TLRPC.Dialog dialog = frozenDialogsList.get(selectedDialogIndex);
-                frozenDialogsList.remove(selectedDialogIndex);
+                frozenDialogsList.add(currentDialogIndex, frozenDialogsList.remove(selectedDialogIndex));
+                viewPages[0].dialogsItemAnimator.prepareForRemove();
+                viewPages[0].updateList(true);
 
-                if (selectedDialogIndex < currentDialogIndex) {
-                    currentDialogIndex--;
-                }
+                int offset = (int) scrollYOffset;
+                int scrollTo = (viewPages[0].dialogsType == 0 && hasHiddenArchive() &&
+                        viewPages[0].archivePullViewState == ARCHIVE_ITEM_STATE_HIDDEN) ? 1 : 0;
 
-                if (currentDialogIndex <= frozenDialogsList.size()) {
-                    frozenDialogsList.add(currentDialogIndex, dialog);
-                    viewPages[0].dialogsItemAnimator.prepareForRemove();
-                    viewPages[0].updateList(true);
-
-                    int offset = (int) scrollYOffset;
-                    int scrollTo = (viewPages[0].dialogsType == 0 && hasHiddenArchive() &&
-                            viewPages[0].archivePullViewState == ARCHIVE_ITEM_STATE_HIDDEN) ? 1 : 0;
-
-                    viewPages[0].layoutManager.scrollToPositionWithOffset(scrollTo, offset);
-                    animate = true;
-                } else {
-                    Log.w("DialogsActivity", "Corrected index for frozenDialogsList is invalid: " + currentDialogIndex + ", frozenSize=" + frozenDialogsList.size());
-                }
+                viewPages[0].layoutManager.scrollToPositionWithOffset(scrollTo, offset);
+                animate = true;
 
             } else if (currentDialogIndex >= 0 && selectedDialogIndex == currentDialogIndex) {
                 animate = true;
@@ -13790,7 +13779,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         }
     }
-
 
     private boolean updatePinStatus(MessagesController.DialogFilter filter, long dialogId, boolean pin, int pinPosition, boolean animated) {
         if (filter != null) {

@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.crashlytics.CrashViewType;
 
 public class CrashLogCell extends LinearLayout {
 
@@ -83,7 +84,7 @@ public class CrashLogCell extends LinearLayout {
 
     }
 
-    public void setData(File crashLog, boolean divider) {
+    public void setData(File crashLog, CrashViewType viewType, boolean divider) {
         this.crashLog = crashLog;
         linearLayout.setVisibility(VISIBLE);
 
@@ -91,7 +92,13 @@ public class CrashLogCell extends LinearLayout {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.ENGLISH);
         String date = dateFormat.format(crashLog.lastModified());
-        crashDateTextView.setText(formatString(R.string.CrashedOnDate, date));
+
+        int dateStringResId = (viewType == CrashViewType.CRASH_LOGS)
+                ? R.string.CrashedOnDate
+                : R.string.DebugLogsGeneratedOnDate;
+
+        crashDateTextView.setText(formatString(dateStringResId, date));
+
 
         needDivider = divider;
         setWillNotDraw(!needDivider);

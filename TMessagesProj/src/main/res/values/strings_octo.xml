@@ -746,12 +746,13 @@
     <string name="NoCrashLogFound">No crash log found</string>
     <string name="CouldNotCopyFile">Could not copy file</string>
     <string name="CopyLatestCrashLog">Copy Latest Crash Log</string>
-    <string name="CrashLogInfo">Crash logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
+    <string name="CrashLogInfo">Crash Logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
     <string name="CrashesDeleteConfirmation">Do you want to delete %s crash logs? This action is irreversible</string>
     <string name="CrashDeleteConfirmation">Do you want to delete one crash log? This action is irreversible</string>
     <string name="CrashesDeleted">%s crash logs have been cleared</string>
     <string name="CrashesUnableToDelete">Could not delete %s crash logs!</string>
     <string name="CrashDeleted">One crash log has been cleared</string>
+    <string name="AllCrashDeleted">All crash logs has been cleared</string>
     <string name="CrashedOnDate">Crashed on: %s</string>
     <string name="CrashLogCopied">Crash log copied to clipboard</string>
     <string name="OpenCrashLog">Open crash log</string>
@@ -759,6 +760,27 @@
     <string name="SendCrashLogDone">Crash log has been sent successfully.</string>
     <string name="CopyCrashLog">Copy crash log</string>
     <string name="ReportCrash">Report crash</string>
+    <string name="NoLogsSelectedForDeletion">No logs selected for deletion</string>
+
+    <!-- Debug history -->
+    <string name="DebugHistory">Debug Logs History</string>
+    <string name="NoDebugLogFound">No debug log found</string>
+    <string name="CouldNotCopyDebugFile">Could not copy file</string>
+    <string name="DebugLogInfo">Debug Logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
+    <string name="DebugsDeleteConfirmation">Do you want to delete %s debug logs? This action is irreversible</string>
+    <string name="DebugDeleteConfirmation">Do you want to delete one debug log? This action is irreversible</string>
+    <string name="DebugsDeleted">%s debug logs have been cleared</string>
+    <string name="DebugsUnableToDelete">Could not delete %s debug logs!</string>
+    <string name="DebugDeleted">One debug log has been cleared</string>
+    <string name="AllDebugDeleted">All debug logs have been cleared</string>
+    <string name="DebugLogsGeneratedOnDate">Debug Logs generated on: %s</string>
+    <string name="DebugLogCopied">Debug log copied to clipboard</string>
+    <string name="OpenDebugLog">Open debug log</string>
+    <string name="SendDebugLog">Send debug log</string>
+    <string name="SendDebugLogDone">Debug log has been sent successfully.</string>
+    <string name="CopyDebugLog">Copy debug log</string>
+    <string name="NoDebugLogsSelectedForDeletion">No debug logs selected for deletion</string>
+    <string name="CopySystemInfo">Copy system info</string>
 
     <!-- Permissions -->
     <string name="SendMediaPermissionStickers">Stickers</string>

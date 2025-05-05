@@ -50,6 +50,7 @@ import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.StoreUtils;
+import it.octogram.android.crashlytics.CrashViewType;
 import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.OctoPreferences;
@@ -179,14 +180,14 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
                                 LogsMigrator.migrateOldLogs();
-                                fragment.presentFragment(new CrashesActivity());
+                                fragment.presentFragment(new OctoLogsActivity(CrashViewType.CRASH_LOGS));
                             })
                             .icon(R.drawable.msg2_help)
                             .title(getString(R.string.CrashHistory))
                             .description(getString(R.string.CrashHistory_Desc))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new OctoLogsActivity()))
+                            .onClick(() -> fragment.presentFragment(new OctoLogsActivity(CrashViewType.DEBUG_LOGS)))
                             .icon(R.drawable.msg_log)
                             .title("Debug Logs (PBETA only)")
                             .description("View debug logs")

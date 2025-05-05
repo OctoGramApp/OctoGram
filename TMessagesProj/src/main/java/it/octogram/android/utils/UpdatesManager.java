@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ChatObject;
@@ -95,8 +96,10 @@ public class UpdatesManager {
         TLRPC.Chat chat = getMessagesController().getChat(-privateChatId);
 
         boolean hasPrivateBetaAccessC = chat != null;
+        OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
         if (!hasPrivateBetaAccessC) {
             OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE: chat empty");
+            OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
         }
 
         if (hasPrivateBetaAccessC) {
@@ -104,6 +107,7 @@ public class UpdatesManager {
             hasPrivateBetaAccessC &= chat.access_hash != 0;
             if (!hasPrivateBetaAccessC) {
                 OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + chat.id + " - " + chat.access_hash);
+                OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
             }
         }
 
@@ -113,6 +117,7 @@ public class UpdatesManager {
             hasPrivateBetaAccessC &= !ChatObject.isPublic(chat);
             if (!hasPrivateBetaAccessC) {
                 OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + ChatObject.isInChat(chat) + ChatObject.isChannel(chat) + ChatObject.isPublic(chat));
+                OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
             }
         }
 

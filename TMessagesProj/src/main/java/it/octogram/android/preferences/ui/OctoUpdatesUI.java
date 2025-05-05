@@ -28,12 +28,14 @@ import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.deeplink.DeepLinkDef;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -48,6 +50,7 @@ import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 
 public class OctoUpdatesUI implements PreferencesEntry {
     private CustomUpdatesCheckCell checkCell;
+    private final static String TAG = "OctoUpdatesUI";
 
     @NonNull
     @Override
@@ -56,8 +59,11 @@ public class OctoUpdatesUI implements PreferencesEntry {
         ConfigProperty<Boolean> isPbetaUser = new ConfigProperty<>(null, pbetaChatInstance != null);
 
         if (pbetaChatInstance == null && OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
+            OctoLogging.d(TAG, String.format(Locale.US, "%s: %s LINE: 62", isPbetaUser.getValue(), (pbetaChatInstance == null && OctoConfig.INSTANCE.receivePBetaUpdates.getValue())));
             OctoConfig.INSTANCE.receivePBetaUpdates.updateValue(false);
         }
+
+        OctoLogging.d(TAG, String.format(Locale.US, "%s %s: LINE:66", OctoConfig.INSTANCE.receivePBetaUpdates.getValue(), isPbetaUser.getValue()));
 
         OctoPreferences build = OctoPreferences.builder(getString(R.string.Updates))
                 .deepLink(DeepLinkDef.UPDATE)
@@ -152,7 +158,7 @@ public class OctoUpdatesUI implements PreferencesEntry {
             switch (currentState) {
                 case CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
                     LaunchActivity.instance.handleNewUpdate(SharedConfig.pendingAppUpdate, true);
-                break;
+                    break;
                 case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY:
                     UpdatesManager.installUpdate();
             }

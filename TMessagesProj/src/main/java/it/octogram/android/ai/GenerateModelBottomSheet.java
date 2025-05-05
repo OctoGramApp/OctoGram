@@ -1,6 +1,15 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.ai;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.runOnUIThread;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
@@ -165,9 +174,27 @@ public class GenerateModelBottomSheet extends BottomSheet {
 
             @Override
             public void onFailed() {
-                progressDialog.dismiss();
-                BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createErrorBulletin(getString(R.string.AiFeatures_CustomModels_Generate_Failed)).show();
+                runOnUIThread(() -> {
+                    progressDialog.dismiss();
+                    BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createErrorBulletin(getString(R.string.AiFeatures_CustomModels_Generate_Failed)).show();
+                });
             }
+            @Override
+            public void onTooManyRequests() {
+                runOnUIThread(() -> {
+                    progressDialog.dismiss();
+                    BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createErrorBulletin(getString((R.string.FloodWait))).show();
+                });
+            }
+
+            @Override
+            public void onModelOverloaded() {
+                runOnUIThread(() -> {
+                    progressDialog.dismiss();
+                    BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createErrorBulletin(getString((R.string.AiFeatures_CustomModels_Feature_Failed_Overloaded))).show();
+                });
+            }
+
         });
     }
 

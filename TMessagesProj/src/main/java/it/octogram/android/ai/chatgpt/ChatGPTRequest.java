@@ -17,7 +17,7 @@ public class ChatGPTRequest {
     private final int maxTokens;
     private final String apiKey;
     private final String apiUrl;
-
+    private final boolean streamOutput;
 
     public ChatGPTRequest(String model, String userMessage, String developerMessage, double temperature, int maxTokens, String apiKey) {
         this.model = model;
@@ -25,16 +25,18 @@ public class ChatGPTRequest {
         this.developerMessage = developerMessage;
         this.temperature = temperature;
         this.maxTokens = maxTokens;
+        this.streamOutput = false;
         this.apiKey = apiKey;
         this.apiUrl = "https://api.openai.com/v1/chat/completions";
     }
 
-    public ChatGPTRequest(String model, String userMessage, String developerMessage, double temperature, int maxTokens, String apiKey, String apiUrl) {
+    public ChatGPTRequest(String model, String userMessage, String developerMessage, double temperature, int maxTokens, boolean streamOutput, String apiKey, String apiUrl) {
         this.model = model;
         this.userMessage = userMessage;
         this.developerMessage = developerMessage;
         this.temperature = temperature;
         this.maxTokens = maxTokens;
+        this.streamOutput = streamOutput;
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
     }
@@ -65,5 +67,23 @@ public class ChatGPTRequest {
 
     public String getApiUrl() {
         return apiUrl;
+    }
+
+    public boolean isStreamOutput() {
+        return streamOutput;
+    }
+
+    @Override
+    public String toString() {
+        return "ChatGPTRequest{" +
+                "model='" + model + '\'' +
+                ", userMessage='" + userMessage + '\'' +
+                ", developerMessage='" + developerMessage + '\'' +
+                ", temperature=" + temperature +
+                ", maxTokens=" + maxTokens +
+                ", apiKey='" + apiKey + '\'' +
+                ", apiUrl='" + apiUrl + '\'' +
+                ", streamOutput=" + streamOutput +
+                '}';
     }
 }

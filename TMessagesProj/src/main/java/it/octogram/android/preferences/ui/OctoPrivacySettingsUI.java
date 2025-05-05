@@ -13,11 +13,14 @@ import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AccountInstance;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.NotificationCenter;
@@ -67,6 +70,8 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> canShowPhoneNumberAlternative = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canShowDebugProperties = new ConfigProperty<>(null, false);
     private final ConfigProperty<Integer> biometricAskEveryTemp = new ConfigProperty<>(OctoConfig.INSTANCE.biometricAskEvery.getKey(), 0);
+    private final ConfigProperty<Boolean> canShowFaceUnlock = new ConfigProperty<>(null, false);
+
     private final HashMap<Integer, ConfigProperty<Boolean>> accountAssoc = new HashMap<>();
 
     @NonNull
@@ -192,7 +197,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             .onClick(() -> checkAvailability(OctoConfig.INSTANCE.allowUsingFaceUnlock))
                             .preferenceValue(OctoConfig.INSTANCE.allowUsingFaceUnlock)
                             .title(getString(R.string.BiometricSettingsAllowFaceUnlock))
-                            .showIf(canShowBiometricOptions)
+                            .showIf(canShowFaceUnlock)
                             .build());
                     category.row(new HeaderRow(getString(R.string.BiometricAskEvery), canShowBiometricAskAfter).headerStyle(false));
                     category.row(new SliderChooseRow.SliderChooseRowBuilder()
@@ -316,6 +321,9 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
         canShowLockedAccountsOptions.updateValue(hasFingerprint && FingerprintUtils.hasLockedAccounts());
         canShowPhoneNumberAlternative.updateValue(OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue());
         canShowDebugProperties.updateValue(hasFingerprint && (BuildConfig.DEBUG_PRIVATE_VERSION || BuildVars.isBetaApp()));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            canShowFaceUnlock.updateValue(canShowBiometricOptions.getValue() && ApplicationLoader.applicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE));
+        }
 
         return hasChanged;
     }
@@ -400,4 +408,22 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
             return false;
         }
     }
+
+    /*public boolean isFaceUnlockStrongAndAvailable(Context context) {
+        var supportedDevices = new String[]{
+                // Pixel 4 Series
+                "flame", "coral",
+                // Pixel 8 Series
+                "husky",
+                // Pixel 9 Series
+                "tokay", "tegu", "caiman", "komodo", "comet",
+        };
+        var isPixelWithStrongBiometric = Arrays.asList(supportedDevices).contains(Build.DEVICE.toLowerCase(Locale.US).trim());
+        var hasFace = context.getPackageManager().hasSystemFeature("android.hardware.biometrics.face");
+        var biometricManager = BiometricManager.from(context);
+
+        var canStrongAuthenticate = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
+
+        return hasFace && (isPixelWithStrongBiometric || canStrongAuthenticate);
+    }*/
 }

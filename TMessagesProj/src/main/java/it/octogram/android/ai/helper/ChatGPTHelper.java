@@ -51,11 +51,11 @@ public class ChatGPTHelper {
                     }
                 } catch (ChatGPTException | StandardHTTPRequest.Http429Exception e) {
                     OctoLogging.e(TAG, "ChatGPT API error: " + e.getMessage(), e);
-                    if (e instanceof StandardHTTPRequest.Http429Exception) {
-                        callback.onTooManyRequests();
-                    } else {
-                        callback.onFailed();
-                    }
+                        if (e instanceof StandardHTTPRequest.Http429Exception) {
+                            callback.onTooManyRequests();
+                        } else {
+                            callback.onFailed();
+                        }
                 } catch (Exception e) {
                     OctoLogging.e(TAG, "Generic error during ChatGPT request", e);
                     callback.onFailed();
