@@ -1,0 +1,63 @@
+name: Notify on commit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    env:
+      SHOW_AUTHOR: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Extract pushed commits
+        id: get_commits
+        run: |
+          PUSHER_USERNAME="${{ github.actor }}"
+          if git rev-list ${{ github.event.before }}..${{ github.sha }} --count >/dev/null 2>&1; then
+            RANGE="${{ github.event.before }}..${{ github.sha }}"
+          else
+            RANGE="${{ github.sha }}"
+          fi
+
+          COUNT=$(git rev-list $RANGE --count)
+          if [ "$COUNT" -eq 0 ]; then
+            echo "commits=" >> $GITHUB_OUTPUT
+            echo "count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "$SHOW_AUTHOR" = "true" ]; then
+            FORMAT="‣ %s (<a href='https://github.com/${{ github.repository }}/commit/%H'>%h</a>) by <a href='https://github.com/$PUSHER_USERNAME'>%an</a>"
+          else
+            FORMAT="‣ %s (<a href='https://github.com/${{ github.repository }}/commit/%H'>%h</a>) by OctoGram-Dev"
+          fi
+
+          COMMITS=$(git log $RANGE --pretty=format:"$FORMAT" --max-count=30)
+
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Send message on Telegram
+        if: success() && steps.get_commits.outputs.count != '0'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_web_page_preview: true
+          format: html
+          message: |
+            📋 New Update in <a href='https://github.com/${{ github.repository }}'>${{ github.repository }}</a> (<a href='https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}'>${{ github.ref_name }}</a>)
+
+            ${{ steps.get_commits.outputs.commits }}
+
+            🔨 <a href='https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.sha }}'>${{ steps.get_commits.outputs.count }} new commit(s)</a>
