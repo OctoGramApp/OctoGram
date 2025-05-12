@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -119,7 +118,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -277,6 +275,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             -1394191079 // samsung a31
     };
     private boolean allowSendingWhileRecording;
+
 
     @SuppressLint("ClickableViewAccessibility")
     public InstantCameraView(Context context, Delegate delegate, Theme.ResourcesProvider resourcesProvider) {
@@ -1115,7 +1114,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         }
     }
 
-    /*public void saveLastCameraBitmap() {
+    /*private void saveLastCameraBitmap() {
         Bitmap bitmap = textureView.getBitmap();
         if (bitmap != null && bitmap.getPixel(0, 0) != 0) {
             lastBitmap = Bitmap.createScaledBitmap(textureView.getBitmap(), 50, 50, true);
@@ -1126,8 +1125,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     FileOutputStream stream = new FileOutputStream(file);
                     lastBitmap.compress(Bitmap.CompressFormat.JPEG, 87, stream);
                     stream.close();
-                } catch (Throwable e) {
-                    e.printStackTrace();
+                } catch (Throwable ignore) {
 
                 }
             }
@@ -1141,7 +1139,6 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             if (lastBitmap != null) {
                 Utilities.blurBitmap(lastBitmap, 7, 1, lastBitmap.getWidth(), lastBitmap.getHeight(), lastBitmap.getRowBytes());
 
-                //noinspection resource
                 ExecutorService executor = Executors.newSingleThreadExecutor();
                 executor.submit(() -> {
                     File file = new File(ApplicationLoader.getFilesDirFixed(), "icthumb.jpg");
@@ -2368,7 +2365,6 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         private AudioRecord audioRecorder;
 
         private ArrayBlockingQueue<AudioBufferInfo> buffers = new ArrayBlockingQueue<>(10);
-        private List<AudioBufferInfo> audioBufferInfoPool = new ArrayList<>();
         private ArrayList<Bitmap> keyframeThumbs = new ArrayList<>();
         private DispatchQueue generateKeyframeThumbsQueue;
         private int frameCount;
@@ -2400,16 +2396,11 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     }
                     AudioBufferInfo buffer;
                     if (buffers.isEmpty()) {
-                        /*try {
+                        try {
                             buffer = new AudioBufferInfo();
                         } catch (OutOfMemoryError error) {
                             System.gc();
                             buffer = new AudioBufferInfo();
-                        }*/
-                        buffer = getAudioBufferFromPool();
-                        if (buffer == null) {
-                            FileLog.e("AudioBufferInfo pool is empty!");
-                            continue;
                         }
                     } else {
                         buffer = buffers.poll();
@@ -2468,7 +2459,6 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                             done = true;
                         }
                         handler.sendMessage(handler.obtainMessage(MSG_AUDIOFRAME_AVAILABLE, buffer));
-                        returnAudioBufferToPool(buffer);
                     } else {
                         if (!running) {
                             done = true;
@@ -2713,7 +2703,6 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                                 if (running) {
                                     buffers.put(input);
                                 }
-                                returnAudioBufferToPool(input);
                                 if (!buffersToWrite.isEmpty()) {
                                     input = buffersToWrite.get(0);
                                 } else {
@@ -3783,18 +3772,6 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                     }
                 }
             }
-        }
-
-        private synchronized AudioBufferInfo getAudioBufferFromPool() {
-            if (!audioBufferInfoPool.isEmpty()) {
-                //noinspection SequencedCollectionMethodCanBeUsed
-                return audioBufferInfoPool.remove(0);
-            }
-            return null;
-        }
-
-        private synchronized void returnAudioBufferToPool(AudioBufferInfo buffer) {
-            audioBufferInfoPool.add(buffer);
         }
 
 

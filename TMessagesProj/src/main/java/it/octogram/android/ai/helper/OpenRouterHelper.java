@@ -43,7 +43,7 @@ public class OpenRouterHelper {
                     var response = openRouterClient.sendMessage(openRouterRequest);
 
                     String content = response.getContent();
-                    OctoLogging.e(TAG, "OpenRouter Content: "+content);
+                    OctoLogging.e(TAG, "OpenRouter Content: " + content);
                     if (content.strip().trim().isEmpty()) {
                         callback.onEmptyResponse();
                     } else {
@@ -51,11 +51,11 @@ public class OpenRouterHelper {
                     }
                 } catch (ChatGPTException | StandardHTTPRequest.Http429Exception e) {
                     OctoLogging.e(TAG, "OpenRouter API error: " + e.getMessage(), e);
-                        if (e instanceof StandardHTTPRequest.Http429Exception) {
-                            callback.onTooManyRequests();
-                        } else {
-                            callback.onFailed();
-                        }
+                    if (e instanceof StandardHTTPRequest.Http429Exception) {
+                        callback.onTooManyRequests();
+                    } else {
+                        callback.onFailed();
+                    }
                 } catch (Exception e) {
                     OctoLogging.e(TAG, "Generic error during OpenRouter request", e);
                     callback.onFailed();

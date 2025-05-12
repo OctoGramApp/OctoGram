@@ -58,7 +58,6 @@ import org.telegram.ui.Components.ThemePreviewDrawable;
 import org.telegram.ui.PhotoViewer;
 import org.telegram.ui.web.WebInstantView;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -91,8 +90,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
-
-import it.octogram.android.logs.OctoLogging;
 
 /**
  * image filter types
@@ -138,8 +135,8 @@ public class ImageLoader {
     private ConcurrentHashMap<String, long[]> fileProgresses = new ConcurrentHashMap<>();
     private HashMap<String, ThumbGenerateTask> thumbGenerateTasks = new HashMap<>();
     private HashMap<String, Integer> forceLoadingImages = new HashMap<>();
-    //private static ThreadLocal<byte[]> bytesLocal = new ThreadLocal<>();
-    //private static ThreadLocal<byte[]> bytesThumbLocal = new ThreadLocal<>();
+    private static ThreadLocal<byte[]> bytesLocal = new ThreadLocal<>();
+    private static ThreadLocal<byte[]> bytesThumbLocal = new ThreadLocal<>();
     private static byte[] header = new byte[12];
     private static byte[] headerThumb = new byte[12];
     private int currentHttpTasksCount = 0;
@@ -1242,7 +1239,7 @@ public class ImageLoader {
                                     MediaStore.Images.Thumbnails.getThumbnail(ApplicationLoader.applicationContext.getContentResolver(), mediaId, MediaStore.Images.Thumbnails.MINI_KIND, opts);
                                 }
                             } else {
-                                /*if (secureDocumentKey != null) {
+                                if (secureDocumentKey != null) {
                                     RandomAccessFile f = new RandomAccessFile(cacheFileFinal, "r");
                                     int len = (int) f.length();
                                     byte[] bytes = bytesLocal.get();
@@ -1273,19 +1270,7 @@ public class ImageLoader {
                                     }
                                     BitmapFactory.decodeStream(is, null, opts);
                                     is.close();
-                                }*/
-
-                                try (InputStream inputStream = secureDocumentKey != null
-                                        ? new EncryptedFileInputStream(cacheFileFinal, secureDocumentKey)
-                                        : new FileInputStream(cacheFileFinal);
-                                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
-
-                                    image = BitmapFactory.decodeStream(bufferedInputStream);
-
-                                } catch (Exception e) {
-                                    FileLog.e(e);
                                 }
-
                             }
 
                             float photoW = opts.outWidth;
@@ -1351,7 +1336,7 @@ public class ImageLoader {
                             }
                         }
 
-                        /*if (opts.inPurgeable || secureDocumentKey != null) {
+                        if (opts.inPurgeable || secureDocumentKey != null) {
                             RandomAccessFile f = new RandomAccessFile(cacheFileFinal, "r");
                             int len = (int) f.length();
                             int offset = 0;
@@ -1387,19 +1372,7 @@ public class ImageLoader {
                             }
                             image = BitmapFactory.decodeStream(is, null, opts);
                             is.close();
-                        }*/
-
-                        try (InputStream inputStream = secureDocumentKey != null
-                                ? new EncryptedFileInputStream(cacheFileFinal, secureDocumentKey)
-                                : new FileInputStream(cacheFileFinal);
-                             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
-
-                            image = BitmapFactory.decodeStream(bufferedInputStream, null, opts);
-
-                        } catch (Exception e) {
-                            FileLog.e(e);
                         }
-
 
                         if (image == null) {
                             if (cacheFileFinal.length() == 0 || cacheImage.filter == null) {
@@ -1493,7 +1466,7 @@ public class ImageLoader {
                                 image = MediaStore.Images.Thumbnails.getThumbnail(ApplicationLoader.applicationContext.getContentResolver(), mediaId, MediaStore.Images.Thumbnails.MINI_KIND, opts);
                             }
                         }
-                        if (!mediaIsVideo && image == null) {
+                        if (image == null) {
                             if (image == null) {
                                 FileInputStream is;
                                 if (secureDocumentKey != null) {
@@ -1523,7 +1496,7 @@ public class ImageLoader {
                             }
 
                             if (image == null) {
-                                /*try {
+                                try {
                                     RandomAccessFile f = new RandomAccessFile(cacheFileFinal, "r");
                                     int len = (int) f.length();
                                     int offset = 0;
@@ -1551,12 +1524,6 @@ public class ImageLoader {
                                         image = BitmapFactory.decodeByteArray(data, offset, len, opts);
                                     }
                                 } catch (Throwable e) {
-                                    FileLog.e(e);
-                                }*/
-                                try (InputStream inputStream = new EncryptedFileInputStream(cacheFileFinal, secureDocumentKey);
-                                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
-                                     image = BitmapFactory.decodeStream(bufferedInputStream);
-                                } catch (Exception e) {
                                     FileLog.e(e);
                                 }
                             }
@@ -1820,7 +1787,7 @@ public class ImageLoader {
         return drawable;
     }
 
-    /*public static Bitmap getStrippedPhotoBitmap(byte[] photoBytes, String filter) {
+    public static Bitmap getStrippedPhotoBitmap(byte[] photoBytes, String filter) {
         int len = photoBytes.length - 3 + Bitmaps.header.length + Bitmaps.footer.length;
         byte[] bytes = bytesLocal.get();
         byte[] data = bytes != null && bytes.length >= len ? bytes : null;
@@ -1841,78 +1808,6 @@ public class ImageLoader {
         Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, len, options);
         if (isRound) {
             Bitmap nbitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-            Canvas canvas = new Canvas(nbitmap);
-            canvas.save();
-            final float s = 1.2f;
-            canvas.scale(s, s, bitmap.getWidth() / 2f, bitmap.getHeight() / 2f);
-            canvas.drawBitmap(bitmap, 0, 0, null);
-            canvas.restore();
-            android.graphics.Path path = new android.graphics.Path();
-            path.addCircle(bitmap.getWidth() / 2f, bitmap.getHeight() / 2f, Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2f, android.graphics.Path.Direction.CW);
-            canvas.clipPath(path);
-            canvas.drawBitmap(bitmap, 0, 0, null);
-            bitmap.recycle();
-            bitmap = nbitmap;
-        }
-        if (bitmap != null && !TextUtils.isEmpty(filter) && filter.contains("b")) {
-            Utilities.blurBitmap(bitmap, 3, 1, bitmap.getWidth(), bitmap.getHeight(), bitmap.getRowBytes());
-        }
-        return bitmap;
-    }*/
-
-    public static Bitmap getStrippedPhotoBitmap(byte[] photoBytes, String filter) {
-        int len = photoBytes.length - 3 + Bitmaps.header.length + Bitmaps.footer.length;
-        byte[] data = new byte[len];
-
-        System.arraycopy(Bitmaps.header, 0, data, 0, Bitmaps.header.length);
-        System.arraycopy(photoBytes, 3, data, Bitmaps.header.length, photoBytes.length - 3);
-        System.arraycopy(Bitmaps.footer, 0, data, Bitmaps.header.length + photoBytes.length - 3, Bitmaps.footer.length);
-
-        data[164] = photoBytes[1];
-        data[166] = photoBytes[2];
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeByteArray(data, 0, len, options);
-
-        int imageHeight = options.outHeight;
-        int imageWidth = options.outWidth;
-
-        final int maxDimension = 1024;
-
-        int sampleSize = 1;
-
-        if (imageHeight > maxDimension || imageWidth > maxDimension) {
-            sampleSize = Math.min(imageWidth / maxDimension, imageHeight / maxDimension);
-        }
-
-        options = new BitmapFactory.Options();
-        options.inSampleSize = sampleSize;
-        options.inPreferredConfig = SharedConfig.deviceIsHigh() || (!TextUtils.isEmpty(filter) && filter.contains("r")) ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-        Bitmap bitmap = null;
-
-        try {
-            bitmap = BitmapFactory.decodeByteArray(data, 0, len, options);
-        } catch (OutOfMemoryError e) {
-            OctoLogging.e("ImageLoader", "OutOfMemoryError decoding bitmap with sampleSize=" + sampleSize, e);
-            return null;
-        } catch (Exception e) {
-            OctoLogging.e("ImageLoader", "Error decoding bitmap", e);
-            return null;
-        }
-
-        if (bitmap == null) {
-            return null;
-        }
-
-
-        final boolean isRound = !TextUtils.isEmpty(filter) && filter.contains("r");
-        if (isRound) {
-            Bitmap.Config config = bitmap.getConfig();
-            if (config == null) {
-                config = Bitmap.Config.ARGB_8888;
-            }
-            Bitmap nbitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), config);
             Canvas canvas = new Canvas(nbitmap);
             canvas.save();
             final float s = 1.2f;

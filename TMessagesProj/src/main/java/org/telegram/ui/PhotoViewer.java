@@ -7410,7 +7410,12 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     data.useSwipeBack = false;
                     data.isInputBox = true;
                     data.setInputBoxText = (v) -> AndroidUtilities.runOnUIThread(() -> {
-                        captionEdit.setText(v);
+                        if (captionEdit != null) {
+                            captionEdit.setText(v);
+                        }
+                        if (topCaptionEdit != null) {
+                            topCaptionEdit.setText(v);
+                        }
                         applyCaption();
                     });
                     MessagesModelsWrapper.initState(data);
@@ -22548,7 +22553,12 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             @Override
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 AndroidUtilities.runOnUIThread(() -> {
-                    captionEdit.setText(finalText.text);
+                    if (captionEdit != null) {
+                        captionEdit.setText(finalText.text);
+                    }
+                    if (topCaptionEdit != null) {
+                        topCaptionEdit.setText(finalText.text);
+                    }
                     applyCaption();
                 });
             }

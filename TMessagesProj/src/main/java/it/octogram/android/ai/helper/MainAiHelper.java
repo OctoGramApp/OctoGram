@@ -8,9 +8,7 @@
 
 package it.octogram.android.ai.helper;
 
-import java.util.List;
-
-import it.octogram.android.ConfigProperty;
+import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ai.AiUtils;
 import it.octogram.android.logs.OctoLogging;
@@ -27,43 +25,30 @@ public class MainAiHelper {
         return canUseAiFeatures() && OctoConfig.INSTANCE.aiFeaturesTranslateMessages.getValue();
     }
 
-    public static int getPreferredProvider() {
-        int favoriteProvider = GeminiHelper.isAvailable() ? Providers.GEMINI : Providers.CHATGPT;
+    public static AiProvidersDetails getPreferredProvider() {
+        AiProvidersDetails favoriteProvider = GeminiHelper.isAvailable() ? AiProvidersDetails.GEMINI : (ChatGPTHelper.isAvailable() ? AiProvidersDetails.CHATGPT : AiProvidersDetails.OPENROUTER);
         if (!OpenRouterHelper.isAvailable() && !GeminiHelper.isAvailable() && !ChatGPTHelper.isAvailable()) {
-            favoriteProvider = -1;
+            favoriteProvider = null;
         }
 
         int recentProvider = OctoConfig.INSTANCE.aiFeaturesRecentProvider.getValue();
-        if (recentProvider == Providers.GEMINI && GeminiHelper.isAvailable()) {
-            favoriteProvider = Providers.GEMINI;
-        } else if (recentProvider == Providers.CHATGPT && ChatGPTHelper.isAvailable()) {
-            favoriteProvider = Providers.CHATGPT;
-        } else if (recentProvider == Providers.OPENROUTER && OpenRouterHelper.isAvailable()) {
-            favoriteProvider = Providers.OPENROUTER;
+        if (recentProvider == AiProvidersDetails.GEMINI.getId() && GeminiHelper.isAvailable()) {
+            favoriteProvider = AiProvidersDetails.GEMINI;
+        } else if (recentProvider == AiProvidersDetails.CHATGPT.getId() && ChatGPTHelper.isAvailable()) {
+            favoriteProvider = AiProvidersDetails.CHATGPT;
+        } else if (recentProvider == AiProvidersDetails.OPENROUTER.getId() && OpenRouterHelper.isAvailable()) {
+            favoriteProvider = AiProvidersDetails.OPENROUTER;
         }
 
         return favoriteProvider;
     }
 
-    public static String getProviderName(int preferredProvider) {
-        if (preferredProvider == Providers.GEMINI) {
-            return "Gemini";
-        } else if (preferredProvider == Providers.CHATGPT) {
-            return "ChatGPT";
-        } else if (preferredProvider == Providers.OPENROUTER) {
-            return "OpenRouter";
-        } else {
-            OctoLogging.e(TAG, "Unknown provider: " + preferredProvider);
-            return "Unknown";
-        }
-    }
-
-    public static boolean isProviderAvailable(int preferredProvider) {
-        if (preferredProvider == Providers.GEMINI) {
+    public static boolean isProviderAvailable(AiProvidersDetails preferredProvider) {
+        if (preferredProvider == AiProvidersDetails.GEMINI) {
             return GeminiHelper.isAvailable();
-        } else if (preferredProvider == Providers.CHATGPT) {
+        } else if (preferredProvider == AiProvidersDetails.CHATGPT) {
             return ChatGPTHelper.isAvailable();
-        } else if (preferredProvider == Providers.OPENROUTER) {
+        } else if (preferredProvider == AiProvidersDetails.OPENROUTER) {
             return OpenRouterHelper.isAvailable();
         } else {
             OctoLogging.e(TAG, "Unknown provider: " + preferredProvider);
@@ -71,23 +56,23 @@ public class MainAiHelper {
         }
     }
 
-    public static void request(AiUtils.AiPrompt aiPrompt, int preferredProvider, OnResultState state) {
+    public static void request(AiUtils.AiPrompt aiPrompt, AiProvidersDetails preferredProvider, OnResultState state) {
         request(aiPrompt, preferredProvider, state, false);
     }
 
-    private static void request(AiUtils.AiPrompt aiPrompt, int preferredProvider, OnResultState state, boolean forced) {
+    private static void request(AiUtils.AiPrompt aiPrompt, AiProvidersDetails preferredProvider, OnResultState state, boolean forced) {
         if (!forced) {
             if (frozenState) {
                 return;
             }
-            OctoConfig.INSTANCE.aiFeaturesRecentProvider.updateValue(preferredProvider);
+            OctoConfig.INSTANCE.aiFeaturesRecentProvider.updateValue(preferredProvider.getId());
         }
 
-        if (preferredProvider == Providers.GEMINI) {
+        if (preferredProvider == AiProvidersDetails.GEMINI) {
             GeminiHelper.prompt(aiPrompt, state);
-        } else if (preferredProvider == Providers.CHATGPT) {
+        } else if (preferredProvider == AiProvidersDetails.CHATGPT) {
             ChatGPTHelper.prompt(aiPrompt, state);
-        } else if (preferredProvider == Providers.OPENROUTER) {
+        } else if (preferredProvider == AiProvidersDetails.OPENROUTER) {
             OpenRouterHelper.prompt(aiPrompt, state);
         } else {
             OctoLogging.e(TAG, "Unknown provider: " + preferredProvider);
@@ -95,34 +80,19 @@ public class MainAiHelper {
         }
     }
 
-    public static void ping(ConfigProperty<Boolean> configProperty, ConfigProperty<String> keyProperty, String key, OnResultState callback) {
-        if (configProperty != OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs && configProperty != OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs && configProperty != OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs) {
-            callback.onFailed();
-            return;
-        }
-
+    public static void ping(AiProvidersDetails provider, String key, OnResultState callback) {
         frozenState = true;
 
-        boolean originalState = configProperty.getValue();
-        configProperty.updateValue(true);
+        boolean originalState = provider.getStatusProperty().getValue();
+        provider.getStatusProperty().updateValue(true);
 
-        int preferredProvider;
+        String originalKeyState = provider.getKeyProperty().getValue();
+        provider.getKeyProperty().updateValue(key);
 
-        if (configProperty == OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs) {
-            preferredProvider = Providers.GEMINI;
-        } else if (configProperty == OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs) {
-            preferredProvider = Providers.CHATGPT;
-        } else {
-            preferredProvider = Providers.OPENROUTER;
-        }
-
-        String originalKeyState = keyProperty.getValue();
-        keyProperty.updateValue(key);
-
-        request(new AiUtils.AiPrompt("Ping", "Pong?"), preferredProvider, new OnResultState() {
+        request(new AiUtils.AiPrompt("Ping", "Pong?"), provider, new OnResultState() {
             private void resetState() {
-                configProperty.updateValue(originalState);
-                keyProperty.updateValue(originalKeyState);
+                provider.getStatusProperty().updateValue(originalState);
+                provider.getKeyProperty().updateValue(originalKeyState);
                 frozenState = false;
             }
 
@@ -153,13 +123,5 @@ public class MainAiHelper {
         default void onModelOverloaded() {
             onFailed();
         }
-    }
-
-    public static class Providers {
-        public static int GEMINI = 0;
-        public static int CHATGPT = 1;
-        public static int OPENROUTER = 2;
-
-        public static List<Integer> availableProviders = List.of(GEMINI, CHATGPT, OPENROUTER);
     }
 }

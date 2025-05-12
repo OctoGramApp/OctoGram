@@ -143,6 +143,8 @@
     <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example1">How many people are there?</string>
     <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example2">Describe the setting</string>
     <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example3">Can you sum up the content?</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example4">Can you recap what it says?</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example5">What it says?</string>
     <string name="AiFeatures_CustomModels_Feature_CloseModal">Close AI suggestion</string>
     <string name="AiFeatures_CustomModels_Feature_UseAsText">Use as text…</string>
     <string name="AiFeatures_CustomModels_Feature_Language">Language</string>

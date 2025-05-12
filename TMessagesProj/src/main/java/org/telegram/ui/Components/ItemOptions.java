@@ -864,6 +864,10 @@ public class ItemOptions {
         return layout;
     }
 
+    public LinearLayout getLinearLayout() {
+        return linearLayout;
+    }
+
     public ActionBarPopupWindow.ActionBarPopupWindowLayout getLastLayout() {
         return lastLayout;
     }

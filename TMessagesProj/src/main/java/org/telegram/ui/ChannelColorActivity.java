@@ -269,7 +269,6 @@ public class ChannelColorActivity extends BaseFragment implements NotificationCe
         getNotificationCenter().removeObserver(this, NotificationCenter.boostByChannelCreated);
         getNotificationCenter().removeObserver(this, NotificationCenter.chatWasBoostedByUser);
         getNotificationCenter().removeObserver(this, NotificationCenter.dialogDeleted);
-        Bulletin.removeDelegate(this);
     }
 
     public ChannelColorActivity(long dialogId) {

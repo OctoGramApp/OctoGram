@@ -27,9 +27,12 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.LaunchActivity;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -589,13 +592,16 @@ public class OctoConfig {
         int changed = 0;
 
         try (FileInputStream downloadedFileStream = new FileInputStream(file)) {
+            InputStreamReader reader = new InputStreamReader(downloadedFileStream, StandardCharsets.UTF_8);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
             StringBuilder jsonStringBuilder = new StringBuilder();
-            int character;
-            while ((character = downloadedFileStream.read()) != -1) {
-                jsonStringBuilder.append((char) character);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                jsonStringBuilder.append(line);
             }
 
-            downloadedFileStream.close();
+            bufferedReader.close();
 
             JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
 
@@ -693,13 +699,13 @@ public class OctoConfig {
             case "translatorFormality" ->
                     isValidInRange(value, TranslatorFormality.DEFAULT.getValue(), TranslatorFormality.HIGH.getValue());
             case "defaultEmojiButtonAction" ->
-                    isValidInRange(value, DefaultEmojiButtonAction.DEFAULT.getValue(), DefaultEmojiButtonAction.STICKERS.getValue());
+                    isValidInRange(value, DefaultEmojiButtonAction.DEFAULT.getValue(), DefaultEmojiButtonAction.GIFS.getValue());
             case "stickerShape" ->
                     isValidInRange(value, StickerShape.DEFAULT.getValue(), StickerShape.MESSAGE.getValue());
             case "drawerBackground" ->
-                    isValidInRange(value, DrawerBackgroundState.WALLPAPER.getValue(), DrawerBackgroundState.PREMIUM_DETAILS.getValue());
+                    isValidInRange(value, DrawerBackgroundState.TRANSPARENT.getValue(), DrawerBackgroundState.PREMIUM_DETAILS.getValue());
             case "drawerFavoriteOption" ->
-                    isValidInRange(value, DrawerFavoriteOption.NONE.getValue(), DrawerFavoriteOption.ARCHIVED_CHATS.getValue());
+                    isValidInRange(value, DrawerFavoriteOption.NONE.getValue(), DrawerFavoriteOption.TELEGRAM_BROWSER.getValue());
             case "drawerBlurBackgroundLevel" -> isValidInRange(value, 1, 100);
             case "drawerDarkenBackgroundLevel" -> isValidInRange(value, 1, 255);
             case "actionBarTitleOption" ->
@@ -728,7 +734,7 @@ public class OctoConfig {
             case "shortcutsPosition" ->
                     isValidInRange(value, ShortcutsPosition.THREE_DOTS.getId(), ShortcutsPosition.PROFILE_DOTS.getId());
             case "cameraPreview" ->
-                    isValidInRange(value, CameraPreview.DEFAULT, CameraPreview.HIDDEN);
+                    isValidInRange(value, CameraPreview.DEFAULT, CameraPreview.BOTTOM_BAR);
             case "useQualityPreset" ->
                     isValidInRange(value, QualityPreset.AUTO.getValue(), QualityPreset.DYNAMIC.getValue());
             case "biometricAskEvery" -> isValidInRange(value, 0, 300);

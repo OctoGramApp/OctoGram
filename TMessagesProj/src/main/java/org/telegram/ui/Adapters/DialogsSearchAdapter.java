@@ -75,7 +75,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.account.FingerprintUtils;
 
 public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
@@ -2140,13 +2139,14 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
                 if (messageObject == null) {
                     cell.setDialog(0, null, 0, false, false);
                 } else {
-                    if (!messageObject.messageOwner.message.isEmpty() && FingerprintUtils.hasLockedChats() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isChatLocked(messageObject.getDialogId())) {
+                    String msg = messageObject.messageOwner.message;
+                    if (msg != null && !msg.isEmpty() && FingerprintUtils.hasLockedChats() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isChatLocked(messageObject.getDialogId())) {
                         if (messageObject.highlightedWords != null) {
                             messageObject.highlightedWords.clear();
                         }
                         TLRPC.TL_messageEntitySpoiler sp = new TLRPC.TL_messageEntitySpoiler();
                         sp.offset = 0;
-                        sp.length = messageObject.messageOwner.message.length();
+                        sp.length = msg.length();
                         messageObject.messageOwner.entities.clear();
                         messageObject.messageOwner.entities.add(sp);
                     }

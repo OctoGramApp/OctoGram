@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import it.octogram.android.AiModelMessagesState;
@@ -204,6 +205,29 @@ public class MessagesModelsWrapper {
             messages.sort(Comparator.comparingInt(MessageObject::getId));
             consumer.accept(messages);
         }
+    }
+
+    public static int getSuggestedAskOnMediaAction(FillStateData data) {
+        int tokenIndex = new Random().nextInt(3) + 1;
+
+        int key;
+        if (tokenIndex == 2) {
+            key = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example2;
+        } else if (tokenIndex == 3) {
+            key = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example3;
+        } else {
+            key = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example1;
+        }
+
+        AiModelMessagesState state = MessagesModelsWrapper.getAvailableStates(data);
+
+        if (state == AiModelMessagesState.VOICE_MESSAGES || state == AiModelMessagesState.MUSIC) {
+            key = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example5;
+            if (tokenIndex == 2 || tokenIndex == 3) {
+                key = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example4;
+            }
+        }
+        return key;
     }
 
     public static AiModelMessagesState getAvailableStates(FillStateData data) {

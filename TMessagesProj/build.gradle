@@ -213,7 +213,8 @@ android {
         }
         vectorDrawables {
             generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
-            useSupportLibrary = true // Fixes for android KitKat
+            // Cause some crash on android 5
+            // useSupportLibrary = true
         }
     }
 }

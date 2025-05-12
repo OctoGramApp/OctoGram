@@ -13,6 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IntDef
 import androidx.annotation.StringDef
 import androidx.core.graphics.toColorInt
+import it.octogram.android.preferences.fragment.OctoAnimationFragment
 import org.telegram.messenger.LocaleController.getString
 import org.telegram.messenger.R
 
@@ -150,6 +151,53 @@ object CameraXResolution {
     }
 }
 
+enum class AiProvidersDetails(
+    val id: Int,
+    val title: String,
+    val keyMinLength: Int,
+    val keyMaxLength: Int,
+    val animationScope: Int,
+    val statusProperty: ConfigProperty<Boolean>,
+    val keyProperty: ConfigProperty<String>,
+    val needWarningZone: Boolean
+) {
+    GEMINI(
+        0,
+        "Gemini",
+        20,
+        45,
+        OctoAnimationFragment.OctoAnimationScopes.GEMINI,
+        OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs,
+        OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIKey,
+        false
+    ),
+    CHATGPT(
+        1,
+        "ChatGPT",
+        100,
+        180,
+        OctoAnimationFragment.OctoAnimationScopes.CHATGPT,
+        OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs,
+        OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIKey,
+        true
+    ),
+    OPENROUTER(
+        2,
+        "OpenRouter",
+        45,
+        100,
+        OctoAnimationFragment.OctoAnimationScopes.CHATGPT,
+        OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs,
+        OctoConfig.INSTANCE.aiFeaturesOpenRouterAPIKey,
+        true
+    );
+
+    companion object {
+        fun fromMainProperty(property: ConfigProperty<Boolean>) : AiProvidersDetails? {
+            return AiProvidersDetails.entries.find { it.statusProperty == property }
+        }
+    }
+}
 
 enum class PhotoResolution(val value: Int) {
     LOW(0),

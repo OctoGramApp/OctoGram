@@ -32,6 +32,7 @@ import org.telegram.ui.Components.ItemOptions;
 import java.util.HashMap;
 import java.util.List;
 
+import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
@@ -76,13 +77,14 @@ public class OctoAiFeaturesUI implements PreferencesEntry {
         this.fragment = fragment;
         this.context = context;
 
-        showNoProviderAlert.updateValue(!areThereEnabledProviders());
+        showNoProviderAlert.updateValue(OctoConfig.INSTANCE.aiFeatures.getValue() && !areThereEnabledProviders());
         modelsAssoc.clear();
 
         return OctoPreferences.builder(getString(R.string.AiFeatures_Brief))
                 .deepLink(DeepLinkDef.AI_FEATURES)
                 .row(new SwitchRow.SwitchRowBuilder()
                         .isMainPageAction(true)
+                        .onPostUpdate(() -> showNoProviderAlert.updateValue(OctoConfig.INSTANCE.aiFeatures.getValue() && !areThereEnabledProviders()))
                         .preferenceValue(OctoConfig.INSTANCE.aiFeatures)
                         .title(getString(R.string.AiFeatures))
                         .build()
@@ -181,7 +183,10 @@ public class OctoAiFeaturesUI implements PreferencesEntry {
 
     private boolean handleSwitch(ConfigProperty<Boolean> currentProperty) {
         if (providers.contains(currentProperty)) {
-            openPropertyConfig(currentProperty);
+            AiProvidersDetails provider = AiProvidersDetails.Companion.fromMainProperty(currentProperty);
+            if (provider != null) {
+                openPropertyConfig(provider);
+            }
         } else {
             if (currentProperty.getValue() && canDisableProperty(currentProperty)) {
                 return true;
@@ -201,7 +206,7 @@ public class OctoAiFeaturesUI implements PreferencesEntry {
         if (features.contains(currentProperty) && !areThereEnabledFeatures(currentProperty)) {
             BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, getString(R.string.AiFeatures_Features_Empty), getString(R.string.AiFeatures_AccessVia_Empty_Disable), () -> {
                 OctoConfig.INSTANCE.aiFeatures.updateValue(false);
-                showNoProviderAlert.updateValue(!areThereEnabledProviders());
+                showNoProviderAlert.updateValue(OctoConfig.INSTANCE.aiFeatures.getValue() && !areThereEnabledProviders());
                 fragment.reloadUIAfterValueUpdate();
             }).show();
             return false;
@@ -210,16 +215,11 @@ public class OctoAiFeaturesUI implements PreferencesEntry {
         return true;
     }
 
-    private void openPropertyConfig(ConfigProperty<Boolean> property) {
-        new AiConfigBottomSheet(context, fragment, new AiConfigBottomSheet.AiConfigInterface() {
-            @Override
-            public ConfigProperty<Boolean> getProperty() {
-                return property;
-            }
-
+    private void openPropertyConfig(AiProvidersDetails property) {
+        new AiConfigBottomSheet(context, fragment, property, new AiConfigBottomSheet.AiConfigInterface() {
             @Override
             public void onStateUpdated() {
-                showNoProviderAlert.updateValue(!areThereEnabledProviders());
+                showNoProviderAlert.updateValue(OctoConfig.INSTANCE.aiFeatures.getValue() && !areThereEnabledProviders());
                 fragment.reloadUIAfterValueUpdate();
             }
 

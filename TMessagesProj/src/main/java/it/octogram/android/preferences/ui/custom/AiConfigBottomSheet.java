@@ -69,18 +69,17 @@ import org.telegram.ui.Components.StickerImageView;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.LaunchActivity;
 
-import it.octogram.android.ConfigProperty;
+import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.ai.helper.MainAiHelper;
 import it.octogram.android.ai.openrouter.OpenRouterModels;
-import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.OctoAnimationFragment;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.PopupChoiceDialogUtils;
 
 public class AiConfigBottomSheet extends BottomSheet {
-    static final String TAG = "AiConfigBottomSheet";
+    private final AiProvidersDetails provider;
 
     private int selectedPosition;
     private final ViewPager viewPager;
@@ -89,21 +88,18 @@ public class AiConfigBottomSheet extends BottomSheet {
     private OutlineEditText modelTextCursor;
     private final BaseFragment fragment;
 
-    private final boolean showWarningZone;
-
     private boolean shouldShowSuccessBulletin = false;
 
-    public AiConfigBottomSheet(Context context, BaseFragment fragment, AiConfigInterface callback) {
+    public AiConfigBottomSheet(Context context, BaseFragment fragment, AiProvidersDetails provider, AiConfigInterface callback) {
         super(context, true);
         setApplyBottomPadding(false);
         setApplyTopPadding(false);
         fixNavigationBar(getThemedColor(Theme.key_windowBackgroundWhite));
 
-        showWarningZone = callback.getProperty() != OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs;
-
+        this.provider = provider;
         this.callback = callback;
         this.fragment = fragment;
-
+        
         TextView textView;
 
         FrameLayout frameLayout = new FrameLayout(getContext());
@@ -125,7 +121,7 @@ public class AiConfigBottomSheet extends BottomSheet {
         PagerAdapter pagerAdapter = new PagerAdapter() {
             @Override
             public int getCount() {
-                return showWarningZone ? 3 : 2;
+                return provider.getNeedWarningZone() ? 3 : 2;
             }
 
             @NonNull
@@ -163,7 +159,7 @@ public class AiConfigBottomSheet extends BottomSheet {
         buttonTextView.setTextColor(Color.WHITE);
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Color.parseColor("#8d3067"), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> {
-            if (selectedPosition == (CurrentStep.INSERT_API_KEY + (showWarningZone ? 1 : 0))) {
+            if (selectedPosition == (CurrentStep.INSERT_API_KEY + (provider.getNeedWarningZone() ? 1 : 0))) {
                 checkApiKey();
                 return;
             }
@@ -172,15 +168,20 @@ public class AiConfigBottomSheet extends BottomSheet {
         });
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
-        if (callback.getProperty().getValue()) {
+        if (provider.getStatusProperty().getValue()) {
             textView = new TextView(context);
             textView.setGravity(Gravity.CENTER);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            textView.setText(formatString(R.string.AiFeatures_AccessVia_Login_DisableS, getServiceDetails().serviceName));
+            textView.setText(formatString(R.string.AiFeatures_AccessVia_Login_DisableS, provider.getTitle()));
             textView.setTextColor(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_dialogTextBlack), 150));
             textView.setOnClickListener(view -> {
-                callback.getProperty().updateValue(false);
+                provider.getStatusProperty().updateValue(false);
                 callback.onStateUpdated();
+
+                if (OctoConfig.INSTANCE.aiFeaturesRecentProvider.getValue() == provider.getId()) {
+                    OctoConfig.INSTANCE.aiFeaturesRecentProvider.clear();
+                }
+
                 shouldShowSuccessBulletin = false;
                 dismiss();
             });
@@ -217,7 +218,7 @@ public class AiConfigBottomSheet extends BottomSheet {
                         animator.start();
                     }
 
-                    if (position == (CurrentStep.INSERT_API_KEY + (showWarningZone ? 1 : 0))) {
+                    if (position == (CurrentStep.INSERT_API_KEY + (provider.getNeedWarningZone() ? 1 : 0))) {
                         buttonTextView.setText(getString(R.string.AiFeatures_AccessVia_Login_NextStep_SaveKey));
                         AndroidUtilities.runOnUIThread(() -> {
                             editTextCursor.getEditText().requestFocus();
@@ -225,7 +226,7 @@ public class AiConfigBottomSheet extends BottomSheet {
                         }, 200);
                     }
 
-                    if (position == CurrentStep.WARNING && showWarningZone && child instanceof ViewPage d) {
+                    if (position == CurrentStep.WARNING && provider.getNeedWarningZone() && child instanceof ViewPage d) {
                         AndroidUtilities.runOnUIThread(d::playAnimation, 200);
                     }
                 }
@@ -262,7 +263,7 @@ public class AiConfigBottomSheet extends BottomSheet {
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (shouldShowSuccessBulletin) {
-            BulletinFactory.of(fragment).createSuccessBulletin(formatString(R.string.AiFeatures_AccessVia_Login_Step3, getServiceDetails().serviceName)).show();
+            BulletinFactory.of(fragment).createSuccessBulletin(formatString(R.string.AiFeatures_AccessVia_Login_Step3, provider.getTitle())).show();
         }
     }
 
@@ -271,7 +272,7 @@ public class AiConfigBottomSheet extends BottomSheet {
             return getString(R.string.AiFeatures_AccessVia_Login_Step1);
         }
 
-        if (showWarningZone && stepId == CurrentStep.WARNING) {
+        if (provider.getNeedWarningZone() && stepId == CurrentStep.WARNING) {
             return getString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning);
         }
 
@@ -280,11 +281,11 @@ public class AiConfigBottomSheet extends BottomSheet {
 
     private String getDescriptionForStepId(int stepId) {
         if (stepId == CurrentStep.INITIAL_STAGE) {
-            return formatString(R.string.AiFeatures_AccessVia_Login_Step1_Desc, getServiceDetails().serviceName);
+            return formatString(R.string.AiFeatures_AccessVia_Login_Step1_Desc, provider.getTitle());
         }
 
-        if (showWarningZone && stepId == CurrentStep.WARNING) {
-            return formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_Desc, getServiceDetails().serviceName);
+        if (provider.getNeedWarningZone() && stepId == CurrentStep.WARNING) {
+            return formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_Desc, provider.getTitle());
         }
 
         return getString(R.string.AiFeatures_AccessVia_Login_Step2_Desc);
@@ -298,12 +299,12 @@ public class AiConfigBottomSheet extends BottomSheet {
 
         if (editTextCursor != null) {
             String value = editTextCursor.getEditText().getText().toString().replaceAll(" ", "").trim();
-            if (value.length() > getServiceDetails().minLength && value.length() < getServiceDetails().maxLength) {
+            if (value.length() > provider.getKeyMinLength() && value.length() < provider.getKeyMaxLength()) {
                 Runnable saveData = () -> {
-                    callback.getProperty().updateValue(true);
-                    getServiceDetails().apiKeyConfigValue.updateValue(value);
+                    provider.getStatusProperty().updateValue(true);
+                    provider.getKeyProperty().updateValue(value);
 
-                    if (callback.getProperty() == OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs && modelTextCursor != null) {
+                    if (provider == AiProvidersDetails.OPENROUTER && modelTextCursor != null) {
                         OctoConfig.INSTANCE.aiFeaturesOpenRouterSelectedModel.updateValue(modelTextCursor.getEditText().getText().toString().trim());
                     }
 
@@ -312,12 +313,12 @@ public class AiConfigBottomSheet extends BottomSheet {
                     dismiss();
                 };
 
-                if (!getServiceDetails().apiKeyConfigValue.getValue().equals(value)) {
+                if (!provider.getKeyProperty().getValue().equals(value)) {
                     isCheckingApiKey = true;
                     AndroidUtilities.hideKeyboard(editTextCursor);
                     final AlertDialog progressDialog = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
                     progressDialog.show();
-                    MainAiHelper.ping(callback.getProperty(), getServiceDetails().apiKeyConfigValue, value, new MainAiHelper.OnResultState() {
+                    MainAiHelper.ping(provider, value, new MainAiHelper.OnResultState() {
                         @Override
                         public void onSuccess(String result) {
                             AndroidUtilities.runOnUIThread(() -> {
@@ -377,8 +378,6 @@ public class AiConfigBottomSheet extends BottomSheet {
     }
 
     public interface AiConfigInterface {
-        ConfigProperty<Boolean> getProperty();
-
         void onStateUpdated();
 
         boolean canShowSuccessBulletin();
@@ -578,10 +577,10 @@ public class AiConfigBottomSheet extends BottomSheet {
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
             if (p == CurrentStep.INITIAL_STAGE) {
-                OctoAnimationFragment octoFragment = new OctoAnimationFragment(context, null, getServiceDetails().animationScope);
+                OctoAnimationFragment octoFragment = new OctoAnimationFragment(context, null, provider.getAnimationScope());
                 octoFragment.setDisableEffect(true);
                 linearLayout.addView(octoFragment, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, OctoAnimationFragment.sz_no_text, Gravity.CENTER_HORIZONTAL));
-            } else if (p == CurrentStep.WARNING && showWarningZone) {
+            } else if (p == CurrentStep.WARNING && provider.getNeedWarningZone()) {
                 RLottieImageView rLottieImageView = new RLottieImageView(context);
                 rLottieImageView.setScaleType(AppCompatImageView.ScaleType.CENTER);
                 rLottieImageView.setAnimation(R.raw.error, 46, 46);
@@ -616,8 +615,8 @@ public class AiConfigBottomSheet extends BottomSheet {
             linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             if (p == CurrentStep.INITIAL_STAGE) {
-                boolean isChatGPT = callback.getProperty() == OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs;
-                boolean isOpenRouter = callback.getProperty() == OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs;
+                boolean isChatGPT = provider == AiProvidersDetails.CHATGPT;
+                boolean isOpenRouter = provider == AiProvidersDetails.OPENROUTER;
                 linearLayout.addView(
                         makeHint(
                                 R.drawable.msg_language,
@@ -638,8 +637,8 @@ public class AiConfigBottomSheet extends BottomSheet {
                         makeHint(R.drawable.msg_copy, getString(R.string.AiFeatures_AccessVia_Login_3), getString(R.string.AiFeatures_AccessVia_Login_3_Desc)),
                         LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
                 );
-            } else if (p == CurrentStep.WARNING && showWarningZone) {
-                String serviceName = getServiceDetails().serviceName;
+            } else if (p == CurrentStep.WARNING && provider.getNeedWarningZone()) {
+                String serviceName = provider.getTitle();
                 linearLayout.addView(
                         makeHint(R.drawable.msg_media, getString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_1), formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_1_Desc, serviceName)),
                         LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
@@ -648,23 +647,23 @@ public class AiConfigBottomSheet extends BottomSheet {
                         makeHint(R.drawable.msg_stories_timer, getString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_2), formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_2_Desc, serviceName)),
                         LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
                 );
-                if (callback.getProperty() == OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs) {
+                if (provider == AiProvidersDetails.CHATGPT) {
                     linearLayout.addView(
                             makeHint(R.drawable.msg_payment_card, getString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_3), formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_3_Desc, serviceName)),
                             LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
                     );
                 }
-            } else if (p == (CurrentStep.INSERT_API_KEY + (showWarningZone ? 1 : 0))) {
+            } else if (p == (CurrentStep.INSERT_API_KEY + (provider.getNeedWarningZone() ? 1 : 0))) {
                 OutlineEditText editText = new OutlineEditText(context);
                 editText.setHint(getString(R.string.AiFeatures_AccessVia_Login_Step2_Hint));
-                editText.getEditText().setText(getServiceDetails().apiKeyConfigValue.getValue());
+                editText.getEditText().setText(provider.getKeyProperty().getValue());
                 editText.updateColorAsDefined(Color.parseColor("#8d3067"));
                 editText.getEditText().setCursorColor(Color.parseColor("#8d3067"));
                 linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 58, Gravity.LEFT | Gravity.TOP, 17, 0, 17, 0));
                 editTextCursor = editText;
 
                 InputFilter[] inputFilters = new InputFilter[1];
-                inputFilters[0] = new CodepointsLengthInputFilter(getServiceDetails().maxLength) {
+                inputFilters[0] = new CodepointsLengthInputFilter(provider.getKeyMaxLength()) {
                     @Override
                     public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dStart, int dEnd) {
                         if (source != null && !TextUtils.isEmpty(source) && TextUtils.indexOf(source, '\n') == source.length() - 1) {
@@ -687,7 +686,7 @@ public class AiConfigBottomSheet extends BottomSheet {
                     return false;
                 });
 
-                if (callback.getProperty() == OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs) {
+                if (provider == AiProvidersDetails.OPENROUTER) {
                     OutlineEditText modelText = new OutlineEditText(context);
                     modelText.setHint(getString(R.string.AiFeatures_AccessVia_Login_Step2_Model));
                     modelText.getEditText().setText(OctoConfig.INSTANCE.aiFeaturesOpenRouterSelectedModel.getValue());
@@ -712,49 +711,6 @@ public class AiConfigBottomSheet extends BottomSheet {
             if (imageView != null) {
                 imageView.playAnimation();
             }
-        }
-    }
-
-    ServiceDetails getServiceDetails() {
-        var property = callback.getProperty();
-
-        if (property.equals(OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs)) {
-            return new ServiceDetails("ChatGPT",
-                    OctoAnimationFragment.OctoAnimationScopes.CHATGPT,
-                    100,
-                    180,
-                    OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIKey);
-        } else if (property.equals(OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs)) {
-            return new ServiceDetails("Gemini",
-                    OctoAnimationFragment.OctoAnimationScopes.GEMINI,
-                    20,
-                    45,
-                    OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIKey);
-        } else if (property.equals(OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs)) {
-            return new ServiceDetails("OpenRouter",
-                    OctoAnimationFragment.OctoAnimationScopes.OPENROUTER,
-                    45,
-                    100,
-                    OctoConfig.INSTANCE.aiFeaturesOpenRouterAPIKey);
-        }
-        OctoLogging.e(TAG, "Unknown service or scope");
-        return new ServiceDetails("Unknown", -1, 20, 45, null);
-    }
-
-
-    static class ServiceDetails {
-        String serviceName;
-        int animationScope;
-        int minLength;
-        int maxLength;
-        ConfigProperty<String> apiKeyConfigValue;
-
-        ServiceDetails(String serviceName, int animationScope, int minLength, int maxLength, ConfigProperty<String> apiKeyConfigValue) {
-            this.serviceName = serviceName;
-            this.animationScope = animationScope;
-            this.minLength = minLength;
-            this.maxLength = maxLength;
-            this.apiKeyConfigValue = apiKeyConfigValue;
         }
     }
 }

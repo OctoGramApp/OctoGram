@@ -197,6 +197,16 @@
   native <methods>;
 }
 
+-keep class * extends java.lang.Throwable {
+    public *;
+}
+
+-keep class it.octogram.** extends java.lang.Exception {
+    <init>(...);
+    public java.lang.Throwable getCause();
+    public java.lang.String getMessage();
+}
+
 -keepnames @com.google.android.gms.common.annotation.KeepName class *
 -keepclassmembernames class * {
     @com.google.android.gms.common.annotation.KeepName *;

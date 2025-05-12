@@ -149,17 +149,18 @@ public class CustomModelsHelper {
     }
 
     private static String readFileContent(File file) throws IOException {
-        StringBuilder contentBuilder = new StringBuilder();
+        StringBuilder jsonStringBuilder = new StringBuilder();
+        FileInputStream downloadedFileStream = new FileInputStream(file);
+        InputStreamReader reader = new InputStreamReader(downloadedFileStream, StandardCharsets.UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(reader);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8.name()))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                contentBuilder.append(line);
-            }
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            jsonStringBuilder.append(line);
         }
 
-        return contentBuilder.toString();
+        bufferedReader.close();
+        return jsonStringBuilder.toString();
     }
 
     public static boolean isValidModel(JSONObject object) {

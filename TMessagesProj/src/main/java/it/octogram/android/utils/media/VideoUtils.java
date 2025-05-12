@@ -8,9 +8,12 @@
 package it.octogram.android.utils.media;
 
 
+import android.annotation.SuppressLint;
+
 import it.octogram.android.VideoQuality;
 
 public class VideoUtils {
+    @SuppressLint("SwitchIntDef")
     public static float getMaxSize(int w, int h, @VideoQuality.Quality int selectedCompression) {
         float ratio = (float) w / (float) h;
         return switch (selectedCompression) {
@@ -20,8 +23,7 @@ public class VideoUtils {
             case VideoQuality.QHD -> getNewSide(1440, ratio);
             case VideoQuality.UHD -> getNewSide(2160, ratio);
             case VideoQuality.MAX -> getNewSide(4096, ratio);
-            case VideoQuality.UNKNOWN -> getNewSide(270, ratio);
-            default -> throw new IllegalStateException("Unexpected value: " + selectedCompression);
+            default -> getNewSide(270, ratio);
         };
     }
 

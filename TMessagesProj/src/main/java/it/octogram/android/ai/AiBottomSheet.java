@@ -33,6 +33,7 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.text.InputType;
 import android.text.Layout;
+import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -41,6 +42,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ReplacementSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,6 +104,7 @@ import java.util.Random;
 
 import it.octogram.android.AiModelMessagesState;
 import it.octogram.android.AiModelType;
+import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ai.helper.CustomModelsHelper;
@@ -115,7 +118,7 @@ import it.octogram.android.utils.OctoUtils;
 
 @SuppressLint("ClickableViewAccessibility")
 public class AiBottomSheet extends BottomSheet {
-    private int favoriteAiProvider;
+    private AiProvidersDetails favoriteAiProvider;
 
     private final TranslateMessagesWrapper.FillStateData data;
     private boolean isProcessingData = false;
@@ -133,6 +136,7 @@ public class AiBottomSheet extends BottomSheet {
 
     private final View buttonShadowView;
     private final TextView buttonTextView;
+    private final ImageView regenerateButton;
     private final ImageView configButton;
 
     private OutlineEditText customPromptInputText;
@@ -204,6 +208,23 @@ public class AiBottomSheet extends BottomSheet {
         };
         textView = new LinkSpanDrawable.LinksTextView(data.context, resourcesProvider);
         textView.setDisablePaddingsOffsetY(true);
+        if (isCustomModel() && ((MessagesModelsWrapper.FillStateData) data).isInputBox) {
+            textView.setOnCreateContextMenuListener((menu, v, menuInfo) -> menu.add(R.string.AiFeatures_CustomModels_Feature_UseAsText).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(@NonNull MenuItem item) {
+                    int start = Selection.getSelectionStart(textView.getText());
+                    int end = Selection.getSelectionEnd(textView.getText());
+
+                    if (start != end) {
+                        CharSequence selectedText = textView.getText().subSequence(start, end);
+                        ((MessagesModelsWrapper.FillStateData) data).setInputBoxText.run(selectedText.toString());
+                        dismiss();
+                        return true;
+                    }
+                    return false;
+                }
+            }));
+        }
         textView.setPadding(dp(22), dp(12), dp(22), dp(6));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, SharedConfig.fontSize);
         textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
@@ -302,7 +323,15 @@ public class AiBottomSheet extends BottomSheet {
                 dismiss();
             }
         });
-        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16+48+8, 16));
+        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16+48+8+48+8, 16));
+
+        regenerateButton = new ImageView(data.context);
+        regenerateButton.setScaleType(ImageView.ScaleType.CENTER);
+        regenerateButton.setImageResource(R.drawable.repeat_solar);
+        regenerateButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
+        regenerateButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
+        regenerateButton.setOnClickListener(v -> init());
+        buttonView.addView(regenerateButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16+48+8, 16));
 
         configButton = new ImageView(data.context);
         configButton.setScaleType(ImageView.ScaleType.CENTER);
@@ -373,40 +402,51 @@ public class AiBottomSheet extends BottomSheet {
 
     private boolean isFirstTime = true;
     private void updateConfigButtonVisibility(boolean isVisible) {
+        List<ImageView> buttons = List.of(configButton, regenerateButton);
+
         if (isFirstTime) {
             isFirstTime = false;
 
-            configButton.setEnabled(isVisible);
-            configButton.setClickable(isVisible);
-            configButton.setAlpha(isVisible ? 1f : 0f);
-            configButton.setTranslationX(isVisible ? 0 : dp(60));
+            for (ImageView button : buttons) {
+                button.setEnabled(isVisible);
+                button.setClickable(isVisible);
+                button.setAlpha(isVisible ? 1f : 0f);
+                button.setTranslationX(isVisible ? 0 : dp(60));
+            }
+
             ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
-            layoutParams.rightMargin = dp(16 + (isVisible ? (48+8) : 0));
+            layoutParams.rightMargin = dp(16 + (isVisible ? (48+8+48+8) : 0));
             buttonTextView.setLayoutParams(layoutParams);
             buttonTextView.invalidate();
         } else {
             if (!isVisible) {
-                configButton.setEnabled(false);
-                configButton.setClickable(false);
+                for (ImageView button : buttons) {
+                    button.setEnabled(false);
+                    button.setClickable(false);
+                }
             }
 
             ValueAnimator buttonAnimatorView = ValueAnimator.ofFloat(isVisible ? 0f : 1f, isVisible ? 1f : 0f);
             buttonAnimatorView.addUpdateListener(animation -> {
                 float value = (float) animation.getAnimatedValue();
                 ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
-                layoutParams.rightMargin = dp((16 + (48+8)*value));
+                layoutParams.rightMargin = dp((16 + (48+8+48+8)*value));
                 buttonTextView.setLayoutParams(layoutParams);
                 buttonTextView.invalidate();
 
-                configButton.setAlpha(value);
-                configButton.setTranslationX(dp(60) * (1f - value));
+                for (ImageView button : buttons) {
+                    button.setAlpha(value);
+                    button.setTranslationX(dp(60) * (1f - value));
+                }
             });
             if (isVisible) {
                 buttonAnimatorView.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        configButton.setEnabled(true);
-                        configButton.setClickable(true);
+                        for (ImageView button : buttons) {
+                            button.setEnabled(true);
+                            button.setClickable(true);
+                        }
                     }
                 });
             }
@@ -520,6 +560,10 @@ public class AiBottomSheet extends BottomSheet {
     }
 
     private void init() {
+        if (isProcessingData) {
+            return;
+        }
+
         headerView.updateView();
         destroyLoadingTextCycle();
 
@@ -555,7 +599,7 @@ public class AiBottomSheet extends BottomSheet {
             boolean loadAsImage = false;
             AiModelMessagesState currentState = MessagesModelsWrapper.getAvailableStates(customData);
             if (modelData.modelType == AiModelType.RELATED_TO_MESSAGES && modelData.uploadMedia && currentState != AiModelMessagesState.TEXT_MESSAGES) {
-                if (favoriteAiProvider != MainAiHelper.Providers.GEMINI) {
+                if (favoriteAiProvider != AiProvidersDetails.GEMINI) {
                     AndroidUtilities.runOnUIThread(() -> {
                         textView.setTextColor(getThemedColor(Theme.key_dialogTextGray3));
                         textView.setText(getString(R.string.AiFeatures_CustomModels_Feature_Failed_Upload));
@@ -583,7 +627,7 @@ public class AiBottomSheet extends BottomSheet {
                 promptAsString = replaceTags(customData, promptAsString);
             }
 
-            String mainSystemInstruction = "Return plain text only or use markdown with double ** or __ for italic like Telegram markdown styling.";
+            String mainSystemInstruction = "Return plain text only or use markdown with double ** or __ for italic like Telegram markdown styling.\nTelegram-supported markdown formatting:\n\nBasic formatting:\n- **bold text** (double asterisks) for emphasis\n- __italic text__ (double underscores) for nuanced meaning\n- `inline code` (single backtick) for technical terms\n- ```code blocks``` (triple backticks) for longer code\n- [text](URL) for links";
             prompt = new AiUtils.AiPrompt(mainSystemInstruction, promptAsString, filePath, mimeType, loadAsImage);
         } else {
             prompt = AiUtils.getTranslationPrompt(true, false, data.translationData.text, toLanguage);
@@ -823,6 +867,7 @@ public class AiBottomSheet extends BottomSheet {
 
     private void requestPromptToUser() {
         updateConfigButtonVisibility(false);
+        MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
 
         LinearLayout linearLayout = new LinearLayout(data.context) {
             @Override
@@ -842,26 +887,18 @@ public class AiBottomSheet extends BottomSheet {
         customPromptInputText.setHint(getString(R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Brief));
         linearLayout.addView(customPromptInputText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 17, 0, 17, 7));
 
-        int tokenIndex = new Random().nextInt(3) + 1;
-        int data;
-        if (tokenIndex == 2) {
-            data = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example2;
-        } else if (tokenIndex == 3) {
-            data = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example3;
-        } else {
-            data = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example1;
-        }
+        int key = MessagesModelsWrapper.getSuggestedAskOnMediaAction(customData);
 
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
         spannableStringBuilder.append(" d  ");
-        spannableStringBuilder.append(getString(data));
+        spannableStringBuilder.append(getString(key));
         SuggestedSpan span = new SuggestedSpan(10);
         span.setColor(Theme.getColor(Theme.key_premiumGradient1));
         spannableStringBuilder.setSpan(span, 1, 2, 0);
 
         FrameLayout layout = createSuggestionRow(0, spannableStringBuilder);
         layout.setOnClickListener((v) -> {
-            customPromptInputText.getEditText().setText(getString(data));
+            customPromptInputText.getEditText().setText(getString(key));
             buttonTextView.callOnClick();
         });
         linearLayout.addView(layout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 50, 0f));
@@ -1028,14 +1065,6 @@ public class AiBottomSheet extends BottomSheet {
         if (isCustomModel()) {
             MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
 
-            if (!isProcessingData && customPrompt == null && isVirtualModel) {
-                item = ActionBarMenuItem.addItem(layout, R.drawable.repeat_solar, getString(R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Repeat), false, resourcesProvider);
-                item.setOnClickListener(view -> {
-                    dismiss[0].run();
-                    init();
-                });
-            }
-
             if (!isProcessingData && customData.isInputBox && customData.setInputBoxText != null) {
                 item = ActionBarMenuItem.addItem(layout, R.drawable.msg_message, getString(R.string.AiFeatures_CustomModels_Feature_UseAsText), false, resourcesProvider);
                 item.setOnClickListener(view -> {
@@ -1184,7 +1213,7 @@ public class AiBottomSheet extends BottomSheet {
         currentBackItem.setOnClickListener(z -> Objects.requireNonNull(originalLayout.getSwipeBack()).closeForeground());
 
         boolean hasDisabledProviders = false;
-        for (int provider : MainAiHelper.Providers.availableProviders) {
+        for (AiProvidersDetails provider : AiProvidersDetails.getEntries()) {
             if (!MainAiHelper.isProviderAvailable(provider)) {
                 hasDisabledProviders = true;
                 continue;
@@ -1227,9 +1256,9 @@ public class AiBottomSheet extends BottomSheet {
     }
 
     @NonNull
-    private ActionBarMenuSubItem getItem(Supplier<Runnable> dismiss, int provider) {
+    private ActionBarMenuSubItem getItem(Supplier<Runnable> dismiss, AiProvidersDetails provider) {
         ActionBarMenuSubItem button = new ActionBarMenuSubItem(getContext(), 2, false, false, resourcesProvider);
-        button.setText(MainAiHelper.getProviderName(provider));
+        button.setText(provider.getTitle());
         button.setChecked(favoriteAiProvider == provider);
         button.setOnClickListener(e -> {
             if (dismiss != null) {
@@ -1241,7 +1270,7 @@ public class AiBottomSheet extends BottomSheet {
             }
 
             favoriteAiProvider = provider;
-            headerView.usedProviderTextView.setText(MainAiHelper.getProviderName(favoriteAiProvider));
+            headerView.usedProviderTextView.setText(provider.getTitle());
             init();
         });
         return button;
@@ -1598,7 +1627,7 @@ public class AiBottomSheet extends BottomSheet {
             usedProviderTextView.setAnimationProperties(.25f, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
             usedProviderTextView.setTextColor(getThemedColor(Theme.key_player_actionBarSubtitle));
             usedProviderTextView.setTextSize(dp(14));
-            usedProviderTextView.setText(MainAiHelper.getProviderName(favoriteAiProvider));
+            usedProviderTextView.setText(favoriteAiProvider.getTitle());
             usedProviderTextView.setPadding(dp(4), dp(2), dp(4), dp(2));
             usedProviderTextView.setOnClickListener(e -> openConfig(false, true));
 

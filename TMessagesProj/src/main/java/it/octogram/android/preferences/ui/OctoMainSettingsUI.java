@@ -85,7 +85,11 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     if ("it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName())) {
                         category.row(new TextDetailRow.TextDetailRowBuilder()
                                 .onClick(() -> {
-                                    throw new RuntimeException("Test crash");
+                                    try {
+                                        throw new IllegalArgumentException("Inner cause");
+                                    } catch (Exception e) {
+                                        throw new RuntimeException("Test crash", e);
+                                    }
                                 })
                                 .icon(R.drawable.msg_cancel)
                                 .title("Crash the app")

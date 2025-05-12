@@ -179,21 +179,33 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
             TextView[] mainSubTextView = {null};
 
             final ItemOptions whatToSaveScrollback = options.makeSwipeback();
-            whatToSaveScrollback.add(R.drawable.ic_ab_back, getString(R.string.Back), options::closeSwipeback);
-            for (int i = 0; i <= SaveDataState.SAVE_MODELS; i++) {
-                int finalI = i;
-                whatToSaveScrollback.addChecked(saveDataState == i, getString(getCorrespondingSaveDataString(i)), () -> {
-                    saveDataState = finalI;
-                    if (mainSubTextView[0] != null) {
-                        mainSubTextView[0].setText(getString(getCorrespondingSaveDataString(finalI)));
-                        options.closeSwipeback();
-                    } else {
-                        options.dismiss();
-                    }
-                });
-            }
+            Runnable fillOptions = () -> {
+                if (whatToSaveScrollback.getLinearLayout() != null) {
+                    whatToSaveScrollback.getLinearLayout().removeAllViews();
+                }
+                if (whatToSaveScrollback.getLastLayout() != null) {
+                    whatToSaveScrollback.getLastLayout().removeAllViews();
+                }
+                whatToSaveScrollback.add(R.drawable.ic_ab_back, getString(R.string.Back), options::closeSwipeback);
+                for (int i = 0; i <= SaveDataState.SAVE_MODELS; i++) {
+                    int finalI = i;
+                    whatToSaveScrollback.addChecked(saveDataState == i, getString(getCorrespondingSaveDataString(i)), () -> {
+                        saveDataState = finalI;
+                        if (mainSubTextView[0] != null) {
+                            mainSubTextView[0].setText(getString(getCorrespondingSaveDataString(finalI)));
+                            options.closeSwipeback();
+                        } else {
+                            options.dismiss();
+                        }
+                    });
+                }
+            };
+            fillOptions.run();
 
-            options.add(getString(R.string.ExportDataSettings_SaveData), getString(getCorrespondingSaveDataString(saveDataState)), () -> options.openSwipeback(whatToSaveScrollback));
+            options.add(getString(R.string.ExportDataSettings_SaveData), getString(getCorrespondingSaveDataString(saveDataState)), () -> {
+                fillOptions.run();
+                options.openSwipeback(whatToSaveScrollback);
+            });
 
             View lastChild = options.getLastLayout().getItemAt(options.getLastLayout().getItemsCount() - 1);
             if (lastChild instanceof ActionBarMenuSubItem) {
