@@ -62,6 +62,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 .category(getString(R.string.ExperimentalSettings), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.moreHapticFeedbacks)
+                            .title(getString(R.string.MoreHapticFeedbacks))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
                             .title(getString(R.string.MediaStream))
                             .build());

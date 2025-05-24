@@ -124,7 +124,7 @@ public class ActionBar extends FrameLayout {
     private Runnable lastRunnable;
     private boolean titleOverlayShown;
     private Runnable titleActionRunnable;
-    private boolean castShadows = true;
+    private boolean castShadows = !OctoConfig.INSTANCE.disableDividers.getValue();
 
     protected boolean isSearchFieldVisible;
     public float searchFieldVisibleAlpha;
@@ -1685,6 +1685,9 @@ public class ActionBar extends FrameLayout {
     }
 
     public void setCastShadows(boolean value) {
+        if (value && OctoConfig.INSTANCE.disableDividers.getValue()) {
+            value = false;
+        }
         if (castShadows != value && getParent() instanceof View) {
             ((View) getParent()).invalidate();
             invalidate();
@@ -1693,7 +1696,7 @@ public class ActionBar extends FrameLayout {
     }
 
     public boolean getCastShadows() {
-        return castShadows;
+        return castShadows && !OctoConfig.INSTANCE.disableDividers.getValue();
     }
 
     @Override
@@ -1710,7 +1713,7 @@ public class ActionBar extends FrameLayout {
         } else if (AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y) {
             return dp(48);
         } else {
-            return dp(56);
+            return dp(62);
         }
     }
 

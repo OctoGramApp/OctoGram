@@ -19,6 +19,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -39,6 +40,7 @@ import org.telegram.ui.Components.Switch;
 
 import java.util.List;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.ui.custom.FolderTypeSelector;
 
 public class PopupChoiceDialogUtils {
@@ -59,6 +61,10 @@ public class PopupChoiceDialogUtils {
             cell.setCheckColor(Theme.getColor(Theme.key_radioBackground), Theme.getColor(Theme.key_dialogRadioBackgroundChecked));
             linearLayout.addView(cell);
             cell.setOnClickListener(v -> {
+                if (OctoConfig.INSTANCE.moreHapticFeedbacks.getValue()) {
+                    cell.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                }
+
                 int sel = (Integer) v.getTag();
                 builder.getDismissRunnable().run();
                 listener.onClick(null, sel);

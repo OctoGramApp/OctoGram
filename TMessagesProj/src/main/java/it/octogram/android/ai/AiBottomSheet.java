@@ -116,6 +116,7 @@ import it.octogram.android.preferences.ui.OctoAiNewModelUI;
 import it.octogram.android.translator.TranslateMessagesWrapper;
 import it.octogram.android.utils.OctoUtils;
 
+/** @noinspection SequencedCollectionMethodCanBeUsed*/
 @SuppressLint("ClickableViewAccessibility")
 public class AiBottomSheet extends BottomSheet {
     private AiProvidersDetails favoriteAiProvider;
@@ -208,23 +209,23 @@ public class AiBottomSheet extends BottomSheet {
         };
         textView = new LinkSpanDrawable.LinksTextView(data.context, resourcesProvider);
         textView.setDisablePaddingsOffsetY(true);
-        if (isCustomModel() && ((MessagesModelsWrapper.FillStateData) data).isInputBox) {
-            textView.setOnCreateContextMenuListener((menu, v, menuInfo) -> menu.add(R.string.AiFeatures_CustomModels_Feature_UseAsText).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(@NonNull MenuItem item) {
-                    int start = Selection.getSelectionStart(textView.getText());
-                    int end = Selection.getSelectionEnd(textView.getText());
-
-                    if (start != end) {
-                        CharSequence selectedText = textView.getText().subSequence(start, end);
-                        ((MessagesModelsWrapper.FillStateData) data).setInputBoxText.run(selectedText.toString());
-                        dismiss();
-                        return true;
-                    }
-                    return false;
-                }
-            }));
-        }
+//        if (isCustomModel() && ((MessagesModelsWrapper.FillStateData) data).isInputBox) {
+//            textView.setOnCreateContextMenuListener((menu, v, menuInfo) -> menu.add(R.string.AiFeatures_CustomModels_Feature_UseAsText).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//                @Override
+//                public boolean onMenuItemClick(@NonNull MenuItem item) {
+//                    int start = Selection.getSelectionStart(textView.getText());
+//                    int end = Selection.getSelectionEnd(textView.getText());
+//
+//                    if (start != end) {
+//                        CharSequence selectedText = textView.getText().subSequence(start, end);
+//                        ((MessagesModelsWrapper.FillStateData) data).setInputBoxText.run(selectedText.toString());
+//                        dismiss();
+//                        return true;
+//                    }
+//                    return false;
+//                }
+//            }));
+//        }
         textView.setPadding(dp(22), dp(12), dp(22), dp(6));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, SharedConfig.fontSize);
         textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
@@ -512,17 +513,17 @@ public class AiBottomSheet extends BottomSheet {
             }
         }
 
-        int newString = R.string.AiFeatures_CustomModels_Feature_Loading_1;
-        if (randomNumber == 2) {
-            newString = R.string.AiFeatures_CustomModels_Feature_Loading_2;
-        } else if (randomNumber == 3) {
-            newString = R.string.AiFeatures_CustomModels_Feature_Loading_3;
-        } else if (randomNumber == 4) {
-            newString = R.string.AiFeatures_CustomModels_Feature_Loading_4;
-        } else if (randomNumber == 5) {
-            newString = R.string.AiFeatures_CustomModels_Feature_Loading_5;
-        }
-        return newString;
+        return getRandomString(randomNumber);
+    }
+
+    private static int getRandomString(int randomNumber) {
+        return switch (randomNumber) {
+            case 2 -> R.string.AiFeatures_CustomModels_Feature_Loading_2;
+            case 3 -> R.string.AiFeatures_CustomModels_Feature_Loading_3;
+            case 4 -> R.string.AiFeatures_CustomModels_Feature_Loading_4;
+            case 5 -> R.string.AiFeatures_CustomModels_Feature_Loading_5;
+            default -> R.string.AiFeatures_CustomModels_Feature_Loading_1;
+        };
     }
 
     private void destroyLoadingTextCycle() {
@@ -567,7 +568,7 @@ public class AiBottomSheet extends BottomSheet {
         headerView.updateView();
         destroyLoadingTextCycle();
 
-        AiUtils.AiPrompt prompt;
+        AiPrompt prompt;
         if (isCustomModel()) {
             MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
 
@@ -628,7 +629,7 @@ public class AiBottomSheet extends BottomSheet {
             }
 
             String mainSystemInstruction = "Return plain text only or use markdown with double ** or __ for italic like Telegram markdown styling.\nTelegram-supported markdown formatting:\n\nBasic formatting:\n- **bold text** (double asterisks) for emphasis\n- __italic text__ (double underscores) for nuanced meaning\n- `inline code` (single backtick) for technical terms\n- ```code blocks``` (triple backticks) for longer code\n- [text](URL) for links";
-            prompt = new AiUtils.AiPrompt(mainSystemInstruction, promptAsString, filePath, mimeType, loadAsImage);
+            prompt = new AiPrompt(mainSystemInstruction, promptAsString, filePath, mimeType, loadAsImage);
         } else {
             prompt = AiUtils.getTranslationPrompt(true, false, data.translationData.text, toLanguage);
         }

@@ -180,7 +180,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                     }
                 }
                 boolean result = super.drawChild(canvas, child, drawingTime);
-                if (actionBarHeight != 0 && headerShadowDrawable != null) {
+                if (actionBarHeight != 0 && headerShadowDrawable != null && !OctoConfig.INSTANCE.disableDividers.getValue()) {
                     headerShadowDrawable.setBounds(0, actionBarY + actionBarHeight, getMeasuredWidth(), actionBarY + actionBarHeight + headerShadowDrawable.getIntrinsicHeight());
                     headerShadowDrawable.draw(canvas);
                 }
@@ -600,7 +600,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                 float bgAlpha = 1f - (bgActionBar.getY() / -(bgActionBar.getHeight() - AndroidUtilities.statusBarHeight));
                 float fgAlpha = 1f - (fgActionBar.getY() / -(fgActionBar.getHeight() - AndroidUtilities.statusBarHeight));
                 canvas.saveLayerAlpha(AndroidUtilities.rectTmp, (int) (AndroidUtilities.lerp(bgAlpha, fgAlpha, 1f - swipeProgress) * 0xFF), Canvas.ALL_SAVE_FLAG);
-                canvas.translate(AndroidUtilities.dp(16) - AndroidUtilities.dp(1) * (1f - progress), AndroidUtilities.dp(16) + (fgActionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0));
+                canvas.translate(AndroidUtilities.dp(16) - AndroidUtilities.dp(1) * (1f - progress), AndroidUtilities.dp(19) + (fgActionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0));
                 menuDrawable.setRotation(backDrawableReverse ? progress : 1f - progress, false);
 
                 if (isSwipeInProgress()) {

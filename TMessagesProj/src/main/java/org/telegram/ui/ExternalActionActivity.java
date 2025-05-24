@@ -650,18 +650,21 @@ public class ExternalActionActivity extends Activity implements INavigationLayou
     public boolean needCloseLastFragment(INavigationLayout layout) {
         if (AndroidUtilities.isTablet()) {
             if (layout == actionBarLayout && layout.getFragmentStack().size() <= 1) {
-                onFinish();
-                finish();
+                /*onFinish();
+                finish();*/
+                super.onBackPressed();
                 return false;
             } else if (layout == layersActionBarLayout && actionBarLayout.getFragmentStack().isEmpty() && layersActionBarLayout.getFragmentStack().size() == 1) {
-                onFinish();
-                finish();
+                /*onFinish();
+                finish();*/
+                super.onBackPressed();
                 return false;
             }
         } else {
             if (layout.getFragmentStack().size() <= 1) {
-                onFinish();
-                finish();
+                /*onFinish();
+                finish();*/
+                super.onBackPressed();
                 return false;
             }
         }

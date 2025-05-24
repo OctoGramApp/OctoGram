@@ -32,6 +32,8 @@ firebase_messaging = "24.1.0"
 firebase_config = "22.0.1"
 firebase_datatransport = "19.0.0"
 firebase_appindexing = "20.0.0"
+firebase-bom = "32.7.0"
+firebase-crashlytics = "18.6.0"
 
 # Google Play Services dependencies
 play_services_maps = "19.2.0"
@@ -55,7 +57,7 @@ guava = "33.4.8-android"
 nanohttpd = "2.3.1"
 
 # CameraX Implementation
-camerax_version = "1.5.0-alpha04"
+camerax_version = "1.5.0-beta01"
 
 # Native libs e ML Kit
 relinker = "1.4.5"
@@ -68,12 +70,22 @@ kotlin_stdlib = "2.0.21" # NOT SUPPORTED ON WINDOWS
 # Generative AI
 generativeai = "0.9.0"
 
+# AppCenter
+appcenter = "3.3.1"
+
+# Huawei HMS
+huawei-push = "6.5.0.300"
+huawei-maps = "6.6.0.300"
+huawei-location = "6.4.0.300"
+huawei-agconnect = "1.6.0.300"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-application" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets-gradle-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-android" }
 android-library = { id = "com.android.library" }
+huawei-agconnect = { id = "com.huawei.agconnect", version.ref = "huawei-agconnect" }
 
 [libraries]
 # AndroidX libraries
@@ -103,6 +115,8 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging", versio
 firebase-config = { module = "com.google.firebase:firebase-config", version.ref = "firebase_config" }
 firebase-datatransport = { module = "com.google.firebase:firebase-datatransport", version.ref = "firebase_datatransport" }
 firebase-appindexing = { module = "com.google.firebase:firebase-appindexing", version.ref = "firebase_appindexing" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebase-crashlytics" }
 
 # Google Play Services libraries
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "play_services_maps" }
@@ -144,3 +158,13 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 
 # Generative AI
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
+
+# AppCenter
+appcenter-distribute = { module = "com.microsoft.appcenter:appcenter-distribute", version.ref = "appcenter" }
+appcenter-crashes = { module = "com.microsoft.appcenter:appcenter-crashes", version.ref = "appcenter" }
+appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", version.ref = "appcenter" }
+
+# Huawei HMS
+huawei-push = { module = "com.huawei.hms:push", version.ref = "huawei-push" }
+huawei-maps = { module = "com.huawei.hms:maps", version.ref = "huawei-maps" }
+huawei-location = { module = "com.huawei.hms:location", version.ref = "huawei-location" }

@@ -55,8 +55,9 @@ import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.logs.OctoLogging;
 import kotlin.uuid.Uuid;
 
-
 public class OctoUtils {
+    private static final String TAG = "OctoUtils";
+
     public static String phoneNumberReplacer(String input, String phoneCountry) {
         if (StringUtils.isEmpty(input)) {
             return input;
@@ -119,7 +120,7 @@ public class OctoUtils {
         try {
             AndroidUtilities.runOnUIThread(() -> Toast.makeText(ApplicationLoader.applicationContext, text, Toast.LENGTH_SHORT).show());
         } catch (Exception e) {
-            OctoLogging.e(e);
+            OctoLogging.e(TAG, e);
         }
     }
 
@@ -175,28 +176,28 @@ public class OctoUtils {
         try {
             PackageInfo pInfo = ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0);
             switch (pInfo.versionCode % 10) {
-                case 1:
-                case 3:
+                case 1, 3 -> {
                     return "arm-v7a";
-                case 2:
-                case 4:
+                }
+                case 2, 4 -> {
                     return "x86";
-                case 5:
-                case 7:
+                }
+                case 5, 7 -> {
                     return "arm64-v8a";
-                case 6:
-                case 8:
+                }
+                case 6, 8 -> {
                     return "x86_64";
-                case 0:
-                case 9:
+                }
+                case 0, 9 -> {
                     if (!addUniversalDetails) {
                         return "universal";
                     }
 
                     return "universal/" + Build.CPU_ABI + " " + Build.CPU_ABI2;
+                }
             }
         } catch (PackageManager.NameNotFoundException e) {
-            OctoLogging.e(e);
+            OctoLogging.e(TAG, e);
         }
 
         return "universal";
@@ -231,7 +232,7 @@ public class OctoUtils {
 
         // Create directory if it doesn't exist
         if (logsDir != null && !logsDir.exists() && !logsDir.mkdirs()) {
-            OctoLogging.e("LogsDirectory", "Failed to create logs directory at: " + logsDir.getAbsolutePath());
+            OctoLogging.e(TAG, "Failed to create logs directory at: " + logsDir.getAbsolutePath());
             return null;
         }
 
@@ -255,7 +256,7 @@ public class OctoUtils {
                     directory = new File(externalDir, LOGS_DIRECTORY);
                 }
             } catch (SecurityException e) {
-                OctoLogging.w("LogsDirectory", "Failed to access external storage", e);
+                OctoLogging.w(TAG, "Failed to access external storage", e);
             }
         }
 
@@ -264,7 +265,7 @@ public class OctoUtils {
             try {
                 directory = new File(context.getCacheDir(), LOGS_DIRECTORY);
             } catch (SecurityException e) {
-                OctoLogging.w("LogsDirectory", "Failed to access cache directory", e);
+                OctoLogging.w(TAG, "Failed to access cache directory", e);
             }
         }
 
@@ -273,7 +274,7 @@ public class OctoUtils {
             try {
                 directory = new File(context.getFilesDir(), LOGS_DIRECTORY);
             } catch (SecurityException e) {
-                OctoLogging.e("LogsDirectory", "Failed to access internal storage", e);
+                OctoLogging.e(TAG, "Failed to access internal storage", e);
             }
         }
 
@@ -417,7 +418,7 @@ public class OctoUtils {
     }
 
     public static CharSequence hidePhoneNumber(@NonNull TLRPC.User user) {
-        OctoLogging.d("OctoUtils", "hidePhoneNumber: " + user);
+        OctoLogging.d(TAG, "hidePhoneNumber: " + user);
         var phone = user.phone;
         String text = PhoneFormat.getInstance().format("+" + phone);
 

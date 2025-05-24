@@ -141,9 +141,15 @@ public class FingerprintUtils {
         return fingerprintCachedState;
     }
 
+    public static boolean hasFingerprintSavedState() {
+        OctoConfig.INSTANCE.arbitraryLoadConfig(OctoConfig.INSTANCE.hasFingerprintSavedState);
+        return OctoConfig.INSTANCE.hasFingerprintSavedState.getValue();
+    }
+
     public static void reloadFingerprintState() {
         isFirstCheck = false;
         fingerprintCachedState = hasFingerprintInternal();
+        OctoConfig.INSTANCE.hasFingerprintSavedState.updateValue(fingerprintCachedState);
     }
 
     private static boolean hasFingerprintInternal() {
@@ -256,16 +262,15 @@ public class FingerprintUtils {
 
     public static boolean isChatLockedNotifications(MessageObject object) {
         String check = "";
-        if (object.getFromChatId() == object.getChatId()) {
-            if (object.getChatId() == UserConfig.getInstance(UserConfig.selectedAccount).clientUserId) {
+        if (object.getFromChatId() == object.getChatId() || (object.getChatId() == 0 && object.getFromChatId() != 0)) {
+            if (object.getFromChatId() == UserConfig.getInstance(UserConfig.selectedAccount).clientUserId) {
                 check = "u_sm";
             } else {
-                check = "u_" + object.getChatId();
+                check = "u_" + object.getFromChatId();
             }
         } else if (object.getChatId() != 0) {
             check = "g_-" + object.getChatId();
         }
-
 
         if (check.isEmpty()) {
             return false;

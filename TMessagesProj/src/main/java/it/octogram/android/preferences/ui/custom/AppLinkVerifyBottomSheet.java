@@ -145,6 +145,7 @@ public class AppLinkVerifyBottomSheet extends CustomBottomSheet {
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         buttonTextView.setOnClickListener(view -> {
+            dismiss();
             Intent intent;
             if (OneUIUtilities.isOneUI()) {
                 intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Utilities.uriParseSafe("package:" + context.getPackageName()));

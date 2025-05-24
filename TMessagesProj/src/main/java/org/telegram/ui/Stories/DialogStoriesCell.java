@@ -674,7 +674,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         float progress = Math.min(collapsedProgress, collapsedProgress2);
         if (progress != 0) {
             float offset = (titleView.getMeasuredHeight() - titleView.getTextHeight()) / 2f;
-            titleView.setTranslationY(y + AndroidUtilities.dp(14) - offset + AndroidUtilities.dp(FAKE_TOP_PADDING));
+            titleView.setTranslationY(y + AndroidUtilities.dp(19) - offset + AndroidUtilities.dp(FAKE_TOP_PADDING));
             int cellWidth = AndroidUtilities.dp(72);
             lastViewRight += -cellWidth + AndroidUtilities.dp(6) + getAvatarRight(cellWidth, collapsedProgress) + AndroidUtilities.dp(12);
             // float toX = AndroidUtilities.dp(28) * Math.min(1, animateToCount) + AndroidUtilities.dp(14) * Math.max(0, animateToCount - 1);

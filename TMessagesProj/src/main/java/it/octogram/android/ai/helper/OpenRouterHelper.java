@@ -9,7 +9,7 @@
 package it.octogram.android.ai.helper;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.AiUtils;
+import it.octogram.android.ai.AiPrompt;
 import it.octogram.android.ai.chatgpt.ChatGPTClient;
 import it.octogram.android.ai.chatgpt.ChatGPTException;
 import it.octogram.android.ai.chatgpt.ChatGPTRequestBuilder;
@@ -20,7 +20,7 @@ public class OpenRouterHelper {
     static final String TAG = "OpenRouterHelper";
     static final ChatGPTClient openRouterClient = new ChatGPTClient();
 
-    public static void prompt(AiUtils.AiPrompt aiPrompt, MainAiHelper.OnResultState callback) {
+    public static void prompt(AiPrompt aiPrompt, MainAiHelper.OnResultState callback) {
         if (!isAvailable()) {
             callback.onFailed();
             return;

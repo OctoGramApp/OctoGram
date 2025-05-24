@@ -117,7 +117,7 @@ public class GenerateModelBottomSheet extends BottomSheet {
         setCustomView(linearLayout);
     }
 
-    private AiUtils.AiPrompt getPrompt(OutlineEditText currentElement) {
+    private AiPrompt getPrompt(OutlineEditText currentElement) {
         SpannableStringBuilder sb = new SpannableStringBuilder()
                 .append("You are an expert in creating high-quality AI prompt instructions. ")
                 .append("Your task is to create optimal prompt instructions for a Telegram client with AI functions.\n\n")
@@ -147,7 +147,7 @@ public class GenerateModelBottomSheet extends BottomSheet {
                 .append("- appearsInList: empty array (I'll determine this automatically)\n")
                 .append("- uploadMedia: boolean (I'll determine this automatically)");
 
-        return new AiUtils.AiPrompt(sb.toString(), sb2.toString());
+        return new AiPrompt(sb.toString(), sb2.toString());
     }
 
     private void generate(OutlineEditText currentElement, AlertDialog progressDialog, Consumer<CustomModelsHelper.CustomModel> consumer) {

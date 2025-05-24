@@ -26,10 +26,8 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.util.Log;
 import android.util.StateSet;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -306,6 +304,9 @@ public class Switch extends View {
             isChecked = checked;
             if (attachedToWindow && animated) {
                 animateToCheckedState(checked);
+                if (OctoConfig.INSTANCE.moreHapticFeedbacks.getValue()) {
+                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                }
             } else {
                 cancelCheckAnimator();
                 setProgress(checked ? 1.0f : 0.0f);

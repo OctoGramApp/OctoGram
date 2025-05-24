@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.AiUtils;
+import it.octogram.android.ai.AiPrompt;
 import it.octogram.android.ai.gemini.GeminiModels;
 import it.octogram.android.logs.OctoLogging;
 
@@ -38,7 +38,7 @@ public class GeminiHelper {
     private static GenerativeModelFutures model;
     private static String lastModelApiKey;
 
-    public static void prompt(AiUtils.AiPrompt aiPrompt, MainAiHelper.OnResultState callback) {
+    public static void prompt(AiPrompt aiPrompt, MainAiHelper.OnResultState callback) {
         if (!isAvailable()) {
             callback.onFailed();
             return;

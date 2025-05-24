@@ -3089,11 +3089,11 @@ public class NotificationsController extends BaseController {
     }
 
     private boolean mustDisableNotifications(MessageObject messageObject) {
-        return !OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isChatLockedNotifications(messageObject);
+        return !OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue() && FingerprintUtils.hasFingerprintSavedState() && FingerprintUtils.isChatLockedNotifications(messageObject);
     }
 
     private boolean mustHideContent(MessageObject messageObject) {
-        return OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue() && OctoConfig.INSTANCE.lockedChatsSpoilerNotifications.getValue() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isChatLockedNotifications(messageObject);
+        return OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue() && OctoConfig.INSTANCE.lockedChatsSpoilerNotifications.getValue() && FingerprintUtils.hasFingerprintSavedState() && FingerprintUtils.isChatLockedNotifications(messageObject);
     }
 
     private void scheduleNotificationRepeat() {

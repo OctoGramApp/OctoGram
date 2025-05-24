@@ -45,6 +45,7 @@ public class ActionBarOverride extends ActionBarLayout {
 
         boolean mustRequireFingerprint = false;
         boolean ignoreAskEvery = false;
+        boolean usesAdvancedUnlock = false;
         if (fragment instanceof CallLogActivity && OctoConfig.INSTANCE.biometricOpenCallsLog.getValue() && FingerprintUtils.hasFingerprintCached()) {
             mustRequireFingerprint = true;
         } else if (fragment instanceof DialogsActivity f2 && FingerprintUtils.hasFingerprintCached() && f2.getArguments() != null) {
@@ -54,6 +55,7 @@ public class ActionBarOverride extends ActionBarLayout {
                 mustRequireFingerprint = true;
             }
         } else if (fragment instanceof ChatActivity f2 && FingerprintUtils.hasFingerprintCached() && f2.getArguments() != null) {
+            usesAdvancedUnlock = true;
             if (f2.getArguments().containsKey("enc_id")) {
                 mustRequireFingerprint = OctoConfig.INSTANCE.biometricOpenSecretChats.getValue();
             } else {
@@ -72,7 +74,7 @@ public class ActionBarOverride extends ActionBarLayout {
         }
 
         if (mustRequireFingerprint) {
-            if (OctoConfig.INSTANCE.advancedBiometricUnlock.getValue()) {
+            if (OctoConfig.INSTANCE.advancedBiometricUnlock.getValue() && usesAdvancedUnlock) {
                 if (pageView == null || !pageView.isShowing()) {
                     getBlockingPageDialog(fragment);
                     pageView.show();

@@ -74,6 +74,7 @@ public class MessagesModelsWrapper {
         }
 
         data.originalSubItem.setMinimumWidth(AndroidUtilities.dp(196));
+        data.applyColors();
 
         if ((availableModels.size() == 1 && !data.canAskOnMedia()) || (availableModels.isEmpty() && data.canAskOnMedia())) {
             if (!availableModels.isEmpty()) {
@@ -341,11 +342,13 @@ public class MessagesModelsWrapper {
             if (data.popupWindowLayout.getSwipeBack() != null) {
                 ActionBarMenuSubItem backItem = ActionBarMenuItem.addItem(windowLayout, R.drawable.msg_arrow_back, getString(R.string.Back), false, null);
                 backItem.setOnClickListener(view -> data.popupWindowLayout.getSwipeBack().closeForeground());
+                data.applyColors(backItem);
             }
 
             if (data.canAskOnMedia()) {
                 ActionBarMenuSubItem item = ActionBarMenuItem.addItem(windowLayout, R.drawable.photo_paint_brush, getString(R.string.AiFeatures_Features_AskOnPhoto), false, null);
                 item.setOnClickListener(view -> handleAskOnMedia(data));
+                data.applyColors(item);
             }
 
             for (String modelID : eligibleModels) {
@@ -358,6 +361,7 @@ public class MessagesModelsWrapper {
                     ActionBarMenuSubItem item = ActionBarMenuItem.addItem(windowLayout, AiFeatureIcons.getModelIcon(model.icon), modelTitle, false, null);
                     item.textView.setText(Emoji.replaceEmoji(modelTitle, item.textView.getPaint().getFontMetricsInt(), true));
                     fixIcon(item);
+                    data.applyColors(item);
 
                     String finalModelTitle = modelTitle;
                     item.setOnClickListener(view -> handleOnClick(modelID, finalModelTitle, model, data));
@@ -382,6 +386,27 @@ public class MessagesModelsWrapper {
         public boolean useSwipeBack = true;
         public boolean isInputBox = false;
         public Utilities.Callback<String> setInputBoxText;
+
+        private int textColor = -1;
+        private int iconColor = -1;
+        public void setColors(int textColor, int iconColor) {
+            this.textColor = textColor;
+            this.iconColor = iconColor;
+        }
+
+        public boolean hasColors() {
+            return textColor != -1 && iconColor != -1;
+        }
+
+        public void applyColors(ActionBarMenuSubItem item) {
+            if (item != null && hasColors()) {
+                item.setColors(textColor, iconColor);
+            }
+        }
+
+        public void applyColors() {
+            applyColors(originalSubItem);
+        }
 
         public void hideButton() {
             originalSubItem.setVisibility(View.GONE);

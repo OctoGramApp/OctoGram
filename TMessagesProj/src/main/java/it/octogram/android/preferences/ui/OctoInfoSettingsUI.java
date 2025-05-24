@@ -57,7 +57,7 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
 
         return OctoPreferences.builder(getString(R.string.OctoInfoSettingsHeader))
                 .deepLink(DeepLinkDef.INFO)
-                .octoAnimation("Discover more on the OctoGram world")
+                .octoAnimation(getString(R.string.OctoMainSettingsInfoWorld))
                 .row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(getPbetaJoinGroupSuggestion(context, fragment, pbetaChatInstance))
                         .build())

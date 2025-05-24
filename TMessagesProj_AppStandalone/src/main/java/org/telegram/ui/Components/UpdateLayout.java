@@ -118,8 +118,7 @@ public class UpdateLayout extends IUpdateLayout {
                 FileLoader.getInstance(currentAccount).cancelLoadFile(SharedConfig.pendingAppUpdate.document);
                 updateAppUpdateViews(currentAccount, true);
             } else {
-                UpdatesManager.installUpdate();
-                //AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, activity);
+                AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, activity);
             }
         });
         updateLayoutIcon = new RadialProgress2(updateLayout);

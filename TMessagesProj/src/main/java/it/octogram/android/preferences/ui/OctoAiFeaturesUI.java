@@ -77,6 +77,10 @@ public class OctoAiFeaturesUI implements PreferencesEntry {
         this.fragment = fragment;
         this.context = context;
 
+        if (OctoConfig.INSTANCE.aiFeatures.getValue() && !OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getValue()) {
+            OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
+        }
+
         showNoProviderAlert.updateValue(OctoConfig.INSTANCE.aiFeatures.getValue() && !areThereEnabledProviders());
         modelsAssoc.clear();
 
@@ -84,6 +88,25 @@ public class OctoAiFeaturesUI implements PreferencesEntry {
                 .deepLink(DeepLinkDef.AI_FEATURES)
                 .row(new SwitchRow.SwitchRowBuilder()
                         .isMainPageAction(true)
+                        .onClick(() -> {
+                            if (OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getValue() || OctoConfig.INSTANCE.aiFeatures.getValue()) {
+                                return true;
+                            }
+
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(fragment.getParentActivity());
+                            alertDialogBuilder.setTitle(getString(R.string.AiFeatures_EnableOptionsTerms));
+                            alertDialogBuilder.setMessage(getString(R.string.AiFeatures_EnableOptionsTerms_Desc));
+                            alertDialogBuilder.setPositiveButton(getString(R.string.AiFeatures_EnableOptionsTerms_Accept ), (dialog, which) -> {
+                                OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
+                                OctoConfig.INSTANCE.aiFeatures.updateValue(true);
+                                showNoProviderAlert.updateValue(!areThereEnabledProviders());
+                                fragment.reloadUIAfterValueUpdate();
+                            });
+                            alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
+                            return false;
+                        })
                         .onPostUpdate(() -> showNoProviderAlert.updateValue(OctoConfig.INSTANCE.aiFeatures.getValue() && !areThereEnabledProviders()))
                         .preferenceValue(OctoConfig.INSTANCE.aiFeatures)
                         .title(getString(R.string.AiFeatures))

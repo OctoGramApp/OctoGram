@@ -27,11 +27,13 @@ import org.telegram.ui.Components.ShareAlert;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
 
-public class FileShareHelper implements NotificationCenter.NotificationCenterDelegate  {
+public class FileShareHelper implements NotificationCenter.NotificationCenterDelegate {
     private final FileShareData data;
     private final int currentAccount;
 
@@ -149,7 +151,7 @@ public class FileShareHelper implements NotificationCenter.NotificationCenterDel
 
             StringBuilder baseInfo = new StringBuilder();
             baseInfo.append(data.caption);
-            baseInfo.append(" - https://octogram.me/");
+            baseInfo.append(String.format(Locale.US, " - https://%s/", OctoUtils.getDomain()));
 
             for (int i = 0; i < sharingDid.size(); i++) {
                 TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();

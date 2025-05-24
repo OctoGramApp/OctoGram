@@ -10,7 +10,7 @@ package it.octogram.android.ai.helper;
 
 import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.AiUtils;
+import it.octogram.android.ai.AiPrompt;
 import it.octogram.android.logs.OctoLogging;
 
 public class MainAiHelper {
@@ -56,11 +56,11 @@ public class MainAiHelper {
         }
     }
 
-    public static void request(AiUtils.AiPrompt aiPrompt, AiProvidersDetails preferredProvider, OnResultState state) {
+    public static void request(AiPrompt aiPrompt, AiProvidersDetails preferredProvider, OnResultState state) {
         request(aiPrompt, preferredProvider, state, false);
     }
 
-    private static void request(AiUtils.AiPrompt aiPrompt, AiProvidersDetails preferredProvider, OnResultState state, boolean forced) {
+    private static void request(AiPrompt aiPrompt, AiProvidersDetails preferredProvider, OnResultState state, boolean forced) {
         if (!forced) {
             if (frozenState) {
                 return;
@@ -89,7 +89,7 @@ public class MainAiHelper {
         String originalKeyState = provider.getKeyProperty().getValue();
         provider.getKeyProperty().updateValue(key);
 
-        request(new AiUtils.AiPrompt("Ping", "Pong?"), provider, new OnResultState() {
+        request(new AiPrompt("Ping", "Pong?"), provider, new OnResultState() {
             private void resetState() {
                 provider.getStatusProperty().updateValue(originalState);
                 provider.getKeyProperty().updateValue(originalKeyState);

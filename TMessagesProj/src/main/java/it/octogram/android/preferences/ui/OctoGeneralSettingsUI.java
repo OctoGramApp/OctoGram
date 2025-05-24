@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ReactionsDoubleTapManageActivity;
 
@@ -237,6 +238,11 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .description(getString(R.string.HideCustomEmojis_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> {
+                                if (OctoConfig.INSTANCE.openArchiveOnPull.getValue() && !SharedConfig.archiveHidden) {
+                                    SharedConfig.toggleArchiveHidden();
+                                }
+                            })
                             .preferenceValue(OctoConfig.INSTANCE.openArchiveOnPull)
                             .title(getString(R.string.OpenArchiveOnPull))
                             .description(getString(R.string.OpenArchiveOnPull_Desc))

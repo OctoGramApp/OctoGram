@@ -1,4 +1,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+//buildscript {
+//    repositories {
+//        mavenCentral()
+//        maven { url 'https://developer.huawei.com/repo/' }
+//    }
+//    dependencies {
+//        classpath 'com.android.tools.build:gradle:8.8.0'
+//        classpath 'com.huawei.agconnect:agcp:1.9.3.300'
+//    }
+//}
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.google.services) apply false
@@ -30,15 +41,6 @@ subprojects {
 
                     coreLibraryDesugaringEnabled = true
                 }
-
-                /*tasks.withType(KotlinCompile).configureEach {
-                    kotlinOptions {
-                        jvmTarget = '21'
-                        languageVersion = '2.0'
-                        useDaemonFallbackStrategy = true
-                        freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
-                    }
-                }*/
 
                 defaultConfig {
                     minSdk = 21

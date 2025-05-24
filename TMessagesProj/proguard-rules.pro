@@ -1,3 +1,7 @@
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    @com.google.android.gms.common.annotation.KeepName *;
+}
 -keep class org.webrtc.* { *; }
 -keep class org.webrtc.audio.* { *; }
 -keep class org.webrtc.voiceengine.* { *; }
@@ -11,6 +15,16 @@
 -keep class androidx.mediarouter.app.MediaRouteButton { *; }
 -keepclassmembers class ** {
     @android.webkit.JavascriptInterface <methods>;
+}
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# https://developers.google.com/ml-kit/known-issues#android_issues
+-keep class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni { *; }
+-keep class com.google.mlkit.nl.languageid.internal.ThickLanguageIdentifier { *; }
+-keepclasseswithmembernames class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni {
+  native <methods>;
 }
 
 # Constant folding for resource integers may mean that a resource passed to this method appears to be unused. Keep the method to prevent this from happening.
@@ -142,19 +156,6 @@
 -keepclasseswithmembernames,includedescriptorclasses class * {
     native <methods>;
 }
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
-}
-
--assumenosideeffects class kotlin.jvm.internal.Intrinsics {
-    public static void check*(...);
-    public static void throw*(...);
-}
-
--assumenosideeffects class android.util.Log {
-    public static *** v(...);
-    public static *** d(...);
-}
 
 -keepclassmembers enum * {
      public static **[] values();
@@ -186,17 +187,7 @@
 
 -overloadaggressively
 
-# -obfuscationdictionary          proguard_phrase.txt
-# -classobfuscationdictionary     proguard_phrase.txt
-# -packageobfuscationdictionary   proguard_phrase.txt
-
-# https://developers.google.com/ml-kit/known-issues#android_issues
--keep class com.google.mlkit.nl.languageid.internal.ThickLanguageIdentifier { *; }
--keep class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni { *; }
--keepclasseswithmembernames class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni {
-  native <methods>;
-}
-
+# Exceptions
 -keep class * extends java.lang.Throwable {
     public *;
 }
@@ -207,7 +198,13 @@
     public java.lang.String getMessage();
 }
 
--keepnames @com.google.android.gms.common.annotation.KeepName class *
--keepclassmembernames class * {
-    @com.google.android.gms.common.annotation.KeepName *;
+#Other 
+-assumenosideeffects class kotlin.jvm.internal.Intrinsics {
+    public static void check*(...);
+    public static void throw*(...);
+}
+
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
 }

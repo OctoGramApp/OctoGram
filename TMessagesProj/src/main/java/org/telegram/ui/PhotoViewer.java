@@ -7418,6 +7418,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         }
                         applyCaption();
                     });
+                    data.setColors(0xffffffff, 0xffffffff);
                     MessagesModelsWrapper.initState(data);
                 }
             }
@@ -14403,6 +14404,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     data.popupWindowLayout = menuItem.getPopupLayout();
                     data.messageObject = newMessageObject;
                     data.messageText = newMessageObject.messageText != null ? newMessageObject.messageText : "";
+                    data.setColors(0xfffafafa, 0xfffafafa);
                     MessagesModelsWrapper.initState(data);
                 }
                 TranslateController translateController = MessagesController.getInstance(currentAccount).getTranslateController();

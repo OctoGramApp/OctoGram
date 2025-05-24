@@ -71,7 +71,7 @@ public class ChatUnreadCell extends FrameLayout {
             rad = dp(SharedConfig.bubbleRadius);
         }
 
-        boolean supportsChatContext = (currentUser != null || currentChat != null) && unreadCount != 0;
+        boolean supportsChatContext = (currentUser != null || currentChat != null) && unreadCount > 6;
         if (supportsChatContext) {
             supportsChatContext = MainAiHelper.canUseAiFeatures() && OctoConfig.INSTANCE.aiFeaturesChatContext.getValue();
         }

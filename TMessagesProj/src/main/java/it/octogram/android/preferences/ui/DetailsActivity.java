@@ -75,6 +75,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
     private int messageForwardsRow;
     private int messageDateRow;
     private int messageDateEditedRow;
+    private int messageEditedHiddenRow;
     private int messageDividerRow;
     private int forwardMessageHeaderRow;
     private int forwardMessageDateRow;
@@ -250,6 +251,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         messageTextLengthRow = -1;
         messageForwardsRow = -1;
         messageDateEditedRow = -1;
+        messageEditedHiddenRow = -1;
         messageDateRow = -1;
         messageDividerRow = -1;
 
@@ -335,6 +337,10 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         }
         if (messageObject.messageOwner.edit_date != 0) {
             messageDateEditedRow = rowCount++;
+        }
+
+        if (messageObject.messageOwner.edit_hide) {
+            messageEditedHiddenRow = rowCount++;
         }
 
         messageDateRow = rowCount++;
@@ -607,6 +613,8 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == messageDateEditedRow) {
                         long date = (long) messageObject.messageOwner.edit_date * 1000;
                         textDetailCell.setTextAndValue(formatString(R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(date))), getString(R.string.EditedDate), true);
+                    } else if (position == messageEditedHiddenRow) {
+                        textDetailCell.setTextAndValue(messageObject.messageOwner.edit_hide ? getString(R.string.CheckPhoneNumberYes) : getString(R.string.CheckPhoneNumberNo), getString(R.string.EditHidden), true);
                     } else if (position == fileDuration) {
                         textDetailCell.setTextAndValue(durationString, getString(R.string.UserRestrictionsDuration), true);
 //                    } else if (position == fileFrameRate) {
@@ -685,7 +693,7 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
                     position == repliedMessageIdRow || position == repliedUserNameRow || position == repliedUserUsernameRow ||
                     position == repliedUserIdRow || position == groupNameRow || position == groupIdRow || position == groupUsernameRow ||
                     position == fileNameRow || position == filePathRow || position == fileSizeRow || position == fileDCRow ||
-                    position == messageForwardsRow || position == messageDateEditedRow || position == fileDuration || position == fileFrameRate ||
+                    position == messageForwardsRow || position == messageDateEditedRow || position == messageEditedHiddenRow || position == fileDuration || position == fileFrameRate ||
                     (position == fileResolution && videoInfo.getFileResolutionRow() != -1) || (position == fileBitrate && videoInfo.getFileBitrateRow() != -1) || (position == fileCodec && videoInfo.getFileCodecRow() != -1) || fileEmojiRow == position || position == fileMimeType ||
                     position == groupDatacenterRow || position == repliedUserDatacenterRow || position == forwardUserDatacenterRow || position == dcRow ||
                     position == messageTextLengthRow || position == repliedMessageTextLengthRow) {

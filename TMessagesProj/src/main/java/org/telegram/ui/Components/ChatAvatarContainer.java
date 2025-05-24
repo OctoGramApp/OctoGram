@@ -261,7 +261,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         titleTextView.setGravity(isCentered() ? Gravity.CENTER_HORIZONTAL : Gravity.LEFT);
         titleTextView.setTypeface(AndroidUtilities.bold());
         titleTextView.setLeftDrawableTopPadding(-dp(1.3f));
-        titleTextView.setCanHideRightDrawable(false);
+        //titleTextView.setCanHideRightDrawable(false);
         //titleTextView.setRightDrawableOutside(true);
         titleTextView.setRightDrawableOutside(!isCentered());
         titleTextView.setScrollNonFitText(isCentered());
@@ -606,7 +606,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int padding = isCentered() ? dp(10) : 0;
+        int padding = isCentered() ? dp(isPreviewMode() ? 35 : 10) : 0;
         int width = MeasureSpec.getSize(widthMeasureSpec) + (isCentered() ? 0 : titleTextView.getPaddingRight());
         int availableWidth = width - dp(((avatarImageView.getVisibility() == VISIBLE || isCentered()) ? 54 : 0) + 16);
 
@@ -718,6 +718,8 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         if (isPreviewMode() && isCentered()) {
             l += dp(AndroidUtilities.isTablet() ? 80 : 72) / 2;
         }
+
+        Log.d("AVATARCONTAINER2", "UPDATED VIEW: "+titleTextView.getMeasuredWidth());
 
         SimpleTextView titleTextLargerCopyView = this.titleTextLargerCopyView.get();
         if (getSubtitleTextView().getVisibility() != GONE) {
@@ -972,7 +974,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
     }
 
     private void setTypingAnimation(boolean start) {
-        if (subtitleTextView == null || isCentered()) return;
+        if (subtitleTextView == null) return;
         if (start) {
             try {
                 int type = MessagesController.getInstance(currentAccount).getPrintingStringType(parentFragment.getDialogId(), parentFragment.getThreadId());

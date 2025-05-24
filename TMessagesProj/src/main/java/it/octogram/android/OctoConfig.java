@@ -57,6 +57,7 @@ public class OctoConfig {
     public static final String OCTOMODEL_EXTENSION = ".octomodel";
     public static final String OCTOEXPORT_EXTENSION = ".octoexport";
     private final List<ConfigProperty<?>> properties = new ArrayList<>();
+    private boolean loadedConfig = false;
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
     public static final String STICKERS_PLACEHOLDER_PACK_NAME = "octo_placeholders_android";
     public static final String PRIVATE_BETA_GROUP_HASH = "61-fnrres2ExNWFk";
@@ -206,6 +207,7 @@ public class OctoConfig {
     // public final ConfigProperty<Boolean> cameraXLowLightBoost = newConfigProperty("cameraXLowLightBoost", false);
 
     /*Experiments*/
+    public final ConfigProperty<Boolean> moreHapticFeedbacks = newConfigProperty("moreHapticFeedbacks", false);
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
     public final ConfigProperty<Integer> navigationSmoothness = newConfigProperty("navigationSmoothness", 1000);
@@ -298,6 +300,9 @@ public class OctoConfig {
     /* Verify Link Tip */
     public final ConfigProperty<Boolean> verifyLinkTip = newConfigProperty("verifyLinkTip", false);
 
+    /* Fingerprint cache */
+    public final ConfigProperty<Boolean> hasFingerprintSavedState = newConfigProperty("hasFingerprintSavedState", false);
+
     private <T> ConfigProperty<T> newConfigProperty(String key, T defaultValue) {
         ConfigProperty<T> property = new ConfigProperty<>(key, defaultValue);
         properties.add(property);
@@ -324,6 +329,11 @@ public class OctoConfig {
     }
 
     private void loadConfig() {
+        if (loadedConfig) {
+            return;
+        }
+
+        loadedConfig = true;
         synchronized (this) {
             for (ConfigProperty<?> property : properties) {
                 if (property.getValue() instanceof Boolean) {
@@ -348,6 +358,13 @@ public class OctoConfig {
                 }
             }
         }
+    }
+
+    public void arbitraryLoadConfig(ConfigProperty<Boolean> arbitraryKey) {
+        if (loadedConfig) {
+            return;
+        }
+        arbitraryKey.setValue(PREFS.getBoolean(arbitraryKey.getKey(), arbitraryKey.getValue()));
     }
 
     private boolean executeIntegerMigration(ConfigProperty<Integer> property) {

@@ -77,6 +77,9 @@
     <string name="AiFeatures_Brief_Settings">AI Settings</string>
     <string name="AiFeatures_Desc">You can integrate more features through AI to have a more true-to-life result.</string>
     <string name="AiFeatures_Desc_Brief">You can integrate more features through AI.</string>
+    <string name="AiFeatures_EnableOptionsTerms">AI Terms</string>
+    <string name="AiFeatures_EnableOptionsTerms_Desc">By enabling the option, the app will make requests to external services but only and exclusively when you use one of the AI features. We will not make automatic requests to Gemini, OpenRouter and ChatGPT in other cases. Do you want to consent?</string>
+    <string name="AiFeatures_EnableOptionsTerms_Accept">Accept</string>
     <string name="AiFeatures_AccessVia">Use AI features via…</string>
     <string name="AiFeatures_AccessVia_ReqAuth">Requires authentication through API Key</string>
     <string name="AiFeatures_AccessVia_GoogleAPI">Google API</string>
@@ -290,6 +293,7 @@
     <string name="ErrorSendingCrashContent">There was an error while sending crash logs</string>
 
     <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
+    <string name="OctoMainSettingsInfoWorld">Discover more on the OctoGram world</string>
     <string name="OctoMainSettingsManageCategory">Manage</string>
     <string name="OctoMainSettingsChats">Chats</string>
     <string name="OctoMainSettingsInfo">Info</string>
@@ -634,6 +638,7 @@
     <string name="IDCopied">ID copied to clipboard.</string>
     <string name="InlineQueryCopied">Inline Query copied to clipboard.</string>
     <string name="MediaStream">Use Media Stream in GroupCall</string>
+    <string name="MoreHapticFeedbacks">Enable More Haptic Feedbacks</string>
     <string name="AudioTypeInCall">Use Type in GroupCall</string>
     <string name="AudioTypeStereo">Stereo</string>
     <string name="AudioTypeMono">Mono (Default)</string>
@@ -720,6 +725,7 @@
     <string name="MessageText">Text</string>
     <string name="MessageTextLength">Text Length</string>
     <string name="EditedDate">Edited Date</string>
+    <string name="EditHidden">Edit Hide</string>
     <string name="MessageDate">Date</string>
     <string name="ForwardsNumber">Forwards</string>
     <string name="MessageScheduledDate">Scheduled date</string>

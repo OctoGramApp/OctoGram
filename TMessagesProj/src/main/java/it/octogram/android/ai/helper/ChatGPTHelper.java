@@ -9,7 +9,7 @@
 package it.octogram.android.ai.helper;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.AiUtils;
+import it.octogram.android.ai.AiPrompt;
 import it.octogram.android.ai.chatgpt.ChatGPTClient;
 import it.octogram.android.ai.chatgpt.ChatGPTException;
 import it.octogram.android.ai.chatgpt.ChatGPTModels;
@@ -23,7 +23,7 @@ public class ChatGPTHelper {
     private static final String TAG = "ChatGPTHelper";
     private static final ChatGPTClient chatGPTClient = new ChatGPTClient();
 
-    public static void prompt(AiUtils.AiPrompt aiPrompt, MainAiHelper.OnResultState callback) {
+    public static void prompt(AiPrompt aiPrompt, MainAiHelper.OnResultState callback) {
         if (!isAvailable()) {
             callback.onFailed();
             return;
@@ -51,13 +51,13 @@ public class ChatGPTHelper {
                     }
                 } catch (ChatGPTException | StandardHTTPRequest.Http429Exception e) {
                     OctoLogging.e(TAG, "ChatGPT API error: " + e.getMessage(), e);
-                        if (e instanceof StandardHTTPRequest.Http429Exception) {
-                            callback.onTooManyRequests();
-                        } else {
-                            callback.onFailed();
-                        }
+                    if (e instanceof StandardHTTPRequest.Http429Exception) {
+                        callback.onTooManyRequests();
+                    } else {
+                        callback.onFailed();
+                    }
                 } catch (Exception e) {
-                    OctoLogging.e(TAG, "Generic error during ChatGPT request", e);
+                    OctoLogging.e(TAG, "Generic error during ChatGPT request" + "(" + e.getMessage() + ")", e);
                     callback.onFailed();
                 }
             }

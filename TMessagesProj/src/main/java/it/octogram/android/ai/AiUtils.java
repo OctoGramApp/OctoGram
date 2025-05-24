@@ -83,45 +83,4 @@ public class AiUtils {
         OctoLogging.d(TAG, "Generated Prompt:\n" + promptBuilder);
         OctoLogging.d(TAG, "Text for AI:\n" + textBuilder);
     }
-
-    public static class AiPrompt {
-        private String prompt;
-        private String text;
-        private String filePath = "";
-        private String mimeType = "";
-        private boolean loadAsImage = false;
-
-        public AiPrompt(String prompt, String text) {
-            this.prompt = prompt;
-            this.text = text;
-        }
-
-        public AiPrompt(String prompt, String text, String filePath, String mimeType, boolean loadAsImage) {
-            this.prompt = prompt;
-            this.text = text;
-            this.filePath = filePath;
-            this.mimeType = mimeType;
-            this.loadAsImage = loadAsImage;
-        }
-
-        public String getPrompt() {
-            return prompt;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public String getFilePath() {
-            return filePath;
-        }
-
-        public String getMimeType() {
-            return mimeType;
-        }
-
-        public boolean getLoadAsImage() {
-            return loadAsImage;
-        }
-    }
 }

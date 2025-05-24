@@ -18,6 +18,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.text.TextPaint;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 
 import androidx.annotation.Keep;
@@ -294,6 +295,9 @@ public class CheckBoxBase {
 
         if (attachedToWindow && animated) {
             animateToCheckedState(checked);
+            if (OctoConfig.INSTANCE.moreHapticFeedbacks.getValue()) {
+                parentView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+            }
         } else {
             cancelCheckAnimator();
             setProgress(checked ? 1.0f : 0.0f);

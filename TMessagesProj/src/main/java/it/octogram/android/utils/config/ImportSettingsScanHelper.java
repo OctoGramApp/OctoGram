@@ -160,6 +160,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIKey.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesCustomModels.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.hasFingerprintSavedState.getKey());
     }
 
     private void fillGeneralOptions(SettingsScanCategory category) {
@@ -298,6 +299,7 @@ public class ImportSettingsScanHelper {
     }
 
     private void fillExperimentsOptions(SettingsScanCategory category) {
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.moreHapticFeedbacks, R.string.MoreHapticFeedbacks));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.mediaInGroupCall, R.string.MediaStream));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showRPCErrors, R.string.ShowRPCErrors));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.gcOutputType, R.string.AudioTypeInCall));
