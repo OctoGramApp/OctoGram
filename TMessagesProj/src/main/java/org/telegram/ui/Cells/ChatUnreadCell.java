@@ -101,6 +101,7 @@ public class ChatUnreadCell extends FrameLayout {
             chatContextAvailable.setText(LocaleController.getString(R.string.AiFeatures_Features_ChatContext_Available));
             backgroundLayout.addView(chatContextAvailable, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 25, 0, 25, 5));
         }
+        //addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 32, 0, 32, 0));
     }
 
     public void setText(String text) {

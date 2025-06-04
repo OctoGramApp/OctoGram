@@ -12,7 +12,7 @@ import static org.telegram.ui.Components.UniversalAdapter.VIEW_TYPE_TEXT;
 import static org.telegram.ui.Components.UniversalAdapter.VIEW_TYPE_USER_GROUP_CHECKBOX;
 import static org.telegram.ui.Components.UniversalAdapter.VIEW_TYPE_USER_CHECKBOX;
 
-import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -72,6 +72,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
     private static final int ACTION_DELETE_ALL = 1;
     private static final int ACTION_BAN = 2;
 
+    private boolean monoforum;
     private Action report;
     private Action deleteAll;
     private Action banOrRestrict;
@@ -229,17 +230,37 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
             adapter.update(true);
         }
 
-        void toggleAllChecks() {
-            boolean value = true;
+        boolean areAllSelected() {
             for (int i = 0; i < totalCount; i++) {
-                if (checks[i] && (filter == null || filter[i])) {
-                    value = false;
-                    break;
+                if (!(checks[i] && (filter == null || filter[i]))) {
+                    return false;
                 }
             }
+            return true;
+        }
+
+        boolean isOneSelected() {
+            for (int i = 0; i < totalCount; i++) {
+                if (checks[i] && (filter == null || filter[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        void toggleAllChecks() {
+            setAllChecks(!isOneSelected());
+        }
+
+        void setAllChecks(boolean value) {
+            setAllChecks(value, true);
+        }
+        void setAllChecks(boolean value, boolean notify) {
             Arrays.fill(checks, value);
             updateCounters();
-            adapter.update(true);
+            if (notify) {
+                adapter.update(true);
+            }
         }
 
         void forEachSelected(Utilities.IndexedConsumer<TLObject> action) {
@@ -376,9 +397,19 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
             bannedRights.send_plain = true;
         }
 
-        report = new Action(ACTION_REPORT, actionParticipants);
-        deleteAll = new Action(ACTION_DELETE_ALL, actionParticipants);
+        final SharedPreferences prefs = MessagesController.getInstance(currentAccount).getMainSettings();
 
+        report = new Action(ACTION_REPORT, actionParticipants);
+//        if (prefs.getBoolean("delete_report", false)) {
+//            report.setAllChecks(true, false);
+//        }
+        deleteAll = new Action(ACTION_DELETE_ALL, actionParticipants);
+//        if (prefs.getBoolean("delete_deleteAll", false)) {
+//            deleteAll.setAllChecks(true, false);
+//            onDeleteAllChanged();
+//        }
+
+        monoforum = ChatObject.isMonoForum(inChat);
         if (ChatObject.canBlockUsers(inChat)) {
             banFilter = new boolean[actionParticipants.size()];
             for (int i = 0; i < actionParticipants.size(); i++) {
@@ -420,6 +451,10 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
         } else {
             banOrRestrict = new Action(ACTION_BAN, new ArrayList<>(0));
         }
+
+//        if (banOrRestrict != null && !restrict && prefs.getBoolean("delete_ban", false)) {
+//            banOrRestrict.setAllChecks(true, false);
+//        }
 
         adapter.update(false);
         actionBar.setTitle(getTitle());
@@ -646,7 +681,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
         fillAction(items, deleteAll);
         fillAction(items, banOrRestrict);
 
-        if (banOrRestrict.isPresent()) {
+        if (!monoforum && banOrRestrict.isPresent()) {
             if (restrict) {
                 items.add(UItem.asShadow(null));
                 if (banOrRestrict.isExpandable()) {
@@ -1024,18 +1059,22 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         banOrRestrict.forEachSelected((participant, i) -> {
+            long chatId = inChat.id;
+            if (ChatObject.isMonoForum(inChat) && ChatObject.canManageMonoForum(currentAccount, inChat) && inChat.linked_monoforum_id != 0) {
+                chatId = inChat.linked_monoforum_id;
+            }
             if (restrict) {
                 TLRPC.TL_chatBannedRights rights = bannedRightsOr(bannedRights, participantsBannedRights.get(i));
                 if (participant instanceof TLRPC.User) {
-                    MessagesController.getInstance(currentAccount).setParticipantBannedRole(inChat.id, (TLRPC.User) participant, null, rights, false, getBaseFragment());
+                    MessagesController.getInstance(currentAccount).setParticipantBannedRole(chatId, (TLRPC.User) participant, null, rights, false, getBaseFragment());
                 } else if (participant instanceof TLRPC.Chat) {
-                    MessagesController.getInstance(currentAccount).setParticipantBannedRole(inChat.id, null, (TLRPC.Chat) participant, rights, false, getBaseFragment());
+                    MessagesController.getInstance(currentAccount).setParticipantBannedRole(chatId, null, (TLRPC.Chat) participant, rights, false, getBaseFragment());
                 }
             } else {
                 if (participant instanceof TLRPC.User) {
-                    MessagesController.getInstance(currentAccount).deleteParticipantFromChat(inChat.id, (TLRPC.User) participant, null, false, false);
+                    MessagesController.getInstance(currentAccount).deleteParticipantFromChat(chatId, (TLRPC.User) participant, null, false, false);
                 } else if (participant instanceof TLRPC.Chat) {
-                    MessagesController.getInstance(currentAccount).deleteParticipantFromChat(inChat.id, null, (TLRPC.Chat) participant, false, false);
+                    MessagesController.getInstance(currentAccount).deleteParticipantFromChat(chatId, null, (TLRPC.Chat) participant, false, false);
                 }
             }
         });
@@ -1098,6 +1137,20 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
                 MessagesController.getInstance(currentAccount).deleteUserChannelHistory(inChat, null, (TLRPC.Chat) participant, getBaseFragment(), 0);
             }
         });
+    }
+
+    private void savePreferences() {
+        final SharedPreferences.Editor e = MessagesController.getInstance(currentAccount).getMainSettings().edit();
+        e.putBoolean("delete_report", report.areAllSelected());
+        e.putBoolean("delete_deleteAll", deleteAll.areAllSelected());
+        e.putBoolean("delete_ban", !restrict && banOrRestrict.areAllSelected());
+        e.apply();
+    }
+
+    @Override
+    public void dismiss() {
+        savePreferences();
+        super.dismiss();
     }
 
     private void proceed() {

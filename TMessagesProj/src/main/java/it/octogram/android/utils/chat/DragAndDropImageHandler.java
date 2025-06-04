@@ -204,6 +204,7 @@ public class DragAndDropImageHandler {
                         parentFragment.getQuickReplyId(),
                         0,
                         false,
+                        0,
                         0
                 );
                 if (delegate != null) delegate.onMessageSend(null, true, scheduleDate, 0);

@@ -97,7 +97,7 @@ public class FolderTypeSelector extends FrameLayout {
         border.setColor(Theme.getColor(Theme.key_actionBarDefault));
         border.setCornerRadius(dp(isSinglePreview ? 15 : 25));
 
-        filterTabsView = new FilterTabsView(context, tabStyle, tabMode);
+        filterTabsView = new FilterTabsView(context, tabStyle, tabMode, null);
         filterTabsView.setDelegate(new FilterTabsView.FilterTabsViewDelegate() {
             @Override
             public void onPageSelected(FilterTabsView.Tab tab, boolean forward) {

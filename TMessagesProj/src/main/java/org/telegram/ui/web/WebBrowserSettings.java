@@ -59,14 +59,12 @@ import org.telegram.ui.Components.Text;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalFragment;
-import org.telegram.ui.Stars.StarsIntroActivity;
-import org.telegram.ui.Stories.bots.BotPreviewsEditContainer;
+import org.telegram.ui.Components.UniversalRecyclerView;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
-
-import it.octogram.android.utils.OctoUtils;
 
 public class WebBrowserSettings extends UniversalFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -675,7 +673,8 @@ public class WebBrowserSettings extends UniversalFragment implements Notificatio
                 return new WebsiteView(context);
             }
 
-            public void bindView(View view, UItem item, boolean divider) {
+            @Override
+            public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
                 ((WebsiteView) view).set(item.text, (ArrayList<String>) item.object2, item.object instanceof Bitmap ? ((Bitmap) item.object) : null, divider);
 
                 if (item instanceof CustomUItem custom) {

@@ -849,7 +849,7 @@ public class ContactsActivity extends BaseFragment implements NotificationCenter
                 drawable = combinedDrawable;
             }*/
             var drawable = CustomFab.createFabBackground();
-            floatingButton.setBackgroundDrawable(drawable);
+            floatingButton.setBackground(drawable);
             floatingButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_actionIcon), PorterDuff.Mode.MULTIPLY));
             SharedPreferences preferences = MessagesController.getGlobalMainSettings();
             boolean configAnimationsEnabled = preferences.getBoolean("view_animations", true);

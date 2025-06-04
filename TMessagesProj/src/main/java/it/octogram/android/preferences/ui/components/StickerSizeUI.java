@@ -249,7 +249,7 @@ public class StickerSizeUI extends BaseFragment {
                 });
                 cells[a].isChat = false;
                 cells[a].setFullyDraw(true);
-                cells[a].setMessageObject(messageObjects[a], null, a == cells.length - 1, a == 0);
+                cells[a].setMessageObject(messageObjects[a], null, a == cells.length - 1, a == 0, false);
                 cells[a].requestLayout();
                 addView(cells[a], LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
             }
@@ -261,7 +261,7 @@ public class StickerSizeUI extends BaseFragment {
             for (int a = 0; a < cells.length; a++) {
                 boolean hasMedia = !(cells[a].getMessageObject().messageOwner.media instanceof TLRPC.TL_messageMediaEmpty);
                 if (hasMedia) {
-                    cells[a].setMessageObject(messageObjects[a], null, a == cells.length - 1, a == 0);
+                    cells[a].setMessageObject(messageObjects[a], null, a == cells.length - 1, a == 0, false);
                     cells[a].invalidate();
                 } else {
                     cells[a].getMessageObject().resetLayout();

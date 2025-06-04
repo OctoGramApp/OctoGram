@@ -98,7 +98,7 @@ public class DetailsPreviewMessages extends LinearLayout {
                 });
                 cell.isChat = true;
                 cell.setFullyDraw(true);
-                cell.setMessageObject(obj, null, false, false);
+                cell.setMessageObject(obj, null, false, false, false);
                 addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
                 cells.add(cell);
             }
@@ -131,7 +131,7 @@ public class DetailsPreviewMessages extends LinearLayout {
         for (int a = 0; a < cells.size(); a++) {
             View cell = cells.get(a);
             if (cell instanceof ChatMessageCell) {
-                ((ChatMessageCell) cell).setMessageObject(messageObjects.get(a), null, false, false);
+                ((ChatMessageCell) cell).setMessageObject(messageObjects.get(a), null, false, false, false);
             } else if (cell instanceof ChatActionCell) {
                 ((ChatActionCell) cell).setMessageObject(messageObjects.get(a), true);
             }
