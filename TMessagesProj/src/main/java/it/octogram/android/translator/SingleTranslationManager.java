@@ -37,6 +37,9 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.TranslatorMode;
 import it.octogram.android.TranslatorProvider;
 
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 public class SingleTranslationManager {
     private Integer reqId;
 
@@ -50,7 +53,7 @@ public class SingleTranslationManager {
     String toLanguage;
     CharSequence text;
     ArrayList<TLRPC.MessageEntity> entities;
-    boolean noforwards;
+    boolean noForwards;
     Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress;
     Runnable onDismiss;
 
@@ -91,7 +94,7 @@ public class SingleTranslationManager {
         fixMessageProvider();
 
         AndroidUtilities.runOnUIThread(() -> {
-            TranslateAlert2 alert = TranslateAlert2.showAlert(context, fragment, currentAccount, peer, msgId, fromLanguage, toLanguage, text, entities, noforwards, onLinkPress, onDismiss, selectedMessage);
+            TranslateAlert2 alert = TranslateAlert2.showAlert(context, fragment, currentAccount, peer, msgId, fromLanguage, toLanguage, text, entities, noForwards, onLinkPress, onDismiss, selectedMessage);
             alert.setDimBehind(false);
         });
     }
@@ -166,19 +169,19 @@ public class SingleTranslationManager {
         }
 
         if (translationProvider == TranslatorProvider.DEFAULT.getValue()) {
-            translateWithDefault(callback);
+            AndroidUtilities.runOnUIThread(() -> translateWithDefault(callback));
         } else if (translationProvider == TranslatorProvider.GOOGLE.getValue()) {
-            GoogleTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
+            AndroidUtilities.runOnUIThread(() -> GoogleTranslator.executeTranslation(text.toString(), entities, toLanguage, callback));
         } else if (translationProvider == TranslatorProvider.YANDEX.getValue()) {
-            YandexTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
+            AndroidUtilities.runOnUIThread(() -> YandexTranslator.executeTranslation(text.toString(), entities, toLanguage, callback));
         } else if (translationProvider == TranslatorProvider.DEEPL.getValue()) {
-            DeepLTranslator.executeTranslation(text.toString(), entities, toLanguage, OctoConfig.INSTANCE.translatorFormality.getValue(), callback);
+            AndroidUtilities.runOnUIThread(() -> DeepLTranslator.executeTranslation(text.toString(), entities, toLanguage, OctoConfig.INSTANCE.translatorFormality.getValue(), callback));
         } else if (translationProvider == TranslatorProvider.BAIDU.getValue()) {
-            BaiduTranslator.executeTranslation(text.toString(), entities, toLanguage, callback);
+            AndroidUtilities.runOnUIThread(() -> BaiduTranslator.executeTranslation(text.toString(), entities, toLanguage, callback));
         } else if (translationProvider == TranslatorProvider.LINGO.getValue()) {
-            LingoTranslator.executeTranslation(text.toString(), toLanguage, callback);
+            AndroidUtilities.runOnUIThread(() -> LingoTranslator.executeTranslation(text.toString(), toLanguage, callback));
         } else if (translationProvider == TranslatorProvider.EMOJIS.getValue()) {
-            EmojisTranslator.executeTranslation(text.toString(), callback);
+            AndroidUtilities.runOnUIThread(() -> EmojisTranslator.executeTranslation(text.toString(), callback));
         } else {
             callback.onResponseReceived();
             callback.onError();
@@ -236,9 +239,13 @@ public class SingleTranslationManager {
 
     public interface OnTranslationResultCallback {
         void onGotReqId(int reqId);
+
         void onResponseReceived();
+
         void onSuccess(TLRPC.TL_textWithEntities finalText);
+
         void onError();
+
         void onUnavailableLanguage();
     }
 }

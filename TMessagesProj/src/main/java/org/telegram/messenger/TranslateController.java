@@ -95,7 +95,8 @@ public class TranslateController extends BaseController {
         final TLRPC.Chat chat = getMessagesController().getChat(-dialogId);
         return (
             UserConfig.getInstance(currentAccount).isPremium() ||
-            chat != null && chat.autotranslation
+            chat != null && chat.autotranslation ||
+            OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEFAULT.getValue()
         );
     }
 

@@ -72,6 +72,7 @@ public class PopupChoiceDialogOption {
         this.itemSliderIconUI = itemSliderIconUI;
         return this;
     }
+
     public PopupChoiceDialogOption setTabStyleIconUI(TabStyle tabStyleIconUI) {
         this.tabStyleIconUI = tabStyleIconUI;
         return this;

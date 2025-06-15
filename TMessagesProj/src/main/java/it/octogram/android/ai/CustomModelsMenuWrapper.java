@@ -49,12 +49,11 @@ import java.util.function.Consumer;
 import it.octogram.android.AiModelMessagesState;
 import it.octogram.android.AiModelType;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.helper.CustomModelsHelper;
-import it.octogram.android.ai.helper.MainAiHelper;
 import it.octogram.android.ai.icons.AiFeatureIcons;
+import it.octogram.android.ai.ui.MainAiBottomSheet;
 import it.octogram.android.translator.TranslateMessagesWrapper;
 
-public class MessagesModelsWrapper {
+public class CustomModelsMenuWrapper {
     public static void initState(FillStateData data) {
         if (!MainAiHelper.canUseAiFeatures() || (data.isInputBox && (data.messageText == null || data.messageText.toString().trim().isEmpty()))) {
             data.hideButton();
@@ -121,7 +120,7 @@ public class MessagesModelsWrapper {
                 }
                 data.modelID = null;
 
-                AiBottomSheet alert = new AiBottomSheet(data);
+                MainAiBottomSheet alert = new MainAiBottomSheet(data);
                 alert.setDimBehind(!data.supportsActivityRelatedDimBehind);
                 alert.show();
             });
@@ -160,7 +159,7 @@ public class MessagesModelsWrapper {
             data.selectedMessages.addAll(messageObjects);
 
             AndroidUtilities.runOnUIThread(() -> {
-                AiBottomSheet alert = new AiBottomSheet(data);
+                MainAiBottomSheet alert = new MainAiBottomSheet(data);
                 alert.setDimBehind(true);
                 alert.show();
             });
@@ -195,7 +194,7 @@ public class MessagesModelsWrapper {
                     Collections.reverse(res.messages);
                     ArrayList<MessageObject> tempMessages = new ArrayList<>();
                     for (TLRPC.Message message : res.messages) {
-                       tempMessages.add(new MessageObject(UserConfig.selectedAccount, message, false, false));
+                        tempMessages.add(new MessageObject(UserConfig.selectedAccount, message, false, false));
                     }
                     consumer.accept(tempMessages);
                 } else if (error != null) {
@@ -220,7 +219,7 @@ public class MessagesModelsWrapper {
             key = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example1;
         }
 
-        AiModelMessagesState state = MessagesModelsWrapper.getAvailableStates(data);
+        AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(data);
 
         if (state == AiModelMessagesState.VOICE_MESSAGES || state == AiModelMessagesState.MUSIC) {
             key = R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example5;
@@ -297,7 +296,7 @@ public class MessagesModelsWrapper {
         }
 
         data.modelID = modelID;
-        AiBottomSheet alert = new AiBottomSheet(data);
+        MainAiBottomSheet alert = new MainAiBottomSheet(data);
         alert.setDimBehind(!data.supportsActivityRelatedDimBehind);
         alert.show();
     }
@@ -389,6 +388,7 @@ public class MessagesModelsWrapper {
 
         private int textColor = -1;
         private int iconColor = -1;
+
         public void setColors(int textColor, int iconColor) {
             this.textColor = textColor;
             this.iconColor = iconColor;

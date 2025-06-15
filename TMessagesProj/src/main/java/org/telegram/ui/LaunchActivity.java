@@ -247,9 +247,8 @@ import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.ActionBarOverride;
 import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
 import it.octogram.android.theme.MonetThemeController;
-import it.octogram.android.utils.account.FingerprintUtils;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ForwardContext;
 import it.octogram.android.utils.data.LanguageController;
 
@@ -1500,8 +1499,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 AndroidUtilities.setLightStatusBar(getWindow(), enable, forceLightStatusBar);
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && checkNavigationBar && (!useCurrentFragment || currentFragment == null || !currentFragment.isInPreviewMode())) {
-                // int color = currentFragment != null && useCurrentFragment ? currentFragment.getNavigationBarColor() : Theme.getColor(Theme.key_windowBackgroundGray, null, true);
-                int color = OctoUtils.getNavBarColor(); // currentFragment != null && useCurrentFragment ? currentFragment.getNavigationBarColor() : Theme.getColor(Theme.key_windowBackgroundGray, null, true);
+                int color = currentFragment != null && useCurrentFragment ? currentFragment.getNavigationBarColor() : Theme.getColor(Theme.key_windowBackgroundGray, null, true);
+                // int color = OctoUtils.getNavBarColor(); // currentFragment != null && useCurrentFragment ? currentFragment.getNavigationBarColor() : Theme.getColor(Theme.key_windowBackgroundGray, null, true);
                 if (actionBarLayout.getSheetFragment(false) != null) {
                     BaseFragment sheetFragment = actionBarLayout.getSheetFragment(false);
                     if (sheetFragment.sheetsStack != null) {

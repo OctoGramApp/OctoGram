@@ -20,7 +20,8 @@ public interface PreferencesEntry {
     @NonNull
     OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context);
 
-    default void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {}
+    default void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    }
 
     default boolean isLockedContent() {
         return false;
@@ -36,6 +37,14 @@ public interface PreferencesEntry {
 
     default void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
 
+    }
+
+    default void onBecomeFullyVisible() {
+
+    }
+
+    default void onBecomeFullyHidden() {
+        
     }
 
 }

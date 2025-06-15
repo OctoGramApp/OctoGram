@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai.helper;
+package it.octogram.android.ai;
 
 import android.util.Pair;
 
@@ -101,9 +101,11 @@ public class CustomModelsHelper {
                         model.saveFromJsonObject(keyData);
                         modelsList.put(key, model);
                     }
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
         loadedModels = true;
     }
 
@@ -193,7 +195,8 @@ public class CustomModelsHelper {
                 object.getBoolean("uploadMedia");
             }
             return true;
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
         return false;
     }
 

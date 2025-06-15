@@ -225,7 +225,7 @@ public class ListAdapter extends AdapterWithDiffUtils {
 
                         if (row.isEnabled()) {
                             frameLayout.setClickable(true);
-                            frameLayout.setOnClickListener((v) ->{
+                            frameLayout.setOnClickListener((v) -> {
 
                             });
                         }

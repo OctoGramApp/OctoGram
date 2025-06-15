@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai;
+package it.octogram.android.ai.ui;
 
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO;
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -33,7 +33,6 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.text.InputType;
 import android.text.Layout;
-import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -42,7 +41,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ReplacementSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,8 +105,11 @@ import it.octogram.android.AiModelType;
 import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.helper.CustomModelsHelper;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.AiPrompt;
+import it.octogram.android.ai.AiUtils;
+import it.octogram.android.ai.CustomModelsHelper;
+import it.octogram.android.ai.CustomModelsMenuWrapper;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.ai.icons.AiFeatureIcons;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoAiFeaturesUI;
@@ -116,9 +117,11 @@ import it.octogram.android.preferences.ui.OctoAiNewModelUI;
 import it.octogram.android.translator.TranslateMessagesWrapper;
 import it.octogram.android.utils.OctoUtils;
 
-/** @noinspection SequencedCollectionMethodCanBeUsed*/
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 @SuppressLint("ClickableViewAccessibility")
-public class AiBottomSheet extends BottomSheet {
+public class MainAiBottomSheet extends BottomSheet {
     private AiProvidersDetails favoriteAiProvider;
 
     private final TranslateMessagesWrapper.FillStateData data;
@@ -142,8 +145,12 @@ public class AiBottomSheet extends BottomSheet {
 
     private OutlineEditText customPromptInputText;
 
-    /** @noinspection SequencedCollectionMethodCanBeUsed*/
-    private record EligibleVariations(int title, int icon, String hashtag, ConfigProperty<Integer> lastValue, List<String> eligibleVariations) {
+    /**
+     * @noinspection SequencedCollectionMethodCanBeUsed
+     */
+    private record EligibleVariations(int title, int icon, String hashtag,
+                                      ConfigProperty<Integer> lastValue,
+                                      List<String> eligibleVariations) {
         public String getCurrentVariation() {
             int currentSavedValue = lastValue.getValue();
             if (currentSavedValue > 0 && currentSavedValue < eligibleVariations.size()) {
@@ -175,7 +182,7 @@ public class AiBottomSheet extends BottomSheet {
     ));
 
 
-    public AiBottomSheet(TranslateMessagesWrapper.FillStateData data) {
+    public MainAiBottomSheet(TranslateMessagesWrapper.FillStateData data) {
         super(data.context, true, null);
 
         toLanguage = TranslateAlert2.getToLanguage();
@@ -247,7 +254,8 @@ public class AiBottomSheet extends BottomSheet {
                     textView.setTextSelectHandleRight(right);
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         textViewContainer.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
         listView = new RecyclerListView(data.context) {
@@ -324,7 +332,7 @@ public class AiBottomSheet extends BottomSheet {
                 dismiss();
             }
         });
-        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16+48+8+48+8, 16));
+        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16 + 48 + 8 + 48 + 8, 16));
 
         regenerateButton = new ImageView(data.context);
         regenerateButton.setScaleType(ImageView.ScaleType.CENTER);
@@ -332,7 +340,7 @@ public class AiBottomSheet extends BottomSheet {
         regenerateButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
         regenerateButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
         regenerateButton.setOnClickListener(v -> init());
-        buttonView.addView(regenerateButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16+48+8, 16));
+        buttonView.addView(regenerateButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16 + 48 + 8, 16));
 
         configButton = new ImageView(data.context);
         configButton.setScaleType(ImageView.ScaleType.CENTER);
@@ -384,11 +392,11 @@ public class AiBottomSheet extends BottomSheet {
     }
 
     private CharSequence getOriginalText() {
-        return data instanceof MessagesModelsWrapper.FillStateData d ? d.messageText : data.translationData.text;
+        return data instanceof CustomModelsMenuWrapper.FillStateData d ? d.messageText : data.translationData.text;
     }
 
     private boolean isCustomModel() {
-        return data instanceof MessagesModelsWrapper.FillStateData;
+        return data instanceof CustomModelsMenuWrapper.FillStateData;
     }
 
     private boolean hasEnoughHeight() {
@@ -402,6 +410,7 @@ public class AiBottomSheet extends BottomSheet {
     }
 
     private boolean isFirstTime = true;
+
     private void updateConfigButtonVisibility(boolean isVisible) {
         List<ImageView> buttons = List.of(configButton, regenerateButton);
 
@@ -416,7 +425,7 @@ public class AiBottomSheet extends BottomSheet {
             }
 
             ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
-            layoutParams.rightMargin = dp(16 + (isVisible ? (48+8+48+8) : 0));
+            layoutParams.rightMargin = dp(16 + (isVisible ? (48 + 8 + 48 + 8) : 0));
             buttonTextView.setLayoutParams(layoutParams);
             buttonTextView.invalidate();
         } else {
@@ -431,7 +440,7 @@ public class AiBottomSheet extends BottomSheet {
             buttonAnimatorView.addUpdateListener(animation -> {
                 float value = (float) animation.getAnimatedValue();
                 ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
-                layoutParams.rightMargin = dp((16 + (48+8+48+8)*value));
+                layoutParams.rightMargin = dp((16 + (48 + 8 + 48 + 8) * value));
                 buttonTextView.setLayoutParams(layoutParams);
                 buttonTextView.invalidate();
 
@@ -457,6 +466,7 @@ public class AiBottomSheet extends BottomSheet {
     }
 
     private Runnable loadingTextCycleStopRunnable;
+
     private void initLoadingTextCycle() {
         ArrayList<Integer> usedStrings = new ArrayList<>();
         Random rand = new Random();
@@ -506,7 +516,7 @@ public class AiBottomSheet extends BottomSheet {
 
     private int getCurrentAiLoadingString(int randomNumber) {
         if (isCustomModel() && (randomNumber == 2 || randomNumber == 4 || randomNumber == 5)) {
-            MessagesModelsWrapper.FillStateData customData = ((MessagesModelsWrapper.FillStateData) data);
+            CustomModelsMenuWrapper.FillStateData customData = ((CustomModelsMenuWrapper.FillStateData) data);
             CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(customData.modelID);
             if (model != null && model.prompt == null) {
                 return R.string.AiFeatures_CustomModels_Feature_Loading_Easy;
@@ -540,10 +550,10 @@ public class AiBottomSheet extends BottomSheet {
         boolean useLoadingCycle = getOriginalText() == null || getOriginalText().toString().isEmpty();
 
         if (isCustomModel()) {
-            MessagesModelsWrapper.FillStateData customData = ((MessagesModelsWrapper.FillStateData) data);
+            CustomModelsMenuWrapper.FillStateData customData = ((CustomModelsMenuWrapper.FillStateData) data);
             if (customData.modelID != null) {
                 CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(customData.modelID);
-                if (model != null && model.uploadMedia && MessagesModelsWrapper.getAvailableStates(customData) != AiModelMessagesState.TEXT_MESSAGES) {
+                if (model != null && model.uploadMedia && CustomModelsMenuWrapper.getAvailableStates(customData) != AiModelMessagesState.TEXT_MESSAGES) {
                     useLoadingCycle = true;
                 }
             } else {
@@ -570,7 +580,7 @@ public class AiBottomSheet extends BottomSheet {
 
         AiPrompt prompt;
         if (isCustomModel()) {
-            MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
+            CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
 
             if (customData.modelID == null) {
                 selectEligibleModels();
@@ -581,7 +591,7 @@ public class AiBottomSheet extends BottomSheet {
             if (modelData == null) {
                 return;
             }
-            
+
             if (modelData.prompt == null && customPromptInputText == null) {
                 requestPromptToUser();
                 return;
@@ -598,7 +608,7 @@ public class AiBottomSheet extends BottomSheet {
             String filePath = "";
             String mimeType = "";
             boolean loadAsImage = false;
-            AiModelMessagesState currentState = MessagesModelsWrapper.getAvailableStates(customData);
+            AiModelMessagesState currentState = CustomModelsMenuWrapper.getAvailableStates(customData);
             if (modelData.modelType == AiModelType.RELATED_TO_MESSAGES && modelData.uploadMedia && currentState != AiModelMessagesState.TEXT_MESSAGES) {
                 if (favoriteAiProvider != AiProvidersDetails.GEMINI) {
                     AndroidUtilities.runOnUIThread(() -> {
@@ -675,7 +685,7 @@ public class AiBottomSheet extends BottomSheet {
         });
     }
 
-    private String replaceTags(MessagesModelsWrapper.FillStateData customData, String promptAsString) {
+    private String replaceTags(CustomModelsMenuWrapper.FillStateData customData, String promptAsString) {
         if (promptAsString == null) {
             return null;
         }
@@ -701,8 +711,8 @@ public class AiBottomSheet extends BottomSheet {
             if (customData.currentChat != null) {
                 TLRPC.Chat chat = customData.currentChat;
                 hashtagReplacementAssoc.put("#chat_title", chat.title);
-                hashtagReplacementAssoc.put("#chat_username", chat.username == null ? "" : "@"+chat.username);
-                hashtagReplacementAssoc.put("#chat_members_count", ""+ chat.participants_count);
+                hashtagReplacementAssoc.put("#chat_username", chat.username == null ? "" : "@" + chat.username);
+                hashtagReplacementAssoc.put("#chat_members_count", "" + chat.participants_count);
 
                 if (promptAsString.contains("#chat_description")) {
                     TLRPC.ChatFull chatFull = MessagesController.getInstance(UserConfig.selectedAccount).getChatFull(chat.id);
@@ -711,7 +721,7 @@ public class AiBottomSheet extends BottomSheet {
             } else {
                 TLRPC.User user = customData.currentUser;
                 hashtagReplacementAssoc.put("#chat_title", user == null ? "" : UserObject.getUserName(user));
-                hashtagReplacementAssoc.put("#chat_username", (user == null || UserObject.getPublicUsername(user) == null) ? "" : ("@"+UserObject.getPublicUsername(user)));
+                hashtagReplacementAssoc.put("#chat_username", (user == null || UserObject.getPublicUsername(user) == null) ? "" : ("@" + UserObject.getPublicUsername(user)));
                 hashtagReplacementAssoc.put("#chat_description", "");
                 hashtagReplacementAssoc.put("#chat_members_count", "0");
             }
@@ -723,8 +733,8 @@ public class AiBottomSheet extends BottomSheet {
                     if (promptAsString.contains("#chat_title") || promptAsString.contains("#chat_username")) {
                         TLRPC.Chat chat = controllerInstance.getChat(chatID);
                         hashtagReplacementAssoc.put("#chat_title", chat == null ? "" : chat.title);
-                        hashtagReplacementAssoc.put("#chat_username", (chat == null || chat.username == null) ? "" : ("@"+chat.username));
-                        hashtagReplacementAssoc.put("#chat_members_count", ""+(chat == null ? 0 : chat.participants_count));
+                        hashtagReplacementAssoc.put("#chat_username", (chat == null || chat.username == null) ? "" : ("@" + chat.username));
+                        hashtagReplacementAssoc.put("#chat_members_count", "" + (chat == null ? 0 : chat.participants_count));
                     }
                     if (promptAsString.contains("#chat_description")) {
                         TLRPC.ChatFull chat = controllerInstance.getChatFull(chatID);
@@ -733,7 +743,7 @@ public class AiBottomSheet extends BottomSheet {
                 } else {
                     TLRPC.User user = controllerInstance.getUser(customData.messageObject.messageOwner.peer_id.user_id);
                     hashtagReplacementAssoc.put("#chat_title", user == null ? "" : UserObject.getUserName(user));
-                    hashtagReplacementAssoc.put("#chat_username", (user == null || UserObject.getPublicUsername(user) == null) ? "" : ("@"+UserObject.getPublicUsername(user)));
+                    hashtagReplacementAssoc.put("#chat_username", (user == null || UserObject.getPublicUsername(user) == null) ? "" : ("@" + UserObject.getPublicUsername(user)));
                     hashtagReplacementAssoc.put("#chat_description", "");
                     hashtagReplacementAssoc.put("#chat_members_count", "0");
                 }
@@ -779,7 +789,7 @@ public class AiBottomSheet extends BottomSheet {
                     .append("\n\n");
             for (int i = 0; i < customData.selectedMessages.size(); i++) {
                 MessageObject object = customData.selectedMessages.get(i);
-                AiModelMessagesState state = MessagesModelsWrapper.getAvailableStates(object);
+                AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(object);
                 if (state != null) {
                     TLObject authorObject = object.getFromPeerObject();
                     if (authorObject instanceof TLRPC.Chat chat) {
@@ -809,25 +819,25 @@ public class AiBottomSheet extends BottomSheet {
             return;
         }
 
-        MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
+        CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
         if (customData.modelID != null) {
             return;
         }
 
-        AiModelMessagesState state = MessagesModelsWrapper.getAvailableStates(customData);
+        AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(customData);
         if (state == null && !customData.isChat && !customData.isInputBox) {
             dismiss();
             return;
         }
 
-        ArrayList<String> availableModels = MessagesModelsWrapper.getEligibleModels(customData, state);
+        ArrayList<String> availableModels = CustomModelsMenuWrapper.getEligibleModels(customData, state);
         if (availableModels.isEmpty()) {
             dismiss();
             return;
         }
 
         if (availableModels.size() == 1) {
-            ((MessagesModelsWrapper.FillStateData) data).modelID = availableModels.get(0);
+            ((CustomModelsMenuWrapper.FillStateData) data).modelID = availableModels.get(0);
             init();
             return;
         }
@@ -856,7 +866,7 @@ public class AiBottomSheet extends BottomSheet {
 
             FrameLayout layout = createSuggestionRow(AiFeatureIcons.getModelIcon(model.icon), title);
             layout.setOnClickListener((v) -> {
-                ((MessagesModelsWrapper.FillStateData) data).modelID = modelID;
+                ((CustomModelsMenuWrapper.FillStateData) data).modelID = modelID;
                 updateConfigButtonVisibility(true);
                 init();
             });
@@ -868,7 +878,7 @@ public class AiBottomSheet extends BottomSheet {
 
     private void requestPromptToUser() {
         updateConfigButtonVisibility(false);
-        MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
+        CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
 
         LinearLayout linearLayout = new LinearLayout(data.context) {
             @Override
@@ -888,7 +898,7 @@ public class AiBottomSheet extends BottomSheet {
         customPromptInputText.setHint(getString(R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Brief));
         linearLayout.addView(customPromptInputText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 17, 0, 17, 7));
 
-        int key = MessagesModelsWrapper.getSuggestedAskOnMediaAction(customData);
+        int key = CustomModelsMenuWrapper.getSuggestedAskOnMediaAction(customData);
 
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
         spannableStringBuilder.append(" d  ");
@@ -959,9 +969,11 @@ public class AiBottomSheet extends BottomSheet {
     }
 
     private final AnimatedFloat sheetTopAnimated;
+
     private float getSheetTop() {
         return getSheetTop(true);
     }
+
     private float getSheetTop(boolean animated) {
         float top = listView.getTop();
         if (listView.getChildCount() >= 1) {
@@ -987,14 +999,14 @@ public class AiBottomSheet extends BottomSheet {
             return;
         }
 
-        if (isCustomModel() && ((MessagesModelsWrapper.FillStateData) data).modelID == null) {
+        if (isCustomModel() && ((CustomModelsMenuWrapper.FillStateData) data).modelID == null) {
             return;
         }
 
         String customPrompt = "";
         boolean isVirtualModel;
         if (isCustomModel()) {
-            CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(((MessagesModelsWrapper.FillStateData) data).modelID);
+            CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(((CustomModelsMenuWrapper.FillStateData) data).modelID);
             if (model != null) {
                 customPrompt = model.prompt;
                 isVirtualModel = model.isVirtualModel();
@@ -1064,13 +1076,13 @@ public class AiBottomSheet extends BottomSheet {
         }
 
         if (isCustomModel()) {
-            MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
+            CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
 
             if (!isProcessingData && customData.isInputBox && customData.setInputBoxText != null) {
                 item = ActionBarMenuItem.addItem(layout, R.drawable.msg_message, getString(R.string.AiFeatures_CustomModels_Feature_UseAsText), false, resourcesProvider);
                 item.setOnClickListener(view -> {
                     dismiss[0].run();
-                    AiBottomSheet.this.dismiss();
+                    MainAiBottomSheet.this.dismiss();
                     customData.setInputBoxText.run(textView.getText().toString());
                 });
             }
@@ -1091,7 +1103,7 @@ public class AiBottomSheet extends BottomSheet {
                 }
                 item.setOnClickListener(view -> {
                     dismiss[0].run();
-                    AiBottomSheet.this.dismiss();
+                    MainAiBottomSheet.this.dismiss();
                     if (data.onNewFragmentOpen != null) {
                         data.onNewFragmentOpen.run();
                     }
@@ -1244,7 +1256,7 @@ public class AiBottomSheet extends BottomSheet {
                 if (dismiss != null) {
                     dismiss.get().run();
                 }
-                AiBottomSheet.this.dismiss();
+                MainAiBottomSheet.this.dismiss();
                 if (data.onNewFragmentOpen != null) {
                     data.onNewFragmentOpen.run();
                 }
@@ -1370,7 +1382,9 @@ public class AiBottomSheet extends BottomSheet {
         return layout;
     }
 
-    /** @noinspection rawtypes, unchecked */
+    /**
+     * @noinspection rawtypes, unchecked
+     */
     private class HeaderView extends FrameLayout {
 
         private final ImageView backButton;
@@ -1388,7 +1402,7 @@ public class AiBottomSheet extends BottomSheet {
 
             View backgroundView = new View(context);
             backgroundView.setBackgroundColor(getThemedColor(Theme.key_dialogBackground));
-            addView(backgroundView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0,  12, 0, 0));
+            addView(backgroundView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 12, 0, 0));
 
             backButton = new ImageView(context);
             backButton.setScaleType(ImageView.ScaleType.CENTER);
@@ -1441,6 +1455,7 @@ public class AiBottomSheet extends BottomSheet {
         }
 
         boolean isFirstDataUpdate = true;
+
         private void updateView() {
             updateTitle(!isFirstDataUpdate);
             if (isFirstDataUpdate) {
@@ -1458,7 +1473,7 @@ public class AiBottomSheet extends BottomSheet {
         private void updateTitle(boolean animated) {
             String pageTitle = getString(R.string.AiFeatures_Features_TranslateAI);
             if (isCustomModel()) { // using custom model
-                MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
+                CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
                 String modelID = customData.modelID;
                 if (modelID == null) { // model selection page
                     pageTitle = getString(R.string.AiFeatures_CustomModels_Feature_SelectModel);
@@ -1483,7 +1498,7 @@ public class AiBottomSheet extends BottomSheet {
 
             String customPrompt = "";
             if (isCustomModel()) {
-                MessagesModelsWrapper.FillStateData customData = (MessagesModelsWrapper.FillStateData) data;
+                CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
                 CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(customData.modelID);
 
                 String customDescriptionText = "";
@@ -1499,13 +1514,13 @@ public class AiBottomSheet extends BottomSheet {
                         }
                     }
                 } else if (customData.modelID == null) {
-                    AiModelMessagesState state = MessagesModelsWrapper.getAvailableStates(customData);
+                    AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(customData);
                     if (state == null && !customData.isChat && !customData.isInputBox) {
                         return;
                     }
 
                     // show the counter of available models
-                    ArrayList<String> availableModels = MessagesModelsWrapper.getEligibleModels(customData, state);
+                    ArrayList<String> availableModels = CustomModelsMenuWrapper.getEligibleModels(customData, state);
                     customDescriptionText = formatString(R.string.AiFeatures_CustomModels_Model_SelectAvailable, availableModels.size());
                 }
 
@@ -1705,6 +1720,7 @@ public class AiBottomSheet extends BottomSheet {
         }
 
         private Boolean lightStatusBarFull;
+
         private void updateLightStatusBar(boolean full) {
             if (lightStatusBarFull == null || lightStatusBarFull != full) {
                 lightStatusBarFull = full;
@@ -1743,6 +1759,7 @@ public class AiBottomSheet extends BottomSheet {
     }
 
     private Boolean buttonShadowShown;
+
     private void updateButtonShadow(boolean show) {
         if (buttonShadowShown == null || buttonShadowShown != show) {
             buttonShadowShown = show;
@@ -1834,6 +1851,7 @@ public class AiBottomSheet extends BottomSheet {
         }
 
         private CharSequence text = getString(R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example);
+
         public void setText(CharSequence text) {
             this.text = text;
             if (layout != null) {

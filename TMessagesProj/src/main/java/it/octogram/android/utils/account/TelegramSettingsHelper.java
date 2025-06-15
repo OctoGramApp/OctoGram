@@ -40,7 +40,7 @@ public class TelegramSettingsHelper {
             "WebBrowserSettings", "FeaturedStickersActivity", "NotificationsCustomSettingsActivity",
             "StickersActivity", "NotificationsSoundActivity", "CacheControlActivity"
     );
-    
+
     private static final Set<String> OCTOGRAM_SETTINGS_CLASSES = Set.of(
             "CrashesActivity", "DestinationLanguageSettings", "EmojiPackSettings",
             "NavigationSettingsUI", "OctoLogsActivity", "PinnedEmojisActivity",

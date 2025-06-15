@@ -61,7 +61,6 @@ import android.util.Property;
 import android.util.StateSet;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -126,7 +125,6 @@ import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.messenger.browser.Browser;
-import org.telegram.messenger.voip.ConferenceCall;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
@@ -258,7 +256,7 @@ import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
 import it.octogram.android.preferences.fragment.ActionBarOverride;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.OctoPrivacyLockedChatsSettingsUI;
+import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
 import it.octogram.android.preferences.ui.components.CustomFab;
 import it.octogram.android.preferences.ui.components.LockedChatsHelp;
 import it.octogram.android.preferences.ui.components.OutlineProvider;
@@ -663,7 +661,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private Bulletin topBulletin;
 
     private AnimationNotificationsLocker notificationsLocker = new AnimationNotificationsLocker();
-    private int animationIndex = -1;
     private boolean searchIsShowed;
     private boolean searchWasFullyShowed;
     public boolean whiteActionBar;
@@ -3019,7 +3016,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (undoView[0] != null) {
             undoView[0].hide(true, 0);
         }
-        getNotificationCenter().onAnimationFinish(animationIndex);
+        notificationsLocker.unlock();
         delegate = null;
         SuggestClearDatabaseBottomSheet.dismissDialog();
     }
@@ -3851,7 +3848,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         return;
                     }
 
-                    if (SharedConfig.passcodeHash.length() == 0) {
+                    if (SharedConfig.passcodeHash.isEmpty()) {
                         if (FingerprintUtils.hasLockedAccounts() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isAccountLockedByNumber(UserConfig.selectedAccount)) {
                             if (LaunchActivity.instance.getActionBarLayout() instanceof ActionBarOverride actionBarOverride ) {
                                 actionBarOverride.lock();
@@ -3877,9 +3874,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 } else if (id == 6) {
                     showArchiveHelp();
                 } else if (id == 180) {
-                    OctoPrivacyLockedChatsSettingsUI instance = new OctoPrivacyLockedChatsSettingsUI();
-                    instance.setShowMoreSettingsOption(true);
-                    presentFragment(new PreferencesFragment(instance));
+                    presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), "lockedChats"));
                 } else if (id == 181) {
                     showLockedChatsHelp();
                 } else if (id >= 10 && id < 10 + UserConfig.MAX_ACCOUNT_COUNT) {
@@ -4615,9 +4610,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
                 @Override
                 protected void onLockedChatsSettingsClick() {
-                    OctoPrivacyLockedChatsSettingsUI instance = new OctoPrivacyLockedChatsSettingsUI();
-                    instance.setShowMoreSettingsOption(true);
-                    presentFragment(new PreferencesFragment(instance));
+                    presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), "lockedChats"));
                 }
 
                 @Override
@@ -5099,8 +5092,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     info.setClickable(true);
                 }
             };
-            writeButton.setCircleSize(dp(OctoConfig.INSTANCE.useSquaredFab.getValue() ? 64 : 56));
-            writeButton.setUseSquaredFab(OctoConfig.INSTANCE.useSquaredFab.getValue());
+            var squaredFab = OctoConfig.INSTANCE.useSquaredFab.getValue();
+            writeButton.setCircleSize(dp(squaredFab ? 64 : 56));
+            writeButton.setUseSquaredFab(squaredFab);
             writeButton.setCirclePadding(dp(8), dp(8));
             contentView.addView(writeButton, LayoutHelper.createFrame(110, 110, Gravity.RIGHT | Gravity.BOTTOM));
 
@@ -7498,9 +7492,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 bottomSheet[0] = null;
             }
             AndroidUtilities.runOnUIThread(() -> {
-                OctoPrivacyLockedChatsSettingsUI instance = new OctoPrivacyLockedChatsSettingsUI();
-                instance.setShowMoreSettingsOption(true);
-                presentFragment(new PreferencesFragment(instance));
+                presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), "lockedChats"));
             }, 300);
         }, () -> {
             if (bottomSheet[0] != null) {
@@ -7801,7 +7793,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             searchAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    getNotificationCenter().onAnimationFinish(animationIndex);
                     if (fragmentContextView != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         fragmentContextView.setTranslationZ(0f);
                     }
@@ -7867,7 +7858,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
-                    getNotificationCenter().onAnimationFinish(animationIndex);
+                    notificationsLocker.unlock();
                     if (searchAnimator == animation) {
                         if (show) {
                             viewPages[0].listView.hide();
@@ -7878,7 +7869,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     }
                 }
             });
-            animationIndex = getNotificationCenter().setAnimationInProgress(animationIndex, null);
+            notificationsLocker.lock();
             searchAnimator.start();
             if (tabsAlphaAnimator != null) {
                 tabsAlphaAnimator.start();
@@ -7995,7 +7986,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         if (fragmentView != null) {
                             fragmentView.requestLayout();
                         }
-                        getNotificationCenter().onAnimationFinish(animationIndex);
+                        notificationsLocker.unlock();
                     }
                 });
                 filtersTabAnimator.addUpdateListener(valueAnimator -> {
@@ -8009,7 +8000,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 });
                 filtersTabAnimator.setDuration(220);
                 filtersTabAnimator.setInterpolator(CubicBezierInterpolator.DEFAULT);
-                animationIndex = getNotificationCenter().setAnimationInProgress(animationIndex, null);
+                notificationsLocker.lock();
                 filtersTabAnimator.start();
                 fragmentView.requestLayout();
             } else {
@@ -13885,16 +13876,27 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (selectedDialogIndex >= 0 && currentDialogIndex >= 0 &&
                     selectedDialogIndex < frozenDialogsList.size() && currentDialogIndex <= frozenDialogsList.size()) {
 
-                frozenDialogsList.add(currentDialogIndex, frozenDialogsList.remove(selectedDialogIndex));
-                viewPages[0].dialogsItemAnimator.prepareForRemove();
-                viewPages[0].updateList(true);
+                TLRPC.Dialog dialog = frozenDialogsList.get(selectedDialogIndex);
+                frozenDialogsList.remove(selectedDialogIndex);
 
-                int offset = (int) scrollYOffset;
-                int scrollTo = (viewPages[0].dialogsType == 0 && hasHiddenArchive() &&
-                        viewPages[0].archivePullViewState == ARCHIVE_ITEM_STATE_HIDDEN) ? 1 : 0;
+                if (selectedDialogIndex < currentDialogIndex) {
+                    currentDialogIndex--;
+                }
 
-                viewPages[0].layoutManager.scrollToPositionWithOffset(scrollTo, offset);
-                animate = true;
+                if (currentDialogIndex <= frozenDialogsList.size()) {
+                    frozenDialogsList.add(currentDialogIndex, dialog);
+                    viewPages[0].dialogsItemAnimator.prepareForRemove();
+                    viewPages[0].updateList(true);
+
+                    int offset = (int) scrollYOffset;
+                    int scrollTo = (viewPages[0].dialogsType == 0 && hasHiddenArchive() &&
+                            viewPages[0].archivePullViewState == ARCHIVE_ITEM_STATE_HIDDEN) ? 1 : 0;
+
+                    viewPages[0].layoutManager.scrollToPositionWithOffset(scrollTo, offset);
+                    animate = true;
+                } else {
+                    Log.w("DialogsActivity", "Corrected index for frozenDialogsList is invalid: " + currentDialogIndex + ", frozenSize=" + frozenDialogsList.size());
+                }
 
             } else if (currentDialogIndex >= 0 && selectedDialogIndex == currentDialogIndex) {
                 animate = true;
@@ -13910,6 +13912,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         }
     }
+
 
     private boolean updatePinStatus(MessagesController.DialogFilter filter, long dialogId, boolean pin, int pinPosition, boolean animated) {
         if (filter != null) {

@@ -6,13 +6,13 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai.chatgpt;
+package it.octogram.android.ai.GenericLLM;
 
 
-public class ChatGPTResponse {
+public class GenericLLMResponse {
     private final String content;
 
-    public ChatGPTResponse(String content) {
+    public GenericLLMResponse(String content) {
         this.content = content;
     }
 

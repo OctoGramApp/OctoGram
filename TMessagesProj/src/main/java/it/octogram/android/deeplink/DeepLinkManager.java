@@ -40,11 +40,14 @@ import org.telegram.ui.SessionsActivity;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.crashlytics.CrashViewType;
+import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.DcStatusActivity;
 import it.octogram.android.preferences.ui.NavigationSettingsUI;
 import it.octogram.android.preferences.ui.OctoAiFeaturesUI;
+import it.octogram.android.preferences.ui.OctoAiProvidersUI;
 import it.octogram.android.preferences.ui.OctoAppearanceUI;
 import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
 import it.octogram.android.preferences.ui.OctoChatsSettingsUI;
@@ -52,9 +55,8 @@ import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
 import it.octogram.android.preferences.ui.OctoInfoSettingsUI;
-import it.octogram.android.preferences.ui.OctoInterfaceSettingsUI;
+import it.octogram.android.preferences.ui.OctoLogsActivity;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
-import it.octogram.android.preferences.ui.OctoPrivacyLockedChatsSettingsUI;
 import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
 import it.octogram.android.preferences.ui.OctoTranslatorUI;
 import it.octogram.android.preferences.ui.PinnedEmojisActivity;
@@ -144,16 +146,20 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new PreferencesFragment(new OctoMainSettingsUI(), parameter));
                 return true;
             }
+            case DeepLinkDef.CHATS -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI(), parameter));
+                return true;
+            }
             case DeepLinkDef.APPEARANCE -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE_APP -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI(), parameter));
+                //fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE_CHAT -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI(), parameter));
+                //fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE_DRAWER -> {
@@ -168,6 +174,10 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI(), parameter));
                 return true;
             }
+            case DeepLinkDef.AI_FEATURES_PROVIDERS -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoAiProvidersUI(), parameter));
+                return true;
+            }
             case DeepLinkDef.INFO -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoInfoSettingsUI(), parameter));
                 return true;
@@ -177,10 +187,6 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
             }
             case DeepLinkDef.PRIVACY_CHATS -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoPrivacyLockedChatsSettingsUI(), parameter));
-                return true;
-            }
-            case DeepLinkDef.LOCKED_CHATS -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI(), "lockedChats"));
                 return true;
             }
@@ -218,6 +224,31 @@ public class DeepLinkManager extends LaunchActivity {
                     activity.handleParameter(parameter);
                 }
                 fragment.presentFragment(activity);
+                return true;
+            }
+            case DeepLinkDef.OCTO_CRASH_LOGS -> {
+                fragment.presentFragment(new OctoLogsActivity(CrashViewType.CRASH_LOGS));
+                return true;
+            }
+            case DeepLinkDef.OCTO_LOGS -> {
+                if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                    fragment.presentFragment(new OctoLogsActivity(CrashViewType.DEBUG_LOGS));
+                } else {
+                    BulletinFactory.of(fragment).createSimpleBulletin(R.raw.error, "Debug logs are not available in production builds.").show();
+                }
+                return true;
+            }
+            case DeepLinkDef.COPY_REPORT_DETAILS -> {
+                if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                    String reportDetails = null;
+                    try {
+                        reportDetails = Crashlytics.getSystemInfo(false, null);
+                    } catch (IllegalAccessException e) {
+                        OctoLogging.e(TAG, "Failed to get system info for report details", e);
+                    }
+                    AndroidUtilities.addToClipboard(reportDetails);
+                    BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, "Report details copied to clipboard.").show();
+                }
                 return true;
             }
         }
@@ -384,6 +415,7 @@ public class DeepLinkManager extends LaunchActivity {
             case "camera" -> DeepLinkDef.CAMERA;
             case "general" -> DeepLinkDef.GENERAL;
             case "octosettings" -> DeepLinkDef.OCTOSETTINGS;
+            case "chats" -> DeepLinkDef.CHATS;
             case "appearance" -> {
                 if (uri.getPath() != null) {
                     if (uri.getPath().equalsIgnoreCase("/app")) yield DeepLinkDef.APPEARANCE_APP;
@@ -400,14 +432,23 @@ public class DeepLinkManager extends LaunchActivity {
             case "pinned_hashtags" -> DeepLinkDef.PINNED_HASHTAGS;
             case "octogram" -> DeepLinkDef.INFO;
             case "dc" -> DeepLinkDef.DC_STATUS;
-            case "ai" -> DeepLinkDef.AI_FEATURES;
+            case "ai" -> {
+                if (uri.getPath() != null) {
+                    if (uri.getPath().equalsIgnoreCase("/providers"))
+                        yield DeepLinkDef.AI_FEATURES_PROVIDERS;
+                }
+                yield DeepLinkDef.AI_FEATURES;
+            }
             case "privacy" -> {
                 if (uri.getPath() != null) {
                     if (uri.getPath().equalsIgnoreCase("/chats")) yield DeepLinkDef.PRIVACY_CHATS;
                 }
                 yield DeepLinkDef.PRIVACY;
             }
-            case "locked_chats" -> DeepLinkDef.LOCKED_CHATS;
+            case "locked_chats" -> DeepLinkDef.PRIVACY_CHATS;
+            case "crashlogs" -> DeepLinkDef.OCTO_CRASH_LOGS;
+            case "debuglogs" -> DeepLinkDef.OCTO_LOGS;
+            case "reportdetails" -> DeepLinkDef.COPY_REPORT_DETAILS;
             default -> {
                 if (authority.startsWith("user")) {
                     yield DeepLinkDef.USER;

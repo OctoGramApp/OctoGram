@@ -31,8 +31,8 @@ import org.telegram.ui.LaunchActivity;
 
 import java.util.function.Supplier;
 
-import it.octogram.android.ai.AiBottomSheet;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.MainAiHelper;
+import it.octogram.android.ai.ui.MainAiBottomSheet;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoAiFeaturesUI;
 
@@ -66,7 +66,7 @@ public class TranslateMessagesWrapper {
 
     private static void openAiTranslation(FillStateData data) {
         AndroidUtilities.runOnUIThread(() -> {
-            AiBottomSheet sheet = new AiBottomSheet(data);
+            MainAiBottomSheet sheet = new MainAiBottomSheet(data);
             sheet.setDimBehind(!data.supportsActivityRelatedDimBehind);
             sheet.show();
         });
@@ -74,6 +74,7 @@ public class TranslateMessagesWrapper {
 
     private static class TranslateMessageSwipeActivity {
         public ActionBarPopupWindow.ActionBarPopupWindowLayout windowLayout;
+
         public TranslateMessageSwipeActivity(FillStateData data) {
             windowLayout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(data.context, 0, null);
             windowLayout.setFitItems(true);

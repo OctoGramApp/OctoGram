@@ -9,6 +9,7 @@
 package it.octogram.android.preferences.fragment;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
@@ -43,6 +44,7 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
@@ -89,6 +91,7 @@ import it.octogram.android.preferences.ui.components.ExpandableRowIndex;
 import it.octogram.android.preferences.ui.components.SwitchCell;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.config.ExpandableRowsOption;
+import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
 public class PreferencesFragment extends BaseFragment {
 
@@ -106,7 +109,9 @@ public class PreferencesFragment extends BaseFragment {
     private ListAdapter listAdapter;
     private RecyclerListView listView;
     private Context context;
-    /** @noinspection deprecation*/
+    /**
+     * @noinspection deprecation
+     */
     private UndoView restartTooltip;
     private FireworksOverlay fireworksOverlay;
     private LinearLayoutManager linearLayoutManager;
@@ -472,6 +477,18 @@ public class PreferencesFragment extends BaseFragment {
         entry.onTransitionAnimationEnd(isOpen, backward);
     }
 
+    @Override
+    public void onBecomeFullyVisible() {
+        super.onBecomeFullyVisible();
+        entry.onBecomeFullyVisible();
+    }
+
+    @Override
+    public void onBecomeFullyHidden() {
+        super.onBecomeFullyHidden();
+        entry.onBecomeFullyHidden();
+    }
+
     private void updateIsSelectingItems() {
         if (isSelectingItems == _isSelectingItems) {
             return;
@@ -793,8 +810,36 @@ public class PreferencesFragment extends BaseFragment {
 
         listAdapter.setItems(oldItems, currentShownItems);
 
-        if (focusOnKey != null) {
-            focusOnKey = null;
+        if (focusOnKey != null && !focusOnKey.isEmpty() && focusElement == -1) {
+            ImportSettingsScanHelper.SettingsScanCategory foundCategory = null;
+            ImportSettingsScanHelper.SettingsScanOption foundOption = null;
+            for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
+                if (foundCategory != null) {
+                    break;
+                }
+
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    if (!option.isTitle && option.property != null && option.property.getKey() != null && option.property.getKey().equalsIgnoreCase(focusOnKey.toLowerCase())) {
+                        foundCategory = category;
+                        foundOption = option;
+                        break;
+                    }
+                }
+            }
+            if (foundCategory != null) {
+                String finalFocusOnKey = focusOnKey;
+                ImportSettingsScanHelper.SettingsScanCategory finalCategory = foundCategory;
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(getString(R.string.OptionMoved));
+                builder.setMessage(formatString(R.string.OptionMoved_Text, foundOption.getName(), foundCategory.getName()));
+                builder.setPositiveButton(getString(R.string.Open), (dialog, which) -> {
+                    dialog.dismiss();
+                    finishFragment();
+                    presentFragment(finalCategory.onGetFragment.onCall(finalFocusOnKey));
+                });
+                builder.setNegativeButton(getString(R.string.Close), null);
+                builder.show();
+            }
         }
 
         if (focusElement != -1) {
@@ -803,6 +848,11 @@ public class PreferencesFragment extends BaseFragment {
             RecyclerListView.IntReturnCallback callback = () -> finalFocusElement;
             listView.highlightRow(callback);
         }
+
+        if (focusOnKey != null) {
+            focusOnKey = null;
+        }
+
     }
 
     private BaseRow getNextVisibleElement(int i, BaseRow element) {

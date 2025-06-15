@@ -28,7 +28,9 @@ import java.util.HashSet;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.custom.DatacenterStatus;
 
-/** @noinspection SequencedCollectionMethodCanBeUsed*/
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 public class DcMediaController implements NotificationCenter.NotificationCenterDelegate {
     private static final int FIRST_ACCOUNT_ID = 0;
     private static final String CHANNEL_USERNAME = "TeAEpdywrkYaBXP9Q32Hn4zjhmfDZN87";
@@ -101,7 +103,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         getNotificationCenter().removeObserver(this, NotificationCenter.fileLoaded);
         getNotificationCenter().removeObserver(this, NotificationCenter.fileLoadProgressChanged);
         getNotificationCenter().removeObserver(this, NotificationCenter.fileLoadFailed);
-        
+
         if (callback != null && promptInterrupt) {
             for (int i = 1; i <= 5; i++) {
                 if (!parsedDcs.contains(i)) {
@@ -109,7 +111,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
                 }
             }
         }
-        
+
         assocFileNames.clear();
         parsedDcs.clear();
 
@@ -245,7 +247,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         int dcIdAssoc = 0;
         for (int i = 0; i < ASSOC_DC_IDS.size(); i++) {
             if (ASSOC_DC_IDS.get(i) == message.id) {
-                dcIdAssoc = i+1;
+                dcIdAssoc = i + 1;
                 break;
             }
         }
@@ -269,7 +271,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         }
 
         if (id == NotificationCenter.fileLoaded) {
-            int time = (int) ((System.currentTimeMillis() - startedAt)/1000F);
+            int time = (int) ((System.currentTimeMillis() - startedAt) / 1000F);
             parsedDcs.add(dcId);
             callback.onUpdate(dcId, DatacenterStatus.DOWNLOAD_END, time, parsedDcs.size());
         } else if (id == NotificationCenter.fileLoadProgressChanged) {
@@ -284,12 +286,15 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
 
     public interface OnFetchResult {
         void onUpdate(int dcId, int status, int parameter, int parsedDcs);
+
         default void onUpdate(int dcId, int status) {
             onUpdate(dcId, status, 0, 0);
         }
+
         default void onUpdate(int dcId, int status, int parameter) {
             onUpdate(dcId, status, parameter, 0);
         }
+
         void onFailed();
     }
 }

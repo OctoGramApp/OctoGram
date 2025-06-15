@@ -1,13 +1,14 @@
 [versions]
 # Gradle plugins
 android-application = "8.8.0" # App Bundle build fails with 8.9.x; use 8.8.0 for stable builds
+desugar_jdk_libs_nio = "2.1.5"
 google-services = "4.4.2"
 secrets-gradle-plugin = "2.0.1"
 kotlin-android = "2.0.21"
 
 # AndroidX dependencies
 androidx_fragment = "1.8.6"
-androidx_core = "1.16.0"
+androidx_core = "1.13.0"
 androidx_palette = "1.0.0"
 androidx_exifinterface = "1.4.1"
 androidx_dynamicanimation = "1.1.0"
@@ -102,6 +103,7 @@ androidx-browser = { module = "androidx.browser:browser", version.ref = "android
 androidx-mediarouter = { module = "androidx.mediarouter:mediarouter", version.ref = "androidx_mediarouter" }
 
 # Google Play Integrity e RecyclerView
+desugar_jdk_libs_nio = { module = "com.android.tools:desugar_jdk_libs_nio", version.ref = "desugar_jdk_libs_nio" }
 google-play-integrity = { module = "com.google.android.play:integrity", version.ref = "google_play_integrity" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "androidx_recyclerview" }
 

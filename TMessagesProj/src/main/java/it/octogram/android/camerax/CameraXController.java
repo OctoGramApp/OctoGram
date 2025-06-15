@@ -615,12 +615,12 @@ public class CameraXController {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public @interface EffectFacing {
         int CAMERA_NONE = 0,
-        CAMERA_NIGHT = 1,
-        CAMERA_HDR = 2,
-        CAMERA_AUTO = 3,
-        CAMERA_WIDE = 4,
-        CAMERA_BOKEH = 5,
-        CAMERA_FACE_RETOUCH = 6;
+                CAMERA_NIGHT = 1,
+                CAMERA_HDR = 2,
+                CAMERA_AUTO = 3,
+                CAMERA_WIDE = 4,
+                CAMERA_BOKEH = 5,
+                CAMERA_FACE_RETOUCH = 6;
     }
 
     public static class CameraLifecycle implements LifecycleOwner {

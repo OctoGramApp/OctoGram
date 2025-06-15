@@ -100,7 +100,8 @@ public class Crashlytics {
         String stacktrace = result.toString();
         try {
             saveCrashLogs(stacktrace);
-        } catch (IOException | IllegalAccessException ignored) {}
+        } catch (IOException | IllegalAccessException ignored) {
+        }
         printWriter.close();
 
         showCrashNotification(stacktrace);
@@ -168,7 +169,8 @@ public class Crashlytics {
                 .append("Google Play Services: ").append(ApplicationLoader.hasPlayServices ? "Enabled" : "Disabled").append("\n")
                 .append("Performance Class: ").append(getPerformanceClassString()).append("\n")
                 .append("Locale: ").append(LocaleController.getSystemLocaleStringIso639()).append("\n")
-                .append("Language CW: ").append(Resources.getSystem().getConfiguration().locale.getLanguage()).append("\n");
+                .append("Language CW: ").append(Resources.getSystem().getConfiguration().locale.getLanguage()).append("\n")
+                .append("Installation Source: ").append(OctoUtils.getInstallerPackageName(ApplicationLoader.applicationContext)).append("\n");
 
         if (includeConfiguration) {
             baseInfo.append("Configuration: ").append(getOctoConfiguration()).append("\n");

@@ -631,12 +631,12 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
             AndroidUtilities.rectTmp.set(0, AndroidUtilities.statusBarHeight, getWidth(), bgActionBar.getY() + bgActionBar.getHeight());
             canvas.saveLayerAlpha(AndroidUtilities.rectTmp, (int) (swipeProgress * 0xFF), Canvas.ALL_SAVE_FLAG);
             //canvas.translate(0, bgActionBar.getY());
-            bgActionBar.onDrawCrossfadeContent(canvas, false, useBackDrawable, swipeProgress);
+            bgActionBar.onDrawCrossfadeContent(canvas, false, true, swipeProgress);
             canvas.restore();
 
             canvas.saveLayerAlpha(AndroidUtilities.rectTmp, (int) ((1 - swipeProgress) * 0xFF), Canvas.ALL_SAVE_FLAG);
             //canvas.translate(0, fgActionBar.getY());
-            fgActionBar.onDrawCrossfadeContent(canvas, true, useBackDrawable, swipeProgress);
+            fgActionBar.onDrawCrossfadeContent(canvas, true, true, swipeProgress);
             canvas.restore();
         }
     }
@@ -1122,6 +1122,10 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     }
 
     private void onSlideAnimationEnd(final boolean backAnimation) {
+        if (canUseCrossfadeEffect()) {
+            swipeProgress = 0f;
+            invalidateActionBars();
+        }
         if (!backAnimation) {
             if (fragmentsStack.size() < 2) {
                 return;
@@ -1181,9 +1185,6 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         containerView.setTranslationX(0);
         containerViewBack.setTranslationX(0);
         setInnerTranslationX(0);
-        if (canUseCrossfadeEffect()) {
-            invalidateActionBars();
-        }
     }
 
     private void prepareForMoving(MotionEvent ev) {
@@ -1472,9 +1473,11 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
 
     private void invalidateActionBars() {
         if (getLastFragment() != null && getLastFragment().getActionBar() != null) {
+            getLastFragment().getActionBar().fixAfterCrossfade();
             getLastFragment().getActionBar().invalidate();
         }
         if (getBackgroundFragment() != null && getBackgroundFragment().getActionBar() != null) {
+            getBackgroundFragment().getActionBar().fixAfterCrossfade();
             getBackgroundFragment().getActionBar().invalidate();
         }
     }
@@ -1512,6 +1515,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         containerViewBack.setScaleY(1.0f);
         containerViewBack.setTranslationX(0);
         if (canUseCrossfadeEffect()) {
+            swipeProgress = 0f;
             invalidateActionBars();
         }
     }

@@ -155,10 +155,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.ai.CustomModelsHelper;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.ImportSettingsUI;
 import it.octogram.android.preferences.ui.OctoAiNewModelUI;
-import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 
 public class ChannelAdminLogActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -3213,9 +3213,9 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                             if (message.getDocumentName().toLowerCase().endsWith("octoexport")) {
                                 boolean isValid = OctoConfig.isValidMessageExport(message);
                                 if (isValid) {
-                                    ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(ChannelAdminLogActivity.this, message);
-                                    sheet.setOriginalActivity(getParentActivity());
-                                    sheet.show();
+                                    ImportSettingsUI ui = new ImportSettingsUI();
+                                    ui.setData(message, null);
+                                    ChannelAdminLogActivity.this.presentFragment(ui);
                                     handled = true;
                                 }
                             }

@@ -265,6 +265,7 @@ public class DrawerOrderSettings extends BaseFragment {
 
     enum ViewType {
         HINT_HEADER, HEADER, MENU_ITEM, SUGGESTED_OPTIONS, SHADOW;
+
         static ViewType fromInt(int i) {
             return values()[i];
         }

@@ -6,14 +6,14 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai.chatgpt;
+package it.octogram.android.ai.GenericLLM;
 
-public class ChatGPTException extends Exception {
-    public ChatGPTException(String message, Throwable cause) {
+public class GenericLLMException extends Exception {
+    public GenericLLMException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ChatGPTException(String message) {
+    public GenericLLMException(String message) {
         super(message);
     }
 }

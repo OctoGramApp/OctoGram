@@ -46,7 +46,7 @@ public class TranslationsWrapper {
         manager.toLanguage = toLanguage;
         manager.text = text;
         manager.entities = entities;
-        manager.noforwards = noforwards;
+        manager.noForwards = noforwards;
         manager.onLinkPress = onLinkPress;
         manager.onDismiss = onDismiss;
 

@@ -159,6 +159,7 @@ public class CustomActionBarTitleBottomSheet extends BottomSheet {
 
     public interface CustomActionBarTitleCallback {
         void didRenameSuccessfully(String customName);
+
         void didReset();
     }
 }

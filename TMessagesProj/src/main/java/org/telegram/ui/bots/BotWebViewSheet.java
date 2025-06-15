@@ -126,8 +126,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import it.octogram.android.utils.OctoUtils;
-
 public class BotWebViewSheet extends Dialog implements NotificationCenter.NotificationCenterDelegate, BottomSheetTabsOverlay.Sheet {
     public final static int TYPE_WEB_VIEW_BUTTON = 0, TYPE_SIMPLE_WEB_VIEW_BUTTON = 1, TYPE_BOT_MENU_BUTTON = 2, TYPE_WEB_VIEW_BOT_APP = 3, TYPE_WEB_VIEW_BOT_MAIN = 4;
 
@@ -869,8 +867,8 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
 
         dimPaint.setColor(0x40000000);
         actionBarColor = getColor(Theme.key_windowBackgroundWhite);
-        //navBarColor = getColor(Theme.key_windowBackgroundGray);
-        navBarColor = OctoUtils.getNavBarColor();
+        navBarColor = getColor(Theme.key_windowBackgroundGray);
+        //navBarColor = OctoUtils.getNavBarColor();
         AndroidUtilities.setNavigationBarColor(getWindow(), navBarColor, false);
         windowView = new WindowView(context);
         windowView.setDelegate((keyboardHeight, isWidthGreater) -> {
@@ -2293,9 +2291,9 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         }
     }
 
-    public void setNavigationBarColor(int colors, boolean animated) {
+    public void setNavigationBarColor(int color, boolean animated) {
         int from = navBarColor;
-        var color = OctoUtils.getNavBarColor(resourcesProvider);
+        //var color = OctoUtils.getNavBarColor(resourcesProvider);
         int to = color;
 
         botButtons.setBackgroundColor(color, animated);
@@ -2304,23 +2302,23 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
             animator.setInterpolator(CubicBezierInterpolator.DEFAULT);
             animator.addUpdateListener(animation -> {
                 float progress = (float) animation.getAnimatedValue();
-                // navBarColor = ColorUtils.blendARGB(from, to, progress);
-                navBarColor = OctoUtils.getNavBarColor(resourcesProvider);
+                navBarColor = ColorUtils.blendARGB(from, to, progress);
+                //navBarColor = OctoUtils.getNavBarColor(resourcesProvider);
                 checkNavBarColor();
             });
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     float progress = 1f;
-                    // navBarColor = ColorUtils.blendARGB(from, to, progress);
-                    navBarColor = OctoUtils.getNavBarColor(resourcesProvider);
+                    navBarColor = ColorUtils.blendARGB(from, to, progress);
+                    // navBarColor = OctoUtils.getNavBarColor(resourcesProvider);
                     checkNavBarColor();
                 }
             });
             animator.start();
         } else {
-            // navBarColor = to;
-            navBarColor = OctoUtils.getNavBarColor(resourcesProvider);
+            navBarColor = to;
+            // navBarColor = OctoUtils.getNavBarColor(resourcesProvider);
             checkNavBarColor();
         }
         AndroidUtilities.setNavigationBarColor(getWindow(), navBarColor, false);
@@ -2399,8 +2397,8 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
 
     @Override
     public int getNavigationBarColor(int color) {
-        // return ColorUtils.blendARGB(color, navBarColor, openedProgress);
-        return OctoUtils.getNavBarColor(resourcesProvider);
+        return ColorUtils.blendARGB(color, navBarColor, openedProgress);
+        // return OctoUtils.getNavBarColor(resourcesProvider);
     }
 
     public WindowView getWindowView() {

@@ -512,7 +512,7 @@ public class MessagesController extends BaseController implements NotificationCe
     public String mapKey;
     public int maxMessageLength;
     public int maxCaptionLength;
-    public int roundVideoSize = OctoConfig.ROUND_MESSAGE_BITRATE;
+    public int roundVideoSize;
     public int roundVideoBitrate;
     public int roundAudioBitrate;
     public boolean blockedCountry;
@@ -1516,6 +1516,7 @@ public class MessagesController extends BaseController implements NotificationCe
         pmReadDateExpirePeriod = mainPreferences.getInt("pmReadDateExpirePeriod", 7 * 86400);
         suggestStickersApiOnly = mainPreferences.getBoolean("suggestStickersApiOnly", false);
         //roundVideoSize = mainPreferences.getInt("roundVideoSize", 384);
+        roundVideoSize = OctoConfig.ROUND_MESSAGE_BITRATE;
         roundVideoBitrate = mainPreferences.getInt("roundVideoBitrate", 1000);
         roundAudioBitrate = mainPreferences.getInt("roundAudioBitrate", 64);
         pendingSuggestions = mainPreferences.getStringSet("pendingSuggestions", null);

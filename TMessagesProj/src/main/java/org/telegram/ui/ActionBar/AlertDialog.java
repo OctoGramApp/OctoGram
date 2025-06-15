@@ -86,8 +86,6 @@ import org.telegram.ui.Stars.StarsReactionsSheet;
 import java.util.ArrayList;
 import java.util.Map;
 
-import it.octogram.android.OctoConfig;
-
 public class AlertDialog extends Dialog implements Drawable.Callback, NotificationCenter.NotificationCenterDelegate {
 
     public static final int ALERT_TYPE_MESSAGE = 0;
@@ -201,7 +199,8 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
     private ArrayList<AlertDialogCell> itemViews = new ArrayList<>();
     private float aspectRatio;
     private boolean dimEnabled = true;
-    private float dimAlpha = OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 0.25f : 0.5f;
+    //private float dimAlpha = 0.5f;
+    private float dimAlpha = 0.25f;
     private boolean dimCustom = false;
     private final Theme.ResourcesProvider resourcesProvider;
     private boolean topAnimationAutoRepeat = true;
@@ -562,7 +561,8 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                             (getHeight() + h) / 2f
                     );
                 } else {
-                    r = dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 25 : 12);
+                    //r = dp(12);
+                    r = dp(25);
                     AndroidUtilities.rectTmp.set(getPaddingLeft(), getPaddingTop(), getMeasuredWidth() - getPaddingRight(), getMeasuredHeight() - getPaddingBottom());
                 }
 
@@ -640,13 +640,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 containerView.setBackgroundDrawable(null);
                 containerView.setPadding(0, 0, 0, 0);
                 //containerView.setBackgroundDrawable(shadowDrawable);
-
-                if (OctoConfig.INSTANCE.uiImmersivePopups.getValue()) {
-                    containerView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(25), backgroundColor));
-                } else {
-                    containerView.setBackground(shadowDrawable);
-                }
-
+                containerView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(25), backgroundColor));
                 drawBackground = false;
             }
         }
@@ -1020,13 +1014,13 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                     }
                 };
             }
-            boolean immersive = OctoConfig.INSTANCE.uiImmersivePopups.getValue();
-
             if (bottomView != null) {
-                buttonsLayout.setPadding(dp(immersive ? 30 : 16), 0, dp(immersive ? 30 : 16), dp(4));
+                // buttonsLayout.setPadding(dp(16), 0, dp(16), dp(4));
+                buttonsLayout.setPadding(dp(30), 0, dp(30), dp(4));
                 buttonsLayout.setTranslationY(-dp(6));
             } else {
-                buttonsLayout.setPadding(dp(immersive ? 20 : 8), dp(8), dp(immersive ? 20 : 8), dp(8));
+                // buttonsLayout.setPadding(dp(8), dp(8), dp(8), dp(8));
+                buttonsLayout.setPadding(dp(20), dp(8), dp(20), dp(8));
             }
             containerView.addView(buttonsLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52));
             if (topAnimationIsNew) {
@@ -1054,7 +1048,8 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setGravity(Gravity.CENTER);
                 textView.setTypeface(AndroidUtilities.bold());
                 textView.setText(positiveButtonText);
-                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 12 : 6), getThemedColor(dialogButtonColorKey)));
+                // textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(6), getThemedColor(dialogButtonColorKey)));
+                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(12), getThemedColor(dialogButtonColorKey)));
                 textView.setPadding(dp(12), 0, dp(12), 0);
                 if (verticalButtons) {
                     buttonsLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 36, LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT));
@@ -1095,7 +1090,8 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
                 textView.setText(negativeButtonText.toString());
-                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 12 : 6), getThemedColor(dialogButtonColorKey)));
+                // textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(6), getThemedColor(dialogButtonColorKey)));
+                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(dp(12), getThemedColor(dialogButtonColorKey)));
                 textView.setPadding(dp(12), 0, dp(12), 0);
                 if (verticalButtons) {
                     buttonsLayout.addView(textView, 0, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 36, LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT));
@@ -1136,7 +1132,8 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
                 textView.setText(neutralButtonText.toString());
-                textView.setBackground(Theme.getRoundRectSelectorDrawable(dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 12 : 6), getThemedColor(dialogButtonColorKey)));
+                // textView.setBackground(Theme.getRoundRectSelectorDrawable(dp(6), getThemedColor(dialogButtonColorKey)));
+                textView.setBackground(Theme.getRoundRectSelectorDrawable(dp(12), getThemedColor(dialogButtonColorKey)));
                 textView.setPadding(dp(12), 0, dp(12), 0);
                 if (verticalButtons) {
                     buttonsLayout.addView(textView, 1, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 36, LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT));
@@ -1210,7 +1207,8 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 if (progressViewStyle == ALERT_TYPE_MESSAGE) {
                     blurredNativeBackground = true;
                     window.setBackgroundBlurRadius(50);
-                    float rad = dp(OctoConfig.INSTANCE.uiImmersivePopups.getValue() ? 25 : 12);
+                    // float rad = dp(12);
+                    float rad = dp(25);
                     ShapeDrawable shapeDrawable = new ShapeDrawable(new RoundRectShape(new float[]{rad, rad, rad, rad, rad, rad, rad, rad}, null, null));
                     shapeDrawable.getPaint().setColor(ColorUtils.setAlphaComponent(backgroundColor, (int) (blurAlpha * 255)));
                     window.setBackgroundDrawable(shapeDrawable);

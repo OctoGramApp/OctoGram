@@ -682,10 +682,21 @@ public class ActionBar extends FrameLayout {
         }
     }
 
+    public void fixAfterCrossfade() {
+        if (backButtonImageView == null) {
+            return;
+        }
+        backButtonImageView.setAlpha(1f);
+    }
+
     public void onDrawCrossfadeContent(Canvas canvas, boolean front, boolean hideBackDrawable, float progress) {
+        if (backButtonImageView != null) {
+            backButtonImageView.setAlpha((progress == 0f || progress == 1f || !hideBackDrawable) ? 1f : 0f);
+        }
+
         for (int i = 0; i < getChildCount(); i++) {
             View ch = getChildAt(i);
-            if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && ch.getAlpha() != 0.0f && ch instanceof ActionBarMenu) {
+            if (ch != backButtonImageView && ch.getVisibility() == View.VISIBLE && ch.getAlpha() != 0.0f && ch instanceof ActionBarMenu) {
             //if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && ch instanceof ActionBarMenu) {
                 canvas.save();
                 canvas.translate(ch.getX(), ch.getY());
@@ -695,10 +706,10 @@ public class ActionBar extends FrameLayout {
         }
 
         canvas.save();
-        canvas.translate(front ? getWidth() * progress * 0.5f : -getWidth() * 0.4f * (1f - progress), 0);
+        canvas.translate(front ? getWidth() * progress * 0.4f : -getWidth() * 0.3f * (1f - progress), 0);
         for (int i = 0; i < getChildCount(); i++) {
             View ch = getChildAt(i);
-            if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && ch.getAlpha() != 0.0f && !(ch instanceof ActionBarMenu)) {
+            if (ch != backButtonImageView && ch.getVisibility() == View.VISIBLE && ch.getAlpha() != 0.0f && !(ch instanceof ActionBarMenu)) {
             //if ((!hideBackDrawable || ch != backButtonImageView) && ch.getVisibility() == View.VISIBLE && !(ch instanceof ActionBarMenu)) {
                 canvas.save();
                 canvas.translate(ch.getX(), ch.getY());

@@ -13,21 +13,38 @@ import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Pair;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AccountInstance;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.BulletinFactory;
+import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.LinkSpanDrawable;
+import org.telegram.ui.Components.ScaleStateListAnimator;
+import org.telegram.ui.Components.spoilers.SpoilersTextView;
 import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.UsersSelectActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +53,6 @@ import java.util.Objects;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.ExpandableRowsIds;
-import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.StickerUi;
@@ -46,13 +62,16 @@ import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.ActionBarOverride;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.ExpandableRows;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
+import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.SliderChooseRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
+import it.octogram.android.preferences.ui.components.LockedChatsHelp;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
@@ -63,10 +82,14 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     private Context context;
     private PreferencesFragment fragment;
     private boolean isFirstFingerprintAsk = true;
-    private boolean fromLockedChatsSettingsUI = false;
-    private final ConfigProperty<Boolean> canShowBiometricOptions = new ConfigProperty<>(null, false);
-    private final ConfigProperty<Boolean> canShowBiometricAskAfter = new ConfigProperty<>(null, false);
+
+    private final ConfigProperty<Boolean> canShowOptions = new ConfigProperty<>(null, true);
+    private final ConfigProperty<Boolean> showFingerprintFailedAlert = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> canShowBiometricLockedChatsExpand = new ConfigProperty<>(null, true);
+    private final ConfigProperty<Boolean> canShowBiometricLockedChatsMoreOptions = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> canShowBiometricLockedChatsMoreOptionsNotifications = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canShowLockedAccountsOptions = new ConfigProperty<>(null, false);
+
     private final ConfigProperty<Boolean> canShowPhoneNumberAlternative = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canShowDebugProperties = new ConfigProperty<>(null, false);
     private final ConfigProperty<Integer> biometricAskEveryTemp = new ConfigProperty<>(OctoConfig.INSTANCE.biometricAskEvery.getKey(), 0);
@@ -83,7 +106,6 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
 
         updateConfig();
         biometricAskEveryTemp.updateValue(OctoConfig.INSTANCE.biometricAskEvery.getValue());
-        boolean canShowLockArchive = canShowBiometricOptions.getValue() && (BuildConfig.DEBUG_PRIVATE_VERSION || BuildVars.isBetaApp());
 
         ArrayList<ExpandableRowsOption> accountsList = new ArrayList<>();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
@@ -97,77 +119,104 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                         .property(currentInstance)
                         .onPostUpdate(this::updateConfig)
                         .onClick(() -> handleAccountLock(finalA, u.id)
-                ));
+                        ));
             }
         }
 
         return OctoPreferences.builder(getString(R.string.PrivacySettings))
                 .deepLink(DeepLinkDef.PRIVACY)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.PRIVACY, true, getString(R.string.OctoPrivacySettingsHeader))
-                .category(getString(R.string.ActionsSettingsBiometric), canShowBiometricOptions, category -> {
+                .row(new CustomCellRow.CustomCellRowBuilder()
+                        .layout(getFingerprintFailAlert())
+                        .showIf(showFingerprintFailedAlert)
+                        .build())
+                .row(new ShadowRow(showFingerprintFailedAlert))
+                .category(getString(R.string.LockedActions), canShowOptions, category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenArchive))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.biometricOpenArchive)
+                            .title(getString(R.string.BiometricSettingsOpenArchive))
+                            .showIf(canShowOptions)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenCallsLog))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.biometricOpenCallsLog)
+                            .title(getString(R.string.BiometricSettingsOpenCallsLog))
+                            .showIf(canShowOptions)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenSecretChats))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.biometricOpenSecretChats)
+                            .title(getString(R.string.BiometricSettingsOpenSecretChats))
+                            .showIf(canShowOptions)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenSettings))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.biometricOpenSettings)
+                            .title(getString(R.string.BiometricSettingsOpenSettings))
+                            .showIf(canShowOptions)
+                            .build());
+                })
+                .category(getString(R.string.LockedChats), canShowOptions, category -> {
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(this::showLockedHelp)
+                            .icon(R.drawable.msg_help)
+                            .title(getString(R.string.HowDoesItWork))
+                            .showIf(canShowOptions)
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .propertySelectionTag("lockedChats")
+                            .onClick(this::runUsersSelectActivity)
+                            .icon(R.drawable.msg_edit)
+                            .title(getString(R.string.LockedChatsHelpHintEditList))
+                            .showIf(canShowOptions)
+                            .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
-                                if (fromLockedChatsSettingsUI) {
-                                    fragment.finishFragment();
-                                } else {
-                                    fragment.presentFragment(new PreferencesFragment(new OctoPrivacyLockedChatsSettingsUI()));
-                                }
+                                canShowBiometricLockedChatsExpand.updateValue(false);
+                                canShowBiometricLockedChatsMoreOptions.updateValue(true);
+                                updateConfig();
                             })
-                            .propertySelectionTag("lockedChats")
-                            .icon(R.drawable.msg_viewchats)
-                            .isNew(NewFeaturesBadgeId.PRIVACY_LOCKED_CHATS.getId())
-                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
-                                @Override
-                                public String getTitle() {
-                                    return getString(R.string.LockedChats);
-                                }
-
-                                @Override
-                                public String getValue() {
-                                    int lockedChats = FingerprintUtils.getLockedChatsCount();
-                                    if (lockedChats == 0) {
-                                        return getString(R.string.CheckPhoneNumberNo);
-                                    }
-
-                                    return ""+lockedChats;
-                                }
-                            })
-                            .title(getString(R.string.LockedChats))
-                            .description(""+FingerprintUtils.getLockedChats().size())
-                            .showIf(canShowBiometricOptions)
+                            .icon(R.drawable.arrow_more)
+                            .title(getString(R.string.LockedChatsHelpHintMore))
+                            .showIf(canShowBiometricLockedChatsExpand)
                             .build());
-                    category.row(new ExpandableRows.ExpandableRowsBuilder()
-                            .setId(ExpandableRowsIds.LOCKED_ELEMENTS.getId())
-                            .setIcon(R.drawable.edit_passcode)
-                            .setMainTitle(getString(R.string.LockedActions))
-                            .hideMainSwitch(true)
-                            .addRow(!canShowLockArchive ? null : new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.BiometricSettingsOpenArchive))
-                                    .property(OctoConfig.INSTANCE.biometricOpenArchive)
-                                    .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenArchive))
-                                    .onPostUpdate(this::updateConfig)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.BiometricSettingsOpenCallsLog))
-                                    .property(OctoConfig.INSTANCE.biometricOpenCallsLog)
-                                    .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenCallsLog))
-                                    .onPostUpdate(this::updateConfig)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.BiometricSettingsOpenSecretChats))
-                                    .property(OctoConfig.INSTANCE.biometricOpenSecretChats)
-                                    .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenSecretChats))
-                                    .onPostUpdate(this::updateConfig)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.BiometricSettingsOpenSettings))
-                                    .property(OctoConfig.INSTANCE.biometricOpenSettings)
-                                    .onClick(() -> checkAvailability(OctoConfig.INSTANCE.biometricOpenSettings))
-                                    .onPostUpdate(this::updateConfig)
-                            )
-                            .showIf(canShowBiometricOptions)
-                            .build()
-                    );
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.lockedChatsHideChats))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.lockedChatsHideChats)
+                            .title(getString(R.string.LockedChats_Options_HideChats))
+                            .description(getString(R.string.LockedChats_Options_HideChats_Desc))
+                            .showIf(canShowBiometricLockedChatsMoreOptions)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.lockedChatsLockScreenshots))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.lockedChatsLockScreenshots)
+                            .title(getString(R.string.LockedChats_Options_LockScreenshots))
+                            .showIf(canShowBiometricLockedChatsMoreOptions)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.lockedChatsShowNotifications))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.lockedChatsShowNotifications)
+                            .title(getString(R.string.LockedChats_Options_ShowNotifications))
+                            .showIf(canShowBiometricLockedChatsMoreOptions)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkAvailability(OctoConfig.INSTANCE.lockedChatsSpoilerNotifications))
+                            .onPostUpdate(this::updateConfig)
+                            .preferenceValue(OctoConfig.INSTANCE.lockedChatsSpoilerNotifications)
+                            .title(getString(R.string.LockedChats_Options_SpoilerContent))
+                            .description(getString(R.string.LockedChats_Options_SpoilerContent_Desc))
+                            .showIf(canShowBiometricLockedChatsMoreOptionsNotifications)
+                            .build());
+                })
+                .category(getString(R.string.ActionsSettingsBiometric), canShowOptions, category -> {
                     category.row(new ExpandableRows.ExpandableRowsBuilder()
                             .setId(ExpandableRowsIds.LOCKED_ACCOUNTS.getId())
                             .setIcon(R.drawable.msg_openprofile)
@@ -175,7 +224,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             .hideMainSwitch(true)
                             .isLocked(true)
                             .addRow(accountsList)
-                            .showIf(canShowBiometricOptions)
+                            .showIf(canShowOptions)
                             .build()
                     );
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -186,12 +235,12 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             .showIf(canShowLockedAccountsOptions)
                             .build());
                 })
-                .category(getString(R.string.BiometricSettings), canShowBiometricOptions, category -> {
+                .category(getString(R.string.BiometricSettings), canShowOptions, category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkAvailability(OctoConfig.INSTANCE.allowUsingDevicePIN))
                             .preferenceValue(OctoConfig.INSTANCE.allowUsingDevicePIN)
                             .title(getString(R.string.BiometricSettingsAllowDevicePIN))
-                            .showIf(canShowBiometricOptions)
+                            .showIf(canShowOptions)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkAvailability(OctoConfig.INSTANCE.allowUsingFaceUnlock))
@@ -199,7 +248,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             .title(getString(R.string.BiometricSettingsAllowFaceUnlock))
                             .showIf(canShowFaceUnlock)
                             .build());
-                    category.row(new HeaderRow(getString(R.string.BiometricAskEvery), canShowBiometricAskAfter).headerStyle(false));
+                    category.row(new HeaderRow(getString(R.string.BiometricAskEvery), canShowOptions).headerStyle(false));
                     category.row(new SliderChooseRow.SliderChooseRowBuilder()
                             .options(new ArrayList<>() {{
                                 add(new Pair<>(0, getString(R.string.BiometricAskEvery_Always)));
@@ -212,24 +261,14 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             .onUpdate(() -> fragment.notifyItemChanged(PreferenceType.FOOTER_INFORMATIVE.getAdapterType()))
                             .onTouchEnd(this::handleSlideBarUpdate)
                             .preferenceValue(biometricAskEveryTemp)
-                            .showIf(canShowBiometricAskAfter)
+                            .showIf(canShowOptions)
                             .build());
                 })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
                         .setDynamicDataUpdate(this::composeBiometricCaptionForSeconds)
                         .title(composeBiometricCaptionForSeconds())
-                        .showIf(canShowBiometricAskAfter)
+                        .showIf(canShowOptions)
                         .build())
-                .category(getString(R.string.Warnings), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.promptBeforeCalling)
-                            .title(getString(R.string.PromptBeforeCalling))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory)
-                            .title(getString(R.string.PromptBeforeDeletingChatHistory))
-                            .build());
-                })
                 .category(getString(R.string.PhoneNumberPrivacy), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> canShowPhoneNumberAlternative.setValue(OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue()))
@@ -269,15 +308,140 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                         .title("Advanced unlock")
                         .showIf(canShowDebugProperties)
                         .build()))
-                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(getString(R.string.BiometricUnavailable))
-                        .showIf(canShowBiometricOptions, true)
-                        .build())
                 .build();
     }
 
-    public void setFromLockedChatsSettingsUI(boolean fromLockedChatsSettingsUI) {
-        this.fromLockedChatsSettingsUI = fromLockedChatsSettingsUI;
+    private LinearLayout getFingerprintFailAlert() {
+        Theme.ResourcesProvider resourcesProvider = fragment.getResourceProvider();
+
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        SpoilersTextView textView = new SpoilersTextView(context);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        textView.setTypeface(AndroidUtilities.bold());
+        textView.setEllipsize(TextUtils.TruncateAt.END);
+        textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
+        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader, resourcesProvider));
+        layout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 21, 15, 21, 0));
+
+        LinkSpanDrawable.LinksTextView detailTextView = new LinkSpanDrawable.LinksTextView(context, resourcesProvider);
+        detailTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
+        detailTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        detailTextView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText, resourcesProvider));
+        detailTextView.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection, resourcesProvider));
+        detailTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
+        detailTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
+        layout.addView(detailTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 21, 14, 21, canShowOptions.getValue() ? 0 : 16));
+
+        textView.setText(getString(R.string.BiometricUnavailable_Title));
+        detailTextView.setText(getString(canShowOptions.getValue() ? R.string.BiometricUnavailable_Desc : R.string.BiometricUnavailable_Desc_Old));
+
+        if (canShowOptions.getValue()) {
+            TextView textViewButton = new TextView(context);
+            textViewButton.setBackground(Theme.AdaptiveRipple.filledRectByKey(Theme.key_featuredStickers_addButton, 8));
+            ScaleStateListAnimator.apply(textViewButton, 0.02f, 1.5f);
+            textViewButton.setLines(1);
+            textViewButton.setSingleLine(true);
+            textViewButton.setGravity(Gravity.CENTER_HORIZONTAL);
+            textViewButton.setEllipsize(TextUtils.TruncateAt.END);
+            textViewButton.setGravity(Gravity.CENTER);
+            textViewButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText, resourcesProvider));
+            textViewButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            textViewButton.setTypeface(AndroidUtilities.bold());
+            layout.addView(textViewButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, 21, 16, 21, 15));
+            textViewButton.setText(getString(R.string.BiometricUnavailable_Test));
+            textViewButton.setOnClickListener(v -> FingerprintUtils.fixFingerprint(context, new FingerprintUtils.FingerprintResult() {
+                public void handle() {
+                    FingerprintUtils.cancelPendingAuthentications();
+                    FingerprintUtils.reloadFingerprintState();
+                    if (FingerprintUtils.hasFingerprintCached()) {
+                        AndroidUtilities.runOnUIThread(() -> {
+                            BulletinFactory.of(fragment).createSuccessBulletin(getString(R.string.BiometricUnavailable_Test_Fixed)).show();
+                            updateConfig();
+                            fragment.reloadUIAfterValueUpdate();
+                        }, 300);
+                    } else {
+                        showError(0);
+                    }
+                }
+
+                public void showError(int error) {
+                    BulletinFactory.of(fragment).createSimpleBulletin(
+                            R.raw.chats_infotip,
+                            getString(R.string.BiometricUnavailable_Test_Wrong) + (error == 0 ? "" : " (e"+error+")"),
+                            getString(R.string.BiometricUnavailable_Test_Wrong_Desc),
+                            getString(R.string.BiometricUnavailable_Test_Wrong_Button), () -> {
+                                Intent intent;
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                    intent = new Intent(Settings.ACTION_FINGERPRINT_ENROLL);
+                                } else {
+                                    intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+                                }
+                                context.startActivity(intent);
+                            }).show();
+                }
+
+                @Override
+                public void onSuccess() {
+                    handle();
+                }
+
+                @Override
+                public void onFailed() {
+                    handle();
+                }
+
+                @Override
+                public void onError(int error) {
+                    showError(error);
+                }
+            }));
+        }
+
+        return layout;
+    }
+
+    @NonNull
+    private static UsersSelectActivity getUsersSelectActivity() {
+        UsersSelectActivity activity = new UsersSelectActivity(true, FingerprintUtils.getLockedChatsIds(), 0);
+        activity.asLockedChats();
+        return activity;
+    }
+
+    private void runUsersSelectActivity() {
+        if (showFingerprintFailedAlert.getValue() || !FingerprintUtils.hasFingerprintCached()) {
+            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, getString(R.string.BiometricUnavailable_Title), getString(R.string.BiometricUnavailable_Unavailable)).show();
+            return;
+        }
+
+        UsersSelectActivity activity = getUsersSelectActivity();
+        activity.setDelegate((ids, flags) -> {
+            FingerprintUtils.clearLockedChats();
+            FingerprintUtils.lockChatsMultiFromIDs(ids, true);
+        });
+        fragment.presentFragment(activity);
+    }
+
+    private void showLockedHelp() {
+        BottomSheet[] bottomSheet = new BottomSheet[1];
+        LockedChatsHelp lockedChatsHelp = new LockedChatsHelp(context, null, () -> {
+            if (bottomSheet[0] != null) {
+                bottomSheet[0].dismiss();
+                bottomSheet[0] = null;
+            }
+        }, () -> {
+            if (bottomSheet[0] != null) {
+                bottomSheet[0].dismiss();
+                bottomSheet[0] = null;
+            }
+            AndroidUtilities.runOnUIThread(this::runUsersSelectActivity, 300);
+        });
+        lockedChatsHelp.asSettingsUI();
+        bottomSheet[0] = new BottomSheet.Builder(context, false, null)
+                .setCustomView(lockedChatsHelp, Gravity.TOP | Gravity.CENTER_HORIZONTAL)
+                .show();
+        bottomSheet[0].fixNavigationBar(Theme.getColor(Theme.key_dialogBackground));
     }
 
     private String composeBiometricCaptionForSeconds() {
@@ -297,39 +461,41 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     private void updateConfig() {
         updateConfigsWithResult();
     }
-    
+
     private boolean updateConfigsWithResult() {
         boolean hasFingerprint = FingerprintUtils.hasFingerprintCached();
-        boolean hasEnabledOptions = OctoConfig.INSTANCE.biometricOpenArchive.getValue() || OctoConfig.INSTANCE.biometricOpenCallsLog.getValue() || OctoConfig.INSTANCE.biometricOpenSecretChats.getValue() || OctoConfig.INSTANCE.biometricOpenSettings.getValue() || FingerprintUtils.hasLockedAccounts();
 
-        boolean hasChanged = canShowBiometricOptions.getValue() != hasFingerprint;
-        if (!hasChanged) {
-            hasChanged = canShowBiometricAskAfter.getValue() != (hasFingerprint&&hasEnabledOptions);
-        }
-        if (!hasChanged) {
-            hasChanged = canShowLockedAccountsOptions.getValue() != (hasFingerprint && FingerprintUtils.hasLockedAccounts());
-        }
-        if (!hasChanged) {
-            hasChanged = canShowPhoneNumberAlternative.getValue() != (OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue());
-        }
-        if (!hasChanged) {
-            hasChanged = canShowDebugProperties.getValue() != (hasFingerprint && (BuildConfig.DEBUG_PRIVATE_VERSION || BuildVars.isBetaApp()));
-        }
+        boolean hasChanged = updateWithHasChangesCheck(canShowOptions, Build.VERSION.SDK_INT >= 23);
+        hasChanged |= updateWithHasChangesCheck(showFingerprintFailedAlert, !hasFingerprint || !canShowOptions.getValue());
+        hasChanged |= updateWithHasChangesCheck(canShowBiometricLockedChatsMoreOptionsNotifications, canShowOptions.getValue() && canShowBiometricLockedChatsMoreOptions.getValue() && OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue());
+        hasChanged |= updateWithHasChangesCheck(canShowLockedAccountsOptions, canShowOptions.getValue() && FingerprintUtils.hasLockedAccounts());
+        hasChanged |= updateWithHasChangesCheck(canShowPhoneNumberAlternative, canShowOptions.getValue() && OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue());
+        hasChanged |= updateWithHasChangesCheck(canShowDebugProperties, canShowOptions.getValue() && (BuildConfig.DEBUG_PRIVATE_VERSION || BuildVars.isBetaApp()));
+        hasChanged |= updateWithHasChangesCheck(canShowFaceUnlock, canShowOptions.getValue() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ApplicationLoader.applicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE));
 
-        canShowBiometricOptions.updateValue(hasFingerprint);
-        canShowBiometricAskAfter.updateValue(hasFingerprint && hasEnabledOptions);
-        canShowLockedAccountsOptions.updateValue(hasFingerprint && FingerprintUtils.hasLockedAccounts());
-        canShowPhoneNumberAlternative.updateValue(OctoConfig.INSTANCE.hidePhoneNumber.getValue() || OctoConfig.INSTANCE.hideOtherPhoneNumber.getValue());
-        canShowDebugProperties.updateValue(hasFingerprint && (BuildConfig.DEBUG_PRIVATE_VERSION || BuildVars.isBetaApp()));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            canShowFaceUnlock.updateValue(canShowBiometricOptions.getValue() && ApplicationLoader.applicationContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE));
+        if (!canShowOptions.getValue()) {
+            hasChanged |= updateWithHasChangesCheck(canShowBiometricLockedChatsExpand, false);
         }
 
         return hasChanged;
     }
 
+    private boolean updateWithHasChangesCheck(ConfigProperty<Boolean> key, Boolean value) {
+        if (key.getValue() == value) {
+            return false;
+        }
+
+        key.updateValue(value);
+        return true;
+    }
+
     private boolean checkAvailability(ConfigProperty<Boolean> option) {
-        if (!option.getValue() || !FingerprintUtils.hasFingerprintCached()) {
+        if (showFingerprintFailedAlert.getValue() || !FingerprintUtils.hasFingerprintCached()) {
+            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, getString(R.string.BiometricUnavailable_Title), getString(R.string.BiometricUnavailable_Unavailable)).show();
+            return false;
+        }
+
+        if (!option.getValue()) {
             return true;
         } else {
             if (fragment.hasUnlockedWithAuth()) {
@@ -351,12 +517,14 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     }
 
     private void handleSlideBarUpdate() {
-        if (OctoConfig.INSTANCE.biometricAskEvery.getValue().equals(biometricAskEveryTemp.getValue())) {
+        if (showFingerprintFailedAlert.getValue() || !FingerprintUtils.hasFingerprintCached()) {
+            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, getString(R.string.BiometricUnavailable_Title), getString(R.string.BiometricUnavailable_Unavailable)).show();
+            biometricAskEveryTemp.updateValue(OctoConfig.INSTANCE.biometricAskEvery.getValue());
+            fragment.notifyItemChanged(PreferenceType.FOOTER_INFORMATIVE.getAdapterType(), PreferenceType.SLIDER_CHOOSE.getAdapterType());
             return;
         }
 
-        if (!FingerprintUtils.hasFingerprintCached()) {
-            OctoConfig.INSTANCE.biometricAskEvery.updateValue(biometricAskEveryTemp.getValue());
+        if (OctoConfig.INSTANCE.biometricAskEvery.getValue().equals(biometricAskEveryTemp.getValue())) {
             return;
         }
 
@@ -376,6 +544,11 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     }
 
     private boolean handleAccountLock(int accountId, long userId) {
+        if (showFingerprintFailedAlert.getValue() || !FingerprintUtils.hasFingerprintCached()) {
+            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, getString(R.string.BiometricUnavailable_Title), getString(R.string.BiometricUnavailable_Unavailable)).show();
+            return false;
+        }
+
         if (!FingerprintUtils.isAccountLocked(userId)) {
             FingerprintUtils.lockAccount(userId, true);
 

@@ -27,8 +27,6 @@ import android.provider.DocumentsContract;
 import android.text.TextPaint;
 import android.text.TextUtils;
 
-import androidx.annotation.RequiresApi;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -108,7 +106,6 @@ public class CustomEmojiController {
         return statusLoading >= LOADING && statusLoading < LOADED_REMOTE;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public static Typeface getCurrentTypeface() {
         if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) return getSystemEmojiTypeface();
         return getSelectedTypeface();
@@ -145,7 +142,6 @@ public class CustomEmojiController {
         return systemEmojiTypeface;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     private static Typeface getSelectedTypeface() {
         return getEmojiCustomPacksInfo()
                 .stream()

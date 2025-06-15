@@ -1,3 +1,5 @@
+import com.android.build.gradle.ProguardFiles
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.services)
@@ -40,6 +42,7 @@ android {
     Properties signingProperties = new Properties()
 
     String signFilePath = getProps("sign.file")
+    Boolean dontObfuscate = getProps("app.dontobfuscate")?.toBoolean() ?: false
 
     if (signFilePath) {
         File signFile = new File(signFilePath)
@@ -75,25 +78,31 @@ android {
         }
 
         pbeta {
-            minifyEnabled = true
-            shrinkResources = true
+            minifyEnabled = !dontObfuscate
+            shrinkResources = !dontObfuscate
             vcsInfo.include = false
             if (signingProperties.size() > 0) {
                 signingConfig = signingConfigs.sign
             }
             jniDebuggable = true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
+            proguardFiles(
+                    getDefaultProguardFile(ProguardFiles.ProguardFile.OPTIMIZE.fileName),
+                    '../TMessagesProj/proguard-rules.pro'
+            )
             ndk.debugSymbolLevel = 'FULL'
         }
 
         release {
-            minifyEnabled = true
-            shrinkResources = true
+            minifyEnabled = !dontObfuscate
+            shrinkResources = !dontObfuscate
             vcsInfo.include = false
             if (signingProperties.size() > 0) {
                 signingConfig = signingConfigs.sign
             }
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
+            proguardFiles(
+                    getDefaultProguardFile(ProguardFiles.ProguardFile.OPTIMIZE.fileName),
+                    '../TMessagesProj/proguard-rules.pro'
+            )
             ndk.debugSymbolLevel = 'FULL'
         }
     }

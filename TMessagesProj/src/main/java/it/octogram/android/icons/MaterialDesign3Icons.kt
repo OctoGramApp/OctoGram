@@ -404,14 +404,6 @@ class MaterialDesign3Icons {
             return icon
         }
 
-        fun getRandom(startingIcon: Int): Int {
-            if (shouldKeepOriginalIcon(startingIcon)) {
-                return startingIcon
-            }
-
-            return materialDesign3Icons.random().second
-        }
-
         private fun shouldKeepOriginalIcon(icon: Int): Boolean {
             return (icon == getConversion(icon) || icon in fixedAlertIcons)
         }

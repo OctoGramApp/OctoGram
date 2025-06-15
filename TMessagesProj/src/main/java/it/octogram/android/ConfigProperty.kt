@@ -26,7 +26,11 @@ class ConfigProperty<T>(
     var key: String?,
     initialValue: T
 ) {
-    private val octoPreferences: SharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Context.MODE_PRIVATE)
+    private val octoPreferences: SharedPreferences =
+        ApplicationLoader.applicationContext.getSharedPreferences(
+            "octoconfig",
+            Context.MODE_PRIVATE
+        )
     private var _value: T = initialValue
     private val defaultValue: T = initialValue
 

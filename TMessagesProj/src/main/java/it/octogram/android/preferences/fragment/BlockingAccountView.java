@@ -490,7 +490,7 @@ public class BlockingAccountView extends ViewGroup {
             mainImageView.layout(x, y, x + mainImageView.getMeasuredWidth(), y + mainImageView.getMeasuredHeight());
             y += mainImageView.getMeasuredHeight() + dp(24);
             x = (width - chipLayout.getMeasuredWidth()) / 2;
-            chipLayout.layout(x, y, x+chipLayout.getMeasuredWidth(), y + chipLayout.getMeasuredHeight());
+            chipLayout.layout(x, y, x + chipLayout.getMeasuredWidth(), y + chipLayout.getMeasuredHeight());
             y += chipLayout.getMeasuredHeight() + dp(5);
             descriptionText.layout(0, y, descriptionText.getMeasuredWidth(), y + descriptionText.getMeasuredHeight());
             x = (width - buttonTextView.getMeasuredWidth()) / 2;
@@ -501,6 +501,7 @@ public class BlockingAccountView extends ViewGroup {
 
     public interface BlockingViewDelegate {
         void onUnlock();
+
         void destroy();
     }
 }

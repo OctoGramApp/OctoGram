@@ -64,47 +64,7 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                 .deepLink(DeepLinkDef.APPEARANCE_DRAWER)
                 .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_openin, getString(R.string.Drawer_Test), () -> LaunchActivity.instance.drawerLayoutContainer.openDrawer(true)))
                 .category(getString(R.string.DrawerTitle), category -> {
-                    category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(drawerPreviewCell = new DrawerPreviewCell(context))
-                            .build());
-                    category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.drawerBackground)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DrawerBackgroundState.TRANSPARENT.getValue())
-                                            .setItemIcon(R.drawable.msg_cancel)
-                                            .setItemTitle(getString(R.string.DrawerBackgroundTransparent)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DrawerBackgroundState.WALLPAPER.getValue())
-                                            .setItemIcon(R.drawable.msg_background)
-                                            .setItemTitle(getString(R.string.DrawerBackgroundWallpaper)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DrawerBackgroundState.PROFILE_PIC.getValue())
-                                            .setItemIcon(R.drawable.msg_view_file)
-                                            .setItemTitle(getString(R.string.DrawerBackgroundProfilePhoto)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DrawerBackgroundState.COLOR.getValue())
-                                            .setItemIcon(R.drawable.msg_colors)
-                                            .setItemTitle(getString(R.string.DrawerBackgroundColor)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DrawerBackgroundState.PREMIUM_DETAILS.getValue())
-                                            .setItemIcon(R.drawable.menu_feature_premium)
-                                            .setItemTitle(getString(R.string.DrawerPremiumDetails))
-                                            .setItemDescription(getString(R.string.DrawerPremiumDetails_Desc))
-                            ))
-                            .onSelected(this::reloadDrawerPreviewInstance)
-                            .title(getString(R.string.DrawerBackground))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(this::reloadDrawerPreviewInstance)
-                            .preferenceValue(OctoConfig.INSTANCE.drawerShowProfilePic)
-                            .title(getString(R.string.DrawerShowProfilePic))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(this::reloadDrawerPreviewInstance)
-                            .preferenceValue(OctoConfig.INSTANCE.drawerGradientBackground)
-                            .title(getString(R.string.DrawerGradientBackground))
-                            .build());
+                    fillMainCategory(context, fragment, category);
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.drawerFavoriteOption)
                             .onClick(() -> canChangeFavoriteOption(context))
@@ -215,6 +175,77 @@ public class OctoDrawerSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .build();
+    }
+
+    public DrawerPreviewCell fillMainCategory(Context context, PreferencesFragment fragment, OctoPreferences.OctoPreferencesBuilder category) {
+        return fillMainCategory(context, fragment, category, false);
+    }
+
+    public DrawerPreviewCell fillMainCategory(Context context, PreferencesFragment fragment, OctoPreferences.OctoPreferencesBuilder category, boolean forceRedirect) {
+        category.row(new CustomCellRow.CustomCellRowBuilder()
+                .layout(drawerPreviewCell = new DrawerPreviewCell(context))
+                .build());
+        category.row(new ListRow.ListRowBuilder()
+                .currentValue(OctoConfig.INSTANCE.drawerBackground)
+                .options(List.of(
+                        new PopupChoiceDialogOption()
+                                .setId(DrawerBackgroundState.TRANSPARENT.getValue())
+                                .setItemIcon(R.drawable.msg_cancel)
+                                .setItemTitle(getString(R.string.DrawerBackgroundTransparent)),
+                        new PopupChoiceDialogOption()
+                                .setId(DrawerBackgroundState.WALLPAPER.getValue())
+                                .setItemIcon(R.drawable.msg_background)
+                                .setItemTitle(getString(R.string.DrawerBackgroundWallpaper)),
+                        new PopupChoiceDialogOption()
+                                .setId(DrawerBackgroundState.PROFILE_PIC.getValue())
+                                .setItemIcon(R.drawable.msg_view_file)
+                                .setItemTitle(getString(R.string.DrawerBackgroundProfilePhoto)),
+                        new PopupChoiceDialogOption()
+                                .setId(DrawerBackgroundState.COLOR.getValue())
+                                .setItemIcon(R.drawable.msg_colors)
+                                .setItemTitle(getString(R.string.DrawerBackgroundColor)),
+                        new PopupChoiceDialogOption()
+                                .setId(DrawerBackgroundState.PREMIUM_DETAILS.getValue())
+                                .setItemIcon(R.drawable.menu_feature_premium)
+                                .setItemTitle(getString(R.string.DrawerPremiumDetails))
+                                .setItemDescription(getString(R.string.DrawerPremiumDetails_Desc))
+                ))
+                .onClick(() -> {
+                    if (forceRedirect) {
+                        fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI(), OctoConfig.INSTANCE.drawerBackground.getKey()));
+                        return false;
+                    }
+                    return true;
+                })
+                .onSelected(this::reloadDrawerPreviewInstance)
+                .title(getString(R.string.DrawerBackground))
+                .build());
+        category.row(new SwitchRow.SwitchRowBuilder()
+                .onPostUpdate(this::reloadDrawerPreviewInstance)
+                .onClick(() -> {
+                    if (forceRedirect) {
+                        fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI(), OctoConfig.INSTANCE.drawerShowProfilePic.getKey()));
+                        return false;
+                    }
+                    return true;
+                })
+                .preferenceValue(OctoConfig.INSTANCE.drawerShowProfilePic)
+                .title(getString(R.string.DrawerShowProfilePic))
+                .build());
+        category.row(new SwitchRow.SwitchRowBuilder()
+                .onPostUpdate(this::reloadDrawerPreviewInstance)
+                .onClick(() -> {
+                    if (forceRedirect) {
+                        fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI(), OctoConfig.INSTANCE.drawerGradientBackground.getKey()));
+                        return false;
+                    }
+                    return true;
+                })
+                .preferenceValue(OctoConfig.INSTANCE.drawerGradientBackground)
+                .title(getString(R.string.DrawerGradientBackground))
+                .build());
+
+        return drawerPreviewCell;
     }
 
     private boolean canChangeFavoriteOption(Context context) {

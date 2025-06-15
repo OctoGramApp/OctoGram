@@ -54,15 +54,17 @@ import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ArticleViewer;
+import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Stories.StoryViewer;
 import org.telegram.ui.bots.BotWebViewAttachedSheet;
 
 import java.util.ArrayList;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.fragment.ActionBarOverride;
-import it.octogram.android.utils.OctoUtils;
 
 public abstract class BaseFragment {
 
@@ -1074,6 +1076,9 @@ public abstract class BaseFragment {
 
     public int getNavigationBarColor() {
         int color = Theme.getColor(Theme.key_windowBackgroundGray, getResourceProvider());
+        if (OctoConfig.INSTANCE.useFluentNavigationBar.getValue()) {
+            color = Theme.getColor(Theme.key_chat_messagePanelBackground, getResourceProvider());
+        }
         if (sheetsStack != null) {
             for (int i = 0; i < sheetsStack.size(); ++i) {
                 AttachedSheet sheet = sheetsStack.get(i);
@@ -1085,8 +1090,11 @@ public abstract class BaseFragment {
         return color;
     }
 
-    public void setNavigationBarColor(int colors) {
-        var color = OctoUtils.getNavBarColor(resourceProvider);
+    public void setNavigationBarColor(int color) {
+        // var color = OctoUtils.getNavBarColor(resourceProvider);
+        if (OctoConfig.INSTANCE.useFluentNavigationBar.getValue()) {
+            color = Theme.getColor(Theme.key_chat_messagePanelBackground, getResourceProvider());
+        }
         Activity activity = getParentActivity();
         if (activity instanceof LaunchActivity) {
             LaunchActivity launchActivity = (LaunchActivity) activity;

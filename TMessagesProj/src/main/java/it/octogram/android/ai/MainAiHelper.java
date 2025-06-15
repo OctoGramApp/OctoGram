@@ -6,11 +6,13 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai.helper;
+package it.octogram.android.ai;
 
 import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.AiPrompt;
+import it.octogram.android.ai.chatgpt.ChatGPTHelper;
+import it.octogram.android.ai.gemini.GeminiHelper;
+import it.octogram.android.ai.openrouter.OpenRouterHelper;
 import it.octogram.android.logs.OctoLogging;
 
 public class MainAiHelper {
@@ -18,7 +20,19 @@ public class MainAiHelper {
     private static boolean frozenState = false;
 
     public static boolean canUseAiFeatures() {
-        return OctoConfig.INSTANCE.aiFeatures.getValue() && (GeminiHelper.isAvailable() || ChatGPTHelper.isAvailable() || OpenRouterHelper.isAvailable());
+        return OctoConfig.INSTANCE.aiFeatures.getValue() && hasAvailableProviders();
+    }
+
+    public static int getEnabledProvidersCount() {
+        int i = 0;
+        if (GeminiHelper.isAvailable()) i++;
+        if (ChatGPTHelper.isAvailable()) i++;
+        if (OpenRouterHelper.isAvailable()) i++;
+        return i;
+    }
+
+    public static boolean hasAvailableProviders() {
+        return getEnabledProvidersCount() > 0;
     }
 
     public static boolean canTranslateMessages() {
@@ -26,8 +40,8 @@ public class MainAiHelper {
     }
 
     public static AiProvidersDetails getPreferredProvider() {
-        AiProvidersDetails favoriteProvider = GeminiHelper.isAvailable() ? AiProvidersDetails.GEMINI : (ChatGPTHelper.isAvailable() ? AiProvidersDetails.CHATGPT : AiProvidersDetails.OPENROUTER);
-        if (!OpenRouterHelper.isAvailable() && !GeminiHelper.isAvailable() && !ChatGPTHelper.isAvailable()) {
+        AiProvidersDetails favoriteProvider = GeminiHelper.isAvailable() ? AiProvidersDetails.GEMINI : ChatGPTHelper.isAvailable() ? AiProvidersDetails.CHATGPT : AiProvidersDetails.OPENROUTER;
+        if (!hasAvailableProviders()) {
             favoriteProvider = null;
         }
 
@@ -114,12 +128,15 @@ public class MainAiHelper {
         void onSuccess(String result);
 
         void onFailed();
+
         default void onTooManyRequests() {
             onFailed();
         }
+
         default void onEmptyResponse() {
             onFailed();
         }
+
         default void onModelOverloaded() {
             onFailed();
         }

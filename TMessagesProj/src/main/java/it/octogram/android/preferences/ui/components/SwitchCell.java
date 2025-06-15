@@ -75,6 +75,7 @@ public class SwitchCell extends FrameLayout {
     private boolean isSelectingItems = false;
     private boolean hasAddedUserData = false;
     private boolean _isLocked = false;
+
     public SwitchCell(Context context, PreferencesFragment fragment) {
         super(context);
         this.fragment = fragment;
@@ -230,7 +231,8 @@ public class SwitchCell extends FrameLayout {
                 CharSequence text = user.first_name;
                 try {
                     text = Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), false);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
                 textView.setText(text);
 
                 backupImageView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));

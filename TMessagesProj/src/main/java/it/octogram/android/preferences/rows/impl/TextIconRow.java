@@ -38,6 +38,7 @@ public class TextIconRow extends BaseRow implements Clickable {
 
     public interface OnDynamicDataUpdate {
         String getTitle();
+
         String getValue();
 
         default int getIcon() {

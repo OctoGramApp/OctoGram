@@ -146,8 +146,8 @@ import java.util.Objects;
 import it.octogram.android.CameraPreview;
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.MessagesModelsWrapper;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.CustomModelsMenuWrapper;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.translator.SingleTranslationManager;
 import it.octogram.android.translator.TranslationsWrapper;
@@ -3510,7 +3510,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 aiFeaturesButton.setMinimumWidth(dp(196));
                 options.addView(aiFeaturesButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
 
-                MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+                CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData();
                 data.context = getContext();
                 data.onSheetOpen = () -> AndroidUtilities.hideKeyboard(commentTextView);
                 data.originalSubItem = aiFeaturesButton;
@@ -3527,7 +3527,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     commentTextView.setText(v);
                     commentTextView.setSelection(0, v.length());
                 });
-                MessagesModelsWrapper.initState(data);
+                CustomModelsMenuWrapper.initState(data);
             }
 
             if (editingMessageObject == null && canHaveStars && chatActivity != null && ChatObject.isChannelAndNotMegaGroup(chatActivity.getCurrentChat()) && chatActivity.getCurrentChatInfo() != null && chatActivity.getCurrentChatInfo().paid_media_allowed) {

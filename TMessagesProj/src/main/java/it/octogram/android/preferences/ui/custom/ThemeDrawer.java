@@ -96,7 +96,7 @@ public class ThemeDrawer extends FrameLayout {
             if (icons != null) {
                 for (int i = 0; i < icons.length; i++) {
                     Drawable icon = ContextCompat.getDrawable(getContext(), icons[i]);
-                    if (icon != null){
+                    if (icon != null) {
                         int iconSize = Math.round(nav_width * 0.19f);
                         int textSize = Math.round(iconSize * 0.6f);
                         int yOffsetText = Math.round((iconSize - textSize) / 2.0f);

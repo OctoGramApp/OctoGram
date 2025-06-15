@@ -38,18 +38,76 @@ import java.util.zip.GZIPInputStream;
 
 import it.octogram.android.logs.OctoLogging;
 
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 public class RawDeepLTranslator {
     private static final String internalRequest = "https://www2.deepl.com/jsonrpc";
     private static final String referer = "https://www.deepl.com/";
-
-    private final AtomicLong id = new AtomicLong(ThreadLocalRandom.current().nextLong(Long.parseLong("10000000000")));
-    private final ReentrantLock lock = new ReentrantLock();
+    private static final Pattern iPattern = Pattern.compile("i");
+    private static final String xInstance = UUID.randomUUID().toString();
     private static volatile String cookie;
     private static int retry_429 = 3;
     private static int retry_timeout = 10;
     private static long sleepTime_429 = 1000L;
-    private static final Pattern iPattern = Pattern.compile("i");
-    private static final String xInstance = UUID.randomUUID().toString();
+    private final AtomicLong id = new AtomicLong(ThreadLocalRandom.current().nextLong(Long.parseLong("10000000000")));
+    private final ReentrantLock lock = new ReentrantLock();
+
+    public RawDeepLTranslator() {
+    }
+
+    private static String composeResult(String response) throws IOException, JSONException {
+        JSONObject object = new JSONObject(response);
+
+        if (object.has("result")) {
+            JSONObject result = object.getJSONObject("result");
+            if (result.has("texts")) {
+                JSONObject firstTextResult = result.getJSONArray("texts").getJSONObject(0);
+                if (firstTextResult.has("text")) {
+                    return firstTextResult.getString("text");
+                }
+            }
+        }
+
+        throw new IOException("empty translation message");
+    }
+
+    @NonNull
+    private static HttpURLConnection getHttpURLConnection() throws IOException {
+        URL downloadUrl = new URL(internalRequest);
+        HttpURLConnection httpConnection = (HttpURLConnection) downloadUrl.openConnection();
+        httpConnection.setConnectTimeout(10000);
+        httpConnection.setRequestProperty("referer", referer);
+        httpConnection.setRequestProperty("x-instance", xInstance);
+        httpConnection.setRequestProperty("user-agent", "DeepL-Android/VersionName(name=1.0.1) Android 10 (aarch64)");
+        httpConnection.setRequestProperty("x-app-os-name", "Android");
+        httpConnection.setRequestProperty("x-app-os-version", "10");
+        httpConnection.setRequestProperty("x-app-version", "1.0.1");
+        httpConnection.setRequestProperty("x-app-build", "13");
+        httpConnection.setRequestProperty("x-app-device", "Pixel 5");
+        httpConnection.setRequestProperty("x-app-instance-id", xInstance);
+        httpConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        httpConnection.setRequestProperty("Accept-Encoding", "gzip");
+        if (cookie != null) {
+            httpConnection.setRequestProperty("Cookie", cookie);
+        }
+
+        httpConnection.setRequestMethod("POST");
+        httpConnection.setDoOutput(true);
+        return httpConnection;
+    }
+
+    public static InputStream decompressStream(InputStream input) throws IOException {
+        PushbackInputStream pb = new PushbackInputStream(input, 2);
+        byte[] signature = new byte[2];
+        int len = pb.read(signature);
+        pb.unread(signature, 0, len);
+        if (signature[0] == (byte) 0x1f && signature[1] == (byte) 0x8b) {
+            return new GZIPInputStream(pb);
+        } else {
+            return pb;
+        }
+    }
 
     public void setParams(int retry_429, int retry_timeout, long sleepTime_429) throws Exception {
         if (retry_429 >= 0 && retry_timeout >= 0) {
@@ -180,22 +238,6 @@ public class RawDeepLTranslator {
         return null;
     }
 
-    private static String composeResult(String response) throws IOException, JSONException {
-        JSONObject object = new JSONObject(response);
-
-        if (object.has("result")) {
-            JSONObject result = object.getJSONObject("result");
-            if (result.has("texts")) {
-                JSONObject firstTextResult = result.getJSONArray("texts").getJSONObject(0);
-                if (firstTextResult.has("text")) {
-                    return firstTextResult.getString("text");
-                }
-            }
-        }
-
-        throw new IOException("empty translation message");
-    }
-
     private String rawRequest(String body) throws IOException {
         boolean errorOccurred = false;
         HttpURLConnection httpConnection = getHttpURLConnection();
@@ -237,43 +279,6 @@ public class RawDeepLTranslator {
                 }
             }
             outBuf.write(data, 0, read);
-        }
-    }
-
-    @NonNull
-    private static HttpURLConnection getHttpURLConnection() throws IOException {
-        URL downloadUrl = new URL(internalRequest);
-        HttpURLConnection httpConnection = (HttpURLConnection) downloadUrl.openConnection();
-        httpConnection.setConnectTimeout(10000);
-        httpConnection.setRequestProperty("referer", referer);
-        httpConnection.setRequestProperty("x-instance", xInstance);
-        httpConnection.setRequestProperty("user-agent", "DeepL-Android/VersionName(name=1.0.1) Android 10 (aarch64)");
-        httpConnection.setRequestProperty("x-app-os-name", "Android");
-        httpConnection.setRequestProperty("x-app-os-version", "10");
-        httpConnection.setRequestProperty("x-app-version", "1.0.1");
-        httpConnection.setRequestProperty("x-app-build", "13");
-        httpConnection.setRequestProperty("x-app-device", "Pixel 5");
-        httpConnection.setRequestProperty("x-app-instance-id", xInstance);
-        httpConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-        httpConnection.setRequestProperty("Accept-Encoding", "gzip");
-        if (cookie != null) {
-            httpConnection.setRequestProperty("Cookie", cookie);
-        }
-
-        httpConnection.setRequestMethod("POST");
-        httpConnection.setDoOutput(true);
-        return httpConnection;
-    }
-
-    public static InputStream decompressStream(InputStream input) throws IOException {
-        PushbackInputStream pb = new PushbackInputStream(input, 2);
-        byte[] signature = new byte[2];
-        int len = pb.read(signature);
-        pb.unread(signature, 0, len);
-        if (signature[0] == (byte) 0x1f && signature[1] == (byte) 0x8b) {
-            return new GZIPInputStream(pb);
-        } else {
-            return pb;
         }
     }
 }

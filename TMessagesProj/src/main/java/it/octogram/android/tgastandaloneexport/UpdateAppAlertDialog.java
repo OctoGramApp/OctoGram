@@ -387,7 +387,8 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                 return super.onInterceptTouchEvent(ev);
             }
 
-            @Override @SuppressLint("ClickableViewAccessibility")
+            @Override
+            @SuppressLint("ClickableViewAccessibility")
             public boolean onTouchEvent(MotionEvent e) {
                 return !isDismissed() && super.onTouchEvent(e);
             }

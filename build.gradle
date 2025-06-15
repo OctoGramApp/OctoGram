@@ -19,8 +19,7 @@ plugins {
 
 subprojects {
     afterEvaluate {
-        if (plugins.hasPlugin("com.android.library") ||
-                plugins.hasPlugin("com.android.application")) {
+        if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
             android {
                 compileSdk = 35
                 buildToolsVersion = "35.0.1"
@@ -28,11 +27,7 @@ subprojects {
 
                 lint {
                     checkReleaseBuilds = false
-                    disable = [
-                            'MissingTranslation',
-                            'ExtraTranslation',
-                            'BlockedPrivateApi'
-                    ]
+                    disable 'MissingTranslation', 'ExtraTranslation', 'BlockedPrivateApi'
                 }
 
                 compileOptions {
@@ -58,7 +53,7 @@ subprojects {
             }
 
             dependencies {
-                coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5'
+                coreLibraryDesugaring libs.desugar.jdk.libs.nio
             }
         }
     }

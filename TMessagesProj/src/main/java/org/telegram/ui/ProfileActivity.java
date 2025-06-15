@@ -13195,6 +13195,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 defaultList.add(new SearchResult(minGuid, category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.onCall())));
 
                 for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    if (option.isTitle || option.property == null) {
+                        continue;
+                    }
                     minGuid++;
                     defaultList.add(new SearchResult(minGuid, option.getName(), category.getName(), category.categoryIcon, () -> presentFragment(category.onGetFragment.onCall(option.property.getKey()))));
                 }

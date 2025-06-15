@@ -85,11 +85,14 @@ public class QueueTranslationManager {
     public interface OnQueueTranslationResultCallback {
         // translation via telegram
         void onGotReqId(int reqId);
+
         void onTelegramUniqueResult(TLObject res, TLRPC.TL_error err);
 
         // translation via other provider
         void onSingleMessageTranslation(int id, TLRPC.TL_textWithEntities result);
+
         void onGeneralError();
+
         void onUnavailableLanguage();
     }
 }

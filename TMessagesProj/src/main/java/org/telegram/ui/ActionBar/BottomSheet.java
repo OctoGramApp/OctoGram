@@ -78,8 +78,6 @@ import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 
-import it.octogram.android.utils.OctoUtils;
-
 public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
     private final static boolean AVOID_SYSTEM_CUTOUT_FULLSCREEN = false;
 
@@ -1186,7 +1184,8 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
         drawDoubleNavigationBar = true;
         scrollNavBar = true;
         navBarColorKey = -1;
-        setOverlayNavBarColor(navBarColor = OctoUtils.getNavBarColor(resourcesProvider));
+        setOverlayNavBarColor(navBarColor = bgColor);
+        // setOverlayNavBarColor(navBarColor = OctoUtils.getNavBarColor(resourcesProvider));
     }
 
     @Override
@@ -2213,7 +2212,8 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
     private int overlayDrawNavBarColor;
 
     public void setOverlayNavBarColor(int color) {
-        overlayDrawNavBarColor = OctoUtils.getNavBarColor(resourcesProvider);
+        overlayDrawNavBarColor = color;
+        // overlayDrawNavBarColor = OctoUtils.getNavBarColor(resourcesProvider);
         if (container != null) {
             container.invalidate();
         }

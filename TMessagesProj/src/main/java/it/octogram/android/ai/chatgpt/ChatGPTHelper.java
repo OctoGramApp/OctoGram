@@ -6,22 +6,22 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai.helper;
+package it.octogram.android.ai.chatgpt;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ai.AiPrompt;
-import it.octogram.android.ai.chatgpt.ChatGPTClient;
-import it.octogram.android.ai.chatgpt.ChatGPTException;
-import it.octogram.android.ai.chatgpt.ChatGPTModels;
-import it.octogram.android.ai.chatgpt.ChatGPTRequest;
-import it.octogram.android.ai.chatgpt.ChatGPTRequestBuilder;
-import it.octogram.android.ai.chatgpt.ChatGPTResponse;
+import it.octogram.android.ai.GenericLLM.GenericLLMClient;
+import it.octogram.android.ai.GenericLLM.GenericLLMException;
+import it.octogram.android.ai.GenericLLM.GenericLLMRequest;
+import it.octogram.android.ai.GenericLLM.GenericLLMRequestBuilder;
+import it.octogram.android.ai.GenericLLM.GenericLLMResponse;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
 
 public class ChatGPTHelper {
     private static final String TAG = "ChatGPTHelper";
-    private static final ChatGPTClient chatGPTClient = new ChatGPTClient();
+    private static final GenericLLMClient chatGPTClient = new GenericLLMClient();
 
     public static void prompt(AiPrompt aiPrompt, MainAiHelper.OnResultState callback) {
         if (!isAvailable()) {
@@ -33,7 +33,8 @@ public class ChatGPTHelper {
             @Override
             public void run() {
                 try {
-                    ChatGPTRequest chatGPTRequest = new ChatGPTRequestBuilder()
+                    GenericLLMRequest chatGPTRequest = new GenericLLMRequestBuilder()
+                            .setApiUrl("https://api.openai.com/v1/chat/completions")
                             .setUserMessage(aiPrompt.getText())
                             .setDeveloperMessage(aiPrompt.getPrompt())
                             .setModel(ChatGPTModels.GPT_3_5_TURBO)
@@ -41,7 +42,7 @@ public class ChatGPTHelper {
                             .setMaxTokens(200)
                             .setApiKey(getApiKey())
                             .build();
-                    ChatGPTResponse response = chatGPTClient.sendMessage(chatGPTRequest);
+                    GenericLLMResponse response = chatGPTClient.sendMessage(chatGPTRequest);
 
                     String content = response.getContent();
                     if (content.strip().trim().isEmpty()) {
@@ -49,7 +50,7 @@ public class ChatGPTHelper {
                     } else {
                         callback.onSuccess(content.strip().trim());
                     }
-                } catch (ChatGPTException | StandardHTTPRequest.Http429Exception e) {
+                } catch (GenericLLMException | StandardHTTPRequest.Http429Exception e) {
                     OctoLogging.e(TAG, "ChatGPT API error: " + e.getMessage(), e);
                     if (e instanceof StandardHTTPRequest.Http429Exception) {
                         callback.onTooManyRequests();

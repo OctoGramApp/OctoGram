@@ -29,8 +29,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -45,7 +43,6 @@ import it.octogram.android.icons.IconsResources;
 
 @SuppressLint("UseCompatLoadingForDrawables")
 public abstract class IconsSelector extends LinearLayout {
-    private final Paint pickerDividersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final NumberPicker picker1;
     public final IconsPreviewCell iconsPreviewCell;
@@ -61,6 +58,7 @@ public abstract class IconsSelector extends LinearLayout {
     public IconsSelector(Context context) {
         super(context);
 
+        Paint pickerDividersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         pickerDividersPaint.setStyle(Paint.Style.STROKE);
         pickerDividersPaint.setStrokeCap(Paint.Cap.ROUND);
         pickerDividersPaint.setStrokeWidth(dp(2));
@@ -69,19 +67,7 @@ public abstract class IconsSelector extends LinearLayout {
         iconsPreviewCell.setLayoutParams(new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f));
         addView(iconsPreviewCell);
 
-        picker1 = new NumberPicker(context, 13) {
-            @Override
-            protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-                var y = dp(31);
-                pickerDividersPaint.setColor(Theme.getColor(Theme.key_radioBackgroundChecked));
-                canvas.drawLine(dp(2), y, getMeasuredWidth() - dp(2), y, pickerDividersPaint);
-
-                y = getMeasuredHeight() - dp(31);
-                canvas.drawLine(dp(2), y, getMeasuredWidth() - dp(2), y, pickerDividersPaint);
-            }
-        };
-
+        picker1 = new NumberPicker(context, 13);
         int[] _newVal = {-1};
         picker1.setWrapSelectorWheel(true);
         picker1.setMinValue(0);
@@ -104,10 +90,6 @@ public abstract class IconsSelector extends LinearLayout {
         addView(picker1, LayoutHelper.createFrame(132, LayoutHelper.MATCH_PARENT, Gravity.RIGHT, 0, 0, 21, 0));
     }
 
-    public static boolean canUseMemeMode() {
-        return BuildConfig.DEBUG_PRIVATE_VERSION || BuildVars.isBetaApp();
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(102), MeasureSpec.EXACTLY));
@@ -127,7 +109,7 @@ public abstract class IconsSelector extends LinearLayout {
         private ViewPropertyAnimator particlesAnimator;
         private final ArrayList<ImageView> icons = new ArrayList<>();
         private int lastCompletedAnimationIconsType = -1;
-        private boolean wasLastCompletedAnimationMemeIcons = false;
+        private boolean wasLastCompletedAnimationParticles = false;
         private final StarParticlesView particlesView;
 
         private final ArrayList<Integer> previewIcons = new ArrayList<>();
@@ -189,8 +171,8 @@ public abstract class IconsSelector extends LinearLayout {
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT));
 
-            particlesView.setAlpha(areMemeIconsEnabled() ? 0.3f : 0f);
-            particlesView.setPaused(!areMemeIconsEnabled());
+            particlesView.setAlpha(useParticlesAnimation() ? 0.3f : 0f);
+            particlesView.setPaused(!useParticlesAnimation());
             fillIcons();
         }
 
@@ -209,10 +191,10 @@ public abstract class IconsSelector extends LinearLayout {
         private void setIcon(ImageView imageView, int icon) {
             Resources res = getResources();
             if (res instanceof IconsResources iconsRes) {
-                var drawable = iconsRes.getForcedDrawable(icon, OctoConfig.INSTANCE.uiIconsType.getValue(), areMemeIconsEnabled());
+                var drawable = iconsRes.getForcedDrawable(icon, OctoConfig.INSTANCE.uiIconsType.getValue());
 
                 lastCompletedAnimationIconsType = OctoConfig.INSTANCE.uiIconsType.getValue();
-                wasLastCompletedAnimationMemeIcons = areMemeIconsEnabled();
+                wasLastCompletedAnimationParticles = useParticlesAnimation();
 
                 if (drawable != null) {
                     imageView.setImageDrawable(drawable);
@@ -233,17 +215,17 @@ public abstract class IconsSelector extends LinearLayout {
 
             animators.clear();
 
-            if (lastCompletedAnimationIconsType == OctoConfig.INSTANCE.uiIconsType.getValue() && wasLastCompletedAnimationMemeIcons == areMemeIconsEnabled()) {
+            if (lastCompletedAnimationIconsType == OctoConfig.INSTANCE.uiIconsType.getValue()) {
                 return;
             }
 
-            if (wasLastCompletedAnimationMemeIcons != areMemeIconsEnabled()) {
+            if (wasLastCompletedAnimationParticles != useParticlesAnimation()) {
                 particlesView.setAlpha(useParticlesAnimation() ? 0f : 0.3f);
                 particlesAnimator = particlesView.animate().alpha(useParticlesAnimation() ? 0.3f : 0f).setDuration(400);
                 particlesAnimator.start();
             }
 
-            particlesView.setPaused(!areMemeIconsEnabled());
+            particlesView.setPaused(!useParticlesAnimation());
 
             for (int i = 0; i < icons.size(); i++) {
                 ImageView icon = icons.get(i);
@@ -252,13 +234,9 @@ public abstract class IconsSelector extends LinearLayout {
                 animateDisappear(icon, () -> animateUpdateAndAppear(icon, finalI));
             }
         }
-
-        private boolean areMemeIconsEnabled() {
-            return OctoConfig.INSTANCE.uiIconsType.getValue() != IconsUIType.DEFAULT.getValue() && OctoConfig.INSTANCE.uiRandomMemeIcons.getValue() && canUseMemeMode();
-        }
-
+        
         private boolean useParticlesAnimation() {
-            return (canUseMemeMode() && areMemeIconsEnabled()) || (!canUseMemeMode() && OctoConfig.INSTANCE.uiIconsType.getValue() != IconsUIType.DEFAULT.getValue());
+            return OctoConfig.INSTANCE.uiIconsType.getValue() != IconsUIType.DEFAULT.getValue();
         }
 
         private void animateDisappear(ImageView icon, Runnable onPostAnimationEnd) {

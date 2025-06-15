@@ -200,8 +200,8 @@ import java.util.Locale;
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PromptBeforeSendMedia;
-import it.octogram.android.ai.helper.MainAiHelper;
-import it.octogram.android.ai.MessagesModelsWrapper;
+import it.octogram.android.ai.MainAiHelper;
+import it.octogram.android.ai.CustomModelsMenuWrapper;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.utils.PopupPromptUtils;
 import it.octogram.android.translator.SingleTranslationManager;
@@ -3627,7 +3627,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         checkSendButton(true);
     }
 
-    private void createSenderSelectView() {
+    public void createSenderSelectView() {
         if (senderSelectView != null) {
             return;
         }
@@ -4584,7 +4584,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             aiFeaturesButton.setMinimumWidth(dp(196));
             options.addView(aiFeaturesButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
 
-            MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+            CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData();
             data.context = getContext();
             data.onSheetOpen = () -> {
                 if (messageSendPreview != null) {
@@ -4607,7 +4607,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             if (replyingMessageObject != null) {
                 data.replyMessageObject = replyingMessageObject;
             }
-            MessagesModelsWrapper.initState(data);
+            CustomModelsMenuWrapper.initState(data);
         }
         options.setupSelectors();
         if (sendWhenOnlineButton != null) {
@@ -9885,24 +9885,45 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         updateSendAsButton(true);
     }
 
+    private boolean _asFakePreview = false;
+
     public void updateSendAsButton(boolean animated) {
-        if (parentFragment == null || delegate == null) {
+        updateSendAsButton(animated, _asFakePreview);
+    }
+
+    public void updateSendAsButton(boolean animated, boolean asFakePreview) {
+        if (asFakePreview && !_asFakePreview) {
+            _asFakePreview = true;
+        }
+        if (!asFakePreview && _asFakePreview) {
+            asFakePreview = true;
+        }
+        if ((parentFragment == null && !asFakePreview) || delegate == null) {
             return;
         }
         createMessageEditText();
-        TLRPC.Chat chat = parentFragment.getMessagesController().getChat(-dialog_id);
-        TLRPC.ChatFull full = parentFragment.getMessagesController().getChatFull(-dialog_id);
+        TLRPC.Chat chat = parentFragment == null ? null : parentFragment.getMessagesController().getChat(-dialog_id);
+        TLRPC.ChatFull full = parentFragment == null ? null : parentFragment.getMessagesController().getChatFull(-dialog_id);
         TLRPC.Peer defPeer = full != null ? full.default_send_as : null;
         if (defPeer == null && delegate.getSendAsPeers() != null && !delegate.getSendAsPeers().peers.isEmpty()) {
             defPeer = delegate.getSendAsPeers().peers.get(0).peer;
         }
-        boolean isVisible = defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
+        boolean tempIsVisible = defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
             !isEditingMessage() && !isRecordingAudioVideo() && !OctoConfig.INSTANCE.hideSendAsChannel.getValue() && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE) &&
             (!ChatObject.isChannelAndNotMegaGroup(chat) || ChatObject.canSendAsPeers(chat)) && !ChatObject.isMonoForum(chat);
+        if (!tempIsVisible && asFakePreview) { // octogram impl
+            tempIsVisible = !OctoConfig.INSTANCE.hideSendAsChannel.getValue(); // octogram impl
+        } // octogram impl
+        boolean isVisible = tempIsVisible; // octogram impl
         if (isVisible) {
             createSenderSelectView();
         }
-        if (defPeer != null) {
+        if (asFakePreview) {
+            TLRPC.User user = MessagesController.getInstance(UserConfig.selectedAccount).getUser(UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId());
+            if (user != null && senderSelectView != null) {
+                senderSelectView.setAvatar(user);
+            }
+        } else if (defPeer != null) {
             if (defPeer.channel_id != 0) {
                 TLRPC.Chat ch = MessagesController.getInstance(currentAccount).getChat(defPeer.channel_id);
                 if (ch != null && senderSelectView != null) {
@@ -9937,7 +9958,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 senderSelectView.setTag(null);
             }
 
-            if (parentFragment.getOtherSameChatsDiff() == 0 && parentFragment.fragmentOpened && animated) {
+            if ((asFakePreview || (parentFragment.getOtherSameChatsDiff() == 0 && parentFragment.fragmentOpened)) && animated) {
                 ValueAnimator anim = ValueAnimator.ofFloat(0, 1).setDuration(150);
                 if (senderSelectView != null) {
                     senderSelectView.setTranslationX(startX);
@@ -10494,6 +10515,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             sizeNotifierLayout.removeView(emojiView);
             emojiView = null;
         }
+        if (parentFragment == null) { // octogram impl
+            return; // octogram impl
+        } // octogram impl
         if (emojiView != null) {
             return;
         }
@@ -11272,7 +11296,17 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         return "" + dialog_id;
     }
 
-    private void setEmojiButtonImage(boolean byOpen, boolean animated) {
+    public void setEmojiButtonImage(boolean byOpen, boolean animated) {
+        setEmojiButtonImage(byOpen, animated, false);
+    }
+
+    public void setEmojiButtonImage(boolean byOpen, boolean animated, boolean asFakePreview) {
+        if (asFakePreview && !_asFakePreview) {
+            _asFakePreview = true;
+        }
+        if (!asFakePreview && _asFakePreview) {
+            asFakePreview = true;
+        }
         if (emojiButton == null) {
             return;
         }
@@ -11300,9 +11334,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 currentPage = currentSelectedDefaultPage - 1;
                 MessagesController.getGlobalEmojiSettings().edit().putInt("selected_page", currentPage).commit();
             }
-            if (currentPage == 0 || !allowStickers && !allowGifs) {
+            if (currentPage == 0 || !allowStickers && !allowGifs && !asFakePreview) { // octogram impl.
                 nextIcon = ChatActivityEnterViewAnimatedIconView.State.SMILE;
-            } else if (messageEditText != null && !TextUtils.isEmpty(messageEditText.getText())) {
+            } else if (messageEditText != null && !TextUtils.isEmpty(messageEditText.getText()) && !asFakePreview) { // octogram impl.
                 nextIcon = ChatActivityEnterViewAnimatedIconView.State.SMILE;
             } else {
                 if (currentPage == 1) {
@@ -11312,10 +11346,12 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 }
             }
         }
-        if (!sendPlainEnabled && nextIcon == ChatActivityEnterViewAnimatedIconView.State.SMILE) {
-            nextIcon = ChatActivityEnterViewAnimatedIconView.State.GIF;
-        } else if (!stickersEnabled && nextIcon != ChatActivityEnterViewAnimatedIconView.State.SMILE) {
-            nextIcon = ChatActivityEnterViewAnimatedIconView.State.SMILE;
+        if (!asFakePreview) { // octogram impl.
+            if (!sendPlainEnabled && nextIcon == ChatActivityEnterViewAnimatedIconView.State.SMILE) {
+                nextIcon = ChatActivityEnterViewAnimatedIconView.State.GIF;
+            } else if (!stickersEnabled && nextIcon != ChatActivityEnterViewAnimatedIconView.State.SMILE) {
+                nextIcon = ChatActivityEnterViewAnimatedIconView.State.SMILE;
+            }
         }
 
         emojiButton.setState(nextIcon, animated);

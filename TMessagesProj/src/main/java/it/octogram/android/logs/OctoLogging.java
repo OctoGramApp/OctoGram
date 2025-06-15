@@ -184,6 +184,7 @@ public class OctoLogging {
             return message;
         }
     }
+
     private static String formatLogMessage(String message, Throwable throwable) {
         StringBuilder builder = new StringBuilder();
         if (message != null) {

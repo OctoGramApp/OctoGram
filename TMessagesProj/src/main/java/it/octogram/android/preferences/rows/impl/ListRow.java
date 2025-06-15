@@ -50,7 +50,7 @@ public class ListRow extends BaseRow implements Clickable {
                    ConfigProperty<Integer> currentValue,
                    Supplier<Boolean> supplierClickable,
                    Runnable supplierClickableSelected
-               ) {
+    ) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.LIST);
         this.icon = icon;
         this.options = options;

@@ -388,7 +388,9 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         processFiles(filesToUpload);
     }
 
-    /** @noinspection SequencedCollectionMethodCanBeUsed*/
+    /**
+     * @noinspection SequencedCollectionMethodCanBeUsed
+     */
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
         private final SparseBooleanArray selectedItems = new SparseBooleanArray();
 
@@ -400,7 +402,9 @@ public class EmojiPackSettings extends BaseFragment implements NotificationCente
         private final int PLACEHOLDER = 5;
         private final int SHADOW = 6;
 
-        /** @noinspection rawtypes*/
+        /**
+         * @noinspection rawtypes
+         */
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List payloads) {
             Object payload = payloads.isEmpty() ? null : payloads.get(0);

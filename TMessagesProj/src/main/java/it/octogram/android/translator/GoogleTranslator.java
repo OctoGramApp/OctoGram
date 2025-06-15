@@ -23,7 +23,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
@@ -31,6 +34,7 @@ import it.octogram.android.utils.OctoUtils;
 
 public class GoogleTranslator {
 
+    private static final String TAG = "GoogleTranslator";
     private static final List<String> targetLanguages = List.of(
             "sq", "ar", "am", "az", "ga", "et", "or", "eu", "be", "bg", "is", "pl", "bs", "fa",
             "af", "tt", "da", "de", "ru", "fr", "tl", "fi", "fy", "km", "ka", "gu",
@@ -82,39 +86,82 @@ public class GoogleTranslator {
                     originalText.text = text;
                     originalText.entities = entities;
 
-                    StringBuilder finalString = new StringBuilder();
-                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
-                    ArrayList<String> parts = OctoUtils.getStringParts(text2, 2500);
+                    String textInHtml = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
+                    ArrayList<String> parts = OctoUtils.getStringParts(textInHtml, 2500);
 
-                    for (String part : parts) {
-                        StandardHTTPRequest.Builder requestBuilder = new StandardHTTPRequest.Builder(composeUrl(part, toLanguage));
-                        requestBuilder.header("User-Agent", getUserAgent());
-                        StandardHTTPRequest httpRequest = requestBuilder.build();
-                        String response = httpRequest.request();
+                    int numberOfParts = parts.size();
+                    CountDownLatch latch = new CountDownLatch(numberOfParts);
+                    ArrayList<String> translatedParts = new ArrayList<>(Collections.nCopies(numberOfParts, null));
+                    AtomicReference<Exception> errorRef = new AtomicReference<>(null);
 
-                        if (TextUtils.isEmpty(response)) {
-                            callback.onResponseReceived();
-                            callback.onError();
-                            return;
-                        }
+                    for (int i = 0; i < numberOfParts; i++) {
+                        final int partIndex = i;
+                        final String currentPart = parts.get(i);
 
-                        finalString.append(composeResult(response));
+                        new Thread(() -> {
+                            if (errorRef.get() != null) {
+                                latch.countDown();
+                                return;
+                            }
+                            try {
+                                StandardHTTPRequest.Builder requestBuilder = new StandardHTTPRequest.Builder(composeUrl(currentPart, toLanguage));
+                                requestBuilder.header("User-Agent", getUserAgent());
+                                StandardHTTPRequest httpRequest = requestBuilder.build();
+                                String response = httpRequest.request();
+
+                                if (TextUtils.isEmpty(response)) {
+                                    throw new IOException("Empty response from Google translation for part " + partIndex);
+                                }
+
+                                Pair<String, String> partResult = parseGoogleResponse(response);
+                                translatedParts.set(partIndex, partResult.first);
+                            } catch (Exception e) {
+                                errorRef.set(e);
+                                OctoLogging.e(TAG, e);
+                            } finally {
+                                latch.countDown();
+                            }
+                        }).start();
                     }
 
-                    TLRPC.TL_textWithEntities finalText = new TLRPC.TL_textWithEntities();
-                    if (entities != null) {
-                        Pair<String, ArrayList<TLRPC.MessageEntity>> text3 = HTMLKeeper.htmlToEntities(finalString.toString(), entities, false);
-                        finalText.text = text3.first;
-                        finalText.entities = text3.second;
-                        finalText = TranslateAlert2.preprocess(originalText, finalText);
-                    } else {
-                        finalText.text = finalString.toString();
+                    try {
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        errorRef.set(e);
+                        OctoLogging.e(TAG, e);
                     }
 
                     callback.onResponseReceived();
-                    callback.onSuccess(finalText);
-                } catch (IOException | JSONException e) {
-                    OctoLogging.e("GoogleTranslator", e);
+
+                    if (errorRef.get() != null) {
+                        callback.onError();
+                        return;
+                    }
+
+                    StringBuilder finalStringBuilder = new StringBuilder();
+                    for (String translatedPart : translatedParts) {
+                        if (translatedPart != null) {
+                            finalStringBuilder.append(translatedPart);
+                        } else {
+                            throw new IOException("Missing translated part after await");
+                        }
+                    }
+
+                    TLRPC.TL_textWithEntities finalTextWithEntities = new TLRPC.TL_textWithEntities();
+                    if (entities != null) {
+                        Pair<String, ArrayList<TLRPC.MessageEntity>> textAndEntitiesTranslated = HTMLKeeper.htmlToEntities(finalStringBuilder.toString(), entities, false);
+                        finalTextWithEntities.text = textAndEntitiesTranslated.first;
+                        finalTextWithEntities.entities = textAndEntitiesTranslated.second;
+                        finalTextWithEntities = TranslateAlert2.preprocess(originalText, finalTextWithEntities);
+                    } else {
+                        finalTextWithEntities.text = finalStringBuilder.toString();
+                        finalTextWithEntities.entities = new ArrayList<>();
+                    }
+
+                    callback.onSuccess(finalTextWithEntities);
+
+                } catch (Exception e) {
+                    OctoLogging.e(TAG, e);
                     callback.onResponseReceived();
                     callback.onError();
                 }
@@ -147,12 +194,14 @@ public class GoogleTranslator {
         return url;
     }
 
-    private static String composeResult(String response) throws JSONException, IOException {
-        JSONObject object = new JSONObject(response);
+    private static Pair<String, String> parseGoogleResponse(String response) throws JSONException, IOException {
+        JSONObject jsonObject = new JSONObject(response);
 
-        if (object.has("sentences")) {
+        String sourceLanguage = jsonObject.optString("src");
+
+        if (jsonObject.has("sentences")) {
             StringBuilder translation = new StringBuilder();
-            JSONArray sentences = object.getJSONArray("sentences");
+            JSONArray sentences = jsonObject.getJSONArray("sentences");
 
             for (int i = 0; i < sentences.length(); i++) {
                 try {
@@ -166,11 +215,11 @@ public class GoogleTranslator {
             }
 
             if (!translation.toString().isEmpty()) {
-                return translation.toString();
+                return new Pair<>(translation.toString(), sourceLanguage);
             }
         }
 
-        throw new IOException("empty translation message");
+        throw new IOException("Invalid or empty translation response");
     }
 
     public static String convertLanguageCode(String completeLanguage) {
@@ -186,9 +235,9 @@ public class GoogleTranslator {
 
         if (languageCode.equals("zh")) {
             String countryCode = completeLanguage.split("-")[1].toLowerCase();
-            if (countryCode.equals("dg")) {
+            if (countryCode.equals("cn") || countryCode.equals("dg")) {
                 languageCode = "zh-CN";
-            } else if (countryCode.equals("hk")) {
+            } else if (countryCode.equals("tw") || countryCode.equals("hk")) {
                 languageCode = "zh-TW";
             }
         }

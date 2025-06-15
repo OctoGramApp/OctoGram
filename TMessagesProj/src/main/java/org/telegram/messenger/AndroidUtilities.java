@@ -227,11 +227,10 @@ import java.util.zip.GZIPOutputStream;
 
 import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.ai.CustomModelsHelper;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.preferences.ui.ImportSettingsUI;
 import it.octogram.android.preferences.ui.OctoAiNewModelUI;
-import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.TypeFaceSupportChecker;
 
 public class AndroidUtilities {
@@ -4161,9 +4160,9 @@ public class AndroidUtilities {
             if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith("octoexport")) {
                 boolean isValid = OctoConfig.isValidMessageExport(message);
                 if (isValid) {
-                    ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(parentFragment, message);
-                    sheet.setOriginalActivity(parentFragment.getParentActivity());
-                    sheet.show();
+                    ImportSettingsUI ui = new ImportSettingsUI();
+                    ui.setData(message, null);
+                    parentFragment.presentFragment(ui);
                     return;
                 }
             }

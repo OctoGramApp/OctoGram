@@ -5,7 +5,7 @@
  *
  * Copyright OctoGram, 2023-2025.
  */
- package it.octogram.android.preferences.fragment;
+package it.octogram.android.preferences.fragment;
 
 import android.app.Dialog;
 import android.content.Context;

@@ -45,8 +45,8 @@ import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.LaunchActivity;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.MessagesModelsWrapper;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.CustomModelsMenuWrapper;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.translator.SingleTranslationManager;
 import it.octogram.android.translator.TranslationsWrapper;
@@ -238,7 +238,7 @@ public class SendMessageOptions extends LinearLayout {
             if (lastFragment == null) {
                 aiFeaturesButton.setVisibility(View.GONE);
             } else {
-                MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+                CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData();
                 data.context = getContext();
                 data.onSheetOpen = () -> {
                     if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
@@ -264,7 +264,7 @@ public class SendMessageOptions extends LinearLayout {
                         }
                     });
                 };
-                MessagesModelsWrapper.initState(data);
+                CustomModelsMenuWrapper.initState(data);
             }
         }
 

@@ -32,10 +32,11 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.StarParticlesView;
 
+import it.octogram.android.OctoColors;
 import it.octogram.android.logs.OctoLogging;
 
 @SuppressLint("ViewConstructor")
-public class OctoAnimationFragment extends FrameLayout  {
+public class OctoAnimationFragment extends FrameLayout {
     private boolean isAnimating = false;
     private boolean isDownscaled = false;
     private boolean upscaleAfterAnimation = false;
@@ -75,7 +76,7 @@ public class OctoAnimationFragment extends FrameLayout  {
             }
         };
         particlesView.setClipWithGradient();
-        particlesView.drawable.colorKey = Color.parseColor(scope != OctoAnimationScopes.OCTO ? "#8d3067" : Theme.isCurrentThemeDark() ? "#3d348b" : "#594bcc");
+        particlesView.drawable.colorKey = Color.parseColor(scope != OctoAnimationScopes.OCTO ? OctoColors.AiColor.getValue() : Theme.isCurrentThemeDark() ? OctoColors.LogoColor.getValue() : OctoColors.LogoColor2.getValue());
         particlesView.drawable.isCircle = scope == OctoAnimationScopes.OCTO;
         particlesView.drawable.centerOffsetY = dp(25);
         particlesView.drawable.minLifeTime = scope != OctoAnimationScopes.OCTO ? 1000 : 2000;

@@ -64,7 +64,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -320,8 +319,8 @@ import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.QualityPreset;
-import it.octogram.android.ai.MessagesModelsWrapper;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.CustomModelsMenuWrapper;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.translator.SingleTranslationManager;
@@ -7422,7 +7421,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         return true;
                     });
                 } else if (a == 15) {
-                    MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+                    CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData();
                     data.context = parentActivity;
                     data.onSheetOpen = () -> {
                         if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
@@ -7445,7 +7444,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         applyCaption();
                     });
                     data.setColors(0xffffffff, 0xffffffff);
-                    MessagesModelsWrapper.initState(data);
+                    CustomModelsMenuWrapper.initState(data);
                 }
             }
             if (sendPopupLayout.getChildCount() == 0) {
@@ -14002,7 +14001,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         setMenuItemIcon(false, true);
 
         boolean noforwards = messageObject != null && (MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId()) || (messageObject.messageOwner != null && messageObject.messageOwner.noforwards) || messageObject.hasRevealedExtendedMedia());
-        android.util.Log.d("NoForward", String.format("NoForward Value: %s", noforwards));
+        OctoLogging.d("NoForward", String.format("NoForward Value: %s", noforwards));
         if (messageObject != null && messages == null) {
             if (messageObject.messageOwner != null && MessageObject.getMedia(messageObject.messageOwner) instanceof TLRPC.TL_messageMediaWebPage && MessageObject.getMedia(messageObject.messageOwner).webpage != null) {
                 TLRPC.WebPage webPage = MessageObject.getMedia(messageObject.messageOwner).webpage;
@@ -14459,7 +14458,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     menuItem.hideSubItem(gallery_ai_features);
                 } else {
                     menuItem.showSubItem(gallery_ai_features);
-                    MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData() {
+                    CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData() {
                         @Override
                         public void hideButton() {
                             menuItem.hideSubItem(gallery_ai_features);
@@ -14473,7 +14472,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     data.messageObject = newMessageObject;
                     data.messageText = newMessageObject.messageText != null ? newMessageObject.messageText : "";
                     data.setColors(0xfffafafa, 0xfffafafa);
-                    MessagesModelsWrapper.initState(data);
+                    CustomModelsMenuWrapper.initState(data);
                 }
                 TranslateController translateController = MessagesController.getInstance(currentAccount).getTranslateController();
                 if (wasIndex != switchingToIndex) {

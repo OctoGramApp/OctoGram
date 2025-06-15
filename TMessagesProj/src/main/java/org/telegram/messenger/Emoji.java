@@ -958,7 +958,7 @@ public class Emoji {
                         } else if (jsonObject.has("document_id")) {
                             temp.add("animated_"+jsonObject.getLong("document_id"));
                         }
-                    } catch (JSONException e) {}
+                    } catch (JSONException ignored) {}
                 }
             } catch (JSONException ignored) {}
         }

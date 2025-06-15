@@ -35,7 +35,7 @@ public class FolderUtils {
 
             JSONArray newArray = new JSONArray();
             boolean found = false;
-            for(int i = 0; i < currentAccountList.length(); i++) {
+            for (int i = 0; i < currentAccountList.length(); i++) {
                 int currentFolder = currentAccountList.getInt(i);
                 if (currentFolder != filterId) {
                     newArray.put(currentFolder);
@@ -56,7 +56,8 @@ public class FolderUtils {
                 currentAccountList.put(filterId);
                 OctoConfig.INSTANCE.hiddenFolderAssoc.updateValue(jsonObject.toString());
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
     }
 
     public static ArrayList<Integer> getHiddenFolders() {
@@ -69,12 +70,13 @@ public class FolderUtils {
             for (int i = 0; i < currentAccountList.length(); i++) {
                 hiddenFolders.add(currentAccountList.getInt(i));
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
         return hiddenFolders;
     }
 
     public static String getKey() {
-        return "_"+ UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
+        return "_" + UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
     }
 
     public static boolean areThereFolders() {

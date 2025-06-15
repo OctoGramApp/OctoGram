@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.preferences.ui.custom;
+package it.octogram.android.ai.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.formatString;
@@ -15,22 +15,15 @@ import static org.telegram.messenger.LocaleController.getString;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.os.Vibrator;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.StaticLayout;
-import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.style.ReplacementSpan;
 import android.text.style.URLSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -45,7 +38,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.graphics.ColorUtils;
@@ -69,14 +61,22 @@ import org.telegram.ui.Components.StickerImageView;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.LaunchActivity;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import it.octogram.android.AiProvidersDetails;
+import it.octogram.android.OctoColors;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.ai.openrouter.OpenRouterModels;
 import it.octogram.android.preferences.fragment.OctoAnimationFragment;
+import it.octogram.android.preferences.ui.components.FreeSpan;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.PopupChoiceDialogUtils;
+import kotlin.Pair;
 
 public class AiConfigBottomSheet extends BottomSheet {
     private final AiProvidersDetails provider;
@@ -90,6 +90,8 @@ public class AiConfigBottomSheet extends BottomSheet {
 
     private boolean shouldShowSuccessBulletin = false;
 
+    private boolean skipToApiKeyConfig = false;
+
     public AiConfigBottomSheet(Context context, BaseFragment fragment, AiProvidersDetails provider, AiConfigInterface callback) {
         super(context, true);
         setApplyBottomPadding(false);
@@ -99,7 +101,9 @@ public class AiConfigBottomSheet extends BottomSheet {
         this.provider = provider;
         this.callback = callback;
         this.fragment = fragment;
-        
+
+        skipToApiKeyConfig = provider.getStatusProperty().getValue();
+
         TextView textView;
 
         FrameLayout frameLayout = new FrameLayout(getContext());
@@ -121,7 +125,7 @@ public class AiConfigBottomSheet extends BottomSheet {
         PagerAdapter pagerAdapter = new PagerAdapter() {
             @Override
             public int getCount() {
-                return provider.getNeedWarningZone() ? 3 : 2;
+                return skipToApiKeyConfig ? 1 : provider.getNeedWarningZone() ? 3 : 2;
             }
 
             @NonNull
@@ -155,11 +159,11 @@ public class AiConfigBottomSheet extends BottomSheet {
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         buttonTextView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setText(getString(R.string.AiFeatures_AccessVia_Login_NextStep));
+        buttonTextView.setText(getString(skipToApiKeyConfig ? R.string.AiFeatures_AccessVia_Login_NextStep_SaveKey : R.string.AiFeatures_AccessVia_Login_NextStep));
         buttonTextView.setTextColor(Color.WHITE);
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Color.parseColor("#8d3067"), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Color.parseColor(OctoColors.AiColor.getValue()), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> {
-            if (selectedPosition == (CurrentStep.INSERT_API_KEY + (provider.getNeedWarningZone() ? 1 : 0))) {
+            if (skipToApiKeyConfig || selectedPosition == (CurrentStep.INSERT_API_KEY + (provider.getNeedWarningZone() ? 1 : 0))) {
                 checkApiKey();
                 return;
             }
@@ -168,7 +172,7 @@ public class AiConfigBottomSheet extends BottomSheet {
         });
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
-        if (provider.getStatusProperty().getValue()) {
+        if (skipToApiKeyConfig) {
             textView = new TextView(context);
             textView.setGravity(Gravity.CENTER);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -225,7 +229,6 @@ public class AiConfigBottomSheet extends BottomSheet {
                             AndroidUtilities.showKeyboard(editTextCursor.getEditText());
                         }, 200);
                     }
-
                     if (position == CurrentStep.WARNING && provider.getNeedWarningZone() && child instanceof ViewPage d) {
                         AndroidUtilities.runOnUIThread(d::playAnimation, 200);
                     }
@@ -259,6 +262,9 @@ public class AiConfigBottomSheet extends BottomSheet {
         setCustomView(linearLayout);
     }
 
+    private void checkApiUrl() {
+    }
+
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
@@ -268,30 +274,35 @@ public class AiConfigBottomSheet extends BottomSheet {
     }
 
     private String getTitleForStepId(int stepId) {
-        if (stepId == CurrentStep.INITIAL_STAGE) {
-            return getString(R.string.AiFeatures_AccessVia_Login_Step1);
+        if (!skipToApiKeyConfig) {
+            if (stepId == CurrentStep.INITIAL_STAGE) {
+                return getString(R.string.AiFeatures_AccessVia_Login_Step1);
+            }
+
+            if (provider.getNeedWarningZone() && stepId == CurrentStep.WARNING) {
+                return getString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning);
+            }
         }
 
-        if (provider.getNeedWarningZone() && stepId == CurrentStep.WARNING) {
-            return getString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning);
-        }
-
-        return getString(R.string.AiFeatures_AccessVia_Login_Step2);
+        return skipToApiKeyConfig ? formatString(R.string.AiFeatures_AccessVia_Login_Step2_Directly, provider.getTitle()) : getString(R.string.AiFeatures_AccessVia_Login_Step2);
     }
 
     private String getDescriptionForStepId(int stepId) {
-        if (stepId == CurrentStep.INITIAL_STAGE) {
-            return formatString(R.string.AiFeatures_AccessVia_Login_Step1_Desc, provider.getTitle());
+        if (!skipToApiKeyConfig) {
+            if (stepId == CurrentStep.INITIAL_STAGE) {
+                return formatString(R.string.AiFeatures_AccessVia_Login_Step1_Desc, provider.getTitle());
+            }
+
+            if (provider.getNeedWarningZone() && stepId == CurrentStep.WARNING) {
+                return formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_Desc, provider.getTitle());
+            }
         }
 
-        if (provider.getNeedWarningZone() && stepId == CurrentStep.WARNING) {
-            return formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_Desc, provider.getTitle());
-        }
-
-        return getString(R.string.AiFeatures_AccessVia_Login_Step2_Desc);
+        return skipToApiKeyConfig ? formatString(R.string.AiFeatures_AccessVia_Login_Step2_Directly_Desc, provider.getTitle()) : getString(R.string.AiFeatures_AccessVia_Login_Step2_Desc);
     }
 
     private boolean isCheckingApiKey = false;
+
     private void checkApiKey() {
         if (isCheckingApiKey) {
             return;
@@ -409,8 +420,8 @@ public class AiConfigBottomSheet extends BottomSheet {
         AppCompatTextView textView2 = new AppCompatTextView(getContext());
         textView2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
         textView2.setTextSize(TypedValue.COMPLEX_UNIT_PX, dp(14));
-        textView2.setLinkTextColor(Color.parseColor("#8d3067"));
-        textView2.setHighlightColor(ColorUtils.setAlphaComponent(Color.parseColor("#8d3067"), 100));
+        textView2.setLinkTextColor(Color.parseColor(OctoColors.AiColor.getValue()));
+        textView2.setHighlightColor(ColorUtils.setAlphaComponent(Color.parseColor(OctoColors.AiColor.getValue()), 100));
         textLayout.addView(textView2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 2.6f, 0, 0));
         hint.addView(textLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL, 41, 0, 0, 0));
 
@@ -446,19 +457,39 @@ public class AiConfigBottomSheet extends BottomSheet {
         Runnable[] runs = {null};
 
         String currentValue = modelTextCursor.getEditText().getText().toString();
-        for (String value : OpenRouterModels.ALL_MODELS) {
-            String finalValue = value;
-            if (value.contains("/")) {
-                value = value.split("/")[1];
+
+        List<Pair<String, String>> normalizedPairs = new ArrayList<>();
+
+        for (String originalValue : OpenRouterModels.ALL_MODELS) {
+            String displayValue = originalValue;
+            if (displayValue.contains("/")) {
+                displayValue = displayValue.split("/")[1];
             }
+            displayValue = displayValue.replace(":free", "");
+            normalizedPairs.add(new Pair<>(displayValue.toLowerCase(), originalValue));
+        }
+
+        Collections.sort(normalizedPairs, Comparator.comparing(Pair::getFirst));
+
+        for (Pair<String, String> pair : normalizedPairs) {
+            String finalValue = pair.getSecond();
+
+            String displayValue = finalValue;
+            if (displayValue.contains("/")) {
+                displayValue = displayValue.split("/")[1];
+            }
+
+            boolean isFree = displayValue.endsWith(":free");
+            displayValue = displayValue.replace(":free", "");
 
             PopupChoiceDialogUtils.CustomRadioDataCell cell = new PopupChoiceDialogUtils.CustomRadioDataCell(getContext());
             cell.setPadding(dp(4), 0, dp(4), 0);
-            cell.setData(value.endsWith(":free") ? applyFreeSpan(value.replaceAll(":free", "")) : value, null, currentValue.equals(finalValue), 0);
-            cell.setTag(value);
+            cell.setData(isFree ? applyFreeSpan(displayValue) : displayValue, null, currentValue.equals(finalValue), 0);
+            cell.setTag(displayValue);
             cell.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), Theme.RIPPLE_MASK_ALL));
             cell.setCheckColor(Theme.getColor(Theme.key_radioBackground), Theme.getColor(Theme.key_dialogRadioBackgroundChecked));
             linearLayout.addView(cell);
+
             cell.setOnClickListener(v -> {
                 modelTextCursor.getEditText().setText(finalValue);
                 if (runs[0] != null) {
@@ -485,87 +516,6 @@ public class AiConfigBottomSheet extends BottomSheet {
         return spannableStringBuilder;
     }
 
-
-    public static class FreeSpan extends ReplacementSpan {
-
-        TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        StaticLayout layout;
-        float width, height;
-
-        private final boolean outline;
-        private int color;
-
-        public void setTypeface(Typeface typeface) {
-            textPaint.setTypeface(typeface);
-        }
-
-        public FreeSpan(float textSize) {
-            this.outline = false;
-            textPaint.setTypeface(AndroidUtilities.bold());
-            bgPaint.setStyle(Paint.Style.FILL);
-            textPaint.setTextSize(dp(textSize));
-        }
-
-        public void setColor(int color) {
-            this.color = color;
-        }
-
-        private CharSequence text = "FREE";
-        public void setText(CharSequence text) {
-            this.text = text;
-            if (layout != null) {
-                layout = null;
-                makeLayout();
-            }
-        }
-
-        public void makeLayout() {
-            if (layout == null) {
-                layout = new StaticLayout(text, textPaint, AndroidUtilities.displaySize.x, Layout.Alignment.ALIGN_NORMAL, 1, 0, false);
-                width = layout.getLineWidth(0);
-                height = layout.getHeight();
-            }
-        }
-
-        @Override
-        public int getSize(@NonNull Paint paint, CharSequence text, int start, int end, @Nullable Paint.FontMetricsInt fm) {
-            makeLayout();
-            return (int) (dp(10) + width);
-        }
-
-        @Override
-        public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float _x, int top, int _y, int bottom, @NonNull Paint paint) {
-            makeLayout();
-
-            int color = this.color;
-            if (color == 0) {
-                color = paint.getColor();
-            }
-            bgPaint.setColor(color);
-            if (outline) {
-                textPaint.setColor(color);
-            } else {
-                textPaint.setColor(AndroidUtilities.computePerceivedBrightness(color) > .721f ? Color.BLACK : Color.WHITE);
-            }
-
-            float x = _x + dp(2), y = _y - height + dp(1);
-            AndroidUtilities.rectTmp.set(x, y, x + width, y + height);
-            float r;
-            r = dp(3.66f);
-            AndroidUtilities.rectTmp.left -= dp(4);
-            AndroidUtilities.rectTmp.top -= dp(2.33f);
-            AndroidUtilities.rectTmp.right += dp(3.66f);
-            AndroidUtilities.rectTmp.bottom += dp(1.33f);
-            canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, bgPaint);
-
-            canvas.save();
-            canvas.translate(x, y);
-            layout.draw(canvas);
-            canvas.restore();
-        }
-    }
-
     private class ViewPage extends LinearLayout {
         private RLottieImageView imageView;
 
@@ -576,15 +526,15 @@ public class AiConfigBottomSheet extends BottomSheet {
             LinearLayout linearLayout = new LinearLayout(context);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-            if (p == CurrentStep.INITIAL_STAGE) {
+            if (p == CurrentStep.INITIAL_STAGE || skipToApiKeyConfig) {
                 OctoAnimationFragment octoFragment = new OctoAnimationFragment(context, null, provider.getAnimationScope());
                 octoFragment.setDisableEffect(true);
                 linearLayout.addView(octoFragment, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, OctoAnimationFragment.sz_no_text, Gravity.CENTER_HORIZONTAL));
-            } else if (p == CurrentStep.WARNING && provider.getNeedWarningZone()) {
+            } else if (p == CurrentStep.WARNING && provider.getNeedWarningZone() && !skipToApiKeyConfig) {
                 RLottieImageView rLottieImageView = new RLottieImageView(context);
                 rLottieImageView.setScaleType(AppCompatImageView.ScaleType.CENTER);
                 rLottieImageView.setAnimation(R.raw.error, 46, 46);
-                rLottieImageView.setBackground(Theme.createCircleDrawable(dp(72), Color.parseColor("#8d3067")));
+                rLottieImageView.setBackground(Theme.createCircleDrawable(dp(72), Color.parseColor(OctoColors.AiColor.getValue())));
                 imageView = rLottieImageView;
                 FrameLayout frameLayout = new FrameLayout(context);
                 frameLayout.addView(rLottieImageView, LayoutHelper.createFrame(72, 72, Gravity.CENTER));
@@ -614,7 +564,7 @@ public class AiConfigBottomSheet extends BottomSheet {
             textView.setPadding(dp(30), dp(10), dp(30), dp(21));
             linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-            if (p == CurrentStep.INITIAL_STAGE) {
+            if (p == CurrentStep.INITIAL_STAGE && !skipToApiKeyConfig) {
                 boolean isChatGPT = provider == AiProvidersDetails.CHATGPT;
                 boolean isOpenRouter = provider == AiProvidersDetails.OPENROUTER;
                 linearLayout.addView(
@@ -637,7 +587,7 @@ public class AiConfigBottomSheet extends BottomSheet {
                         makeHint(R.drawable.msg_copy, getString(R.string.AiFeatures_AccessVia_Login_3), getString(R.string.AiFeatures_AccessVia_Login_3_Desc)),
                         LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
                 );
-            } else if (p == CurrentStep.WARNING && provider.getNeedWarningZone()) {
+            } else if (p == CurrentStep.WARNING && provider.getNeedWarningZone() && !skipToApiKeyConfig) {
                 String serviceName = provider.getTitle();
                 linearLayout.addView(
                         makeHint(R.drawable.msg_media, getString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_1), formatString(R.string.AiFeatures_AccessVia_Login_ExtraStep_Warning_1_Desc, serviceName)),
@@ -653,12 +603,12 @@ public class AiConfigBottomSheet extends BottomSheet {
                             LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 32, 0, 32, 16)
                     );
                 }
-            } else if (p == (CurrentStep.INSERT_API_KEY + (provider.getNeedWarningZone() ? 1 : 0))) {
+            } else if (skipToApiKeyConfig || p == (CurrentStep.INSERT_API_KEY + (provider.getNeedWarningZone() ? 1 : 0))) {
                 OutlineEditText editText = new OutlineEditText(context);
                 editText.setHint(getString(R.string.AiFeatures_AccessVia_Login_Step2_Hint));
                 editText.getEditText().setText(provider.getKeyProperty().getValue());
-                editText.updateColorAsDefined(Color.parseColor("#8d3067"));
-                editText.getEditText().setCursorColor(Color.parseColor("#8d3067"));
+                editText.updateColorAsDefined(Color.parseColor(OctoColors.AiColor.getValue()));
+                editText.getEditText().setCursorColor(Color.parseColor(OctoColors.AiColor.getValue()));
                 linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 58, Gravity.LEFT | Gravity.TOP, 17, 0, 17, 0));
                 editTextCursor = editText;
 
@@ -690,7 +640,7 @@ public class AiConfigBottomSheet extends BottomSheet {
                     OutlineEditText modelText = new OutlineEditText(context);
                     modelText.setHint(getString(R.string.AiFeatures_AccessVia_Login_Step2_Model));
                     modelText.getEditText().setText(OctoConfig.INSTANCE.aiFeaturesOpenRouterSelectedModel.getValue());
-                    modelText.updateColorAsDefined(Color.parseColor("#8d3067"));
+                    modelText.updateColorAsDefined(Color.parseColor(OctoColors.AiColor.getValue()));
                     modelText.getEditText().setFocusable(false);
                     modelText.getEditText().setClickable(true);
                     modelText.setFocusable(false);

@@ -21,6 +21,7 @@ import it.octogram.android.utils.OctoUtils;
 
 public class LogsMigrator {
     private static final String TAG = "LogsMigrator";
+
     public static void migrateOldLogs() {
         if (OctoConfig.INSTANCE.isMigrateOldLogs.getValue()) {
             return;
@@ -56,7 +57,9 @@ public class LogsMigrator {
         OctoConfig.INSTANCE.isMigrateOldLogs.updateValue(true);
     }
 
-    /** @noinspection ResultOfMethodCallIgnored*/
+    /**
+     * @noinspection ResultOfMethodCallIgnored
+     */
     private static void copyFile(File sourceFile, File destFile) throws IOException {
         try (FileInputStream in = new FileInputStream(sourceFile);
              FileOutputStream out = new FileOutputStream(destFile)) {

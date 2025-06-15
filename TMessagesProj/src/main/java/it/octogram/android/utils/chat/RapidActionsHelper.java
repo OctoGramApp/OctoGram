@@ -113,7 +113,8 @@ public class RapidActionsHelper {
                 args.putBoolean("destroyAfterSelect", true);
                 fragment.presentFragment(new ContactsActivity(args));
             }
-            case InterfaceRapidButtonsActions.SAVED_MESSAGES -> SavedMessagesController.openSavedMessages();
+            case InterfaceRapidButtonsActions.SAVED_MESSAGES ->
+                    SavedMessagesController.openSavedMessages();
             case InterfaceRapidButtonsActions.ARCHIVED_CHATS -> {
                 Bundle args = new Bundle();
                 args.putInt("folderId", 1);
@@ -129,7 +130,8 @@ public class RapidActionsHelper {
                 args.putInt("dialogsType", DialogsActivity.DIALOGS_TYPE_HIDDEN_CHATS);
                 fragment.presentFragment(new DialogsActivity(args));
             }
-            case InterfaceRapidButtonsActions.PROXY -> fragment.presentFragment(new ProxyListActivity());
+            case InterfaceRapidButtonsActions.PROXY ->
+                    fragment.presentFragment(new ProxyListActivity());
             case InterfaceRapidButtonsActions.SEARCH -> {
                 if (fragment instanceof DialogsActivity f2) {
                     f2.showSearch(true, false, true);

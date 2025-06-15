@@ -49,7 +49,9 @@ import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
 
-/** @noinspection SequencedCollectionMethodCanBeUsed*/
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 public class DestinationLanguageSettings extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ListAdapter listAdapter;

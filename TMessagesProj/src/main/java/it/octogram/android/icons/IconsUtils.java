@@ -64,7 +64,7 @@ public class IconsUtils {
     }
 
     private static int getNewSecretChatIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_secret_ny;
             case 3 -> R.drawable.menu_secret_cn;
             default -> R.drawable.msg_secret;
@@ -76,7 +76,7 @@ public class IconsUtils {
     }
 
     private static int getNewGroupIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_groups_ny;
             case 1 -> R.drawable.msg_groups_14;
             case 2 -> R.drawable.msg_groups_hw;
@@ -86,7 +86,7 @@ public class IconsUtils {
     }
 
     private static int getContactsIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_contacts_ny;
             case 1 -> R.drawable.msg_contacts_14;
             case 2 -> R.drawable.msg_contacts_hw;
@@ -96,7 +96,7 @@ public class IconsUtils {
     }
 
     private static int getCallsIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_calls_ny;
             case 1 -> R.drawable.msg_calls_14;
             case 2 -> R.drawable.msg_calls_hw;
@@ -106,7 +106,7 @@ public class IconsUtils {
     }
 
     private static int getSavedMessagesIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_saved_ny;
             case 1 -> R.drawable.msg_saved_14;
             case 2 -> R.drawable.msg_saved_hw;
@@ -116,7 +116,7 @@ public class IconsUtils {
     }
 
     private static int getSettingsIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_settings_ny;
             case 1 -> R.drawable.msg_settings_14;
             case 2 -> R.drawable.msg_settings_hw;
@@ -126,7 +126,7 @@ public class IconsUtils {
     }
 
     private static int getInviteIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_invite_ny;
             case 1 -> R.drawable.msg_secret_ny;
             case 2 -> R.drawable.msg_invite_hw;
@@ -136,7 +136,7 @@ public class IconsUtils {
     }
 
     private static int getHelpIcon(int eventType) {
-        return switch(eventType) {
+        return switch (eventType) {
             case 0 -> R.drawable.msg_help_ny;
             case 2, 3 -> R.drawable.msg_help_hw;
             default -> R.drawable.msg_help;

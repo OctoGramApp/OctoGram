@@ -8,265 +8,270 @@
 
 package it.octogram.android.preferences.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.os.Parcelable;
-import android.text.TextUtils;
+import android.text.SpannableString;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
+import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.SimpleTextView;
+import org.telegram.ui.LaunchActivity;
 
+import java.text.MessageFormat;
 import java.util.List;
 
-import it.octogram.android.ActionBarTitleOption;
+import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.ConfigProperty;
-import it.octogram.android.CustomEmojiController;
-import it.octogram.android.ExpandableRowsIds;
-import it.octogram.android.NewFeaturesBadgeId;
+import it.octogram.android.IconsUIType;
+import it.octogram.android.InterfaceCheckboxUI;
+import it.octogram.android.InterfaceSliderUI;
+import it.octogram.android.InterfaceSwitchUI;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StickerUi;
+import it.octogram.android.TabMode;
+import it.octogram.android.TabStyle;
 import it.octogram.android.deeplink.DeepLinkDef;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.rows.impl.ExpandableRows;
+import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.FooterInformativeRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
-import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
-import it.octogram.android.preferences.rows.impl.TextDetailRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
-import it.octogram.android.preferences.ui.custom.CustomActionBarTitleBottomSheet;
-import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
+import it.octogram.android.preferences.ui.custom.FolderTypeSelector;
+import it.octogram.android.preferences.ui.custom.IconsSelector;
+import it.octogram.android.preferences.ui.custom.InterfaceSwitchesPreview;
+import it.octogram.android.utils.appearance.MessageStringHelper;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
-import it.octogram.android.utils.config.ExpandableRowsOption;
 
 public class OctoAppearanceUI implements PreferencesEntry {
+    private IconsSelector iconsSelector;
+    private PreferencesFragment fragment;
+
+    private final ConfigProperty<Boolean> isUsingDefault = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> isUsingSolar = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> isUsingM3 = new ConfigProperty<>(null, false);
+
+    private DrawerPreviewCell drawerPreviewCell;
+    private FolderTypeSelector folderTypeSelector;
+    private InterfaceSwitchesPreview switchesPreview;
+
+    private boolean wasCentered = false;
+    private boolean wasCenteredAtBeginning = false;
+    private float _centeredMeasure = -1;
+
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
-        ConfigProperty<Boolean> showCustomTitleRow = new ConfigProperty<>(null, OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
-
-        ConfigProperty<Boolean> areShortcutsEnabled = new ConfigProperty<>(null, false);
-        ConfigProperty<Boolean> showTooManyOptionsAlert = new ConfigProperty<>(null, false);
-
-        Runnable updateShortcutsState = () -> {
-            areShortcutsEnabled.updateValue(areShortcutsEnabled());
-            showTooManyOptionsAlert.updateValue(getEnabledShortcutsCount() > 2 && OctoConfig.INSTANCE.shortcutsPosition.getValue() == ShortcutsPosition.CHAT_INFO.getId());
-        };
-        updateShortcutsState.run();
+        wasCentered = isTitleCentered();
+        wasCenteredAtBeginning = wasCentered;
+        this.fragment = fragment;
+        updateConfig();
 
         return OctoPreferences.builder(getString(R.string.Appearance))
                 .deepLink(DeepLinkDef.APPEARANCE)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.APPEARANCE, true, getString(R.string.OctoAppearanceSettingsHeader))
-                .row(new TextDetailRow.TextDetailRowBuilder()
-                        .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI())))
-                        .icon(R.drawable.msg_groups)
-                        .title(getString(R.string.ChatTitle))
-                        .description(getString(R.string.Chat_Desc))
-                        .build()
-                )
-                .row(new TextDetailRow.TextDetailRowBuilder()
-                        .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI())))
-                        .icon(R.drawable.msg_map_type)
-                        .title(getString(R.string.DrawerTitle))
-                        .description(getString(R.string.Drawer_Desc))
-                        .build()
-                )
-                .row(new TextDetailRow.TextDetailRowBuilder()
-                        .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoInterfaceSettingsUI())))
-                        .icon(R.drawable.media_draw)
-                        .isNew(NewFeaturesBadgeId.APPEARANCE_INTERFACE.getId())
-                        .title(getString(R.string.AppTitleSettings))
-                        .description(getString(R.string.AppTitle_Desc))
-                        .build()
-                )
-                .row(new ShadowRow())
-                .category(getString(R.string.ActionsHeader), category -> {
-                    category.row(new ExpandableRows.ExpandableRowsBuilder()
-                            .setId(ExpandableRowsIds.CONTEXT_MENU_ELEMENTS.getId())
-                            .setIcon(R.drawable.msg_list)
-                            .setMainTitle(getString(R.string.ContextElements))
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.ClearFromCache))
-                                    .property(OctoConfig.INSTANCE.contextClearFromCache)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.CopyPhoto))
-                                    .property(OctoConfig.INSTANCE.contextCopyPhoto)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.AddToSavedMessages))
-                                    .property(OctoConfig.INSTANCE.contextSaveMessage)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.ReportChat))
-                                    .property(OctoConfig.INSTANCE.contextReportMessage)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.MessageDetails))
-                                    .property(OctoConfig.INSTANCE.contextMessageDetails)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.NoQuoteForward))
-                                    .property(OctoConfig.INSTANCE.contextNoQuoteForward)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.CustomF_ReplyPvt))
-                                    .property(OctoConfig.INSTANCE.contextReplyPrivateChat)
-                            )
-                            .postNotificationName(NotificationCenter.reloadInterface)
-                            .build()
-                    );
-                    category.row(new ExpandableRows.ExpandableRowsBuilder()
-                            .setId(ExpandableRowsIds.ADMIN_SHORTCUTS.getId())
-                            .setIcon(R.drawable.msg_admins)
-                            .setMainTitle(getString(R.string.AdminShortcuts))
-                            .setOnSingleStateChange(updateShortcutsState)
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.ChannelAdministrators))
-                                    .property(OctoConfig.INSTANCE.shortcutsAdministrators)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.EventLog))
-                                    .property(OctoConfig.INSTANCE.shortcutsRecentActions)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.Statistics))
-                                    .property(OctoConfig.INSTANCE.shortcutsStatistics)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.ChannelPermissions))
-                                    .property(OctoConfig.INSTANCE.shortcutsPermissions)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.InviteLinks))
-                                    .property(OctoConfig.INSTANCE.shortcutsInviteLinks)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.GroupMembers))
-                                    .property(OctoConfig.INSTANCE.shortcutsMembers)
-                            )
-                            .build()
-                    );
+                .category(getString(R.string.ImproveInterface), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(switchesPreview = new InterfaceSwitchesPreview(context))
+                            .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.shortcutsPosition)
-                            .onSelected(updateShortcutsState)
+                            .currentValue(OctoConfig.INSTANCE.uiTitleCenteredState)
                             .options(List.of(
                                     new PopupChoiceDialogOption()
-                                            .setId(ShortcutsPosition.THREE_DOTS.getId())
-                                            .setItemTitle(getString(R.string.AdminShortcutsPositionThreeDots))
-                                            .setItemDescription(getString(R.string.AdminShortcutsPositionThreeDots_Desc)),
+                                            .setId(ActionBarCenteredTitle.ALWAYS.getValue())
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredAlways)),
                                     new PopupChoiceDialogOption()
-                                            .setId(ShortcutsPosition.CHAT_INFO.getId())
-                                            .setItemTitle(getString(R.string.AdminShortcutsPositionChatInfo))
-                                            .setItemDescription(getString(R.string.AdminShortcutsPositionChatInfo_Desc) + " " + getString(R.string.AdminShortcutsPositionChatInfo_Alert)),
+                                            .setId(ActionBarCenteredTitle.JUST_IN_CHATS.getValue())
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredChats)),
                                     new PopupChoiceDialogOption()
-                                            .setId(ShortcutsPosition.PROFILE_DOTS.getId())
-                                            .setItemTitle(getString(R.string.AdminShortcutsPositionChatThreeDots))
-                                            .setItemDescription(getString(R.string.AdminShortcutsPositionChatThreeDots_Desc))
+                                            .setId(ActionBarCenteredTitle.JUST_IN_SETTINGS.getValue())
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredSettings)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(ActionBarCenteredTitle.NEVER.getValue())
+                                            .setItemTitle(getString(R.string.ImproveInterfaceTitleCenteredNever))
                             ))
-                            .showIf(areShortcutsEnabled)
-                            .title(getString(R.string.AdminShortcutsPosition))
+                            .onSelected(() -> animateActionBarUpdate(fragment))
+                            .title(getString(R.string.ImproveInterfaceTitleCentered))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.DEFAULT.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.DEFAULT)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.ONEUIOLD.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.ONEUIOLD)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchOneUIOld)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.ONEUINEW.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.ONEUINEW)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchOneUINew)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.GOOGLE.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.GOOGLE)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchGoogle)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSwitchUI.GOOGLE_NEW.getValue())
+                                            .setItemSwitchIconUI(InterfaceSwitchUI.GOOGLE_NEW)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSwitchGoogleNew))
+                            ))
+                            .onSelected(() -> {
+                                reloadUI(fragment);
+                                AndroidUtilities.runOnUIThread(() -> switchesPreview.animateUpdate(), 100);
+                            })
+                            .currentValue(OctoConfig.INSTANCE.interfaceSwitchUI)
+                            .title(getString(R.string.ImproveInterfaceSwitch))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.DEFAULT.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.DEFAULT)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.ROUNDED.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.ROUNDED)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxRounded)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.TRANSPARENT_UNCHECKED)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxSemiTransparent)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue())
+                                            .setItemCheckboxIconUI(InterfaceCheckboxUI.ALWAYS_TRANSPARENT)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceCheckboxAlwaysTransparent1))
+                            ))
+                            .onSelected(() -> AndroidUtilities.runOnUIThread(() -> switchesPreview.animateUpdate(), 100))
+                            .currentValue(OctoConfig.INSTANCE.interfaceCheckboxUI)
+                            .title(getString(R.string.ImproveInterfaceCheckbox))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSliderUI.DEFAULT.getValue())
+                                            .setItemSliderIconUI(InterfaceSliderUI.DEFAULT)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSliderDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSliderUI.MODERN.getValue())
+                                            .setItemSliderIconUI(InterfaceSliderUI.MODERN)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSliderModern)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(InterfaceSliderUI.ANDROID.getValue())
+                                            .setItemSliderIconUI(InterfaceSliderUI.ANDROID)
+                                            .setItemTitle(getString(R.string.ImproveInterfaceSliderAndroid))
+                            ))
+                            .onSelected(() -> AndroidUtilities.runOnUIThread(() -> switchesPreview.animateUpdate(), 100))
+                            .currentValue(OctoConfig.INSTANCE.interfaceSliderUI)
+                            .title(getString(R.string.ImproveInterfaceSlider))
+                            .build());
+                })
+                .category(R.string.DrawerTitle, category -> {
+                    drawerPreviewCell = new OctoDrawerSettingsUI().fillMainCategory(context, fragment, category, true);
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .isBlue(true)
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI())))
+                            .icon(R.drawable.media_draw)
+                            .title(getString(R.string.DrawerTitle_More))
+                            .build());
+                })
+                .category(getString(R.string.ImproveIcons), category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(iconsSelector = new IconsSelector(context) {
+                                @Override
+                                protected void onSelectedIcons() {
+                                    updateConfig();
+                                    fragment.reloadUIAfterValueUpdate();
+                                    fragment.showRestartTooltip();
+                                }
+                            })
+                            .postNotificationName(NotificationCenter.mainUserInfoChanged, NotificationCenter.reloadInterface)
                             .build());
                 })
                 .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(getString(R.string.AdminShortcutsPositionChatInfo_Alert))
-                        .showIf(showTooManyOptionsAlert)
+                        .title(getString(R.string.ImproveIconsDefault_Desc))
+                        .showIf(isUsingDefault)
                         .build())
-                .category(getString(R.string.FontEmojisHeader), category -> {
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new EmojiPackSettings()))
-                            .value(CustomEmojiController.getSelectedPackName())
-                            .icon(OctoUtils.getPetIconFixed())
-                            .title(getString(R.string.EmojiSets))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                AndroidUtilities.clearTypefaceCache();
-                                Parcelable recyclerViewState = null;
-                                if (fragment.getListView().getLayoutManager() != null)
-                                    recyclerViewState = fragment.getListView().getLayoutManager().onSaveInstanceState();
-                                fragment.getParentLayout().rebuildAllFragmentViews(true, true);
-                                fragment.getListView().getLayoutManager().onRestoreInstanceState(recyclerViewState);
-                            })
-                            .icon(R.drawable.msg_text_outlined)
-                            .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
-                            .title(getString(R.string.UseSystemFont))
-                            .requiresRestart(true)
-                            .build());
-                })
-                .category(getString(R.string.InterfaceHeader), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.showUserIconsInChatsList)
-                            .title(getString(R.string.ShowUserIconsInChatsList))
-                            .description(getString(R.string.ShowUserIconsInChatsList_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideStories)
-                            .requiresRestart(true)
-                            .title(getString(R.string.HideStories))
-                            .description(getString(R.string.HideStories_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.alwaysShowDownloads)
-                            .requiresRestart(true)
-                            .title(getString(R.string.AlwaysShowDownloads))
-                            .description(getString(R.string.AlwaysShowDownloads_Desc))
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(composeIconsDescription(true))
+                        .showIf(isUsingSolar)
+                        .build())
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(composeIconsDescription(false))
+                        .showIf(isUsingM3)
+                        .build())
+                .category(R.string.ManageFolders, category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(folderTypeSelector = new FolderTypeSelector(context))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.actionBarTitleOption)
+                            .currentValue(OctoConfig.INSTANCE.tabMode)
                             .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(ActionBarTitleOption.EMPTY.getValue())
-                                            .setItemTitle(getString(R.string.ActionBarTitleCustomEmpty)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(ActionBarTitleOption.APP_NAME.getValue())
-                                            .setItemTitle(getString(R.string.BuildAppName)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(ActionBarTitleOption.ACCOUNT_NAME.getValue())
-                                            .setItemTitle(getString(R.string.ActionBarTitleAccountName)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(ActionBarTitleOption.ACCOUNT_USERNAME.getValue())
-                                            .setItemTitle(getString(R.string.ActionBarTitleAccountUsername)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(ActionBarTitleOption.FOLDER_NAME.getValue())
-                                            .setItemTitle(getString(R.string.ActionBarTitleFolderName)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(ActionBarTitleOption.CUSTOM.getValue())
-                                            .setItemTitle(getString(R.string.ActionBarTitleCustom))
+                                    new PopupChoiceDialogOption().setId(TabMode.TEXT.getValue()).setItemTitle(R.string.FolderTypeDefault).setTabModeIconUI(TabMode.TEXT),
+                                    new PopupChoiceDialogOption().setId(TabMode.ICON.getValue()).setItemTitle(R.string.FolderTypeIconsOnly).setTabModeIconUI(TabMode.ICON),
+                                    new PopupChoiceDialogOption().setId(TabMode.MIXED.getValue()).setItemTitle(R.string.FolderTypeTextAndIcons).setTabModeIconUI(TabMode.MIXED)
                             ))
                             .onSelected(() -> {
-                                showCustomTitleRow.setValue(OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
-                                fragment.rebuildAllFragmentsWithLast();
+                                AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+                                folderTypeSelector.fillTabs();
                             })
-                            .title(getString(R.string.ActionBarTitle))
+                            .title(R.string.FolderType)
                             .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> editCustomName(fragment, context))
-                            .value(getCustomNameStatus())
-                            .showIf(showCustomTitleRow)
-                            .title(getString(R.string.ActionBarTitleCustom))
-                            .build()
-                    );
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.tabStyle)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption().setId(TabStyle.DEFAULT.getValue()).setItemTitle(R.string.FolderStyleDefault).setTabStyleIconUI(TabStyle.DEFAULT),
+                                    new PopupChoiceDialogOption().setId(TabStyle.ROUNDED.getValue()).setItemTitle(R.string.FolderStyleRounded).setTabStyleIconUI(TabStyle.ROUNDED),
+                                    new PopupChoiceDialogOption().setId(TabStyle.FLOATING.getValue()).setItemTitle(R.string.FolderStyleFloating).setTabStyleIconUI(TabStyle.FLOATING),
+                                    new PopupChoiceDialogOption().setId(TabStyle.TEXT_ONLY.getValue()).setItemTitle(R.string.FolderStyleTextOnly).setTabStyleIconUI(TabStyle.TEXT_ONLY),
+                                    new PopupChoiceDialogOption().setId(TabStyle.CHIPS.getValue()).setItemTitle(R.string.FolderStyleChips).setTabStyleIconUI(TabStyle.CHIPS),
+                                    new PopupChoiceDialogOption().setId(TabStyle.PILLS.getValue()).setItemTitle(R.string.FolderStylePills).setTabStyleIconUI(TabStyle.PILLS),
+                                    new PopupChoiceDialogOption().setId(TabStyle.FULL.getValue()).setItemTitle(R.string.FolderStyleFull).setTabStyleIconUI(TabStyle.FULL)
+                            ))
+                            .onSelected(() -> {
+                                AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+                                folderTypeSelector.fillTabs();
+                            })
+                            .title(R.string.FolderStyle)
+                            .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> {
-                                Parcelable recyclerViewState = null;
-                                RecyclerView.LayoutManager layoutManager = fragment.getListView().getLayoutManager();
-                                if (layoutManager != null)
-                                    recyclerViewState = layoutManager.onSaveInstanceState();
-                                fragment.getParentLayout().rebuildAllFragmentViews(false, false);
-                                if (layoutManager != null && recyclerViewState != null)
-                                    layoutManager.onRestoreInstanceState(recyclerViewState);
+                                AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+                                folderTypeSelector.fillTabs();
                             })
-                            .preferenceValue(OctoConfig.INSTANCE.disableDividers)
-                            .title(getString(R.string.HideDividers))
+                            .preferenceValue(OctoConfig.INSTANCE.hideUnreadCounterOnFolder)
+                            .title(R.string.HideUnreadCounter)
+                            .description(R.string.HideUnreadCounter_Desc)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated))
+                            .preferenceValue(OctoConfig.INSTANCE.showFoldersMessagesCounter)
+                            .title(R.string.ShowMessagesCounter)
+                            .description(R.string.ShowMessagesCounter_Desc)
+                            .showIf(OctoConfig.INSTANCE.hideUnreadCounterOnFolder, true)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> AccountInstance.getInstance(UserConfig.selectedAccount).getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated))
+                            .preferenceValue(OctoConfig.INSTANCE.includeMutedChatsInCounter)
+                            .title(R.string.IncludeMutedChats)
+                            .description(R.string.IncludeMutedChats_Desc)
+                            .showIf(OctoConfig.INSTANCE.hideUnreadCounterOnFolder, true)
                             .build());
                 })
                 .category(getString(R.string.LocalOther), category -> {
@@ -284,46 +289,97 @@ public class OctoAppearanceUI implements PreferencesEntry {
                 .build();
     }
 
-    private int getEnabledShortcutsCount() {
-        int i = 0;
-        if (OctoConfig.INSTANCE.shortcutsAdministrators.getValue()) i++;
-        if (OctoConfig.INSTANCE.shortcutsRecentActions.getValue()) i++;
-        if (OctoConfig.INSTANCE.shortcutsStatistics.getValue()) i++;
-        if (OctoConfig.INSTANCE.shortcutsPermissions.getValue()) i++;
-        if (OctoConfig.INSTANCE.shortcutsInviteLinks.getValue()) i++;
-        if (OctoConfig.INSTANCE.shortcutsMembers.getValue()) i++;
-        return i;
+    private CharSequence composeIconsDescription(boolean isSolar) {
+        return MessageStringHelper.getUrlNoUnderlineText(
+                new SpannableString(
+                        MessageStringHelper.fromHtml(
+                                isSolar ?
+                                        formatString(
+                                                R.string.ImproveIconsSolar_Desc,
+                                                "<a href='tg://resolve?domain=TierOhneNation'>@TierOhneNation</a>",
+                                                "<a href='tg://resolve?domain=design480'>@Design480</a>"
+                                        ) :
+                                        formatString(
+                                                R.string.ImproveIconsMaterialDesign3_Desc,
+                                                MessageFormat.format("<a href=''https://m3.material.io/styles/icons''>{0}</a>", getString(R.string.ImproveIconsMaterialDesign3_DescHere))
+                                        )
+                        )
+                )
+        );
     }
 
-    private boolean areShortcutsEnabled() {
-        return getEnabledShortcutsCount() > 0;
+    private void updateConfig() {
+        int currentState = OctoConfig.INSTANCE.uiIconsType.getValue();
+
+        isUsingDefault.setValue(currentState == IconsUIType.DEFAULT.getValue());
+        isUsingSolar.setValue(currentState == IconsUIType.SOLAR.getValue());
+        isUsingM3.setValue(currentState == IconsUIType.MATERIAL_DESIGN_3.getValue());
     }
 
-    private void editCustomName(PreferencesFragment fragment, Context context) {
-        var bottomSheet = new CustomActionBarTitleBottomSheet(context, new CustomActionBarTitleBottomSheet.CustomActionBarTitleCallback() {
-            @Override
-            public void didRenameSuccessfully(String customName) {
-                OctoConfig.INSTANCE.actionBarCustomTitle.updateValue(customName);
-                OctoConfig.INSTANCE.actionBarTitleOption.updateValue(ActionBarTitleOption.CUSTOM.getValue());
-                fragment.rebuildAllFragmentsWithLast();
-            }
+    private void animateActionBarUpdate(PreferencesFragment fragment) {
+        boolean centered = isTitleCentered();
+        ActionBar actionBar = fragment.getActionBar();
 
-            @Override
-            public void didReset() {
-                OctoConfig.INSTANCE.actionBarCustomTitle.updateValue("Home");
-                OctoConfig.INSTANCE.actionBarTitleOption.updateValue(ActionBarTitleOption.EMPTY.getValue());
-                fragment.rebuildAllFragmentsWithLast();
-            }
-        });
-        bottomSheet.show();
-    }
-
-    private String getCustomNameStatus() {
-        String customName = OctoConfig.INSTANCE.actionBarCustomTitle.getValue();
-        if (TextUtils.isEmpty(customName)) {
-            customName = getString(R.string.ActionBarTitleCustomEmpty);
+        if (wasCentered == centered) {
+            return;
         }
 
-        return customName;
+        if (actionBar != null) {
+            SimpleTextView titleTextView = actionBar.getTitleTextView();
+
+            if (_centeredMeasure == -1) {
+                _centeredMeasure = actionBar.getMeasuredWidth() / 2f - titleTextView.getTextWidth() / 2f - dp((AndroidUtilities.isTablet() ? 80 : 72));
+            }
+
+            titleTextView.animate().translationX(_centeredMeasure * (centered ? 1 : 0) - (wasCenteredAtBeginning ? Math.abs(_centeredMeasure) : 0)).setDuration(150).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    wasCentered = centered;
+
+                    reloadUI(fragment);
+                    LaunchActivity.makeRipple(centered ? (actionBar.getMeasuredWidth() / 2f) : 0, 0, centered ? 1.3f : 0.1f);
+                }
+            }).start();
+        } else {
+            reloadUI(fragment, true);
+        }
+    }
+
+    private boolean isTitleCentered() {
+        int centeredState = OctoConfig.INSTANCE.uiTitleCenteredState.getValue();
+        return centeredState == ActionBarCenteredTitle.ALWAYS.getValue() || centeredState == ActionBarCenteredTitle.JUST_IN_SETTINGS.getValue();
+    }
+
+    private boolean isFirstDraw = true;
+    @Override
+    public void onBecomeFullyVisible() {
+        if (isFirstDraw) {
+            isFirstDraw = false;
+            return;
+        }
+
+        AndroidUtilities.runOnUIThread(() -> {
+            fragment.reloadUIAfterValueUpdate();
+            drawerPreviewCell.reloadInstance();
+            drawerPreviewCell.updateMiniIcon();
+        });
+    }
+
+    /**
+     * @noinspection deprecation
+     */
+    public void reloadUI(PreferencesFragment fragment, boolean reloadLast) {
+        Parcelable recyclerViewState = null;
+        RecyclerView.LayoutManager layoutManager = fragment.getListView().getLayoutManager();
+        if (layoutManager != null)
+            recyclerViewState = layoutManager.onSaveInstanceState();
+        fragment.getParentLayout().rebuildAllFragmentViews(reloadLast, reloadLast);
+        if (layoutManager != null && recyclerViewState != null)
+            layoutManager.onRestoreInstanceState(recyclerViewState);
+    }
+
+    public void reloadUI(PreferencesFragment fragment) {
+        reloadUI(fragment, false);
     }
 }

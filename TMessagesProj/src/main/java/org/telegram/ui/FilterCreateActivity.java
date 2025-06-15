@@ -959,6 +959,39 @@ public class FilterCreateActivity extends BaseFragment {
             return;
         }
         int flags = newFilterFlags & MessagesController.DIALOG_FILTER_FLAG_ALL_CHATS;
+        /*String newName = "";
+        if ((flags & MessagesController.DIALOG_FILTER_FLAG_ALL_CHATS) == MessagesController.DIALOG_FILTER_FLAG_ALL_CHATS) {
+            if ((newFilterFlags & MessagesController.DIALOG_FILTER_FLAG_EXCLUDE_READ) != 0) {
+                newName = LocaleController.getString(R.string.FilterNameUnread);
+            } else if ((newFilterFlags & MessagesController.DIALOG_FILTER_FLAG_EXCLUDE_MUTED) != 0) {
+                newName = LocaleController.getString(R.string.FilterNameNonMuted);
+            }
+        } else if ((flags & MessagesController.DIALOG_FILTER_FLAG_CONTACTS) != 0) {
+            flags &=~ MessagesController.DIALOG_FILTER_FLAG_CONTACTS;
+            if (flags == 0) {
+                newName = LocaleController.getString(R.string.FilterContacts);
+            }
+        } else if ((flags & MessagesController.DIALOG_FILTER_FLAG_NON_CONTACTS) != 0) {
+            flags &=~ MessagesController.DIALOG_FILTER_FLAG_NON_CONTACTS;
+            if (flags == 0) {
+                newName = LocaleController.getString(R.string.FilterNonContacts);
+            }
+        } else if ((flags & MessagesController.DIALOG_FILTER_FLAG_GROUPS) != 0) {
+            flags &=~ MessagesController.DIALOG_FILTER_FLAG_GROUPS;
+            if (flags == 0) {
+                newName = LocaleController.getString(R.string.FilterGroups);
+            }
+        } else if ((flags & MessagesController.DIALOG_FILTER_FLAG_BOTS) != 0) {
+            flags &=~ MessagesController.DIALOG_FILTER_FLAG_BOTS;
+            if (flags == 0) {
+                newName = LocaleController.getString(R.string.FilterBots);
+            }
+        } else if ((flags & MessagesController.DIALOG_FILTER_FLAG_CHANNELS) != 0) {
+            flags &=~ MessagesController.DIALOG_FILTER_FLAG_CHANNELS;
+            if (flags == 0) {
+                newName = LocaleController.getString(R.string.FilterChannels);
+            }
+        }*/
         var result = FolderIconController.getEmoticonData(flags);
         String newName = result.getFirst();
         String newEmoticon = result.getSecond();
@@ -1059,7 +1092,6 @@ public class FilterCreateActivity extends BaseFragment {
     }
 
     private void save(boolean progress, Runnable after) {
-
         final CharSequence[] parsedTitle = new CharSequence[] { newFilterName };
         final ArrayList<TLRPC.MessageEntity> entities = getMediaDataController().getEntities(parsedTitle, false);
         saveFilterToServer(filter, newFilterFlags, parsedTitle[0].toString(), newFilterEmoticon, entities, !newFilterAnimations, newFilterColor, newAlwaysShow, newNeverShow, newPinned, creatingNew, false, hasUserChanged, true, progress, this, () -> {

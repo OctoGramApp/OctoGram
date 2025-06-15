@@ -62,6 +62,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 .category(getString(R.string.ExperimentalSettings), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.useFluentNavigationBar)
+                            .title(getString(R.string.UseFluentNavigationBar))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.moreHapticFeedbacks)
                             .title(getString(R.string.MoreHapticFeedbacks))
                             .build());
@@ -175,11 +180,6 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 .category(getString(R.string.Chats), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
-                            .preferenceValue(OctoConfig.INSTANCE.hideBottomBarChannels)
-                            .title(getString(R.string.HideBottomBarChannels))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(context))
                             .onPostUpdate(fragment::rebuildAllFragmentsWithLast)
                             .preferenceValue(OctoConfig.INSTANCE.hideOpenButtonChatsList)
                             .title(getString(R.string.HideOpenButtonChatsList))
@@ -265,7 +265,6 @@ public class OctoExperimentsUI implements PreferencesEntry {
         OctoConfig.INSTANCE.alternativeNavigation.clear();
         OctoConfig.INSTANCE.animatedActionBar.clear();
         OctoConfig.INSTANCE.navigationSmoothness.clear();
-        OctoConfig.INSTANCE.hideBottomBarChannels.clear();
         OctoConfig.INSTANCE.hideOpenButtonChatsList.clear();
         OctoConfig.INSTANCE.alwaysExpandBlockQuotes.clear();
         OctoConfig.INSTANCE.profileBubbleMoreTopPadding.clear();

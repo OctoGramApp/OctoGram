@@ -301,15 +301,16 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.TranslatorMode;
-import it.octogram.android.ai.MessagesModelsWrapper;
-import it.octogram.android.ai.helper.CustomModelsHelper;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.TranslatorProvider;
+import it.octogram.android.ai.CustomModelsMenuWrapper;
+import it.octogram.android.ai.CustomModelsHelper;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.DetailsActivity;
+import it.octogram.android.preferences.ui.ImportSettingsUI;
 import it.octogram.android.preferences.ui.OctoAiNewModelUI;
 import it.octogram.android.preferences.ui.components.CustomMediaFilterDialog;
 import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
-import it.octogram.android.preferences.ui.custom.ImportSettingsBottomSheet;
 import it.octogram.android.translator.TranslateMessagesWrapper;
 import it.octogram.android.translator.TranslationsWrapper;
 import it.octogram.android.utils.OctoUtils;
@@ -4075,11 +4076,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
             @Override
             protected boolean canSearch() {
-                return !isInsideContainer && !isInPreviewMode() && !inBubbleMode && searchItem != null && !searching && (!isThreadChat() || isTopic);
+                return !isInsideContainer && !isInPreviewMode() && !inBubbleMode && searchItem != null && !searching && (!isThreadChat() || isTopic) && OctoConfig.INSTANCE.headerLongPressSearch.getValue();
             }
 
             @Override
             protected void openSearch() {
+                if (OctoConfig.INSTANCE.headerLongPressSearch.getValue()) return;
                 resetSearch();
                 openSearchWithText(isSupportedTags() ? "" : null);
             }
@@ -4117,7 +4119,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     || UserObject.isReplyUser(currentUser)
                     || currentUser != null && currentUser.self
                     || OctoConfig.INSTANCE.searchIconInHeader.getValue()
-                    || chatMode == MODE_PINNED) {
+                    || chatMode == MODE_PINNED
+                    || !OctoConfig.INSTANCE.headerLongPressSearch.getValue()) {
                 return false;
             }
             openSearchWithText(null);
@@ -4245,7 +4248,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
             if (currentChat != null && MainAiHelper.canUseAiFeatures()) {
                 ActionBarMenuSubItem item = headerItem.addSubItem(ai_features, R.drawable.aifeatures_solar, LocaleController.getString(R.string.AiFeatures_Brief));
-                MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData() {
+                CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData() {
                     @Override
                     public void hideButton() {
                         headerItem.hideSubItem(ai_features);
@@ -4258,7 +4261,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 data.isChat = true;
                 data.currentChat = currentChat;
                 data.currentUser = currentUser;
-                MessagesModelsWrapper.initState(data);
+                CustomModelsMenuWrapper.initState(data);
             }
 
             if (currentUser != null && currentUser.self && chatMode != MODE_SAVED) {
@@ -8679,14 +8682,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 });
             } else if (isAiModelSelection()) {
                 ArrayList<MessageObject> objects = new ArrayList<>();
-                for (int a = 0; a < selectedMessagesIds.length; ++a) {
-                    for (int k = 0; k < selectedMessagesIds[a].size(); ++k) {
-                        MessageObject messageObject = selectedMessagesIds[a].valueAt(k);
+                for (SparseArray<MessageObject> selectedMessagesId : selectedMessagesIds) {
+                    for (int k = 0; k < selectedMessagesId.size(); ++k) {
+                        MessageObject messageObject = selectedMessagesId.valueAt(k);
                         objects.add(messageObject);
                     }
                 }
                 finishFragment();
-                MessagesModelsWrapper.handleMessagesSelectionWithModel(context, customAiModelID, currentUser, currentChat, objects);
+                CustomModelsMenuWrapper.handleMessagesSelectionWithModel(context, customAiModelID, currentUser, currentChat, objects);
             } else if (chatMode == MODE_PINNED) {
                 finishFragment();
                 chatActivityDelegate.onUnpin(true, bottomOverlayChatText.getTag() == null);
@@ -9975,8 +9978,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         translateButton = new TranslateButton(getContext(), this, themeDelegate) {
             @Override
             protected void onButtonClick() {
-                // TODO: REQUIRE SOME TEST if (getMessagesController().getTranslateController().isFeatureAvailable()) {
-                if (getUserConfig().isPremium() || currentChat != null && currentChat.autotranslation) {
+                if (getUserConfig().isPremium() || currentChat != null && currentChat.autotranslation || OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEFAULT.getValue()) {
                     getMessagesController().getTranslateController().toggleTranslatingDialog(getDialogId());
                 } else {
                     MessagesController.getNotificationsSettings(currentAccount).edit().putInt("dialog_show_translate_count" + getDialogId(), 14).commit();
@@ -27634,6 +27636,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     private void showGiftButton(boolean show, boolean animated) {
         if (getContext() == null) return;
+        if (show && OctoConfig.INSTANCE.hideGiftButtonChannels.getValue()) {
+            show = false;
+        }
         final boolean wasShown = bottomGiftButton != null && bottomGiftButton.getAlpha() > 0.5f;
         if (bottomGiftButton == null) {
             bottomGiftButton = new ImageView(getContext());
@@ -27666,6 +27671,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private void showSuggestButton(boolean show, boolean animated) {
         if (bottomSuggestButton == null && !show) {
             return;
+        }
+        if (show && OctoConfig.INSTANCE.hideChatButtonChannels.getValue()) {
+            show = false;
         }
 
         final boolean wasShown = bottomSuggestButton != null && bottomSuggestButton.getAlpha() > 0.5f;
@@ -32249,7 +32257,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         processSelectedOption(options.get(i));
                     });
                     if (option == OPTION_AI_FEATURES) {
-                        MessagesModelsWrapper.FillStateData data = new MessagesModelsWrapper.FillStateData();
+                        CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData();
                         data.context = getContext();
                         data.onSheetOpen = () -> closeMenu(false);
                         data.onSheetClose = () -> dimBehindView(false);
@@ -32258,7 +32266,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         data.popupWindowLayout = popupLayout;
                         data.messageObject = message;
                         data.messageText = messageTextToTranslate;
-                        MessagesModelsWrapper.initState(data);
+                        CustomModelsMenuWrapper.initState(data);
                     }
                     if (option == OPTION_TRANSLATE) {
                         final boolean translateEnabled = getMessagesController().getTranslateController().isContextTranslateEnabled();
@@ -33790,50 +33798,44 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     } else if (getMessageType(selectedObject) == 208) {
                         AlertDialog progressDialog = new AlertDialog(getParentActivity(), 3);
                         File finalLocFile = locFile;
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                boolean success = true;
-                                CustomEmojiController.EmojiPackBase emojiPackBase = null;
-                                try {
-                                    emojiPackBase = CustomEmojiController.installEmoji(finalLocFile, false);
-                                } catch (Exception e) {
-                                    FileLog.e("Emoji Font install failed", e);
-                                    success = false;
-                                }
-                                boolean finalSuccess = success;
-                                CustomEmojiController.EmojiPackBase finalEmojiPackBase = emojiPackBase;
-                                AndroidUtilities.runOnUIThread(() -> {
-                                    progressDialog.dismiss();
-                                    if (finalSuccess && finalEmojiPackBase != null) {
-                                        if (finalEmojiPackBase.getPackId().equals(OctoConfig.INSTANCE.selectedEmojiPack.getValue())) {
-                                            BulletinFactory.of(ChatActivity.this).createErrorBulletin(LocaleController.getString("EmojiSetAlreadyApplied", R.string.EmojiSetAlreadyApplied), themeDelegate).show();
-                                        } else {
-                                            EmojiSetBulletinLayout bulletinLayout = new EmojiSetBulletinLayout(
-                                                    getParentActivity(),
-                                                    LocaleController.getString("EmojiSetApplied", R.string.EmojiSetApplied),
-                                                    LocaleController.formatString("EmojiSetAppliedInfo", R.string.EmojiSetAppliedInfo, finalEmojiPackBase.getPackName()),
-                                                    finalEmojiPackBase,
-                                                    themeDelegate
-                                            );
-                                            Bulletin.make(ChatActivity.this, bulletinLayout, Bulletin.DURATION_LONG).show();
-                                            OctoConfig.INSTANCE.selectedEmojiPack.updateValue(finalEmojiPackBase.getPackId());
-                                            if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) OctoConfig.INSTANCE.useSystemEmoji.updateValue(!OctoConfig.INSTANCE.useSystemEmoji.getValue());
-                                            Emoji.reloadEmoji();
-                                            NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
-                                        }
-                                    } else {
-                                        BulletinFactory.of(ChatActivity.this).createErrorBulletin(LocaleController.getString("InvalidCustomEmojiSet", R.string.InvalidCustomEmojiSet), themeDelegate).show();
-                                    }
-                                });
+                        Utilities.globalQueue.postRunnable(() -> {
+                            boolean success = true;
+                            CustomEmojiController.EmojiPackBase emojiPackBase = null;
+                            try {
+                                emojiPackBase = CustomEmojiController.installEmoji(finalLocFile, false);
+                            } catch (Exception e) {
+                                FileLog.e("Emoji Font install failed", e);
+                                success = false;
                             }
-                        }.start();
+                            boolean finalSuccess = success;
+                            CustomEmojiController.EmojiPackBase finalEmojiPackBase = emojiPackBase;
+                            AndroidUtilities.runOnUIThread(() -> {
+                                progressDialog.dismiss();
+                                if (finalSuccess && finalEmojiPackBase != null) {
+                                    if (finalEmojiPackBase.getPackId().equals(OctoConfig.INSTANCE.selectedEmojiPack.getValue())) {
+                                        BulletinFactory.of(ChatActivity.this).createErrorBulletin(LocaleController.getString("EmojiSetAlreadyApplied", R.string.EmojiSetAlreadyApplied), themeDelegate).show();
+                                    } else {
+                                        EmojiSetBulletinLayout bulletinLayout = new EmojiSetBulletinLayout(
+                                                getParentActivity(),
+                                                LocaleController.getString(R.string.EmojiSetApplied),
+                                                LocaleController.formatString(R.string.EmojiSetAppliedInfo, finalEmojiPackBase.getPackName()),
+                                                finalEmojiPackBase,
+                                                themeDelegate
+                                        );
+                                        Bulletin.make(ChatActivity.this, bulletinLayout, Bulletin.DURATION_LONG).show();
+                                        OctoConfig.INSTANCE.selectedEmojiPack.updateValue(finalEmojiPackBase.getPackId());
+                                        if (OctoConfig.INSTANCE.useSystemEmoji.getValue()) OctoConfig.INSTANCE.useSystemEmoji.updateValue(!OctoConfig.INSTANCE.useSystemEmoji.getValue());
+                                        Emoji.reloadEmoji();
+                                        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.emojiLoaded);
+                                    }
+                                } else {
+                                    BulletinFactory.of(ChatActivity.this).createErrorBulletin(LocaleController.getString(R.string.InvalidCustomEmojiSet), themeDelegate).show();
+                                }
+                            });
+                        });
                         progressDialog.setCanCancel(false);
                         progressDialog.showDelayed(300);
-
-                    } else if (locFile.getName().toLowerCase().endsWith(".octo")) {
-                        // TODO??
-                    } else  {
+                    } else {
                         if (LocaleController.getInstance().applyLanguageFile(locFile, currentAccount)) {
                             presentFragment(new LanguageSelectActivity());
                         } else {
@@ -40559,9 +40561,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (message.getDocumentName().toLowerCase().endsWith("octoexport")) {
                     boolean isValid = OctoConfig.isValidMessageExport(message);
                     if (isValid) {
-                        ImportSettingsBottomSheet sheet = new ImportSettingsBottomSheet(ChatActivity.this, message);
-                        sheet.setOriginalActivity(getParentActivity());
-                        sheet.show();
+                        ImportSettingsUI ui = new ImportSettingsUI();
+                        ui.setData(message, null);
+                        ChatActivity.this.presentFragment(ui);
                         handled = true;
                     }
                 }

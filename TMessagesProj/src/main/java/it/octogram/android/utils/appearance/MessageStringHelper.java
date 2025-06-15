@@ -167,6 +167,6 @@ public class MessageStringHelper {
     }
 
     public static Spanned fromHtml(@NonNull String source, Html.TagHandler tagHandler) {
-        return HtmlCompat.fromHtml(source, HtmlCompat.FROM_HTML_MODE_LEGACY,null, tagHandler);
+        return HtmlCompat.fromHtml(source, HtmlCompat.FROM_HTML_MODE_LEGACY, null, tagHandler);
     }
 }

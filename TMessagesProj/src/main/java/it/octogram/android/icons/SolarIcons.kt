@@ -456,13 +456,5 @@ class SolarIcons {
             }
             return icon
         }
-
-        fun getRandom(startingFrom: Int): Int {
-            if (getConversion(startingFrom) == startingFrom || startingFrom == R.drawable.popup_fixed_alert || startingFrom == R.drawable.popup_fixed_alert2 || startingFrom == R.drawable.popup_fixed_alert3) {
-                return startingFrom
-            }
-
-            return solarIcons.random().second
-        }
     }
 }

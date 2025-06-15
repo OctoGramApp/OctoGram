@@ -16,9 +16,6 @@
 -keepclassmembers class ** {
     @android.webkit.JavascriptInterface <methods>;
 }
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
-}
 
 # https://developers.google.com/ml-kit/known-issues#android_issues
 -keep class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni { *; }
@@ -184,8 +181,6 @@
 -dontwarn android.support.annotation.Size
 -dontwarn android.support.annotation.VisibleForTesting
 -dontwarn android.support.v4.app.NotificationCompat$Builder
-
--overloadaggressively
 
 # Exceptions
 -keep class * extends java.lang.Throwable {

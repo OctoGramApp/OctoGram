@@ -43,13 +43,16 @@ import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.network.BrowserUtils;
 
-/** @noinspection SequencedCollectionMethodCanBeUsed*/
+/**
+ * @noinspection SequencedCollectionMethodCanBeUsed
+ */
 public class UpdatesManager {
     private static final String TAG = "UpdatesManager";
     private static final long privateChatId = -1733655252L;
     private static final long privateBotId = 6563667131L;
 
     public static Map<String, String> pbetaVersionsReplacement;
+
     static {
         pbetaVersionsReplacement = new HashMap<>();
         pbetaVersionsReplacement.put("arm64-v8a", "arm64");
@@ -65,7 +68,7 @@ public class UpdatesManager {
 
     private static boolean isLoadingTLRPCAppUpdate;
     private static TLRPC.TL_help_appUpdate currentUpdateData;
-    private static final int FIRST_ACCOUNT_ID = 0;
+    public static final int FIRST_ACCOUNT_ID = 0;
 
     protected static MessagesController getMessagesController() {
         return MessagesController.getInstance(FIRST_ACCOUNT_ID);
@@ -184,7 +187,7 @@ public class UpdatesManager {
             @Override
             public void run() {
                 try {
-                    String reqUrl = String.format(Locale.getDefault(),"https://raw.githubusercontent.com/OctoGramApp/assets/ota/version_history/history.json?ms=%d", System.currentTimeMillis());
+                    String reqUrl = String.format(Locale.getDefault(), "https://raw.githubusercontent.com/OctoGramApp/assets/ota/version_history/history.json?ms=%d", System.currentTimeMillis());
                     String reqResponse = new StandardHTTPRequest.Builder(reqUrl).build().request();
                     updatesData = new JSONObject(reqResponse);
 
@@ -670,13 +673,17 @@ public class UpdatesManager {
 
     public interface UpdatesManagerPrepareInterface {
         void onSuccess();
+
         void onError();
     }
 
     public interface UpdatesManagerCheckInterface {
         void onThereIsUpdate(JSONObject updateData);
+
         void onThereIsUpdate(TLRPC.TL_help_appUpdate appUpdate);
+
         void onNoUpdate();
+
         void onError();
     }
 

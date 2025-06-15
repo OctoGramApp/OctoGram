@@ -39,8 +39,8 @@ public class OutlineProvider extends ViewOutlineProvider {
     /**
      * Constructor for the OutlineProvider class.
      *
-     * @param width    The width of the outline.
-     * @param height   The height of the outline.
+     * @param width  The width of the outline.
+     * @param height The height of the outline.
      */
     public OutlineProvider(int width, int height) {
         this.width = width;
@@ -78,7 +78,7 @@ public class OutlineProvider extends ViewOutlineProvider {
      * This method is called to define the outline of the view.
      * It determines whether to draw a rounded rectangle or an oval shape based on the 'isSquare' flag.
      *
-     * @param view The view whose outline is being defined.
+     * @param view    The view whose outline is being defined.
      * @param outline The outline object to be modified and used to define the view's outline.
      */
     @Override

@@ -125,19 +125,7 @@ public abstract class CameraTypeSelector extends LinearLayout {
 
         addView(appCompatImageView);
 
-        picker1 = new NumberPicker(context, 13) {
-            @Override
-            protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-                var y = dp(31);
-                pickerDividersPaint.setColor(Theme.getColor(Theme.key_radioBackgroundChecked));
-                canvas.drawLine(dp(2), y, getMeasuredWidth() - dp(2), y, pickerDividersPaint);
-
-                y = getMeasuredHeight() - dp(31);
-                canvas.drawLine(dp(2), y, getMeasuredWidth() - dp(2), y, pickerDividersPaint);
-            }
-        };
-
+        picker1 = new NumberPicker(context, 13);
         int[] _newVal = {-1};
         picker1.setWrapSelectorWheel(true);
         picker1.setMinValue(0);

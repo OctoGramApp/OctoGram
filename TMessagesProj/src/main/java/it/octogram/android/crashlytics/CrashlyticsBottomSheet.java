@@ -82,7 +82,8 @@ public class CrashlyticsBottomSheet extends CustomBottomSheet {
     public static void showCrash(BaseFragment fragment) {
         try {
             new CrashlyticsBottomSheet(fragment).show();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     @Override

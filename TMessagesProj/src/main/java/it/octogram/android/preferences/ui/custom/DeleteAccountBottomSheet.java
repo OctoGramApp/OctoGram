@@ -82,6 +82,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
             public boolean onTouchEvent(MotionEvent ev) {
                 return false;
             }
+
             @Override
             public boolean onInterceptTouchEvent(MotionEvent ev) {
                 return false;
@@ -243,12 +244,9 @@ public class DeleteAccountBottomSheet extends BottomSheet {
 
     private String getTitleForStepId(int stepId) {
         return switch (stepId) {
-            case CurrentStep.FREE_CLOUD_STORAGE ->
-                    getString(R.string.DeleteAccountStep1Title);
-            case CurrentStep.GROUPS_AND_CHANNELS ->
-                    getString(R.string.DeleteAccountStep2Title);
-            default ->
-                    getString(R.string.DeleteAccountStep3Title);
+            case CurrentStep.FREE_CLOUD_STORAGE -> getString(R.string.DeleteAccountStep1Title);
+            case CurrentStep.GROUPS_AND_CHANNELS -> getString(R.string.DeleteAccountStep2Title);
+            default -> getString(R.string.DeleteAccountStep3Title);
         };
     }
 
@@ -258,8 +256,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                     getString(R.string.DeleteAccountStep1Description);
             case CurrentStep.GROUPS_AND_CHANNELS ->
                     getString(R.string.DeleteAccountStep2Description);
-            default ->
-                    getString(R.string.DeleteAccountStep3Description);
+            default -> getString(R.string.DeleteAccountStep3Description);
         };
     }
 
@@ -277,7 +274,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                 progressDialog.setCanCancel(false);
 
                 TL_account.deleteAccount req = new TL_account.deleteAccount();
-                req.reason = String.format(Locale.US, "deletion requested by the user via %s - request made after 2fa confirmation", OctoUtils.getDomain()) ;
+                req.reason = String.format(Locale.US, "deletion requested by the user via %s - request made after 2fa confirmation", OctoUtils.getDomain());
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                     if (response instanceof TLRPC.TL_boolTrue) {
                         AccountInstance accountInstance = AccountInstance.getInstance(currentAccount);

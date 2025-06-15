@@ -65,7 +65,7 @@ import it.octogram.android.AiModelMessagesState;
 import it.octogram.android.AiModelType;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.ExpandableRowsIds;
-import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.ai.CustomModelsHelper;
 import it.octogram.android.ai.icons.AiFeatureIcons;
 import it.octogram.android.icons.IconSelectorAlert;
 import it.octogram.android.preferences.OctoPreferences;
@@ -180,25 +180,25 @@ public class OctoAiNewModelUI implements PreferencesEntry {
                             .title(getString(R.string.AiFeatures_CustomModels_Create_ModelIcon))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                        .currentValue(modelType)
-                        .onSelected(this::updateConfig)
-                        .options(List.of(
-                                new PopupChoiceDialogOption()
-                                        .setId(AiModelType.RELATED_TO_MESSAGES.getId())
-                                        .setItemTitle(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Messages))
-                                        .setItemDescription(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Messages_Desc)),
-                                new PopupChoiceDialogOption()
-                                        .setId(AiModelType.RELATED_TO_INPUT.getId())
-                                        .setItemTitle(getString(R.string.AiFeatures_CustomModels_Create_ModelType_InputBox))
-                                        .setItemDescription(getString(R.string.AiFeatures_CustomModels_Create_ModelType_InputBox_Desc)),
-                                new PopupChoiceDialogOption()
-                                        .setId(AiModelType.RELATED_TO_CHATS.getId())
-                                        .setItemTitle(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Chats))
-                                        .setItemDescription(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Chats_Desc))
-                        ))
-                        .icon(R.drawable.msg_customize)
-                        .title(getString(R.string.AiFeatures_CustomModels_Create_ModelType))
-                        .build());
+                            .currentValue(modelType)
+                            .onSelected(this::updateConfig)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(AiModelType.RELATED_TO_MESSAGES.getId())
+                                            .setItemTitle(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Messages))
+                                            .setItemDescription(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Messages_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(AiModelType.RELATED_TO_INPUT.getId())
+                                            .setItemTitle(getString(R.string.AiFeatures_CustomModels_Create_ModelType_InputBox))
+                                            .setItemDescription(getString(R.string.AiFeatures_CustomModels_Create_ModelType_InputBox_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(AiModelType.RELATED_TO_CHATS.getId())
+                                            .setItemTitle(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Chats))
+                                            .setItemDescription(getString(R.string.AiFeatures_CustomModels_Create_ModelType_Chats_Desc))
+                            ))
+                            .icon(R.drawable.msg_customize)
+                            .title(getString(R.string.AiFeatures_CustomModels_Create_ModelType))
+                            .build());
                 })
                 .categoryWithoutShadow(getString(R.string.AiFeatures_CustomModels_Create_Prompt), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder().layout(getPromptInput(false)).avoidReDraw(true).build());

@@ -51,7 +51,7 @@ public class BrowserUtils {
         int engineType = SharedConfig.searchEngineType + 1;
         String searchUrl = getString("SearchEngine" + engineType + "SearchURL");
         String host = AndroidUtilities.getHostAuthority(searchUrl);
-        return "https://"+host;
+        return "https://" + host;
     }
 
     public static boolean isUsingWifi() {

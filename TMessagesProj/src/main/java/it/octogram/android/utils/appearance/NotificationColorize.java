@@ -32,7 +32,7 @@ public class NotificationColorize {
             }
             return color;
         } else {
-            
+
             return Color.parseColor("#3D348B");
         }
     }

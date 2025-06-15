@@ -118,7 +118,7 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                         .title(getCameraDesc(CameraType.SYSTEM_CAMERA))
                         .showIf(usingSystemCamera)
                         .build())
-                .category(getString(R.string.CameraOption), usingCameraX, category -> {
+                .category(getString(R.string.TranslatorCategoryOptions), usingCameraX, category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.cameraXZeroShutter)
                             .title(getString(R.string.ZeroShutter))
@@ -142,8 +142,6 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                                 .title(getString(R.string.CurrentCameraXResolution))
                                 .build());
                     }
-                })
-                .category(getString(R.string.TranslatorCategoryOptions), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.startWithRearCamera)
                             .title(getString(R.string.StartWithRearCamera))

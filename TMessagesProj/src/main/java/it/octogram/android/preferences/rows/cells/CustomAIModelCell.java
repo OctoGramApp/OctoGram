@@ -39,7 +39,7 @@ import org.telegram.ui.Components.LayoutHelper;
 import java.util.function.Consumer;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.ai.CustomModelsHelper;
 import it.octogram.android.ai.icons.AiFeatureIcons;
 
 @SuppressLint("ViewConstructor")
@@ -124,7 +124,8 @@ public class CustomAIModelCell extends FrameLayout {
                 CharSequence modelTitle = model.title.trim();
                 try {
                     modelTitle = Emoji.replaceEmoji(modelTitle, textView.getPaint().getFontMetricsInt(), false);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
                 textView.setText(modelTitle);
             } else {
                 textView.setText(formatString(R.string.AiFeatures_CustomModels_ModelID, modelID));

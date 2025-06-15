@@ -672,7 +672,7 @@ public class ConnectionsManager extends BaseController {
 
     public void switchBackend(boolean restart) {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        preferences.edit().remove("language_showed2").apply();
+        preferences.edit().remove("language_showed2").commit();
         native_switchBackend(currentAccount, restart);
     }
 
@@ -1058,8 +1058,8 @@ public class ConnectionsManager extends BaseController {
                     }
                 }
             }
-            if (OctoConfig.INSTANCE.forceUseIpV6.getValue() && hasIpv6) {
-                if (forceTryIpV6) {
+            if (hasIpv6) {
+                if (OctoConfig.INSTANCE.forceUseIpV6.getValue() && forceTryIpV6) {
                     return USE_IPV6_ONLY;
                 }
                 if (hasStrangeIpv4) {

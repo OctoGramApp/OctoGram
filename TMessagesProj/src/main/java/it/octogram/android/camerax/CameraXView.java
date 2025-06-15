@@ -359,6 +359,7 @@ public class CameraXView extends BaseCameraView {
 
     private boolean textureInited = false;
     private final boolean frontface;
+
     @Override
     public void initTexture() {
         if (textureInited) {

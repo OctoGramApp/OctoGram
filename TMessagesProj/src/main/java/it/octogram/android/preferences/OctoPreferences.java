@@ -31,7 +31,8 @@ import it.octogram.android.preferences.rows.impl.HeaderRow;
 import it.octogram.android.preferences.rows.impl.ShadowRow;
 import it.octogram.android.preferences.rows.impl.StickerHeaderRow;
 
-public record OctoPreferences(CharSequence title, String deepLink, boolean hasSaveButton, List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
+public record OctoPreferences(CharSequence title, String deepLink, boolean hasSaveButton,
+                              List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
 
     public static OctoPreferencesBuilder builder(String name) {
         return new OctoPreferencesBuilder(name);
@@ -133,6 +134,7 @@ public record OctoPreferences(CharSequence title, String deepLink, boolean hasSa
             preferences.add(new ShadowRow());
             return this;
         }
+
         public OctoPreferencesBuilder sticker(Context context, String packName, StickerUi stickerNum, boolean autoRepeat, String description, ConfigProperty<Boolean> showIf) {
             StickerImageView stickerImageView = createStickerImageView(context, packName, stickerNum.getValue(), autoRepeat);
             preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()

@@ -17,8 +17,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
-import androidx.core.graphics.ColorUtils;
-
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -71,7 +69,8 @@ public class FolderTypeSelector extends FrameLayout {
             internalFrameLayout.setPadding(dp(2), dp(2), dp(2), dp(2));
             GradientDrawable border = new GradientDrawable();
             border.setShape(GradientDrawable.RECTANGLE);
-            border.setStroke(dp(1), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText), 150), dp(5), dp(5));
+            border.setAlpha(150);
+            border.setStroke(dp(1), Theme.getColor(Theme.key_windowBackgroundWhiteGrayText), dp(5), dp(5));
             border.setCornerRadius(dp(25));
             internalFrameLayout.setBackground(border);
         }

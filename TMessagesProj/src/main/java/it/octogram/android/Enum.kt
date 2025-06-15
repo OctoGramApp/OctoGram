@@ -24,14 +24,13 @@ enum class EmojiStatus(val value: Int) {
 }
 
 enum class DcIdStyle(val value: Int) {
-    NONE(0),
     OWLGRAM(1),
     TELEGRAM(2),
     MINIMAL(3);
 
     companion object {
         fun fromInt(value: Int): DcIdStyle {
-            return DcIdStyle.entries.find { it.value == value } ?: NONE
+            return DcIdStyle.entries.find { it.value == value } ?: OWLGRAM
         }
     }
 }
@@ -78,7 +77,8 @@ enum class PhoneNumberAlternative(val value: Int) {
 
     companion object {
         fun fromInt(value: Int): PhoneNumberAlternative {
-            return PhoneNumberAlternative.entries.find { it.value == value } ?: SHOW_HIDDEN_NUMBER_STRING
+            return PhoneNumberAlternative.entries.find { it.value == value }
+                ?: SHOW_HIDDEN_NUMBER_STRING
         }
     }
 }
@@ -151,51 +151,61 @@ object CameraXResolution {
     }
 }
 
+enum class OctoColors(val value: String) {
+    AiColor("#8d3067"),
+    LogoColor("#251D7B"),
+    LogoColor2("#594bcc"),
+}
+
 enum class AiProvidersDetails(
     val id: Int,
     val title: String,
+    val useThisProviderString: String,
     val keyMinLength: Int,
     val keyMaxLength: Int,
     val animationScope: Int,
     val statusProperty: ConfigProperty<Boolean>,
-    val keyProperty: ConfigProperty<String>,
+    val keyProperty: ConfigProperty<String>? = null,
+    val urlProperty: ConfigProperty<String>? = null,
     val needWarningZone: Boolean
 ) {
     GEMINI(
-        0,
-        "Gemini",
-        20,
-        45,
-        OctoAnimationFragment.OctoAnimationScopes.GEMINI,
-        OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs,
-        OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIKey,
-        false
+        id = 0,
+        title = "Gemini",
+        useThisProviderString = getString(R.string.AiFeatures_AccessVia_GoogleAPI),
+        keyMinLength = 20,
+        keyMaxLength = 45,
+        animationScope = OctoAnimationFragment.OctoAnimationScopes.GEMINI,
+        statusProperty = OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs,
+        keyProperty = OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIKey,
+        needWarningZone = false
     ),
     CHATGPT(
-        1,
-        "ChatGPT",
-        100,
-        180,
-        OctoAnimationFragment.OctoAnimationScopes.CHATGPT,
-        OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs,
-        OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIKey,
-        true
+        id = 1,
+        title = "ChatGPT",
+        useThisProviderString = getString(R.string.AiFeatures_AccessVia_ChatGPTAPI),
+        keyMinLength = 100,
+        keyMaxLength = 180,
+        animationScope = OctoAnimationFragment.OctoAnimationScopes.CHATGPT,
+        statusProperty = OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIs,
+        keyProperty = OctoConfig.INSTANCE.aiFeaturesUseChatGPTAPIKey,
+        needWarningZone = true
     ),
     OPENROUTER(
-        2,
-        "OpenRouter",
-        45,
-        100,
-        OctoAnimationFragment.OctoAnimationScopes.CHATGPT,
-        OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs,
-        OctoConfig.INSTANCE.aiFeaturesOpenRouterAPIKey,
-        true
+        id = 2,
+        title = "OpenRouter",
+        useThisProviderString = getString(R.string.AiFeatures_AccessVia_OpenRouterAPI),
+        keyMinLength = 45,
+        keyMaxLength = 100,
+        animationScope = OctoAnimationFragment.OctoAnimationScopes.OPENROUTER,
+        statusProperty = OctoConfig.INSTANCE.aiFeaturesUseOpenRouterAPIs,
+        keyProperty = OctoConfig.INSTANCE.aiFeaturesOpenRouterAPIKey,
+        needWarningZone = true
     );
 
     companion object {
-        fun fromMainProperty(property: ConfigProperty<Boolean>) : AiProvidersDetails? {
-            return AiProvidersDetails.entries.find { it.statusProperty == property }
-        }
+        fun fromMainProperty(property: ConfigProperty<Boolean>): AiProvidersDetails? =
+            entries.find { it.statusProperty == property }
     }
 }
 
@@ -276,6 +286,7 @@ enum class MediaFilter(val value: Int) {
     URL(11),
     PINNED_MESSAGES(12),
     CHAT_PHOTOS(13);
+
     companion object {
         @JvmStatic
         fun fromValue(value: Int): MediaFilter {
@@ -309,14 +320,30 @@ enum class IconsUIType(val value: Int) {
     SOLAR(1),
     MATERIAL_DESIGN_3(2)
 }
+
 @StringDef(
-    DrawerItem.MY_PROFILE_ID, DrawerItem.NEW_GROUP_ID, DrawerItem.CONTACTS_ID, DrawerItem.CALLS_ID,
-    DrawerItem.SAVED_MESSAGE_ID, DrawerItem.SETTINGS_ID, DrawerItem.OCTOGRAM_SETTINGS_ID,
-    DrawerItem.NEW_CHANNEL_ID, DrawerItem.NEW_SECRET_CHAT_ID, DrawerItem.INVITE_FRIENDS_ID,
-    DrawerItem.TELEGRAM_FEATURES_ID, DrawerItem.ARCHIVED_MESSAGES_ID, DrawerItem.DATACENTER_STATUS_ID,
-    DrawerItem.QR_LOGIN_ID, DrawerItem.SET_STATUS_ID, DrawerItem.CONNECTED_DEVICES_ID,
-    DrawerItem.POWER_USAGE_ID, DrawerItem.PROXY_SETTINGS_ID, DrawerItem.DIVIDER_ID,
-    DrawerItem.ATTACH_MENU_BOT_ID, DrawerItem.DOWNLOADS_ID, DrawerItem.TELEGRAM_BROWSER_ID,
+    DrawerItem.MY_PROFILE_ID,
+    DrawerItem.NEW_GROUP_ID,
+    DrawerItem.CONTACTS_ID,
+    DrawerItem.CALLS_ID,
+    DrawerItem.SAVED_MESSAGE_ID,
+    DrawerItem.SETTINGS_ID,
+    DrawerItem.OCTOGRAM_SETTINGS_ID,
+    DrawerItem.NEW_CHANNEL_ID,
+    DrawerItem.NEW_SECRET_CHAT_ID,
+    DrawerItem.INVITE_FRIENDS_ID,
+    DrawerItem.TELEGRAM_FEATURES_ID,
+    DrawerItem.ARCHIVED_MESSAGES_ID,
+    DrawerItem.DATACENTER_STATUS_ID,
+    DrawerItem.QR_LOGIN_ID,
+    DrawerItem.SET_STATUS_ID,
+    DrawerItem.CONNECTED_DEVICES_ID,
+    DrawerItem.POWER_USAGE_ID,
+    DrawerItem.PROXY_SETTINGS_ID,
+    DrawerItem.DIVIDER_ID,
+    DrawerItem.ATTACH_MENU_BOT_ID,
+    DrawerItem.DOWNLOADS_ID,
+    DrawerItem.TELEGRAM_BROWSER_ID,
     DrawerItem.DATA_AND_STORAGE_ID
 )
 @Retention(AnnotationRetention.SOURCE)
@@ -477,7 +504,8 @@ enum class ExpandableRowsIds(val id: Int) {
     ADMIN_SHORTCUTS(4),
     LOCKED_ELEMENTS(5),
     LOCKED_ACCOUNTS(6),
-    AI_MODEL_OPTIONS_MESSAGES(7)
+    AI_MODEL_OPTIONS_MESSAGES(7),
+    CHAT_HEADER_SEARCH(8)
 }
 
 enum class AiModelType(val id: Int) {
@@ -489,6 +517,7 @@ enum class AiModelType(val id: Int) {
         fun hasState(value: Int): Boolean {
             return AiModelType.entries.any { it.id == value }
         }
+
         fun find(value: Int): AiModelType {
             return AiModelType.entries.find { it.id == value } ?: RELATED_TO_MESSAGES
         }
@@ -496,7 +525,10 @@ enum class AiModelType(val id: Int) {
 }
 
 enum class AiModelMessagesState(val id: String, val stateName: String) {
-    TEXT_MESSAGES("msg", getString(R.string.AiFeatures_CustomModels_Create_OptionsHeader_MessagesTexts)),
+    TEXT_MESSAGES(
+        "msg",
+        getString(R.string.AiFeatures_CustomModels_Create_OptionsHeader_MessagesTexts)
+    ),
     PHOTOS("pts", getString(R.string.SendMediaPermissionPhotos)),
     STICKERS("sts", getString(R.string.AccDescrStickers)),
     MUSIC("msc", getString(R.string.SendMediaPermissionMusic)),
@@ -508,6 +540,7 @@ enum class AiModelMessagesState(val id: String, val stateName: String) {
         fun hasState(value: String): Boolean {
             return AiModelMessagesState.entries.any { it.id == value }
         }
+
         fun find(value: String): AiModelMessagesState {
             return AiModelMessagesState.entries.find { it.id == value } ?: TEXT_MESSAGES
         }
@@ -623,11 +656,17 @@ enum class WebPages(
     val website: String,
     val category: Int
 ) {
-    TELEGRAM(1, "Telegram",  R.drawable.telegram_camera_icon, "https://telegram.org", 1),
+    TELEGRAM(1, "Telegram", R.drawable.telegram_camera_icon, "https://telegram.org", 1),
     FAQ(2, "FAQ", R.drawable.msg_emoji_question, "https://telegram.org/faq", 1),
     DOCUMENTATION(3, "Documentation", R.drawable.msg_bot, "https://core.telegram.org", 1),
     TG_CORE(4, "Telegram Core", R.drawable.left_status_profile, "https://my.telegram.org", 2),
-    TRANSLATIONS(5, "Translations", R.drawable.msg_translate, "https://translations.telegram.org", 2),
+    TRANSLATIONS(
+        5,
+        "Translations",
+        R.drawable.msg_translate,
+        "https://translations.telegram.org",
+        2
+    ),
     CONTEST(6, "Contest", R.drawable.gift_unpack, "https://contest.com", 2),
     ADS(7, "Ads", R.drawable.msg_language, "https://ads.telegram.org", 2),
     GATEWAY(8, "Gateway", R.drawable.msg2_ask_question, "https://gateway.telegram.org", 2),

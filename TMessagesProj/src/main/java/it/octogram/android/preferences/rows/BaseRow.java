@@ -167,7 +167,10 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
         if (item instanceof CustomAIModelRow v2) {
             return this instanceof CustomAIModelRow v3 && Objects.equals(v2.getModelID(), v3.getModelID());
         }
-        if (item instanceof HeaderRow || item instanceof SwitchRow || item instanceof FooterInformativeRow) {
+        if (item instanceof HeaderRow v1) {
+            return this instanceof HeaderRow v2 && Objects.equals(item.getTitle(), getTitle()) && v2.getUseHeaderStyle() == v1.getUseHeaderStyle();
+        }
+        if (item instanceof SwitchRow || item instanceof FooterInformativeRow) {
             return Objects.equals(item.getTitle(), getTitle());
         }
         return true;

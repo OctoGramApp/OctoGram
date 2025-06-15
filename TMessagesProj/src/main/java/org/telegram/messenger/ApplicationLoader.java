@@ -55,8 +55,6 @@ import java.util.Locale;
 
 import it.octogram.android.StoreUtils;
 import it.octogram.android.camerax.CameraXUtils;
-import it.octogram.android.tgastandaloneexport.UpdateAppAlertDialog;
-import it.octogram.android.tgastandaloneexport.UpdateLayout;
 
 public class ApplicationLoader extends Application {
 
@@ -152,7 +150,7 @@ public class ApplicationLoader extends Application {
     }
 
     protected boolean isStandalone() {
-        return isStandaloneBuild();
+        return isStandaloneBuild(); // false;
     }
 
     protected boolean isBeta() {
@@ -625,14 +623,7 @@ public class ApplicationLoader extends Application {
     }
 
     public boolean showUpdateAppPopup(Context context, TLRPC.TL_help_appUpdate update, int account) {
-        try {
-            (new UpdateAppAlertDialog(context, update, account)).show();
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
-        // UpdateAppAlertDialog IS PART OF TGA STANDALONE BUILD
-        // THE OCTOGRAM BEHAVIOR IS MUCH DIFFERENT THAN TGA ONE
-        return true;
+        return false;
     }
 
     public boolean showCustomUpdateAppPopup(Context context, BetaUpdate update, int account) {
@@ -640,9 +631,7 @@ public class ApplicationLoader extends Application {
     }
 
     public IUpdateLayout takeUpdateLayout(Activity activity, ViewGroup sideMenu, ViewGroup sideMenuContainer) {
-        // UpdateLayout IS PART OF TGA STANDALONE BUILD
-        // THE OCTOGRAM BEHAVIOR IS MUCH DIFFERENT THAN TGA ONE
-        return new UpdateLayout(activity, sideMenu, sideMenuContainer);
+        return null;
     }
 
     public IUpdateButton takeUpdateButton(Context context) {

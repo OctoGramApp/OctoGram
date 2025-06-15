@@ -234,7 +234,7 @@ public class DatacenterStatus extends LinearLayout {
             colorKey = Theme.key_windowBackgroundWhiteGrayText;
 
             if (status == DOWNLOAD_FAILED_TRY_LATER) {
-                statusText += " — "+getString(R.string.DatacenterStatusSection_DwFailed_DiscoverMode);
+                statusText += " — " + getString(R.string.DatacenterStatusSection_DwFailed_DiscoverMode);
             }
         } else if (status == INTERRUPTED && isMediaPage) {
             statusText = getString(R.string.DatacenterStatusSection_Interrupted);
@@ -322,6 +322,7 @@ public class DatacenterStatus extends LinearLayout {
     }
 
     private ValueAnimator loadingAnimator;
+
     public void setLoading(boolean loading) {
         if (!isMediaPage) {
             return;

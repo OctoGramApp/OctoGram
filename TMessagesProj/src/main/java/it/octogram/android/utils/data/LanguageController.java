@@ -66,7 +66,8 @@ public class LanguageController {
                     versioning.put(langCode, remoteMD5);
                     OctoConfig.INSTANCE.languagePackVersioning.updateValue(versioning.toString());
                 }
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }).start();
     }
 

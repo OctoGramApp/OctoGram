@@ -3,13 +3,6 @@
           xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
 
-    <supports-screens android:anyDensity="true"
-                      android:largeScreens="true"
-                      android:normalScreens="true"
-                      android:resizeable="true"
-                      android:smallScreens="true"
-                      android:xlargeScreens="true"/>
-
     <uses-feature android:glEsVersion="0x00020000" android:required="false"/>
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
@@ -122,8 +115,7 @@
         android:allowAudioPlaybackCapture="true"
         tools:replace="android:supportsRtl"
         android:usesCleartextTraffic="true"
-        tools:targetApi="r"
-    >
+        tools:targetApi="r">
         <!-- usesCleartextTraffic for browser supporting opening http:// links -->
 
         <activity-alias

@@ -20,6 +20,9 @@
 
     <string name="TranscriptionTooLong">This voice message is too long.</string>
 
+    <string name="OptionMoved">Option moved</string>
+    <string name="OptionMoved_Text">The searched option (%s) was moved to a different category (%s).</string>
+
     <!-- Media filtering -->
     <string name="MediaFilter">Filter by media type</string>
     <string name="MediaFilterItemAll">No filter</string>
@@ -80,12 +83,15 @@
     <string name="AiFeatures_EnableOptionsTerms">AI Terms</string>
     <string name="AiFeatures_EnableOptionsTerms_Desc">By enabling the option, the app will make requests to external services but only and exclusively when you use one of the AI features. We will not make automatic requests to Gemini, OpenRouter and ChatGPT in other cases. Do you want to consent?</string>
     <string name="AiFeatures_EnableOptionsTerms_Accept">Accept</string>
-    <string name="AiFeatures_AccessVia">Use AI features via…</string>
-    <string name="AiFeatures_AccessVia_ReqAuth">Requires authentication through API Key</string>
+    <string name="AiFeatures_AccessVia_Desc">Manage providers for AI features</string>
+    <string name="AiFeatures_AccessVia_Available">Available providers</string>
+    <string name="AiFeatures_AccessVia_Added">Added providers</string>
     <string name="AiFeatures_AccessVia_GoogleAPI">Google API</string>
     <string name="AiFeatures_AccessVia_ChatGPTAPI">ChatGPT API</string>
     <string name="AiFeatures_AccessVia_OpenRouterAPI">OpenRouter API</string>
+    <string name="AiFeatures_AccessVia_SelectableOne">You can select the provider to use directly when using the AI feature. The app will remember the last option.</string>
     <string name="AiFeatures_AccessVia_Empty">At least one provider must be enabled to use AI features.</string>
+    <string name="AiFeatures_AccessVia_AddMore">You can add multiple providers and choose the one you prefer individually when using an AI feature.</string>
     <string name="AiFeatures_AccessVia_Empty_Disable">Disable</string>
     <string name="AiFeatures_AccessVia_Login_Step1">Log on to the service</string>
     <string name="AiFeatures_AccessVia_Login_Step1_Desc">Use of %s is allowed only through an API Key, which you can generate by following the steps given here.</string>
@@ -107,6 +113,8 @@
     <string name="AiFeatures_AccessVia_Login_Step2_Desc">Past the copied API Key in the box below.</string>
     <string name="AiFeatures_AccessVia_Login_Step2_Hint">Your API Key</string>
     <string name="AiFeatures_AccessVia_Login_Step2_Model">Selected model</string>
+    <string name="AiFeatures_AccessVia_Login_Step2_Directly">Manage %s</string>
+    <string name="AiFeatures_AccessVia_Login_Step2_Directly_Desc">Manage the configuration of %s according to your parameters.</string>
     <string name="AiFeatures_AccessVia_Login_Step3">%s has been configured successfully.</string>
     <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning">Warning</string>
     <string name="AiFeatures_AccessVia_Login_ExtraStep_Warning_Desc">The use of %s API is not recommended as:</string>
@@ -119,6 +127,9 @@
     <string name="AiFeatures_AccessVia_Login_NextStep">Next step</string>
     <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey">Save key</string>
     <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong">Wrong key</string>
+    <string name="AiFeatures_AccessVia_Login_NextStep_SaveUrl">Save url</string>
+    <string name="AiFeatures_AccessVia_Login_Step2_Url_Hint">Your API Url</string>
+
     <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong_Desc">The indicated API key doesn\'t seem to work. Do you want to save it anyway?</string>
     <string name="AiFeatures_AccessVia_Login_NextStep_SaveKey_Wrong_Server">A server error occurred. Do you want to save the API key anyway?</string>
     <string name="AiFeatures_AccessVia_Login_DisableS">Disable %s integration</string>
@@ -328,6 +339,7 @@
     <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app</string>
     <string name="PromptBeforeCalling">Prompt before calling</string>
     <string name="DcIdHeader">Datacenter and User ID</string>
+    <string name="ShowDcID">Show Datacenter and ID</string>
     <string name="DcIdTypeDescriptionBotapi">It introduces a "-" sign for groups and prepends "-100" for supergroups, broadcast groups, and channels.</string>
     <string name="DcIdTypeDescriptionTelegram">It shows IDs directly as they are provided by Telegram.</string>
     <string name="ShowRegistrationDate">Show registration date</string>
@@ -339,19 +351,13 @@
     <string name="HideGreetingSticker">Hide greeting sticker</string>
     <string name="HideGreetingSticker_Desc">Hides the greeting sticker when messaging a new contact</string>
     <string name="PlayGifsAsVideo">Play GIFs as Videos</string>
-    <string name="PlayGifsAsVideo_Desc">Allows to play gifs as video files</string>
-    <string name="HideKeyboardOnScroll">Hide keyboard on chat scroll</string>
-    <string name="HideKeyboardOnScroll_Desc">Hides the keyboard when scrolling in the chat</string>
+    <string name="HideKeyboardOnScroll">Hide keyboard on scroll</string>
     <string name="HideSendAsChannel">Hide send as channel</string>
-    <string name="HideSendAsChannel_Desc">Hides the send as channel action near the keyboard</string>
     <string name="ShowOnlineStatus">Show online status</string>
     <string name="ShowOnlineStatus_Desc">Shows the online status of other people next to their profile picture in groups</string>
     <string name="HideCustomEmojis">Hide custom emojis</string>
-    <string name="HideCustomEmojis_Desc">Hides all custom emojis in the keyboard or as a reaction</string>
     <string name="VoiceImprovements">Noise suppression in calls</string>
-    <string name="VoiceImprovements_Desc">Enables noise suppression and voice normalization while in a call</string>
     <string name="UnmuteWithVolumeDown">Unmute videos with volume down</string>
-    <string name="UnmuteWithVolumeDown_Desc">Unmute a video by pressing the volume down button</string>
     <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
     <string name="HideAllChatFolder">Hide \"All Chats\" tab</string>
     <string name="AccentColorAsNotificationColor">Accent color as notification color</string>
@@ -366,6 +372,8 @@
     <string name="TryConnectWithIPV6">Try connecting through IPv6</string>
     <string name="DefaultEmojiButtonType">Emoji button action</string>
     <string name="DefaultEmojiButtonTypeDefault">Default</string>
+
+    <string name="OctoChatsSettingsHeader">Here you can customize your chats experience with the app</string>
 
     <string name="ActionsSettingsBiometric">Actions</string>
     <string name="BiometricSettings">Biometric</string>
@@ -389,6 +397,7 @@
     <string name="LockedChatsHelpHint3Title">Applied only locally</string>
     <string name="LockedChatsHelpHint3Description">Hidden chats will be displayed normally on other devices.</string>
     <string name="LockedChatsHelpHintEditList">Edit list</string>
+    <string name="LockedChatsHelpHintMore">Show more options</string>
     <string name="LockedChats_Options_Desc">Here you can customize locked chats options</string>
     <string name="LockedChats_Options_MoreSettings">Customize more options</string>
     <string name="LockedChats_Options_HideChats">Hide locked chats</string>
@@ -411,7 +420,15 @@
     <string name="BiometricAskEvery">Ask for authentication every…</string>
     <string name="BiometricAskEvery_Always">Always</string>
     <string name="BiometricAskEvery_Desc">Biometric authentication will only be required once every %1$s.</string>
-    <string name="BiometricUnavailable">Many security settings aren\'t available because the device doesn\'t support biometric unlocking. If it\'s enabled, check the system settings.</string>
+    <string name="BiometricUnavailable_Title">Fingerprint not detected</string>
+    <string name="BiometricUnavailable_Unavailable">Check device\'s fingerprint settings before editing options.</string>
+    <string name="BiometricUnavailable_Desc">No fingerprint has been detected in your Android settings. If fingerprint authentication is already enabled, try pressing the "Test Fingerprint" button to resolve the issue.</string>
+    <string name="BiometricUnavailable_Desc_Old">Many options have been hidden because they aren\'t compatible with your device.</string>
+    <string name="BiometricUnavailable_Test">Test Fingerprint</string>
+    <string name="BiometricUnavailable_Test_Fixed">Fingerprint has been detected successfully.</string>
+    <string name="BiometricUnavailable_Test_Wrong">Something went wrong.</string>
+    <string name="BiometricUnavailable_Test_Wrong_Desc">Try to reboot your device or check system settings.</string>
+    <string name="BiometricUnavailable_Test_Wrong_Button">Settings</string>
     <string name="LockedActions">Locked actions</string>
     <string name="LockedAccounts">Locked accounts</string>
     <string name="LockedAccounts_HideFromList">Hide locked accounts</string>
@@ -430,11 +447,9 @@
     <string name="ForceChatBlurEffect">Force chat blur effect</string>
     <string name="ForceChatBlurEffectName">Alpha</string>
     <string name="InterfaceHeader">Interface</string>
-    <string name="FormattingHeader">Formatting</string>
     <string name="FormatTimeWithSeconds">Format time with seconds</string>
     <string name="FormatTimeWithSeconds_Desc">10:20 > 10:20:22</string>
     <string name="NumberRounding">Number rounding</string>
-    <string name="NumberRounding_Desc">3110 > 3.11K</string>
     <string name="PencilIconForEdited">Pencil icon for edited messages</string>
     <string name="PencilIconForEdited_Desc">This will replace the text "Edited" with a pencil icon</string>
     <string name="HideDividers">Hide dividers</string>
@@ -455,9 +470,9 @@
     <string name="ActionBarTitleCustomDescription">Enter here the custom title that will appear in the header bar instead of \"%s\".</string>
     <string name="ActionBarTitleCustomEmpty">Empty</string>
     <string name="ActionBarTitleCustomSet">Set name</string>
-    <string name="SearchIconInHeader">Search icon in header bar</string>
+    <string name="SearchIconInHeader">Search icon in header</string>
+    <string name="HeaderLongPressSearch">Long press to search</string>
     <string name="SlidingTitle">Sliding title</string>
-    <string name="SlidingTitle_Desc">The title will slide on screen when it\'s too long</string>
     <string name="HideStories">Hide stories</string>
     <string name="HideStories_Desc">You won\'t see stories in the main header, but you can still find them on a user\'s profile.</string>
     <string name="AlwaysShowDownloads">Don\'t hide downloads</string>
@@ -494,6 +509,7 @@
     <string name="Chat_Desc">Customize the appearance of chats</string>
 
     <string name="DrawerTitle">Drawer</string>
+    <string name="DrawerTitle_More">More drawer settings</string>
     <string name="Drawer_Desc">Customize the appearance of the drawer</string>
     <string name="Drawer_Test">Open</string>
     <string name="DrawerBackground">Background Type</string>
@@ -638,6 +654,7 @@
     <string name="IDCopied">ID copied to clipboard.</string>
     <string name="InlineQueryCopied">Inline Query copied to clipboard.</string>
     <string name="MediaStream">Use Media Stream in GroupCall</string>
+    <string name="UseFluentNavigationBar">Use Fluent Navigation Bar</string>
     <string name="MoreHapticFeedbacks">Enable More Haptic Feedbacks</string>
     <string name="AudioTypeInCall">Use Type in GroupCall</string>
     <string name="AudioTypeStereo">Stereo</string>
@@ -646,10 +663,13 @@
     <string name="MaxStickerSizeDefault">20 (Default)</string>
     <string name="MaxRecentSticker_Unlimited">Unlimited</string>
     <string name="AlwaysExpandBlockQuotes">Always expand blockquotes</string>
-    <string name="HideBottomBarChannels">Hide bottom bar in channels</string>
     <string name="HideOpenButtonChatsList">Hide open button in chats list</string>
     <string name="ProfileBubbleHideBorder">Hide dashed border</string>
     <string name="ProfileBubbleMoreTopPadding">Add more top padding</string>
+
+    <string name="HideBottomBarChannels">Hide bottom bar in channels</string>
+    <string name="HideChatButtonChannels">Hide chat button</string>
+    <string name="HideGiftButtonChannels">Hide gift button</string>
 
     <!-- Telegram Browser -->
     <string name="OctoTgBrowser">Telegram Browser</string>
@@ -834,7 +854,7 @@
     <string name="ImportReadyDescription">An OctoGram configuration was detected in this file. Keep in mind that this will overwrite your settings. Do you want to proceed with the import?</string>
     <string name="ImportReadyDescriptionFromExternal">This file, sent by an external user, contains a configuration of OctoGram and may activate unwanted experimental options. Are you sure you want to apply it?</string>
     <string name="ImportReadyImport">Proceed with import</string>
-    <string name="ImportReadyImportSecureContext">This option contains some privacy and security settings regarding your app. Some parts, such as saved messages, may be restricted by fingerprint authentication. Do you want to import them?</string>
+    <string name="ImportReadyImportSecureContext2">This option contains some privacy and security settings regarding your app.\n\nSome parts, such as saved messages, may be restricted by fingerprint authentication.\n\nDo you want to import them?</string>
     <string name="ImportReadyImportSelected">Import selected</string>
     <string name="ImportReadyImportDone">%d options have been imported successfully. Restart the app to complete the transfer.</string>
     <string name="ImportReadyImportDonePopup">To complete…</string>

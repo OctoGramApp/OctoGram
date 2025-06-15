@@ -11,26 +11,27 @@ package it.octogram.android.preferences.ui;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
+import android.os.Parcelable;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.AlertDialog;
-import org.telegram.ui.ReactionsDoubleTapManageActivity;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Supplier;
 
+import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.ConfigProperty;
-import it.octogram.android.DcIdStyle;
-import it.octogram.android.DcIdType;
-import it.octogram.android.DefaultEmojiButtonAction;
-import it.octogram.android.DoubleTapAction;
+import it.octogram.android.CustomEmojiController;
+import it.octogram.android.InterfaceRapidButtonsActions;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.deeplink.DeepLinkDef;
@@ -41,248 +42,164 @@ import it.octogram.android.preferences.rows.impl.CustomCellRow;
 import it.octogram.android.preferences.rows.impl.ListRow;
 import it.octogram.android.preferences.rows.impl.SwitchRow;
 import it.octogram.android.preferences.rows.impl.TextIconRow;
-import it.octogram.android.preferences.ui.custom.DcInfoSelector;
+import it.octogram.android.preferences.ui.custom.CustomActionBarTitleBottomSheet;
+import it.octogram.android.preferences.ui.custom.RapidActionsPreviewLayout;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
-    SwitchRow enableSmartNotificationsSwitchRow;
-    private DcInfoSelector dcInfoSelector;
+    private RapidActionsPreviewLayout rapidActionsPreviewLayout;
 
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
-        ConfigProperty<Boolean> canShowSelectReaction = new ConfigProperty<>(null, OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue());
-        ConfigProperty<Boolean> isDcIdVisible = new ConfigProperty<>(null, OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.NONE.getValue());
+        ConfigProperty<Boolean> showCustomTitleRow = new ConfigProperty<>(null, OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
+
+        ConfigProperty<Boolean> canChooseSecondaryButtonAction = new ConfigProperty<>(null, false);
+
+        Runnable restartStates = () -> canChooseSecondaryButtonAction.updateValue(!OctoConfig.INSTANCE.rapidActionsDefaultConfig.getValue() && OctoConfig.INSTANCE.rapidActionsMainButtonAction.getValue() != InterfaceRapidButtonsActions.HIDDEN.getValue());
+        restartStates.run();
 
         return OctoPreferences.builder(getString(R.string.OctoGeneralSettings))
                 .deepLink(DeepLinkDef.GENERAL)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.GENERAL, true, getString(R.string.OctoGeneralSettingsHeader))
-                .category(getString(R.string.DcIdHeader), category -> {
-                    category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(dcInfoSelector = new DcInfoSelector(context, fragment.getResourceProvider()))
-                            .showIf(isDcIdVisible)
+                .category(getString(R.string.InterfaceHeader), category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.showUserIconsInChatsList)
+                            .title(getString(R.string.ShowUserIconsInChatsList))
+                            .description(getString(R.string.ShowUserIconsInChatsList_Desc))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.registrationDateInProfiles)
-                            .title(getString(R.string.ShowRegistrationDate))
-                            .description(getString(R.string.ShowRegistrationDate_Desc))
-                            .postNotificationName(NotificationCenter.reloadInterface)
+                            .preferenceValue(OctoConfig.INSTANCE.hideStories)
+                            .requiresRestart(true)
+                            .title(getString(R.string.HideStories))
+                            .description(getString(R.string.HideStories_Desc))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.alwaysShowDownloads)
+                            .requiresRestart(true)
+                            .title(getString(R.string.AlwaysShowDownloads))
+                            .description(getString(R.string.AlwaysShowDownloads_Desc))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.actionBarTitleOption)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(ActionBarTitleOption.EMPTY.getValue())
+                                            .setItemTitle(getString(R.string.ActionBarTitleCustomEmpty)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(ActionBarTitleOption.APP_NAME.getValue())
+                                            .setItemTitle(getString(R.string.BuildAppName)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(ActionBarTitleOption.ACCOUNT_NAME.getValue())
+                                            .setItemTitle(getString(R.string.ActionBarTitleAccountName)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(ActionBarTitleOption.ACCOUNT_USERNAME.getValue())
+                                            .setItemTitle(getString(R.string.ActionBarTitleAccountUsername)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(ActionBarTitleOption.FOLDER_NAME.getValue())
+                                            .setItemTitle(getString(R.string.ActionBarTitleFolderName)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(ActionBarTitleOption.CUSTOM.getValue())
+                                            .setItemTitle(getString(R.string.ActionBarTitleCustom))
+                            ))
                             .onSelected(() -> {
-                                isDcIdVisible.setValue(OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.NONE.getValue());
-                                AndroidUtilities.runOnUIThread(() -> dcInfoSelector.update());
+                                showCustomTitleRow.setValue(OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
+                                fragment.rebuildAllFragmentsWithLast();
                             })
-                            .currentValue(OctoConfig.INSTANCE.dcIdStyle)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdStyle.NONE.getValue())
-                                            .setItemTitle(getString(R.string.Nothing))
-                                            .setItemDescription(getString(R.string.DCStyleNothing_Desc)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdStyle.OWLGRAM.getValue())
-                                            .setItemTitle("OwlGram")
-                                            .setItemDescription(getString(R.string.DCStyleOwlGram_Desc)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdStyle.TELEGRAM.getValue())
-                                            .setItemTitle("Telegram")
-                                            .setItemDescription(getString(R.string.DCStyleTelegram_Desc)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdStyle.MINIMAL.getValue())
-                                            .setItemTitle("Minimal")
-                                            .setItemDescription(getString(R.string.DCStyleMinimal_Desc))
-                            ))
-                            .title(getString(R.string.Style))
+                            .title(getString(R.string.ActionBarTitle))
                             .build());
-                    category.row(new ListRow.ListRowBuilder()
-                            .onSelected(() -> dcInfoSelector.updateChatID())
-                            .currentValue(OctoConfig.INSTANCE.dcIdType)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdType.BOT_API.getValue())
-                                            .setItemTitle("Bot API")
-                                            .setItemDescription(getString(R.string.DcIdTypeDescriptionBotapi)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdType.TELEGRAM.getValue())
-                                            .setItemTitle("Telegram")
-                                            .setItemDescription(getString(R.string.DcIdTypeDescriptionTelegram))
-                            ))
-                            .showIf(isDcIdVisible)
-                            .title(getString(R.string.Type))
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> editCustomName(fragment, context))
+                            .value(getCustomNameStatus())
+                            .showIf(showCustomTitleRow)
+                            .title(getString(R.string.ActionBarTitleCustom))
+                            .build()
+                    );
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> {
+                                Parcelable recyclerViewState = null;
+                                RecyclerView.LayoutManager layoutManager = fragment.getListView().getLayoutManager();
+                                if (layoutManager != null)
+                                    recyclerViewState = layoutManager.onSaveInstanceState();
+                                fragment.getParentLayout().rebuildAllFragmentViews(false, false);
+                                if (layoutManager != null && recyclerViewState != null)
+                                    layoutManager.onRestoreInstanceState(recyclerViewState);
+                            })
+                            .preferenceValue(OctoConfig.INSTANCE.disableDividers)
+                            .title(getString(R.string.HideDividers))
                             .build());
                 })
-                .category(getString(R.string.Chats), category -> {
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .icon(R.drawable.chats_pin)
-                            .value(PinnedEmojisActivity.getRowDescription())
-                            .propertySelectionTag("pinnedEmojis")
-                            .onClick(() -> {
-                                PinnedEmojisActivity activity = new PinnedEmojisActivity();
-                                activity.setFragment(fragment);
-                                fragment.presentFragment(activity);
-                            })
-                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
-                                @Override
-                                public String getTitle() {
-                                    return getString(R.string.PinnedEmojisList);
-                                }
-
-                                @Override
-                                public String getValue() {
-                                    return PinnedEmojisActivity.getRowDescription();
-                                }
-                            })
-                            .title(getString(R.string.PinnedEmojisList))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .icon(R.drawable.msg2_reactions2)
-                            .value(PinnedReactionsActivity.getRowDescription())
-                            .propertySelectionTag("pinnedReactions")
-                            .onClick(() -> {
-                                PinnedReactionsActivity activity = new PinnedReactionsActivity();
-                                activity.setFragment(fragment);
-                                fragment.presentFragment(activity);
-                            })
-                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
-                                @Override
-                                public String getTitle() {
-                                    return getString(R.string.PinnedReactions);
-                                }
-
-                                @Override
-                                public String getValue() {
-                                    return PinnedReactionsActivity.getRowDescription();
-                                }
-                            })
-                            .title(getString(R.string.PinnedReactions))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .icon(R.drawable.menu_hashtag)
-                            .value(PinnedHashtagsActivity.getRowDescription())
-                            .propertySelectionTag("pinnedHashtags")
-                            .onClick(() -> {
-                                PinnedHashtagsActivity activity = new PinnedHashtagsActivity();
-                                activity.setFragment(fragment);
-                                fragment.presentFragment(activity);
-                            })
-                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
-                                @Override
-                                public String getTitle() {
-                                    return getString(R.string.PinnedHashtags);
-                                }
-
-                                @Override
-                                public String getValue() {
-                                    return PinnedHashtagsActivity.getRowDescription();
-                                }
-                            })
-                            .title(getString(R.string.PinnedHashtags))
-                            .build());
-                    category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.defaultEmojiButtonAction)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.DEFAULT.getValue())
-                                            .setItemTitle(getString(R.string.DefaultEmojiButtonTypeDefault))
-                                            .setItemIcon(R.drawable.msg_forward_replace),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.EMOJIS.getValue())
-                                            .setItemTitle(getString(R.string.Emoji))
-                                            .setItemIcon(R.drawable.msg_emoji_smiles),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.STICKERS.getValue())
-                                            .setItemTitle(getString(R.string.AttachSticker))
-                                            .setItemIcon(R.drawable.msg_sticker),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.GIFS.getValue())
-                                            .setItemTitle(getString(R.string.AttachGif))
-                                            .setItemIcon(R.drawable.msg_gif)
-                            ))
-                            .title(getString(R.string.DefaultEmojiButtonType))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.jumpToNextChannelOrTopic)
-                            .title(getString(R.string.JumpToNextChannelOrTopic))
-                            .description(getString(R.string.JumpToNextChannelOrTopic_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.swipeToPip)
-                            .title(getString(R.string.SwipeToPIP))
-                            .description(getString(R.string.SwipeToPIP_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideGreetingSticker)
-                            .title(getString(R.string.HideGreetingSticker))
-                            .description(getString(R.string.HideGreetingSticker_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideKeyboardOnScroll)
-                            .title(getString(R.string.HideKeyboardOnScroll))
-                            .description(getString(R.string.HideKeyboardOnScroll_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideSendAsChannel)
-                            .title(getString(R.string.HideSendAsChannel))
-                            .description(getString(R.string.HideSendAsChannel_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.showOnlineStatus)
-                            .title(getString(R.string.ShowOnlineStatus))
-                            .description(getString(R.string.ShowOnlineStatus_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideCustomEmojis)
-                            .title(getString(R.string.HideCustomEmojis))
-                            .description(getString(R.string.HideCustomEmojis_Desc))
+                .category(R.string.ImproveRapidActions, category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(rapidActionsPreviewLayout = new RapidActionsPreviewLayout(context))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onPostUpdate(() -> {
-                                if (OctoConfig.INSTANCE.openArchiveOnPull.getValue() && !SharedConfig.archiveHidden) {
-                                    SharedConfig.toggleArchiveHidden();
-                                }
+                                restartStates.run();
+                                rapidActionsPreviewLayout.restart();
+                                NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.storiesEnabledUpdate);
                             })
-                            .preferenceValue(OctoConfig.INSTANCE.openArchiveOnPull)
-                            .title(getString(R.string.OpenArchiveOnPull))
-                            .description(getString(R.string.OpenArchiveOnPull_Desc))
-                            .build());
-                })
-                .category(getString(R.string.MediaTab), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.activeNoiseSuppression)
-                            .title(getString(R.string.VoiceImprovements))
-                            .description(getString(R.string.VoiceImprovements_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.playGifAsVideo)
-                            .title(getString(R.string.PlayGifsAsVideo))
-                            .description(getString(R.string.PlayGifsAsVideo_Desc))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.unmuteVideosWithVolumeDown)
-                            .title(getString(R.string.UnmuteWithVolumeDown))
-                            .description(getString(R.string.UnmuteWithVolumeDown_Desc))
-                            .build());
-                })
-                .category(getString(R.string.DoubleTapActionsHeader), category -> {
-                    category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.doubleTapAction)
-                            .options(composeDoubleTapOptions(false))
-                            .onSelected(() -> canShowSelectReaction.setValue(OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue()))
-                            .title(getString(R.string.PreferredActionIncoming))
+                            .preferenceValue(OctoConfig.INSTANCE.rapidActionsDefaultConfig)
+                            .title(getString(R.string.ImproveRapidActionsDefault))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.doubleTapActionOut)
-                            .options(composeDoubleTapOptions(true))
-                            .onSelected(() -> canShowSelectReaction.setValue(OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue()))
-                            .title(getString(R.string.PreferredActionOutgoing))
+                            .supplierOptions(composeOptions(true, false))
+                            .onSelected(() -> {
+                                restartStates.run();
+                                rapidActionsPreviewLayout.restart();
+                                NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.storiesEnabledUpdate);
+                            })
+                            .currentValue(OctoConfig.INSTANCE.rapidActionsMainButtonAction)
+                            .title(getString(R.string.ImproveRapidActionsMainButtonAction))
+                            .showIf(OctoConfig.INSTANCE.rapidActionsDefaultConfig, true)
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .supplierOptions(composeOptions(true, true))
+                            .onSelected(restartStates)
+                            .currentValue(OctoConfig.INSTANCE.rapidActionsMainButtonActionLongPress)
+                            .title(getString(R.string.ImproveRapidActionsMainButtonActionLongPress))
+                            .showIf(canChooseSecondaryButtonAction)
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .supplierOptions(composeOptions(false, false))
+                            .onSelected(() -> {
+                                restartStates.run();
+                                rapidActionsPreviewLayout.restart();
+                                NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.storiesEnabledUpdate);
+                            })
+                            .currentValue(OctoConfig.INSTANCE.rapidActionsSecondaryButtonAction)
+                            .title(getString(R.string.ImproveRapidActionsSecondaryButtonAction))
+                            .showIf(canChooseSecondaryButtonAction)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(rapidActionsPreviewLayout::restart)
+                            .preferenceValue(OctoConfig.INSTANCE.useSquaredFab)
+                            .title(R.string.SquaredFab)
+                            .requiresRestart(true)
+                            .build());
+                })
+                .category(getString(R.string.FontEmojisHeader), category -> {
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new EmojiPackSettings()))
+                            .value(CustomEmojiController.getSelectedPackName())
+                            .icon(OctoUtils.getPetIconFixed())
+                            .title(getString(R.string.EmojiSets))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .icon(OctoUtils.getPetIconFixed())
-                            .onClick(() -> fragment.presentFragment(new ReactionsDoubleTapManageActivity()))
-                            .showIf(canShowSelectReaction)
-                            .title(getString(R.string.CustomEmojiReaction))
+                            .onClick(() -> {
+                                AndroidUtilities.clearTypefaceCache();
+                                Parcelable recyclerViewState = null;
+                                if (fragment.getListView().getLayoutManager() != null)
+                                    recyclerViewState = fragment.getListView().getLayoutManager().onSaveInstanceState();
+                                fragment.getParentLayout().rebuildAllFragmentViews(true, true);
+                                fragment.getListView().getLayoutManager().onRestoreInstanceState(recyclerViewState);
+                            })
+                            .icon(R.drawable.msg_text_outlined)
+                            .preferenceValue(OctoConfig.INSTANCE.useSystemFont)
+                            .title(getString(R.string.UseSystemFont))
+                            .requiresRestart(true)
                             .build());
                 })
                 .category(getString(R.string.Notifications), category -> {
@@ -290,7 +207,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.accentColorAsNotificationColor)
                             .title(getString(R.string.AccentColorAsNotificationColor))
                             .build());
-                    category.row(enableSmartNotificationsSwitchRow = new SwitchRow.SwitchRowBuilder()
+                    category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> {
                                 checkSmartNotificationsEnabled(fragment);
                                 return true;
@@ -302,41 +219,84 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .build();
     }
 
-    private List<PopupChoiceDialogOption> composeDoubleTapOptions(boolean isOut) {
-        Map<DoubleTapAction, OptionData> baseOptions = new LinkedHashMap<>();
-        baseOptions.put(DoubleTapAction.DISABLED, new OptionData(R.string.Disable, R.drawable.msg_block));
-        baseOptions.put(DoubleTapAction.REACTION, new OptionData(R.string.Reaction, -1));
-        baseOptions.put(DoubleTapAction.COPY, new OptionData(R.string.Copy, R.drawable.msg_copy));
-        baseOptions.put(DoubleTapAction.FORWARD, new OptionData(R.string.Forward, R.drawable.msg_forward));
-        baseOptions.put(DoubleTapAction.REPLY, new OptionData(R.string.Reply, R.drawable.menu_reply));
-        baseOptions.put(DoubleTapAction.DELETE, new OptionData(R.string.Delete, R.drawable.msg_delete));
-        baseOptions.put(DoubleTapAction.SAVE, new OptionData(R.string.Save, R.drawable.msg_saved));
-        baseOptions.put(DoubleTapAction.TRANSLATE, new OptionData(R.string.TranslateMessage, R.drawable.msg_translate));
+    private Supplier<List<PopupChoiceDialogOption>> composeOptions(boolean isMainButton, boolean isLongPress) {
+        return () -> {
+            ArrayList<PopupChoiceDialogOption> options = new ArrayList<>();
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.HIDDEN.getValue())
+                    .setItemIcon(R.drawable.msg_cancel)
+                    .setItemTitle(getString(isLongPress ? R.string.SlowmodeOff : R.string.CameraButtonPosition_Hidden)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.POST_STORY.getValue())
+                    .setItemIcon(R.drawable.msg_camera)
+                    .setItemTitle(getString(R.string.AccDescrCaptureStory)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SEND_MESSAGE.getValue())
+                    .setItemIcon(R.drawable.msg_message_s)
+                    .setItemTitle(getString(R.string.NewMessageTitle)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SAVED_MESSAGES.getValue())
+                    .setItemIcon(R.drawable.msg_saved)
+                    .setItemTitle(getString(R.string.SavedMessages)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.ARCHIVED_CHATS.getValue())
+                    .setItemIcon(R.drawable.msg_archive)
+                    .setItemTitle(getString(R.string.ArchivedChats)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SETTINGS.getValue())
+                    .setItemIcon(R.drawable.msg_settings)
+                    .setItemTitle(getString(R.string.Settings)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.LOCKED_CHATS.getValue())
+                    .setItemIcon(R.drawable.edit_passcode)
+                    .setItemTitle(getString(R.string.LockedChats)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.PROXY.getValue())
+                    .setItemIcon(R.drawable.msg2_proxy_off)
+                    .setItemTitle(getString(R.string.Proxy)));
+            options.add(new PopupChoiceDialogOption()
+                    .setId(InterfaceRapidButtonsActions.SEARCH.getValue())
+                    .setItemIcon(R.drawable.msg_search)
+                    .setItemTitle(getString(R.string.Search)));
 
-        List<PopupChoiceDialogOption> options = new ArrayList<>();
-
-        for (Map.Entry<DoubleTapAction, OptionData> entry : baseOptions.entrySet()) {
-            PopupChoiceDialogOption option = new PopupChoiceDialogOption()
-                    .setId(entry.getKey().getValue())
-                    .setItemTitle(getString(entry.getValue().titleResId));
-
-            if (entry.getKey() == DoubleTapAction.REACTION) {
-                option.setItemIcon(OctoUtils.getPetIconFixed());
-            } else {
-                option.setItemIcon(entry.getValue().iconResId);
+            for (PopupChoiceDialogOption option : options) {
+                checkButtonActions(isMainButton, isLongPress, option);
             }
 
-            options.add(option);
+            return options;
+        };
+    }
+
+    private void checkButtonActions(boolean isMainButton, boolean isLongPress, PopupChoiceDialogOption data) {
+        if (data.id == InterfaceRapidButtonsActions.HIDDEN.getValue()) {
+            return;
         }
 
-        if (isOut) {
-            options.add(new PopupChoiceDialogOption()
-                    .setId(DoubleTapAction.EDIT.getValue())
-                    .setItemTitle(getString(R.string.Edit))
-                    .setItemIcon(R.drawable.msg_edit));
-        }
+        data.setClickable(!(
+                (
+                        isMainButton && OctoConfig.INSTANCE.rapidActionsSecondaryButtonAction.getValue() == data.id
+                ) || (
+                        isMainButton && !isLongPress && OctoConfig.INSTANCE.rapidActionsMainButtonActionLongPress.getValue() == data.id
+                ) || (
+                        isMainButton && isLongPress && OctoConfig.INSTANCE.rapidActionsMainButtonAction.getValue() == data.id
+                ) || (
+                        !isMainButton && OctoConfig.INSTANCE.rapidActionsMainButtonAction.getValue() == data.id
+                )
+        ));
 
-        return options;
+        if (data.id == InterfaceRapidButtonsActions.POST_STORY.getValue()) {
+            for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
+                UserConfig userConfig = UserConfig.getInstance(a);
+                if (!userConfig.isClientActivated()) {
+                    continue;
+                }
+                boolean storiesEnabled = MessagesController.getInstance(a).storiesEnabled();
+                if (!storiesEnabled) {
+                    data.setItemDescription(R.string.ImproveRapidActionsMainButtonActionStoriesUnavailableLong);
+                    break;
+                }
+            }
+        }
     }
 
     private void checkSmartNotificationsEnabled(PreferencesFragment fragment) {
@@ -351,5 +311,31 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                 .show();
     }
 
-    private record OptionData(int titleResId, int iconResId) {}
+    private void editCustomName(PreferencesFragment fragment, Context context) {
+        var bottomSheet = new CustomActionBarTitleBottomSheet(context, new CustomActionBarTitleBottomSheet.CustomActionBarTitleCallback() {
+            @Override
+            public void didRenameSuccessfully(String customName) {
+                OctoConfig.INSTANCE.actionBarCustomTitle.updateValue(customName);
+                OctoConfig.INSTANCE.actionBarTitleOption.updateValue(ActionBarTitleOption.CUSTOM.getValue());
+                fragment.rebuildAllFragmentsWithLast();
+            }
+
+            @Override
+            public void didReset() {
+                OctoConfig.INSTANCE.actionBarCustomTitle.updateValue("Home");
+                OctoConfig.INSTANCE.actionBarTitleOption.updateValue(ActionBarTitleOption.EMPTY.getValue());
+                fragment.rebuildAllFragmentsWithLast();
+            }
+        });
+        bottomSheet.show();
+    }
+
+    private String getCustomNameStatus() {
+        String customName = OctoConfig.INSTANCE.actionBarCustomTitle.getValue();
+        if (TextUtils.isEmpty(customName)) {
+            customName = getString(R.string.ActionBarTitleCustomEmpty);
+        }
+
+        return customName;
+    }
 }

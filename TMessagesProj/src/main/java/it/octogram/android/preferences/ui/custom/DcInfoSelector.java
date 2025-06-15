@@ -10,8 +10,13 @@ package it.octogram.android.preferences.ui.custom;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
 import android.util.TypedValue;
@@ -19,13 +24,13 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-
-import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
@@ -36,6 +41,7 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.PeerColorActivity;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 import it.octogram.android.Datacenter;
@@ -54,11 +60,18 @@ public class DcInfoSelector extends FrameLayout {
     private FrameLayout profileViewFrame;
     private PeerColorActivity.ProfilePreview profilePreview;
     private int lastState = -1;
+    private boolean wasShown = false;
     private final TLRPC.User user = AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().getCurrentUser();
     private final Integer dc_id = AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId();
     private static final String telegramBotApiChatId = "-1001966997491";
     private final String defaultChatId = String.format(Locale.US, "%s", user.id);
     private final Theme.ResourcesProvider resourceProvider;
+
+    private final FrameLayout navigationLayout;
+    private final ImageView hiddenViewImage;
+    private AnimatorSet discussValueAnimator;
+
+    private final PorterDuffColorFilter defaultHiddenImageFilter;
 
     public DcInfoSelector(Context context, Theme.ResourcesProvider resourceProvider) {
         super(context);
@@ -72,11 +85,30 @@ public class DcInfoSelector extends FrameLayout {
 
         GradientDrawable border = new GradientDrawable();
         border.setShape(GradientDrawable.RECTANGLE);
-        border.setStroke(dp(1), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourceProvider), 150), dp(5), dp(5));
+        border.setStroke(dp(1), Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourceProvider), dp(5), dp(5));
+        border.setAlpha(150);
         border.setCornerRadius(dp(25));
         internalFrameLayout.setBackground(border);
+        
+        navigationLayout = getNavigationLayout(context);
+        navigationLayout.setAlpha(OctoConfig.INSTANCE.showDcId.getValue() ? 1f : 0.2f);
+        internalFrameLayout.addView(navigationLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
-        internalFrameLayout.addView(getNavigationLayout(context), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        hiddenViewImage = new ImageView(getContext());
+        hiddenViewImage.setImageResource(R.drawable.msg_archive_hide);
+        hiddenViewImage.setAlpha(OctoConfig.INSTANCE.showDcId.getValue() ? 0f : 1f);
+        hiddenViewImage.setScaleType(ImageView.ScaleType.CENTER);
+        hiddenViewImage.setColorFilter(defaultHiddenImageFilter = new PorterDuffColorFilter(Theme.getColor(Theme.key_chat_fieldOverlayText), PorterDuff.Mode.SRC_IN));
+        internalFrameLayout.addView(hiddenViewImage, LayoutHelper.createFrame(48, 48, Gravity.CENTER));
+        wasShown = OctoConfig.INSTANCE.showDcId.getValue();
+
+        if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) {
+            MessagesController.PeerColor color = getOwnPeerColorState();
+            if (color != null) {
+                hiddenViewImage.setColorFilter(new PorterDuffColorFilter(color.getStoryColor1(Theme.isCurrentThemeDark()), PorterDuff.Mode.SRC_IN));
+                editedColorFix = true;
+            }
+        }
 
         setPadding(dp(15), dp(15), dp(15), dp(15));
         addView(internalFrameLayout, new FrameLayout.LayoutParams(
@@ -105,21 +137,14 @@ public class DcInfoSelector extends FrameLayout {
         telegramView = composeTelegramView(context, longCaption, getCurrentChatIDFormat());
         navigationFrame.addView(telegramView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.LEFT));
 
-        MessagesController.PeerColors peerColors = MessagesController.getInstance(UserConfig.selectedAccount).profilePeerColors;
-        MessagesController.PeerColor peerColor = peerColors == null ? null : peerColors.getColor(UserObject.getProfileColorId(user));
-        boolean canUsePeerColors = false;
-        if (peerColor != null)  {
-            canUsePeerColors = peerColor.getBgColor1(Theme.isCurrentThemeDark()) != peerColor.getBgColor2(Theme.isCurrentThemeDark());
-            canUsePeerColors &= peerColor.getBgColor1(Theme.isCurrentThemeDark()) != Theme.getColor(Theme.key_windowBackgroundWhite);
-            canUsePeerColors &= peerColor.getBgColor2(Theme.isCurrentThemeDark()) != Theme.getColor(Theme.key_windowBackgroundWhite);
-        }
+        MessagesController.PeerColor peerColor = getOwnPeerColorState();
 
         profileViewFrame = new FrameLayout(context);
         GradientDrawable border2 = new GradientDrawable(
                 GradientDrawable.Orientation.BOTTOM_TOP,
                 new int[]{
-                        canUsePeerColors ? peerColor.getBgColor1(Theme.isCurrentThemeDark()) : Theme.getColor(Theme.key_avatar_backgroundActionBarBlue),
-                        canUsePeerColors ? peerColor.getBgColor2(Theme.isCurrentThemeDark()) : Theme.getColor(Theme.key_avatar_backgroundActionBarBlue)
+                        peerColor != null ? peerColor.getBgColor1(Theme.isCurrentThemeDark()) : Theme.getColor(Theme.key_avatar_backgroundActionBarBlue),
+                        peerColor != null ? peerColor.getBgColor2(Theme.isCurrentThemeDark()) : Theme.getColor(Theme.key_avatar_backgroundActionBarBlue)
                 }
         );
         border2.setCornerRadius(dp(25));
@@ -134,6 +159,23 @@ public class DcInfoSelector extends FrameLayout {
         preloadUI();
 
         return navigationFrame;
+    }
+
+    private MessagesController.PeerColor getOwnPeerColorState() {
+        if (!UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+            return null;
+        }
+
+        MessagesController.PeerColors peerColors = MessagesController.getInstance(UserConfig.selectedAccount).profilePeerColors;
+        MessagesController.PeerColor peerColor = peerColors == null ? null : peerColors.getColor(UserObject.getProfileColorId(user));
+        boolean canUsePeerColors = false;
+        if (peerColor != null)  {
+            canUsePeerColors = peerColor.getBgColor1(Theme.isCurrentThemeDark()) != peerColor.getBgColor2(Theme.isCurrentThemeDark());
+            canUsePeerColors &= peerColor.getBgColor1(Theme.isCurrentThemeDark()) != Theme.getColor(Theme.key_windowBackgroundWhite);
+            canUsePeerColors &= peerColor.getBgColor2(Theme.isCurrentThemeDark()) != Theme.getColor(Theme.key_windowBackgroundWhite);
+        }
+
+        return canUsePeerColors ? peerColor : null;
     }
 
     private LinearLayout composeTelegramView(Context context, String valueText, String idText) {
@@ -185,6 +227,8 @@ public class DcInfoSelector extends FrameLayout {
     public void update() {
         int currentState = OctoConfig.INSTANCE.dcIdStyle.getValue();
 
+        updateShowDcId();
+
         if (lastState == currentState) {
             return;
         }
@@ -192,24 +236,53 @@ public class DcInfoSelector extends FrameLayout {
         int lastStateSaved = lastState;
         lastState = currentState;
 
-        if (currentState == DcIdStyle.NONE.getValue()) {
-            return;
-        }
-
-        boolean disableAnimations = lastStateSaved == DcIdStyle.NONE.getValue();
-
         View toHide, toShow;
-        if (disableAnimations) {
-            animateChild(owlgramView, true, true);
-            animateChild(telegramView, true, true);
-            animateChild(profileViewFrame, true, true);
-        } else if ((toHide = getAssocChild(lastStateSaved)) != null) {
-            animateChild(toHide, true, false);
+        if ((toHide = getAssocChild(lastStateSaved)) != null) {
+            animateChild(toHide, true);
         }
 
         if ((toShow = getAssocChild(currentState)) != null) {
-            animateChild(toShow, false, disableAnimations);
+            animateChild(toShow, false);
         }
+    }
+
+    private boolean editedColorFix = false;
+    private void updateShowDcId() {
+        boolean isShow = OctoConfig.INSTANCE.showDcId.getValue();
+        if (isShow == wasShown) {
+            return;
+        }
+
+        if (!isShow) {
+            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() && !editedColorFix) {
+                MessagesController.PeerColor color = getOwnPeerColorState();
+                if (color != null) {
+                    hiddenViewImage.setColorFilter(new PorterDuffColorFilter(color.getStoryColor1(Theme.isCurrentThemeDark()), PorterDuff.Mode.SRC_IN));
+                    editedColorFix = true;
+                }
+            } else if (OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.MINIMAL.getValue() && editedColorFix) {
+                hiddenViewImage.setColorFilter(defaultHiddenImageFilter);
+                editedColorFix = false;
+            }
+        }
+
+        if (discussValueAnimator != null) {
+            discussValueAnimator.cancel();
+            discussValueAnimator = null;
+        }
+
+        wasShown = isShow;
+
+        ArrayList<Animator> animators = new ArrayList<>();
+        animators.add(ObjectAnimator.ofFloat(navigationLayout, "alpha", isShow ? 0.2f : 1f, isShow ? 1f : 0.2f));
+        animators.add(ObjectAnimator.ofFloat(hiddenViewImage, "alpha", isShow ? 1f : 0f, isShow ? 0f : 1f));
+        animators.add(ObjectAnimator.ofFloat(hiddenViewImage, "scaleX", isShow ? 1f : 0.6f, isShow ? 0.6f : 1f));
+        animators.add(ObjectAnimator.ofFloat(hiddenViewImage, "scaleY", isShow ? 1f : 0.6f, isShow ? 0.6f : 1f));
+
+        AnimatorSet set = discussValueAnimator = new AnimatorSet();
+        set.setDuration(200);
+        set.playTogether(animators);
+        set.start();
     }
 
     public void updateChatID() {
@@ -232,14 +305,7 @@ public class DcInfoSelector extends FrameLayout {
         return OctoConfig.INSTANCE.dcIdType.getValue() == DcIdType.BOT_API.getValue() ? telegramBotApiChatId : defaultChatId;
     }
 
-    private void animateChild(View view, boolean disappear, boolean disableAnimations) {
-        if (disableAnimations) {
-            view.setAlpha(disappear ? 0f : 1f);
-            view.setScaleX(1f);
-            view.setScaleY(1f);
-            return;
-        }
-
+    private void animateChild(View view, boolean disappear) {
         view.setAlpha(disappear ? 1f : 0f);
         view.setScaleX(disappear ? 1f : 0.8f);
         view.setScaleY(disappear ? 1f : 0.8f);

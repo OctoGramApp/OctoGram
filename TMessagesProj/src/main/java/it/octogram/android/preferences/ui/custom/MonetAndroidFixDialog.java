@@ -93,7 +93,8 @@ public class MonetAndroidFixDialog extends CustomBottomSheet {
     public static void showDialog(BaseFragment fragment) {
         try {
             new MonetAndroidFixDialog(fragment).show();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     @Override

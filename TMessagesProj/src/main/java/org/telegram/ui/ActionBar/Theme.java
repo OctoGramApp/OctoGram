@@ -2535,8 +2535,7 @@ public class Theme {
         }
 
         public boolean isLight() {
-            //return pathToFile == null && !isDark();
-            return !isDark();
+            return pathToFile == null && !isDark();
         }
 
         public String getKey() {
@@ -6799,7 +6798,7 @@ public class Theme {
         applyProfileTheme();
         applyChatTheme(false, bg);
         boolean checkNavigationBarColor = !hasPreviousTheme;
-        AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.didSetNewTheme, false, checkNavigationBarColor));
+        AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.didSetNewTheme, false, checkNavigationBarColor, true));
     }
 
     public static boolean hasHue(int color) {
@@ -7358,7 +7357,7 @@ public class Theme {
                 switchingNightTheme = false;
             }
         } else {
-            if (currentTheme != currentDayTheme && (currentTheme == null || currentDayTheme != null && currentTheme.isLight() != currentDayTheme.isLight())) {
+            if (currentTheme != currentDayTheme && (currentTheme == null || currentDayTheme != null && currentTheme.isDark() != currentDayTheme.isDark())) {
                 isInNigthMode = false;
                 lastThemeSwitchTime = SystemClock.elapsedRealtime();
                 switchingNightTheme = true;
@@ -8289,7 +8288,7 @@ public class Theme {
                             finished = true;
                             break;
                         } else {
-                            var isAndroid12OrHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+                            boolean isAndroid12OrHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
                             if ((idx = line.indexOf('=')) != -1) {
                                 String key = line.substring(0, idx);
                                 String param = line.substring(idx + 1).trim();
@@ -8305,8 +8304,7 @@ public class Theme {
                                 } else {
                                     value = Utilities.parseInt(param);
                                 }
-                                int keyFromString;
-                                keyFromString = ThemeColors.stringKeyToInt(key);
+                                int keyFromString = ThemeColors.stringKeyToInt(key);
                                 if (keyFromString >= 0) {
                                     stringMap.put(keyFromString, value);
                                 }

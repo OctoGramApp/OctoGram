@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai.helper;
+package it.octogram.android.ai.gemini;
 
 import android.graphics.BitmapFactory;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.Executor;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ai.AiPrompt;
-import it.octogram.android.ai.gemini.GeminiModels;
+import it.octogram.android.ai.MainAiHelper;
 import it.octogram.android.logs.OctoLogging;
 
 public class GeminiHelper {

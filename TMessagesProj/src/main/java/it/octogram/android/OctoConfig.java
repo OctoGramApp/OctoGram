@@ -39,7 +39,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.ai.CustomModelsHelper;
+import it.octogram.android.ai.groq.GroqModels;
 import it.octogram.android.ai.openrouter.OpenRouterModels;
 import it.octogram.android.camerax.CameraXUtils;
 import it.octogram.android.drawer.MenuOrderController;
@@ -66,6 +67,7 @@ public class OctoConfig {
     public static final String AI_EXAMPLE_CHANNEL_TAG = "OctoModels";
 
     /*General*/
+    public final ConfigProperty<Boolean> showDcId = newConfigProperty("showDcId", true);
     public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM.getValue());
     public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API.getValue());
     public final ConfigProperty<Boolean> registrationDateInProfiles = newConfigProperty("registrationDateInProfiles", false);
@@ -97,6 +99,9 @@ public class OctoConfig {
     public final ConfigProperty<String> pinnedEmojisList = newConfigProperty("pinnedEmojisList", "[]");
     public final ConfigProperty<Boolean> usePinnedHashtagsFeature = newConfigProperty("usePinnedHashtagsFeature", false);
     public final ConfigProperty<String> pinnedHashtagsList = newConfigProperty("pinnedHashtagsList", "[]");
+    public final ConfigProperty<Boolean> hideBottomBarChannels = newConfigProperty("hideBottomBarChannels", false);
+    public final ConfigProperty<Boolean> hideChatButtonChannels = newConfigProperty("hideChatButtonChannels", false);
+    public final ConfigProperty<Boolean> hideGiftButtonChannels = newConfigProperty("hideGiftButtonChannels", false);
 
     /* Privacy */
     public final ConfigProperty<Boolean> hidePhoneNumber = newConfigProperty("hidePhoneNumber", true);
@@ -142,6 +147,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> numberRounding = newConfigProperty("numberRounding", false);
     public final ConfigProperty<Boolean> pencilIconForEditedMessages = newConfigProperty("pencilIconForEditedMessages", false);
     public final ConfigProperty<Boolean> searchIconInHeader = newConfigProperty("searchIconInHeader", false);
+    public final ConfigProperty<Boolean> headerLongPressSearch = newConfigProperty("headerLongPressSearch", true);
     public final ConfigProperty<Boolean> slidingTitle = newConfigProperty("slidingTitle", false);
     public final ConfigProperty<Integer> eventType = newConfigProperty("eventType", EventType.NONE.getValue());
     public final ConfigProperty<Integer> maxStickerSize = newConfigProperty("maxStickerSize", 14);
@@ -207,6 +213,7 @@ public class OctoConfig {
     // public final ConfigProperty<Boolean> cameraXLowLightBoost = newConfigProperty("cameraXLowLightBoost", false);
 
     /*Experiments*/
+    public final ConfigProperty<Boolean> useFluentNavigationBar = newConfigProperty("useFluentNavigationBar", false);
     public final ConfigProperty<Boolean> moreHapticFeedbacks = newConfigProperty("moreHapticFeedbacks", false);
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
@@ -225,14 +232,11 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> useTranslationsArgsFix = newConfigProperty("useTranslationsArgsFix", true);
     public final ConfigProperty<Boolean> forceHideLockScreenPopup = newConfigProperty("forceHideLockScreenPopup", false);
     public final ConfigProperty<Integer> uiTitleCenteredState = newConfigProperty("uiTitleCenteredState", ActionBarCenteredTitle.NEVER.getValue());
-    public final ConfigProperty<Boolean> uiImmersivePopups = newConfigProperty("uiImmersivePopups", false);
     public final ConfigProperty<Integer> interfaceSwitchUI = newConfigProperty("interfaceSwitchUI", InterfaceSwitchUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> interfaceCheckboxUI = newConfigProperty("interfaceCheckboxUI", InterfaceCheckboxUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> interfaceSliderUI = newConfigProperty("interfaceSliderUI", InterfaceSliderUI.DEFAULT.getValue());
     public final ConfigProperty<Integer> uiIconsType = newConfigProperty("uiIconsType", IconsUIType.DEFAULT.getValue());
-    public final ConfigProperty<Boolean> uiRandomMemeIcons = newConfigProperty("uiRandomMemeIcons", false);
     public final ConfigProperty<Boolean> useSquaredFab = newConfigProperty("useSquaredFab", false);
-    public final ConfigProperty<Boolean> hideBottomBarChannels = newConfigProperty("hideBottomBarChannels", false);
     public final ConfigProperty<Boolean> hideOpenButtonChatsList = newConfigProperty("hideOpenButtonChatsList", false);
     public final ConfigProperty<Boolean> alwaysExpandBlockQuotes = newConfigProperty("alwaysExpandBlockQuotes", false);
     public final ConfigProperty<Boolean> profileBubbleHideBorder = newConfigProperty("profileBubbleHideBorder", false);
@@ -262,13 +266,6 @@ public class OctoConfig {
     /*AI Features */
     public final ConfigProperty<Boolean> aiFeatures = newConfigProperty("aiFeatures", false);
     public final ConfigProperty<Boolean> aiFeaturesAcceptedTerms = newConfigProperty("aiFeaturesAcceptedTerms", false);
-    public final ConfigProperty<Boolean> aiFeaturesUseGoogleAPIs = newConfigProperty("aiFeaturesUseGoogleAPIs", false);
-    public final ConfigProperty<String> aiFeaturesUseGoogleAPIKey = newConfigProperty("aiFeaturesUseGoogleAPIKey", "");
-    public final ConfigProperty<Boolean> aiFeaturesUseChatGPTAPIs = newConfigProperty("aiFeaturesUseChatGPTAPIs", false);
-    public final ConfigProperty<String> aiFeaturesUseChatGPTAPIKey = newConfigProperty("aiFeaturesUseChatGPTAPIKey", "");
-    public final ConfigProperty<Boolean> aiFeaturesUseOpenRouterAPIs = newConfigProperty("aiFeaturesUseOpenRouterAPIs", false);
-    public final ConfigProperty<String> aiFeaturesOpenRouterAPIKey = newConfigProperty("aiFeaturesOpenRouterAPIKey", "");
-    public final ConfigProperty<String> aiFeaturesOpenRouterSelectedModel = newConfigProperty("aiFeaturesOpenRouterSelectedModel", OpenRouterModels.GOOGLE_GEMINI_2_0_FLASH_EXP);
     public final ConfigProperty<Integer> aiFeaturesRecentProvider = newConfigProperty("aiFeaturesRecentProvider", -1);
     public final ConfigProperty<Boolean> aiFeaturesTranslateMessages = newConfigProperty("aiFeaturesTranslateMessages", true);
     public final ConfigProperty<Boolean> aiFeaturesChatContext = newConfigProperty("aiFeaturesChatContext", true);
@@ -278,6 +275,29 @@ public class OctoConfig {
     public final ConfigProperty<String> aiFeaturesLastUsedLanguage = newConfigProperty("aiFeaturesLastUsedLanguage", "");
     public final ConfigProperty<Integer> aiFeaturesLastUsedFormality = newConfigProperty("aiFeaturesLastUsedFormality", 0);
     public final ConfigProperty<Integer> aiFeaturesLastUsedLength = newConfigProperty("aiFeaturesLastUsedLength", 0);
+
+    /* Gemini */
+    public final ConfigProperty<Boolean> aiFeaturesUseGoogleAPIs = newConfigProperty("aiFeaturesUseGoogleAPIs", false);
+    public final ConfigProperty<String> aiFeaturesUseGoogleAPIKey = newConfigProperty("aiFeaturesUseGoogleAPIKey", "");
+
+    /* ChatGPT */
+    public final ConfigProperty<Boolean> aiFeaturesUseChatGPTAPIs = newConfigProperty("aiFeaturesUseChatGPTAPIs", false);
+    public final ConfigProperty<String> aiFeaturesUseChatGPTAPIKey = newConfigProperty("aiFeaturesUseChatGPTAPIKey", "");
+
+    /* OpenRouter */
+    public final ConfigProperty<Boolean> aiFeaturesUseOpenRouterAPIs = newConfigProperty("aiFeaturesUseOpenRouterAPIs", false);
+    public final ConfigProperty<String> aiFeaturesOpenRouterAPIKey = newConfigProperty("aiFeaturesOpenRouterAPIKey", "");
+    public final ConfigProperty<String> aiFeaturesOpenRouterSelectedModel = newConfigProperty("aiFeaturesOpenRouterSelectedModel", OpenRouterModels.GOOGLE_GEMINI_2_0_FLASH_EXP_FREE);
+
+    /* Groq */
+    public final ConfigProperty<Boolean> aiFeaturesUseGroqAPIs = newConfigProperty("aiFeaturesUseGroqAPIs", false);
+    public final ConfigProperty<String> aiFeaturesUseGroqAPIKey = newConfigProperty("aiFeaturesUseGroqAPIKey", "");
+    public final ConfigProperty<String> aiFeaturesGroqSelectedModel = newConfigProperty("aiFeaturesGroqSelectedModel", GroqModels.LLAMA3_70B_8192);
+
+    /* Ollama */
+    public final ConfigProperty<Boolean> aiFeaturesUseOllamaAPIs = newConfigProperty("aiFeaturesUseOllamaAPIs", false);
+    public final ConfigProperty<String> aiFeaturesOllamaApiUrl = newConfigProperty("aiFeaturesOllamaApiUrl", "");
+    public final ConfigProperty<String> aiFeaturesOllamaSelectedModel = newConfigProperty("aiFeaturesOllamaSelectedModel", "NO_MODEL");
 
     /*Lite Mode: sync power saver with device settings*/
     public final ConfigProperty<Boolean> syncPowerSaver = newConfigProperty("syncPowerSaver", false);
@@ -414,6 +434,15 @@ public class OctoConfig {
                         return true;
                     }
                 }
+            } else if (property.getKey().equals(dcIdStyle.getKey())) {
+                if (PREFS.contains("dcIdStyle")) {
+                    int val = PREFS.getInt("dcIdStyle", 0);
+                    if (val == 0) {
+                        showDcId.updateValue(false);
+                        property.updateValue(DcIdStyle.OWLGRAM.getValue());
+                        return true;
+                    }
+                }
             }
         }
 
@@ -528,7 +557,7 @@ public class OctoConfig {
         ArrayList<ConfigProperty<?>> availableProperties = new ArrayList<>();
         for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
             for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                if (option.property.getKey() != null) {
+                if (!option.isTitle && option.property != null && option.property.getKey() != null) {
                     availableProperties.add(option.property);
                 }
             }
@@ -609,23 +638,12 @@ public class OctoConfig {
         int changed = 0;
 
         try (FileInputStream downloadedFileStream = new FileInputStream(file)) {
-            InputStreamReader reader = new InputStreamReader(downloadedFileStream, StandardCharsets.UTF_8);
-            BufferedReader bufferedReader = new BufferedReader(reader);
-
-            StringBuilder jsonStringBuilder = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                jsonStringBuilder.append(line);
-            }
-
-            bufferedReader.close();
-
-            JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
+            JSONObject result = getJsonObject(downloadedFileStream);
 
             if (isJSONArrayValidData(result)) {
                 for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
                     for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                        if (option.property.getKey() != null && dataToImport.contains(option.property.getKey()) && result.has(option.property.getKey())) {
+                        if (!option.isTitle && option.property != null && option.property.getKey() != null && dataToImport.contains(option.property.getKey()) && result.has(option.property.getKey())) {
                             Object value = result.get(option.property.getKey());
                             if (option.property.getValue() instanceof Boolean && value instanceof Boolean v) {
                                 ((ConfigProperty<Boolean>) option.property).updateValue(v);
@@ -647,7 +665,7 @@ public class OctoConfig {
                                 ((ConfigProperty<String>) option.property).updateValue(reparseStringValue(option.property.getKey(), s));
                                 changed++;
                             } else if (option.property.getValue() instanceof String && value instanceof JSONArray a) {
-                                OctoLogging.e(TAG, "test parsjsong: "+a);
+                                OctoLogging.e(TAG, "test parsjsong: " + a);
                             }
                         }
                     }
@@ -662,11 +680,13 @@ public class OctoConfig {
                             for (int i = 0; i < array.length(); i++) {
                                 try {
                                     object.put(OctoUtils.generateRandomString().replace("-", ""), array.getJSONObject(i));
-                                } catch (JSONException ignored) {}
+                                } catch (JSONException ignored) {
+                                }
                             }
                             OctoConfig.INSTANCE.aiFeaturesCustomModels.updateValue(object.toString());
                         }
-                    } catch (JSONException ignored) {}
+                    } catch (JSONException ignored) {
+                    }
                     changed++;
                 }
 
@@ -687,12 +707,28 @@ public class OctoConfig {
         return changed;
     }
 
+    @NonNull
+    private static JSONObject getJsonObject(FileInputStream downloadedFileStream) throws IOException, JSONException {
+        InputStreamReader reader = new InputStreamReader(downloadedFileStream, StandardCharsets.UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+
+        StringBuilder jsonStringBuilder = new StringBuilder();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            jsonStringBuilder.append(line);
+        }
+
+        bufferedReader.close();
+
+        return new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
+    }
+
     private boolean isValueValid(String fieldName, int value) {
         return switch (fieldName) {
             case "blurEffectStrength" -> isValidInRange(value, 0, 255);
             case "cameraXResolution" -> isValidInRange(value, -1, 4096);
             case "dcIdStyle" ->
-                    isValidInRange(value, DcIdStyle.NONE.getValue(), DcIdStyle.MINIMAL.getValue());
+                    isValidInRange(value, DcIdStyle.OWLGRAM.getValue(), DcIdStyle.MINIMAL.getValue());
             case "dcIdType" ->
                     value == DcIdType.BOT_API.getValue() || value == DcIdType.TELEGRAM.getValue();
             case "doubleTapAction", "doubleTapActionOut" ->
@@ -772,26 +808,24 @@ public class OctoConfig {
     }
 
     private boolean isValueValid(String fieldName, JSONArray value) {
-        return switch (fieldName) {
-            case "ai_models" -> {
-                for (int i = 0; i < value.length(); i++) {
-                    try {
-                        JSONObject keyData = value.getJSONObject(i);
-                        if (!CustomModelsHelper.isValidModel(keyData)) {
-                            OctoLogging.d(TAG, "failed to import backup as an aiModel is invalid");
-                            yield false;
-                        }
-                    } catch (JSONException ignored) {
-                        OctoLogging.d(TAG, "failed to import backup as JSONException occurred during aiModels verify");
-                        yield false;
+        if ("ai_models".equals(fieldName)) {
+            for (int i = 0; i < value.length(); i++) {
+                try {
+                    JSONObject keyData = value.getJSONObject(i);
+                    if (!CustomModelsHelper.isValidModel(keyData)) {
+                        OctoLogging.d(TAG, "failed to import backup as an aiModel is invalid");
+                        return false;
                     }
+                } catch (JSONException ignored) {
+                    OctoLogging.d(TAG, "failed to import backup as JSONException occurred during aiModels verify");
+                    return false;
                 }
-                yield true;
             }
-            default -> false;
-        };
+            return true;
+        } else {
+            return false;
+        }
     }
-
     private String reparseStringValue(String fieldName, String value) {
         if (fieldName.equals("drawerItems")) {
             return MenuOrderController.reparseMenuItemsAsString(value);
@@ -818,7 +852,7 @@ public class OctoConfig {
         boolean hasInvolvedAccounts = false;
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
             long id = UserConfig.getInstance(a).clientUserId;
-            if (id > 0 && (preferences.contains("passcodeHash"+id) || preferences.contains("passcodeSalt"+id))) {
+            if (id > 0 && (preferences.contains("passcodeHash" + id) || preferences.contains("passcodeSalt" + id))) {
                 hasInvolvedAccounts = true;
                 break;
             }
@@ -888,7 +922,8 @@ public class OctoConfig {
         try {
             JSONArray jsonArray = new JSONArray(new JSONTokener(pinnedEmojisList.getValue()));
             return jsonArray.length() > 0;
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         return false;
     }
@@ -927,7 +962,8 @@ public class OctoConfig {
 
                 return EmojiStatus.CAN_BE_ADDED.getValue();
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         return EmojiStatus.UNAVAILABLE.getValue();
     }
@@ -977,13 +1013,15 @@ public class OctoConfig {
                     }
 
                     successHandled++;
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
 
                 if (successHandled >= 15) {
                     break;
                 }
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         return hashtags;
     }
@@ -1014,13 +1052,15 @@ public class OctoConfig {
                         successHandled++;
                     }
                     reactions.add(visibleReaction);
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
 
                 if (successHandled >= 5) {
                     break;
                 }
             }
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
 
         return reactions;
     }

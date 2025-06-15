@@ -1,18 +1,10 @@
-/*
- * This is the source code of OctoGram for Android
- * It is licensed under GNU GPL v2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
- *
- * Copyright OctoGram, 2023-2025.
- */
-
-package it.octogram.android.preferences.ui.custom;
+package it.octogram.android.preferences.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
-import android.app.Activity;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -34,6 +26,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,12 +38,16 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.ActionBarMenu;
+import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.HeaderCell;
+import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Components.AnimatedTextView;
-import org.telegram.ui.Components.BottomSheetWithRecyclerListView;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -64,8 +61,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
@@ -76,122 +73,169 @@ import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
-public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
-    private Activity originalActivity;
-    private final MessageObject message;
-    private final File file;
+public class ImportSettingsUI extends BaseFragment {
+    private MessageObject message;
+    private File file;
+    private ImportButton actionButton;
     private Adapter adapter;
-    private final ImportButton actionButton;
 
-    private final ArrayList<Item> items = new ArrayList<>();
-    private final ArrayList<Item> oldItems = new ArrayList<>();
+    private RecyclerListView recyclerListView;
+    private final ArrayList<ImportItem> items = new ArrayList<>();
+    private final ArrayList<ImportItem> oldItems = new ArrayList<>();
 
     private final ArrayList<String> mainCategoriesSelection = new ArrayList<>();
     private final ArrayList<String> dataToImport = new ArrayList<>();
     private final ArrayList<String> secureContexts = new ArrayList<>();
     private final ArrayList<String> availableKeysInBackup = new ArrayList<>();
 
+    private ImportSettingsScanHelper.SettingsScanCategory selectedCategory;
+
     private static boolean hasAuthorizedBiometric = false;
 
     private int totalImportableKeysCounter = 0;
-    private final List<String> expanded = new ArrayList<>();
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_CHECKBOX = 1;
     private static final int VIEW_TYPE_SWITCH = 2;
     private static final int VIEW_TYPE_INFO = 3;
+    private static final int VIEW_TYPE_MINIHEADER = 4;
+    private static final int VIEW_TYPE_SHADOW = 6;
 
-    public ImportSettingsBottomSheet(BaseFragment fragment, MessageObject message1) {
-        this(fragment, message1, null);
-    }
-
-    public ImportSettingsBottomSheet(BaseFragment fragment, File file) {
-        this(fragment, null, file);
-    }
-
-    public ImportSettingsBottomSheet(BaseFragment fragment, MessageObject message1, File file1) {
-        super(fragment.getContext(), fragment, false, false, false, true, ActionBarType.FADING, fragment.getResourceProvider());
-        hasAuthorizedBiometric = !FingerprintUtils.hasFingerprintCached();
-
-        Context context = fragment.getContext();
+    public void setData(MessageObject message1, File file1) {
         message = message1;
         file = file1;
+    }
+
+    @Override
+    public View createView(Context context) {
+        actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+        actionBar.setAllowOverlayTitle(true);
+        actionBar.setTitle(getString(R.string.ImportReady));
+        actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
+            @Override
+            public void onItemClick(int id) {
+                if (id == -1) {
+                    if (selectedCategory != null) {
+                        destroySelection();
+                    } else {
+                        finishFragment();
+                    }
+                } else if (id == 71 && message != null) {
+                    finishFragment();
+                    if (getParentActivity() != null) {
+                        AndroidUtilities.openForView(message, getParentActivity(), null, false);
+                    }
+                }
+            }
+        });
+
+        if (message != null) {
+            ActionBarMenu menu = actionBar.createMenu();
+            ActionBarMenuItem menuItem = menu.addItem(71, R.drawable.msg_openin);
+            menuItem.setContentDescription(getString(R.string.ImportReadyOpenFile));
+        }
 
         initDataToImportList();
 
-        setShowHandle(true);
-        fixNavigationBar();
+        fragmentView = new FrameLayout(context);
+        FrameLayout frameLayout = (FrameLayout) fragmentView;
+        frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
 
-        recyclerListView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerListView.setPadding(backgroundPaddingLeft, headerTotalHeight, backgroundPaddingLeft, dp(48+10+10 + (message == null ? 0 : 48)));
+        recyclerListView = new RecyclerListView(context);
+        recyclerListView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+        recyclerListView.setAdapter(adapter = new Adapter());
         recyclerListView.setOnItemClickListener((view, position, x, y) -> {
-            if (items.isEmpty() || (view == null) || (position < 0) || (position - 1 >= items.size())) {
+            if (items.isEmpty() || (view == null) || (position < 0) || (position >= items.size())) {
                 return;
             }
 
-            final Item item = items.get(position - 1);
+            final ImportItem item = items.get(position);
 
-            if (item.viewType == VIEW_TYPE_HEADER) {
+            if (item.viewType == VIEW_TYPE_HEADER || item.viewType == VIEW_TYPE_MINIHEADER || item.viewType == VIEW_TYPE_SHADOW || item.viewType == VIEW_TYPE_INFO) {
                 return;
             }
 
             handleOnClickPosition(view, item, x);
         });
-        this.takeTranslationIntoAccount = true;
         DefaultItemAnimator itemAnimator = getDefaultItemAnimator();
         recyclerListView.setItemAnimator(itemAnimator);
+        frameLayout.addView(recyclerListView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, 0, 0, 0, 0, 48 + 10 + 10));
 
-        SelectorBtnCell buttonContainer = new SelectorBtnCell(getContext(), resourcesProvider, null);
+        SelectorBtnCell buttonContainer = new SelectorBtnCell(getContext(), null,null);
         buttonContainer.setClickable(true);
         buttonContainer.setOrientation(LinearLayout.VERTICAL);
         buttonContainer.setPadding(dp(10), dp(0), dp(10), dp(10));
-        buttonContainer.setBackgroundColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
+        buttonContainer.setBackgroundColor(Theme.getColor(Theme.key_dialogBackground));
 
         actionButton = new ImportButton(context);
-        actionButton.setOnClickListener(e -> executeFileImport());
-        buttonContainer.addView(actionButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
+        actionButton.setOnClickListener(e -> {
+            if (selectedCategory != null) {
+                destroySelection();
+            } else {
+                executeFileImport();
+            }
+        });
+        buttonContainer.addView(actionButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 10, 0, 0));
 
-        if (message != null) {
-            TextView textView = new TextView(context);
-            textView.setGravity(Gravity.CENTER);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            textView.setText(getString(R.string.ImportReadyOpenFile));
-            textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
-            textView.setOnClickListener(view -> {
-                dismiss();
-                if (originalActivity != null) {
-                    AndroidUtilities.openForView(message, originalActivity, null, false);
-                }
-            });
-            buttonContainer.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
-        }
-
-        containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
+        frameLayout.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 0, 0, 0));
 
         updateItems();
         if (!secureContexts.isEmpty()) {
-            reloadActionButtonSize();
+            reloadActionButton();
         }
+
+        return fragmentView;
     }
 
     @Override
-    protected void onDismissWithTouchOutside() {
-        super.onDismissWithTouchOutside();
-        if (file != null && file.getPath().startsWith(AndroidUtilities.getCacheDir().getPath())) {
-            if (file.delete()) {
-                OctoLogging.d("ImportSettings", "File has been deleted after import: " + file.getAbsolutePath());
-            }
+    public void onBeginSlide() {
+        if (selectedCategory != null) {
+            return;
         }
+
+        super.onBeginSlide();
+    }
+
+    @Override
+    public boolean canBeginSlide() {
+        return selectedCategory == null;
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (selectedCategory != null) {
+            destroySelection();
+            return false;
+        }
+
+        return super.onBackPressed();
+    }
+
+    private void initSelection(ImportSettingsScanHelper.SettingsScanCategory category) {
+        initSelection(category, false);
+    }
+
+    private void initSelection(ImportSettingsScanHelper.SettingsScanCategory category, boolean fromBack) {
+        selectedCategory = category;
+        updateItems();
+        reloadActionButton();
+        actionBar.setTitleAnimated(category.getName(), !fromBack, 300);
+    }
+
+    private void destroySelection() {
+        if (selectedCategory != null && selectedCategory.refersTo != null) {
+            initSelection(selectedCategory.refersTo, true);
+            return;
+        }
+
+        selectedCategory = null;
+        updateItems();
+        reloadActionButton();
+        actionBar.setTitleAnimated(getString(R.string.ImportReady), false, 300);
     }
 
     @NonNull
     private DefaultItemAnimator getDefaultItemAnimator() {
-        DefaultItemAnimator itemAnimator = new DefaultItemAnimator() {
-            @Override
-            protected void onMoveAnimationUpdate(RecyclerView.ViewHolder holder) {
-                super.onMoveAnimationUpdate(holder);
-                containerView.invalidate();
-            }
-        };
+        DefaultItemAnimator itemAnimator = new DefaultItemAnimator();
         itemAnimator.setSupportsChangeAnimations(false);
         itemAnimator.setDelayAnimations(false);
         itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -206,7 +250,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
             boolean hasAvailableKey = false;
             for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                if (availableKeysInBackup.contains(option.property.getKey())) {
+                if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey())) {
                     hasAvailableKey = true;
                     if (!category.isSecureContext) {
                         dataToImport.add(option.property.getKey());
@@ -251,7 +295,8 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 String key = it.next();
                 availableKeysInBackup.add(key);
             }
-        } catch (IOException | JSONException ignored) {}
+        } catch (IOException | JSONException ignored) {
+        }
     }
 
     private void updateItems() {
@@ -259,37 +304,105 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         oldItems.addAll(items);
         items.clear();
 
-        items.add(Item.asHeader());
+        Runnable clearItems = () -> {
+            if (items.size() < 2) {
+                return;
+            }
+
+            ImportItem lastItem = items.get(items.size() - 1);
+            ImportItem previousItem = items.get(items.size() - 2);
+
+            if (lastItem.viewType == VIEW_TYPE_SHADOW) {
+                items.remove(lastItem);
+            } else if (lastItem.viewType == VIEW_TYPE_MINIHEADER && previousItem.viewType == VIEW_TYPE_SHADOW) {
+                items.removeAll(Arrays.asList(lastItem, previousItem));
+            }
+        };
+
+        if (selectedCategory != null) {
+            ImportItem mainTitleCategory = ImportItem.asSwitch(selectedCategory.categoryId, selectedCategory.categoryIcon, selectedCategory.getName());
+            items.add(mainTitleCategory);
+        }
+
+        items.add(ImportItem.asHeader(selectedCategory));
+
+        if (selectedCategory != null) {
+            ArrayList<ImportSettingsScanHelper.SettingsScanCategory> subCategories = ImportSettingsScanHelper.INSTANCE.getSubCategories(selectedCategory);
+            if (!subCategories.isEmpty()) {
+                ImportItem subMiniHeader = ImportItem.asMiniHeader("Sub categories");
+                items.add(subMiniHeader);
+                boolean hasCategories = false;
+                for (ImportSettingsScanHelper.SettingsScanCategory category : subCategories) {
+                    if (isCategoryAvailable(category)) {
+                        hasCategories = true;
+                        ImportItem mainTitleCategory = ImportItem.asSwitch(category.categoryId, category.categoryIcon, category.getName());
+                        items.add(mainTitleCategory);
+                    }
+                }
+                if (hasCategories) {
+                    items.add(ImportItem.asShadow());
+                } else {
+                    items.remove(subMiniHeader);
+                }
+            }
+        }
 
         for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
-            Item mainTitleCategory = Item.asSwitch(category.categoryIcon, category.getName(), category.categoryId);
-            items.add(mainTitleCategory);
+            if ((selectedCategory != null && selectedCategory != category) || !isCategoryAvailable(category)) {
+                continue;
+            }
 
-            boolean hasAvailableKey = false;
-            for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                if (availableKeysInBackup.contains(option.property.getKey())) {
-                    hasAvailableKey = true;
-                    if (expanded.contains(category.categoryId)) {
-                        items.add(Item.asCheckbox(option.getName(), option.property.getKey()));
+            if (selectedCategory == null && category.refersTo == null) {
+                ImportItem mainTitleCategory = ImportItem.asSwitch(category.categoryId, category.categoryIcon, category.getName());
+                items.add(mainTitleCategory);
+            }
+
+            if (selectedCategory == category) {// && mainCategoriesSelection.contains(category.categoryId)
+                for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+                    if (option.isTitle) {
+                        clearItems.run();
+                        items.add(ImportItem.asShadow());
+                        items.add(ImportItem.asMiniHeader(option.getName()));
+                    }
+
+                    if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey())) {
+                        items.add(ImportItem.asCheckbox(option.property.getKey(), option.getName()));
                     }
                 }
             }
 
-            if (!hasAvailableKey) {
-                items.remove(mainTitleCategory);
-            }
+            clearItems.run();
         }
 
-        if (availableKeysInBackup.contains("ai_models")) {
-            items.add(Item.asSwitch(R.drawable.aifeatures_solar, getString(R.string.AiFeatures_CustomModels_Full), "ai_models"));
+        if (availableKeysInBackup.contains("ai_models") && selectedCategory == null) {
+            items.add(ImportItem.asSwitch("ai_models", R.drawable.aifeatures_solar, getString(R.string.AiFeatures_CustomModels_Full)));
         }
 
         adapter.setItems(oldItems, items);
     }
 
+    private boolean isCategoryAvailable(ImportSettingsScanHelper.SettingsScanCategory category) {
+        for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
+            if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey())) {
+                return true;
+            }
+        }
+
+        ArrayList<ImportSettingsScanHelper.SettingsScanCategory> subCategories = ImportSettingsScanHelper.INSTANCE.getSubCategories(category);
+        if (!subCategories.isEmpty()) {
+            for (ImportSettingsScanHelper.SettingsScanCategory subCategory : subCategories) {
+                if (isCategoryAvailable(subCategory)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private void executeFileImport() {
         if (dataToImport.isEmpty()) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getParentActivity());
             alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportFailedZeroTitle));
             alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportFailedZeroCaption));
             alertDialogBuilder.setPositiveButton("OK", null);
@@ -320,7 +433,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
             };
 
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getParentActivity());
             alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportDonePopup));
             alertDialogBuilder.setMessage(formatString(R.string.ImportReadyImportDone, changedOptions));
             alertDialogBuilder.setPositiveButton("OK", (dialog, v) -> restart.run());
@@ -333,59 +446,52 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
     }
 
-    @Override
-    protected CharSequence getTitle() {
-        return getString(R.string.ImportReady);
-    }
-
-    @Override
-    protected RecyclerListView.SelectionAdapter createAdapter(RecyclerListView listView) {
-        return adapter = new Adapter();
-    }
-
-    public void setOriginalActivity(Activity originalActivity) {
-        this.originalActivity = originalActivity;
-    }
-
-    private void handleOnClickPosition(View view, Item item, float x) {
-        if (!hasAuthorizedBiometric && secureContexts.contains(item.itemRelationId)) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(originalActivity);
-            alertDialogBuilder.setTitle(getString(R.string.Warning));
-            alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportSecureContext));
-            alertDialogBuilder.setPositiveButton(getString(R.string.Proceed), (dialog, which) -> FingerprintUtils.checkFingerprint(getContext(), FingerprintUtils.FingerprintAction.IMPORT_SETTINGS, true, () -> {
-                hasAuthorizedBiometric = true;
-                handleOnClickPosition(view, item, x);
-            }));
-            alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-            return;
-        }
-
+    private void handleOnClickPosition(View view, ImportItem item, float x) {
         if (item.viewType == VIEW_TYPE_SWITCH) {
-            if (item.hasInnerData() && (LocaleController.isRTL ? x > dp(19 + 37 + 19) : x < view.getMeasuredWidth() - dp(19 + 37 + 19))) {
-                if (!expanded.contains(item.itemRelationId)) {
-                    expanded.add(item.itemRelationId);
-                } else {
-                    expanded.remove(item.itemRelationId);
-                }
-
-                updateItems();
+            if (!hasAuthorizedBiometric && secureContexts.contains(item.id)) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getParentActivity());
+                alertDialogBuilder.setTitle(getString(R.string.Warning));
+                alertDialogBuilder.setMessage(getString(R.string.ImportReadyImportSecureContext2));
+                alertDialogBuilder.setPositiveButton(getString(R.string.Proceed), (dialog, which) -> FingerprintUtils.checkFingerprint(getContext(), FingerprintUtils.FingerprintAction.IMPORT_SETTINGS, true, () -> {
+                    hasAuthorizedBiometric = true;
+                    handleOnClickPosition(view, item, x);
+                }));
+                alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.redPositive();
+                alertDialog.show();
                 return;
             }
 
-            if (mainCategoriesSelection.contains(item.itemRelationId)) {
-                mainCategoriesSelection.remove(item.itemRelationId);
-            } else {
-                mainCategoriesSelection.add(item.itemRelationId);
+            if ((selectedCategory == null || !Objects.equals(selectedCategory.categoryId, item.id)) && ImportSettingsScanHelper.INSTANCE.getCategoryById(item.id) != null && (LocaleController.isRTL ? x > dp(19 + 37 + 19) : x < view.getMeasuredWidth() - dp(19 + 37 + 19))) {
+                initSelection(ImportSettingsScanHelper.INSTANCE.getCategoryById(item.id));
+                return;
             }
 
-            ImportSettingsScanHelper.SettingsScanCategory category = ImportSettingsScanHelper.INSTANCE.getCategoryById(item.itemRelationId);
+            if (mainCategoriesSelection.contains(item.id)) {
+                mainCategoriesSelection.remove(item.id);
+            } else {
+                mainCategoriesSelection.add(item.id);
+            }
+
+            ImportSettingsScanHelper.SettingsScanCategory category = ImportSettingsScanHelper.INSTANCE.getCategoryById(item.id);
             if (category != null) {
-                if (item.hasInnerData()) {
-                    boolean mustBeEnabled = mainCategoriesSelection.contains(item.itemRelationId);
-                    for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                        if (availableKeysInBackup.contains(option.property.getKey())) {
+                boolean mustBeEnabled = mainCategoriesSelection.contains(item.id);
+                ArrayList<ImportSettingsScanHelper.SettingsScanCategory> categories = new ArrayList<>();
+                categories.add(category);
+                categories.addAll(ImportSettingsScanHelper.INSTANCE.getSubCategories(category));
+
+                for (ImportSettingsScanHelper.SettingsScanCategory singleCategory : categories) {
+                    if (singleCategory != category) {
+                        if (mustBeEnabled && !mainCategoriesSelection.contains(singleCategory.categoryId)) {
+                            mainCategoriesSelection.add(singleCategory.categoryId);
+                        } else if (!mustBeEnabled) {
+                            mainCategoriesSelection.remove(singleCategory.categoryId);
+                        }
+                    }
+
+                    for (ImportSettingsScanHelper.SettingsScanOption option : singleCategory.options) {
+                        if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey())) {
                             if (mustBeEnabled && !dataToImport.contains(option.property.getKey())) {
                                 dataToImport.add(option.property.getKey());
                             } else if (!mustBeEnabled) {
@@ -394,42 +500,70 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                         }
                     }
                 }
-            } else if (!item.hasInnerData()) {
-                if (mainCategoriesSelection.contains(item.itemRelationId) && !dataToImport.contains(item.itemRelationId)) {
-                    dataToImport.add(item.itemRelationId);
-                } else if (!mainCategoriesSelection.contains(item.itemRelationId)) {
-                    dataToImport.remove(item.itemRelationId);
+
+                if (category.refersTo != null) {
+                    if (mustBeEnabled && !mainCategoriesSelection.contains(category.refersTo.categoryId)) {
+                        mainCategoriesSelection.add(category.refersTo.categoryId);
+                    } else if (!mustBeEnabled) {
+                        categories.clear();
+                        categories.add(category.refersTo);
+                        categories.addAll(ImportSettingsScanHelper.INSTANCE.getSubCategories(category.refersTo));
+
+                        boolean hasEnabledOptions = false;
+                        for (ImportSettingsScanHelper.SettingsScanCategory singleCategory : categories) {
+                            for (ImportSettingsScanHelper.SettingsScanOption option : singleCategory.options) {
+                                if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey()) && dataToImport.contains(option.property.getKey())) {
+                                    hasEnabledOptions = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasEnabledOptions && !mainCategoriesSelection.contains(category.refersTo.categoryId)) {
+                            mainCategoriesSelection.add(category.refersTo.categoryId);
+                        } else if (!hasEnabledOptions) {
+                            mainCategoriesSelection.remove(category.refersTo.categoryId);
+                        }
+                    }
+                }
+            } else {
+                if (mainCategoriesSelection.contains(item.id) && !dataToImport.contains(item.id)) {
+                    dataToImport.add(item.id);
+                } else if (!mainCategoriesSelection.contains(item.id)) {
+                    dataToImport.remove(item.id);
                 }
             }
 
             updateItems();
-            reloadActionButtonSize();
+            reloadActionButton();
         } else if (item.viewType == VIEW_TYPE_CHECKBOX) {
-            if (dataToImport.contains(item.itemRelationId)) {
-                dataToImport.remove(item.itemRelationId);
+            if (dataToImport.contains(item.id)) {
+                dataToImport.remove(item.id);
             } else {
-                dataToImport.add(item.itemRelationId);
+                dataToImport.add(item.id);
             }
 
-            fixItemRelationIdState(item.itemRelationId);
+            fixItemRelationIdState(item.id);
             updateItems();
-            reloadActionButtonSize();
+            reloadActionButton();
         }
     }
 
-    private void reloadActionButtonSize() {
+    private void reloadActionButton() {
         int dataToImportSize = dataToImport.size();
         actionButton.setSize(dataToImportSize == totalImportableKeysCounter, dataToImportSize, totalImportableKeysCounter);
     }
 
     private void fixItemRelationIdState(String itemRelationId) {
         for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
-            boolean hasSelectedOption = false;
+            boolean hasFoundOption = false;
             boolean isOneOptionSelected = false;
+            ImportSettingsScanHelper.SettingsScanCategory foundCategory = null;
+
             for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                if (availableKeysInBackup.contains(option.property.getKey())) {
+                if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey())) {
                     if (Objects.requireNonNull(option.property.getKey()).equals(itemRelationId)) {
-                        hasSelectedOption = true;
+                        hasFoundOption = true;
+                        foundCategory = category;
                     }
                     if (dataToImport.contains(option.property.getKey())) {
                         isOneOptionSelected = true;
@@ -437,7 +571,26 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 }
             }
 
-            if (hasSelectedOption) {
+            if (!isOneOptionSelected && hasFoundOption) {
+                for (ImportSettingsScanHelper.SettingsScanCategory singleCategory : ImportSettingsScanHelper.INSTANCE.getSubCategories(foundCategory)) {
+                    for (ImportSettingsScanHelper.SettingsScanOption option : singleCategory.options) {
+                        if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey()) && dataToImport.contains(option.property.getKey())) {
+                            isOneOptionSelected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (hasFoundOption) {
+                if (foundCategory.refersTo != null) {
+                    if (isOneOptionSelected && !mainCategoriesSelection.contains(foundCategory.refersTo.categoryId)) {
+                        mainCategoriesSelection.add(foundCategory.refersTo.categoryId);
+                    } else if (!isOneOptionSelected) {
+                        mainCategoriesSelection.remove(foundCategory.refersTo.categoryId);
+                    }
+                }
+
                 if (isOneOptionSelected && !mainCategoriesSelection.contains(category.categoryId)) {
                     mainCategoriesSelection.add(category.categoryId);
                 } else if (!isOneOptionSelected) {
@@ -478,6 +631,11 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                         setContentDescription(getTextView().getText());
                     }
                 };
+            } else if (viewType == VIEW_TYPE_MINIHEADER) {
+                view = new HeaderCell(context);
+                view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+            } else if (viewType == VIEW_TYPE_SHADOW) {
+                view = new ShadowSectionCell(context);
             }
 
             return new RecyclerListView.Holder(view);
@@ -489,13 +647,19 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 return;
             }
 
-            final ImportSettingsBottomSheet.Item item = items.get(position);
+            final ImportItem item = items.get(position);
             final int viewType = holder.getItemViewType();
 
             if (viewType == VIEW_TYPE_CHECKBOX || viewType == VIEW_TYPE_SWITCH) {
                 final boolean divider = position + 1 < items.size() && viewType != VIEW_TYPE_SWITCH;
                 SwitchCell switchCell = (SwitchCell) holder.itemView;
                 switchCell.set(item, divider);
+            } else if (viewType == VIEW_TYPE_HEADER) {
+                ImportSettingsTopLayerCell view = (ImportSettingsTopLayerCell) holder.itemView;
+                view.setCategory(item.category);
+            } else if (viewType == VIEW_TYPE_MINIHEADER) {
+                HeaderCell headerCellView = (HeaderCell) holder.itemView;
+                headerCellView.setText(item.text);
             } else if (viewType == VIEW_TYPE_INFO) {
                 TextInfoPrivacyCell textInfoPrivacyCell = (TextInfoPrivacyCell) holder.itemView;
                 if (TextUtils.isEmpty(item.text)) {
@@ -535,39 +699,38 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
     }
 
-    private static class Item extends AdapterWithDiffUtils.Item {
+    private static class ImportItem extends AdapterWithDiffUtils.Item {
+        private final String id;
         public CharSequence text;
         public int iconResId;
-        public String itemRelationId;
+        private final ImportSettingsScanHelper.SettingsScanCategory category;
 
-        private Item(int viewType, CharSequence text, int iconResId, String relationId) {
+        private ImportItem(int viewType, String id, CharSequence text, int iconResId, ImportSettingsScanHelper.SettingsScanCategory category) {
             super(viewType, false);
+            this.id = id;
             this.text = text;
             this.iconResId = iconResId;
-            this.itemRelationId = relationId;
+            this.category = category;
         }
 
-        private boolean hasInnerData() {
-            boolean hasInnerData = false;
-            for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
-                if (category.categoryId.equals(this.itemRelationId)) {
-                    hasInnerData = !category.options.isEmpty();
-                    break;
-                }
-            }
-            return hasInnerData;
+        public static ImportItem asHeader(ImportSettingsScanHelper.SettingsScanCategory category) {
+            return new ImportItem(VIEW_TYPE_HEADER, null, null, 0, category);
         }
 
-        public static Item asHeader() {
-            return new Item(VIEW_TYPE_HEADER, null, 0, null);
+        public static ImportItem asMiniHeader(CharSequence text) {
+            return new ImportItem(VIEW_TYPE_MINIHEADER, null, text, 0, null);
         }
 
-        public static Item asCheckbox(CharSequence text, String relationId) {
-            return new Item(VIEW_TYPE_CHECKBOX, text, 0, relationId);
+        public static ImportItem asCheckbox(String id, CharSequence text) {
+            return new ImportItem(VIEW_TYPE_CHECKBOX, id, text, 0, null);
         }
 
-        public static Item asSwitch(int iconResId, CharSequence text, String relationId) {
-            return new Item(VIEW_TYPE_SWITCH, text, iconResId, relationId);
+        public static ImportItem asSwitch(String id, int iconResId, CharSequence text) {
+            return new ImportItem(VIEW_TYPE_SWITCH, id, text, iconResId, null);
+        }
+
+        public static ImportItem asShadow() {
+            return new ImportItem(VIEW_TYPE_SHADOW, null, null, 0, null);
         }
 
         @Override
@@ -575,27 +738,20 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof Item item)) {
+            if (!(o instanceof ImportItem item)) {
                 return false;
             }
             if (item.viewType != viewType) {
                 return false;
             }
             if (viewType == VIEW_TYPE_HEADER) {
-                return true;
+                return Objects.equals(item.category, category);
             }
             if (viewType == VIEW_TYPE_SWITCH) {
-                if (item.iconResId != iconResId) {
-                    return false;
-                }
+                return TextUtils.equals(item.id, id);
             }
-            if (viewType == VIEW_TYPE_SWITCH || viewType == VIEW_TYPE_CHECKBOX) {
-                if (!Objects.equals(item.itemRelationId, itemRelationId)) {
-                    return false;
-                }
-            }
-            if (viewType == VIEW_TYPE_INFO) {
-                return TextUtils.equals(item.text, text);
+            if (viewType == VIEW_TYPE_INFO || viewType == VIEW_TYPE_MINIHEADER) {
+                //return TextUtils.equals(item.text, text);
             }
             return true;
         }
@@ -608,7 +764,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         private final TextView textView;
         private final AnimatedTextView countTextView;
         private final ImageView arrowView;
-        private final Switch switchView;
+        private Switch switchView;
         private final CheckBox2 checkBoxView;
 
         private boolean needDivider, needLine;
@@ -651,7 +807,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             arrowView = new ImageView(context);
             arrowView.setVisibility(GONE);
             arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
-            arrowView.setImageResource(R.drawable.arrow_more);
+            arrowView.setImageResource(R.drawable.msg_arrow_forward);
 
             textViewLayout = new LinearLayout(context);
             textViewLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -680,7 +836,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             checkBoxView.setDrawBackgroundAsArc(10);
             checkBoxView.setVisibility(GONE);
             checkBoxView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-            addView(checkBoxView, LayoutHelper.createFrame(21, 21, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), LocaleController.isRTL ? 0 : 64, 0, LocaleController.isRTL ? 64 : 0, 0));
+            addView(checkBoxView, LayoutHelper.createFrame(21, 21, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), 19, 0, LocaleController.isRTL ? 64 : 0, 0));
 
             setFocusable(true);
         }
@@ -693,12 +849,15 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
             );
         }
 
-        private boolean isExpanded;
         private boolean _isLocked = false;
+        private boolean _initData = false;
+        private boolean _wasBigSwitchChecked = false;
 
-        public void set(Item item, boolean divider) {
+        public void set(ImportItem item, boolean divider) {
             if (item.viewType == VIEW_TYPE_SWITCH) {
-                boolean hasInnerData = item.hasInnerData();
+                ImportSettingsScanHelper.SettingsScanCategory category = ImportSettingsScanHelper.INSTANCE.getCategoryById(item.id);
+                boolean hasInnerData = category != null;
+                boolean asBigSwitch = selectedCategory != null && Objects.equals(item.id, selectedCategory.categoryId);
 
                 checkBoxView.setVisibility(GONE);
                 imageView.setVisibility(VISIBLE);
@@ -706,11 +865,63 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                 textView.setText(item.text);
                 textView.setTranslationX(0);
                 switchView.setVisibility(VISIBLE);
-                switchView.setChecked(mainCategoriesSelection.contains(item.itemRelationId), true);
-                needLine = hasInnerData;
+                switchView.setChecked(mainCategoriesSelection.contains(item.id), true);
+                needLine = hasInnerData && !asBigSwitch;
 
-                boolean isLocked = false;
-                if (secureContexts.contains(item.itemRelationId)) {
+                boolean needAnimateColorChange = false;
+                int fromColor = 0, toColor = 0;
+
+                if ((asBigSwitch && !_initData) || (!asBigSwitch && _initData)) {
+                    _initData = asBigSwitch;
+                    needAnimateColorChange = true;
+                    int c1 = Theme.getColor(Theme.key_windowBackgroundWhite);
+                    int c2 = Theme.getColor(switchView.isChecked() ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked);
+
+                    int index = indexOfChild(switchView);
+                    ViewGroup.LayoutParams layoutParams = switchView.getLayoutParams();
+                    removeView(switchView);
+
+                    _wasBigSwitchChecked = switchView.isChecked();
+                    switchView = new Switch(getContext());
+                    switchView.setColors(Theme.key_switchTrack, Theme.key_switchTrackChecked, Theme.key_windowBackgroundWhite, Theme.key_windowBackgroundWhite);
+                    switchView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+                    if (asBigSwitch) {
+                        fromColor = c1;
+                        toColor = c2;
+                        switchView.setColors(Theme.key_switchTrackBlue, Theme.key_switchTrackBlueChecked, Theme.key_switchTrackBlueThumb, Theme.key_switchTrackBlueThumbChecked);
+                    } else {
+                        fromColor = c2;
+                        toColor = c1;
+                        switchView.setColors(Theme.key_switchTrack, Theme.key_switchTrackChecked, Theme.key_windowBackgroundWhite, Theme.key_windowBackgroundWhite);
+                    }
+                    switchView.setChecked(mainCategoriesSelection.contains(item.id), true);
+                    addView(switchView, index == -1 ? 0 : index, layoutParams);
+
+                    textView.setTypeface(asBigSwitch ? AndroidUtilities.bold() : AndroidUtilities.mediumTypeface);
+                    textView.setTextColor(Theme.getColor(asBigSwitch ? Theme.key_windowBackgroundCheckText : Theme.key_windowBackgroundWhiteBlackText));
+                    imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(asBigSwitch ? Theme.key_windowBackgroundCheckText : Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
+                } else if (asBigSwitch && _wasBigSwitchChecked != switchView.isChecked()) {
+                    _wasBigSwitchChecked = switchView.isChecked();
+                    fromColor = Theme.getColor(switchView.isChecked() ? Theme.key_windowBackgroundUnchecked : Theme.key_windowBackgroundChecked);
+                    toColor = Theme.getColor(switchView.isChecked() ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked);
+                    needAnimateColorChange = true;
+                }
+
+                if (needAnimateColorChange) {
+                    int finalFromColor = fromColor;
+                    int finalToColor = toColor;
+
+                    ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+                    animator.addUpdateListener(animation -> {
+                        float value = (float) animation.getAnimatedValue();
+                        setBackgroundColor(ColorUtils.blendARGB(finalFromColor, finalToColor, value));
+                    });
+                    animator.setDuration(200);
+                    animator.start();
+                }
+
+                boolean isLocked;
+                if (secureContexts.contains(item.id)) {
                     isLocked = !hasAuthorizedBiometric;
 
                     arrowView.setVisibility((hasInnerData || isLocked) ? VISIBLE : GONE);
@@ -720,49 +931,49 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
                     if (_isLocked != isLocked) {
                         _isLocked = isLocked;
                         arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor((isLocked || !hasInnerData) ? Theme.key_stickers_menu : Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
-                        arrowView.setImageResource((isLocked || !hasInnerData) ? R.drawable.other_lockedfolders2 : R.drawable.arrow_more);
+                        arrowView.setImageResource((isLocked || !hasInnerData) ? R.drawable.other_lockedfolders2 : R.drawable.msg_arrow_forward);
                         arrowView.setTranslationX((isLocked || !hasInnerData) ? dp(2) : 0);
                     }
                 } else {
                     arrowView.setVisibility(hasInnerData ? VISIBLE : GONE);
                     arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
-                    arrowView.setImageResource(R.drawable.arrow_more);
+                    arrowView.setImageResource(R.drawable.msg_arrow_forward);
                     arrowView.setTranslationX(0);
-                }
-
-                boolean currentExpanded = expanded.contains(item.itemRelationId) && !isLocked;
-                if (isExpanded != currentExpanded) {
-                    isExpanded = currentExpanded;
-                    arrowView.animate().rotation(isExpanded ? 180 : 0).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).setDuration(240).start();
                 }
 
                 if (hasInnerData) {
                     countTextView.setVisibility(VISIBLE);
-                    ImportSettingsScanHelper.SettingsScanCategory category = ImportSettingsScanHelper.INSTANCE.getCategoryById(item.itemRelationId);
                     int selectedOptionsOnTotal = 0;
                     int totalOptions = 0;
 
-                    for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                        if (availableKeysInBackup.contains(option.property.getKey())) {
-                            if (dataToImport.contains(option.property.getKey())) {
-                                selectedOptionsOnTotal++;
+                    ArrayList<ImportSettingsScanHelper.SettingsScanCategory> categories = new ArrayList<>();
+                    categories.add(category);
+                    categories.addAll(ImportSettingsScanHelper.INSTANCE.getSubCategories(category));
+
+                    for (ImportSettingsScanHelper.SettingsScanCategory singleCategory : categories) {
+                        for (ImportSettingsScanHelper.SettingsScanOption option : singleCategory.options) {
+                            if (!option.isTitle && option.property != null && availableKeysInBackup.contains(option.property.getKey())) {
+                                if (dataToImport.contains(option.property.getKey())) {
+                                    selectedOptionsOnTotal++;
+                                }
+                                totalOptions++;
                             }
-                            totalOptions++;
                         }
                     }
+
                     countTextView.setText(selectedOptionsOnTotal + "/" + totalOptions);
                 } else {
                     countTextView.setVisibility(GONE);
                 }
             } else {
                 checkBoxView.setVisibility(VISIBLE);
-                checkBoxView.setChecked(dataToImport.contains(item.itemRelationId), true);
+                checkBoxView.setChecked(dataToImport.contains(item.id), true);
                 imageView.setVisibility(GONE);
                 switchView.setVisibility(GONE);
                 countTextView.setVisibility(GONE);
                 arrowView.setVisibility(GONE);
                 textView.setText(item.text);
-                textView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));
+                //textView.setTranslationX(dp(41) * (LocaleController.isRTL ? -2.2f : 1));
                 needLine = false;
             }
 
@@ -794,7 +1005,7 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
     }
 
-    private static class ImportButton extends FrameLayout {
+    private class ImportButton extends FrameLayout {
         FrameLayout button;
         AnimatedTextView.AnimatedTextDrawable textView;
         AnimatedTextView.AnimatedTextDrawable valueTextView;
@@ -888,13 +1099,19 @@ public class ImportSettingsBottomSheet extends BottomSheetWithRecyclerListView {
         }
 
         public void setSize(boolean allSelected, long size, long total) {
-            textView.setText((
-                    allSelected ?
-                            getString(R.string.ImportReadyImport) :
-                            getString(R.string.ImportReadyImportSelected)
-            ));
-            valueTextView.setText(size <= 0 || allSelected ? "" : (size + "/" + total));
-            setDisabled(size <= 0);
+            if (selectedCategory != null) {
+                textView.setText("Save");
+                valueTextView.setText("");
+            } else {
+                textView.setText((
+                        allSelected ?
+                                getString(R.string.ImportReadyImport) :
+                                getString(R.string.ImportReadyImportSelected)
+                ));
+                valueTextView.setText(size <= 0 || allSelected ? "" : (size + "/" + total));
+            }
+
+            setDisabled(size <= 0 && selectedCategory == null);
             button.invalidate();
 
             button.setContentDescription(TextUtils.concat(textView.getText(), "\t", valueTextView.getText()));

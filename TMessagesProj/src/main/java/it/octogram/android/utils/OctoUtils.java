@@ -9,6 +9,7 @@
 package it.octogram.android.utils;
 
 import android.content.Context;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
@@ -21,6 +22,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
 
 import org.apache.commons.lang3.StringUtils;
@@ -480,6 +482,44 @@ public class OctoUtils {
 
     public static String generateRandomString() {
         return safeToString(Uuid.Companion.random()).replace("-", "");
+    }
+
+    @Nullable
+    public static String getInstallerPackageName(@NonNull Context context) {
+        final String packageName = context.getPackageName();
+
+        // Use modern API for Android R (API 30) and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                PackageManager pm = context.getPackageManager();
+                InstallSourceInfo sourceInfo = pm.getInstallSourceInfo(packageName);
+
+                String installingPackage = sourceInfo.getInstallingPackageName();
+                if (!TextUtils.isEmpty(installingPackage)) {
+                    return installingPackage;
+                }
+
+                String initiatingPackage = sourceInfo.getInitiatingPackageName();
+                if (!TextUtils.isEmpty(initiatingPackage)) {
+                    return initiatingPackage;
+                }
+
+            } catch (PackageManager.NameNotFoundException e) {
+                OctoLogging.w(TAG, "Package not found when getting install source info", e);
+            } catch (Exception e) {
+                OctoLogging.w(TAG, "Failed to get install source info via modern API", e);
+            }
+        }
+
+        // Fallback to legacy API for older versions or if modern API fails
+        try {
+            PackageManager pm = context.getPackageManager();
+            String installerPackage = pm.getInstallerPackageName(packageName);
+            return TextUtils.isEmpty(installerPackage) ? null : installerPackage;
+        } catch (Exception e) {
+            OctoLogging.w(TAG, "Failed to get installer package name via legacy API", e);
+            return null;
+        }
     }
 }
 

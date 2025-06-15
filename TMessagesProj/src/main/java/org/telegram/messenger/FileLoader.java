@@ -199,7 +199,6 @@ public class FileLoader extends BaseController {
     private final FileLoaderPriorityQueue[] largeFilesQueue = new FileLoaderPriorityQueue[5];
 
     public final static long DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2000L;
-    // public final static long DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2001L;
     public final static long DEFAULT_MAX_FILE_SIZE_PREMIUM = DEFAULT_MAX_FILE_SIZE * 2L;
 
     public final static int PRELOAD_CACHE_TYPE = 11;
@@ -1503,6 +1502,9 @@ public class FileLoader extends BaseController {
     public static TLRPC.VideoSize getClosestVideoSizeWithSize(ArrayList<TLRPC.VideoSize> sizes, int side, boolean byMinSide, boolean ignoreStripped) {
         if (sizes == null || sizes.isEmpty()) {
             return null;
+        }
+        if (side > 160) {
+            side = 1080;
         }
         int lastSide = 0;
         TLRPC.VideoSize closestObject = null;

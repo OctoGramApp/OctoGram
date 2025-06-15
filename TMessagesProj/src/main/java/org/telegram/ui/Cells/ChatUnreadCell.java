@@ -14,7 +14,6 @@ import android.content.Context;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -29,9 +28,9 @@ import org.telegram.ui.ActionBar.Theme;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.MessagesModelsWrapper;
-import it.octogram.android.ai.helper.CustomModelsHelper;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.CustomModelsMenuWrapper;
+import it.octogram.android.ai.CustomModelsHelper;
+import it.octogram.android.ai.MainAiHelper;
 
 public class ChatUnreadCell extends FrameLayout {
 
@@ -90,7 +89,7 @@ public class ChatUnreadCell extends FrameLayout {
 
         if (supportsChatContext) {
             backgroundLayout.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_chat_unreadMessagesStartBackground), rad));
-            backgroundLayout.setOnClickListener(v -> MessagesModelsWrapper.handleMessagesSelectionWithModel(context, CustomModelsHelper.VIRTUAL_CHAT_CONTEXT_MODEL_ID, currentUser, currentChat, new ArrayList<>(), unreadCount));
+            backgroundLayout.setOnClickListener(v -> CustomModelsMenuWrapper.handleMessagesSelectionWithModel(context, CustomModelsHelper.VIRTUAL_CHAT_CONTEXT_MODEL_ID, currentUser, currentChat, new ArrayList<>(), unreadCount));
 
             TextView chatContextAvailable = new TextView(context);
             chatContextAvailable.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);

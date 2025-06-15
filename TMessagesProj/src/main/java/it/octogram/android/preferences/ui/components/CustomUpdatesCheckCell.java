@@ -107,21 +107,21 @@ public class CustomUpdatesCheckCell extends FrameLayout implements NotificationC
                 leftTextView.setText(getString(R.string.UpdatesSettingsCheck));
                 checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButton));
                 resetButtonState();
-            break;
+                break;
             case CheckCellState.CHECKING_UPDATES:
                 leftTextView.setText(getString(R.string.UpdatesSettingsCheck));
                 checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButtonChecking));
                 disableButtonClick();
-            break;
+                break;
             case CheckCellState.UPDATE_NEED_DOWNLOAD:
                 leftTextView.setText(getString(R.string.UpdatesSettingsCheckAvailable));
                 checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButtonDownload));
                 resetButtonState();
-            break;
+                break;
             case CheckCellState.UPDATE_IS_DOWNLOADING:
                 leftTextView.setText(formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)));
                 hideButton();
-            break;
+                break;
             case CheckCellState.UPDATE_IS_READY:
                 leftTextView.setText(getString(R.string.UpdatesSettingsCheckReady));
                 checkAvailableUpdatesView.setText(getString(R.string.UpdatesSettingsCheckButtonInstall));

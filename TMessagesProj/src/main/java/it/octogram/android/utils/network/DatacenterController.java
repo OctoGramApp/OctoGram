@@ -71,9 +71,11 @@ public class DatacenterController {
 
         public interface UpdateCallback {
             void onUpdate(int dcId, int status, int parameter);
+
             default void onUpdate(int dcId, int status) {
                 onUpdate(dcId, status, 0);
             }
+
             void onNewCycle();
         }
     }

@@ -370,6 +370,7 @@ public class CheckBoxBase {
                 superDrawCircle(canvas, cx, cy, rad, paint);
             }
         }
+
         paint.setColor(getThemedColor(checkColorKey));
 
         if (getUIState() == InterfaceCheckboxUI.ALWAYS_TRANSPARENT.getValue()) {
@@ -417,13 +418,21 @@ public class CheckBoxBase {
                     int alpha = Color.alpha(color);
                     backgroundPaint.setColor(color);
                     backgroundPaint.setAlpha((int) (alpha * progress));
-                    canvas.drawArc(rect, startAngle, sweepAngle, false, backgroundPaint);
+                    if (getUIState() == InterfaceCheckboxUI.ROUNDED.getValue()) {
+                        canvas.drawRoundRect(rect, 10, 10, backgroundPaint);
+                    } else {
+                        canvas.drawArc(rect, startAngle, sweepAngle, false, backgroundPaint);
+                    }
                     color = getThemedColor(Theme.key_chat_attachPhotoBackground);
                     alpha = Color.alpha(color);
                     backgroundPaint.setColor(color);
                     backgroundPaint.setAlpha((int) (alpha * progress));
                 }
-                canvas.drawArc(rect, startAngle, sweepAngle, false, backgroundPaint);
+                if (getUIState() == InterfaceCheckboxUI.ROUNDED.getValue()) {
+                    canvas.drawRoundRect(rect, 10, 10, backgroundPaint);
+                } else {
+                    canvas.drawArc(rect, startAngle, sweepAngle, false, backgroundPaint);
+                }
             }
         }
 

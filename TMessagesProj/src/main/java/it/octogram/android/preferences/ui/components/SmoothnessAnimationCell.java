@@ -97,6 +97,7 @@ public class SmoothnessAnimationCell extends FrameLayout {
 
     static class SmoothnessAnimationUI extends BaseFragment {
         private boolean isFirstPage = true;
+
         @Override
         public View createView(Context context) {
             if (isFirstPage) {

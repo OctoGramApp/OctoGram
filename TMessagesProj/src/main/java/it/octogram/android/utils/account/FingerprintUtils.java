@@ -52,9 +52,14 @@ public class FingerprintUtils {
     private static final HashMap<String, ArrayList<String>> cachedChatsLists = new HashMap<>();
     private static boolean readFromConfig = false;
     private static final ArrayList<Long> cachedAccountsList = new ArrayList<>();
+    private static final ArrayList<BiometricPrompt> pendingAuths = new ArrayList<>();
     private static boolean readFromConfigAccountsList = false;
     private static long lastTimeAskedFingerprint = 0;
     private static final String TAG = "FingerprintUtils";
+
+    public static void fixFingerprint(Context context, FingerprintResult callback) {
+        checkFingerprint(context, FingerprintAction.FIX_FINGERPRINT, true, 0, callback);
+    }
 
     public static void checkFingerprint(Context context, @FingerprintAction int reason, FingerprintResult callback) {
         checkFingerprint(context, reason, false, 0, callback);
@@ -65,20 +70,33 @@ public class FingerprintUtils {
     }
 
     public static void checkFingerprint(Context context, @FingerprintAction int reason, boolean useCustomAskEvery, int askEvery, FingerprintResult callback) {
-        if (Build.VERSION.SDK_INT < 23 || !hasFingerprintCached()) {
-            callback.onSuccess();
-            return;
-        }
-
-        if (BiometricManager.from(context).canAuthenticate(getAuthenticationStatus()) != BiometricManager.BIOMETRIC_SUCCESS) {
+        if (Build.VERSION.SDK_INT < 23) {
             callback.onFailed();
             return;
         }
 
-        if ((System.currentTimeMillis() - lastTimeAskedFingerprint) / 1000 < (useCustomAskEvery ? askEvery : OctoConfig.INSTANCE.biometricAskEvery.getValue())) {
-            callback.onSuccess();
-            return;
+        if (reason == FingerprintAction.FIX_FINGERPRINT) {
+            FingerprintController.checkKeyReady();
+            FingerprintController.deleteInvalidKey();
+            FingerprintController.checkKeyReady();
+        } else {
+            if (!hasFingerprintCached()) {
+                callback.onSuccess();
+                return;
+            }
+
+            if (BiometricManager.from(context).canAuthenticate(getAuthenticationStatus()) != BiometricManager.BIOMETRIC_SUCCESS) {
+                callback.onFailed();
+                return;
+            }
+
+            if ((System.currentTimeMillis() - lastTimeAskedFingerprint) / 1000 < (useCustomAskEvery ? askEvery : OctoConfig.INSTANCE.biometricAskEvery.getValue())) {
+                callback.onSuccess();
+                return;
+            }
         }
+
+        cancelPendingAuthentications();
 
         BiometricPrompt prompt = new BiometricPrompt(LaunchActivity.instance, ContextCompat.getMainExecutor(context), new BiometricPrompt.AuthenticationCallback() {
             @Override
@@ -111,7 +129,15 @@ public class FingerprintUtils {
             builder.setNegativeButtonText(getString(R.string.Cancel));
             builder.setAllowedAuthenticators(getAuthenticationStatus());
         }
+        pendingAuths.add(prompt);
         prompt.authenticate(builder.build());
+    }
+
+    public static void cancelPendingAuthentications() {
+        for (BiometricPrompt prompt : pendingAuths) {
+            prompt.cancelAuthentication();
+        }
+        pendingAuths.clear();
     }
 
     @StringRes
@@ -122,6 +148,7 @@ public class FingerprintUtils {
             case FingerprintAction.IMPORT_SETTINGS -> R.string.UnlockToImportSettings;
             case FingerprintAction.UNLOCK_ACCOUNT -> R.string.UnlockToSwitchAccount;
             case FingerprintAction.EXPAND_SETTINGS -> R.string.UnlockToExpand;
+            case FingerprintAction.FIX_FINGERPRINT -> R.string.BiometricUnavailable_Test;
             default -> -1;
         };
     }
@@ -236,7 +263,7 @@ public class FingerprintUtils {
     }
 
     private static String getAccountId(long accountId) {
-        return "U"+accountId;
+        return "U" + accountId;
     }
 
     public static boolean isChatLocked(TLRPC.User currentUser, TLRPC.Chat currentChat) {
@@ -407,13 +434,15 @@ public class FingerprintUtils {
                     for (int i = 0; i < lockedChatsForAccount.length(); i++) {
                         try {
                             tempList.add(lockedChatsForAccount.getString(i));
-                        } catch (JSONException ignored) {}
+                        } catch (JSONException ignored) {
+                        }
                     }
 
                     if (!tempList.isEmpty()) {
                         cachedChatsLists.put(key, tempList);
                     }
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
             }
         } catch (JSONException ignored) {
         }
@@ -543,10 +572,10 @@ public class FingerprintUtils {
         return !cachedAccountsList.isEmpty();
     }
 
-    @IntDef({FingerprintAction.EDIT_SETTINGS, FingerprintAction.OPEN_PAGE, FingerprintAction.IMPORT_SETTINGS, FingerprintAction.UNLOCK_ACCOUNT, FingerprintAction.EXPAND_SETTINGS})
+    @IntDef({FingerprintAction.EDIT_SETTINGS, FingerprintAction.OPEN_PAGE, FingerprintAction.IMPORT_SETTINGS, FingerprintAction.UNLOCK_ACCOUNT, FingerprintAction.EXPAND_SETTINGS, FingerprintAction.FIX_FINGERPRINT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FingerprintAction {
-        int EDIT_SETTINGS = 1, OPEN_PAGE = 2, IMPORT_SETTINGS = 3, UNLOCK_ACCOUNT = 4, EXPAND_SETTINGS = 5;
+        int EDIT_SETTINGS = 1, OPEN_PAGE = 2, IMPORT_SETTINGS = 3, UNLOCK_ACCOUNT = 4, EXPAND_SETTINGS = 5, FIX_FINGERPRINT = 6;
     }
 
     public interface FingerprintResult {

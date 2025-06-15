@@ -24,6 +24,7 @@ import it.octogram.android.translator.raw.RawDeepLTranslator;
 
 public class DeepLTranslator {
     private static final RawDeepLTranslator rawInstance = new RawDeepLTranslator();
+    private static final String TAG = "DeepLTranslator";
 
     private static final List<String> targetLanguages = List.of(
             "bg", "cs", "da", "de", "el", "en", "en-GB", "en-US", "es", "fi", "fr", "hu", "id",
@@ -39,7 +40,7 @@ public class DeepLTranslator {
                     originalText.text = text;
                     originalText.entities = entities;
 
-                    String text2 = entities == null ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
+                    String text2 = (entities == null) ? text : HTMLKeeper.entitiesToHtml(text, entities, false);
                     String result = rawInstance.executeTranslation(text2, "", toLanguage, getFormalityString(formality), "newlines");
 
                     TLRPC.TL_textWithEntities finalText = new TLRPC.TL_textWithEntities();
@@ -55,7 +56,7 @@ public class DeepLTranslator {
                     callback.onResponseReceived();
                     callback.onSuccess(finalText);
                 } catch (JSONException | IOException e) {
-                    OctoLogging.e("DeepLTranslator", e);
+                    OctoLogging.e(TAG, e);
                     callback.onResponseReceived();
                     callback.onError();
                 } catch (Exception e) {

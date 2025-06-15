@@ -52,7 +52,7 @@ import org.telegram.ui.LaunchActivity;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
-import it.octogram.android.ai.helper.CustomModelsHelper;
+import it.octogram.android.ai.CustomModelsHelper;
 import it.octogram.android.preferences.ui.OctoMainSettingsUI;
 import it.octogram.android.utils.chat.FileShareHelper;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
@@ -68,6 +68,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
         int SAVE_SETTINGS = 1;
         int SAVE_MODELS = 2;
     }
+
     private int saveDataState = SaveDataState.SAVE_EVERYTHING;
 
     public ExportDoneReadyBottomSheet(Context context, BaseFragment baseFragment) {
@@ -145,7 +146,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> shareExport(true));
-        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16+48+8, 16));
+        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16 + 48 + 8, 16));
 
         configButton = new ImageView(context);
         configButton.setScaleType(ImageView.ScaleType.CENTER);
@@ -229,7 +230,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
     }
 
     private int getCorrespondingSaveDataString(int state) {
-        return switch(state) {
+        return switch (state) {
             case SaveDataState.SAVE_SETTINGS -> R.string.ExportDataSettings_JustSettings;
             case SaveDataState.SAVE_MODELS -> R.string.ExportDataSettings_JustAiModels;
             default -> R.string.ExportDataSettings_Everything;
@@ -285,7 +286,7 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
-        intent.putExtra(Intent.EXTRA_TITLE, fileNameText+OctoConfig.OCTOEXPORT_EXTENSION);
+        intent.putExtra(Intent.EXTRA_TITLE, fileNameText + OctoConfig.OCTOEXPORT_EXTENSION);
         baseFragment.startActivityForResult(intent, CREATE_FILE_REQ);
     }
 
@@ -295,13 +296,14 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
         if (saveDataState <= 1) {
             for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
                 for (ImportSettingsScanHelper.SettingsScanOption option : category.options) {
-                    if (ImportSettingsScanHelper.INSTANCE.excludedOptions.contains(option.property.getKey())) {
+                    if (option.isTitle || option.property == null || ImportSettingsScanHelper.INSTANCE.excludedOptions.contains(option.property.getKey())) {
                         continue;
                     }
 
                     try {
                         mainObject.put(option.property.getKey(), option.property.getValue());
-                    } catch (JSONException ignored) {}
+                    } catch (JSONException ignored) {
+                    }
                 }
             }
         }
@@ -313,7 +315,8 @@ public class ExportDoneReadyBottomSheet extends BottomSheet {
             }
             try {
                 mainObject.put("ai_models", array);
-            } catch (JSONException ignored) {}
+            } catch (JSONException ignored) {
+            }
         }
 
         return mainObject;

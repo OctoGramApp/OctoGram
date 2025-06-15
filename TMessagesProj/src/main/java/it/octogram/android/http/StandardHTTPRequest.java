@@ -112,16 +112,18 @@ public class StandardHTTPRequest {
 
         /**
          * Constructs an Http429Exception with a custom message.
+         *
          * @param message The detail message.
          */
         public Http429Exception(String message) {
             super(message);
         }
 
-         /**
+        /**
          * Constructs an Http429Exception with a custom message and cause.
+         *
          * @param message The detail message.
-         * @param cause The cause.
+         * @param cause   The cause.
          */
         public Http429Exception(String message, Throwable cause) {
             super(message, cause);
@@ -161,8 +163,8 @@ public class StandardHTTPRequest {
             }
 
             if (stream == null) {
-                 OctoLogging.w(TAG, "Response stream is null (Code: " + responseCode + ")");
-                 return null;
+                OctoLogging.w(TAG, "Response stream is null (Code: " + responseCode + ")");
+                return null;
             }
 
             StringBuilder responseBuilder = new StringBuilder();

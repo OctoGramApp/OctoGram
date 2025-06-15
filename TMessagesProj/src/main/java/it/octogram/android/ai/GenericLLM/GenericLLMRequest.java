@@ -5,10 +5,12 @@
  *
  * Copyright OctoGram, 2023-2025.
  */
-package it.octogram.android.ai.chatgpt;
+package it.octogram.android.ai.GenericLLM;
 
 
-public class ChatGPTRequest {
+import androidx.annotation.NonNull;
+
+public class GenericLLMRequest {
 
     private final String model;
     private final String userMessage;
@@ -18,19 +20,11 @@ public class ChatGPTRequest {
     private final String apiKey;
     private final String apiUrl;
     private final boolean streamOutput;
+    private final byte[] mediaBlob;
+    private final String mediaMimeType;
+    private final Boolean isOpenRouter;
 
-    public ChatGPTRequest(String model, String userMessage, String developerMessage, double temperature, int maxTokens, String apiKey) {
-        this.model = model;
-        this.userMessage = userMessage;
-        this.developerMessage = developerMessage;
-        this.temperature = temperature;
-        this.maxTokens = maxTokens;
-        this.streamOutput = false;
-        this.apiKey = apiKey;
-        this.apiUrl = "https://api.openai.com/v1/chat/completions";
-    }
-
-    public ChatGPTRequest(String model, String userMessage, String developerMessage, double temperature, int maxTokens, boolean streamOutput, String apiKey, String apiUrl) {
+    public GenericLLMRequest(String model, String userMessage, String developerMessage, double temperature, int maxTokens, boolean streamOutput, String apiKey, String apiUrl, byte[] mediaBlob, String mediaMimeType, boolean isOpenRouter) {
         this.model = model;
         this.userMessage = userMessage;
         this.developerMessage = developerMessage;
@@ -39,6 +33,9 @@ public class ChatGPTRequest {
         this.streamOutput = streamOutput;
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
+        this.mediaBlob = mediaBlob;
+        this.mediaMimeType = mediaMimeType;
+        this.isOpenRouter = isOpenRouter;
     }
 
     public String getModel() {
@@ -73,17 +70,37 @@ public class ChatGPTRequest {
         return streamOutput;
     }
 
+    public byte[] getMediaBlob() {
+        return mediaBlob;
+    }
+
+    public String getMediaMimeType() {
+        return mediaMimeType;
+    }
+
+    public boolean hasMedia() {
+        return mediaBlob != null && mediaBlob.length > 0 && mediaMimeType != null && !mediaMimeType.isEmpty();
+    }
+
+    public boolean isOpenRouter() {
+        return isOpenRouter;
+    }
+
+    @NonNull
     @Override
     public String toString() {
-        return "ChatGPTRequest{" +
+        return "GenericLLMRequest{" +
                 "model='" + model + '\'' +
                 ", userMessage='" + userMessage + '\'' +
                 ", developerMessage='" + developerMessage + '\'' +
                 ", temperature=" + temperature +
                 ", maxTokens=" + maxTokens +
-                ", apiKey='" + apiKey + '\'' +
+                ", apiKey='***'" +
                 ", apiUrl='" + apiUrl + '\'' +
                 ", streamOutput=" + streamOutput +
+                ", hasMedia=" + hasMedia() +
+                ", mediaMimeType='" + mediaMimeType + '\'' +
+                ", isOpenRouter=" + isOpenRouter +
                 '}';
     }
 }

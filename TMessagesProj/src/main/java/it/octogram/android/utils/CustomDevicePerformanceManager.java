@@ -37,17 +37,17 @@ public class CustomDevicePerformanceManager {
      * Each element in the array represents a specific device hardware ID, likely obtained through
      * system properties or build characteristics.
      * <p>
-     *  -1775228513: EXYNOS 850
-     *  802464304:  EXYNOS 7872
-     *  802464333:  EXYNOS 7880
-     *  802464302:  EXYNOS 7870
-     *  2067362118: MSM8953
-     *  2067362060: MSM8937
-     *  2067362084: MSM8940
-     *  2067362241: MSM8992
-     *  2067362117: MSM8952
-     *  2067361998: MSM8917
-     *  -1853602818: SDM439
+     * -1775228513: EXYNOS 850
+     * 802464304:  EXYNOS 7872
+     * 802464333:  EXYNOS 7880
+     * 802464302:  EXYNOS 7870
+     * 2067362118: MSM8953
+     * 2067362060: MSM8937
+     * 2067362084: MSM8940
+     * 2067362241: MSM8992
+     * 2067362117: MSM8952
+     * 2067361998: MSM8917
+     * -1853602818: SDM439
      */
     private static final int[] LOW_SOC = {
             -1775228513, // EXYNOS 850
@@ -82,9 +82,9 @@ public class CustomDevicePerformanceManager {
      * The method also logs the performance information for debugging purposes.
      *
      * @return The performance class of the device, which can be one of the following:
-     *         {@link SharedConfig#PERFORMANCE_CLASS_LOW},
-     *         {@link SharedConfig#PERFORMANCE_CLASS_AVERAGE},
-     *         {@link SharedConfig#PERFORMANCE_CLASS_HIGH}.
+     * {@link SharedConfig#PERFORMANCE_CLASS_LOW},
+     * {@link SharedConfig#PERFORMANCE_CLASS_AVERAGE},
+     * {@link SharedConfig#PERFORMANCE_CLASS_HIGH}.
      */
     public static int measureDevicePerformanceClass() {
         int androidVersion = Build.VERSION.SDK_INT;
@@ -129,7 +129,7 @@ public class CustomDevicePerformanceManager {
      *
      * @param cpuCount The total number of CPU cores available.
      * @return The average maximum CPU frequency in MHz, or -1 if no frequency information
-     *         could be retrieved for any core.
+     * could be retrieved for any core.
      */
     private static int getMaxCpuFrequency(int cpuCount) {
         int totalCpuFreq = 0;
@@ -192,7 +192,7 @@ public class CustomDevicePerformanceManager {
      * @param maxCpuFreq       The maximum CPU frequency in kHz.
      * @param memoryClass      The memory class of the device.
      * @param androidVersion   The Android version of the device.
-     * @param ram             The total RAM available in bytes.
+     * @param ram              The total RAM available in bytes.
      */
     private static void logPerformanceInfo(int performanceClass, int cpuCount, int maxCpuFreq, int memoryClass, int androidVersion, long ram) {
         if (BuildVars.LOGS_ENABLED) {

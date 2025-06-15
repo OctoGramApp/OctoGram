@@ -132,7 +132,7 @@ public class UpdateLayout extends IUpdateLayout {
             int neededIcon = getNeededAction(currentAccount);
             if (neededIcon == MediaActionDrawable.ICON_DOWNLOAD) {
                 FileLoader.getInstance(currentAccount).loadFile(SharedConfig.pendingAppUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
-                updateAppUpdateViews(currentAccount,  true);
+                updateAppUpdateViews(currentAccount, true);
             } else if (neededIcon == MediaActionDrawable.ICON_CANCEL) {
                 FileLoader.getInstance(currentAccount).cancelLoadFile(SharedConfig.pendingAppUpdate.document);
                 updateAppUpdateViews(currentAccount, true);

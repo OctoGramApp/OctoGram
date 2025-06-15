@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.ai;
+package it.octogram.android.ai.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.runOnUIThread;
@@ -46,10 +46,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import it.octogram.android.OctoColors;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
-import it.octogram.android.ai.helper.CustomModelsHelper;
-import it.octogram.android.ai.helper.MainAiHelper;
+import it.octogram.android.ai.AiPrompt;
+import it.octogram.android.ai.CustomModelsHelper;
+import it.octogram.android.ai.MainAiHelper;
 
 public class GenerateModelBottomSheet extends BottomSheet {
     private final Context context;
@@ -94,8 +96,8 @@ public class GenerateModelBottomSheet extends BottomSheet {
         currentElement.getEditText().setMaxLines(10);
         currentElement.getEditText().setPadding(AndroidUtilities.dp(15), AndroidUtilities.dp(15), AndroidUtilities.dp(15), AndroidUtilities.dp(15));
         currentElement.setHint(getString(R.string.AiFeatures_CustomModels_Generate_Input));
-        currentElement.updateColorAsDefined(Color.parseColor("#8d3067"));
-        currentElement.getEditText().setCursorColor(Color.parseColor("#8d3067"));
+        currentElement.updateColorAsDefined(Color.parseColor(OctoColors.AiColor.getValue()));
+        currentElement.getEditText().setCursorColor(Color.parseColor(OctoColors.AiColor.getValue()));
         linearLayout.addView(currentElement, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 17, 10, 17, 10));
 
         TextView buttonTextView = new TextView(context);
@@ -105,7 +107,7 @@ public class GenerateModelBottomSheet extends BottomSheet {
         buttonTextView.setTypeface(AndroidUtilities.bold());
         buttonTextView.setText(getString(R.string.AiFeatures_CustomModels_Generate_Button));
         buttonTextView.setTextColor(Color.WHITE);
-        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Color.parseColor("#8d3067"), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
+        buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Color.parseColor(OctoColors.AiColor.getValue()), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
         buttonTextView.setOnClickListener(view -> {
             AlertDialog progressDialog = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
             progressDialog.setCanCancel(false);
@@ -179,6 +181,7 @@ public class GenerateModelBottomSheet extends BottomSheet {
                     BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createErrorBulletin(getString(R.string.AiFeatures_CustomModels_Generate_Failed)).show();
                 });
             }
+
             @Override
             public void onTooManyRequests() {
                 runOnUIThread(() -> {
@@ -273,7 +276,8 @@ public class GenerateModelBottomSheet extends BottomSheet {
                     hasMediaTypes = true;
                     break;
                 }
-            } catch (JSONException ignored) {}
+            } catch (JSONException ignored) {
+            }
         }
         String lowerPrompt = prompt.toLowerCase();
         boolean mentionsMedia = lowerPrompt.contains("photo") ||
