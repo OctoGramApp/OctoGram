@@ -126,6 +126,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.PhotoResolution;
 import it.octogram.android.media.AudioEnhance;
 
 public class MediaController implements AudioManager.OnAudioFocusChangeListener, NotificationCenter.NotificationCenterDelegate, SensorEventListener {
@@ -496,7 +497,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public boolean isCropped;
         public int ttl;
         public long effectId;
-        public boolean highQuality;
+        public boolean highQuality = PhotoResolution.Companion.fromInt(OctoConfig.INSTANCE.photoResolution.getValue()).isHigh();
 
         public CropState cropState;
 
@@ -525,7 +526,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             savedFilterState = null;
             stickers = null;
             cropState = null;
-            highQuality = false;
+            highQuality = PhotoResolution.Companion.fromInt(OctoConfig.INSTANCE.photoResolution.getValue()).isHigh();
         }
 
         public void copyFrom(MediaEditState state) {
@@ -4815,8 +4816,8 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             requestRecordAudioFocus(false);
         }
         try {
-            AudioEnhance.releaseVoiceEnhancements();
             if (audioRecorder != null) {
+                AudioEnhance.releaseVoiceEnhancements();
                 audioRecorder.release();
                 audioRecorder = null;
             }

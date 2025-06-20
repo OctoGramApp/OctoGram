@@ -47,6 +47,12 @@ enum class DefaultEmojiButtonAction(val value: Int) {
     GIFS(3)
 }
 
+enum class DefaultMicrophoneButtonAction(val value: Int) {
+    DEFAULT(0),
+    VOICE_MESSAGE(1),
+    VIDEO_MESSAGE(2)
+}
+
 enum class DoubleTapAction(val value: Int) {
     DISABLED(0),
     REACTION(1),
@@ -214,9 +220,11 @@ enum class PhotoResolution(val value: Int) {
     DEFAULT(1),
     HIGH(2);
 
+    fun isHigh(): Boolean = this.value > DEFAULT.value
+
     companion object {
         fun fromInt(value: Int): PhotoResolution {
-            return PhotoResolution.entries.find { it.value == value } ?: DEFAULT
+            return entries.find { it.value == value } ?: DEFAULT
         }
     }
 }

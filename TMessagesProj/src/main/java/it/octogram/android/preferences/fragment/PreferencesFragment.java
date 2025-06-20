@@ -59,6 +59,7 @@ import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Components.UndoView;
+import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
@@ -835,7 +836,7 @@ public class PreferencesFragment extends BaseFragment {
                 builder.setPositiveButton(getString(R.string.Open), (dialog, which) -> {
                     dialog.dismiss();
                     finishFragment();
-                    presentFragment(finalCategory.onGetFragment.onCall(finalFocusOnKey));
+                    LaunchActivity.instance.presentFragment(finalCategory.onGetFragment.onCall(finalFocusOnKey));
                 });
                 builder.setNegativeButton(getString(R.string.Close), null);
                 builder.show();

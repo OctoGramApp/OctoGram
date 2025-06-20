@@ -309,6 +309,7 @@ public class ChatSettingsPreviews extends FrameLayout {
 
         inputBox.setEmojiButtonImage(false, true, true);
         inputBox.updateSendAsButton(true, true);
+        inputBox.checkRoundVideo(true);
     }
 
     private void reloadDiscuss() {

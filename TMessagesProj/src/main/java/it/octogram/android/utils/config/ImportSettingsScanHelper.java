@@ -239,17 +239,17 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.repliesLinksShowEmojis, composeName(R.string.RepliesLinksHeader, R.string.RepliesLinksShowEmojis)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.formatTimeWithSeconds, R.string.FormatTimeWithSeconds));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.pencilIconForEditedMessages, R.string.PencilIconForEdited));
-        category.options.add(SettingsScanOption.asTitle("Stickers")); //todo
+        category.options.add(SettingsScanOption.asTitle(R.string.AccDescrStickers));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.maxStickerSize, R.string.StickersSizeHeader));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.stickerShape, R.string.StickerShape));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideSentTimeOnStickers, R.string.RemoveTimeOnStickers));
-        category.options.add(SettingsScanOption.asTitle("Prompts"));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeCalling, composeName(R.string.Warnings, R.string.PromptBeforeCalling)));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory, composeName(R.string.Warnings, R.string.PromptBeforeDeletingChatHistory)));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingStickers, composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingStickers)));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingGIFs, composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingGIFs)));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingVoiceMessages, composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingVoiceMessages)));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingVideoMessages, composeName(R.string.PromptBeforeSending, R.string.PromptBeforeSendingVideoMessages)));
+        category.options.add(SettingsScanOption.asTitle(R.string.Warnings));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingStickers, R.string.PromptBeforeSendingStickers2));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingGIFs, R.string.PromptBeforeSendingGIFs2));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingVoiceMessages, R.string.PromptBeforeSendingVoiceMessages2));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeSendingVideoMessages, R.string.PromptBeforeSendingVideoMessages2));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.promptBeforeCalling, R.string.PromptBeforeCalling2));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory, R.string.PromptBeforeDeletingChatHistory2));
         category.options.add(SettingsScanOption.asTitle(R.string.ActionsHeader));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.shortcutsPosition, R.string.AdminShortcutsPosition));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.jumpToNextChannelOrTopic, R.string.JumpToNextChannelOrTopic));
@@ -257,12 +257,12 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideGreetingSticker, R.string.HideGreetingSticker));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showOnlineStatus, R.string.ShowOnlineStatus));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.openArchiveOnPull, R.string.OpenArchiveOnPull));
-        category.options.add(SettingsScanOption.asTitle("Input box")); //todo
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.defaultEmojiButtonAction, R.string.DefaultEmojiButtonType));
+        category.options.add(SettingsScanOption.asTitle(R.string.InputBoxSettings));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.defaultEmojiButtonAction, R.string.DefaultEmojiButtonType2));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideKeyboardOnScroll, R.string.HideKeyboardOnScroll));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideSendAsChannel, R.string.HideSendAsChannel));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideCustomEmojis, R.string.HideCustomEmojis));
-        category.options.add(SettingsScanOption.asTitle("Bottom bar")); //todo
+        category.options.add(SettingsScanOption.asTitle(R.string.BottomBar));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideBottomBarChannels, R.string.HideBottomBarChannels));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideChatButtonChannels, R.string.HideChatButtonChannels));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideGiftButtonChannels, R.string.HideGiftButtonChannels));

@@ -93,6 +93,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> forceUseIpV6 = newConfigProperty("forceUseIpV6", false);
     public final ConfigProperty<Boolean> enableSmartNotificationsForPrivateChats = newConfigProperty("enableSmartNotificationsForPrivateChats", false);
     public final ConfigProperty<Integer> defaultEmojiButtonAction = newConfigProperty("defaultEmojiButtonAction", DefaultEmojiButtonAction.DEFAULT.getValue());
+    public final ConfigProperty<Integer> defaultRightButtonAction = newConfigProperty("defaultRightButtonAction", DefaultMicrophoneButtonAction.DEFAULT.getValue());
     public final ConfigProperty<Boolean> swipeToPip = newConfigProperty("swipeToPip", false);
     public final ConfigProperty<Boolean> usePinnedEmojisFeature = newConfigProperty("usePinnedEmojisFeature", false);
     public final ConfigProperty<Boolean> hideRecentEmojis = newConfigProperty("hideRecentEmojis", false);
@@ -245,6 +246,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> rapidActionsMainButtonAction = newConfigProperty("rapidActionsMainButtonAction", InterfaceRapidButtonsActions.POST_STORY.getValue());
     public final ConfigProperty<Integer> rapidActionsMainButtonActionLongPress = newConfigProperty("rapidActionsMainButtonActionLongPress", InterfaceRapidButtonsActions.SAVED_MESSAGES.getValue());
     public final ConfigProperty<Integer> rapidActionsSecondaryButtonAction = newConfigProperty("rapidActionsSecondaryButtonAction", InterfaceRapidButtonsActions.SEND_MESSAGE.getValue());
+    public final ConfigProperty<Boolean> roundedTextBox = newConfigProperty("roundedTextBox", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -346,6 +348,68 @@ public class OctoConfig {
         return OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO.getValue()
                 ? AudioFormat.CHANNEL_OUT_MONO
                 : AudioFormat.CHANNEL_OUT_STEREO;
+    }
+
+    private static @NonNull Map<String, String> getStringMap() {
+        Map<String, String> associations = new HashMap<>();
+        associations.put("drawerChangeStatus", "set_status");
+        associations.put("drawerNewGroup", "new_group");
+        associations.put("drawerNewChannel", "new_channel");
+        associations.put("drawerContacts", "contacts");
+        associations.put("drawerCalls", "calls");
+        associations.put("drawerPeopleNearby", "nearby_people");
+        associations.put("drawerSavedMessages", "saved_message");
+        associations.put("drawerOctogramSettings", "octogram_settings");
+        associations.put("drawerDatacenterInfo", "datacenter_status");
+        associations.put("drawerInviteFriends", "invite_friends");
+        associations.put("drawerTelegramFeatures", "telegram_features");
+        return associations;
+    }
+
+    public static boolean isValidMessageExport(MessageObject message) {
+        return isValidExport(OctoUtils.getFileContentFromMessage(message));
+    }
+
+    public static boolean isValidExport(File downloadedFile) {
+        if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
+            try {
+                FileInputStream downloadedFileStream = new FileInputStream(downloadedFile);
+
+                StringBuilder jsonStringBuilder = new StringBuilder();
+                int character;
+                while ((character = downloadedFileStream.read()) != -1) {
+                    jsonStringBuilder.append((char) character);
+                }
+
+                downloadedFileStream.close();
+
+                JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
+                if (INSTANCE.isJSONArrayValidData(result)) {
+                    return true;
+                }
+            } catch (IOException e) {
+                OctoLogging.e(TAG, "an io exception occurred internally during isValidMessageExport OctoConfig", e);
+            } catch (JSONException e) {
+                OctoLogging.e(TAG, "a json exception occurred internally during isValidMessageExport OctoConfig", e);
+            }
+        }
+        return false;
+    }
+
+    @NonNull
+    private static JSONObject getJsonObject(FileInputStream downloadedFileStream) throws IOException, JSONException {
+        InputStreamReader reader = new InputStreamReader(downloadedFileStream, StandardCharsets.UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+
+        StringBuilder jsonStringBuilder = new StringBuilder();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            jsonStringBuilder.append(line);
+        }
+
+        bufferedReader.close();
+
+        return new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
     }
 
     private void loadConfig() {
@@ -495,22 +559,6 @@ public class OctoConfig {
         return false;
     }
 
-    private static @NonNull Map<String, String> getStringMap() {
-        Map<String, String> associations = new HashMap<>();
-        associations.put("drawerChangeStatus", "set_status");
-        associations.put("drawerNewGroup", "new_group");
-        associations.put("drawerNewChannel", "new_channel");
-        associations.put("drawerContacts", "contacts");
-        associations.put("drawerCalls", "calls");
-        associations.put("drawerPeopleNearby", "nearby_people");
-        associations.put("drawerSavedMessages", "saved_message");
-        associations.put("drawerOctogramSettings", "octogram_settings");
-        associations.put("drawerDatacenterInfo", "datacenter_status");
-        associations.put("drawerInviteFriends", "invite_friends");
-        associations.put("drawerTelegramFeatures", "telegram_features");
-        return associations;
-    }
-
     public void resetConfig() {
         synchronized (this) {
             SharedPreferences.Editor editor = PREFS.edit();
@@ -521,36 +569,6 @@ public class OctoConfig {
             }
             editor.apply();
         }
-    }
-
-    public static boolean isValidMessageExport(MessageObject message) {
-        return isValidExport(OctoUtils.getFileContentFromMessage(message));
-    }
-
-    public static boolean isValidExport(File downloadedFile) {
-        if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
-            try {
-                FileInputStream downloadedFileStream = new FileInputStream(downloadedFile);
-
-                StringBuilder jsonStringBuilder = new StringBuilder();
-                int character;
-                while ((character = downloadedFileStream.read()) != -1) {
-                    jsonStringBuilder.append((char) character);
-                }
-
-                downloadedFileStream.close();
-
-                JSONObject result = new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
-                if (INSTANCE.isJSONArrayValidData(result)) {
-                    return true;
-                }
-            } catch (IOException e) {
-                OctoLogging.e(TAG, "an io exception occurred internally during isValidMessageExport OctoConfig", e);
-            } catch (JSONException e) {
-                OctoLogging.e(TAG, "a json exception occurred internally during isValidMessageExport OctoConfig", e);
-            }
-        }
-        return false;
     }
 
     private boolean isJSONArrayValidData(JSONObject result) {
@@ -705,22 +723,6 @@ public class OctoConfig {
         }
 
         return changed;
-    }
-
-    @NonNull
-    private static JSONObject getJsonObject(FileInputStream downloadedFileStream) throws IOException, JSONException {
-        InputStreamReader reader = new InputStreamReader(downloadedFileStream, StandardCharsets.UTF_8);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-
-        StringBuilder jsonStringBuilder = new StringBuilder();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            jsonStringBuilder.append(line);
-        }
-
-        bufferedReader.close();
-
-        return new JSONObject(new JSONTokener(jsonStringBuilder.toString()));
     }
 
     private boolean isValueValid(String fieldName, int value) {

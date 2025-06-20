@@ -119,6 +119,7 @@ import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BirthdayController;
 import org.telegram.messenger.BotWebViewVibrationEffect;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
@@ -198,6 +199,7 @@ import java.util.List;
 import java.util.Locale;
 
 import it.octogram.android.DefaultEmojiButtonAction;
+import it.octogram.android.DefaultMicrophoneButtonAction;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PromptBeforeSendMedia;
 import it.octogram.android.ai.MainAiHelper;
@@ -4175,7 +4177,21 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 if (topView != null && topView.getVisibility() == View.VISIBLE) {
                     top += topView.getHeight();
                 }
-                canvas.clipRect(0, top, getMeasuredWidth(), getMeasuredHeight());
+
+                if (!OctoConfig.INSTANCE.roundedTextBox.getValue()) {
+                    canvas.clipRect(0, top, getMeasuredWidth(), getMeasuredHeight());
+                } else {
+                    Path clipPath = new Path();
+                    float cornerRadius = AndroidUtilities.dp(24);
+                    RectF clipRect = new RectF(
+                            AndroidUtilities.dp(6),
+                            top,
+                            getMeasuredWidth() - AndroidUtilities.dp(6),
+                            getMeasuredHeight()
+                    );
+                    clipPath.addRoundRect(clipRect, cornerRadius, cornerRadius, Path.Direction.CW);
+                    canvas.clipPath(clipPath);
+                }
             } else {
                 canvas.clipRect(0, animatedTop, getMeasuredWidth(), animatedTop + child.getLayoutParams().height + dp(2));
             }
@@ -4218,16 +4234,28 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
         bottom += chatSearchExpandOffset;
 
-        if (allowBlur) {
-            backgroundPaint.setColor(getThemedColor(Theme.key_chat_messagePanelBackground));
-            if (SharedConfig.chatBlurEnabled() && sizeNotifierLayout != null) {
-                blurBounds.set(0, bottom, getWidth(), getHeight());
-                sizeNotifierLayout.drawBlurRect(canvas, getTop(), blurBounds, backgroundPaint, false);
+        if (!OctoConfig.INSTANCE.roundedTextBox.getValue()) {
+            if (allowBlur) {
+                backgroundPaint.setColor(getThemedColor(Theme.key_chat_messagePanelBackground));
+                if (SharedConfig.chatBlurEnabled() && sizeNotifierLayout != null) {
+                    blurBounds.set(0, bottom, getWidth(), getHeight());
+                    sizeNotifierLayout.drawBlurRect(canvas, getTop(), blurBounds, backgroundPaint, false);
+                } else {
+                    canvas.drawRect(0, bottom, getWidth(), getHeight(), backgroundPaint);
+                }
             } else {
-                canvas.drawRect(0, bottom, getWidth(), getHeight(), backgroundPaint);
+                canvas.drawRect(0, bottom, getWidth(), getHeight(), getThemedPaint(Theme.key_paint_chatComposeBackground));
             }
         } else {
-            canvas.drawRect(0, bottom, getWidth(), getHeight(), getThemedPaint(Theme.key_paint_chatComposeBackground));
+            float cornerRadius;
+            RectF roundRect;
+            Paint paintToUse = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+            cornerRadius = AndroidUtilities.dp(28);
+            roundRect = new RectF(0, bottom, getWidth(), getHeight());
+            paintToUse.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
+
+            canvas.drawRoundRect(roundRect, cornerRadius, cornerRadius, paintToUse);
         }
     }
 
@@ -6196,19 +6224,23 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     }
 
     public void checkRoundVideo() {
-        if (hasRecordVideo) {
+        checkRoundVideo(false);
+    }
+
+    public void checkRoundVideo(boolean forced) {
+        if (hasRecordVideo && !forced) {
             return;
         }
-        if (attachLayout == null || Build.VERSION.SDK_INT < 18) {
+        if ((attachLayout == null && !forced) || Build.VERSION.SDK_INT < 18) {
             hasRecordVideo = false;
-            setRecordVideoButtonVisible(false, false);
+            setRecordVideoButtonVisible(false, forced);
             return;
         }
         hasRecordVideo = true;
         sendRoundEnabled = true;
         sendVoiceEnabled = true;
         boolean isChannel = false;
-        if (DialogObject.isChatDialog(dialog_id)) {
+        if (DialogObject.isChatDialog(dialog_id) && !forced) {
             TLRPC.Chat chat = accountInstance.getMessagesController().getChat(-dialog_id);
             isChannel = ChatObject.isChannel(chat) && !chat.megagroup;
             if (isChannel && !chat.creator && (chat.admin_rights == null || !chat.admin_rights.post_messages)) {
@@ -6222,11 +6254,18 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }*/
         boolean currentModeVideo = false;
         if (hasRecordVideo) {
-            if (SharedConfig.hasCameraCache) {
+            if (SharedConfig.hasCameraCache && !forced) {
                 CameraController.getInstance().initCamera(null);
             }
             SharedPreferences preferences = MessagesController.getGlobalMainSettings();
             currentModeVideo = preferences.getBoolean(isChannel ? "currentModeVideoChannel" : "currentModeVideo", isChannel);
+
+            int configData = OctoConfig.INSTANCE.defaultRightButtonAction.getValue();
+            if (configData == DefaultMicrophoneButtonAction.VOICE_MESSAGE.getValue()) {
+                currentModeVideo = false;
+            } else if (configData == DefaultMicrophoneButtonAction.VIDEO_MESSAGE.getValue()) {
+                currentModeVideo = true;
+            }
         }
 
         if (!sendRoundEnabled && currentModeVideo) {
@@ -6239,7 +6278,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 currentModeVideo = false;
             }
         }
-        setRecordVideoButtonVisible(currentModeVideo, false);
+        setRecordVideoButtonVisible(currentModeVideo, forced);
     }
 
     public boolean isInVideoMode() {
@@ -11285,7 +11324,15 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             if (!shouldDrawBackground) {
                 index = sizeNotifierLayout.getChildCount();
             }
+//            if (!OctoConfig.INSTANCE.roundedTextBox.getValue()) {
             sizeNotifierLayout.addView(emojiView, index);
+//            } else {
+//                FrameLayout.LayoutParams layoutParams = LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT);
+//                layoutParams.leftMargin = AndroidUtilities.dp(10);
+//                layoutParams.rightMargin = AndroidUtilities.dp(10);
+//                layoutParams.bottomMargin = AndroidUtilities.dp(8);
+//                sizeNotifierLayout.addView(emojiView, index, layoutParams);
+//            }
         }
     }
 

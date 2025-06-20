@@ -75,6 +75,12 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
                             .title(getString(R.string.MediaStream))
                             .build());
+                    /*category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.roundedTextBox)
+                            .title("Enable Rounded TextBox")
+                            .requiresRestart(true)
+                            .build());*/
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.showRPCErrors)
@@ -102,19 +108,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                     category.row(new ListRow.ListRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .currentValue(OctoConfig.INSTANCE.maxRecentStickers)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption().setId(0).setItemTitle(getString(R.string.MaxStickerSizeDefault)),
-                                    new PopupChoiceDialogOption().setId(1).setItemTitle("30"),
-                                    new PopupChoiceDialogOption().setId(2).setItemTitle("40"),
-                                    new PopupChoiceDialogOption().setId(3).setItemTitle("50"),
-                                    new PopupChoiceDialogOption().setId(4).setItemTitle("80"),
-                                    new PopupChoiceDialogOption().setId(5).setItemTitle("100"),
-                                    new PopupChoiceDialogOption().setId(6).setItemTitle("120"),
-                                    new PopupChoiceDialogOption().setId(7).setItemTitle("150"),
-                                    new PopupChoiceDialogOption().setId(8).setItemTitle("180"),
-                                    new PopupChoiceDialogOption().setId(9).setItemTitle("200"),
-                                    new PopupChoiceDialogOption().setId(10).setItemTitle(R.string.MaxRecentSticker_Unlimited)
-                            ))
+                            .options(buildMaxRecentStickersOptions())
                             .title(getString(R.string.MaxRecentStickers))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
@@ -279,5 +273,18 @@ public class OctoExperimentsUI implements PreferencesEntry {
         var bottomSheet = new AllowExperimentalBottomSheet(context);
         bottomSheet.show();
         return OctoConfig.INSTANCE.experimentsEnabled.getValue();
+    }
+
+    private List<PopupChoiceDialogOption> buildMaxRecentStickersOptions() {
+        List<PopupChoiceDialogOption> options = new ArrayList<>();
+        options.add(new PopupChoiceDialogOption().setId(0).setItemTitle(getString(R.string.MaxStickerSizeDefault)));
+
+        int[] values = {30, 40, 50, 80, 100, 120, 150, 180, 200};
+        for (int i = 0; i < values.length; i++) {
+            options.add(new PopupChoiceDialogOption().setId(i + 1).setItemTitle(String.valueOf(values[i])));
+        }
+
+        options.add(new PopupChoiceDialogOption().setId(values.length + 1).setItemTitle(getString(R.string.MaxRecentSticker_Unlimited)));
+        return options;
     }
 }

@@ -337,7 +337,6 @@
 
     <string name="OctoGeneralSettings">General Settings</string>
     <string name="OctoGeneralSettingsHeader">Here you can customize your general experience with the app</string>
-    <string name="PromptBeforeCalling">Prompt before calling</string>
     <string name="DcIdHeader">Datacenter and User ID</string>
     <string name="ShowDcID">Show Datacenter and ID</string>
     <string name="DcIdTypeDescriptionBotapi">It introduces a "-" sign for groups and prepends "-100" for supergroups, broadcast groups, and channels.</string>
@@ -364,13 +363,14 @@
     <string name="EnableSmartNotificationsForPrivateChats">Enable smart notifications for private chats</string>
     <string name="OpenArchiveOnPull">Pull down to Open the Archive</string>
     <string name="OpenArchiveOnPull_Desc">Automatically opens the archive when pulling down</string>
-    <string name="PromptBeforeDeletingChatHistory">Prompt before deleting chat history</string>
     <string name="DoubleTapActionsHeader">Double tap actions</string>
     <string name="PreferredActionIncoming">Incoming messages</string>
     <string name="PreferredActionOutgoing">Outgoing messages</string>
     <string name="CustomEmojiReaction">Custom emoji reaction</string>
     <string name="TryConnectWithIPV6">Try connecting through IPv6</string>
-    <string name="DefaultEmojiButtonType">Emoji button action</string>
+    <string name="InputBoxSettings">Input Box</string>
+    <string name="DefaultEmojiButtonType2">Left button action</string>
+    <string name="DefaultRightButtonType">Right button action</string>
     <string name="DefaultEmojiButtonTypeDefault">Default</string>
 
     <string name="OctoChatsSettingsHeader">Here you can customize your chats experience with the app</string>
@@ -456,11 +456,12 @@
     <string name="RepliesLinksHeader">Replies and Links</string>
     <string name="RepliesLinksShowColors">Show custom colors</string>
     <string name="RepliesLinksShowEmojis">Show emojis</string>
-    <string name="PromptBeforeSending">Prompt before sending</string>
-    <string name="PromptBeforeSendingStickers">Stickers</string>
-    <string name="PromptBeforeSendingGIFs">GIFs</string>
-    <string name="PromptBeforeSendingVoiceMessages">Voice Messages</string>
-    <string name="PromptBeforeSendingVideoMessages">Video Messages</string>
+    <string name="PromptBeforeSendingStickers2">Before sending stickers</string>
+    <string name="PromptBeforeSendingGIFs2">Before sending GIFs</string>
+    <string name="PromptBeforeSendingVoiceMessages2">Before sending Voice Messages</string>
+    <string name="PromptBeforeSendingVideoMessages2">Before sending Video Messages</string>
+    <string name="PromptBeforeDeletingChatHistory2">Before deleting chat history</string>
+    <string name="PromptBeforeCalling2">Before calling</string>
     <string name="HeaderHeader">Header</string>
     <string name="ActionBarTitle">Title shown in header</string>
     <string name="ActionBarTitleAccountName">Account name</string>
@@ -667,6 +668,7 @@
     <string name="ProfileBubbleHideBorder">Hide dashed border</string>
     <string name="ProfileBubbleMoreTopPadding">Add more top padding</string>
 
+    <string name="BottomBar">Bottom Bar</string>
     <string name="HideBottomBarChannels">Hide bottom bar in channels</string>
     <string name="HideChatButtonChannels">Hide chat button</string>
     <string name="HideGiftButtonChannels">Hide gift button</string>
@@ -691,6 +693,8 @@
 
     <string name="MKVAsVideo">Show MKV as Video</string>
     <string name="StreamAllVideos">Stream All Videos</string>
+
+    <string name="PinnedElements">Pinned Elements</string>
 
     <!--Pinned Emojis List-->
     <string name="PinnedEmojisList">Pinned Emojis</string>

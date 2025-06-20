@@ -31,6 +31,7 @@ import it.octogram.android.ConfigProperty;
 import it.octogram.android.DcIdStyle;
 import it.octogram.android.DcIdType;
 import it.octogram.android.DefaultEmojiButtonAction;
+import it.octogram.android.DefaultMicrophoneButtonAction;
 import it.octogram.android.DoubleTapAction;
 import it.octogram.android.ExpandableRowsIds;
 import it.octogram.android.NewFeaturesBadgeId;
@@ -207,7 +208,7 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                             .build());
                 })
                 .row(new ShadowRow())
-                .category("Pinned elements", category -> {
+                .category(R.string.PinnedElements, category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .icon(R.drawable.chats_pin)
                             .value(PinnedEmojisActivity.getRowDescription())
@@ -279,29 +280,29 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                     category.row(new ExpandableRows.ExpandableRowsBuilder()
                             .setId(ExpandableRowsIds.PROMPT_BEFORE_SENDING.getId())
                             .setIcon(R.drawable.msg_send)
-                            .setMainTitle(getString(R.string.PromptBeforeSending))
+                            .setMainTitle(getString(R.string.Warnings))
                             .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.PromptBeforeSendingStickers))
+                                    .optionTitle(getString(R.string.PromptBeforeSendingStickers2))
                                     .property(OctoConfig.INSTANCE.promptBeforeSendingStickers)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.PromptBeforeSendingGIFs))
+                                    .optionTitle(getString(R.string.PromptBeforeSendingGIFs2))
                                     .property(OctoConfig.INSTANCE.promptBeforeSendingGIFs)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.PromptBeforeSendingVoiceMessages))
+                                    .optionTitle(getString(R.string.PromptBeforeSendingVoiceMessages2))
                                     .property(OctoConfig.INSTANCE.promptBeforeSendingVoiceMessages)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.PromptBeforeSendingVideoMessages))
+                                    .optionTitle(getString(R.string.PromptBeforeSendingVideoMessages2))
                                     .property(OctoConfig.INSTANCE.promptBeforeSendingVideoMessages)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.PromptBeforeCalling))
+                                    .optionTitle(getString(R.string.PromptBeforeCalling2))
                                     .property(OctoConfig.INSTANCE.promptBeforeCalling)
                             )
                             .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.PromptBeforeDeletingChatHistory))
+                                    .optionTitle(getString(R.string.PromptBeforeDeletingChatHistory2))
                                     .property(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory)
                             )
                             .build()
@@ -427,7 +428,7 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                         .title(getString(R.string.AdminShortcutsPositionChatInfo_Alert))
                         .showIf(showTooManyOptionsAlert)
                         .build())
-                .category("Input box", category -> {
+                .category(R.string.InputBoxSettings, category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(inputBoxCellPreview = new ChatSettingsPreviews(context, fragment, ChatSettingsPreviews.PreviewType.INPUT_BOX))
                             .build()
@@ -453,7 +454,26 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                                             .setItemTitle(getString(R.string.AttachGif))
                                             .setItemIcon(R.drawable.msg_gif)
                             ))
-                            .title(getString(R.string.DefaultEmojiButtonType))
+                            .title(getString(R.string.DefaultEmojiButtonType2))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.defaultRightButtonAction)
+                            .onSelected(() -> inputBoxCellPreview.invalidate())
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultMicrophoneButtonAction.DEFAULT.getValue())
+                                            .setItemTitle(getString(R.string.DefaultEmojiButtonTypeDefault))
+                                            .setItemIcon(R.drawable.msg_forward_replace),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultMicrophoneButtonAction.VOICE_MESSAGE.getValue())
+                                            .setItemTitle(getString(R.string.AccDescrVoiceMessage))
+                                            .setItemIcon(R.drawable.msg_voice_unmuted),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultMicrophoneButtonAction.VIDEO_MESSAGE.getValue())
+                                            .setItemTitle(getString(R.string.AccDescrVideoMessage))
+                                            .setItemIcon(R.drawable.msg_video)
+                            ))
+                            .title(getString(R.string.DefaultRightButtonType))
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.hideKeyboardOnScroll)
@@ -469,7 +489,7 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.HideCustomEmojis))
                             .build());
                 })
-                .category("Bottom bar", category -> {
+                .category(R.string.BottomBar, category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(bottomBarCellPreview = new ChatSettingsPreviews(context, fragment, ChatSettingsPreviews.PreviewType.DISCUSS))
                             .build()

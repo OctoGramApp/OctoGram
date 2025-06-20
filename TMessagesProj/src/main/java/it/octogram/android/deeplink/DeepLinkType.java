@@ -26,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
         DeepLinkDef.APPEARANCE,
         DeepLinkDef.UPDATE,
         DeepLinkDef.USER,
+        DeepLinkDef.CHATS,
         DeepLinkDef.APPEARANCE_APP,
         DeepLinkDef.APPEARANCE_CHAT,
         DeepLinkDef.APPEARANCE_DRAWER,

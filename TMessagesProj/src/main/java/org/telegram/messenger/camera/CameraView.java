@@ -752,7 +752,7 @@ public class CameraView extends BaseCameraView implements TextureView.SurfaceTex
                 if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW) {
                     photoMaxWidth = 1280;
                     photoMaxHeight = 960;
-                } else if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_HIGH && OctoConfig.INSTANCE.photoResolution.getValue() == PhotoResolution.HIGH.getValue()) {
+                } else if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_HIGH && PhotoResolution.Companion.fromInt(OctoConfig.INSTANCE.photoResolution.getValue()).isHigh()) {
                     photoMaxWidth = 2560;
                     photoMaxHeight = 1920;
                 } else {
@@ -767,7 +767,7 @@ public class CameraView extends BaseCameraView implements TextureView.SurfaceTex
                 if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW) {
                     photoMaxWidth = 1280;
                     photoMaxHeight = 960;
-                } else if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_HIGH && OctoConfig.INSTANCE.photoResolution.getValue() == PhotoResolution.HIGH.getValue()) {
+                } else if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_HIGH && PhotoResolution.Companion.fromInt(OctoConfig.INSTANCE.photoResolution.getValue()).isHigh()) {
                     photoMaxWidth = 2560;
                     photoMaxHeight = 1440;
                 } else {

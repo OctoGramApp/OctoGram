@@ -67,6 +67,8 @@ import org.telegram.ui.TopicsFragment;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.logs.OctoLogging;
+
 public class ChatAvatarContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     public boolean allowDrawStories;
@@ -629,7 +631,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         int width = MeasureSpec.getSize(widthMeasureSpec) + (isCentered() ? 0 : titleTextView.getPaddingRight());
         int availableWidth = width - dp(((avatarImageView.getVisibility() == VISIBLE || isCentered()) ? 54 : 0) + 16);
 
-        Log.d("AVATARCONTAINER", "onmeasure - prev: "+isPreviewMode() + " - cent: "+isCentered());
+        OctoLogging.d("AVATARCONTAINER", "onmeasure - prev: "+isPreviewMode() + " - cent: "+isCentered());
 
         avatarImageView.measure(MeasureSpec.makeMeasureSpec(dp(42), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(42), MeasureSpec.EXACTLY));
         titleTextView.measure(MeasureSpec.makeMeasureSpec(availableWidth - padding, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(dp(24 + 8) + titleTextView.getPaddingRight(), MeasureSpec.AT_MOST));
@@ -733,12 +735,12 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
 
         int l = leftPadding + (avatarImageView.getVisibility() == VISIBLE && !isCentered() ? dp( 54) : 0) + (isCentered() ? 0 : rightAvatarPadding);
 
-        Log.d("AVATARCONTAINER", "onlayout - prev: "+isPreviewMode() + " - cent: "+isCentered());
+        OctoLogging.d("AVATARCONTAINER", "onlayout - prev: "+isPreviewMode() + " - cent: "+isCentered());
         if (isPreviewMode() && isCentered()) {
             l += dp(AndroidUtilities.isTablet() ? 80 : 72) / 2;
         }
 
-        Log.d("AVATARCONTAINER2", "UPDATED VIEW: "+titleTextView.getMeasuredWidth());
+        OctoLogging.d("AVATARCONTAINER2", "UPDATED VIEW: "+titleTextView.getMeasuredWidth());
 
         SimpleTextView titleTextLargerCopyView = this.titleTextLargerCopyView.get();
         if (getSubtitleTextView().getVisibility() != GONE) {

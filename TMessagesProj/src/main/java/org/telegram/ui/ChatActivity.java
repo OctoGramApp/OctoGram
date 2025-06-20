@@ -135,6 +135,7 @@ import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChannelBoostsController;
 import org.telegram.messenger.ChatMessageSharedResources;
@@ -6287,6 +6288,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         chatListView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
         chatListViewPaddingTop = 0;
         paddingTopHeight = 0;
+
+        if (OctoConfig.INSTANCE.roundedTextBox.getValue()) {
+            chatListView.setClipToPadding(false);
+            chatListView.setPadding(0, 0, 0, AndroidUtilities.dp(60));
+        }
+
         invalidateChatListViewTopPadding();
         if (MessagesController.getGlobalMainSettings().getBoolean("view_animations", true)) {
             chatListItemAnimator = new ChatListItemAnimator(this, chatListView, themeDelegate) {
@@ -8234,7 +8241,23 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         if (!ChatObject.isChannel(currentChat) || currentChat.megagroup) {
             chatActivityEnterView.setBotInfo(botInfo, false);
         }
-        contentView.addView(chatActivityEnterView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM));
+
+        if (!OctoConfig.INSTANCE.roundedTextBox.getValue()) {
+            contentView.addView(chatActivityEnterView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM));
+        } else {
+
+            FrameLayout.LayoutParams enterViewLayoutParams = LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT);
+            enterViewLayoutParams.topMargin = AndroidUtilities.dp(20) * 5;
+            enterViewLayoutParams.bottomMargin = AndroidUtilities.dp(8);
+
+            enterViewLayoutParams.leftMargin = AndroidUtilities.dp(10);
+            enterViewLayoutParams.rightMargin = AndroidUtilities.dp(10);
+
+            enterViewLayoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER;
+
+            contentView.addView(chatActivityEnterView, enterViewLayoutParams);
+            //contentView.addView(chatActivityEnterView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 10, 0, 10, 8));
+        }
         if (chatMode != MODE_EDIT_BUSINESS_LINK) {
             chatActivityEnterView.checkChannelRights();
         }

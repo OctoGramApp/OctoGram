@@ -8206,6 +8206,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                                     return;
                                 stickerEmptySent = true;
                                 generateThumb();
+                                photoEntry.highQuality = false;
                                 photoEntry.imagePath = fullStickerPath;
                                 placeProvider.sendButtonPressed(currentIndex, finalVideoEditedInfo, notify, scheduleDate, forceDocument);
                                 NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationNameOnUIThread(NotificationCenter.customStickerCreated, true);
@@ -14932,7 +14933,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     isCurrentVideo = false;
                     if (object instanceof MediaController.PhotoEntry && !((MediaController.PhotoEntry) object).isVideo) {
                         final MediaController.PhotoEntry entry = (MediaController.PhotoEntry) object;
-                        if (!entry.isVideo && (currentIndex == index ? getCurrentVideoEditedInfo() : entry.editedInfo) == null) {
+                        if (!entry.isVideo && (currentIndex == index ? getCurrentVideoEditedInfo() : entry.editedInfo) == null && sendPhotoType != SELECT_TYPE_STICKER) {
                             compressItem.setVisibility(View.VISIBLE);
                             compressItem.setPhotoState(highQuality);
                         } else {
@@ -15870,7 +15871,6 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
         }
         detectFaces();
-        // TODO: QR Detection
         if (captionEdit != null) {
             long dialogId = 0;
             if (placeProvider != null)
