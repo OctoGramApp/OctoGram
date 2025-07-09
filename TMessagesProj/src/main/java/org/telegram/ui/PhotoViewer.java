@@ -121,6 +121,7 @@ import android.widget.Scroller;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -215,6 +216,7 @@ import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
@@ -5290,11 +5292,16 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                                 if (topicKey.topicId != 0) {
                                     ForumUtilities.applyTopic(chatActivity, topicKey);
                                 }
-                                if (((LaunchActivity) parentActivity).presentFragment(chatActivity, true, false)) {
+                                if (!((LaunchActivity) parentActivity).presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
                                     chatActivity.showFieldPanelForForward(true, fmessages);
-                                } else {
+                                }))) {
                                     fragment1.finishFragment();
                                 }
+//                                if (((LaunchActivity) parentActivity).presentFragment(chatActivity, true, false)) {
+//                                    chatActivity.showFieldPanelForForward(true, fmessages);
+//                                } else {
+//                                    fragment1.finishFragment();
+//                                }
                             }
                             return true;
                         });

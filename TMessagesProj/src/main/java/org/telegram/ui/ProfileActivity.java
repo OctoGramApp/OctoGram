@@ -5346,7 +5346,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         // Octogram - Minimal dc id style
         dcIdTextView = new TextViewSwitcher(context);
-        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() ? View.VISIBLE : View.GONE);
+        dcIdTextView.setVisibility((OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) ? View.VISIBLE : View.GONE);
         dcIdTextView.setFactory(() -> {
             TextView view = new TextView(context);
             view.setTextColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue));
@@ -6308,10 +6308,15 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     }
                     ChatActivity chatActivity = new ChatActivity(args);
                     chatActivity.setPreloadedSticker(getMediaDataController().getGreetingsSticker(), false);
-                    presentFragment(chatActivity, removeFragment);
-                    if (AndroidUtilities.isTablet()) {
-                        finishFragment();
-                    }
+                    presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
+                        if (AndroidUtilities.isTablet()) {
+                            finishFragment();
+                        }
+                    }));
+//                    presentFragment(chatActivity, removeFragment);
+//                    if (AndroidUtilities.isTablet()) {
+//                        finishFragment();
+//                    }
                 }
             }
         } else {
@@ -7894,7 +7899,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 updateCollectibleHint();
             }
 
-            if (!searchMode && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) {
+            if (!searchMode && OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) {
                 dcIdTextView.setAlpha(diff);
                 dcIdTextView.setTag(diff);
                 if (diff == 0) {
@@ -9479,13 +9484,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 numberSectionRow = rowCount++;
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue())
+                if (OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue())
                     dcIdRow = rowCount++;
 
                 numberRow = rowCount++;
                 setUsernameRow = rowCount++;
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue())
+                if (OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue())
                     dcIdRow = rowCount++;
 
                 if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat())
@@ -9573,7 +9578,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 infoStartRow = rowCount;
                 infoHeaderRow = rowCount++;
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue()) {
+                if (OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue()) {
                     dcIdRow = rowCount++;
                 };
 
@@ -9587,7 +9592,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     usernameRow = rowCount++;
                 }
 
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue()) {
+                if (OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue()) {
                     dcIdRow = rowCount++;
                 }
                 if (OctoConfig.INSTANCE.registrationDateInProfiles.getValue() && !isChat()){
@@ -9711,7 +9716,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 sharedMediaRow = rowCount++;
             }
         } else if (chatId != 0) {
-            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue()) {
+            if (OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.OWLGRAM.getValue()) {
                 infoHeaderRow = rowCount++;
                 // todo current user current chat
                 dcIdRow = rowCount++;
@@ -9720,7 +9725,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (LocaleController.isRTL && ChatObject.isChannel(currentChat) && chatInfo != null && !currentChat.megagroup && chatInfo.linked_chat_id != 0) {
                     emptyRow = rowCount++;
                 }
-                if (OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.OWLGRAM.getValue()) {
+                if (OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.OWLGRAM.getValue()) {
                     infoHeaderRow = rowCount++;
                 }
                 if (chatInfo != null) {
@@ -9741,7 +9746,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 //            if (infoHeaderRow != -1) {
 //                notificationsDividerRow = rowCount++;
 //            }
-            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue()) {
+            if (OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.TELEGRAM.getValue()) {
                 dcIdRow = rowCount++;
             }
             notificationsRow = rowCount++;
@@ -11310,7 +11315,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         avatarContainer.setVisibility(View.VISIBLE);
         nameTextView[1].setVisibility(View.VISIBLE);
         onlineTextView[1].setVisibility(View.VISIBLE);
-        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() ? View.VISIBLE : View.GONE);
+        dcIdTextView.setVisibility((OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) ? View.VISIBLE : View.GONE);
         onlineTextView[3].setVisibility(View.VISIBLE);
 
         actionBar.onSearchFieldVisibilityChanged(searchTransitionProgress > 0.5f);
@@ -11442,7 +11447,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         nameTextView[1].setVisibility(hide);
         onlineTextView[1].setVisibility(hide);
-        dcIdTextView.setVisibility(OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() ? hide : View.GONE);
+        dcIdTextView.setVisibility((OctoConfig.INSTANCE.showDcId.getValue() && OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) ? hide : View.GONE);
         onlineTextView[3].setVisibility(hide);
 
         if (otherItem != null) {

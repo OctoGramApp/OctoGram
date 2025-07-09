@@ -131,6 +131,7 @@ import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
@@ -7855,8 +7856,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             } else {
                 args.putLong("chat_id", -peerId);
             }
-            parentActivity.presentFragment(new ChatActivity(args));
-            dismiss();
+            parentActivity.presentFragment(new INavigationLayout.NavigationParams(new ChatActivity(args)).setOnFragmentOpen(() -> dismiss()));
         } else if (option == 8) {
             parentActivity.switchToAccount(currentAccount, true);
             BaseFragment fragment = parentActivity.getActionBarLayout().getFragmentStack().get(parentActivity.getActionBarLayout().getFragmentStack().size() - 1);
@@ -7872,8 +7872,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             } else {
                 args.putLong("chat_id", -peerId);
             }
-            parentActivity.presentFragment(new ChatActivity(args));
-            dismiss();
+            parentActivity.presentFragment(new INavigationLayout.NavigationParams(new ChatActivity(args)).setOnFragmentOpen(() -> dismiss()));
         } else if (option == 7) {
             voIPService.editCallMember(object, true, null, null, false, null);
             updateMuteButton(MUTE_BUTTON_STATE_MUTED_BY_ADMIN, true);

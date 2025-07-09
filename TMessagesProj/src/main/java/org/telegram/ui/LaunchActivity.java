@@ -51,6 +51,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.util.Base64;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -68,7 +69,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import android.window.OnBackAnimationCallback;
+import android.window.OnBackInvokedDispatcher;
 
+import androidx.activity.BackEventCompat;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.arch.core.util.Function;
@@ -1059,6 +1064,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         CustomEmojiController.checkEmojiPacks();
         BackupAgent.requestBackup(this);
         RestrictedLanguagesSelectActivity.checkRestrictedLanguages(false);
+
+        if (!OctoConfig.INSTANCE.usePredictiveGestures.getValue()) {
+            attachBackEvent();
+        }
     }
 
     private void showAttachMenuBot(TLRPC.TL_attachMenuBot attachMenuBot, String startApp, boolean sidemenu) {
@@ -4954,14 +4963,22 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                             BaseFragment lastFragment = getSafeLastFragment();
                                             if (lastFragment == null) return;
                                             BaseFragment chatActivity = ChatActivity.of(dialogId);
-                                            lastFragment.presentFragment(chatActivity);
-
-                                            TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
-                                            if (chat != null) {
-                                                AndroidUtilities.runOnUIThread(() -> {
-                                                    BulletinFactory.of(chatActivity).createSimpleBulletin(R.raw.stars_send, LocaleController.getString(R.string.StarsSubscriptionCompleted), AndroidUtilities.replaceTags(formatPluralString("StarsSubscriptionCompletedText", (int) stars, chat.title))).show(true);
-                                                }, 250);
-                                            }
+                                            lastFragment.presentFragment(new INavigationLayout.NavigationParams(chatActivity).setOnFragmentOpen(() -> {
+                                                TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
+                                                if (chat != null) {
+                                                    AndroidUtilities.runOnUIThread(() -> {
+                                                        BulletinFactory.of(chatActivity).createSimpleBulletin(R.raw.stars_send, LocaleController.getString(R.string.StarsSubscriptionCompleted), AndroidUtilities.replaceTags(formatPluralString("StarsSubscriptionCompletedText", (int) stars, chat.title))).show(true);
+                                                    }, 250);
+                                                }
+                                            }));
+//                                            lastFragment.presentFragment(chatActivity);
+//
+//                                            TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
+//                                            if (chat != null) {
+//                                                AndroidUtilities.runOnUIThread(() -> {
+//                                                    BulletinFactory.of(chatActivity).createSimpleBulletin(R.raw.stars_send, LocaleController.getString(R.string.StarsSubscriptionCompleted), AndroidUtilities.replaceTags(formatPluralString("StarsSubscriptionCompletedText", (int) stars, chat.title))).show(true);
+//                                                }, 250);
+//                                            }
                                         });
                                     }
                                 });
@@ -6242,7 +6259,20 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     @Override
     public boolean didSelectDialogs(DialogsActivity dialogsFragment, ArrayList<MessagesStorage.TopicKey> dids, CharSequence message, boolean param, boolean _notify, int _scheduleDate, TopicsFragment topicsFragment) {
+        return didSelectDialogs(dialogsFragment, dids, message, param, _notify, _scheduleDate, topicsFragment, false);
+    }
+
+    public boolean didSelectDialogs(DialogsActivity dialogsFragment, ArrayList<MessagesStorage.TopicKey> dids, CharSequence message, boolean param, boolean _notify, int _scheduleDate, TopicsFragment topicsFragment, boolean forced) {
         final int account = dialogsFragment != null ? dialogsFragment.getCurrentAccount() : currentAccount;
+
+        if (!forced && dids.size() <= 1) {
+            for (MessagesStorage.TopicKey did : dids) {
+                if (FingerprintUtils.isChatLocked(did)) {
+                    FingerprintUtils.checkFingerprint(actionBarLayout.getContext(), FingerprintUtils.FingerprintAction.OPEN_PAGE, false, () -> didSelectDialogs(dialogsFragment, dids, message, param, _notify, _scheduleDate, topicsFragment, true));
+                    return true;
+                }
+            }
+        }
 
         if (exportingChatUri != null) {
             Uri uri = exportingChatUri;
@@ -6259,6 +6289,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         args.putLong("user_id", result);
                     } else {
                         args.putLong("chat_id", -result);
+                    }
+                    if (forced) {
+                        args.putBoolean("forceIgnoreLock", true);
                     }
                     ChatActivity fragment = new ChatActivity(args);
                     fragment.setOpenImport();
@@ -6302,6 +6335,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     args.putLong("user_id", did);
                 } else {
                     args.putLong("chat_id", -did);
+                }
+                if (forced) {
+                    args.putBoolean("forceIgnoreLock", true);
                 }
                 if (scheduleDate != 0) {
                     args.putInt("chatMode", ChatActivity.MODE_SCHEDULED);
@@ -6578,12 +6614,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         ).setDuration(Bulletin.DURATION_PROLONG).show();
     }
 
-    public void presentFragment(INavigationLayout.NavigationParams params) {
-        getActionBarLayout().presentFragment(params);
+    public boolean presentFragment(INavigationLayout.NavigationParams params) {
+        return getActionBarLayout().presentFragment(params);
     }
 
-    public void presentFragment(BaseFragment fragment) {
-        getActionBarLayout().presentFragment(fragment);
+    public boolean presentFragment(BaseFragment fragment) {
+        return getActionBarLayout().presentFragment(fragment);
     }
 
     public boolean presentFragment(final BaseFragment fragment, final boolean removeLast, boolean forceWithoutAnimation) {
@@ -9124,5 +9160,38 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     public PipActivityController getPipController() {
         return pipActivityController;
+    }
+
+    private boolean hasAttachedBackEvent = false;
+    public void attachBackEvent() {
+        if (hasAttachedBackEvent || !ActionBarLayout.CAN_USE_PREDICTIVE_GESTURES) {
+            return;
+        }
+        hasAttachedBackEvent = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    LaunchActivity.instance.onBackPressed();
+                }
+
+                @Override
+                public void handleOnBackProgressed(@NonNull BackEventCompat backEvent) {
+                    super.handleOnBackProgressed(backEvent);
+                    Log.e("ev", "prgf"+backEvent.getProgress());
+                }
+            });
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_OVERLAY, actionBarLayout.getInstance());
+        }
+    }
+
+    public void detachBackEvent() {
+        if (!hasAttachedBackEvent || !ActionBarLayout.CAN_USE_PREDICTIVE_GESTURES) {
+            return;
+        }
+        hasAttachedBackEvent = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(actionBarLayout.getInstance());
+        }
     }
 }

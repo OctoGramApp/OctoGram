@@ -44,9 +44,6 @@ public class GroqModels {
     // -- Llama-3.3-70b-versatile Series
     public static final String LLAMA_3_3_70B_VERSATILE = "llama-3.3-70b-versatile";
 
-    // -- Llama-guard-3-8b Series
-    public static final String LLAMA_GUARD_3_8B = "llama-guard-3-8b";
-
     // -- Llama3-70b-8192 Series
     public static final String LLAMA3_70B_8192 = "llama3-70b-8192";
 
@@ -54,8 +51,8 @@ public class GroqModels {
     public static final String LLAMA3_8B_8192 = "llama3-8b-8192";
 
     // -- Meta-llama Series
-    public static final String META_LLAMA_LLAMA_PROMPT_GUARD_2_22M = "meta-llama/llama-prompt-guard-2-22m";
     public static final String META_LLAMA_LLAMA_PROMPT_GUARD_2_86M = "meta-llama/llama-prompt-guard-2-86m";
+    public static final String META_LLAMA_LLAMA_PROMPT_GUARD_2_22M = "meta-llama/llama-prompt-guard-2-22m";
     public static final String META_LLAMA_LLAMA_GUARD_4_12B = "meta-llama/llama-guard-4-12b";
     public static final String META_LLAMA_LLAMA_4_MAVERICK_17B_128E_INSTRUCT = "meta-llama/llama-4-maverick-17b-128e-instruct";
     public static final String META_LLAMA_LLAMA_4_SCOUT_17B_16E_INSTRUCT = "meta-llama/llama-4-scout-17b-16e-instruct";
@@ -68,6 +65,9 @@ public class GroqModels {
 
     // -- Playai-tts-arabic Series
     public static final String PLAYAI_TTS_ARABIC = "playai-tts-arabic";
+
+    // -- Qwen Series
+    public static final String QWEN_QWEN3_32B = "qwen/qwen3-32b";
 
     // -- Qwen-qwq-32b Series
     public static final String QWEN_QWQ_32B = "qwen-qwq-32b";
@@ -87,17 +87,17 @@ public class GroqModels {
         GEMMA2_9B_IT,
         LLAMA_3_1_8B_INSTANT,
         LLAMA_3_3_70B_VERSATILE,
-        LLAMA_GUARD_3_8B,
         LLAMA3_70B_8192,
         LLAMA3_8B_8192,
-        META_LLAMA_LLAMA_PROMPT_GUARD_2_22M,
         META_LLAMA_LLAMA_PROMPT_GUARD_2_86M,
+        META_LLAMA_LLAMA_PROMPT_GUARD_2_22M,
         META_LLAMA_LLAMA_GUARD_4_12B,
         META_LLAMA_LLAMA_4_MAVERICK_17B_128E_INSTRUCT,
         META_LLAMA_LLAMA_4_SCOUT_17B_16E_INSTRUCT,
         MISTRAL_SABA_24B,
         PLAYAI_TTS,
         PLAYAI_TTS_ARABIC,
+        QWEN_QWEN3_32B,
         QWEN_QWQ_32B,
         WHISPER_LARGE_V3,
         WHISPER_LARGE_V3_TURBO
@@ -115,17 +115,17 @@ public class GroqModels {
         GEMMA2_9B_IT,
         LLAMA_3_1_8B_INSTANT,
         LLAMA_3_3_70B_VERSATILE,
-        LLAMA_GUARD_3_8B,
         LLAMA3_70B_8192,
         LLAMA3_8B_8192,
-        META_LLAMA_LLAMA_PROMPT_GUARD_2_22M,
         META_LLAMA_LLAMA_PROMPT_GUARD_2_86M,
+        META_LLAMA_LLAMA_PROMPT_GUARD_2_22M,
         META_LLAMA_LLAMA_GUARD_4_12B,
         META_LLAMA_LLAMA_4_MAVERICK_17B_128E_INSTRUCT,
         META_LLAMA_LLAMA_4_SCOUT_17B_16E_INSTRUCT,
         MISTRAL_SABA_24B,
         PLAYAI_TTS,
         PLAYAI_TTS_ARABIC,
+        QWEN_QWEN3_32B,
         QWEN_QWQ_32B,
         WHISPER_LARGE_V3,
         WHISPER_LARGE_V3_TURBO

@@ -103,6 +103,7 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BackDrawable;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Adapters.SearchAdapterHelper;
@@ -2159,7 +2160,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
 
                 forwardNoQuoteItem = new ActionBarMenuItem(context, null, getThemedColor(Theme.key_actionBarActionModeDefaultSelector), getThemedColor(Theme.key_actionBarActionModeDefaultIcon), false);
                 forwardNoQuoteItem.setIcon(R.drawable.msg_forward);
-                forwardNoQuoteItem.setContentDescription(9+LocaleController.getString("NoQuoteForward", R.string.NoQuoteForward));
+                forwardNoQuoteItem.setContentDescription(getString(R.string.NoQuoteForward));
                 forwardNoQuoteItem.setDuplicateParentStateEnabled(false);
                 actionModeLayout.addView(forwardNoQuoteItem, new LinearLayout.LayoutParams(AndroidUtilities.dp(54), ViewGroup.LayoutParams.MATCH_PARENT));
                 actionModeViews.add(forwardNoQuoteItem);
@@ -4732,8 +4733,9 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
 
                     ChatActivity chatActivity = new ChatActivity(args1);
                     ForumUtilities.applyTopic(chatActivity, dids.get(0));
-                    fragment1.presentFragment(chatActivity, true);
-                    chatActivity.showFieldPanelForForward(true, fmessages);
+                    fragment1.presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> chatActivity.showFieldPanelForForward(true, fmessages)));
+//                    fragment1.presentFragment(chatActivity, true);
+//                    chatActivity.showFieldPanelForForward(true, fmessages);
                 }
                 return true;
             });

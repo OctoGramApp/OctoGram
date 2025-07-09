@@ -13,6 +13,7 @@ import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.style.URLSpan;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +52,6 @@ import it.octogram.android.AiModelType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ai.icons.AiFeatureIcons;
 import it.octogram.android.ai.ui.MainAiBottomSheet;
-import it.octogram.android.translator.TranslateMessagesWrapper;
 
 public class CustomModelsMenuWrapper {
     public static void initState(FillStateData data) {
@@ -67,7 +67,7 @@ public class CustomModelsMenuWrapper {
         }
 
         ArrayList<String> availableModels = getEligibleModels(data, state);
-        if (availableModels.isEmpty() && !data.canAskOnMedia()) {
+        if (availableModels.isEmpty() && !data.canAskOnMedia() && !data.canTranslate()) {
             data.hideButton();
             return;
         }
@@ -75,7 +75,7 @@ public class CustomModelsMenuWrapper {
         data.originalSubItem.setMinimumWidth(AndroidUtilities.dp(196));
         data.applyColors();
 
-        if ((availableModels.size() == 1 && !data.canAskOnMedia()) || (availableModels.isEmpty() && data.canAskOnMedia())) {
+        if ((availableModels.size() + (data.canAskOnMedia() ? 1 : 0) + (data.canTranslate() ? 1 : 0)) == 1) {
             if (!availableModels.isEmpty()) {
                 String modelID = availableModels.get(0);
                 CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(modelID);
@@ -92,17 +92,24 @@ public class CustomModelsMenuWrapper {
                     String finalModelTitle = modelTitle;
                     data.originalSubItem.setOnClickListener(view -> handleOnClick(modelID, finalModelTitle, model, data));
                 }
-            } else {
+            } else if (data.canAskOnMedia()) {
                 data.originalSubItem.setIcon(R.drawable.photo_paint_brush);
                 data.originalSubItem.setText(getString(R.string.AiFeatures_Features_AskOnPhoto));
                 data.originalSubItem.setOnClickListener(view -> handleAskOnMedia(data));
+            } else if (data.canTranslate()) {
+                data.originalSubItem.setIcon(R.drawable.msg_translate);
+                data.originalSubItem.setText(getString(R.string.AiFeatures_Features_TranslateAI2));
+                data.originalSubItem.setOnClickListener(view -> handleAiTranslation(data));
             }
+            data.originalSubItem.setSubtext(getString(R.string.AiFeatures_Brief));
+            data.originalSubItem.setRightIcon(0);
             return;
         }
 
         data.originalSubItem.setRightIcon(R.drawable.msg_arrowright);
         data.originalSubItem.setIcon(R.drawable.aifeatures_solar);
         data.originalSubItem.setText(getString(R.string.AiFeatures_Brief));
+        data.originalSubItem.setSubtext(null);
 
         CustomModelSwipeActivity viewToSwipeBack = new CustomModelSwipeActivity(data, availableModels);
         if (data.useSwipeBack) {
@@ -306,6 +313,11 @@ public class CustomModelsMenuWrapper {
         handleOnClick(data.modelID, null, null, data);
     }
 
+    private static void handleAiTranslation(FillStateData data) {
+        data.modelID = CustomModelsHelper.VIRTUAL_TRANSLATE_MODEL_ID;
+        handleOnClick(data.modelID, null, null, data);
+    }
+
     private static void fixIcon(ActionBarMenuSubItem item) {
         var imageView = item.getImageView();
 
@@ -342,12 +354,23 @@ public class CustomModelsMenuWrapper {
                 ActionBarMenuSubItem backItem = ActionBarMenuItem.addItem(windowLayout, R.drawable.msg_arrow_back, getString(R.string.Back), false, null);
                 backItem.setOnClickListener(view -> data.popupWindowLayout.getSwipeBack().closeForeground());
                 data.applyColors(backItem);
+                ActionBarMenuItem.addGap(0, windowLayout);
+            }
+
+            if (data.canTranslate()) {
+                ActionBarMenuSubItem item = ActionBarMenuItem.addItem(windowLayout, R.drawable.cup_star_solar, getString(R.string.AiFeatures_Features_TranslateAI2), false, null);
+                item.setOnClickListener(view -> handleAiTranslation(data));
+                data.applyColors(item);
             }
 
             if (data.canAskOnMedia()) {
                 ActionBarMenuSubItem item = ActionBarMenuItem.addItem(windowLayout, R.drawable.photo_paint_brush, getString(R.string.AiFeatures_Features_AskOnPhoto), false, null);
                 item.setOnClickListener(view -> handleAskOnMedia(data));
                 data.applyColors(item);
+            }
+
+            if (data.canTranslate() || data.canAskOnMedia()) {
+                ActionBarMenuItem.addGap(0, windowLayout);
             }
 
             for (String modelID : eligibleModels) {
@@ -369,9 +392,10 @@ public class CustomModelsMenuWrapper {
         }
     }
 
-    public static class FillStateData extends TranslateMessagesWrapper.FillStateData {
+    public static class FillStateData {
         public MessageObject messageObject;
         public CharSequence messageText;
+        public Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress;
 
         public String modelID;
 
@@ -385,6 +409,15 @@ public class CustomModelsMenuWrapper {
         public boolean useSwipeBack = true;
         public boolean isInputBox = false;
         public Utilities.Callback<String> setInputBoxText;
+
+        public Context context;
+        public Runnable onSheetOpen;
+        public Runnable onSheetClose;
+        public Runnable onNewFragmentOpen;
+        public boolean noforwards = false;
+        public boolean supportsActivityRelatedDimBehind = false;
+        public ActionBarPopupWindow.ActionBarPopupWindowLayout popupWindowLayout;
+        public ActionBarMenuSubItem originalSubItem;
 
         private int textColor = -1;
         private int iconColor = -1;
@@ -418,6 +451,10 @@ public class CustomModelsMenuWrapper {
 
         public boolean canAskOnMedia() {
             return useSwipeBack && !isInputBox && !isChat && OctoConfig.INSTANCE.aiFeaturesAskOnMedia.getValue() && getAvailableStates(this) != null && getAvailableStates(this) != AiModelMessagesState.TEXT_MESSAGES;
+        }
+
+        public boolean canTranslate() {
+            return useSwipeBack && !isInputBox && !isChat && OctoConfig.INSTANCE.aiFeaturesTranslateMessages.getValue() && messageText != null && !messageText.toString().trim().isEmpty();
         }
     }
 }

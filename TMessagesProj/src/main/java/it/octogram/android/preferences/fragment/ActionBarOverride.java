@@ -10,6 +10,9 @@ package it.octogram.android.preferences.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -34,6 +37,8 @@ public class ActionBarOverride extends ActionBarLayout {
     private long lastUnlockedAccount = 0;
     private BlockingAccountDialog accountView;
     private BlockingAccountDialog pageView;
+    public static int GENERIC_BACK_EVENT_STATE = 99393939;
+    public static int FORCE_BACK_INVOKED_META_STATE = 993939;
 
     public ActionBarOverride(Context context, boolean main) {
         super(context, main);
@@ -45,7 +50,6 @@ public class ActionBarOverride extends ActionBarLayout {
 
         boolean mustRequireFingerprint = false;
         boolean ignoreAskEvery = false;
-        boolean usesAdvancedUnlock = false;
         if (fragment instanceof CallLogActivity && OctoConfig.INSTANCE.biometricOpenCallsLog.getValue() && FingerprintUtils.hasFingerprintCached()) {
             mustRequireFingerprint = true;
         } else if (fragment instanceof DialogsActivity f2 && FingerprintUtils.hasFingerprintCached() && f2.getArguments() != null) {
@@ -55,13 +59,14 @@ public class ActionBarOverride extends ActionBarLayout {
                 mustRequireFingerprint = true;
             }
         } else if (fragment instanceof ChatActivity f2 && FingerprintUtils.hasFingerprintCached() && f2.getArguments() != null) {
-            usesAdvancedUnlock = true;
-            if (f2.getArguments().containsKey("enc_id")) {
-                mustRequireFingerprint = OctoConfig.INSTANCE.biometricOpenSecretChats.getValue();
-            } else {
-                boolean isCurrentChatLocked = FingerprintUtils.isChatLocked(f2.getArguments());
-                if (isCurrentChatLocked && needToUnlockAfterDialogsActivity(f2)) {
-                    mustRequireFingerprint = true;
+            if (!f2.getArguments().getBoolean("forceIgnoreLock", false) && !f2.getArguments().containsKey("start_from_date")) {
+                if (f2.getArguments().containsKey("enc_id")) {
+                    mustRequireFingerprint = OctoConfig.INSTANCE.biometricOpenSecretChats.getValue();
+                } else {
+                    boolean isCurrentChatLocked = FingerprintUtils.isChatLocked(f2.getArguments());
+                    if (isCurrentChatLocked && needToUnlockAfterDialogsActivity(f2)) {
+                        mustRequireFingerprint = true;
+                    }
                 }
             }
         } else if (fragment instanceof PreferencesFragment f2 && f2.isLockedContent() && FingerprintUtils.hasFingerprintCached()) {
@@ -74,22 +79,23 @@ public class ActionBarOverride extends ActionBarLayout {
         }
 
         if (mustRequireFingerprint) {
-            if (OctoConfig.INSTANCE.advancedBiometricUnlock.getValue() && usesAdvancedUnlock) {
-                if (pageView == null || !pageView.isShowing()) {
-                    getBlockingPageDialog(fragment);
-                    pageView.show();
+            FingerprintUtils.checkFingerprint(ApplicationLoader.applicationContext, FingerprintUtils.FingerprintAction.OPEN_PAGE, ignoreAskEvery, () -> {
+                ActionBarOverride.super.presentFragment(params);
+                if (params.onFragmentOpen != null) {
+                    params.onFragmentOpen.run();
                 }
-                return super.presentFragment(params);
-            }
-
-            FingerprintUtils.checkFingerprint(ApplicationLoader.applicationContext, FingerprintUtils.FingerprintAction.OPEN_PAGE, ignoreAskEvery, () -> ActionBarOverride.super.presentFragment(params));
+            });
 
             return false;
         } else {
             handleAccountState();
         }
 
-        return super.presentFragment(params);
+        boolean state = super.presentFragment(params);
+        if (params.onFragmentOpen != null) {
+            params.onFragmentOpen.run();
+        }
+        return state;
     }
 
     @Override
@@ -213,5 +219,17 @@ public class ActionBarOverride extends ActionBarLayout {
             }
         }
         return true;
+    }
+
+    private CustomPredictiveHandler customPredictiveHandler;
+
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public CustomPredictiveHandler getInstance() {
+        if (customPredictiveHandler != null) {
+            return customPredictiveHandler;
+        }
+
+        customPredictiveHandler = new CustomPredictiveHandler();
+        return customPredictiveHandler;
     }
 }

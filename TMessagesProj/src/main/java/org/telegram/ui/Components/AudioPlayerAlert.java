@@ -97,6 +97,7 @@ import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
@@ -1543,14 +1544,22 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
                     if (topicKey.topicId != 0) {
                         ForumUtilities.applyTopic(chatActivity, topicKey);
                     }
-                    if (parentActivity.presentFragment(chatActivity, true, false)) {
+                    if (!(parentActivity.presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
                         chatActivity.showFieldPanelForForward(true, fmessages);
                         if (topicKey.topicId != 0) {
                             fragment1.removeSelfFromStack();
                         }
-                    } else {
+                    })))) {
                         fragment1.finishFragment();
                     }
+//                    if (parentActivity.presentFragment(chatActivity, true, false)) {
+//                        chatActivity.showFieldPanelForForward(true, fmessages);
+//                        if (topicKey.topicId != 0) {
+//                            fragment1.removeSelfFromStack();
+//                        }
+//                    } else {
+//                        fragment1.finishFragment();
+//                    }
                 }
                 return true;
             });
@@ -1617,8 +1626,9 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
             }
             args.putInt("message_id", messageObject.getId());
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.closeChats);
-            parentActivity.presentFragment(new ChatActivity(args), false, false);
-            dismiss();
+            parentActivity.presentFragment(new INavigationLayout.NavigationParams(new ChatActivity(args)).setOnFragmentOpen(() -> dismiss()));
+//            parentActivity.presentFragment(new ChatActivity(args), false, false);
+//            dismiss();
         } else if (id == 5) {
             if (Build.VERSION.SDK_INT >= 23 && (Build.VERSION.SDK_INT <= 28 || BuildVars.NO_SCOPED_STORAGE) && parentActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 parentActivity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 4);

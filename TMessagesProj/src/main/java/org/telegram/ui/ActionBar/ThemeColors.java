@@ -74,6 +74,7 @@ public class ThemeColors {
         defaultColors[key_share_linkBackground] = 0x0F000000;
 
         defaultColors[key_windowBackgroundWhite] = 0xffffffff;
+        defaultColors[key_color_text_box] = 0xFFDCE2F9;
         defaultColors[key_windowBackgroundUnchecked] = 0xff9da7b1;
         defaultColors[key_windowBackgroundChecked] = 0xff579ed9;
         defaultColors[key_windowBackgroundCheckText] = 0xffffffff;
@@ -868,6 +869,7 @@ public class ThemeColors {
         colorKeysMap.put(key_dialogSwipeRemove, "dialogSwipeRemove");
         colorKeysMap.put(key_dialogReactionMentionBackground, "dialogReactionMentionBackground");
         colorKeysMap.put(key_windowBackgroundWhite, "windowBackgroundWhite");
+        colorKeysMap.put(key_color_text_box, "key_color_text_box");
         colorKeysMap.put(key_windowBackgroundUnchecked, "windowBackgroundUnchecked");
         colorKeysMap.put(key_windowBackgroundChecked, "windowBackgroundChecked");
         colorKeysMap.put(key_windowBackgroundCheckText, "windowBackgroundCheckText");

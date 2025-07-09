@@ -116,6 +116,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.contextMessageDetails.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.contextNoQuoteForward.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.contextReplyPrivateChat.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.contextReplyMessage.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.useTranslationsArgsFix.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.receivePBetaUpdates.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.mediaFiltering.getKey());
@@ -170,6 +171,8 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesUseOllamaAPIs.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesOllamaSelectedModel.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesOllamaApiUrl.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.usePredictiveGestures.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.roundedTextBox.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getKey()); // part of main settings page
     }
 
@@ -239,6 +242,10 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.repliesLinksShowEmojis, composeName(R.string.RepliesLinksHeader, R.string.RepliesLinksShowEmojis)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.formatTimeWithSeconds, R.string.FormatTimeWithSeconds));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.pencilIconForEditedMessages, R.string.PencilIconForEdited));
+        category.options.add(SettingsScanOption.asTitle(R.string.ContextMenu));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.contextMenuBriefingState, R.string.ContextMenuBriefingState));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.contextMenuShortcutsTitles, R.string.ContextMenuBriefingState_Shortcuts_Title));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.contextMenuBottomShortcuts, R.string.ContextMenuBriefingState_Shortcuts_Bottom));
         category.options.add(SettingsScanOption.asTitle(R.string.AccDescrStickers));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.maxStickerSize, R.string.StickersSizeHeader));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.stickerShape, R.string.StickerShape));
@@ -259,6 +266,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.openArchiveOnPull, R.string.OpenArchiveOnPull));
         category.options.add(SettingsScanOption.asTitle(R.string.InputBoxSettings));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.defaultEmojiButtonAction, R.string.DefaultEmojiButtonType2));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.defaultRightButtonAction, R.string.DefaultRightButtonType));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideKeyboardOnScroll, R.string.HideKeyboardOnScroll));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideSendAsChannel, R.string.HideSendAsChannel));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideCustomEmojis, R.string.HideCustomEmojis));
@@ -347,6 +355,7 @@ public class ImportSettingsScanHelper {
         category.options.add(SettingsScanOption.asTitle(R.string.AlternativeNavigation));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.navigationSmoothness, R.string.SmootherNavigation));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.animatedActionBar, R.string.AnimatedActionBar));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.navigationBounceLevel, R.string.BounceNavigation));
         category.options.add(SettingsScanOption.asTitle(R.string.Chats));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.hideOpenButtonChatsList, R.string.HideOpenButtonChatsList));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alwaysExpandBlockQuotes, R.string.AlwaysExpandBlockQuotes));
@@ -355,6 +364,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.profileBubbleMoreTopPadding, R.string.ProfileBubbleMoreTopPadding));
         category.options.add(SettingsScanOption.asTitle(R.string.DownloadAndUploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useQualityPreset, R.string.UseQualityPreset));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.keepOriginalFileName, R.string.KeepOriginalFileName));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost, R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost, R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue, R.string.DownloadBoostType));

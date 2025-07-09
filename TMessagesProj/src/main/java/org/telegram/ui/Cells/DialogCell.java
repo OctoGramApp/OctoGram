@@ -3434,7 +3434,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     }
 
     private Object handleCurrentPreviewData() {
-        if (message == null) {
+        if (message == null || !OctoConfig.INSTANCE.showUserIconsInChatsList.getValue()) {
             return null;
         }
 
@@ -3443,10 +3443,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         //customC &= user != null;
 
         if (customC) {
-            customC = OctoConfig.INSTANCE.showUserIconsInChatsList.getValue();
-            customC &= !ChatObject.isChannelOrGiga(chat);
+            customC = !ChatObject.isChannelOrGiga(chat);
             customC &= !ChatObject.isForum(chat);
             customC &= !UserObject.isAnonymous(user);
+            customC &= !ChatObject.isMonoForum(chat);
             customC &= !message.isOut();
             customC &= draftMessage == null;
             customC &= !(message.messageOwner instanceof TLRPC.TL_messageService);
@@ -3459,7 +3459,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
         if (customC) {
             return message.getSenderId();
-        } else if (message.isForwarded() && (ChatObject.isChannelOrGiga(chat) || (chat == null && user != null))) {
+        } else if (message.isForwarded() && ((ChatObject.isChannelOrGiga(chat) && !ChatObject.isMonoForum(chat)) || (chat == null && user != null))) {
             // show forwarded channel image just in channels/gigagroups or private chats
             boolean canTryToShowForwarded = drawAvatar;
             canTryToShowForwarded &= !message.isOut();

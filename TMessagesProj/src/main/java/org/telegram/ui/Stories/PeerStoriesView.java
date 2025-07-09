@@ -4035,7 +4035,10 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
             checkStealthMode(true);
         } else if (id == NotificationCenter.storiesLimitUpdate) {
             StoriesController.StoryLimit storyLimit = MessagesController.getInstance(currentAccount).getStoriesController().checkStoryLimit();
-            if (storyLimit == null || !storyLimit.active(currentAccount) || delegate == null) {
+            if (storyLimit == null || delegate == null) {
+                return;
+            }
+            if (!storyLimit.active(currentAccount)) {
                 return;
             }
             final LimitReachedBottomSheet sheet = new LimitReachedBottomSheet(fragmentForLimit(), findActivity(), storyLimit.getLimitReachedType(), currentAccount, null);

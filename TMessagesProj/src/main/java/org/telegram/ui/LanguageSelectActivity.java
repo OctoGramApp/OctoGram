@@ -198,9 +198,10 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                     int backgroundColor = Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider);
                     drawItemBackground(canvas, 0, translateSettingsBackgroundHeight, backgroundColor);
 //                    drawItemBackground(canvas, 1, Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider));
-                    if (listAdapter.settingsFromPosition != -1 && listAdapter.settingsToPosition != -1) {
+                    /*if (listAdapter.settingsFromPosition != -1 && listAdapter.settingsToPosition != -1) {
                         drawSectionBackground(canvas, listAdapter.settingsFromPosition, listAdapter.settingsToPosition, backgroundColor);
-                    }
+                    }*/
+                    drawSectionBackground(canvas, 1, 2, backgroundColor);
                 }
                 super.dispatchDraw(canvas);
             }
@@ -762,7 +763,7 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                     translateSettings.setTextAndIcon(LocaleController.getString(R.string.Translator), R.drawable.msg_translate, false);
                     break;
                 }
-                case VIEW_TYPE_SETTINGS_2: {
+                /*case VIEW_TYPE_SETTINGS_2: {
                     TextSettingsCell settingsCell = (TextSettingsCell) holder.itemView;
                     settingsCell.updateRTL();
 //                    if (translationModels != null) {
@@ -785,7 +786,7 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                         cell.setCheckBoxIcon(!getUserConfig().isPremium() ? R.drawable.permission_locked : 0);
                     }
                     break;
-                }
+                }*/
                 case VIEW_TYPE_INFO: {
                     TextInfoPrivacyCell infoCell = (TextInfoPrivacyCell) holder.itemView;
                     infoCell.updateRTL();
@@ -813,13 +814,13 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
             }
         }
 
-        private int settingsFromPosition = -1;
+        /*private int settingsFromPosition = -1;
         private int settingsToPosition = -1;
         private int manualTranslationPosition = -1;
         private int autoTranslationPosition = -1;
         private int doNotTranslatePosition = -1;
         private int infoPosition1, infoPosition2;
-        private int languagesStartsPosition;
+        private int languagesStartsPosition;*/
         @Override
         public int getItemViewType(int i) {
             final int position = i;
@@ -838,7 +839,7 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                 }*/
                 //if (i-- == 0) return VIEW_TYPE_INFO;
                 //if (i-- == 0) return VIEW_TYPE_INFO;
-                if (getMessagesController().isTranslationsManualEnabled() || getMessagesController().isTranslationsAutoEnabled()) {
+                /*if (getMessagesController().isTranslationsManualEnabled() || getMessagesController().isTranslationsAutoEnabled()) {
                     settingsFromPosition = position - i;
                     if (i-- == 0) return VIEW_TYPE_HEADER;
                     if (getMessagesController().isTranslationsManualEnabled()) {
@@ -880,12 +881,12 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                 } else {
                     settingsFromPosition = -1;
                     settingsToPosition = -1;
-                }
+                }*/
                 if (i-- == 0) return VIEW_TYPE_HEADER;
                 if (!unofficialLanguages.isEmpty() && (i == unofficialLanguages.size() || i == unofficialLanguages.size() + sortedLanguages.size() + 1) || unofficialLanguages.isEmpty() && i == sortedLanguages.size()) {
                     return VIEW_TYPE_SHADOW;
                 }
-                languagesStartsPosition = position - i;
+                //languagesStartsPosition = position - i;
                 return VIEW_TYPE_LANGUAGE;
             }
         }

@@ -51,6 +51,7 @@ import it.octogram.android.preferences.ui.OctoAiProvidersUI;
 import it.octogram.android.preferences.ui.OctoAppearanceUI;
 import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
 import it.octogram.android.preferences.ui.OctoChatsSettingsUI;
+import it.octogram.android.preferences.ui.OctoContextMenuSettingsUI;
 import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
 import it.octogram.android.preferences.ui.OctoExperimentsUI;
 import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
@@ -148,6 +149,10 @@ public class DeepLinkManager extends LaunchActivity {
             }
             case DeepLinkDef.CHATS -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI(), parameter));
+                return true;
+            }
+            case DeepLinkDef.CHATS_CONTETXMENU -> {
+                fragment.presentFragment(new PreferencesFragment(new OctoContextMenuSettingsUI(), parameter));
                 return true;
             }
             case DeepLinkDef.APPEARANCE -> {
@@ -415,7 +420,12 @@ public class DeepLinkManager extends LaunchActivity {
             case "camera" -> DeepLinkDef.CAMERA;
             case "general" -> DeepLinkDef.GENERAL;
             case "octosettings" -> DeepLinkDef.OCTOSETTINGS;
-            case "chats" -> DeepLinkDef.CHATS;
+            case "chats" -> {
+                if (uri.getPath() != null) {
+                    if (uri.getPath().equalsIgnoreCase("/cm")) yield DeepLinkDef.CHATS_CONTETXMENU;
+                }
+                yield DeepLinkDef.CHATS;
+            }
             case "appearance" -> {
                 if (uri.getPath() != null) {
                     if (uri.getPath().equalsIgnoreCase("/app")) yield DeepLinkDef.APPEARANCE_APP;

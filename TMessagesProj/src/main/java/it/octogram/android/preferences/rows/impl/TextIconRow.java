@@ -18,6 +18,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextCell;
 
 import it.octogram.android.ConfigProperty;
+import it.octogram.android.NewFeaturesBadgeId;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.PreferenceType;
 import it.octogram.android.preferences.rows.BaseRow;
@@ -173,7 +174,7 @@ public class TextIconRow extends BaseRow implements Clickable {
             return this;
         }
 
-        public TextIconRowBuilder isNew(String newID) {
+        public TextIconRowBuilder isNew(@NewFeaturesBadgeId String newID) {
             this.newID = newID;
             return this;
         }

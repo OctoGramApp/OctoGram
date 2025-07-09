@@ -53,6 +53,7 @@ import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.Bulletin;
@@ -155,8 +156,8 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         } else if (id == R.id.menu_open_bot) {
             Bundle bundle = new Bundle();
             bundle.putLong("user_id", botId);
-            parentAlert.baseFragment.presentFragment(new ChatActivity(bundle));
-            parentAlert.dismiss();
+            parentAlert.baseFragment.presentFragment(new INavigationLayout.NavigationParams(new ChatActivity(bundle)).setOnFragmentOpen(() -> parentAlert.dismiss()));
+            //parentAlert.dismiss();
         } else if (id == R.id.menu_reload_page) {
             if (webViewContainer.getWebView() != null) {
                 webViewContainer.getWebView().animate().cancel();

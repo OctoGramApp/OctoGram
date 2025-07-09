@@ -646,12 +646,22 @@ public class TodoItemMenu extends Dialog {
             messageOptions.addGap();
         }
 
+        boolean hasExtraOptions = false;
         for (int i = 0, N = icons.size(); i < N; ++i) {
             final int option = options.get(i);
+            if (option == ChatActivity.OPTION_AI_FEATURES) {
+                hasExtraOptions = true;
+                continue;
+            }
             messageOptions.add(icons.get(i), items.get(i), () -> {
                 onOptionClick.run(option);
                 dismiss(option == ChatActivity.OPTION_DELETE || option == ChatActivity.OPTION_PIN);
             });
+        }
+
+        if (hasExtraOptions) {
+            messageOptions.addGap();
+            messageOptions.addText(getString(R.string.ContextMenuElements_MoreHidden), 14);
         }
 
         messageOptions.setupSelectors();

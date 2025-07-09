@@ -17,9 +17,9 @@ actionBarDefaultSearch=n1_50
 actionBarDefaultSearchArchivedPlaceholder=a1_1000
 actionBarDefaultSearchPlaceholder=a1_100
 actionBarDefaultSelector=n2_800
-actionBarDefaultSubmenuBackground=n1_900
+actionBarDefaultSubmenuBackground=n1_800
 actionBarDefaultSubmenuItem=n1_50
-actionBarDefaultSubmenuItemIcon=a1_100
+actionBarDefaultSubmenuItemIcon=a2_100
 actionBarDefaultSubmenuSeparator=n1_900
 actionBarDefaultSubtitle=n1_50
 actionBarDefaultTitle=a2_0
@@ -735,5 +735,7 @@ chat_outVoiceSeekbarSelected=n1_300
 chat_outBubbleGradient=a1_600
 chat_outBubbleGradient2=a1_600
 chat_outBubbleGradient3=a1_700
+
+key_color_text_box=a2_100
 
 end

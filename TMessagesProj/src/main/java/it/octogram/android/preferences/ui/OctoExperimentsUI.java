@@ -17,9 +17,11 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.ui.ActionBar.ActionBarLayout;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.LaunchActivity;
 
@@ -60,6 +62,19 @@ public class OctoExperimentsUI implements PreferencesEntry {
                 .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_reset, getString(R.string.ResetSettings), () -> OctoMainSettingsUI.openResetSettingsProcedure(fragment, context, true)).asDanger())
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, getString(R.string.OctoExperimentsSettingsHeader))
                 .category(getString(R.string.ExperimentalSettings), category -> {
+                    if (BuildConfig.DEBUG) {
+                        category.row(new SwitchRow.SwitchRowBuilder()
+                                .onPostUpdate(() -> {
+                                    if (!OctoConfig.INSTANCE.usePredictiveGestures.getValue()) {
+                                        LaunchActivity.instance.attachBackEvent();
+                                    }
+                                })
+                                .onClick(() -> checkExperimentsEnabled(context))
+                                .preferenceValue(OctoConfig.INSTANCE.usePredictiveGestures)
+                                .title("Predictive Gestures")
+                                .showIf(new ConfigProperty<>(null, ActionBarLayout.CAN_USE_PREDICTIVE_GESTURES))
+                                .build());
+                    }
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.useFluentNavigationBar)
@@ -75,12 +90,14 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
                             .title(getString(R.string.MediaStream))
                             .build());
-                    /*category.row(new SwitchRow.SwitchRowBuilder()
-                            .onClick(() -> checkExperimentsEnabled(context))
-                            .preferenceValue(OctoConfig.INSTANCE.roundedTextBox)
-                            .title("Enable Rounded TextBox")
-                            .requiresRestart(true)
-                            .build());*/
+                    if (BuildConfig.DEBUG) {
+                        category.row(new SwitchRow.SwitchRowBuilder()
+                                .onClick(() -> checkExperimentsEnabled(context))
+                                .preferenceValue(OctoConfig.INSTANCE.roundedTextBox)
+                                .title("Enable Rounded TextBox")
+                                .requiresRestart(true)
+                                .build());
+                    }
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.showRPCErrors)
@@ -225,6 +242,11 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
+                            .preferenceValue(OctoConfig.INSTANCE.keepOriginalFileName)
+                            .title(getString(R.string.KeepOriginalFileName))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.uploadBoost)
                             .title(getString(R.string.UploadBoost))
                             .build());
@@ -249,7 +271,10 @@ public class OctoExperimentsUI implements PreferencesEntry {
 
     public static void resetSettings() {
         OctoConfig.INSTANCE.experimentsEnabled.clear();
+        OctoConfig.INSTANCE.useFluentNavigationBar.clear();
+        OctoConfig.INSTANCE.moreHapticFeedbacks.clear();
         OctoConfig.INSTANCE.mediaInGroupCall.clear();
+        OctoConfig.INSTANCE.roundedTextBox.clear();
         OctoConfig.INSTANCE.showRPCErrors.clear();
         OctoConfig.INSTANCE.gcOutputType.clear();
         OctoConfig.INSTANCE.photoResolution.clear();
@@ -259,11 +284,13 @@ public class OctoExperimentsUI implements PreferencesEntry {
         OctoConfig.INSTANCE.alternativeNavigation.clear();
         OctoConfig.INSTANCE.animatedActionBar.clear();
         OctoConfig.INSTANCE.navigationSmoothness.clear();
+        OctoConfig.INSTANCE.navigationBounceLevel.clear();
         OctoConfig.INSTANCE.hideOpenButtonChatsList.clear();
         OctoConfig.INSTANCE.alwaysExpandBlockQuotes.clear();
         OctoConfig.INSTANCE.profileBubbleMoreTopPadding.clear();
         OctoConfig.INSTANCE.profileBubbleHideBorder.clear();
         OctoConfig.INSTANCE.uploadBoost.clear();
+        OctoConfig.INSTANCE.keepOriginalFileName.clear();
         OctoConfig.INSTANCE.downloadBoost.clear();
         OctoConfig.INSTANCE.downloadBoostValue.clear();
     }

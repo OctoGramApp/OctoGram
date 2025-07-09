@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
@@ -27,9 +28,10 @@ import org.telegram.ui.Cells.DrawerProfileCell;
 import it.octogram.android.OctoConfig;
 
 @SuppressLint("ViewConstructor")
-public class DrawerPreviewCell extends FrameLayout {
+public class DrawerPreviewCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
     private final DrawerProfileCell drawerProfileCell;
     private boolean inDrawer;
+    private GradientDrawable border;
 
     public static final int height = dp(148);
 
@@ -107,11 +109,13 @@ public class DrawerPreviewCell extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.didApplyNewTheme);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.didApplyNewTheme);
     }
 
     private FrameLayout getInternalFrameLayout(Context context) {
@@ -133,7 +137,7 @@ public class DrawerPreviewCell extends FrameLayout {
         if (!OctoConfig.INSTANCE.profileBubbleHideBorder.getValue() || !inDrawer) {
             internalFrameLayout.setPadding(dp(3), dp(3), dp(3), dp(3));
         }
-        GradientDrawable border = new GradientDrawable();
+        border = new GradientDrawable();
         border.setShape(GradientDrawable.RECTANGLE);
         border.setAlpha(255);
         if (!OctoConfig.INSTANCE.profileBubbleHideBorder.getValue() || !inDrawer) {
@@ -145,5 +149,18 @@ public class DrawerPreviewCell extends FrameLayout {
         internalFrameLayout.addView(scaledFrameLayout);
 
         return internalFrameLayout;
+    }
+
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.didApplyNewTheme) {
+            if (!OctoConfig.INSTANCE.profileBubbleHideBorder.getValue() || !inDrawer) {
+                border.setColor(Theme.getColor(Theme.key_chats_menuBackground));
+                border.setStroke(dp(1), AndroidUtilities.getTransparentColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText), 0.5f), dp(5), dp(5));
+            }
+            if (!inDrawer) {
+                setBackground(Theme.createRoundRectDrawable(0, Theme.getColor(Theme.key_windowBackgroundWhite)));
+            }
+        }
     }
 }

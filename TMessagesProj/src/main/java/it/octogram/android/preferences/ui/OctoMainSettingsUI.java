@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
@@ -46,7 +47,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import it.octogram.android.ConfigProperty;
-import it.octogram.android.NewFeaturesBadgeId;
+import it.octogram.android.NewFeaturesBadgeIds;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.StoreUtils;
@@ -83,7 +84,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                 .deepLink(DeepLinkDef.OCTOSETTINGS)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.MAIN_SETTINGS, true, getString(R.string.OctoMainSettingsHeader))
                 .category(getString(R.string.Settings), category -> {
-                    if ("it.octogram.android.beta".equals(ApplicationLoader.applicationContext.getPackageName())) {
+                    if (BuildConfig.DEBUG) {
                         category.row(new TextDetailRow.TextDetailRowBuilder()
                                 .onClick(() -> {
                                     try {
@@ -115,12 +116,13 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAppearanceUI())))
                             .icon(R.drawable.settings_appearance)
-                            .isNew(NewFeaturesBadgeId.APPEARANCE.getId())
+                            .isNew(NewFeaturesBadgeIds.APPEARANCE)
                             .title(getString(R.string.Appearance))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI())))
                             .icon(R.drawable.msg2_discussion)
+                            .isNew(NewFeaturesBadgeIds.CHATS)
                             .title(getString(R.string.ChatTitle))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -131,7 +133,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoPrivacySettingsUI())))
                             .icon(R.drawable.menu_privacy)
-                            .isNew(NewFeaturesBadgeId.PRIVACY_MAIN.getId())
+                            .isNew(NewFeaturesBadgeIds.PRIVACY_MAIN)
                             .title(getString(R.string.PrivacySettings))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()

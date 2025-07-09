@@ -48,9 +48,12 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 import androidx.dynamicanimation.animation.FloatValueHolder;
@@ -59,6 +62,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
@@ -87,6 +91,7 @@ import java.util.List;
 import java.util.UUID;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.logs.OctoLogging;
 
 public class ActionBarLayout extends FrameLayout implements INavigationLayout, FloatingDebugProvider {
 
@@ -95,10 +100,12 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     private boolean isSheet;
     private Window window;
 
+    public static boolean CAN_USE_PREDICTIVE_GESTURES = BuildConfig.DEBUG;
+
     private boolean USE_ALTERNATIVE_NAVIGATION = OctoConfig.INSTANCE.alternativeNavigation.getValue();
     private boolean USE_ACTIONBAR_CROSSFADE = OctoConfig.INSTANCE.animatedActionBar.getValue();
     private float SPRING_STIFFNESS = OctoConfig.INSTANCE.navigationSmoothness.getValue();
-    private static final float SPRING_DAMPING_RATIO = 1f;
+    private float SPRING_DAMPING_RATIO = 1f - (float) OctoConfig.INSTANCE.navigationBounceLevel.getValue() / 100;
     public static float SPRING_MULTIPLIER = 1000f;
     private SpringAnimation currentSpringAnimation;
     private float swipeProgress;
@@ -258,17 +265,17 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                     FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) child.getLayoutParams();
                     if (child.getFitsSystemWindows() || child instanceof BaseFragment.AttachedSheetWindow) {
                         child.layout(
-                            layoutParams.leftMargin,
-                            layoutParams.topMargin,
-                            layoutParams.leftMargin + child.getMeasuredWidth(),
-                            layoutParams.topMargin + child.getMeasuredHeight()
+                                layoutParams.leftMargin,
+                                layoutParams.topMargin,
+                                layoutParams.leftMargin + child.getMeasuredWidth(),
+                                layoutParams.topMargin + child.getMeasuredHeight()
                         );
                     } else {
                         child.layout(
-                            layoutParams.leftMargin,
-                            layoutParams.topMargin + actionBarHeight,
-                            layoutParams.leftMargin + child.getMeasuredWidth(),
-                            layoutParams.topMargin + actionBarHeight + child.getMeasuredHeight()
+                                layoutParams.leftMargin,
+                                layoutParams.topMargin + actionBarHeight,
+                                layoutParams.leftMargin + child.getMeasuredWidth(),
+                                layoutParams.topMargin + actionBarHeight + child.getMeasuredHeight()
                         );
                     }
                 }
@@ -1441,6 +1448,250 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         return false;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public class CustomPredictiveHandler implements OnBackAnimationCallback {
+        private float getEventX(BackEvent backEvent) {
+            float backEventX = 0f;
+            if (backEvent != null) {
+                backEventX = backEvent.getTouchX();
+                if (backEvent.getSwipeEdge() == BackEvent.EDGE_RIGHT) {
+                    backEventX = containerView.getMeasuredWidth() - backEventX;
+                }
+            }
+            return backEventX;
+        }
+
+        private boolean canAct() {
+            if (fragmentsStack.size() > 1) {
+                BaseFragment currentFragment = fragmentsStack.get(fragmentsStack.size() - 1);
+                if (!currentFragment.isSwipeBackEnabled(MotionEvent.obtain(
+                        System.currentTimeMillis(),
+                        System.currentTimeMillis(),
+                        MotionEvent.ACTION_MOVE,
+                        0,
+                        0,
+                        0
+                ))) {
+                    return false;
+                }
+            }
+            return !checkTransitionAnimation() && !inActionMode && !animationInProgress && fragmentsStack.size() > 1 && allowSwipe() && OctoConfig.INSTANCE.usePredictiveGestures.getValue();
+        }
+
+        @Override
+        public void onBackInvoked() {
+            if (!CAN_USE_PREDICTIVE_GESTURES) {
+                return;
+            }
+
+            if (!startedTracking && !animationInProgress) {
+                if (fragmentsStack.size() > 1) {
+                    LaunchActivity.instance.onBackPressed();
+                }
+                return;
+            }
+
+            if (!OctoConfig.INSTANCE.usePredictiveGestures.getValue()) {
+                LaunchActivity.instance.onBackPressed();
+                return;
+            }
+
+            onAnimationEnd(null, false);
+        }
+
+        @Override
+        public void onBackStarted(@NonNull BackEvent backEvent) {
+            if (!CAN_USE_PREDICTIVE_GESTURES) {
+                return;
+            }
+
+            if (!startedTracking && canAct()) {
+                if (velocityTracker != null) {
+                    velocityTracker.clear();
+                }
+                if (velocityTracker == null) {
+                    velocityTracker = VelocityTracker.obtain();
+                }
+
+                long now = System.currentTimeMillis();
+                MotionEvent ev;
+                prepareForMoving(ev = MotionEvent.obtain(
+                        now,
+                        now,
+                        MotionEvent.ACTION_MOVE,
+                        getEventX(backEvent),
+                        backEvent.getTouchY(),
+                        0
+                ));
+                velocityTracker.addMovement(ev);
+                if (!beginTrackingSent) {
+                    if (parentActivity.getCurrentFocus() != null) {
+                        AndroidUtilities.hideKeyboard(parentActivity.getCurrentFocus());
+                    }
+                    BaseFragment currentFragment = fragmentsStack.get(fragmentsStack.size() - 1);
+                    currentFragment.onBeginSlide();
+                    beginTrackingSent = true;
+                }
+            }
+        }
+
+        @Override
+        public void onBackProgressed(@NonNull BackEvent backEvent) {
+            if (!CAN_USE_PREDICTIVE_GESTURES) {
+                return;
+            }
+
+            if (!startedTracking || !canAct()) {
+                return;
+            }
+
+            if (velocityTracker == null) {
+                velocityTracker = VelocityTracker.obtain();
+            }
+
+            long now = System.currentTimeMillis();
+            velocityTracker.addMovement(MotionEvent.obtain(
+                    now,
+                    now,
+                    MotionEvent.ACTION_MOVE,
+                    getEventX(backEvent),
+                    backEvent.getTouchY(),
+                    0
+            ));
+
+            int dx = Math.max(0, (int) ((getEventX(backEvent) - startedTrackingX) * 1.6));
+
+            containerView.setTranslationX(dx);
+            if (USE_ALTERNATIVE_NAVIGATION) {
+                containerViewBack.setTranslationX(-(containerView.getMeasuredWidth() - dx) * 0.35f);
+                if (canUseCrossfadeEffect()) {
+                    swipeProgress = MathUtils.clamp((float) dx / containerView.getMeasuredWidth(), 0f, 1f);
+                }
+            } else {
+                containerViewBack.setTranslationX(0);
+            }
+
+            setInnerTranslationX(dx);
+        }
+
+        @Override
+        public void onBackCancelled() {
+            if (!CAN_USE_PREDICTIVE_GESTURES) {
+                return;
+            }
+
+            onAnimationEnd(null, true);
+        }
+
+        private void onAnimationEnd(BackEvent backEvent, boolean backAnimation) {
+            if (!startedTracking || !canAct()) {
+                return;
+            }
+
+            float velX = velocityTracker.getXVelocity();
+            float x = containerView.getX();
+
+            if (USE_ALTERNATIVE_NAVIGATION) {
+                int containerViewWidth = containerView.getMeasuredWidth();
+                //int containerViewBackWidth = containerViewBack.getMeasuredWidth();
+
+                FloatValueHolder valueHolder = new FloatValueHolder((x / containerViewWidth) * SPRING_MULTIPLIER);
+                currentSpringAnimation = new SpringAnimation(valueHolder);
+
+                if (!backAnimation) {
+                    currentSpringAnimation.setSpring(new SpringForce(SPRING_MULTIPLIER).setStiffness(SPRING_STIFFNESS).setDampingRatio(SPRING_DAMPING_RATIO));
+                    if (velX != 0) {
+                        currentSpringAnimation.setStartVelocity(velX / 15f);
+                    }
+                } else {
+                    currentSpringAnimation.setSpring(new SpringForce(0f).setStiffness(SPRING_STIFFNESS).setDampingRatio(SPRING_DAMPING_RATIO));
+                }
+                currentSpringAnimation.addUpdateListener((animation, value, velocity) -> {
+                    float progress = value / SPRING_MULTIPLIER;
+                    containerView.setTranslationX(progress * containerViewWidth);
+                    containerViewBack.setTranslationX(-(containerViewWidth - progress * containerView.getMeasuredWidth()) * 0.35f);
+                    setInnerTranslationX(progress * containerViewWidth);
+
+                    if (canUseCrossfadeEffect()) {
+                        swipeProgress = progress;
+                    }
+
+                    if (!backAnimation) {
+                        getLastFragment().onTransitionAnimationProgress(false, progress);
+                        getBackgroundFragment().onTransitionAnimationProgress(true, progress);
+                    } else {
+                        getBackgroundFragment().onTransitionAnimationProgress(true, 1f - progress);
+                    }
+                });
+                currentSpringAnimation.addEndListener((animation, canceled, value, velocity) -> {
+                    if (animation == currentSpringAnimation) {
+                        onSlideAnimationEnd(backAnimation);
+                        onAnimationEndCheck(true);
+                    }
+                });
+                currentSpringAnimation.start();
+
+                animationInProgress = true;
+                layoutToIgnore = containerViewBack;
+
+                if (velocityTracker != null) {
+                    velocityTracker.recycle();
+                    velocityTracker = null;
+                }
+
+                return;
+            }
+
+            float distToMove;
+            AnimatorSet animatorSet = new AnimatorSet();
+            BaseFragment currentFragment = fragmentsStack.get(fragmentsStack.size() - 1);
+            boolean overrideTransition = currentFragment.shouldOverrideSlideTransition(false, backAnimation);
+            if (!backAnimation) {
+                distToMove = containerView.getMeasuredWidth() - x;
+                int duration = Math.max((int) (200.0f / containerView.getMeasuredWidth() * distToMove), 50);
+                if (!overrideTransition) {
+                    animatorSet.playTogether(
+                            ObjectAnimator.ofFloat(containerView, View.TRANSLATION_X, containerView.getMeasuredWidth()).setDuration(duration),
+                            ObjectAnimator.ofFloat(ActionBarLayout.this, "innerTranslationX", (float) containerView.getMeasuredWidth()).setDuration(duration)
+                    );
+                }
+            } else {
+                distToMove = x;
+                int duration = Math.max((int) (320.0f / containerView.getMeasuredWidth() * distToMove), 120);
+                if (!overrideTransition) {
+                    animatorSet.playTogether(
+                            ObjectAnimator.ofFloat(containerView, View.TRANSLATION_X, 0).setDuration(duration),
+                            ObjectAnimator.ofFloat(ActionBarLayout.this, "innerTranslationX", 0.0f).setDuration(duration)
+                    );
+                    animatorSet.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+                }
+            }
+
+            Animator customTransition = currentFragment.getCustomSlideTransition(false, backAnimation, distToMove);
+            if (customTransition != null) {
+                animatorSet.playTogether(customTransition);
+            }
+
+            BaseFragment lastFragment = fragmentsStack.get(fragmentsStack.size() - 2);
+            if (lastFragment != null) {
+                customTransition = lastFragment.getCustomSlideTransition(false, backAnimation, distToMove);
+                if (customTransition != null) {
+                    animatorSet.playTogether(customTransition);
+                }
+            }
+
+            animatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    onSlideAnimationEnd(backAnimation);
+                }
+            });
+            animatorSet.start();
+            animationInProgress = true;
+            layoutToIgnore = containerViewBack;
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (transitionAnimationPreviewMode || startedTracking || checkTransitionAnimation() || fragmentsStack.isEmpty()) {
@@ -2117,6 +2368,11 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         }
         ImageLoader.getInstance().onFragmentStackChanged();
         checkBlackScreen(action);
+        if (CAN_USE_PREDICTIVE_GESTURES && (fragmentsStack.size() > 1 || !OctoConfig.INSTANCE.usePredictiveGestures.getValue())) {
+            LaunchActivity.instance.attachBackEvent();
+        } else {
+            LaunchActivity.instance.detachBackEvent();
+        }
     }
 
     @Override
@@ -3279,6 +3535,11 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     @Override
     public void updateSpringStiffness(int stiffness) {
         SPRING_STIFFNESS = stiffness;
+    }
+
+    @Override
+    public void updateBounceLevel(float bounceLevel) {
+        SPRING_DAMPING_RATIO = 1f - bounceLevel;
     }
 
     @Override

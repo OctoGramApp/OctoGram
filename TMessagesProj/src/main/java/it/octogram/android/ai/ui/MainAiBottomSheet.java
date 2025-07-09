@@ -114,7 +114,6 @@ import it.octogram.android.ai.icons.AiFeatureIcons;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
 import it.octogram.android.preferences.ui.OctoAiFeaturesUI;
 import it.octogram.android.preferences.ui.OctoAiNewModelUI;
-import it.octogram.android.translator.TranslateMessagesWrapper;
 import it.octogram.android.utils.OctoUtils;
 
 /**
@@ -124,7 +123,7 @@ import it.octogram.android.utils.OctoUtils;
 public class MainAiBottomSheet extends BottomSheet {
     private AiProvidersDetails favoriteAiProvider;
 
-    private final TranslateMessagesWrapper.FillStateData data;
+    private final CustomModelsMenuWrapper.FillStateData data;
     private boolean isProcessingData = false;
 
     private String toLanguage;
@@ -182,7 +181,7 @@ public class MainAiBottomSheet extends BottomSheet {
     ));
 
 
-    public MainAiBottomSheet(TranslateMessagesWrapper.FillStateData data) {
+    public MainAiBottomSheet(CustomModelsMenuWrapper.FillStateData data) {
         super(data.context, true, null);
 
         toLanguage = TranslateAlert2.getToLanguage();
@@ -392,11 +391,11 @@ public class MainAiBottomSheet extends BottomSheet {
     }
 
     private CharSequence getOriginalText() {
-        return data instanceof CustomModelsMenuWrapper.FillStateData d ? d.messageText : data.translationData.text;
+        return data.messageText;
     }
 
     private boolean isCustomModel() {
-        return data instanceof CustomModelsMenuWrapper.FillStateData;
+        return data.modelID != CustomModelsHelper.VIRTUAL_TRANSLATE_MODEL_ID;
     }
 
     private boolean hasEnoughHeight() {
@@ -516,8 +515,7 @@ public class MainAiBottomSheet extends BottomSheet {
 
     private int getCurrentAiLoadingString(int randomNumber) {
         if (isCustomModel() && (randomNumber == 2 || randomNumber == 4 || randomNumber == 5)) {
-            CustomModelsMenuWrapper.FillStateData customData = ((CustomModelsMenuWrapper.FillStateData) data);
-            CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(customData.modelID);
+            CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(data.modelID);
             if (model != null && model.prompt == null) {
                 return R.string.AiFeatures_CustomModels_Feature_Loading_Easy;
             }
@@ -550,10 +548,9 @@ public class MainAiBottomSheet extends BottomSheet {
         boolean useLoadingCycle = getOriginalText() == null || getOriginalText().toString().isEmpty();
 
         if (isCustomModel()) {
-            CustomModelsMenuWrapper.FillStateData customData = ((CustomModelsMenuWrapper.FillStateData) data);
-            if (customData.modelID != null) {
-                CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(customData.modelID);
-                if (model != null && model.uploadMedia && CustomModelsMenuWrapper.getAvailableStates(customData) != AiModelMessagesState.TEXT_MESSAGES) {
+            if (data.modelID != null) {
+                CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(data.modelID);
+                if (model != null && model.uploadMedia && CustomModelsMenuWrapper.getAvailableStates(data) != AiModelMessagesState.TEXT_MESSAGES) {
                     useLoadingCycle = true;
                 }
             } else {
@@ -580,14 +577,12 @@ public class MainAiBottomSheet extends BottomSheet {
 
         AiPrompt prompt;
         if (isCustomModel()) {
-            CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
-
-            if (customData.modelID == null) {
+            if (data.modelID == null) {
                 selectEligibleModels();
                 return;
             }
 
-            CustomModelsHelper.CustomModel modelData = CustomModelsHelper.getModelById(customData.modelID);
+            CustomModelsHelper.CustomModel modelData = CustomModelsHelper.getModelById(data.modelID);
             if (modelData == null) {
                 return;
             }
@@ -608,7 +603,7 @@ public class MainAiBottomSheet extends BottomSheet {
             String filePath = "";
             String mimeType = "";
             boolean loadAsImage = false;
-            AiModelMessagesState currentState = CustomModelsMenuWrapper.getAvailableStates(customData);
+            AiModelMessagesState currentState = CustomModelsMenuWrapper.getAvailableStates(data);
             if (modelData.modelType == AiModelType.RELATED_TO_MESSAGES && modelData.uploadMedia && currentState != AiModelMessagesState.TEXT_MESSAGES) {
                 if (favoriteAiProvider != AiProvidersDetails.GEMINI) {
                     AndroidUtilities.runOnUIThread(() -> {
@@ -619,10 +614,10 @@ public class MainAiBottomSheet extends BottomSheet {
                     return;
                 }
 
-                File finalFile = OctoUtils.getFileContentFromMessage(customData.messageObject);
+                File finalFile = OctoUtils.getFileContentFromMessage(data.messageObject);
                 if (finalFile != null && finalFile.exists()) {
                     filePath = finalFile.getAbsolutePath();
-                    mimeType = customData.messageObject.getMimeType();
+                    mimeType = data.messageObject.getMimeType();
                     loadAsImage = currentState == AiModelMessagesState.STICKERS || currentState == AiModelMessagesState.PHOTOS;
                 } else {
                     AndroidUtilities.runOnUIThread(() -> {
@@ -635,13 +630,13 @@ public class MainAiBottomSheet extends BottomSheet {
             }
 
             if (modelData.prompt != null) {
-                promptAsString = replaceTags(customData, promptAsString);
+                promptAsString = replaceTags(promptAsString);
             }
 
             String mainSystemInstruction = "Return plain text only or use markdown with double ** or __ for italic like Telegram markdown styling.\nTelegram-supported markdown formatting:\n\nBasic formatting:\n- **bold text** (double asterisks) for emphasis\n- __italic text__ (double underscores) for nuanced meaning\n- `inline code` (single backtick) for technical terms\n- ```code blocks``` (triple backticks) for longer code\n- [text](URL) for links";
             prompt = new AiPrompt(mainSystemInstruction, promptAsString, filePath, mimeType, loadAsImage);
         } else {
-            prompt = AiUtils.getTranslationPrompt(true, false, data.translationData.text, toLanguage);
+            prompt = AiUtils.getTranslationPrompt(true, false, data.messageText, toLanguage);
         }
 
         isProcessingData = true;
@@ -685,21 +680,21 @@ public class MainAiBottomSheet extends BottomSheet {
         });
     }
 
-    private String replaceTags(CustomModelsMenuWrapper.FillStateData customData, String promptAsString) {
+    private String replaceTags(String promptAsString) {
         if (promptAsString == null) {
             return null;
         }
 
         HashMap<String, String> hashtagReplacementAssoc = new HashMap<>();
-        if (customData.isInputBox) {
+        if (data.isInputBox) {
             if (promptAsString.contains("#reply_to_text")) {
-                hashtagReplacementAssoc.put("#reply_to_text", customData.replyMessageObject != null && customData.replyMessageObject.messageText != null ? customData.replyMessageObject.messageText.toString() : "");
+                hashtagReplacementAssoc.put("#reply_to_text", data.replyMessageObject != null && data.replyMessageObject.messageText != null ? data.replyMessageObject.messageText.toString() : "");
             }
             if (promptAsString.contains("#reply_to_author")) {
-                if (customData.replyMessageObject == null) {
+                if (data.replyMessageObject == null) {
                     hashtagReplacementAssoc.put("#reply_to_author", "");
                 } else {
-                    TLObject object = customData.replyMessageObject.getFromPeerObject();
+                    TLObject object = data.replyMessageObject.getFromPeerObject();
                     if (object instanceof TLRPC.Chat chat) {
                         hashtagReplacementAssoc.put("#reply_to_author", chat.title);
                     } else if (object instanceof TLRPC.User user) {
@@ -707,9 +702,9 @@ public class MainAiBottomSheet extends BottomSheet {
                     }
                 }
             }
-        } else if (customData.isChat) {
-            if (customData.currentChat != null) {
-                TLRPC.Chat chat = customData.currentChat;
+        } else if (data.isChat) {
+            if (data.currentChat != null) {
+                TLRPC.Chat chat = data.currentChat;
                 hashtagReplacementAssoc.put("#chat_title", chat.title);
                 hashtagReplacementAssoc.put("#chat_username", chat.username == null ? "" : "@" + chat.username);
                 hashtagReplacementAssoc.put("#chat_members_count", "" + chat.participants_count);
@@ -719,7 +714,7 @@ public class MainAiBottomSheet extends BottomSheet {
                     hashtagReplacementAssoc.put("#chat_description", chatFull.about);
                 }
             } else {
-                TLRPC.User user = customData.currentUser;
+                TLRPC.User user = data.currentUser;
                 hashtagReplacementAssoc.put("#chat_title", user == null ? "" : UserObject.getUserName(user));
                 hashtagReplacementAssoc.put("#chat_username", (user == null || UserObject.getPublicUsername(user) == null) ? "" : ("@" + UserObject.getPublicUsername(user)));
                 hashtagReplacementAssoc.put("#chat_description", "");
@@ -728,7 +723,7 @@ public class MainAiBottomSheet extends BottomSheet {
         } else {
             if (promptAsString.contains("#chat_title") || promptAsString.contains("#chat_description") || promptAsString.contains("#chat_members_count") || promptAsString.contains("#chat_username")) {
                 MessagesController controllerInstance = MessagesController.getInstance(UserConfig.selectedAccount);
-                long chatID = customData.messageObject.getChatId();
+                long chatID = data.messageObject.getChatId();
                 if (chatID != 0) {
                     if (promptAsString.contains("#chat_title") || promptAsString.contains("#chat_username")) {
                         TLRPC.Chat chat = controllerInstance.getChat(chatID);
@@ -741,7 +736,7 @@ public class MainAiBottomSheet extends BottomSheet {
                         hashtagReplacementAssoc.put("#chat_description", chat == null ? "" : chat.about);
                     }
                 } else {
-                    TLRPC.User user = controllerInstance.getUser(customData.messageObject.messageOwner.peer_id.user_id);
+                    TLRPC.User user = controllerInstance.getUser(data.messageObject.messageOwner.peer_id.user_id);
                     hashtagReplacementAssoc.put("#chat_title", user == null ? "" : UserObject.getUserName(user));
                     hashtagReplacementAssoc.put("#chat_username", (user == null || UserObject.getPublicUsername(user) == null) ? "" : ("@" + UserObject.getPublicUsername(user)));
                     hashtagReplacementAssoc.put("#chat_description", "");
@@ -749,8 +744,8 @@ public class MainAiBottomSheet extends BottomSheet {
                 }
             }
         }
-        if (promptAsString.contains("#message_text") && !customData.isChat) {
-            hashtagReplacementAssoc.put("#message_text", customData.messageText == null ? "" : customData.messageText.toString());
+        if (promptAsString.contains("#message_text") && !data.isChat) {
+            hashtagReplacementAssoc.put("#message_text", data.messageText == null ? "" : data.messageText.toString());
         }
         if (promptAsString.contains(formalityRecord.hashtag)) {
             hashtagReplacementAssoc.put(formalityRecord.hashtag, formalityRecord.getCurrentVariation());
@@ -777,7 +772,7 @@ public class MainAiBottomSheet extends BottomSheet {
             }
         }
 
-        if (customData.isChat) {
+        if (data.isChat) {
             String uid1 = OctoUtils.generateRandomString();
             StringBuilder tempPrompt = new StringBuilder(promptAsString);
             tempPrompt.append("\n\n")
@@ -787,8 +782,8 @@ public class MainAiBottomSheet extends BottomSheet {
                     .append(uid1)
                     .append(">> AS END TAG")
                     .append("\n\n");
-            for (int i = 0; i < customData.selectedMessages.size(); i++) {
-                MessageObject object = customData.selectedMessages.get(i);
+            for (int i = 0; i < data.selectedMessages.size(); i++) {
+                MessageObject object = data.selectedMessages.get(i);
                 AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(object);
                 if (state != null) {
                     TLObject authorObject = object.getFromPeerObject();
@@ -819,25 +814,24 @@ public class MainAiBottomSheet extends BottomSheet {
             return;
         }
 
-        CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
-        if (customData.modelID != null) {
+        if (data.modelID != null) {
             return;
         }
 
-        AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(customData);
-        if (state == null && !customData.isChat && !customData.isInputBox) {
+        AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(data);
+        if (state == null && !data.isChat && !data.isInputBox) {
             dismiss();
             return;
         }
 
-        ArrayList<String> availableModels = CustomModelsMenuWrapper.getEligibleModels(customData, state);
+        ArrayList<String> availableModels = CustomModelsMenuWrapper.getEligibleModels(data, state);
         if (availableModels.isEmpty()) {
             dismiss();
             return;
         }
 
         if (availableModels.size() == 1) {
-            ((CustomModelsMenuWrapper.FillStateData) data).modelID = availableModels.get(0);
+            data.modelID = availableModels.get(0);
             init();
             return;
         }
@@ -866,7 +860,7 @@ public class MainAiBottomSheet extends BottomSheet {
 
             FrameLayout layout = createSuggestionRow(AiFeatureIcons.getModelIcon(model.icon), title);
             layout.setOnClickListener((v) -> {
-                ((CustomModelsMenuWrapper.FillStateData) data).modelID = modelID;
+                data.modelID = modelID;
                 updateConfigButtonVisibility(true);
                 init();
             });
@@ -878,7 +872,6 @@ public class MainAiBottomSheet extends BottomSheet {
 
     private void requestPromptToUser() {
         updateConfigButtonVisibility(false);
-        CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
 
         LinearLayout linearLayout = new LinearLayout(data.context) {
             @Override
@@ -898,7 +891,7 @@ public class MainAiBottomSheet extends BottomSheet {
         customPromptInputText.setHint(getString(R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Brief));
         linearLayout.addView(customPromptInputText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 17, 0, 17, 7));
 
-        int key = CustomModelsMenuWrapper.getSuggestedAskOnMediaAction(customData);
+        int key = CustomModelsMenuWrapper.getSuggestedAskOnMediaAction(data);
 
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
         spannableStringBuilder.append(" d  ");
@@ -999,14 +992,14 @@ public class MainAiBottomSheet extends BottomSheet {
             return;
         }
 
-        if (isCustomModel() && ((CustomModelsMenuWrapper.FillStateData) data).modelID == null) {
+        if (isCustomModel() && data.modelID == null) {
             return;
         }
 
         String customPrompt = "";
         boolean isVirtualModel;
         if (isCustomModel()) {
-            CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(((CustomModelsMenuWrapper.FillStateData) data).modelID);
+            CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(data.modelID);
             if (model != null) {
                 customPrompt = model.prompt;
                 isVirtualModel = model.isVirtualModel();
@@ -1076,18 +1069,16 @@ public class MainAiBottomSheet extends BottomSheet {
         }
 
         if (isCustomModel()) {
-            CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
-
-            if (!isProcessingData && customData.isInputBox && customData.setInputBoxText != null) {
+            if (!isProcessingData && data.isInputBox && data.setInputBoxText != null) {
                 item = ActionBarMenuItem.addItem(layout, R.drawable.msg_message, getString(R.string.AiFeatures_CustomModels_Feature_UseAsText), false, resourcesProvider);
                 item.setOnClickListener(view -> {
                     dismiss[0].run();
                     MainAiBottomSheet.this.dismiss();
-                    customData.setInputBoxText.run(textView.getText().toString());
+                    data.setInputBoxText.run(textView.getText().toString());
                 });
             }
 
-            if (!customData.isInputBox && customData.modelID != null) {
+            if (!data.isInputBox && data.modelID != null) {
                 FrameLayout gap = new FrameLayout(getContext());
                 gap.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefaultSubmenuSeparator));
                 View gapShadow = new View(getContext());
@@ -1110,15 +1101,15 @@ public class MainAiBottomSheet extends BottomSheet {
                     AndroidUtilities.runOnUIThread(() -> {
                         if (isVirtualModel) {
                             String focusKey = "";
-                            if (customData.modelID.equals(CustomModelsHelper.VIRTUAL_ASK_ON_MEDIA_MODEL_ID)) {
+                            if (data.modelID.equals(CustomModelsHelper.VIRTUAL_ASK_ON_MEDIA_MODEL_ID)) {
                                 focusKey = OctoConfig.INSTANCE.aiFeaturesAskOnMedia.getKey();
-                            } else if (customData.modelID.equals(CustomModelsHelper.VIRTUAL_CHAT_CONTEXT_MODEL_ID)) {
+                            } else if (data.modelID.equals(CustomModelsHelper.VIRTUAL_CHAT_CONTEXT_MODEL_ID)) {
                                 focusKey = OctoConfig.INSTANCE.aiFeaturesChatContext.getKey();
                             }
                             LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI(), focusKey));
                         } else {
                             OctoAiNewModelUI newModelUI = new OctoAiNewModelUI();
-                            newModelUI.setCurrentModelId(customData.modelID);
+                            newModelUI.setCurrentModelId(data.modelID);
                             LaunchActivity.instance.presentFragment(new PreferencesFragment(newModelUI));
                         }
                     }, 300);
@@ -1471,10 +1462,9 @@ public class MainAiBottomSheet extends BottomSheet {
         }
 
         private void updateTitle(boolean animated) {
-            String pageTitle = getString(R.string.AiFeatures_Features_TranslateAI);
+            String pageTitle = getString(R.string.AiFeatures_Features_TranslateAI2);
             if (isCustomModel()) { // using custom model
-                CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
-                String modelID = customData.modelID;
+                String modelID = data.modelID;
                 if (modelID == null) { // model selection page
                     pageTitle = getString(R.string.AiFeatures_CustomModels_Feature_SelectModel);
                 } else { // model has been selected
@@ -1483,7 +1473,7 @@ public class MainAiBottomSheet extends BottomSheet {
                         if (!model.title.trim().isEmpty()) { // model has a title
                             pageTitle = model.title.trim();
                         } else { // model doesn't have a title
-                            pageTitle = formatString(R.string.AiFeatures_CustomModels_ModelID, customData.modelID);
+                            pageTitle = formatString(R.string.AiFeatures_CustomModels_ModelID, data.modelID);
                         }
                     }
                 }
@@ -1498,12 +1488,11 @@ public class MainAiBottomSheet extends BottomSheet {
 
             String customPrompt = "";
             if (isCustomModel()) {
-                CustomModelsMenuWrapper.FillStateData customData = (CustomModelsMenuWrapper.FillStateData) data;
-                CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(customData.modelID);
+                CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(data.modelID);
 
                 String customDescriptionText = "";
 
-                if (customData.modelID != null && model != null) {
+                if (data.modelID != null && model != null) {
                     customPrompt = model.prompt;
 
                     if (model.prompt == null) {
@@ -1513,14 +1502,14 @@ public class MainAiBottomSheet extends BottomSheet {
                             customDescriptionText = getString(R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc);
                         }
                     }
-                } else if (customData.modelID == null) {
-                    AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(customData);
-                    if (state == null && !customData.isChat && !customData.isInputBox) {
+                } else if (data.modelID == null) {
+                    AiModelMessagesState state = CustomModelsMenuWrapper.getAvailableStates(data);
+                    if (state == null && !data.isChat && !data.isInputBox) {
                         return;
                     }
 
                     // show the counter of available models
-                    ArrayList<String> availableModels = CustomModelsMenuWrapper.getEligibleModels(customData, state);
+                    ArrayList<String> availableModels = CustomModelsMenuWrapper.getEligibleModels(data, state);
                     customDescriptionText = formatString(R.string.AiFeatures_CustomModels_Model_SelectAvailable, availableModels.size());
                 }
 

@@ -4716,7 +4716,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         floatingButtonContainer = new FrameLayout(context);
-        floatingButtonContainer.setVisibility(onlySelect && initialDialogsType != 10 || folderId != 0 || isHiddenChats() ? View.GONE : View.VISIBLE);
+        floatingButtonContainer.setVisibility(onlySelect && initialDialogsType != 10 || folderId != 0 || isHiddenChats() || RapidActionsHelper.isButtonHiddenAsCustomConfig(true)  ? View.GONE : View.VISIBLE);
         contentView.addView(floatingButtonContainer, LayoutHelper.createFrame((Build.VERSION.SDK_INT >= 21 ? 56 : 60), (Build.VERSION.SDK_INT >= 21 ? 56 : 60), (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.BOTTOM, LocaleController.isRTL ? 14 : 0, 0, LocaleController.isRTL ? 0 : 14, 14));
         floatingButtonContainer.setOnClickListener(v -> {
             if (parentLayout != null && parentLayout.isInPreviewMode()) {
@@ -9058,17 +9058,33 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
             prepareBlurBitmap();
             parentLayout.setHighlightActionButtons(true);
+            ChatActivity[] finalActivity = new ChatActivity[]{null};
             if (AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y) {
-                presentFragmentAsPreview(chatActivity[0] = new ChatActivity(args));
-            } else {
-                presentFragmentAsPreviewWithMenu(chatActivity[0] = new ChatActivity(args), previewMenu[0]);
-                if (chatActivity[0] != null) {
-                    chatActivity[0].allowExpandPreviewByClick = true;
-                    try {
-                        chatActivity[0].getAvatarContainer().getAvatarImageView().performAccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
-                    } catch (Exception ignore) {
+//                presentFragmentAsPreview(finalActivity[0] = new ChatActivity(args));
+                presentFragment(new INavigationLayout.NavigationParams(finalActivity[0] = new ChatActivity(args)).setPreview(true).setOnFragmentOpen(() -> {
+                    if (finalActivity[0] != null) {
+                        chatActivity[0] = finalActivity[0];
                     }
-                }
+                }));
+            } else {
+                presentFragment(new INavigationLayout.NavigationParams(finalActivity[0] = new ChatActivity(args)).setPreview(true).setMenuView(previewMenu[0]).setOnFragmentOpen(() -> {
+                    if (finalActivity[0] != null) {
+                        chatActivity[0] = finalActivity[0];
+                        chatActivity[0].allowExpandPreviewByClick = true;
+                        try {
+                            chatActivity[0].getAvatarContainer().getAvatarImageView().performAccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }));
+//                presentFragmentAsPreviewWithMenu(chatActivity[0] = new ChatActivity(args), previewMenu[0]);
+//                if (chatActivity[0] != null) {
+//                    chatActivity[0].allowExpandPreviewByClick = true;
+//                    try {
+//                        chatActivity[0].getAvatarContainer().getAvatarImageView().performAccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+//                    } catch (Exception ignore) {
+//                    }
+//                }
             }
             return true;
         }
@@ -9128,9 +9144,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (floatingButton2 != null) {
                 floatingButton2.setImageResource(R.drawable.fab_compose_small);
                 floatingButton2Container.setContentDescription(LocaleController.getString(R.string.NewMessageTitle));
-                if (floatingButtonContainer.getVisibility() == View.VISIBLE) {
-                    floatingButton2Container.setVisibility(View.VISIBLE);
-                }
+//                if (floatingButtonContainer.getVisibility() == View.VISIBLE) {
+//                    floatingButton2Container.setVisibility(View.VISIBLE);
+//                }
             }
         } else {
             floatingButton.setAnimation(R.raw.write_contacts_fab_icon, 52, 52);
@@ -9139,9 +9155,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (floatingButton2 != null) {
                 floatingButton2.setImageResource(R.drawable.filled_premium_camera);
                 floatingButton2Container.setContentDescription(LocaleController.getString(R.string.AccDescrCaptureStory));
-                if (floatingButtonContainer.getVisibility() == View.VISIBLE) {
-                    floatingButton2Container.setVisibility(View.VISIBLE);
-                }
+//                if (floatingButtonContainer.getVisibility() == View.VISIBLE) {
+//                    floatingButton2Container.setVisibility(View.VISIBLE);
+//                }
             }
         }
 

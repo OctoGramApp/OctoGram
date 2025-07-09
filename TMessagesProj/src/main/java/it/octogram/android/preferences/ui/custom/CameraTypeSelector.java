@@ -12,7 +12,6 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.getTransparentColor;
 import static org.telegram.messenger.LocaleController.getString;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -25,6 +24,7 @@ import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageView;
 
@@ -35,11 +35,18 @@ import org.telegram.ui.Components.NumberPicker;
 
 import it.octogram.android.OctoConfig;
 
-
 public abstract class CameraTypeSelector extends LinearLayout {
+
     private final NumberPicker picker1;
-    Paint pickerDividersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    String[] strings = new String[]{
+    private final Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint lensPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final RectF cameraBodyRect = new RectF();
+    private final Rect cameraIconRect = new Rect();
+    private final Drawable[] cameraDrawables = new Drawable[4];
+    private final PorterDuffColorFilter cameraColorFilter;
+    private final int color;
+
+    private final String[] strings = new String[]{
             getString(R.string.CameraTypeDefault),
             getString(R.string.CameraTypeX),
             getString(R.string.CameraType2),
@@ -49,108 +56,133 @@ public abstract class CameraTypeSelector extends LinearLayout {
     public CameraTypeSelector(Context context) {
         super(context);
 
+        setWillNotDraw(false);
+
+        Paint pickerDividersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         pickerDividersPaint.setStyle(Paint.Style.STROKE);
         pickerDividersPaint.setStrokeCap(Paint.Cap.ROUND);
         pickerDividersPaint.setStrokeWidth(dp(2));
-        var colorIcon = Theme.getColor(Theme.key_switchTrack);
-        var color = getTransparentColor(colorIcon, 0.5f);
-        AppCompatImageView appCompatImageView = new AppCompatImageView(context) {
-            @Override
-            @SuppressLint("DrawAllocation")
-            protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-                var h = getMeasuredHeight() - dp(20);
-                var w = Math.round((h * 222.22F) / 100F);
 
-                var left = (getMeasuredWidth() / 2) - (w / 2);
-                var top = (getMeasuredHeight() / 2) - (h / 2);
-                var right = w + left;
-                var bottom = top + h;
-                var radius = Math.round((h * 14.77F) / 100F);
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setStrokeWidth(dp(2));
 
-                var rectF = new RectF(left, top, right, bottom);
-                var p = new Paint(Paint.ANTI_ALIAS_FLAG);
-                p.setStyle(Paint.Style.STROKE);
-                p.setColor(color);
-                p.setStrokeWidth(dp(2));
-                canvas.drawRoundRect(rectF, radius, radius, p);
+        lensPaint.setStyle(Paint.Style.STROKE);
+        lensPaint.setStrokeWidth(4);
 
-                var sensorHeight = Math.round(h * 0.3201F);
-                var frameWidth = Math.round(sensorHeight * 1.7692F);
-                var gapBetween = dp(6);
-                var captureLeft = left + gapBetween;
-                var captureBottom = bottom - gapBetween;
-                var captureTop = captureBottom - sensorHeight;
-                var captureRight = captureLeft + frameWidth;
+        int colorIcon = Theme.getColor(Theme.key_switchTrack);
+        color = getTransparentColor(colorIcon, 0.5f);
+        cameraColorFilter = new PorterDuffColorFilter(colorIcon, PorterDuff.Mode.SRC_ATOP);
 
-                var frameStroke = dp(2);
-                var frameBottom = captureBottom - frameStroke;
-                var frameStart = captureLeft + frameStroke;
-                var frameTop = captureTop + frameStroke;
-                var frameEnd = captureRight - frameStroke;
-                var blockWidth = Math.round((frameEnd - frameStart) / 3F);
-                var blockHeight = Math.round((frameBottom - frameTop) / 2F);
+        cameraDrawables[0] = AppCompatResources.getDrawable(context, R.drawable.telegram_camera_icon);
+        cameraDrawables[1] = AppCompatResources.getDrawable(context, R.drawable.x_camera_icon);
+        cameraDrawables[2] = AppCompatResources.getDrawable(context, R.drawable.camera_revert2);
+        cameraDrawables[3] = AppCompatResources.getDrawable(context, R.drawable.system_camera_icon);
 
-                Paint lensPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                for (var x = 0; x < 2; x++) {
-                    var y = 1;
-                    var xPosition = frameStart + (blockWidth * x);
-                    var yPosition = frameTop + (blockHeight * y);
-                    var lensDiameter = Math.round(blockWidth * 0.5F);
-                    var lensCenterX = xPosition + (blockWidth / 2);
-                    var lensCenterY = yPosition + (blockHeight / 2);
-                    lensPaint.setStyle(Paint.Style.STROKE);
-                    lensPaint.setStrokeWidth(4);
-                    lensPaint.setColor(color);
-                    canvas.drawCircle(lensCenterX, lensCenterY, Math.round(lensDiameter / 2F), lensPaint);
-                }
-                int cameraIconId = getCameraDrawable(picker1.getValue());
-                Drawable cameraDrawable = AppCompatResources.getDrawable(context, cameraIconId);
-                var iconHeight = Math.round(h * 0.37F);
-                var iconWidth = Math.round(iconHeight * 0.9803F);
-                var iconLeft = (getMeasuredWidth() / 2) - (iconWidth / 2);
-                var iconTop = (getMeasuredHeight() / 2) - (iconHeight / 2);
-                var iconRight = iconLeft + iconWidth;
-                var iconBottom = iconTop + iconHeight;
-                var cameraIconRect = new Rect(iconLeft, iconTop, iconRight, iconBottom);
-                if (cameraDrawable != null) {
-                    cameraDrawable.setBounds(cameraIconRect);
-                    cameraDrawable.setAlpha(Math.round(255 * 0.5F));
-                    cameraDrawable.setColorFilter(new PorterDuffColorFilter(colorIcon, PorterDuff.Mode.SRC_ATOP));
-                    cameraDrawable.draw(canvas);
-                }
-            }
-        };
-        appCompatImageView.setLayoutParams(new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f));
-
+        AppCompatImageView appCompatImageView = drawMock(context);
         addView(appCompatImageView);
 
         picker1 = new NumberPicker(context, 13);
-        int[] _newVal = {-1};
         picker1.setWrapSelectorWheel(true);
         picker1.setMinValue(0);
         picker1.setDrawDividers(true);
         picker1.setMaxValue(strings.length - 1);
         picker1.setFormatter(value -> strings[value]);
+
+        final int[] _newVal = {-1};
         picker1.setOnValueChangedListener((picker, oldVal, newVal) -> {
             appCompatImageView.invalidate();
             invalidate();
             _newVal[0] = newVal;
             picker.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         });
+
         picker1.setOnScrollListener((view, scrollState) -> {
             if (scrollState == NumberPicker.OnScrollListener.SCROLL_STATE_IDLE && _newVal[0] != -1) {
                 onSelectedCamera(_newVal[0]);
             }
         });
-        var selectedButton = OctoConfig.INSTANCE.cameraType.getValue();
+
+        int selectedButton = OctoConfig.INSTANCE.cameraType.getValue();
         picker1.setValue(selectedButton);
+
         addView(picker1, LayoutHelper.createFrame(132, LayoutHelper.MATCH_PARENT, Gravity.RIGHT, 0, 0, 21, 0));
+    }
+
+    @NonNull
+    private AppCompatImageView drawMock(Context context) {
+        AppCompatImageView appCompatImageView = new AppCompatImageView(context) {
+            @Override
+            protected void onDraw(Canvas canvas) {
+                super.onDraw(canvas);
+
+                int h = getMeasuredHeight() - dp(20);
+                int w = Math.round((h * 222.22F) / 100F);
+
+                int left = (getMeasuredWidth() / 2) - (w / 2);
+                int top = (getMeasuredHeight() / 2) - (h / 2);
+                int right = w + left;
+                int bottom = top + h;
+
+                float radius = Math.round((h * 14.77F) / 100F);
+
+                cameraBodyRect.set(left, top, right, bottom);
+                borderPaint.setColor(color);
+                canvas.drawRoundRect(cameraBodyRect, radius, radius, borderPaint);
+
+                int sensorHeight = Math.round(h * 0.3201F);
+                int frameWidth = Math.round(sensorHeight * 1.7692F);
+                int gapBetween = dp(6);
+                int captureLeft = left + gapBetween;
+                int captureBottom = bottom - gapBetween;
+                int captureTop = captureBottom - sensorHeight;
+                int captureRight = captureLeft + frameWidth;
+
+                int frameStroke = dp(2);
+                int frameBottom = captureBottom - frameStroke;
+                int frameStart = captureLeft + frameStroke;
+                int frameTop = captureTop + frameStroke;
+                int frameEnd = captureRight - frameStroke;
+
+                int blockWidth = Math.round((frameEnd - frameStart) / 3F);
+                int blockHeight = Math.round((frameBottom - frameTop) / 2F);
+
+                lensPaint.setColor(color);
+                for (int x = 0; x < 2; x++) {
+                    int y = 1;
+                    int xPosition = frameStart + (blockWidth * x);
+                    int yPosition = frameTop + (blockHeight * y);
+                    int lensDiameter = Math.round(blockWidth * 0.5F);
+                    int lensCenterX = xPosition + (blockWidth / 2);
+                    int lensCenterY = yPosition + (blockHeight / 2);
+                    canvas.drawCircle(lensCenterX, lensCenterY, lensDiameter / 2F, lensPaint);
+                }
+
+                Drawable cameraDrawable = cameraDrawables[picker1.getValue()];
+                if (cameraDrawable != null) {
+                    int iconHeight = Math.round(h * 0.37F);
+                    int iconWidth = Math.round(iconHeight * 0.9803F);
+                    int iconLeft = (getMeasuredWidth() / 2) - (iconWidth / 2);
+                    int iconTop = (getMeasuredHeight() / 2) - (iconHeight / 2);
+                    cameraIconRect.set(iconLeft, iconTop, iconLeft + iconWidth, iconTop + iconHeight);
+
+                    cameraDrawable.setBounds(cameraIconRect);
+                    cameraDrawable.setAlpha(Math.round(255 * 0.5F));
+                    cameraDrawable.setColorFilter(cameraColorFilter);
+                    cameraDrawable.draw(canvas);
+                }
+            }
+        };
+        appCompatImageView.setLayoutParams(new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f));
+
+        return appCompatImageView;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(102), MeasureSpec.EXACTLY));
+        super.onMeasure(
+                MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(dp(102), MeasureSpec.EXACTLY)
+        );
     }
 
     @Override
@@ -158,19 +190,6 @@ public abstract class CameraTypeSelector extends LinearLayout {
         if (picker1.getValue() == 1) {
             canvas.drawLine(dp(8), getMeasuredHeight() - 1, getMeasuredWidth() - dp(8), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
-    }
-
-    private int getCameraDrawable(int cameraType) {
-        return switch (cameraType) {
-            case 0 -> // TELEGRAM
-                    R.drawable.telegram_camera_icon;
-            case 1 -> // CAMERA_X
-                    R.drawable.x_camera_icon;
-            case 2 -> // CAMERA_2
-                    R.drawable.camera_revert2;
-            default -> // SYSTEM_CAMERA
-                    R.drawable.system_camera_icon;
-        };
     }
 
     protected abstract void onSelectedCamera(int cameraSelected);

@@ -98,6 +98,7 @@ import org.telegram.ui.AccountFrozenAlert;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.AvatarSpan;
@@ -4752,14 +4753,21 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                                             BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
                                             if (lastFragment == null) return;
                                             BaseFragment chatActivity = ChatActivity.of(dialogId);
-                                            lastFragment.presentFragment(chatActivity);
+                                            lastFragment.presentFragment(new INavigationLayout.NavigationParams(chatActivity).setOnFragmentOpen(() -> {
+                                                TLRPC.Chat newChat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
+                                                if (newChat != null) {
+                                                    AndroidUtilities.runOnUIThread(() -> {
+                                                        BulletinFactory.of(chatActivity).createSimpleBulletin(R.raw.stars_send, getString(R.string.StarsSubscriptionCompleted), AndroidUtilities.replaceTags(formatPluralString("StarsSubscriptionCompletedText", (int) stars, newChat.title))).show(true);
+                                                    }, 250);
+                                                }
+                                            }));
 
-                                            TLRPC.Chat newChat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
-                                            if (newChat != null) {
-                                                AndroidUtilities.runOnUIThread(() -> {
-                                                    BulletinFactory.of(chatActivity).createSimpleBulletin(R.raw.stars_send, getString(R.string.StarsSubscriptionCompleted), AndroidUtilities.replaceTags(formatPluralString("StarsSubscriptionCompletedText", (int) stars, newChat.title))).show(true);
-                                                }, 250);
-                                            }
+//                                            TLRPC.Chat newChat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
+//                                            if (newChat != null) {
+//                                                AndroidUtilities.runOnUIThread(() -> {
+//                                                    BulletinFactory.of(chatActivity).createSimpleBulletin(R.raw.stars_send, getString(R.string.StarsSubscriptionCompleted), AndroidUtilities.replaceTags(formatPluralString("StarsSubscriptionCompletedText", (int) stars, newChat.title))).show(true);
+//                                                }, 250);
+//                                            }
                                         });
                                     }
                                 });

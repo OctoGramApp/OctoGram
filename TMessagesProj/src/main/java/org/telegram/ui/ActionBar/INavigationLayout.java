@@ -84,6 +84,7 @@ public interface INavigationLayout {
     void updateUseAlternativeNavigation(boolean status);
     void updateUseActionbarCrossfade(boolean status);
     void updateSpringStiffness(int stiffness);
+    void updateBounceLevel(float bounceLevel);
     void setDisallowParentIntercept(boolean disallowParentIntercept);
 
     static INavigationLayout newLayout(Context context, boolean main) {
@@ -355,6 +356,8 @@ public interface INavigationLayout {
         public ActionBarPopupWindow.ActionBarPopupWindowLayout menuView;
         public boolean needDelayWithoutAnimation;
 
+        public Runnable onFragmentOpen;
+
         public boolean isFromDelay;
         public boolean delayDone;
 
@@ -389,6 +392,11 @@ public interface INavigationLayout {
 
         public NavigationParams setNeedDelayWithoutAnimation(boolean needDelayWithoutAnimation) {
             this.needDelayWithoutAnimation = needDelayWithoutAnimation;
+            return this;
+        }
+
+        public NavigationParams setOnFragmentOpen(Runnable onFragmentOpen) {
+            this.onFragmentOpen = onFragmentOpen;
             return this;
         }
     }

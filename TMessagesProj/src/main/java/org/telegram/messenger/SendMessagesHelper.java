@@ -3903,7 +3903,8 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             fromPeer = getMessagesController().getPeer(ChatObject.getSendAsPeerId(chat, chatFull, true));
         }
 
-        if (BuildConfig.DEBUG_VERSION) {
+        // if (!BuildConfig.DEBUG_VERSION) {
+        if (!BuildVars.DEBUG_VERSION) {
             final TLRPC.Chat chat = sendToPeer != null ? getMessagesController().getChat(sendToPeer.channel_id) : null;
             final boolean needMonoForumPeer = ChatObject.isMonoForum(chat) && ChatObject.canManageMonoForum(currentAccount, chat);
             if (needMonoForumPeer != (sendMessageParams.monoForumPeer != 0)) {

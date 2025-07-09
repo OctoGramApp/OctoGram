@@ -43,6 +43,7 @@ import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BackDrawable;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.MenuDrawable;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
@@ -937,8 +938,11 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                         }
                     }
                     ChatActivity chatActivity = new ChatActivity(args1);
-                    fragment1.presentFragment(chatActivity, true);
-                    chatActivity.showFieldPanelForForward(true, fmessages);
+                    fragment1.presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
+                        chatActivity.showFieldPanelForForward(true, fmessages);
+                    }));
+//                    fragment1.presentFragment(chatActivity, true);
+//                    chatActivity.showFieldPanelForForward(true, fmessages);
                 }
                 return true;
             });

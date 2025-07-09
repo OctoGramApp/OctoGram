@@ -157,7 +157,7 @@ public class OctoConfig {
     public final ConfigProperty<String> selectedEmojiPack = newConfigProperty("selectedEmojiPack", "default");
     public final ConfigProperty<Boolean> showSnowflakes = newConfigProperty("showSnowflakes", false);
     public final ConfigProperty<Boolean> disableDividers = newConfigProperty("disableDividers", false);
-    public final ConfigProperty<Integer> stickerShape = newConfigProperty("stickerShape", StickerShape.DEFAULT.getValue());
+    public final ConfigProperty<Integer> stickerShape = newConfigProperty("stickerShape", StickerShape.DEFAULT);
     public final ConfigProperty<Integer> drawerBackground = newConfigProperty("drawerBackground", DrawerBackgroundState.WALLPAPER.getValue());
     public final ConfigProperty<Boolean> drawerGradientBackground = newConfigProperty("drawerGradientBackground", true);
     public final ConfigProperty<Boolean> drawerShowProfilePic = newConfigProperty("drawerShowProfilePic", true);
@@ -188,7 +188,11 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> contextReportMessage = newConfigProperty("context_reportMessage", true);
     public final ConfigProperty<Boolean> contextMessageDetails = newConfigProperty("context_messageDetails", true);
     public final ConfigProperty<Boolean> contextNoQuoteForward = newConfigProperty("context_noQuoteForward", false);
+    public final ConfigProperty<Boolean> contextReplyMessage = newConfigProperty("context_replyMessage", true);
     public final ConfigProperty<Boolean> contextReplyPrivateChat = newConfigProperty("context_replyPrivateChat", false);
+    public final ConfigProperty<Integer> contextMenuBriefingState = newConfigProperty("contextMenuBriefingState", ContextMenuBriefingState.DISABLED.getState());
+    public final ConfigProperty<Boolean> contextMenuBottomShortcuts = newConfigProperty("contextMenuBottomShortcuts", false);
+    public final ConfigProperty<Boolean> contextMenuShortcutsTitles = newConfigProperty("contextMenuShortcutsTitles", false);
 
     /*Admin Shortcuts*/
     public final ConfigProperty<Boolean> shortcutsAdministrators = newConfigProperty("shortcuts_administrators", false);
@@ -214,13 +218,16 @@ public class OctoConfig {
     // public final ConfigProperty<Boolean> cameraXLowLightBoost = newConfigProperty("cameraXLowLightBoost", false);
 
     /*Experiments*/
+    public final ConfigProperty<Boolean> usePredictiveGestures = newConfigProperty("usePredictiveGestures", true);
     public final ConfigProperty<Boolean> useFluentNavigationBar = newConfigProperty("useFluentNavigationBar", false);
     public final ConfigProperty<Boolean> moreHapticFeedbacks = newConfigProperty("moreHapticFeedbacks", false);
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
     public final ConfigProperty<Integer> navigationSmoothness = newConfigProperty("navigationSmoothness", 1000);
+    public final ConfigProperty<Integer> navigationBounceLevel = newConfigProperty("navigationBounceLevel", 0);
     public final ConfigProperty<Boolean> animatedActionBar = newConfigProperty("animatedActionBar", false);
     public final ConfigProperty<Integer> useQualityPreset = newConfigProperty("useQualityPreset", QualityPreset.AUTO.getValue());
+    public final ConfigProperty<Boolean> keepOriginalFileName = newConfigProperty("keepOriginalFileName", false);
     public final ConfigProperty<Boolean> uploadBoost = newConfigProperty("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = newConfigProperty("downloadBoost", false);
     public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", DownloadBoost.NORMAL.getValue());
@@ -755,8 +762,10 @@ public class OctoConfig {
                     isValidInRange(value, TranslatorFormality.DEFAULT.getValue(), TranslatorFormality.HIGH.getValue());
             case "defaultEmojiButtonAction" ->
                     isValidInRange(value, DefaultEmojiButtonAction.DEFAULT.getValue(), DefaultEmojiButtonAction.GIFS.getValue());
+            case "defaultRightButtonAction" ->
+                    isValidInRange(value, DefaultMicrophoneButtonAction.DEFAULT.getValue(), DefaultMicrophoneButtonAction.VIDEO_MESSAGE.getValue());
             case "stickerShape" ->
-                    isValidInRange(value, StickerShape.DEFAULT.getValue(), StickerShape.MESSAGE.getValue());
+                    isValidInRange(value, StickerShape.DEFAULT, StickerShape.MESSAGE);
             case "drawerBackground" ->
                     isValidInRange(value, DrawerBackgroundState.TRANSPARENT.getValue(), DrawerBackgroundState.PREMIUM_DETAILS.getValue());
             case "drawerFavoriteOption" ->
@@ -797,6 +806,8 @@ public class OctoConfig {
                  "rapidActionsMainButtonActionLongPress",
                  "rapidActionsSecondaryButtonAction" ->
                     isValidInRange(value, InterfaceRapidButtonsActions.HIDDEN.getValue(), InterfaceRapidButtonsActions.SEARCH.getValue());
+            case "contextMenuBriefingState" -> isValidInRange(value, ContextMenuBriefingState.DISABLED.getState(), ContextMenuBriefingState.ENABLED_SHORTCUTS.getState());
+            case "navigationBounceLevel" -> value == 0 || value == 20 || value == 40 || value == 60 || value == 80;
             default -> false;
         };
     }

@@ -159,6 +159,7 @@ import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.BasePermissionsActivity;
@@ -4304,7 +4305,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
             cornerRadius = AndroidUtilities.dp(28);
             roundRect = new RectF(0, bottom, getWidth(), getHeight());
-            paintToUse.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
+            paintToUse.setColor(getThemedColor(Theme.key_color_text_box));
 
             canvas.drawRoundRect(roundRect, cornerRadius, cornerRadius, paintToUse);
         }
@@ -10621,13 +10622,20 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                                 return true;
                             }
                             ChatActivity chatActivity = new ChatActivity(args1);
-                            if (parentFragment.presentFragment(chatActivity, true)) {
+                            if (!(parentFragment.presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
                                 if (!AndroidUtilities.isTablet()) {
                                     parentFragment.removeSelfFromStack();
                                 }
-                            } else {
+                            })))) {
                                 fragment1.finishFragment();
                             }
+//                            if (parentFragment.presentFragment(chatActivity, true)) {
+//                                if (!AndroidUtilities.isTablet()) {
+//                                    parentFragment.removeSelfFromStack();
+//                                }
+//                            } else {
+//                                fragment1.finishFragment();
+//                            }
                         } else {
                             fragment1.finishFragment();
                         }

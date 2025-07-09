@@ -45,6 +45,7 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.BackDrawable;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
@@ -795,11 +796,16 @@ public class ResaleGiftsFragment extends BaseFragment {
                             }
                         }
                     };
-                    presentFragment(chatActivity, true);
-
-                    if (closeParentSheet != null) {
-                        closeParentSheet.run();
-                    }
+                    presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
+                        if (closeParentSheet != null) {
+                            closeParentSheet.run();
+                        }
+                    }));
+//                    presentFragment(chatActivity, true);
+//
+//                    if (closeParentSheet != null) {
+//                        closeParentSheet.run();
+//                    }
                 }
             });
             showDialog(sheet);

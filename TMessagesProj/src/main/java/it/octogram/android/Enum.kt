@@ -273,10 +273,14 @@ enum class DownloadBoost(val value: Int) {
     EXTREME(2)
 }
 
-enum class StickerShape(val value: Int) {
-    DEFAULT(0),
-    ROUND(1),
-    MESSAGE(2)
+object StickerShape {
+    const val DEFAULT = 0
+    const val ROUND = 1
+    const val MESSAGE = 2
+
+    @Retention(AnnotationRetention.SOURCE)
+    @IntDef(DEFAULT, MESSAGE, ROUND)
+    annotation class StickerShapeDef
 }
 
 enum class MediaFilter(val value: Int) {
@@ -298,7 +302,7 @@ enum class MediaFilter(val value: Int) {
     companion object {
         @JvmStatic
         fun fromValue(value: Int): MediaFilter {
-            return MediaFilter.entries.find { it.value == value } ?: ALL
+            return entries.find { it.value == value } ?: ALL
         }
     }
 }
@@ -417,14 +421,23 @@ object DrawerItem {
     }
 }
 
-enum class NewFeaturesBadgeId(val id: String) {
-    AI_FEATURES_ID("AFI"),
-    PRIVACY_MAIN("PVL"),
-    PRIVACY_LOCKED_CHATS("PVLS"),
-    APPEARANCE("APLS"),
-    APPEARANCE_INTERFACE("APLSD")
-}
+@Retention(AnnotationRetention.SOURCE)
+@StringDef(
+    NewFeaturesBadgeIds.PRIVACY_MAIN,
+    NewFeaturesBadgeIds.APPEARANCE,
+    NewFeaturesBadgeIds.CHATS,
+    NewFeaturesBadgeIds.APPEARANCE_INTERFACE,
+    NewFeaturesBadgeIds.CONTEXT_MENU_NEW_INTF
+)
+annotation class NewFeaturesBadgeId
 
+object NewFeaturesBadgeIds {
+    const val PRIVACY_MAIN = "PVL2"
+    const val APPEARANCE = "APLS2"
+    const val CHATS = "CHST2"
+    const val APPEARANCE_INTERFACE = "APLSD"
+    const val CONTEXT_MENU_NEW_INTF = "CNTX3"
+}
 enum class StickerUi(val value: Int) {
     TRANSLATOR(0),
     MAIN(1),
@@ -508,7 +521,6 @@ enum class AutoDownloadUpdate(val value: Int) {
 enum class ExpandableRowsIds(val id: Int) {
     REPLIES_AND_LINKS(1),
     PROMPT_BEFORE_SENDING(2),
-    CONTEXT_MENU_ELEMENTS(3),
     ADMIN_SHORTCUTS(4),
     LOCKED_ELEMENTS(5),
     LOCKED_ACCOUNTS(6),
@@ -559,6 +571,18 @@ enum class ShortcutsPosition(val id: Int) {
     THREE_DOTS(0),
     CHAT_INFO(1),
     PROFILE_DOTS(2)
+}
+
+enum class ContextMenuBriefingState(val state: Int) {
+    DISABLED(0),
+    ENABLED_SUBCATEGORIES(1),
+    ENABLED_SHORTCUTS(2);
+
+    companion object {
+        fun fromInt(value: Int): ContextMenuBriefingState {
+            return ContextMenuBriefingState.entries.find { it.state == value } ?: DISABLED
+        }
+    }
 }
 
 enum class InterfaceSwitchUI(val value: Int) {

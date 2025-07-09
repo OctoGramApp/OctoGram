@@ -16,6 +16,7 @@ import static org.telegram.messenger.LocaleController.getString;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -36,6 +37,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.graphics.ColorUtils;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
@@ -45,23 +53,31 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
+import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
+import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.ChatActivityEnterView;
 import org.telegram.ui.Components.ChatAvatarContainer;
+import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
+import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.UnreadCounterTextView;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Random;
 
 import it.octogram.android.ActionBarCenteredTitle;
+import it.octogram.android.ContextMenuBriefingState;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.utils.chat.ContextMenuHelper;
 
 @SuppressLint({"ClickableViewAccessibility", "ViewConstructor"})
 public class ChatSettingsPreviews extends FrameLayout {
@@ -85,7 +101,7 @@ public class ChatSettingsPreviews extends FrameLayout {
     private boolean wasChatHidden = false;
     private boolean wasGiftHidden = false;
 
-    public static final int height = AndroidUtilities.displayMetrics.heightPixels / 5;
+    private final ImageView gradientBackground;
 
     public static class PreviewType {
         public static int HEADER = 0;
@@ -93,6 +109,7 @@ public class ChatSettingsPreviews extends FrameLayout {
         public static int STICKER = 2;
         public static int INPUT_BOX = 3;
         public static int DISCUSS = 4;
+        public static int CONTEXT_MENU = 5;
     }
 
     public ChatSettingsPreviews(Context context, int viewType) {
@@ -120,6 +137,18 @@ public class ChatSettingsPreviews extends FrameLayout {
         border.setCornerRadius(dp(16));
         internalFrameLayout.setBackground(border);
 
+        gradientBackground = new ImageView(context);
+        gradientBackground.setAlpha(0f);
+        GradientDrawable gradient = new GradientDrawable(
+                GradientDrawable.Orientation.BOTTOM_TOP,
+                new int[] {
+                        Theme.getColor(Theme.key_chats_menuBackground),
+                        ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_chats_menuBackground), 100),
+                        AndroidUtilities.getTransparentColor(Theme.getColor(Theme.key_chats_menuBackground), 0)
+                }
+        );
+        gradientBackground.setBackground(gradient);
+
         internalFrameLayout.addView(getInterface(), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         setPadding(dp(15), dp(15), dp(15), dp(15));
@@ -127,6 +156,8 @@ public class ChatSettingsPreviews extends FrameLayout {
         addView(internalFrameLayout, LayoutHelper.createLinear(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT));
+
+        addView(gradientBackground, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.BOTTOM));
     }
 
     private LinearLayout getInterface() {
@@ -295,7 +326,7 @@ public class ChatSettingsPreviews extends FrameLayout {
     }
 
     private void reloadMessages() {
-        if (viewType != PreviewType.STICKER && viewType != PreviewType.MESSAGES) {
+        if (viewType != PreviewType.STICKER && viewType != PreviewType.MESSAGES && viewType != PreviewType.CONTEXT_MENU) {
             return;
         }
 
@@ -379,16 +410,22 @@ public class ChatSettingsPreviews extends FrameLayout {
 
         private Drawable backgroundDrawable;
         private Drawable oldBackgroundDrawable;
-        private final ChatMessageCell cell;
-        private final MessageObject finalMessageObject;
+        private ChatMessageCell cell;
+        private MessageObject finalMessageObject;
+        private ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout;
         private final Drawable shadowDrawable;
+
+        private RecyclerListView listView;
+        private final ArrayList<ContextMenuPreviewItem> currentShownRecentItems = new ArrayList<>();
+        private final ArrayList<ContextMenuPreviewItem> oldRecentItems = new ArrayList<>();
+        private ContextMenuPreviewAdapter previewAdapter;
 
         public StickerSizePreviewMessages(Context context) {
             super(context);
 
             setWillNotDraw(false);
             setOrientation(LinearLayout.VERTICAL);
-            if (viewType == PreviewType.MESSAGES) {
+            if (viewType == PreviewType.MESSAGES || viewType == PreviewType.CONTEXT_MENU) {
                 setPadding(0, dp(11), 0, dp(11));
             } else if (viewType == PreviewType.STICKER) {
                 setPadding(0, dp(8), 0, 0);
@@ -396,129 +433,228 @@ public class ChatSettingsPreviews extends FrameLayout {
 
             shadowDrawable = Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
 
-            MessageObject[] messageObjects = new MessageObject[2];
+            if (viewType == PreviewType.CONTEXT_MENU) {
+                popupLayout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(context, R.drawable.popup_fixed_alert2, null, 0);
+                popupLayout.setMinimumWidth(AndroidUtilities.dp(250));
+                popupLayout.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefaultSubmenuBackground));
+                popupLayout.setAlpha(0f);
+                popupLayout.setPivotX(0);
+                popupLayout.setPivotY(0);
+                popupLayout.setFitItems(true);
 
-            int date = (int) (System.currentTimeMillis() / 1000) - 60 * 60;
-            TLRPC.TL_message stickerMessage = new TLRPC.TL_message();
-            stickerMessage.date = date + 10;
-            stickerMessage.dialog_id = 1;
-            stickerMessage.flags = 257;
-            stickerMessage.id = 1;
-            stickerMessage.post_author = "OctoGram";
-            stickerMessage.media = new TLRPC.TL_messageMediaDocument();
-            stickerMessage.media.flags = 1;
-            stickerMessage.media.document = new TLRPC.TL_document();
-            stickerMessage.media.document.mime_type = "image/webp";
-            stickerMessage.media.document.file_reference = new byte[0];
-            stickerMessage.media.document.access_hash = 0;
-            stickerMessage.media.document.date = date;
-            TLRPC.TL_documentAttributeSticker stickerAttribute = new TLRPC.TL_documentAttributeSticker();
-            stickerAttribute.alt = "\ud83d\udc19";
-            stickerMessage.media.document.attributes.add(stickerAttribute);
-            TLRPC.TL_documentAttributeImageSize imageSizeAttribute = new TLRPC.TL_documentAttributeImageSize();
-            imageSizeAttribute.h = 512;
-            imageSizeAttribute.w = 512;
-            stickerMessage.media.document.attributes.add(imageSizeAttribute);
-            stickerMessage.message = "\ud83d\udc19";
-            stickerMessage.out = true;
-            stickerMessage.peer_id = new TLRPC.TL_peerUser();
-            stickerMessage.peer_id.user_id = 0;
-            stickerMessage.views = 350;
-            messageObjects[0] = new MessageObject(UserConfig.selectedAccount, stickerMessage, true, false);
-            messageObjects[0].useCustomPhoto = true;
+                listView = new RecyclerListView(context);
+                listView.setItemAnimator(getDefaultItemAnimator());
+                listView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+                listView.setAdapter(previewAdapter = new ContextMenuPreviewAdapter(context));
+                listView.setTag(14);
+                popupLayout.addView(listView, LayoutHelper.createLinear(250 - 8*2, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 8, 0, 8, 0));
 
-            stickerMessage = new TLRPC.TL_message();
-            int[] replyMessages = {
-                    R.string.StickerSizePreviewMessage1,
-                    R.string.StickerSizePreviewMessage2,
-                    R.string.StickerSizePreviewMessage3,
-                    R.string.StickerSizePreviewMessage5
-            };
-            int randomReplyMessageKey = replyMessages[new Random().nextInt(replyMessages.length)];
-            stickerMessage.message = getString(randomReplyMessageKey);
-
-            stickerMessage.date = date + 1270;
-            stickerMessage.dialog_id = -1;
-            stickerMessage.flags = 259;
-            stickerMessage.id = 2;
-            stickerMessage.media = new TLRPC.TL_messageMediaEmpty();
-            stickerMessage.out = false;
-            stickerMessage.peer_id = new TLRPC.TL_peerUser();
-            stickerMessage.peer_id.user_id = 1;
-
-            int[] readMessageKeys = {
-                    R.string.StickerSizePreviewMessage1,
-                    R.string.StickerSizePreviewMessage2,
-                    R.string.StickerSizePreviewMessage3,
-                    R.string.StickerSizePreviewMessage5
-            };
-
-            int randomReadMessageKey = readMessageKeys[new Random().nextInt(readMessageKeys.length)];
-            String emojiCharacter = "";
-            long documentId = 0;
-
-            if (randomReadMessageKey == R.string.StickerSizePreviewMessage1) {
-                emojiCharacter = "\ud83d\udc19";
-                documentId = 5352815688010441881L;
-            } else if (randomReadMessageKey == R.string.StickerSizePreviewMessage2) {
-                emojiCharacter = "\ud83c\udf55";
-                documentId = 5370980663778351052L;
+                addView(popupLayout, LayoutHelper.createLinear(250, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
+                AndroidUtilities.runOnUIThread(this::invalidateInternally, 20);
             }
 
-            stickerMessage.message = getString(randomReadMessageKey);
+            if (viewType == PreviewType.STICKER || viewType == PreviewType.MESSAGES) {
+                MessageObject[] messageObjects = new MessageObject[2];
 
-            int emojiStartIndex = stickerMessage.message.indexOf(emojiCharacter);
-            if (emojiStartIndex >= 0) {
-                TLRPC.TL_messageEntityCustomEmoji customEmojiEntity = new TLRPC.TL_messageEntityCustomEmoji();
-                customEmojiEntity.offset = emojiStartIndex;
-                customEmojiEntity.length = emojiCharacter.length();
-                customEmojiEntity.document_id = documentId;
-                stickerMessage.entities.add(customEmojiEntity);
+                int date = (int) (System.currentTimeMillis() / 1000) - 60 * 60;
+                TLRPC.TL_message stickerMessage = new TLRPC.TL_message();
+                stickerMessage.date = date + 10;
+                stickerMessage.dialog_id = 1;
+                stickerMessage.flags = 257;
+                stickerMessage.id = 1;
+                stickerMessage.post_author = "OctoGram";
+                stickerMessage.media = new TLRPC.TL_messageMediaDocument();
+                stickerMessage.media.flags = 1;
+                stickerMessage.media.document = new TLRPC.TL_document();
+                stickerMessage.media.document.mime_type = "image/webp";
+                stickerMessage.media.document.file_reference = new byte[0];
+                stickerMessage.media.document.access_hash = 0;
+                stickerMessage.media.document.date = date;
+                TLRPC.TL_documentAttributeSticker stickerAttribute = new TLRPC.TL_documentAttributeSticker();
+                stickerAttribute.alt = "\ud83d\udc19";
+                stickerMessage.media.document.attributes.add(stickerAttribute);
+                TLRPC.TL_documentAttributeImageSize imageSizeAttribute = new TLRPC.TL_documentAttributeImageSize();
+                imageSizeAttribute.h = 512;
+                imageSizeAttribute.w = 512;
+                stickerMessage.media.document.attributes.add(imageSizeAttribute);
+                stickerMessage.message = "\ud83d\udc19";
+                stickerMessage.out = true;
+                stickerMessage.peer_id = new TLRPC.TL_peerUser();
+                stickerMessage.peer_id.user_id = 0;
+                stickerMessage.views = 350;
+                messageObjects[0] = new MessageObject(UserConfig.selectedAccount, stickerMessage, true, false);
+                messageObjects[0].useCustomPhoto = true;
+
+                stickerMessage = new TLRPC.TL_message();
+                int[] replyMessages = {
+                        R.string.StickerSizePreviewMessage1,
+                        R.string.StickerSizePreviewMessage2,
+                        R.string.StickerSizePreviewMessage3,
+                        R.string.StickerSizePreviewMessage5
+                };
+                int randomReplyMessageKey = replyMessages[new Random().nextInt(replyMessages.length)];
+                stickerMessage.message = getString(randomReplyMessageKey);
+
+                stickerMessage.date = date + 1270;
+                stickerMessage.dialog_id = -1;
+                stickerMessage.flags = 259;
+                stickerMessage.id = 2;
+                stickerMessage.media = new TLRPC.TL_messageMediaEmpty();
+                stickerMessage.out = false;
+                stickerMessage.peer_id = new TLRPC.TL_peerUser();
+                stickerMessage.peer_id.user_id = 1;
+
+                int[] readMessageKeys = {
+                        R.string.StickerSizePreviewMessage1,
+                        R.string.StickerSizePreviewMessage2,
+                        R.string.StickerSizePreviewMessage3,
+                        R.string.StickerSizePreviewMessage5
+                };
+
+                int randomReadMessageKey = readMessageKeys[new Random().nextInt(readMessageKeys.length)];
+                String emojiCharacter = "";
+                long documentId = 0;
+
+                if (randomReadMessageKey == R.string.StickerSizePreviewMessage1) {
+                    emojiCharacter = "\ud83d\udc19";
+                    documentId = 5352815688010441881L;
+                } else if (randomReadMessageKey == R.string.StickerSizePreviewMessage2) {
+                    emojiCharacter = "\ud83c\udf55";
+                    documentId = 5370980663778351052L;
+                }
+
+                stickerMessage.message = getString(randomReadMessageKey);
+
+                int emojiStartIndex = stickerMessage.message.indexOf(emojiCharacter);
+                if (emojiStartIndex >= 0) {
+                    TLRPC.TL_messageEntityCustomEmoji customEmojiEntity = new TLRPC.TL_messageEntityCustomEmoji();
+                    customEmojiEntity.offset = emojiStartIndex;
+                    customEmojiEntity.length = emojiCharacter.length();
+                    customEmojiEntity.document_id = documentId;
+                    stickerMessage.entities.add(customEmojiEntity);
+                }
+
+                stickerMessage.date = date + 1270;
+                stickerMessage.dialog_id = 1;
+                stickerMessage.flags = 257 + 8;
+                stickerMessage.from_id = new TLRPC.TL_peerUser();
+                stickerMessage.id = 2;
+                stickerMessage.reply_to = new TLRPC.TL_messageReplyHeader();
+                stickerMessage.reply_to.flags |= 16;
+                stickerMessage.reply_to.reply_to_msg_id = 1;
+                stickerMessage.media = new TLRPC.TL_messageMediaEmpty();
+                stickerMessage.out = false;
+                stickerMessage.peer_id = new TLRPC.TL_peerUser();
+                stickerMessage.peer_id.user_id = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
+                stickerMessage.flags |= TLRPC.MESSAGE_FLAG_EDITED | TLRPC.MESSAGE_FLAG_HAS_VIEWS | TLRPC.MESSAGE_FLAG_HAS_ENTITIES;
+                stickerMessage.edit_date = date + 1950;
+                stickerMessage.edit_hide = false;
+                stickerMessage.views = 250;
+                messageObjects[1] = new MessageObject(UserConfig.selectedAccount, stickerMessage, true, false);
+                messageObjects[1].overrideLinkEmoji = 5258073068852485953L;
+                messageObjects[1].overrideLinkColor = 9;
+                messageObjects[1].customReplyName = getString(R.string.StickersSizeChannelTitleMini);
+                messageObjects[1].replyMessageObject = messageObjects[0];
+
+                finalMessageObject = messageObjects[viewType != ChatSettingsPreviews.PreviewType.STICKER ? 1 : 0];
+                cell = new ChatMessageCell(context, UserConfig.selectedAccount);
+                cell.setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
+                });
+                cell.isChat = false;
+                cell.setFullyDraw(true);
+                cell.setMessageObject(finalMessageObject, null, true, true, false); // check for firstInChat
+                cell.requestLayout();
+                addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
             }
+        }
 
-            stickerMessage.date = date + 1270;
-            stickerMessage.dialog_id = 1;
-            stickerMessage.flags = 257 + 8;
-            stickerMessage.from_id = new TLRPC.TL_peerUser();
-            stickerMessage.id = 2;
-            stickerMessage.reply_to = new TLRPC.TL_messageReplyHeader();
-            stickerMessage.reply_to.flags |= 16;
-            stickerMessage.reply_to.reply_to_msg_id = 1;
-            stickerMessage.media = new TLRPC.TL_messageMediaEmpty();
-            stickerMessage.out = false;
-            stickerMessage.peer_id = new TLRPC.TL_peerUser();
-            stickerMessage.peer_id.user_id = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
-            stickerMessage.flags |= TLRPC.MESSAGE_FLAG_EDITED | TLRPC.MESSAGE_FLAG_HAS_VIEWS | TLRPC.MESSAGE_FLAG_HAS_ENTITIES;
-            stickerMessage.edit_date = date + 1950;
-            stickerMessage.edit_hide = false;
-            stickerMessage.views = 250;
-            messageObjects[1] = new MessageObject(UserConfig.selectedAccount, stickerMessage, true, false);
-            messageObjects[1].overrideLinkEmoji = 5258073068852485953L;
-            messageObjects[1].overrideLinkColor = 9;
-            messageObjects[1].customReplyName = getString(R.string.StickersSizeChannelTitleMini);
-            messageObjects[1].replyMessageObject = messageObjects[0];
-
-            finalMessageObject = messageObjects[viewType != ChatSettingsPreviews.PreviewType.STICKER ? 1 : 0];
-            cell = new ChatMessageCell(context, UserConfig.selectedAccount);
-            cell.setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
-            });
-            cell.isChat = false;
-            cell.setFullyDraw(true);
-            cell.setMessageObject(finalMessageObject, null, true, true, false); // check for firstInChat
-            cell.requestLayout();
-            addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        @NonNull
+        private DefaultItemAnimator getDefaultItemAnimator() {
+            DefaultItemAnimator itemAnimator = new DefaultItemAnimator();
+            itemAnimator.setSupportsChangeAnimations(false);
+            itemAnimator.setDelayAnimations(false);
+            itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+            itemAnimator.setDurations(340);
+            return itemAnimator;
         }
 
         @Override
         public void invalidate() {
             super.invalidate();
-            boolean hasMedia = !(cell.getMessageObject().messageOwner.media instanceof TLRPC.TL_messageMediaEmpty);
-            if (hasMedia) {
-                cell.setMessageObject(finalMessageObject, null, true, true, false); // check for firstInChat
-                cell.invalidate();
-            } else {
-                cell.getMessageObject().resetLayout();
-                cell.requestLayout();
+            invalidateInternally();
+        }
+
+        private void invalidateInternally() {
+            if (popupLayout != null) {
+                if (listView.getTag() instanceof ValueAnimator v2) {
+                    v2.cancel();
+                    listView.setTag(null);
+                }
+
+                boolean isFirstLoad = popupLayout.getAlpha() == 0f;
+                int height = listView.getMeasuredHeight();
+                ViewGroup.LayoutParams params = listView.getLayoutParams();
+                params.height = height;
+                listView.setLayoutParams(params);
+
+                oldRecentItems.clear();
+                oldRecentItems.addAll(currentShownRecentItems);
+                currentShownRecentItems.clear();
+                currentShownRecentItems.addAll(ContextMenuHelper.fillPreviewMenu(context));
+                previewAdapter.setItems(oldRecentItems, currentShownRecentItems);
+
+                listView.measure(
+                        View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                );
+
+                int newHeight = listView.getMeasuredHeight();
+
+                boolean[] useLimitedView = {false};
+                if (OctoConfig.INSTANCE.contextMenuBriefingState.getValue() == ContextMenuBriefingState.DISABLED.getState()) {
+                    if (newHeight > AndroidUtilities.displaySize.y/3) {
+                        newHeight = AndroidUtilities.displaySize.y/3;
+                        useLimitedView[0] = true;
+                    }
+                }
+
+                int finalNewHeight = newHeight;
+                boolean wasGradientBackgroundShown = gradientBackground.getAlpha() > 0f;
+
+                ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+                animator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+                animator.addUpdateListener(animation -> {
+                    float progress = (float) animation.getAnimatedValue();
+                    ViewGroup.LayoutParams p2 = listView.getLayoutParams();
+                    p2.height = (int) ((height + (finalNewHeight - height) * progress) * (isFirstLoad ? progress : 1));
+                    listView.setLayoutParams(p2);
+
+                    if (useLimitedView[0] && !wasGradientBackgroundShown) {
+                        gradientBackground.setAlpha(progress);
+                    } else if (!useLimitedView[0] && wasGradientBackgroundShown) {
+                        gradientBackground.setAlpha(1f - progress);
+                    }
+
+                    if (isFirstLoad) {
+                        popupLayout.setAlpha(progress);
+                        popupLayout.setScaleX(progress);
+                        popupLayout.setScaleY(progress);
+                    }
+                });
+                animator.setDuration(340);
+                animator.start();
+                listView.setTag(animator);
+            }
+
+            if (cell != null) {
+                boolean hasMedia = !(cell.getMessageObject().messageOwner.media instanceof TLRPC.TL_messageMediaEmpty);
+                if (hasMedia) {
+                    cell.setMessageObject(finalMessageObject, null, true, true, false); // check for firstInChat
+                    cell.invalidate();
+                } else {
+                    cell.getMessageObject().resetLayout();
+                    cell.requestLayout();
+                }
             }
         }
 
@@ -607,6 +743,76 @@ public class ChatSettingsPreviews extends FrameLayout {
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             return false;
+        }
+
+        private class ContextMenuPreviewAdapter extends AdapterWithDiffUtils {
+
+            private final Context context;
+
+            public ContextMenuPreviewAdapter(Context context) {
+                this.context = context;
+            }
+
+            @Override
+            public boolean isEnabled(RecyclerView.ViewHolder holder) {
+                return true;
+            }
+
+            @NonNull
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                if (viewType == ContextMenuPreviewItem.ITEM) {
+                    ActionBarMenuSubItem currentItem = new ActionBarMenuSubItem(context, false, false);
+                    currentItem.setMinimumWidth(AndroidUtilities.dp(250 - 8*2));
+                    return new RecyclerListView.Holder(currentItem);
+                } else if (viewType == ContextMenuPreviewItem.GAP_SHADOW) {
+                    return new RecyclerListView.Holder(new ActionBarPopupWindow.GapView(context, null));
+                } else if (viewType == ContextMenuPreviewItem.SHORTCUTS) {
+                    return new RecyclerListView.Holder(new ContextMenuHelper.ShortcutsLayout(context));
+                }
+                return new RecyclerListView.Holder(new View(context));
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+                if (position < currentShownRecentItems.size()) {
+                    ContextMenuPreviewItem property = currentShownRecentItems.get(position);
+                    if (property.viewType == ContextMenuPreviewItem.ITEM) {
+                        ActionBarMenuSubItem item = (ActionBarMenuSubItem) holder.itemView;
+                        item.setTextAndIcon(property.name, property.icon);
+                        item.setRightIcon(property.expandable ? R.drawable.msg_arrowright : 0);
+                    } else if (property.viewType == ContextMenuPreviewItem.GAP_SHADOW) {
+                        ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
+                        if (layoutParams == null) {
+                            layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 8);
+                        } else {
+                            layoutParams.height = 8;
+                        }
+                        holder.itemView.setLayoutParams(layoutParams);
+                    } else if (property.viewType == ContextMenuPreviewItem.SHORTCUTS) {
+                        ContextMenuHelper.ShortcutsLayout item = (ContextMenuHelper.ShortcutsLayout) holder.itemView;
+                        ViewGroup.LayoutParams layoutParams = item.getLayoutParams();
+                        if (layoutParams == null) {
+                            layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        } else {
+                            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                        }
+                        item.setLayoutParams(layoutParams);
+                        item.fillPreviewOptions();
+                    }
+                }
+            }
+
+            @Override
+            public int getItemCount() {
+                return currentShownRecentItems.size();
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return currentShownRecentItems.get(position).viewType;
+            }
         }
     }
 
@@ -724,6 +930,41 @@ public class ChatSettingsPreviews extends FrameLayout {
         @Override
         public void onAudioVideoInterfaceUpdated() {
 
+        }
+    }
+
+    public static class ContextMenuPreviewItem extends AdapterWithDiffUtils.Item {
+
+        public CharSequence name;
+        public Integer icon;
+        public boolean expandable;
+
+        public static int ITEM = 0;
+        public static int GAP_SHADOW = 1;
+        public static int SHORTCUTS = 2;
+
+        public ContextMenuPreviewItem(int viewType) {
+            super(viewType, true);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ContextMenuPreviewItem item)) {
+                return false;
+            }
+            if (viewType != item.viewType) {
+                return false;
+            }
+            if (viewType == ContextMenuPreviewItem.SHORTCUTS) {
+                return true;
+            }
+            if (viewType == ContextMenuPreviewItem.GAP_SHADOW) {
+                return true;
+            }
+            return Objects.equals(name, item.name);
         }
     }
 }

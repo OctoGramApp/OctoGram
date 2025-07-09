@@ -32,6 +32,7 @@ import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FingerprintController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.support.fingerprint.FingerprintManagerCompat;
@@ -234,6 +235,10 @@ public class FingerprintUtils {
         return getState(dialog.id);
     }
 
+    private static String getState(MessagesStorage.TopicKey dialog) {
+        return getState(dialog.dialogId);
+    }
+
     private static String getState(long id) {
         if (DialogObject.isUserDialog(id)) {
             if (id == UserConfig.getInstance(UserConfig.selectedAccount).clientUserId) {
@@ -271,6 +276,10 @@ public class FingerprintUtils {
     }
 
     public static boolean isChatLocked(TLRPC.Dialog dialog) {
+        return isChatLocked(getState(dialog));
+    }
+
+    public static boolean isChatLocked(MessagesStorage.TopicKey dialog) {
         return isChatLocked(getState(dialog));
     }
 

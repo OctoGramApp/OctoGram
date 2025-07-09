@@ -34,7 +34,7 @@ import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.DefaultMicrophoneButtonAction;
 import it.octogram.android.DoubleTapAction;
 import it.octogram.android.ExpandableRowsIds;
-import it.octogram.android.NewFeaturesBadgeId;
+import it.octogram.android.NewFeaturesBadgeIds;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StickerShape;
@@ -94,7 +94,6 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoAiFeaturesUI())))
                             .icon(R.drawable.cup_star_solar)
-                            .isNew(NewFeaturesBadgeId.AI_FEATURES_ID.getId())
                             .title(getString(R.string.AiFeatures_Brief))
                             .build());
                 })
@@ -178,6 +177,12 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.PencilIconForEdited))
                             .description(getString(R.string.PencilIconForEdited_Desc))
                             .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoContextMenuSettingsUI())))
+                            .icon(R.drawable.msg_media)
+                            .isNew(NewFeaturesBadgeIds.CONTEXT_MENU_NEW_INTF)
+                            .title(getString(R.string.ContextMenu))
+                            .build());
                 })
                 .category(getString(R.string.StickersSizeHeader), category -> {
                     category.row(new SliderRow.SliderRowBuilder()
@@ -194,9 +199,15 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                             .onSelected(() -> stickersCellPreview.invalidate())
                             .currentValue(OctoConfig.INSTANCE.stickerShape)
                             .options(List.of(
-                                    new PopupChoiceDialogOption().setId(StickerShape.DEFAULT.getValue()).setItemTitle(getString(R.string.StyleTypeDefault)),
-                                    new PopupChoiceDialogOption().setId(StickerShape.ROUND.getValue()).setItemTitle(getString(R.string.StickerShapeRounded)),
-                                    new PopupChoiceDialogOption().setId(StickerShape.MESSAGE.getValue()).setItemTitle(getString(R.string.StyleTypeMessage))
+                                    new PopupChoiceDialogOption()
+                                            .setId(StickerShape.DEFAULT)
+                                            .setItemTitle(getString(R.string.StyleTypeDefault)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(StickerShape.ROUND)
+                                            .setItemTitle(getString(R.string.StickerShapeRounded)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(StickerShape.MESSAGE)
+                                            .setItemTitle(getString(R.string.StyleTypeMessage))
                             ))
                             .postNotificationName(NotificationCenter.reloadInterface)
                             .title(getString(R.string.StickerShape))
@@ -305,41 +316,6 @@ public class OctoChatsSettingsUI implements PreferencesEntry {
                                     .optionTitle(getString(R.string.PromptBeforeDeletingChatHistory2))
                                     .property(OctoConfig.INSTANCE.warningBeforeDeletingChatHistory)
                             )
-                            .build()
-                    );
-                    category.row(new ExpandableRows.ExpandableRowsBuilder()
-                            .setId(ExpandableRowsIds.CONTEXT_MENU_ELEMENTS.getId())
-                            .setIcon(R.drawable.msg_list)
-                            .setMainTitle(getString(R.string.ContextElements))
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.ClearFromCache))
-                                    .property(OctoConfig.INSTANCE.contextClearFromCache)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.CopyPhoto))
-                                    .property(OctoConfig.INSTANCE.contextCopyPhoto)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.AddToSavedMessages))
-                                    .property(OctoConfig.INSTANCE.contextSaveMessage)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.ReportChat))
-                                    .property(OctoConfig.INSTANCE.contextReportMessage)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.MessageDetails))
-                                    .property(OctoConfig.INSTANCE.contextMessageDetails)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.NoQuoteForward))
-                                    .property(OctoConfig.INSTANCE.contextNoQuoteForward)
-                            )
-                            .addRow(new ExpandableRowsOption()
-                                    .optionTitle(getString(R.string.CustomF_ReplyPvt))
-                                    .property(OctoConfig.INSTANCE.contextReplyPrivateChat)
-                            )
-                            .postNotificationName(NotificationCenter.reloadInterface)
                             .build()
                     );
                     category.row(new ExpandableRows.ExpandableRowsBuilder()

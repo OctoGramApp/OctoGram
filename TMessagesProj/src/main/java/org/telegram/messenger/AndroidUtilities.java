@@ -6716,7 +6716,8 @@ public class AndroidUtilities {
     }
 
     public static void logFlagSecure() {
-        if (!BuildConfig.DEBUG_VERSION) {
+        // if (!BuildConfig.DEBUG_VERSION) {
+        if (!BuildVars.DEBUG_VERSION) {
             return;
         }
 

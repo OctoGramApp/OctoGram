@@ -3438,6 +3438,7 @@ public class Theme {
     public static final int key_dialogGiftsTabText = colorsCount++;
 
     public static final int key_windowBackgroundWhite = colorsCount++;
+    public static final int key_color_text_box = colorsCount++;
     public static final int key_windowBackgroundUnchecked = colorsCount++;
     public static final int key_windowBackgroundChecked = colorsCount++;
     public static final int key_windowBackgroundCheckText = colorsCount++;

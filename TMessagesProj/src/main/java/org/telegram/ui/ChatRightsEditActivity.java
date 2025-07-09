@@ -57,6 +57,7 @@ import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
@@ -1450,14 +1451,23 @@ public class ChatRightsEditActivity extends BaseFragment implements Notification
                         return;
                     }
                     ChatActivity chatActivity = new ChatActivity(args1);
-                    presentFragment(chatActivity, true);
-                    if (BulletinFactory.canShowBulletin(chatActivity)) {
-                        if (isAddingNew && asAdmin) {
-                            BulletinFactory.createAddedAsAdminBulletin(chatActivity, currentUser.first_name).show();
-                        } else if (!isAddingNew && !initialAsAdmin && asAdmin) {
-                            BulletinFactory.createPromoteToAdminBulletin(chatActivity, currentUser.first_name).show();
+                    presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
+                        if (BulletinFactory.canShowBulletin(chatActivity)) {
+                            if (isAddingNew && asAdmin) {
+                                BulletinFactory.createAddedAsAdminBulletin(chatActivity, currentUser.first_name).show();
+                            } else if (!isAddingNew && !initialAsAdmin && asAdmin) {
+                                BulletinFactory.createPromoteToAdminBulletin(chatActivity, currentUser.first_name).show();
+                            }
                         }
-                    }
+                    }));
+//                    presentFragment(chatActivity, true);
+//                    if (BulletinFactory.canShowBulletin(chatActivity)) {
+//                        if (isAddingNew && asAdmin) {
+//                            BulletinFactory.createAddedAsAdminBulletin(chatActivity, currentUser.first_name).show();
+//                        } else if (!isAddingNew && !initialAsAdmin && asAdmin) {
+//                            BulletinFactory.createPromoteToAdminBulletin(chatActivity, currentUser.first_name).show();
+//                        }
+//                    }
                 };
                 if (asAdmin || initialAsAdmin) {
                     getMessagesController().setUserAdminRole(currentChat.id, currentUser, asAdmin ? adminRights : emptyAdminRights(false), currentRank, false, this, isAddingNew, asAdmin, botHash, onFinish, err -> {

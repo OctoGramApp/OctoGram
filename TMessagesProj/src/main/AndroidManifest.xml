@@ -116,6 +116,7 @@
         tools:replace="android:supportsRtl"
         android:usesCleartextTraffic="true"
         tools:targetApi="r">
+        <!--android:enableOnBackInvokedCallback="true"-->
         <!-- usesCleartextTraffic for browser supporting opening http:// links -->
 
         <activity-alias

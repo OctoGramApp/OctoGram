@@ -205,7 +205,8 @@ public class DragAndDropImageHandler {
                         0,
                         false,
                         0,
-                        0
+                        0,
+                        null
                 );
                 if (delegate != null) delegate.onMessageSend(null, true, scheduleDate, 0);
             }

@@ -155,8 +155,8 @@ public class RapidActionsPreviewLayout extends FrameLayout {
             boolean storiesEnabled = MessagesController.getInstance(UserConfig.selectedAccount).storiesEnabled();
             buttonsVisible = true;
             mainButtonAction = storiesEnabled ? InterfaceRapidButtonsActions.POST_STORY : InterfaceRapidButtonsActions.SEND_MESSAGE;
-            showSecondaryButton = storiesEnabled;
-            secondaryButtonAction = InterfaceRapidButtonsActions.SEND_MESSAGE;
+            showSecondaryButton = true;
+            secondaryButtonAction = storiesEnabled ? InterfaceRapidButtonsActions.SEND_MESSAGE : InterfaceRapidButtonsActions.POST_STORY;
         }
 
         boolean useSquaredFab = OctoConfig.INSTANCE.useSquaredFab.getValue();

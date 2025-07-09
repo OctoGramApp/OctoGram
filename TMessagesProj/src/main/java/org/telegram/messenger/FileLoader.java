@@ -30,6 +30,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import it.octogram.android.OctoConfig;
+
 public class FileLoader extends BaseController {
 
     private static final int PRIORITY_STREAM = 4;
@@ -1649,6 +1651,9 @@ public class FileLoader extends BaseController {
             TLRPC.Document document = (TLRPC.Document) attach;
             String docExt;
             docExt = getDocumentFileName(document);
+            if (OctoConfig.INSTANCE.keepOriginalFileName.getValue() && !docExt.isEmpty()) {
+                return docExt;
+            }
             int idx;
             if ((idx = docExt.lastIndexOf('.')) == -1) {
                 docExt = "";

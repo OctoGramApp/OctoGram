@@ -16,6 +16,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -96,6 +97,9 @@ public class ActionBarPopupWindow extends PopupWindow {
     }
 
     public static class ActionBarPopupWindowLayout extends FrameLayout {
+        private static final boolean USE_NEW_BACKGROUND = true;
+        private static final Paint newBackgroundPaint = new Paint();
+
         public final static int FLAG_USE_SWIPEBACK = 1;
         public final static int FLAG_SHOWN_FROM_BOTTOM = 2;
         public final static int FLAG_DONT_USE_SCROLLVIEW = 4;
@@ -162,6 +166,9 @@ public class ActionBarPopupWindow extends PopupWindow {
             if (backgroundDrawable != null) {
                 backgroundDrawable.getPadding(bgPaddings);
                 setBackgroundColor(getThemedColor(Theme.key_actionBarDefaultSubmenuBackground));
+            }
+            if (USE_NEW_BACKGROUND) {
+                newBackgroundPaint.setColor(getThemedColor(Theme.key_actionBarDefaultSubmenuBackground));
             }
 
 
@@ -288,6 +295,9 @@ public class ActionBarPopupWindow extends PopupWindow {
         public void setBackgroundColor(int color) {
             if (backgroundColor != color && backgroundDrawable != null) {
                 backgroundDrawable.setColorFilter(new PorterDuffColorFilter(backgroundColor = color, PorterDuff.Mode.MULTIPLY));
+                if (USE_NEW_BACKGROUND) {
+                    newBackgroundPaint.setColor(backgroundColor);
+                }
             }
         }
 
@@ -368,6 +378,9 @@ public class ActionBarPopupWindow extends PopupWindow {
             backgroundDrawable = drawable;
             if (backgroundDrawable != null) {
                 backgroundDrawable.getPadding(bgPaddings);
+                if (USE_NEW_BACKGROUND && drawable.getColorFilter() instanceof PorterDuffColorFilter f1) {
+                    newBackgroundPaint.setColorFilter(f1);
+                }
             }
         }
 
@@ -481,7 +494,11 @@ public class ActionBarPopupWindow extends PopupWindow {
                         canvas.save();
                         canvas.clipRect(0, bgPaddings.top, getMeasuredWidth(), getMeasuredHeight());
                     }
-                    backgroundDrawable.setAlpha(applyAlpha ? backAlpha : 255);
+                    if (USE_NEW_BACKGROUND) {
+                        newBackgroundPaint.setAlpha(applyAlpha ? backAlpha : 255);
+                    } else {
+                        backgroundDrawable.setAlpha(applyAlpha ? backAlpha : 255);
+                    }
                     if (shownFromBottom) {
                         final int height = getMeasuredHeight();
                         AndroidUtilities.rectTmp2.set(0, (int) (height * (1.0f - backScaleY)), (int) (getMeasuredWidth() * backScaleX), height);
@@ -522,8 +539,13 @@ public class ActionBarPopupWindow extends PopupWindow {
                         rect.set(AndroidUtilities.rectTmp2.right, AndroidUtilities.rectTmp2.top, AndroidUtilities.rectTmp2.right, AndroidUtilities.rectTmp2.top);
                         AndroidUtilities.lerp(rect, AndroidUtilities.rectTmp2, reactionsEnterProgress, AndroidUtilities.rectTmp2);
                     }
-                    backgroundDrawable.setBounds(AndroidUtilities.rectTmp2);
-                    backgroundDrawable.draw(canvas);
+                    if (USE_NEW_BACKGROUND) {
+                        canvas.drawRoundRect(AndroidUtilities.rectTmp2.left + bgPaddings.left, AndroidUtilities.rectTmp2.top + bgPaddings.top, AndroidUtilities.rectTmp2.right - bgPaddings.right, AndroidUtilities.rectTmp2.bottom - bgPaddings.top, 40f, 40f, newBackgroundPaint);
+                        backgroundDrawable.setBounds(AndroidUtilities.rectTmp2);
+                    } else {
+                        backgroundDrawable.setBounds(AndroidUtilities.rectTmp2);
+                        backgroundDrawable.draw(canvas);
+                    }
                     if (clipChildren) {
                         AndroidUtilities.rectTmp2.left += bgPaddings.left;
                         AndroidUtilities.rectTmp2.top += bgPaddings.top;

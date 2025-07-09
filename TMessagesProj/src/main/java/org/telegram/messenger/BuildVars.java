@@ -20,13 +20,13 @@ import it.octogram.android.StoreUtils;
 
 public class BuildVars {
 
-    public static boolean DEBUG_VERSION = false; //BuildConfig.DEBUG_PRIVATE_VERSION;
-    public static boolean LOGS_ENABLED = false; //BuildConfig.DEBUG_PRIVATE_VERSION;
+    public static boolean DEBUG_VERSION = BuildConfig.DEBUG; //BuildConfig.DEBUG_PRIVATE_VERSION;
+    public static boolean LOGS_ENABLED = BuildConfig.DEBUG; //BuildConfig.DEBUG_PRIVATE_VERSION;
     public static boolean FIREBASE_CRASHLYTICS_ENABLED = false;
     public static boolean DEBUG_PRIVATE_VERSION = BuildConfig.DEBUG_PRIVATE_VERSION;
     public static boolean USE_CLOUD_STRINGS = true;
     public static boolean CHECK_UPDATES = false;
-    public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
+    public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= 29;
     public static String BUILD_VERSION_STRING = BuildConfig.BUILD_VERSION_STRING;
     public static int TELEGRAM_BUILD_VERSION = BuildConfig.TELEGRAM_BUILD_VERSION;
     public static String TELEGRAM_VERSION_STRING = BuildConfig.TELEGRAM_VERSION_STRING;
@@ -39,7 +39,7 @@ public class BuildVars {
     public static String HUAWEI_STORE_URL = "https://appgallery.huawei.com/app/C101184875";
     public static String GOOGLE_AUTH_CLIENT_ID = "760348033671-81kmi3pi84p11ub8hp9a1funsv0rn2p9.apps.googleusercontent.com";
 
-    public static String HUAWEI_APP_ID = "101184875";
+    public static String HUAWEI_APP_ID = "0";
 
     // You can use this flag to disable Google Play Billing (If you're making fork and want it to be in Google Play)
     public static boolean IS_BILLING_UNAVAILABLE = StoreUtils.isFromPlayStore();

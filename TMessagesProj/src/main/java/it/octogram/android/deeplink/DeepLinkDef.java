@@ -20,6 +20,7 @@ public class DeepLinkDef {
     public static final String GENERAL = "general";
     public static final String OCTOSETTINGS = "octosettings";
     public static final String CHATS = "chats";
+    public static final String CHATS_CONTETXMENU = "chats/cm";
     public static final String APPEARANCE = "appearance";
     public static final String APPEARANCE_DRAWER = "appearance/drawer";
     public static final String UPDATE = "update";

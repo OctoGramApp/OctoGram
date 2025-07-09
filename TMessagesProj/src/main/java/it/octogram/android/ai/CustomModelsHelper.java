@@ -46,6 +46,7 @@ public class CustomModelsHelper {
     public static final int DEFAULT_MESSAGES_TO_PASS = 15;
     public static final String VIRTUAL_CHAT_CONTEXT_MODEL_ID = "vcm";
     public static final String VIRTUAL_ASK_ON_MEDIA_MODEL_ID = "aom";
+    public static final String VIRTUAL_TRANSLATE_MODEL_ID = "tov";
 
     public static List<Pair<String, String>> getAvailableHashtags(int currentModelType) {
         ArrayList<Pair<String, String>> list = new ArrayList<>();

@@ -137,10 +137,7 @@
     <string name="AiFeatures_Features_ChatContext">Chat Context</string>
     <string name="AiFeatures_Features_ChatContext_Available">tap to see chat context</string>
     <string name="AiFeatures_Features_AskOnPhoto">Ask on Media</string>
-    <string name="AiFeatures_Features_TranslateViaGeneric">Translate…</string>
-    <string name="AiFeatures_Features_TranslateVia">Translate via %s</string>
-    <string name="AiFeatures_Features_TranslateAI">Translate using AI</string>
-    <string name="AiFeatures_Features_TranslateAI_Details">Translation by AI is capable of interpreting message context and dialects. You can configure it **here**.</string>
+    <string name="AiFeatures_Features_TranslateAI2">AI Translation</string>
     <string name="AiFeatures_Features_TranslateAI_MoreProviders">You can configure more AI providers **here**.</string>
     <string name="AiFeatures_Features_Empty">At least one feature must be enabled to use AI features.</string>
     <string name="AiFeatures_CustomModels">Custom Models</string>
@@ -489,8 +486,6 @@
     <string name="ShowSnowflakes">Show snowflakes</string>
     <string name="ForcePacmanAnimation">Force pacman animation</string>
     <string name="ForcePacmanAnimation_Desc">Force pacman animation when archiving a chat</string>
-    <string name="ContextElements">Context menu Elements</string>
-    <string name="ContextElements_Desc">Customize the elements in the context menu</string>
     <string name="AppearanceHiddenOptions">Some header-related options have been hidden because they are automatically handled by the centered title option.</string>
 
     <string name="AdminShortcuts">Admin Shortcuts</string>
@@ -502,6 +497,17 @@
     <string name="AdminShortcutsPositionChatInfo_Alert">With this position, it is recommended to show only the options really needed given the limited space available.</string>
     <string name="AdminShortcutsPositionChatThreeDots">Profile menu</string>
     <string name="AdminShortcutsPositionChatThreeDots_Desc">The options will be shown in the 3 dots menu at the top right of the profile.</string>
+
+    <string name="ContextMenu">Context Menu</string>
+    <string name="ContextMenuBriefingState">Briefing State</string>
+    <string name="ContextMenuBriefingState_Disabled">Disabled</string>
+    <string name="ContextMenuBriefingState_Subcategories">Using subcategories</string>
+    <string name="ContextMenuBriefingState_Shortcuts">Using shortcuts</string>
+    <string name="ContextMenuBriefingState_Shortcuts_Bottom">Move shortcuts to the bottom</string>
+    <string name="ContextMenuBriefingState_Shortcuts_Title">Show shortcuts titles</string>
+    <string name="ContextMenuElements">Elements</string>
+    <string name="ContextMenuElements_ReplyHidden">You can reply to messages by dragging them from right to left.</string>
+    <string name="ContextMenuElements_MoreHidden">Some OctoGram options may not be visible in this view.</string>
 
     <string name="AppTitleSettings">App</string>
     <string name="AppTitle_Desc">Customize the appearance of the app</string>
@@ -563,6 +569,7 @@
     <string name="AlternativeNavigation_Desc">Use a different navigation style when navigating through the app</string>
     <string name="SmootherNavigation">Smoothness</string>
     <string name="SmootherNavigation_Desc">Choose the fluidity of individual screens in the app</string>
+    <string name="BounceNavigation">Bounce level</string>
     <string name="AnimatedActionBar">Animated action bar</string>
     <string name="AnimatedActionBarn_Desc">Make the action bar transition animation more linear</string>
     <string name="UseQualityPreset">Use quality preset</string>
@@ -573,6 +580,7 @@
     <string name="UseQualityPreset_LowQuality_Desc">It automatically selects the lowest quality when you watch a video or story.</string>
     <string name="UseQualityPreset_Dynamic">Dynamic</string>
     <string name="UseQualityPreset_Dynamic_Desc">It will use the lower quality only if you are not using Wi-Fi.</string>
+    <string name="KeepOriginalFileName">Use original document name</string>
     <string name="UploadBoost">Upload boost</string>
     <string name="DownloadBoost">Download boost</string>
     <string name="DownloadBoostType">Download Boost type</string>
@@ -1020,7 +1028,7 @@
     <string name="ForwardedMessage">Forwarded Message</string>
 
     <!-- Squared Fab -->
-    <string name="SquaredFab">Squared FAB (Experimental)</string>
+    <string name="SquaredFab">Squared FAB</string>
 
     <!-- DC Style desc-->
     <string name="DCStyleNothing_Desc">The indicator will be hidden.</string>

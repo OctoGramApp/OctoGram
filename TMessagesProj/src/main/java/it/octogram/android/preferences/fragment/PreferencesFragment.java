@@ -732,6 +732,7 @@ public class PreferencesFragment extends BaseFragment {
         currentShownItems.clear();
 
         int focusElement = -1;
+        boolean gotFocus = false;
         BaseRow skipElement = null;
 
         //ArrayList<Integer> lockedExpandableRowsToIgnore = new ArrayList<>();
@@ -760,6 +761,10 @@ public class PreferencesFragment extends BaseFragment {
                         expandedRowIds.add(expandableRows.getId());
                     }
                 }
+            }
+
+            if (isFocused) {
+                gotFocus = true;
             }
 
             if (!canShowItem(category)) {
@@ -811,7 +816,7 @@ public class PreferencesFragment extends BaseFragment {
 
         listAdapter.setItems(oldItems, currentShownItems);
 
-        if (focusOnKey != null && !focusOnKey.isEmpty() && focusElement == -1) {
+        if (focusOnKey != null && !focusOnKey.isEmpty() && !gotFocus) {
             ImportSettingsScanHelper.SettingsScanCategory foundCategory = null;
             ImportSettingsScanHelper.SettingsScanOption foundOption = null;
             for (ImportSettingsScanHelper.SettingsScanCategory category : ImportSettingsScanHelper.INSTANCE.categories) {
@@ -835,7 +840,6 @@ public class PreferencesFragment extends BaseFragment {
                 builder.setMessage(formatString(R.string.OptionMoved_Text, foundOption.getName(), foundCategory.getName()));
                 builder.setPositiveButton(getString(R.string.Open), (dialog, which) -> {
                     dialog.dismiss();
-                    finishFragment();
                     LaunchActivity.instance.presentFragment(finalCategory.onGetFragment.onCall(finalFocusOnKey));
                 });
                 builder.setNegativeButton(getString(R.string.Close), null);

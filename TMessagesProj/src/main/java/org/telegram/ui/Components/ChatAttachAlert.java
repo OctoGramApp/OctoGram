@@ -151,6 +151,7 @@ import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.ai.CustomModelsMenuWrapper;
 import it.octogram.android.ai.MainAiHelper;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.ui.DestinationLanguageSettings;
 import it.octogram.android.translator.SingleTranslationManager;
 import it.octogram.android.translator.TranslationsWrapper;
@@ -2520,6 +2521,30 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     }
                 } else if (num == 11) {
                     openQuickRepliesLayout();
+                } else if (num == itemCameraId) {
+                    final String TAG = "ChatAttachAlert";
+                    OctoLogging.d(TAG, "Camera item selected");
+
+                    boolean isRestrictedButBoostAllowed = (!photosEnabled && !videosEnabled && checkCanRemoveRestrictionsByBoosts());
+                    boolean isSystemCameraPreferred = OctoConfig.INSTANCE.cameraType.getValue() == CameraType.SYSTEM_CAMERA.getValue();
+
+                    if (isRestrictedButBoostAllowed || isSystemCameraPreferred) {
+                        OctoLogging.d(TAG, "Triggering camera button long press: " +
+                                (isRestrictedButBoostAllowed ? "boost override active" : "") +
+                                (isSystemCameraPreferred ? (isRestrictedButBoostAllowed ? ", " : "") + "system camera selected" : ""));
+                        onCameraButtonLongPress();
+                        return;
+                    }
+
+                    if (currentAttachLayout != photoLayout) {
+                        OctoLogging.d(TAG, "Switching layout to photoLayout");
+                        showLayout(photoLayout);
+                    } else {
+                        OctoLogging.d(TAG, "photoLayout already active; skipping layout switch");
+                    }
+
+                    OctoLogging.d(TAG, "Delegating to handleCameraAction()");
+                    handleCameraAction();
                 } else if (num == 12) {
                     if (!todoEnabled && checkCanRemoveRestrictionsByBoosts()) {
                         return;
@@ -2538,14 +2563,8 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     }
                 } else if (view.getTag() instanceof Integer) {
                     delegate.didPressedButton((Integer) view.getTag(), true, true, 0, 0, isCaptionAbove(), false, 0);
-                } else if (num == itemCameraId) {
-                    if ((!photosEnabled && !videosEnabled && checkCanRemoveRestrictionsByBoosts()) || OctoConfig.INSTANCE.cameraType.getValue() == CameraType.SYSTEM_CAMERA.getValue()) {
-                        onCameraButtonLongPress();
-                        return;
-                    }
-                    if (currentAttachLayout != photoLayout) showLayout(photoLayout);
-                    handleCameraAction();
                 }
+
                 int left = view.getLeft();
                 int right = view.getRight();
                 int extra = dp(10);
@@ -4097,33 +4116,37 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 containerView.invalidate();
             }
         } else {
-            int width = Math.max(nextAttachLayout.getWidth(), currentAttachLayout.getWidth());
+            /*int width = Math.max(nextAttachLayout.getWidth(), currentAttachLayout.getWidth());
             if (nextAttachLayout instanceof ChatAttachAlertPhotoLayoutPreview) {
                 nextAttachLayout.setTranslationX(width);
-                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) currentAttachLayout;
-                    if (photoLayout != null) {
-                        if (photoLayout.cameraView != null) {
-                            photoLayout.cameraView.setVisibility(View.INVISIBLE);
-                        }
-                        if (photoLayout.cameraIcon != null) {
-                            photoLayout.cameraIcon.setVisibility(View.INVISIBLE);
-                        }
-                        if (photoLayout.cameraCell != null) {
-                            photoLayout.cameraCell.setVisibility(View.VISIBLE);
-                        }
+                    if (photoLayout.cameraView != null) {
+                        photoLayout.cameraView.setVisibility(View.INVISIBLE);
+                        photoLayout.cameraIcon.setVisibility(View.INVISIBLE);
+                        photoLayout.cameraCell.setVisibility(View.VISIBLE);
                     }
                 }
             } else {
                 currentAttachLayout.setTranslationX(-width);
-                if (nextAttachLayout == photoLayout && OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                if (nextAttachLayout == photoLayout) {
                     ChatAttachAlertPhotoLayout photoLayout = (ChatAttachAlertPhotoLayout) nextAttachLayout;
                     if (photoLayout.cameraView != null) {
                         photoLayout.cameraView.setVisibility(View.VISIBLE);
-                        if (photoLayout.cameraIcon != null) {
-                            photoLayout.cameraIcon.setVisibility(View.VISIBLE);
-                        }
+                        photoLayout.cameraIcon.setVisibility(View.VISIBLE);
                     }
+                }
+            }*/
+            int width = Math.max(nextAttachLayout.getWidth(), currentAttachLayout.getWidth());
+            if (nextAttachLayout instanceof ChatAttachAlertPhotoLayoutPreview) {
+                nextAttachLayout.setTranslationX(width);
+                if (currentAttachLayout instanceof ChatAttachAlertPhotoLayout currentLayout && OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                    updateCameraUI(currentLayout, false);
+                }
+            } else {
+                currentAttachLayout.setTranslationX(-width);
+                if (nextAttachLayout == photoLayout && nextAttachLayout instanceof ChatAttachAlertPhotoLayout nextLayout && OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
+                    updateCameraUI(nextLayout, true);
                 }
             }
             nextAttachLayout.setAlpha(1);
@@ -4177,6 +4200,16 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             }
         }
     }
+
+    private void updateCameraUI(ChatAttachAlertPhotoLayout layout, boolean showCamera) {
+        if (layout.cameraView != null)
+            layout.cameraView.setVisibility(showCamera ? View.VISIBLE : View.INVISIBLE);
+        if (layout.cameraIcon != null)
+            layout.cameraIcon.setVisibility(showCamera ? View.VISIBLE : View.INVISIBLE);
+        if (layout.cameraCell != null)
+            layout.cameraCell.setVisibility(showCamera ? View.VISIBLE : View.GONE);
+    }
+
     public AttachAlertLayout getCurrentAttachLayout() {
         return currentAttachLayout;
     }
@@ -5687,9 +5720,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             attachBotsEndRow = -1;
             if (!(baseFragment instanceof ChatActivity)) {
                 galleryButton = buttonsCount++;
-                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
-                    cameraButton = buttonsCount++;
-                }
+                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) cameraButton = buttonsCount++;
                 documentButton = buttonsCount++;
                 if (allowEnterCaption) {
                     musicButton = buttonsCount++;
@@ -5703,9 +5734,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     if (editType == EDITMEDIA_TYPE_PHOTOVIDEO) {
                         galleryButton = buttonsCount++;
                     }
-                    if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
-                        cameraButton = buttonsCount++;
-                    }
+                    if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) cameraButton = buttonsCount++;
                     if (editType == EDITMEDIA_TYPE_FILE) {
                         documentButton = buttonsCount++;
                     }
@@ -5718,9 +5747,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 TLRPC.Chat chat = baseFragment instanceof ChatActivity ? ((ChatActivity) baseFragment).getCurrentChat() : null;
                 final boolean paidUser = user != null && ((ChatActivity) baseFragment).getMessagesController().getSendPaidMessagesStars(user.id) > 0;
                 galleryButton = buttonsCount++;
-                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) {
-                    cameraButton = buttonsCount++;
-                }
+                if (OctoConfig.INSTANCE.cameraPreview.getValue() == CameraPreview.BOTTOM_BAR) cameraButton = buttonsCount++;
                 if ((photosEnabled || videosEnabled) && !paidUser && (chat == null || !ChatObject.isMonoForum(chat))) {
                     if (baseFragment instanceof ChatActivity && !((ChatActivity) baseFragment).isInScheduleMode() && !((ChatActivity) baseFragment).isSecretChat() && ((ChatActivity) baseFragment).getChatMode() != ChatActivity.MODE_QUICK_REPLIES) {
                         ChatActivity chatActivity = (ChatActivity) baseFragment;
@@ -6203,13 +6230,30 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
     }
 
     private void handleCameraAction() {
+        final String TAG = "ChatAttachAlert";
+        OctoLogging.d(TAG, "handleCameraAction() called");
+
         if (!photosEnabled && !videosEnabled) {
-            if (checkCanRemoveRestrictionsByBoosts()) return;
-            showLayout(restrictedLayout = new ChatAttachRestrictedLayout(1, this, getContext(), resourcesProvider));
+            OctoLogging.d(TAG, "Camera action blocked: both photosEnabled and videosEnabled are false");
+
+            if (checkCanRemoveRestrictionsByBoosts()) {
+                OctoLogging.d(TAG, "Restrictions can be removed by boosts. Exiting handleCameraAction.");
+                return;
+            }
+
+            OctoLogging.d(TAG, "Showing restricted layout for camera action");
+            restrictedLayout = new ChatAttachRestrictedLayout(1, this, getContext(), resourcesProvider);
+            showLayout(restrictedLayout);
             return;
         }
+
+        OctoLogging.d(TAG, "Camera action allowed. Proceeding to open camera");
+
         photoLayout.checkCamera(false);
+        OctoLogging.d(TAG, "photoLayout.checkCamera(false) called");
+
         photoLayout.openCamera(true);
+        OctoLogging.d(TAG, "photoLayout.openCamera(true) called");
     }
 
     public void onCameraButtonLongPress() {
