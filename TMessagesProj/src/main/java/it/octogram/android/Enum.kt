@@ -242,7 +242,7 @@ enum class TranslatorProvider(val value: Int) {
     DEEPL(3),
     BAIDU(4),
     LINGO(5),
-    EMOJIS(6)
+    DEVICE_TRANSLATION(7)
 }
 
 enum class TranslatorFormality(val value: Int) {

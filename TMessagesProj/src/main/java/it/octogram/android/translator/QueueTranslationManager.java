@@ -53,6 +53,11 @@ public class QueueTranslationManager {
             int finalI = i;
             TranslationsWrapper.translate(UserConfig.selectedAccount, peer, singleMessageId, translations.language, messageContent.text, messageContent.entities, new SingleTranslationManager.OnTranslationResultCallback() {
                 @Override
+                public boolean isFromQueue() {
+                    return true;
+                }
+
+                @Override
                 public void onGotReqId(int reqId) {
                     // ignored: request can't be done using telegram so reqid doesn't exist
                 }

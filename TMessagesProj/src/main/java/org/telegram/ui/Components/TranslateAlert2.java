@@ -336,6 +336,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             return;
         }
 
+        loadingTextView.setText(Emoji.replaceEmoji(reqText == null ? "" : reqText.toString(), loadingTextView.getPaint().getFontMetricsInt(), true));
         updateCopyEnabled(false);
         TranslationsWrapper.translate(currentAccount, reqPeer, reqMessageId, toLanguage, reqText, reqMessageEntities, new SingleTranslationManager.OnTranslationResultCallback() {
             @Override
@@ -346,6 +347,22 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             @Override
             public void onResponseReceived() {
                 reqId = null;
+            }
+
+            @Override
+            public void onDownloadingModel(ArrayList<String> languages) {
+                ArrayList<String> toDownloadNames = new ArrayList<>();
+                for (String lang : languages) {
+                    toDownloadNames.add(languageName(lang));
+                }
+
+                loadingTextView.setText(LocaleController.formatPluralString(
+                    "DownloadingTranslationModelsText",
+                    toDownloadNames.size(),
+                    toDownloadNames.size() == 2 ?
+                        LocaleController.formatString(R.string.DownloadingTranslationModelsTextAnd, toDownloadNames.get(0), toDownloadNames.get(1)) :
+                        TextUtils.join(", ", toDownloadNames)
+                ));
             }
 
             @Override

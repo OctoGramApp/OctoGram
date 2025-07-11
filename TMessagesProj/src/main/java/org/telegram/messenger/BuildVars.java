@@ -21,7 +21,7 @@ import it.octogram.android.StoreUtils;
 public class BuildVars {
 
     public static boolean DEBUG_VERSION = BuildConfig.DEBUG; //BuildConfig.DEBUG_PRIVATE_VERSION;
-    public static boolean LOGS_ENABLED = BuildConfig.DEBUG; //BuildConfig.DEBUG_PRIVATE_VERSION;
+    public static boolean LOGS_ENABLED = false; //BuildConfig.DEBUG_PRIVATE_VERSION;
     public static boolean FIREBASE_CRASHLYTICS_ENABLED = false;
     public static boolean DEBUG_PRIVATE_VERSION = BuildConfig.DEBUG_PRIVATE_VERSION;
     public static boolean USE_CLOUD_STRINGS = true;

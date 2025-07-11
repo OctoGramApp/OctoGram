@@ -345,6 +345,13 @@ public class ActionBarMenuSubItem extends FrameLayout {
             layoutParams.bottomMargin = visible ? dp(10) : 0;
             textView.setLayoutParams(layoutParams);
         }
+        if (visible) {
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) textView.getLayoutParams();
+            if (layoutParams.bottomMargin == 0) {
+                layoutParams.bottomMargin = dp(10);
+                textView.setLayoutParams(layoutParams);
+            }
+        }
         subtextView.setText(text);
     }
 

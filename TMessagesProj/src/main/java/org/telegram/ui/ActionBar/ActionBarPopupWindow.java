@@ -97,7 +97,7 @@ public class ActionBarPopupWindow extends PopupWindow {
     }
 
     public static class ActionBarPopupWindowLayout extends FrameLayout {
-        private static final boolean USE_NEW_BACKGROUND = true;
+        private static final boolean USE_NEW_BACKGROUND = false;
         private static final Paint newBackgroundPaint = new Paint();
 
         public final static int FLAG_USE_SWIPEBACK = 1;

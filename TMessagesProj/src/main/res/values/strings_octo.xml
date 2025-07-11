@@ -74,6 +74,11 @@
     <string name="TranslatorUnsupportedLanguageChange">Edit provider</string>
     <string name="TranslatorUnsupportedLanguageChangeDone">Provider has been updated successfully.</string>
 
+    <string name="DownloadingTranslationModelsTextAnd">%1$s and %2$s</string>
+    <string name="DownloadingTranslationModelsText_one">%2$s language model is needed for local translation</string>
+    <string name="DownloadingTranslationModelsText_other">%2$s language models are needed for local translation</string>
+    <string name="DownloadingTranslationModelsTitle">Downloading Models...</string>
+
     <!--AI Features-->
     <string name="AiFeatures">Integrate AI features</string>
     <string name="AiFeatures_Brief">AI Features</string>

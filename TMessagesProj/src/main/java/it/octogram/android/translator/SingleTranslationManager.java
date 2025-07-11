@@ -168,9 +168,19 @@ public class SingleTranslationManager {
             return;
         }
 
+        String method = MessagesController.getInstance(currentAccount).translationsManualEnabled;
+
+        if (translationProvider == TranslatorProvider.DEFAULT.getValue()) {
+            if (method.equalsIgnoreCase("alternative")) {
+                translationProvider = TranslatorProvider.GOOGLE.getValue();
+            } else if (method.equalsIgnoreCase("system")) {
+                translationProvider = TranslatorProvider.DEVICE_TRANSLATION.getValue();
+            }
+        }
+
         if (translationProvider == TranslatorProvider.DEFAULT.getValue()) {
             AndroidUtilities.runOnUIThread(() -> translateWithDefault(callback));
-        } else if (translationProvider == TranslatorProvider.GOOGLE.getValue()) {
+        } else if (translationProvider == TranslatorProvider.GOOGLE.getValue() || (translationProvider == TranslatorProvider.DEVICE_TRANSLATION.getValue() && callback.isFromQueue())) {
             AndroidUtilities.runOnUIThread(() -> GoogleTranslator.executeTranslation(text.toString(), entities, toLanguage, callback));
         } else if (translationProvider == TranslatorProvider.YANDEX.getValue()) {
             AndroidUtilities.runOnUIThread(() -> YandexTranslator.executeTranslation(text.toString(), entities, toLanguage, callback));
@@ -180,8 +190,8 @@ public class SingleTranslationManager {
             AndroidUtilities.runOnUIThread(() -> BaiduTranslator.executeTranslation(text.toString(), entities, toLanguage, callback));
         } else if (translationProvider == TranslatorProvider.LINGO.getValue()) {
             AndroidUtilities.runOnUIThread(() -> LingoTranslator.executeTranslation(text.toString(), toLanguage, callback));
-        } else if (translationProvider == TranslatorProvider.EMOJIS.getValue()) {
-            AndroidUtilities.runOnUIThread(() -> EmojisTranslator.executeTranslation(text.toString(), callback));
+        } else if (translationProvider == TranslatorProvider.DEVICE_TRANSLATION.getValue()) {
+            AndroidUtilities.runOnUIThread(() -> OnDeviceTranslator.executeTranslation(selectedMessage, toLanguage, text.toString(), callback));
         } else {
             callback.onResponseReceived();
             callback.onError();
@@ -238,7 +248,14 @@ public class SingleTranslationManager {
     }
 
     public interface OnTranslationResultCallback {
+        default boolean isFromQueue() {
+            return false;
+        }
         void onGotReqId(int reqId);
+
+        default void onDownloadingModel(ArrayList<String> languages) {
+
+        }
 
         void onResponseReceived();
 

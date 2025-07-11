@@ -53,6 +53,7 @@ import it.octogram.android.TranslatorFormality;
 import it.octogram.android.TranslatorMode;
 import it.octogram.android.TranslatorProvider;
 import it.octogram.android.deeplink.DeepLinkDef;
+import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.preferences.OctoPreferences;
 import it.octogram.android.preferences.PreferencesEntry;
 import it.octogram.android.preferences.fragment.PreferencesFragment;
@@ -124,8 +125,6 @@ public class OctoTranslatorUI implements PreferencesEntry {
 
                             return true;
                         })
-                        .premium(OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium())
-                        .autoShowPremiumAlert(false)
                         .preferenceValue(translateEntireChat)
                         .title(getString(R.string.ShowTranslateChatButton))
                         .build()
@@ -150,6 +149,17 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             .onClick(() -> fragment.presentFragment(new DestinationLanguageSettings()))
                             .propertySelectionTag("destinationLanguage")
                             .value(getTranslateDestinationStatus())
+                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
+                                @Override
+                                public String getTitle() {
+                                    return getString(R.string.TranslatorDestination);
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return getTranslateDestinationStatus();
+                                }
+                            })
                             .showIf(canSelectProvider)
                             .title(getString(R.string.TranslatorDestination))
                             .build()
@@ -158,34 +168,68 @@ public class OctoTranslatorUI implements PreferencesEntry {
                             .onClick(() -> fragment.presentFragment(new RestrictedLanguagesSelectActivity()))
                             .propertySelectionTag("doNotTranslate")
                             .value(getDoNotTranslateStatus())
+                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
+                                @Override
+                                public String getTitle() {
+                                    return getString(R.string.DoNotTranslate);
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return getDoNotTranslateStatus();
+                                }
+                            })
                             .showIf(canSelectDoNotTranslate)
                             .title(getString(R.string.DoNotTranslate))
                             .build()
                     );
-                    category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.translatorProvider)
-                            .options(getProvidersPopupOptions())
-                            .onSelected(() -> {
-                                boolean needEntireChatReload = false;
-                                if (!UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
-                                    if (OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && translateEntireChat.getValue()) {
-                                        MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().setChatTranslateEnabled(false);
-                                        NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.updateSearchSettings);
-                                    }
-                                    needEntireChatReload = true;
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .onClick(() -> {
+                                OctoTranslatorProviderUI ui = new OctoTranslatorProviderUI();
+                                ui.setOnChangedRunnable(fragment::reloadUIAfterValueUpdate);
+                                fragment.presentFragment(new PreferencesFragment(ui));
+                            })
+                            .propertySelectionTag("translatorProvider")
+                            .value(TranslationsWrapper.getProviderName())
+                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
+                                @Override
+                                public String getTitle() {
+                                    return getString(R.string.TranslatorProvider);
                                 }
 
-                                updateItemsVisibility();
-                                checkProviderAvailability(context);
-
-                                if (needEntireChatReload) {
-                                    fragment.reloadUIAfterValueUpdate();
+                                @Override
+                                public String getValue() {
+                                    return TranslationsWrapper.getProviderName();
                                 }
                             })
                             .showIf(canSelectProvider)
                             .title(getString(R.string.TranslatorProvider))
                             .build()
                     );
+//                    category.row(new ListRow.ListRowBuilder()
+//                            .currentValue(OctoConfig.INSTANCE.translatorProvider)
+//                            .options(getProvidersPopupOptions())
+//                            .onSelected(() -> {
+//                                boolean needEntireChatReload = false;
+//                                if (!UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+//                                    if (OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEFAULT.getValue() && translateEntireChat.getValue()) {
+//                                        MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().setChatTranslateEnabled(false);
+//                                        NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.updateSearchSettings);
+//                                    }
+//                                    needEntireChatReload = true;
+//                                }
+//
+//                                updateItemsVisibility();
+//                                checkProviderAvailability(context);
+//
+//                                if (needEntireChatReload) {
+//                                    fragment.reloadUIAfterValueUpdate();
+//                                }
+//                            })
+//                            .showIf(canSelectProvider)
+//                            .title(getString(R.string.TranslatorProvider))
+//                            .build()
+//                    );
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.translatorFormality)
                             .options(List.of(
@@ -267,51 +311,6 @@ public class OctoTranslatorUI implements PreferencesEntry {
         return layout;
     }
 
-    public static List<PopupChoiceDialogOption> getProvidersPopupOptions() {
-        List<PopupChoiceDialogOption> list = List.of(
-                updateProviderAvailability(new PopupChoiceDialogOption()
-                        .setId(TranslatorProvider.DEFAULT.getValue())
-                        .setItemTitle("Telegram")
-                        .setItemDescription(getString(R.string.TranslatorProviderSuggestedPremium))),
-                updateProviderAvailability(new PopupChoiceDialogOption()
-                        .setId(TranslatorProvider.GOOGLE.getValue())
-                        .setItemTitle("Google")
-                        .setItemDescription(getString(R.string.TranslatorProviderSuggestedGeneral))),
-                updateProviderAvailability(new PopupChoiceDialogOption()
-                        .setId(TranslatorProvider.DEEPL.getValue())
-                        .setItemTitle("DeepL")
-                        .setItemDescription(getString(R.string.TranslatorProviderSuggestedAccurate))),
-                updateProviderAvailability(new PopupChoiceDialogOption().setId(TranslatorProvider.YANDEX.getValue()).setItemTitle("Yandex")),
-                updateProviderAvailability(new PopupChoiceDialogOption()
-                        .setId(TranslatorProvider.BAIDU.getValue())
-                        .setItemTitle("Baidu")
-                        .setItemDescription(getString(R.string.TranslatorProviderSuggestedChinese))),
-                updateProviderAvailability(new PopupChoiceDialogOption()
-                        .setId(TranslatorProvider.LINGO.getValue())
-                        .setItemTitle("Lingo")
-                        .setItemDescription(getString(R.string.TranslatorProviderSuggestedLingo)))
-        );
-
-        if (BuildVars.DEBUG_PRIVATE_VERSION || BuildVars.DEBUG_VERSION || OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.EMOJIS.getValue()) {
-            ArrayList<PopupChoiceDialogOption> data = new ArrayList<>(list);
-            data.add(new PopupChoiceDialogOption()
-                    .setId(TranslatorProvider.EMOJIS.getValue())
-                    .setItemTitle("Emojis")
-                    .setItemDescription("For the meme"));
-            return data;
-        }
-
-        return list;
-    }
-
-    private static PopupChoiceDialogOption updateProviderAvailability(PopupChoiceDialogOption provider) {
-        if (TranslationsWrapper.isLanguageUnavailable(TranslateAlert2.getToLanguage(), provider.id)) {
-            provider.setClickable(false);
-            provider.setItemDescription(getString(R.string.TranslatorProviderUnsuggested));
-        }
-
-        return provider;
-    }
 
     private void updateItemsVisibility(ConfigProperty<Boolean> except) {
         TranslateController translateController = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController();
@@ -321,26 +320,35 @@ public class OctoTranslatorUI implements PreferencesEntry {
 
         if (except != showButtonBool) {
             showButtonBool.updateValue(isSingleMessageTranslationEnabled);
+            OctoLogging.d("updateItemsVisibility", "showButtonBool -> " + isSingleMessageTranslationEnabled);
         }
 
         if (except != translateEntireChat) {
             translateEntireChat.updateValue(isTranslateEntireChatEnabled);
+            OctoLogging.d("updateItemsVisibility", "translateEntireChat -> " + isTranslateEntireChatEnabled);
         }
 
         if (except != canSelectDoNotTranslate) {
             canSelectDoNotTranslate.updateValue(canShowOtherOptions);
+            OctoLogging.d("updateItemsVisibility", "canSelectDoNotTranslate -> " + canShowOtherOptions);
         }
 
         if (except != canSelectProvider) {
-            canSelectProvider.updateValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.EXTERNAL.getValue());
+            boolean value = canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.EXTERNAL.getValue();
+            canSelectProvider.updateValue(value);
+            OctoLogging.d("updateItemsVisibility", "canSelectProvider -> " + value);
         }
 
         if (except != canSelectFormality) {
-            canSelectFormality.updateValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEEPL.getValue());
+            boolean value = canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() == TranslatorProvider.DEEPL.getValue();
+            canSelectFormality.updateValue(value);
+            OctoLogging.d("updateItemsVisibility", "canSelectFormality -> " + value);
         }
 
         if (except != canSelectKeepMarkdown) {
-            canSelectKeepMarkdown.updateValue(canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.LINGO.getValue() && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue());
+            boolean value = canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.LINGO.getValue() && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue();
+            canSelectKeepMarkdown.updateValue(value);
+            OctoLogging.d("updateItemsVisibility", "canSelectKeepMarkdown -> " + value);
         }
     }
 

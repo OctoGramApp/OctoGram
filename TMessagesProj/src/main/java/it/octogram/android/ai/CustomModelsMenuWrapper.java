@@ -76,6 +76,8 @@ public class CustomModelsMenuWrapper {
         data.applyColors();
 
         if ((availableModels.size() + (data.canAskOnMedia() ? 1 : 0) + (data.canTranslate() ? 1 : 0)) == 1) {
+            data.originalSubItem.setRightIcon(R.drawable.msg_arrowright);
+            data.originalSubItem.setSubtext(getString(R.string.AiFeatures_Brief));
             if (!availableModels.isEmpty()) {
                 String modelID = availableModels.get(0);
                 CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(modelID);
@@ -101,15 +103,13 @@ public class CustomModelsMenuWrapper {
                 data.originalSubItem.setText(getString(R.string.AiFeatures_Features_TranslateAI2));
                 data.originalSubItem.setOnClickListener(view -> handleAiTranslation(data));
             }
-            data.originalSubItem.setSubtext(getString(R.string.AiFeatures_Brief));
-            data.originalSubItem.setRightIcon(0);
+            data.originalSubItem.invalidate();
             return;
         }
 
         data.originalSubItem.setRightIcon(R.drawable.msg_arrowright);
         data.originalSubItem.setIcon(R.drawable.aifeatures_solar);
         data.originalSubItem.setText(getString(R.string.AiFeatures_Brief));
-        data.originalSubItem.setSubtext(null);
 
         CustomModelSwipeActivity viewToSwipeBack = new CustomModelSwipeActivity(data, availableModels);
         if (data.useSwipeBack) {

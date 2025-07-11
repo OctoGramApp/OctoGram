@@ -87,6 +87,7 @@ dependencies {
 
     // Generative Ai
     implementation libs.generativeai
+    implementation libs.translate
 
     compileOnly libs.findbugs.jsr305
     compileOnly libs.checker.qual

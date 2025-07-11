@@ -1,7 +1,4 @@
 /*
- * This file is AUTO-GENERATED — DO NOT EDIT MANUALLY.
- * To update it, modify the Go template source and regenerate this file.
- *
  * This is the source code of OctoGram for Android
  * It is licensed under GNU GPL v2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).

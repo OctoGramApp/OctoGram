@@ -1393,11 +1393,11 @@ public class LocaleController {
             MediaDataController.getInstance(currentAccount).loadAttachMenuBots(false, true);
         }
 
-        if (TranslateAlert2.isDestinationFollowApp() && TranslationsWrapper.isLanguageUnavailable(currentLocale.getLanguage())) {
+        /*if (TranslateAlert2.isDestinationFollowApp() && TranslationsWrapper.isLanguageUnavailable(TranslateAlert2.getToLanguage())) {
             AndroidUtilities.runOnUIThread(() -> {
                 TranslationsWrapper.suggestProviderUpdate(LaunchActivity.instance, LaunchActivity.getSafeLastFragment(), null);
             });
-        }
+        }*/
 
         return requestId;
     }

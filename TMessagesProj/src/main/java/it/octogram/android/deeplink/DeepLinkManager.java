@@ -151,7 +151,7 @@ public class DeepLinkManager extends LaunchActivity {
                 fragment.presentFragment(new PreferencesFragment(new OctoChatsSettingsUI(), parameter));
                 return true;
             }
-            case DeepLinkDef.CHATS_CONTETXMENU -> {
+            case DeepLinkDef.CHATS_CONTEXTMENU -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoContextMenuSettingsUI(), parameter));
                 return true;
             }
@@ -422,7 +422,7 @@ public class DeepLinkManager extends LaunchActivity {
             case "octosettings" -> DeepLinkDef.OCTOSETTINGS;
             case "chats" -> {
                 if (uri.getPath() != null) {
-                    if (uri.getPath().equalsIgnoreCase("/cm")) yield DeepLinkDef.CHATS_CONTETXMENU;
+                    if (uri.getPath().equalsIgnoreCase("/cm")) yield DeepLinkDef.CHATS_CONTEXTMENU;
                 }
                 yield DeepLinkDef.CHATS;
             }

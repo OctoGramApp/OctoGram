@@ -45164,6 +45164,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     options.add(OPTION_TRANSLATE);
                     icons.add(R.drawable.msg_translate);
                 }
+                if (selectedObject != null && selectedObject.contentType == 0 && selectedObject.translated && (!TextUtils.isEmpty(selectedObject.getMessageTextToTranslate(groupedMessages, null)) && !selectedObject.isAnimatedEmoji() && !selectedObject.isDice())) {
+                    items.add(LocaleController.getString("HideTranslation", R.string.HideTranslation));
+                    options.add(OPTION_UNTRANSLATE);
+                    icons.add(R.drawable.msg_cancel);
+                }
                 if (message.canEditMessage(currentChat) && message.type != MessageObject.TYPE_POLL) {
                     items.add(LocaleController.getString(R.string.Edit));
                     options.add(OPTION_EDIT);
@@ -45503,6 +45508,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     items.add(LocaleController.getString(R.string.TranslateMessage));
                     options.add(OPTION_TRANSLATE);
                     icons.add(R.drawable.msg_translate);
+                }
+                if (selectedObject != null && selectedObject.contentType == 0 && selectedObject.translated && (!TextUtils.isEmpty(selectedObject.getMessageTextToTranslate(selectedObjectGroup, null)) && !selectedObject.isAnimatedEmoji() && !selectedObject.isDice())) {
+                    items.add(LocaleController.getString("HideTranslation", R.string.HideTranslation));
+                    options.add(OPTION_UNTRANSLATE);
+                    icons.add(R.drawable.msg_cancel);
                 }
                 if (allowEdit) {
                     items.add(LocaleController.getString(R.string.Edit));
