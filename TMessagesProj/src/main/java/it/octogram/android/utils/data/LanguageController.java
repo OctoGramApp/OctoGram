@@ -29,7 +29,7 @@ import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.StandardHTTPRequest;
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 
 public class LanguageController {

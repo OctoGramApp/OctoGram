@@ -51,6 +51,11 @@
     <string name="TranslatorModeExternal">External app</string>
     <string name="TranslatorEntireUnavailable">This feature is not available with the selected provider because you do not have a Telegram Premium subscription.</string>
     <string name="TranslatorProvider">Provider</string>
+    <string name="TranslatorProviderTelegramOptions">Telegram Options</string>
+    <string name="TranslatorProviderTelegramDefault">Default</string>
+    <string name="TranslatorProviderTelegramOptions_Desc">If enabled, the app follows Telegram\'s default translation. Telegram developers can choose to use ChatGPT, Google Translate as appropriate and this choice is in no way dependent on OctoGram. It\'s the default option and is recommended for most users.</string>
+    <string name="TranslatorProviderOctoGramOptions">OctoGram Options</string>
+    <string name="TranslatorProviderCloudOptions">Cloud Options</string>
     <string name="TranslatorProviderSuggestedPremium">Recommended if the account has a Telegram Premium subscription.</string>
     <string name="TranslatorProviderSuggestedGeneral">It\'s the fastest provider but may resort to translation errors.</string>
     <string name="TranslatorProviderSuggestedAccurate">It\'s very accurate but not recommended because of high limits.</string>
@@ -59,6 +64,24 @@
     <string name="TranslatorProviderUnsuggested">It doesn\'t support the language currently set.</string>
     <string name="TranslatorProviderUnsupported">The currently set language (%s) is not supported by the selected provider.</string>
     <string name="TranslatorProviderUnsupportedDialogs">The translation target language of some chats has been changed because the previously set language is not supported by the selected provider.</string>
+
+    <string name="TranslatorArticlePartiallyUntranslated">%d% of page hasn\'t been translated due to an internal error. Please try again later.</string>
+
+    <string name="TranslatorProvider_GoogleCloud_1">Open Google Cloud Console</string>
+    <string name="TranslatorProvider_GoogleCloud_1_Desc">Access the Google Cloud Console through this link: <![CDATA[<a href="https://console.cloud.google.com/apis/library/translate.googleapis.com">console.cloud.google.com</a>]]>.</string>
+    <string name="TranslatorProvider_GoogleCloud_2">Enable service</string>
+    <string name="TranslatorProvider_GoogleCloud_2_Desc">If you do not have it, click on the "Enable" button.</string>
+    <string name="TranslatorProvider_GoogleCloud_3">Copy the key</string>
+    <string name="TranslatorProvider_GoogleCloud_3_Desc">Go to "Credentials" page, copy the API Key you generated and go to the next step.</string>
+    <string name="TranslatorProvider_NeededExtension">Extension needed</string>
+    <string name="TranslatorProvider_NeededExtension_Desc">To enable local translation on the device, an extension must be installed. Follow the next steps to proceed.</string>
+    <string name="TranslatorProvider_NeededExtension_Button">Open channel</string>
+    <string name="TranslatorProvider_NeededExtension_1">Open our channel</string>
+    <string name="TranslatorProvider_NeededExtension_1_Desc">Open our channel from the link below and download the highlighted APK.</string>
+    <string name="TranslatorProvider_NeededExtension_2">Install the APK</string>
+    <string name="TranslatorProvider_NeededExtension_2_Desc">Install the APK as if it were a regular app. When finished, close the installer.</string>
+    <string name="TranslatorProvider_NeededExtension_3">Retry</string>
+    <string name="TranslatorProvider_NeededExtension_3_Desc">Enable device translation to verify that everything was successful.</string>
     <string name="TranslatorDestination">Translate to</string>
     <string name="TranslatorDestinationFollow">Follow app</string>
     <string name="TranslatorDestinationFollowDestination">Follow default destination</string>
@@ -70,6 +93,9 @@
     <string name="TranslateEntireChatDescription">You can choose to show the button to translate an entire chat. </string>
     <string name="TranslatorInMessageBadge">translated</string>
     <string name="TranslatorFailed">Translation failed.</string>
+    <string name="TranslatorExtensionFailed">An error occurred with the extension. Please, try again later.</string>
+    <string name="TranslatorExtensionSpaceFree">Space optimization</string>
+    <string name="TranslatorExtensionSpaceFree_Desc">If you want to free up additional space and no longer want to use the translation on the device, you can uninstall the extension from the settings.</string>
     <string name="TranslatorUnsupportedLanguage">Selected language isn\'t supported by the selected provider.</string>
     <string name="TranslatorUnsupportedLanguageChange">Edit provider</string>
     <string name="TranslatorUnsupportedLanguageChangeDone">Provider has been updated successfully.</string>
@@ -77,7 +103,10 @@
     <string name="DownloadingTranslationModelsTextAnd">%1$s and %2$s</string>
     <string name="DownloadingTranslationModelsText_one">%2$s language model is needed for local translation</string>
     <string name="DownloadingTranslationModelsText_other">%2$s language models are needed for local translation</string>
-    <string name="DownloadingTranslationModelsTitle">Downloading Models...</string>
+    <string name="DownloadingModelsTranslator">Downloading Models…</string>
+    <string name="DownloadingModelsTranslator_Desc">Downloading of some necessary language models is in progress. Please wait…</string>
+    <string name="TranslatingArticleTranslator">Translating Article…</string>
+    <string name="TranslatingArticleTranslator_Desc">The translation of the article is in progress and may take a few seconds...</string>
 
     <!--AI Features-->
     <string name="AiFeatures">Integrate AI features</string>
@@ -454,6 +483,8 @@
     <string name="NumberRounding">Number rounding</string>
     <string name="PencilIconForEdited">Pencil icon for edited messages</string>
     <string name="PencilIconForEdited_Desc">This will replace the text "Edited" with a pencil icon</string>
+    <string name="ShowShareButtonMessages">Show share button</string>
+    <string name="ShowShareButtonMessages_Desc">Choose whether to show share button for media and channel posts</string>
     <string name="HideDividers">Hide dividers</string>
     <string name="RepliesLinksHeader">Replies and Links</string>
     <string name="RepliesLinksShowColors">Show custom colors</string>
@@ -585,7 +616,6 @@
     <string name="UseQualityPreset_LowQuality_Desc">It automatically selects the lowest quality when you watch a video or story.</string>
     <string name="UseQualityPreset_Dynamic">Dynamic</string>
     <string name="UseQualityPreset_Dynamic_Desc">It will use the lower quality only if you are not using Wi-Fi.</string>
-    <string name="KeepOriginalFileName">Use original document name</string>
     <string name="UploadBoost">Upload boost</string>
     <string name="DownloadBoost">Download boost</string>
     <string name="DownloadBoostType">Download Boost type</string>
@@ -1074,4 +1104,14 @@
     <string name="AppLinkNotVerifiedMessage">For Android 12 and newer, you need to manually add link to verified links in order to open t.me links in OctoGram.</string>
     <string name="MaxDragAndDropFileCount">You cannot add more than %s photos/video!</string>
 
+    <string name="OnDeviceTranslationModels">On-device models</string>
+    <string name="OnDeviceTranslationModels_Manage">Manage downloaded models for translations</string>
+    <string name="NoModelsDownloaded">No language models downloaded</string>
+    <string name="OnDeviceModelsHint">These models have been downloaded to your device for offline translation. You can remove them to free up space.</string>
+    <string name="DownloadedLanguages">Downloaded languages</string>
+    <string name="DeleteModelTitle">Delete model</string>
+    <string name="DeleteModelMessage">Are you sure you want to delete the translation model for **%1$s**? You\'ll need to download it again to translate to or from this language.</string>
+    <string name="FailedToDeleteModel">Could not delete the model. Please try again later.</string>
+    <string name="Error">Error</string>
+    <string name="OnDeviceTranslationModels_UnsupportedVersion">You\'re using an outdated version of the OctoGram Extension – OnDevice. Please update to at least version **%1$s** (**%2$d**).</string>
 </resources>

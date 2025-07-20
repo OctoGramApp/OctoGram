@@ -43,8 +43,10 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
@@ -129,6 +131,11 @@ public class WebActionBar extends FrameLayout {
     public static final int forward_item = 9;
     public static final int instant_item = 10;
 
+    public static final int translate_item = 999;
+
+    public boolean isArticleTranslated = false;
+    public int untranslatedPercent = 0;
+
     public WebActionBar(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
@@ -210,7 +217,14 @@ public class WebActionBar extends FrameLayout {
                 o.add(R.drawable.msg_openin, getString(R.string.OpenInExternalApp), click.run(open_item));
                 o.add(R.drawable.msg_search, getString(R.string.Search), click.run(search_item));
                 o.add(R.drawable.msg_share, getString(R.string.ShareFile), click.run(share_item));
+                if (MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled() || isArticleTranslated) {
+                    o.add(isArticleTranslated ? R.drawable.msg_cancel : R.drawable.msg_translate, getString(isArticleTranslated ? R.string.HideTranslation : R.string.TranslateMessage), click.run(translate_item));
+                }
                 o.add(R.drawable.msg_settings_old, getString(R.string.Settings), click.run(settings_item));
+                if (isArticleTranslated && untranslatedPercent > 2) {
+                    o.addGap();
+                    o.addText(formatString(R.string.TranslatorArticlePartiallyUntranslated, untranslatedPercent), 13, dp(200));
+                }
             } else if (menuType == ArticleViewer.PageLayout.TYPE_WEB) {
                 if (!isTonsite) {
                     o.add(R.drawable.msg_openin, getString(R.string.OpenInExternalApp), click.run(open_item));

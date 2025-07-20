@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 /**
  * Provides basic functionality for making HTTP requests using Java's standard {@link HttpURLConnection}.

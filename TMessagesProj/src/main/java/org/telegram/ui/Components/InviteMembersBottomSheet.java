@@ -6,11 +6,9 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.StateListAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -25,7 +23,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 
@@ -62,8 +59,8 @@ import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
+import it.octogram.android.app.ui.components.CustomFab;
+import it.octogram.android.app.ui.components.OutlineProvider;
 
 public class InviteMembersBottomSheet extends UsersAlertBase implements NotificationCenter.NotificationCenterDelegate {
 

@@ -254,14 +254,14 @@ import it.octogram.android.InterfaceRapidButtonsActions;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.crashlytics.Crashlytics;
 import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
-import it.octogram.android.preferences.fragment.ActionBarOverride;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.LockedChatsHelp;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
-import it.octogram.android.preferences.ui.custom.AppLinkVerifyBottomSheet;
-import it.octogram.android.preferences.ui.custom.MonetAndroidFixDialog;
+import it.octogram.android.app.fragment.ActionBarOverride;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.OctoPrivacySettingsUI;
+import it.octogram.android.app.ui.components.CustomFab;
+import it.octogram.android.app.ui.cells.LockedChatsIntroductionCell;
+import it.octogram.android.app.ui.components.OutlineProvider;
+import it.octogram.android.app.ui.bottomsheets.AppLinkVerifyBottomSheet;
+import it.octogram.android.app.ui.cells.MonetAndroidFixDialog;
 import it.octogram.android.theme.MonetIconController;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ForwardContext;
@@ -3242,7 +3242,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 if (viewPages[0] != null) {
                     viewPages[0].listView.setEmptyView(folderId == 0 ? viewPages[0].progressView : null);
                     if (!onlySelect) {
-                        floatingButtonContainer.setVisibility(View.VISIBLE);
+                        floatingButtonContainer.setVisibility(RapidActionsHelper.isButtonHiddenAsCustomConfig(true) ? View.GONE : View.VISIBLE);
                         if (floatingButton2Container != null) {
                             floatingButton2Container.setVisibility((OctoConfig.INSTANCE.rapidActionsDefaultConfig.getValue() ? storiesEnabled : !RapidActionsHelper.isButtonHiddenAsCustomConfig(false)) ? View.VISIBLE : View.GONE);
                         }
@@ -7486,7 +7486,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     private void showLockedChatsHelp() {
         BottomSheet[] bottomSheet = new BottomSheet[1];
-        LockedChatsHelp lockedChatsHelp = new LockedChatsHelp(getContext(), getResourceProvider(), () -> {
+        LockedChatsIntroductionCell lockedChatsIntroductionCell = new LockedChatsIntroductionCell(getContext(), getResourceProvider(), () -> {
             if (bottomSheet[0] != null) {
                 bottomSheet[0].dismiss();
                 bottomSheet[0] = null;
@@ -7501,7 +7501,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         });
         bottomSheet[0] = new BottomSheet.Builder(getContext(), false, getResourceProvider())
-                .setCustomView(lockedChatsHelp, Gravity.TOP | Gravity.CENTER_HORIZONTAL)
+                .setCustomView(lockedChatsIntroductionCell, Gravity.TOP | Gravity.CENTER_HORIZONTAL)
                 .show();
         bottomSheet[0].fixNavigationBar(Theme.getColor(Theme.key_dialogBackground));
     }

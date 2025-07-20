@@ -67,7 +67,7 @@ import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
 import java.util.ArrayList;
 
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 
 public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.SelectableView> {
 
@@ -1488,7 +1488,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                     if (onTranslateListener != null) {
                         onTranslateListener.run(getSelectedText(), translateFromLanguage, translateToLanguage, () -> showActions());
                     } else {
-                        TranslationsWrapper.initTranslationItem(textSelectionOverlay.getContext(), null, null, UserConfig.selectedAccount, null, 0, translateFromLanguage, translateToLanguage, getSelectedText(), null, false, null, null);
+                        MainTranslationsHandler.initTranslationItem(textSelectionOverlay.getContext(), null, null, UserConfig.selectedAccount, null, 0, translateFromLanguage, translateToLanguage, getSelectedText(), null, false, null, null);
                     }
                     hideActions();
                     clear(true);

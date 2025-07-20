@@ -56,12 +56,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import it.octogram.android.fonts.FontFileReader;
+import it.octogram.android.app.ui.cells.EmojiSetBulletinLayout;
 import it.octogram.android.http.FileDownloader;
 import it.octogram.android.http.StandardHTTPRequest;
-import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.data.FileUnzip;
+import it.octogram.android.utils.fonts.FontFileReader;
 
 public class CustomEmojiController {
     private static Typeface systemEmojiTypeface;

@@ -1651,9 +1651,6 @@ public class FileLoader extends BaseController {
             TLRPC.Document document = (TLRPC.Document) attach;
             String docExt;
             docExt = getDocumentFileName(document);
-            if (OctoConfig.INSTANCE.keepOriginalFileName.getValue() && !docExt.isEmpty()) {
-                return docExt;
-            }
             int idx;
             if ((idx = docExt.lastIndexOf('.')) == -1) {
                 docExt = "";

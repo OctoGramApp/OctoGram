@@ -34,8 +34,6 @@ import android.widget.ImageView;
 
 import androidx.core.content.ContextCompat;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
@@ -48,7 +46,6 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SavedMessagesController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
@@ -67,7 +64,7 @@ import org.telegram.ui.TopicsFragment;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 public class ChatAvatarContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -119,6 +116,10 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
 
     protected boolean useAnimatedSubtitle() {
         return false;
+    }
+
+    protected boolean canOpenStories() {
+        return true;
     }
 
     public void hideSubtitle() {
@@ -232,7 +233,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 if (allowDrawStories) {
-                    if (params.checkOnTouchEvent(event, this)) {
+                    if (canOpenStories() && params.checkOnTouchEvent(event, this)) {
                         return true;
                     }
                 }

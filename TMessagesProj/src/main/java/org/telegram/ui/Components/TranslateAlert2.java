@@ -13,6 +13,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -55,7 +57,6 @@ import org.json.JSONArray;
 import org.json.JSONTokener;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
@@ -87,8 +88,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import it.octogram.android.translator.SingleTranslationManager;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.app.ui.bottomsheets.ArticleTranslationsBottomSheet;
+import it.octogram.android.utils.translator.SingleTranslationsHandler;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 
 public class TranslateAlert2 extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
@@ -122,6 +125,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
     private boolean firstTranslation = true;
 
     private ImageView copyButton;
+    private ArticleTranslationsBottomSheet downloadingSheet;
 
     public TranslateAlert2(
         Context context,
@@ -338,7 +342,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
 
         loadingTextView.setText(Emoji.replaceEmoji(reqText == null ? "" : reqText.toString(), loadingTextView.getPaint().getFontMetricsInt(), true));
         updateCopyEnabled(false);
-        TranslationsWrapper.translate(currentAccount, reqPeer, reqMessageId, toLanguage, reqText, reqMessageEntities, new SingleTranslationManager.OnTranslationResultCallback() {
+        MainTranslationsHandler.translate(currentAccount, reqPeer, reqMessageId, toLanguage, reqText, reqMessageEntities, new SingleTranslationsHandler.OnTranslationResultCallback() {
             @Override
             public void onGotReqId(int reqId2) {
                 reqId = reqId2;
@@ -347,30 +351,53 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             @Override
             public void onResponseReceived() {
                 reqId = null;
+                if (downloadingSheet != null) {
+                    downloadingSheet.dismiss();
+                    downloadingSheet = null;
+                }
             }
 
             @Override
-            public void onDownloadingModel(ArrayList<String> languages) {
-                ArrayList<String> toDownloadNames = new ArrayList<>();
-                for (String lang : languages) {
-                    toDownloadNames.add(languageName(lang));
+            public void onDownloadingModel(int percent) {
+                if (downloadingSheet != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        downloadingSheet.setProgress((float) percent / 100);
+
+                        if (percent == 100) {
+                            downloadingSheet.dismiss();
+                            downloadingSheet = null;
+                        }
+                    });
+                    return;
                 }
 
-                loadingTextView.setText(LocaleController.formatPluralString(
-                    "DownloadingTranslationModelsText",
-                    toDownloadNames.size(),
-                    toDownloadNames.size() == 2 ?
-                        LocaleController.formatString(R.string.DownloadingTranslationModelsTextAnd, toDownloadNames.get(0), toDownloadNames.get(1)) :
-                        TextUtils.join(", ", toDownloadNames)
-                ));
+                downloadingSheet = new ArticleTranslationsBottomSheet(getContext(), true, true);
+                downloadingSheet.show();
+
+//                ArrayList<String> toDownloadNames = new ArrayList<>();
+//                for (String lang : languages) {
+//                    toDownloadNames.add(languageName(lang));
+//                }
+//
+//                loadingTextView.setText(LocaleController.formatPluralString(
+//                    "DownloadingTranslationModelsText",
+//                    toDownloadNames.size(),
+//                    toDownloadNames.size() == 2 ?
+//                        LocaleController.formatString(R.string.DownloadingTranslationModelsTextAnd, toDownloadNames.get(0), toDownloadNames.get(1)) :
+//                        TextUtils.join(", ", toDownloadNames)
+//                ));
             }
 
             @Override
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 firstTranslation = false;
 
+                if (!OctoConfig.INSTANCE.translatorKeepMarkdown.getValue()) {
+                    finalText.entities.clear();
+                }
+
                 CharSequence translated = SpannableStringBuilder.valueOf(finalText.text);
-                MessageObject.addEntitiesToText(translated, finalText.entities, false, true, false, false);
+                MessageObject.addEntitiesToText(translated, finalText.entities, false, true, true, false);
                 translated = preprocessText(translated);
 
                 textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
@@ -382,25 +409,43 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
                 });
             }
 
-            @Override
-            public void onError() {
+            public void onError(int string) {
                 textView.setTextColor(getThemedColor(Theme.key_dialogTextGray3));
-                textView.setText(LocaleController.getString("TranslationFailedAlert2", R.string.TranslationFailedAlert2));
+                textView.setText(LocaleController.getString(string));
                 AndroidUtilities.runOnUIThread(() -> {
                     updateCopyEnabled(false);
                     adapter.updateMainView(textViewContainer);
                 });
+
+            }
+
+            @Override
+            public void onError() {
+                onError(R.string.TranslationFailedAlert2);
             }
 
             @Override
             public void onUnavailableLanguage() {
-                textView.setTextColor(getThemedColor(Theme.key_dialogTextGray3));
-                textView.setText(LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage));
                 headerView.toLanguageTextView.setText(languageName(toLanguage));
+                onError(R.string.TranslatorUnsupportedLanguage);
+            }
+
+            @Override
+            public void onExtensionError() {
+                onError(R.string.TranslatorExtensionFailed);
+            }
+
+            @Override
+            public void onExtensionNeedInstall() {
                 AndroidUtilities.runOnUIThread(() -> {
-                    updateCopyEnabled(false);
-                    adapter.updateMainView(textViewContainer);
-                });
+                    dismiss();
+                    SingleTranslationsHandler.OnTranslationResultCallback.super.onExtensionNeedInstall();
+                }, 2000);
+            }
+
+            @Override
+            public void onExtensionNeedUpdate() {
+
             }
         });
 

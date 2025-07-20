@@ -79,7 +79,6 @@ huawei-push = "6.5.0.300"
 huawei-maps = "6.6.0.300"
 huawei-location = "6.4.0.300"
 huawei-agconnect = "1.6.0.300"
-translate = "17.0.3"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-application" }
@@ -171,4 +170,3 @@ appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", 
 huawei-push = { module = "com.huawei.hms:push", version.ref = "huawei-push" }
 huawei-maps = { module = "com.huawei.hms:maps", version.ref = "huawei-maps" }
 huawei-location = { module = "com.huawei.hms:location", version.ref = "huawei-location" }
-translate = { group = "com.google.mlkit", name = "translate", version.ref = "translate" }

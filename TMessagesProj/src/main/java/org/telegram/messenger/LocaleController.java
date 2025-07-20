@@ -31,7 +31,7 @@ import androidx.annotation.StringRes;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.OctoUtils;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 import it.octogram.android.utils.data.LanguageController;
 
 import org.telegram.messenger.time.FastDateFormat;
@@ -1393,11 +1393,11 @@ public class LocaleController {
             MediaDataController.getInstance(currentAccount).loadAttachMenuBots(false, true);
         }
 
-        /*if (TranslateAlert2.isDestinationFollowApp() && TranslationsWrapper.isLanguageUnavailable(TranslateAlert2.getToLanguage())) {
+        if (TranslateAlert2.isDestinationFollowApp() && MainTranslationsHandler.isLanguageUnavailable(currentLocale.getLanguage())) {
             AndroidUtilities.runOnUIThread(() -> {
-                TranslationsWrapper.suggestProviderUpdate(LaunchActivity.instance, LaunchActivity.getSafeLastFragment(), null);
+                MainTranslationsHandler.suggestProviderUpdate(LaunchActivity.instance, LaunchActivity.getSafeLastFragment(), null);
             });
-        }*/
+        }
 
         return requestId;
     }

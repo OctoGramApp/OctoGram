@@ -55,7 +55,7 @@ import org.telegram.ui.Components.LayoutHelper;
 
 import java.io.File;
 
-import it.octogram.android.preferences.ui.components.CustomUpdatesCheckCell;
+import it.octogram.android.app.ui.cells.CheckForUpdatesButtonCell;
 import it.octogram.android.utils.UpdatesManager;
 
 @SuppressLint("ViewConstructor")
@@ -130,25 +130,25 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         }
 
         public void updateState(int state, float loadProgress) {
-            boolean isCellEnabled = state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING;
+            boolean isCellEnabled = state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING;
             if (isScheduleButton) {
-                isCellEnabled = state == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD;
+                isCellEnabled = state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD;
             }
             background.setClickable(isCellEnabled);
             background.setEnabled(isCellEnabled);
 
             if (isScheduleButton) {
-                if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
+                if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                     }
                     setText(getString(R.string.AppUpdateRemindMeLater), !isFirstUpdate);
-                } else if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                } else if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
                     }
                     setText("You can close this popup during the download.", !isFirstUpdate);
-                } else if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY) {
+                } else if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
                     }
@@ -156,24 +156,24 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
                 }
             } else {
                 switch (state) {
-                    case CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
+                    case CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
                         setText(formatString(R.string.AppUpdateDownloadNow), !isFirstUpdate);
                         break;
-                    case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING:
+                    case CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING:
                         setText(formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)), !isFirstUpdate);
                         break;
-                    case CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY:
+                    case CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY:
                         setText(getString(R.string.UpdatesSettingsCheckButtonInstall), !isFirstUpdate);
                         break;
                 }
 
-                if (state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                     }
                     background.setAlpha(1f);
                     background.animate().alpha(0f).setDuration(200).start();
-                } else if (state != CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                } else if (state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
                     }
@@ -351,9 +351,9 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
 
         doneButton = new BottomSheetCell(context, false, false);
         doneButton.background.setOnClickListener(v -> {
-            if (doneButton.getState() == CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY) {
+            if (doneButton.getState() == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY) {
                 UpdatesManager.installUpdate();
-            } else if (doneButton.getState() == CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
+            } else if (doneButton.getState() == CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
                 FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
             }
         });
@@ -363,7 +363,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         scheduleButton.background.setOnClickListener(v -> dismiss());
         container.addView(scheduleButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 50, Gravity.LEFT | Gravity.BOTTOM, 0, 0, 0, 0));
 
-        updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
+        updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
         if (UpdatesManager.canAutoDownloadUpdates()) {
             FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
         }
@@ -436,25 +436,25 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         }
 
         if (id == NotificationCenter.fileLoaded) {
-            updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY);
+            updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY);
         } else if (id == NotificationCenter.fileLoadProgressChanged) {
             Long loadedSize = (Long) args[1];
             Long totalSize = (Long) args[2];
             float loadProgress = loadedSize / (float) totalSize;
 
-            updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING, loadProgress);
+            updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, loadProgress);
         } else if (id == NotificationCenter.fileLoadFailed) {
             // force re-check data from the beginning
 
             File completePathFileName = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
             if (completePathFileName.exists()) {
-                updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_READY);
+                updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY);
             } else {
                 if (FileLoader.getInstance(0).isLoadingFile(name)) {
                     Float p = ImageLoader.getInstance().getFileProgress(name);
-                    updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_IS_DOWNLOADING, (p != null ? p : 0.0f));
+                    updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, (p != null ? p : 0.0f));
                 } else {
-                    updateState(CustomUpdatesCheckCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
+                    updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
                 }
             }
         }

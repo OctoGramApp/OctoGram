@@ -112,7 +112,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.icons.IconSelectorAlert;
+import it.octogram.android.app.ui.cells.IconStyleSelectorCell;
 import it.octogram.android.utils.appearance.FolderIconController;
 import it.octogram.android.utils.config.FolderUtils;
 
@@ -162,7 +162,7 @@ public class FilterCreateActivity extends BaseFragment {
     private static final int MAX_NAME_LENGTH = 12;
 
     private static final int done_button = 1;
-    private IconSelectorAlert iconSelectorAlert;
+    private IconStyleSelectorCell iconStyleSelectorCell;
 
     @SuppressWarnings("FieldCanBeLocal")
     public static class HintInnerCell extends FrameLayout {
@@ -941,7 +941,7 @@ public class FilterCreateActivity extends BaseFragment {
     public void onPause() {
         super.onPause();
         try {
-            iconSelectorAlert.dismiss();
+            iconStyleSelectorCell.dismiss();
         } catch (Exception ignored) {}
     }
 
@@ -1606,15 +1606,15 @@ public class FilterCreateActivity extends BaseFragment {
                     cell.editTextEmoji.getEditText().setImeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
                     cell.setOnChangeIcon(mContext, (m) -> {
-                        iconSelectorAlert = new IconSelectorAlert(mContext);
-                        iconSelectorAlert.setOnItemClick((emoticon) -> {
+                        iconStyleSelectorCell = new IconStyleSelectorCell(mContext);
+                        iconStyleSelectorCell.setOnItemClick((emoticon) -> {
                             newFilterEmoticon = emoticon;
                             nameEditTextCell.setIcon(FolderIconController.getTabIcon(newFilterEmoticon), true);
                             checkDoneButton(true);
                         });
                         cell.editTextEmoji.hidePopup(true);
                         cell.editTextEmoji.closeKeyboard();
-                        iconSelectorAlert.show();
+                        iconStyleSelectorCell.show();
                     });
                     cell.setIcon(FolderIconController.getTabIcon(newFilterEmoticon), false);
 

@@ -46,7 +46,6 @@ import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
@@ -95,9 +94,9 @@ import it.octogram.android.DrawerBackgroundState;
 import it.octogram.android.DrawerFavoriteOption;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
-import it.octogram.android.icons.IconsUtils;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
+import it.octogram.android.utils.icons.IconsUtils;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.OctoAppearanceDrawerSettingsUI;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.network.BrowserUtils;
 
@@ -574,7 +573,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                     return true;
                 }
                 drawerLayoutContainer.closeDrawer();
-                LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
+                LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoAppearanceDrawerSettingsUI()));
                 return true;
             });
 
@@ -678,7 +677,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
                 }
 
                 drawerLayoutContainer.closeDrawer();
-                LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoDrawerSettingsUI()));
+                LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoAppearanceDrawerSettingsUI()));
                 return true;
             });
 

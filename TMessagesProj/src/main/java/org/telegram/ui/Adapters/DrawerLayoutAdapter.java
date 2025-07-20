@@ -9,7 +9,6 @@
 package org.telegram.ui.Adapters;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -17,7 +16,6 @@ import androidx.annotation.Keep;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
@@ -41,10 +39,10 @@ import java.util.Collections;
 
 import it.octogram.android.DrawerItem;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.drawer.MenuOrderController;
-import it.octogram.android.icons.IconsUtils;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
+import it.octogram.android.utils.config.DrawerOrderController;
+import it.octogram.android.utils.icons.IconsUtils;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.components.DrawerPreviewCell;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.OctoUtils;
 
@@ -414,9 +412,9 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
         items.add(new Item(7, LocaleController.getString("InviteFriends", R.string.InviteFriends), inviteIcon));
         items.add(new Item(13, LocaleController.getString("TelegramFeatures", R.string.TelegramFeatures), helpIcon));*/
         UserConfig me = UserConfig.getInstance(UserConfig.selectedAccount);
-        int item_size = MenuOrderController.sizeAvailable();
+        int item_size = DrawerOrderController.sizeAvailable();
         for (int i = 0; i < item_size; i++) {
-            MenuOrderController.EditableMenuItem data = MenuOrderController.getSingleAvailableMenuItem(i);
+            DrawerOrderController.EditableMenuItem data = DrawerOrderController.getSingleAvailableMenuItem(i);
             if (data != null) {
                 var menuItemId = DrawerItem.Id.INSTANCE.getById(data.id);
                 if (menuItemId != null) {
@@ -459,7 +457,7 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                         case DIVIDER -> {
                             boolean foundPreviousDivider = false;
                             if (i > 0) {
-                                MenuOrderController.EditableMenuItem previousData = MenuOrderController.getSingleAvailableMenuItem(i - 1);
+                                DrawerOrderController.EditableMenuItem previousData = DrawerOrderController.getSingleAvailableMenuItem(i - 1);
                                 if (previousData != null && previousData.id.equals("divider")) {
                                     foundPreviousDivider = true;
                                 }

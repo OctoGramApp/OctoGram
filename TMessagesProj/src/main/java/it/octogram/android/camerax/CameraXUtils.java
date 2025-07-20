@@ -11,6 +11,8 @@ package it.octogram.android.camerax;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Size;
 
 import androidx.annotation.NonNull;
@@ -41,15 +43,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import it.octogram.android.CameraXResolution;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 public class CameraXUtils {
     private static final String TAG = "CameraXUtils";
-    private static Map<Quality, Size> qualityToSize;
-    private static Exception qualityException;
+    private static volatile Map<Quality, Size> qualityToSize;
+    private static volatile Exception qualityException;
     private static int cameraResolution = -1;
 
     public static boolean isCameraXSupported() {
@@ -121,36 +125,39 @@ public class CameraXUtils {
 
         OctoLogging.d(TAG, "Fetching ProcessCameraProvider instance.");
 
+        Executor backgroundExecutor = Executors.newSingleThreadExecutor();
+        Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+
         providerFuture.addListener(() -> {
-            ProcessCameraProvider provider = null;
             try {
-                OctoLogging.d(TAG, "Camera provider future listener invoked.");
-                provider = providerFuture.get();
+                ProcessCameraProvider provider = providerFuture.get();
                 OctoLogging.d(TAG, "Camera provider obtained successfully.");
 
-                CameraSelector cameraSelector = new CameraSelector.Builder().build();
-                OctoLogging.d(TAG, "CameraSelector built successfully.");
+                backgroundExecutor.execute(() -> {
+                    try {
+                        CameraSelector cameraSelector = new CameraSelector.Builder().build();
+                        OctoLogging.d(TAG, "CameraSelector built successfully on background thread.");
 
-                qualityToSize = getAvailableVideoSizes(cameraSelector, provider);
-                OctoLogging.d(TAG, "Video sizes loaded successfully: " + qualityToSize);
+                        Map<Quality, Size> loadedSizes = getAvailableVideoSizes(cameraSelector, provider);
+                        OctoLogging.d(TAG, "Video sizes loaded successfully on background thread: " + loadedSizes);
 
-                loadSuggestedResolution();
-                OctoLogging.d(TAG, "Suggested resolutions loaded.");
+                        mainThreadHandler.post(() -> {
+                            qualityToSize = loadedSizes;
+                            loadSuggestedResolution();
+                            OctoLogging.d(TAG, "Updated qualityToSize and loaded suggested resolution on main thread.");
+                        });
 
-            } catch (InterruptedException e) {
-                qualityException = e;
-                OctoLogging.e(TAG, "Interrupted while loading camera sizes.", e);
-            } catch (ExecutionException e) {
+                    } catch (Exception e) {
+                        mainThreadHandler.post(() -> {
+                            qualityException = e;
+                            OctoLogging.e(TAG, "Unexpected exception occurred while loading camera sizes in background.", e);
+                        });
+                    }
+                });
+
+            } catch (ExecutionException | InterruptedException e) {
                 qualityException = e;
                 OctoLogging.e(TAG, "Exception getting CameraProvider.", e);
-            } catch (Exception e) {
-                qualityException = e;
-                OctoLogging.e(TAG, "Unexpected exception occurred while loading camera sizes.", e);
-            } finally {
-                if (provider != null) {
-                    provider.unbindAll();
-                    OctoLogging.d(TAG, "Camera provider unbound.");
-                }
             }
         }, ContextCompat.getMainExecutor(context));
 

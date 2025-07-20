@@ -9,7 +9,6 @@
 package it.octogram.android.utils
 
 import androidx.core.graphics.toColorInt
-import it.octogram.android.logs.OctoLogging
 import org.telegram.messenger.BuildVars
 import org.telegram.messenger.R
 import org.telegram.tgnet.TLRPC

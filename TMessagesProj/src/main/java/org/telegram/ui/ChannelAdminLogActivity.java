@@ -155,10 +155,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.CustomModelsHelper;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.ImportSettingsUI;
-import it.octogram.android.preferences.ui.OctoAiNewModelUI;
+import it.octogram.android.utils.ai.CustomModelsHelper;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.ImportSettingsUI;
+import it.octogram.android.app.ui.OctoChatsAiNewModelUI;
 
 public class ChannelAdminLogActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -3222,7 +3222,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                             if (message.getDocumentName().toLowerCase().endsWith(OctoConfig.OCTOMODEL_EXTENSION)) {
                                 CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelFromMessage(message);
                                 if (model != null) {
-                                    OctoAiNewModelUI newModelUI = new OctoAiNewModelUI();
+                                    OctoChatsAiNewModelUI newModelUI = new OctoChatsAiNewModelUI();
                                     newModelUI.setCurrentModel(model);
                                     ChannelAdminLogActivity.this.presentFragment(new PreferencesFragment(newModelUI));
                                     handled = true;

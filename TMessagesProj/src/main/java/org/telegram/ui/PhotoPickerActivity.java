@@ -12,13 +12,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -38,7 +36,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
@@ -88,7 +85,6 @@ import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
-import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.EditTextEmoji;
 import org.telegram.ui.Components.FlickerLoadingView;
@@ -104,11 +100,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.translator.SingleTranslationManager;
-import it.octogram.android.translator.TranslationsWrapper;
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
+import it.octogram.android.app.ui.OctoChatsTranslatorDestinationUI;
+import it.octogram.android.utils.translator.SingleTranslationsHandler;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
+import it.octogram.android.app.ui.components.CustomFab;
+import it.octogram.android.app.ui.components.OutlineProvider;
 
 public class PhotoPickerActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -1842,7 +1838,7 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
 
         AndroidUtilities.hideKeyboard(commentTextView);
 
-        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        OctoChatsTranslatorDestinationUI destinationSettings = new OctoChatsTranslatorDestinationUI();
         destinationSettings.setCallback(this::executeMessageTranslation);
         presentFragment(destinationSettings);
     }
@@ -1858,19 +1854,22 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
         final AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
         progressDialog.showDelayed(500);
 
-        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, commentTextView.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
-            @Override
-            public void onGotReqId(int reqId) {
-
-            }
+        MainTranslationsHandler.translate(UserConfig.selectedAccount, realDestination, commentTextView.getText().toString().trim(), new SingleTranslationsHandler.OnTranslationResultCallback() {
 
             @Override
             public void onResponseReceived() {
-                progressDialog.dismiss();
+                AndroidUtilities.runOnUIThread(() -> {
+                    progressDialog.dismiss();
 
-                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                    sendPopupWindow.dismiss();
-                }
+                    if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                        sendPopupWindow.dismiss();
+                    }
+                });
+            }
+
+            @Override
+            public void onExtensionNeedUpdate() {
+
             }
 
             @Override
@@ -1886,6 +1885,11 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
             @Override
             public void onUnavailableLanguage() {
                 BulletinFactory.of(sizeNotifierFrameLayout, getResourceProvider()).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)).show();
+            }
+
+            @Override
+            public void onExtensionError() {
+                BulletinFactory.of(sizeNotifierFrameLayout, getResourceProvider()).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorExtensionFailed)).show();
             }
         });
     }

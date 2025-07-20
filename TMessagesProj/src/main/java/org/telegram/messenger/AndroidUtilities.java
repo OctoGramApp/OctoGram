@@ -227,10 +227,10 @@ import java.util.zip.GZIPOutputStream;
 
 import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.CustomModelsHelper;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.ImportSettingsUI;
-import it.octogram.android.preferences.ui.OctoAiNewModelUI;
+import it.octogram.android.utils.ai.CustomModelsHelper;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.ImportSettingsUI;
+import it.octogram.android.app.ui.OctoChatsAiNewModelUI;
 import it.octogram.android.utils.appearance.TypeFaceSupportChecker;
 
 public class AndroidUtilities {
@@ -4170,7 +4170,7 @@ public class AndroidUtilities {
             if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith(OctoConfig.OCTOMODEL_EXTENSION)) {
                 CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelFromMessage(message);
                 if (model != null) {
-                    OctoAiNewModelUI newModelUI = new OctoAiNewModelUI();
+                    OctoChatsAiNewModelUI newModelUI = new OctoChatsAiNewModelUI();
                     newModelUI.setCurrentModel(model);
                     parentFragment.presentFragment(new PreferencesFragment(newModelUI));
                     return;

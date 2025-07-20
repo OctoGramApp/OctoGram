@@ -70,7 +70,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.custom.AllowSmartNotificationsBottomSheet;
+import it.octogram.android.app.ui.bottomsheets.AllowSmartNotificationsBottomSheet;
 
 public class ProfileNotificationsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 

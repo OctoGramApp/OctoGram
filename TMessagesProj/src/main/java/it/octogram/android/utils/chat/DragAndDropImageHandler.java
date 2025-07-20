@@ -35,7 +35,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 /**
  * @noinspection SequencedCollectionMethodCanBeUsed

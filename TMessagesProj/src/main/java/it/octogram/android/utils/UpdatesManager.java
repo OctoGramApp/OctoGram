@@ -40,7 +40,6 @@ import java.util.Objects;
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.StandardHTTPRequest;
-import it.octogram.android.logs.OctoLogging;
 import it.octogram.android.utils.network.BrowserUtils;
 
 /**

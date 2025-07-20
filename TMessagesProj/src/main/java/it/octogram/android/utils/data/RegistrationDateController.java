@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 public class RegistrationDateController {
     private static final String TAG = "RegistrationDateCtrl";

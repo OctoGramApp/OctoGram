@@ -23,7 +23,7 @@ import org.telegram.messenger.UserConfig;
 
 import java.io.File;
 
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 public class MessageHelper {
     private static final String TAG = "MessageHelper";

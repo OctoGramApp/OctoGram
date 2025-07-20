@@ -16,7 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 
 public class LogsMigrator {

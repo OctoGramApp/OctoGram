@@ -69,7 +69,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedDispatcher;
 
 import androidx.activity.BackEventCompat;
@@ -99,7 +98,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.AutoDeleteMediaTask;
 import org.telegram.messenger.BackupAgent;
-import org.telegram.messenger.BetaUpdate;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChannelBoostsController;
@@ -246,11 +244,11 @@ import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.crashlytics.Crashlytics;
-import it.octogram.android.deeplink.DeepLinkManager;
-import it.octogram.android.icons.IconsResources;
-import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.fragment.ActionBarOverride;
-import it.octogram.android.preferences.ui.components.DrawerPreviewCell;
+import it.octogram.android.utils.deeplink.DeepLinkManager;
+import it.octogram.android.utils.icons.IconsResources;
+import it.octogram.android.utils.OctoLogging;
+import it.octogram.android.app.fragment.ActionBarOverride;
+import it.octogram.android.app.ui.components.DrawerPreviewCell;
 import it.octogram.android.theme.MonetThemeController;
 import it.octogram.android.utils.UpdatesManager;
 import it.octogram.android.utils.account.FingerprintUtils;
@@ -9168,7 +9166,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             return;
         }
         hasAttachedBackEvent = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
@@ -9190,7 +9188,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             return;
         }
         hasAttachedBackEvent = false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(actionBarLayout.getInstance());
         }
     }

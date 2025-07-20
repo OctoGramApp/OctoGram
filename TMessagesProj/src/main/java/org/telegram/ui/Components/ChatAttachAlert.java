@@ -149,12 +149,12 @@ import java.util.Objects;
 import it.octogram.android.CameraPreview;
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.CustomModelsMenuWrapper;
-import it.octogram.android.ai.MainAiHelper;
-import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.translator.SingleTranslationManager;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
+import it.octogram.android.utils.ai.MainAiHelper;
+import it.octogram.android.utils.OctoLogging;
+import it.octogram.android.app.ui.OctoChatsTranslatorDestinationUI;
+import it.octogram.android.utils.translator.SingleTranslationsHandler;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 
 public class ChatAttachAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate, BottomSheet.BottomSheetDelegateInterface {
 
@@ -6069,7 +6069,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             messageSendPreview = null;
         }
 
-        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        OctoChatsTranslatorDestinationUI destinationSettings = new OctoChatsTranslatorDestinationUI();
         destinationSettings.setCallback(this::executeMessageTranslation);
         AndroidUtilities.runOnUIThread(() -> {
             if (baseFragment != null) {
@@ -6094,22 +6094,22 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         final AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
         progressDialog.showDelayed(500);
 
-        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, commentTextView.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
+        MainTranslationsHandler.translate(UserConfig.selectedAccount, realDestination, commentTextView.getText().toString().trim(), new SingleTranslationsHandler.OnTranslationResultCallback() {
             @Override
-            public void onGotReqId(int reqId) {
+            public void onResponseReceived() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    progressDialog.dismiss();
 
+                    if (messageSendPreview != null) {
+                        messageSendPreview.dismiss(false);
+                        messageSendPreview = null;
+                    }
+                });
             }
 
             @Override
-            public void onResponseReceived() {
-                progressDialog.dismiss();
+            public void onExtensionNeedUpdate() {
 
-                if (messageSendPreview != null) {
-                    AndroidUtilities.runOnUIThread(() -> {
-                        messageSendPreview.dismiss(false);
-                        messageSendPreview = null;
-                    });
-                }
             }
 
             @Override
@@ -6127,6 +6127,11 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             @Override
             public void onUnavailableLanguage() {
                 BulletinFactory.of(sizeNotifierFrameLayout, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)).show();
+            }
+
+            @Override
+            public void onExtensionError() {
+                BulletinFactory.of(sizeNotifierFrameLayout, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorExtensionFailed)).show();
             }
         });
     }

@@ -43,7 +43,7 @@ import java.lang.reflect.Field;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.NotificationColorize;
 

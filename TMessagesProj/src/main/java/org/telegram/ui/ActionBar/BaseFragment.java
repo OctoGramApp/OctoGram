@@ -54,9 +54,7 @@ import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ArticleViewer;
-import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Stories.StoryViewer;
 import org.telegram.ui.bots.BotWebViewAttachedSheet;
@@ -64,7 +62,7 @@ import org.telegram.ui.bots.BotWebViewAttachedSheet;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.fragment.ActionBarOverride;
+import it.octogram.android.app.fragment.ActionBarOverride;
 
 public abstract class BaseFragment {
 

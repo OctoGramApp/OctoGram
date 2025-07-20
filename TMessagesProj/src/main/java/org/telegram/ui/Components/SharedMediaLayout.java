@@ -2160,7 +2160,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
 
                 forwardNoQuoteItem = new ActionBarMenuItem(context, null, getThemedColor(Theme.key_actionBarActionModeDefaultSelector), getThemedColor(Theme.key_actionBarActionModeDefaultIcon), false);
                 forwardNoQuoteItem.setIcon(R.drawable.msg_forward);
-                forwardNoQuoteItem.setContentDescription(getString(R.string.NoQuoteForward));
+                forwardNoQuoteItem.setContentDescription(9+LocaleController.getString(R.string.NoQuoteForward));
                 forwardNoQuoteItem.setDuplicateParentStateEnabled(false);
                 actionModeLayout.addView(forwardNoQuoteItem, new LinearLayout.LayoutParams(AndroidUtilities.dp(54), ViewGroup.LayoutParams.MATCH_PARENT));
                 actionModeViews.add(forwardNoQuoteItem);

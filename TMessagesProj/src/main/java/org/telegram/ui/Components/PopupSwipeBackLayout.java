@@ -22,8 +22,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.core.view.GestureDetectorCompat;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.UserConfig;
@@ -32,6 +30,8 @@ import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.ArrayList;
+
+import it.octogram.android.utils.OctoLogging;
 
 public class PopupSwipeBackLayout extends FrameLayout {
     private final static int DURATION = 300;
@@ -79,7 +79,7 @@ public class PopupSwipeBackLayout extends FrameLayout {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 if (e1 == null || e2 == null) {
-                    android.util.Log.e("PopupSwipeBackLayout", "MotionEvent is null in onScroll: e1=" + e1 + ", e2=" + e2);
+                    OctoLogging.d("PopupSwipeBackLayout", "MotionEvent is null in onScroll: e1=" + e1 + ", e2=" + e2);
                     return false;
                 }
                 if (!isProcessingSwipe && !isSwipeDisallowed) {
@@ -434,8 +434,8 @@ public class PopupSwipeBackLayout extends FrameLayout {
 
         int s = canvas.save();
         mPath.rewind();
-        //int rad = AndroidUtilities.dp(6);
-        float rad = 40f;
+//        var rad = ActionBarPopupWindow.ActionBarPopupWindowLayout.USE_NEW_BACKGROUND ? 40f : AndroidUtilities.dp(6);
+        int rad = AndroidUtilities.dp(6);
         if (stickToRight) {
             mRect.set(getWidth() - w, y, getWidth(), y + h);
         } else {

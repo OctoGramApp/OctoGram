@@ -39,15 +39,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import it.octogram.android.ai.CustomModelsHelper;
-import it.octogram.android.ai.groq.GroqModels;
-import it.octogram.android.ai.openrouter.OpenRouterModels;
+import it.octogram.android.app.ui.bottomsheets.DoubleBottomMigrationBottomSheet;
 import it.octogram.android.camerax.CameraXUtils;
-import it.octogram.android.drawer.MenuOrderController;
-import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.ui.custom.DoubleBottomMigrationBottomSheet;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
+import it.octogram.android.utils.ai.CustomModelsHelper;
+import it.octogram.android.utils.ai.groq.GroqModels;
+import it.octogram.android.utils.ai.openrouter.OpenRouterModels;
+import it.octogram.android.utils.config.DrawerOrderController;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
 @SuppressWarnings("unchecked")
@@ -147,6 +147,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> formatTimeWithSeconds = newConfigProperty("formatTimeWithSeconds", false);
     public final ConfigProperty<Boolean> numberRounding = newConfigProperty("numberRounding", false);
     public final ConfigProperty<Boolean> pencilIconForEditedMessages = newConfigProperty("pencilIconForEditedMessages", false);
+    public final ConfigProperty<Boolean> showShareButtonForMessages = newConfigProperty("showShareButtonForMessages", true);
     public final ConfigProperty<Boolean> searchIconInHeader = newConfigProperty("searchIconInHeader", false);
     public final ConfigProperty<Boolean> headerLongPressSearch = newConfigProperty("headerLongPressSearch", true);
     public final ConfigProperty<Boolean> slidingTitle = newConfigProperty("slidingTitle", false);
@@ -227,7 +228,6 @@ public class OctoConfig {
     public final ConfigProperty<Integer> navigationBounceLevel = newConfigProperty("navigationBounceLevel", 0);
     public final ConfigProperty<Boolean> animatedActionBar = newConfigProperty("animatedActionBar", false);
     public final ConfigProperty<Integer> useQualityPreset = newConfigProperty("useQualityPreset", QualityPreset.AUTO.getValue());
-    public final ConfigProperty<Boolean> keepOriginalFileName = newConfigProperty("keepOriginalFileName", false);
     public final ConfigProperty<Boolean> uploadBoost = newConfigProperty("uploadBoost", false);
     public final ConfigProperty<Boolean> downloadBoost = newConfigProperty("downloadBoost", false);
     public final ConfigProperty<Integer> downloadBoostValue = newConfigProperty("downloadBoostValue", DownloadBoost.NORMAL.getValue());
@@ -254,6 +254,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> rapidActionsMainButtonActionLongPress = newConfigProperty("rapidActionsMainButtonActionLongPress", InterfaceRapidButtonsActions.SAVED_MESSAGES.getValue());
     public final ConfigProperty<Integer> rapidActionsSecondaryButtonAction = newConfigProperty("rapidActionsSecondaryButtonAction", InterfaceRapidButtonsActions.SEND_MESSAGE.getValue());
     public final ConfigProperty<Boolean> roundedTextBox = newConfigProperty("roundedTextBox", false);
+    public final ConfigProperty<Boolean> useSmoothPopupBackground = newConfigProperty("useSmoothPopupBackground", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -268,9 +269,11 @@ public class OctoConfig {
     /*Translator*/
     public final ConfigProperty<Integer> translatorMode = newConfigProperty("translatorMode", TranslatorMode.DEFAULT.getValue());
     public final ConfigProperty<Integer> translatorProvider = newConfigProperty("translatorProvider", TranslatorProvider.DEFAULT.getValue());
+    public final ConfigProperty<String> googleCloudKeyTranslator = newConfigProperty("googleCloudKeyTranslator", "");
     public final ConfigProperty<Integer> translatorFormality = newConfigProperty("translatorFormality", TranslatorFormality.DEFAULT.getValue());
     public final ConfigProperty<Boolean> translatorKeepMarkdown = newConfigProperty("translatorKeepMarkdown", true);
     public final ConfigProperty<String> lastTranslatePreSendLanguage = newConfigProperty("lastTranslatePreSendLanguage", null);
+    public final ConfigProperty<Long> translatorUninstallExtensionHideTime = newConfigProperty("translatorUninstallExtensionHideTime", 0L);
 
     /*AI Features */
     public final ConfigProperty<Boolean> aiFeatures = newConfigProperty("aiFeatures", false);
@@ -378,7 +381,7 @@ public class OctoConfig {
     }
 
     public static boolean isValidExport(File downloadedFile) {
-        if (downloadedFile != null && downloadedFile.length() <= 1024 * 30) { // 30 kB limit
+        if (downloadedFile != null && downloadedFile.length() <= 1024 * 200) { // 200 kB limit
             try {
                 FileInputStream downloadedFileStream = new FileInputStream(downloadedFile);
 
@@ -446,6 +449,9 @@ public class OctoConfig {
                     }
 
                     integerProperty.setValue(PREFS.getInt(integerProperty.getKey(), integerProperty.getValue()));
+                } else if (property.getValue() instanceof Long) {
+                    ConfigProperty<Long> longProperty = (ConfigProperty<Long>) property;
+                    longProperty.setValue(PREFS.getLong(longProperty.getKey(), longProperty.getValue()));
                 }
             }
         }
@@ -535,13 +541,13 @@ public class OctoConfig {
 
                     if (PREFS.getBoolean(e.getKey(), false)) {
                         if (e.getKey().equals("drawerInviteFriends")) {
-                            newDrawerItems.put(MenuOrderController.DIVIDER_ITEM);
+                            newDrawerItems.put(DrawerOrderController.DIVIDER_ITEM);
                         }
 
                         newDrawerItems.put(e.getValue());
 
                         if (e.getKey().equals("drawerChangeStatus")) {
-                            newDrawerItems.put(MenuOrderController.DIVIDER_ITEM);
+                            newDrawerItems.put(DrawerOrderController.DIVIDER_ITEM);
                         }
                     }
                 }
@@ -721,7 +727,7 @@ public class OctoConfig {
                     OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
                 }
 
-                MenuOrderController.reloadConfig();
+                DrawerOrderController.reloadConfig();
             }
         } catch (IOException e) {
             OctoLogging.e(TAG, "an io exception occurred internally during isValidMessageExport octoconfig", e);
@@ -757,7 +763,7 @@ public class OctoConfig {
             case "translatorMode" ->
                     isValidInRange(value, TranslatorMode.DEFAULT.getValue(), TranslatorMode.EXTERNAL.getValue());
             case "translatorProvider" ->
-                    isValidInRange(value, TranslatorProvider.DEFAULT.getValue(), TranslatorProvider.DEVICE_TRANSLATION.getValue());
+                    isValidInRange(value, TranslatorProvider.DEFAULT.getValue(), TranslatorProvider.LINGO.getValue());
             case "translatorFormality" ->
                     isValidInRange(value, TranslatorFormality.DEFAULT.getValue(), TranslatorFormality.HIGH.getValue());
             case "defaultEmojiButtonAction" ->
@@ -814,7 +820,7 @@ public class OctoConfig {
 
     private boolean isValueValid(String fieldName, String value) {
         return switch (fieldName) {
-            case "drawerItems" -> MenuOrderController.isMenuItemsImportValid(value);
+            case "drawerItems" -> DrawerOrderController.isMenuItemsImportValid(value);
             case "actionBarCustomTitle" -> value.length() <= 40;
             default -> false;
         };
@@ -841,7 +847,7 @@ public class OctoConfig {
     }
     private String reparseStringValue(String fieldName, String value) {
         if (fieldName.equals("drawerItems")) {
-            return MenuOrderController.reparseMenuItemsAsString(value);
+            return DrawerOrderController.reparseMenuItemsAsString(value);
         }
         return value;
     }

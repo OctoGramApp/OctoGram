@@ -47,7 +47,7 @@ import java.util.Iterator;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 public class FingerprintUtils {
     private static final HashMap<String, ArrayList<String>> cachedChatsLists = new HashMap<>();

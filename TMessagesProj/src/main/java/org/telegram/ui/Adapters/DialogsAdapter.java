@@ -83,7 +83,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.components.LockedChatsHelp;
+import it.octogram.android.app.ui.cells.LockedChatsIntroductionCell;
 import it.octogram.android.utils.account.FingerprintUtils;
 
 public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements DialogCell.DialogCellDelegate {
@@ -697,7 +697,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             case VIEW_TYPE_LOCKEDCHATS_FULLSCREEN:
                 LastEmptyView lastEmptyViewLockedChats = new LastEmptyView(mContext);
                 lastEmptyViewLockedChats.addView(
-                        new LockedChatsHelp(mContext, null, DialogsAdapter.this::onLockedChatsSettingsClick, null),
+                        new LockedChatsIntroductionCell(mContext, null, DialogsAdapter.this::onLockedChatsSettingsClick, null),
                         LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER, 0, -(int) (DialogStoriesCell.HEIGHT_IN_DP * .5f), 0, 0)
                 );
                 view = lastEmptyViewLockedChats;

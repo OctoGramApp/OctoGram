@@ -84,7 +84,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.util.FloatProperty;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
 import android.util.Range;
@@ -121,7 +120,6 @@ import android.widget.Scroller;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -324,12 +322,12 @@ import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.QualityPreset;
-import it.octogram.android.ai.CustomModelsMenuWrapper;
-import it.octogram.android.ai.MainAiHelper;
-import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.translator.SingleTranslationManager;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
+import it.octogram.android.utils.ai.MainAiHelper;
+import it.octogram.android.utils.OctoLogging;
+import it.octogram.android.app.ui.OctoChatsTranslatorDestinationUI;
+import it.octogram.android.utils.translator.SingleTranslationsHandler;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 import it.octogram.android.utils.chat.ForwardContext;
 import it.octogram.android.utils.chat.MessageHelper;
 import it.octogram.android.utils.media.VideoUtils;
@@ -5922,7 +5920,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         //menuItem.addSubItem(gallery_menu_edit_avatar, R.drawable.photo_paint, LocaleController.getString(R.string.EditPhoto)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_set_as_main, R.drawable.msg_openprofile, getString(R.string.SetAsMain)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_translate, R.drawable.msg_translate, getString(R.string.TranslateMessage)).setColors(0xfffafafa, 0xfffafafa);
-        menuItem.addSubItem(gallery_menu_hide_translation, R.drawable.msg_translate, getString(R.string.HideTranslation)).setColors(0xfffafafa, 0xfffafafa);
+        menuItem.addSubItem(gallery_menu_hide_translation, R.drawable.msg_cancel, getString(R.string.HideTranslation)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_delete, R.drawable.msg_delete, getString(R.string.Delete)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_cancel_loading, R.drawable.msg_cancel, getString(R.string.StopDownload)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.redrawPopup(0xf9222222);
@@ -22662,7 +22660,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             sendPopupWindow.dismiss();
         }
 
-        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        OctoChatsTranslatorDestinationUI destinationSettings = new OctoChatsTranslatorDestinationUI();
         destinationSettings.setCallback(this::executeMessageTranslation);
         AndroidUtilities.runOnUIThread(() -> {
             parentFragment.presentFragment(destinationSettings);
@@ -22680,19 +22678,21 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         final AlertDialog progressDialog = new AlertDialog(activityContext, AlertDialog.ALERT_TYPE_SPINNER);
         progressDialog.showDelayed(500);
 
-        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, captionEdit.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
+        MainTranslationsHandler.translate(UserConfig.selectedAccount, realDestination, captionEdit.getText().toString().trim(), new SingleTranslationsHandler.OnTranslationResultCallback() {
             @Override
-            public void onGotReqId(int reqId) {
+            public void onResponseReceived() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    progressDialog.dismiss();
 
+                    if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                        sendPopupWindow.dismiss();
+                    }
+                });
             }
 
             @Override
-            public void onResponseReceived() {
-                progressDialog.dismiss();
+            public void onExtensionNeedUpdate() {
 
-                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                    AndroidUtilities.runOnUIThread(() -> sendPopupWindow.dismiss());
-                }
             }
 
             @Override
@@ -22716,6 +22716,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             @Override
             public void onUnavailableLanguage() {
                 BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage)).show();
+            }
+
+            @Override
+            public void onExtensionError() {
+                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString("TranslatorExtensionFailed", R.string.TranslatorExtensionFailed)).show();
             }
         });
     }

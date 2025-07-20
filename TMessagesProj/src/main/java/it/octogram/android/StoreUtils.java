@@ -15,7 +15,7 @@ import androidx.annotation.Nullable;
 
 import org.telegram.messenger.ApplicationLoader;
 
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 public class StoreUtils {
 

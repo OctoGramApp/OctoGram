@@ -45,12 +45,12 @@ import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.LaunchActivity;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.CustomModelsMenuWrapper;
-import it.octogram.android.ai.MainAiHelper;
-import it.octogram.android.preferences.ui.DestinationLanguageSettings;
-import it.octogram.android.translator.SingleTranslationManager;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.app.ui.OctoChatsTranslatorDestinationUI;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
+import it.octogram.android.utils.ai.MainAiHelper;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
+import it.octogram.android.utils.translator.SingleTranslationsHandler;
 
 @SuppressLint({"ClickableViewAccessibility", "ViewConstructor"})
 public class SendMessageOptions extends LinearLayout {
@@ -386,7 +386,7 @@ public class SendMessageOptions extends LinearLayout {
             sendPopupWindow.dismiss();
         }
 
-        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        OctoChatsTranslatorDestinationUI destinationSettings = new OctoChatsTranslatorDestinationUI();
         destinationSettings.setCallback(this::executeMessageTranslation);
 
         AndroidUtilities.runOnUIThread(() -> {
@@ -416,19 +416,21 @@ public class SendMessageOptions extends LinearLayout {
         }
 
         BulletinFactory finalFactory = factory;
-        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, getTextFieldContent(), new SingleTranslationManager.OnTranslationResultCallback() {
+        MainTranslationsHandler.translate(UserConfig.selectedAccount, realDestination, getTextFieldContent(), new SingleTranslationsHandler.OnTranslationResultCallback() {
             @Override
-            public void onGotReqId(int reqId) {
+            public void onResponseReceived() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    progressDialog.dismiss();
 
+                    if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
+                        sendPopupWindow.dismiss();
+                    }
+                });
             }
 
             @Override
-            public void onResponseReceived() {
-                progressDialog.dismiss();
+            public void onExtensionNeedUpdate() {
 
-                if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
-                    AndroidUtilities.runOnUIThread(() -> sendPopupWindow.dismiss());
-                }
             }
 
             @Override
@@ -453,6 +455,13 @@ public class SendMessageOptions extends LinearLayout {
             public void onUnavailableLanguage() {
                 if (finalFactory != null) {
                     finalFactory.createSimpleBulletin(R.raw.info, getString(R.string.TranslatorUnsupportedLanguage)).show();
+                }
+            }
+
+            @Override
+            public void onExtensionError() {
+                if (finalFactory != null) {
+                    finalFactory.createSimpleBulletin(R.raw.info, getString(R.string.TranslatorExtensionFailed)).show();
                 }
             }
         });

@@ -54,7 +54,6 @@ import it.octogram.android.IconsUIType;
 import it.octogram.android.MediaFilter;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
-import it.octogram.android.logs.OctoLogging;
 import kotlin.uuid.Uuid;
 
 public class OctoUtils {

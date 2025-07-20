@@ -41,7 +41,7 @@ import org.telegram.ui.Components.Switch;
 import java.util.List;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.custom.FolderTypeSelector;
+import it.octogram.android.app.ui.cells.FolderTypeSelectorCell;
 
 public class PopupChoiceDialogUtils {
     public static Dialog createChoiceDialog(Activity parentActivity, List<PopupChoiceDialogOption> options, final CharSequence title, final int selected, final DialogInterface.OnClickListener listener) {
@@ -91,9 +91,9 @@ public class PopupChoiceDialogUtils {
                 } else if (option.itemSliderIconUI != null) {
                     tempLayout.addView(getSeekBar(builder.getContext(), option.itemSliderIconUI.getValue()), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
                 } else if (option.tabStyleIconUI != null) {
-                    tempLayout.addView(new FolderTypeSelector(builder.getContext(), true, option.tabStyleIconUI), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
+                    tempLayout.addView(new FolderTypeSelectorCell(builder.getContext(), true, option.tabStyleIconUI), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
                 } else if (option.tabModeIconUI != null) {
-                    tempLayout.addView(new FolderTypeSelector(builder.getContext(), true, option.tabModeIconUI), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
+                    tempLayout.addView(new FolderTypeSelectorCell(builder.getContext(), true, option.tabModeIconUI), LayoutHelper.createFrame(125, 44, Gravity.CENTER_VERTICAL | Gravity.RIGHT));
                 }
 
                 cell.addView(tempLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, (option.tabStyleIconUI != null || option.tabModeIconUI != null) ? 44 : 50, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT), 0, 0, 18, 0));

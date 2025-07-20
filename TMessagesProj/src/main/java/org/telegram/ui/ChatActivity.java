@@ -312,16 +312,16 @@ import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.TranslatorMode;
 import it.octogram.android.TranslatorProvider;
-import it.octogram.android.ai.CustomModelsMenuWrapper;
-import it.octogram.android.ai.CustomModelsHelper;
-import it.octogram.android.ai.MainAiHelper;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.DetailsActivity;
-import it.octogram.android.preferences.ui.ImportSettingsUI;
-import it.octogram.android.preferences.ui.OctoAiNewModelUI;
-import it.octogram.android.preferences.ui.components.CustomMediaFilterDialog;
-import it.octogram.android.preferences.ui.custom.EmojiSetBulletinLayout;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
+import it.octogram.android.utils.ai.CustomModelsHelper;
+import it.octogram.android.utils.ai.MainAiHelper;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.DetailsActivity;
+import it.octogram.android.app.ui.ImportSettingsUI;
+import it.octogram.android.app.ui.OctoChatsAiNewModelUI;
+import it.octogram.android.app.ui.components.CustomMediaFilterDialog;
+import it.octogram.android.app.ui.cells.EmojiSetBulletinLayout;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ContextMenuHelper;
@@ -1929,7 +1929,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         }
 
                         if (selectedObject.translated) {
-                            TranslationsWrapper.hideTranslationItem(currentAccount, selectedObject);
+                            MainTranslationsHandler.hideTranslationItem(currentAccount, selectedObject);
                             return;
                         }
 
@@ -1973,7 +1973,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         };
                         boolean noforwards = (getMessagesController().isChatNoForwards(currentChat) || message.messageOwner.noforwards && currentUser != null && currentUser.bot) && message.messageOwner.action == null && message.isSent() && !message.isEditing() && chatMode != MODE_SCHEDULED && chatMode != MODE_SAVED && getDialogId() != UserObject.VERIFY;
                         ArrayList<TLRPC.MessageEntity> entities = selectedObject != null && selectedObject.messageOwner != null ? selectedObject.messageOwner.entities : null;
-                        TranslationsWrapper.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, message.getId(), "und", toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
+                        MainTranslationsHandler.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, message.getId(), "und", toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
                     }
                 }
             }
@@ -4138,6 +4138,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             avatarContainer.onDestroy();
         }
         avatarContainer = new ChatAvatarContainer(context, this, currentEncryptedChat != null, themeDelegate) {
+            @Override
+            protected boolean canOpenStories() {
+                return !isTitleCentered();
+            }
+
             @Override
             protected boolean useAnimatedSubtitle() {
                 return chatMode == MODE_SAVED;
@@ -32057,7 +32062,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
                             if (selectedObject != null && selectedObject.translated && !translateController.isTranslatingDialog(selectedObject.getDialogId())) {
                                 item.setOnClickListener(e -> {
-                                    TranslationsWrapper.hideTranslationItem(currentAccount, selectedObject);
+                                    MainTranslationsHandler.hideTranslationItem(currentAccount, selectedObject);
                                     closeMenu(true);
                                 });
                             } else {
@@ -32092,7 +32097,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     }
                                     String toLangValue = fromLang != null && fromLang.equals(toLang) ? toLangDefault : toLang;
                                     ArrayList<TLRPC.MessageEntity> entities = selectedObject != null && selectedObject.messageOwner != null ? selectedObject.messageOwner.entities : null;
-                                    TranslationsWrapper.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], fromLang, toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
+                                    MainTranslationsHandler.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], fromLang, toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
                                     closeMenu(OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.DEFAULT.getValue());
                                     /*TranslateAlert2 alert = TranslateAlert2.showAlert(getParentActivity(), this, currentAccount, inputPeer, messageIdToTranslate[0], fromLang, toLangValue, finalMessageText, entities, noforwardsOrPaidMedia, onLinkPress, () -> dimBehindView(false));
                                     alert.setDimBehind(false);
@@ -32140,7 +32145,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     }
                                     String toLangValue = fromLang[0] != null && fromLang[0].equals(toLang) ? toLangDefault : toLang;
                                     ArrayList<TLRPC.MessageEntity> entities = selectedObject != null && selectedObject.messageOwner != null ? selectedObject.messageOwner.entities : null;
-                                    TranslationsWrapper.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], fromLang[0], toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
+                                    MainTranslationsHandler.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], fromLang[0], toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
                                     closeMenu(OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.DEFAULT.getValue());
                                     /*TranslateAlert2 alert = TranslateAlert2.showAlert(getParentActivity(), this, currentAccount, inputPeer, messageIdToTranslate[0], fromLang[0], toLangValue, finalMessageText, entities, noforwardsOrPaidMedia, onLinkPress, () -> dimBehindView(false));
                                     alert.setDimBehind(false);
@@ -32163,7 +32168,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     if (selectedObject == null || getParentActivity() == null) {
                                         return;
                                     }
-                                    TranslationsWrapper.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], "und", toLang, finalMessageText, null, noforwards, onLinkPress, () -> dimBehindView(false));
+                                    MainTranslationsHandler.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], "und", toLang, finalMessageText, null, noforwards, onLinkPress, () -> dimBehindView(false));
                                     closeMenu(OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.DEFAULT.getValue());
                                     /*TranslateAlert2 alert = TranslateAlert2.showAlert(getParentActivity(), this, currentAccount, inputPeer, messageIdToTranslate[0], "und", toLang, finalMessageText, null, noforwardsOrPaidMedia, onLinkPress, () -> dimBehindView(false));
                                     alert.setDimBehind(false);
@@ -41214,7 +41219,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (message.getDocumentName().toLowerCase().endsWith(OctoConfig.OCTOMODEL_EXTENSION)) {
                     CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelFromMessage(message);
                     if (model != null) {
-                        OctoAiNewModelUI newModelUI = new OctoAiNewModelUI();
+                        OctoChatsAiNewModelUI newModelUI = new OctoChatsAiNewModelUI();
                         newModelUI.setCurrentModel(model);
                         ChatActivity.this.presentFragment(new PreferencesFragment(newModelUI));
                         handled = true;
@@ -45164,7 +45169,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     options.add(OPTION_TRANSLATE);
                     icons.add(R.drawable.msg_translate);
                 }
-                if (selectedObject != null && selectedObject.contentType == 0 && selectedObject.translated && (!TextUtils.isEmpty(selectedObject.getMessageTextToTranslate(groupedMessages, null)) && !selectedObject.isAnimatedEmoji() && !selectedObject.isDice())) {
+                if (selectedObject != null && selectedObject.contentType == 0 && selectedObject.translated) {
                     items.add(LocaleController.getString("HideTranslation", R.string.HideTranslation));
                     options.add(OPTION_UNTRANSLATE);
                     icons.add(R.drawable.msg_cancel);
@@ -45509,7 +45514,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     options.add(OPTION_TRANSLATE);
                     icons.add(R.drawable.msg_translate);
                 }
-                if (selectedObject != null && selectedObject.contentType == 0 && selectedObject.translated && (!TextUtils.isEmpty(selectedObject.getMessageTextToTranslate(selectedObjectGroup, null)) && !selectedObject.isAnimatedEmoji() && !selectedObject.isDice())) {
+                if (selectedObject != null && selectedObject.contentType == 0 && selectedObject.translated) {
                     items.add(LocaleController.getString("HideTranslation", R.string.HideTranslation));
                     options.add(OPTION_UNTRANSLATE);
                     icons.add(R.drawable.msg_cancel);

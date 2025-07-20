@@ -28,7 +28,7 @@ import org.telegram.ui.Components.StickerImageView;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
-import it.octogram.android.preferences.ui.components.CustomBottomSheet;
+import it.octogram.android.app.ui.bottomsheets.CustomBottomSheet;
 
 public class CrashlyticsBottomSheet extends CustomBottomSheet {
     private CrashlyticsBottomSheet(BaseFragment fragment) {

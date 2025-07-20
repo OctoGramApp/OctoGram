@@ -8,64 +8,85 @@
 
 package it.octogram.android.utils.chat;
 
-import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.LocaleController.getString;
-
 import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.ViewPropertyAnimator;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
 
-import org.telegram.messenger.AccountInstance;
-import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.R;
-import org.telegram.messenger.Utilities;
-import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
-import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.ChatActivity;
-import org.telegram.ui.Components.AnimatedEmojiSpan;
-import org.telegram.ui.Components.LayoutHelper;
 
 import java.util.ArrayList;
 
-import it.octogram.android.ContextMenuBriefingState;
-import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.MainAiHelper;
-import it.octogram.android.preferences.ui.components.ChatSettingsPreviews;
+import it.octogram.android.app.ui.cells.ChatSettingsPreviewsCell.ContextMenuPreviewItem;
 
 public class ContextMenuHelper {
+    private static final int MAX_SHORTCUTS = 4;
     public static final ContextMenuHelper INSTANCE = new ContextMenuHelper();
 
     public static boolean mustUseSwipeback() {
         return false;
     }
 
-    public static ArrayList<ChatSettingsPreviews.ContextMenuPreviewItem> fillPreviewMenu(Context context) {
-        return new ArrayList<>();
+    public static ArrayList<ContextMenuPreviewItem> fillPreviewMenu(Context context) {
+        return new ContextMenuComposer(context).build();
     }
 
     public static void fillMenu(Context context, ArrayList<CharSequence> items, ArrayList<Integer> options, ArrayList<Integer> icons, OnItemAddReady callback) {
+        new ContextMenuComposer(context, items, options, icons, callback);
+    }
+
+    private static boolean mustSkipItem(Integer option) {
+        return false;
+    }
+
+    private static class ContextMenuComposer {
+        private final ArrayList<ContextMenuPreviewItem> finalItems = new ArrayList<>();
+
+        public ContextMenuComposer(Context context, ArrayList<CharSequence> items, ArrayList<Integer> options, ArrayList<Integer> icons, @Nullable OnItemAddReady callback) {}
+
+        public ContextMenuComposer(Context context) {}
+
+        private void fillState() {}
+
+        private void fixState() {}
+
+        private void handleItem(int id, int icon, CharSequence name, Object category) {}
+
+        private ArrayList<Integer> getVisibleShortcutsList() {
+            return new ArrayList<>();
+        }
+
+        private void handleShortcuts() {}
+
+        private ArrayList<Integer> handleSubCategories() {
+            return new ArrayList<>();
+        }
+
+        private ArrayList<ContextMenuPreviewItem> build() {
+            return finalItems;
+        }
+
+        private Object composeSubCategoryLayout(Object category) {
+            return null;
+        }
+
+        private Object getPopupWindowLayout() {
+            return null;
+        }
+
+        private int getCategoryAvailableOptionsCount(Object category) {
+            return 0;
+        }
     }
 
     public interface OnItemAddReady {
-        ActionBarPopupWindow.ActionBarPopupWindowLayout getPopupWindowLayout();
-        void onItemAdd(int id, ActionBarMenuSubItem item);
-        void onShortcutsAdd(ShortcutsLayout shortcutsLayout);
-        void onSeparatorAdd();
-        void onItemClick(int id);
+        default ActionBarPopupWindow.ActionBarPopupWindowLayout getPopupWindowLayout() { return null; }
+        default void onItemAdd(int id, ActionBarMenuSubItem item) {}
+        default void onShortcutsAdd(ShortcutsLayout shortcutsLayout) {}
+        default void onSeparatorAdd() {}
+        default void onItemClick(int id) {}
     }
 
     public static class ShortcutsLayout extends LinearLayout {
@@ -73,24 +94,27 @@ public class ContextMenuHelper {
             super(context);
         }
 
+        private boolean isFirstAppear = true;
+        private boolean lastDrawState = false;
+        private boolean isAnimatingPreview = false;
+        private final ArrayList<ViewPropertyAnimator> animators = new ArrayList<>();
+
         public void fillOptions(ArrayList<CharSequence> items, ArrayList<Integer> options, ArrayList<Integer> icons) {
+            fillOptions(items, options, icons, false);
         }
 
-        public void fillOptions(ArrayList<CharSequence> items, ArrayList<Integer> options, ArrayList<Integer> icons, boolean faster) {
-        }
+        public void fillOptions(ArrayList<CharSequence> items, ArrayList<Integer> options, ArrayList<Integer> icons, boolean faster) {}
 
-        public void fillPreviewOptions() {
-        }
+        public void fillPreviewOptions() {}
 
-        public void setOnItemClick(Utilities.Callback<Integer> onItemClick) {
-        }
+        public void setOnItemClick(Object onItemClick) {}
     }
 
-    public AccountInstance getAccountInstance(int currentAccount) {
+    public Object getAccountInstance(int currentAccount) {
         return null;
     }
 
-    public MessagesController getMessagesController(int currentAccount) {
+    public Object getMessagesController(int currentAccount) {
         return null;
     }
 }

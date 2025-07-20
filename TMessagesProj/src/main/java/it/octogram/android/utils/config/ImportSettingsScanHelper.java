@@ -20,18 +20,18 @@ import java.util.Locale;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.OctoAiFeaturesUI;
-import it.octogram.android.preferences.ui.OctoAppearanceUI;
-import it.octogram.android.preferences.ui.OctoCameraSettingsUI;
-import it.octogram.android.preferences.ui.OctoChatsSettingsUI;
-import it.octogram.android.preferences.ui.OctoDrawerSettingsUI;
-import it.octogram.android.preferences.ui.OctoExperimentsUI;
-import it.octogram.android.preferences.ui.OctoGeneralSettingsUI;
-import it.octogram.android.preferences.ui.OctoPrivacySettingsUI;
-import it.octogram.android.preferences.ui.OctoTranslatorUI;
-import it.octogram.android.preferences.ui.OctoUpdatesUI;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.OctoAppearanceDrawerSettingsUI;
+import it.octogram.android.app.ui.OctoAppearanceUI;
+import it.octogram.android.app.ui.OctoCameraSettingsUI;
+import it.octogram.android.app.ui.OctoChatsAiFeaturesUI;
+import it.octogram.android.app.ui.OctoChatsTranslatorUI;
+import it.octogram.android.app.ui.OctoChatsUI;
+import it.octogram.android.app.ui.OctoExperimentsUI;
+import it.octogram.android.app.ui.OctoGeneralSettingsUI;
+import it.octogram.android.app.ui.OctoPrivacySettingsUI;
+import it.octogram.android.app.ui.OctoUpdatesUI;
+import it.octogram.android.utils.OctoLogging;
 
 public class ImportSettingsScanHelper {
     public ArrayList<SettingsScanCategory> categories = new ArrayList<>();
@@ -43,10 +43,10 @@ public class ImportSettingsScanHelper {
 
         SettingsScanCategory generalCategory = new SettingsScanCategory("general", R.string.General, R.drawable.msg_media, (t) -> new PreferencesFragment(new OctoGeneralSettingsUI(), t));
         SettingsScanCategory appearanceCategory = new SettingsScanCategory("appearance", R.string.Appearance, R.drawable.settings_appearance, (t) -> new PreferencesFragment(new OctoAppearanceUI(), t));
-        SettingsScanCategory appearanceDrawerCategory = new SettingsScanCategory("appearanceDrawer", R.string.DrawerTitle, R.drawable.msg_map_type, (t) -> new PreferencesFragment(new OctoDrawerSettingsUI(), t)).setRefersTo(appearanceCategory);
-        SettingsScanCategory chatsCategory = new SettingsScanCategory("chats", R.string.ChatTitle, R.drawable.msg2_discussion, (t) -> new PreferencesFragment(new OctoChatsSettingsUI(), t));
-        SettingsScanCategory chatsTranslatorCategory = new SettingsScanCategory("translator", R.string.Translator, R.drawable.msg_translate, (t) -> new PreferencesFragment(new OctoTranslatorUI(), t)).setRefersTo(chatsCategory);
-        SettingsScanCategory chatsAiFeaturesCategory = new SettingsScanCategory("aiFeatures", R.string.AiFeatures_Brief, R.drawable.cup_star_solar, (t) -> new PreferencesFragment(new OctoAiFeaturesUI(), t)).setRefersTo(chatsCategory);
+        SettingsScanCategory appearanceDrawerCategory = new SettingsScanCategory("appearanceDrawer", R.string.DrawerTitle, R.drawable.msg_map_type, (t) -> new PreferencesFragment(new OctoAppearanceDrawerSettingsUI(), t)).setRefersTo(appearanceCategory);
+        SettingsScanCategory chatsCategory = new SettingsScanCategory("chats", R.string.ChatTitle, R.drawable.msg2_discussion, (t) -> new PreferencesFragment(new OctoChatsUI(), t));
+        SettingsScanCategory chatsTranslatorCategory = new SettingsScanCategory("translator", R.string.Translator, R.drawable.msg_translate, (t) -> new PreferencesFragment(new OctoChatsTranslatorUI(), t)).setRefersTo(chatsCategory);
+        SettingsScanCategory chatsAiFeaturesCategory = new SettingsScanCategory("aiFeatures", R.string.AiFeatures_Brief, R.drawable.cup_star_solar, (t) -> new PreferencesFragment(new OctoChatsAiFeaturesUI(), t)).setRefersTo(chatsCategory);
         SettingsScanCategory chatCameraCategory = new SettingsScanCategory("chatcamera", R.string.ChatCamera, R.drawable.msg_camera, (t) -> new PreferencesFragment(new OctoCameraSettingsUI(), t));
         SettingsScanCategory privacyCategory = new SettingsScanCategory("privacy", R.string.PrivacySettings, R.drawable.menu_privacy, (t) -> new PreferencesFragment(new OctoPrivacySettingsUI(), t));
         SettingsScanCategory experimentsCategory = new SettingsScanCategory("experiments", R.string.Experiments, R.drawable.outline_science_white, (t) -> new PreferencesFragment(new OctoExperimentsUI(), t));
@@ -173,6 +173,7 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesOllamaApiUrl.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.usePredictiveGestures.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.roundedTextBox.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.useSmoothPopupBackground.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getKey()); // part of main settings page
     }
 
@@ -364,7 +365,6 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.profileBubbleMoreTopPadding, R.string.ProfileBubbleMoreTopPadding));
         category.options.add(SettingsScanOption.asTitle(R.string.DownloadAndUploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.useQualityPreset, R.string.UseQualityPreset));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.keepOriginalFileName, R.string.KeepOriginalFileName));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uploadBoost, R.string.UploadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoost, R.string.DownloadBoost));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.downloadBoostValue, R.string.DownloadBoostType));

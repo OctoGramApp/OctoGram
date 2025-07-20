@@ -28,9 +28,9 @@ import org.telegram.ui.ActionBar.Theme;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.ai.CustomModelsMenuWrapper;
-import it.octogram.android.ai.CustomModelsHelper;
-import it.octogram.android.ai.MainAiHelper;
+import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
+import it.octogram.android.utils.ai.CustomModelsHelper;
+import it.octogram.android.utils.ai.MainAiHelper;
 
 public class ChatUnreadCell extends FrameLayout {
 

@@ -15,7 +15,7 @@ import org.telegram.ui.ProfileActivity;
 import java.util.Objects;
 import java.util.Set;
 
-import it.octogram.android.preferences.fragment.PreferencesFragment;
+import it.octogram.android.app.fragment.PreferencesFragment;
 
 public class TelegramSettingsHelper {
     private static final Set<String> TELEGRAM_SETTINGS_CLASSES = Set.of(

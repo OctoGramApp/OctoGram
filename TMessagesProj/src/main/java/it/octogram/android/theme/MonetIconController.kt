@@ -10,7 +10,7 @@ package it.octogram.android.theme
 
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
-import it.octogram.android.logs.OctoLogging
+import it.octogram.android.utils.OctoLogging
 import org.telegram.ui.LauncherIconController
 
 object MonetIconController {

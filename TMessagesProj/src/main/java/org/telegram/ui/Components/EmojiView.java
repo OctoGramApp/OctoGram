@@ -86,10 +86,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
@@ -151,8 +147,6 @@ import java.util.Objects;
 
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
 
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 

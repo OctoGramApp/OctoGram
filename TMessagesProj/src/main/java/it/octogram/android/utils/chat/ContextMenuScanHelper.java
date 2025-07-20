@@ -8,11 +8,6 @@
 
 package it.octogram.android.utils.chat;
 
-import static org.telegram.messenger.LocaleController.getString;
-
-import org.telegram.messenger.R;
-import org.telegram.ui.ChatActivity;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,9 +16,20 @@ public class ContextMenuScanHelper {
     public static final ArrayList<Integer> options = new ArrayList<>();
     public static final ArrayList<Integer> icons = new ArrayList<>();
 
+    static {
+    }
+
     public static final ArrayList<Integer> pinnedOptions = new ArrayList<>();
+    static {
+    }
+
     public static final HashMap<Integer, String> pinnedOptionsNameReplacements = new HashMap<>();
+    static {
+    }
+
     public static final ArrayList<SubCategories> subcategories = new ArrayList<>();
+    static {
+    }
 
     public static class SubCategories {
         private int categoryIcon;
@@ -45,9 +51,6 @@ public class ContextMenuScanHelper {
         }
 
         public SubCategories addCategoryOption(int option) {
-            if (!categoryOptions.contains(option)) {
-                categoryOptions.add(option);
-            }
             return this;
         }
 
@@ -56,11 +59,11 @@ public class ContextMenuScanHelper {
         }
 
         public String getCategoryName() {
-            return getString(categoryName);
+            return "";
         }
 
         public ArrayList<Integer> getCategoryOptions() {
-            return categoryOptions;
+            return new ArrayList<>();
         }
     }
 }

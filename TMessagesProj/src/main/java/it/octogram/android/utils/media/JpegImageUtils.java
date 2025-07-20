@@ -24,7 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 
 public final class JpegImageUtils {
     private static final String TAG = "JpegImageUtils";

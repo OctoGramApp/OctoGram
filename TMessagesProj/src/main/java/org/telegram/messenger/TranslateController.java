@@ -1,15 +1,9 @@
 package org.telegram.messenger;
 
-import static org.telegram.ui.Components.TranslateAlert2.userAgents;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.icu.text.Collator;
-import android.net.Uri;
-import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
 import android.view.inputmethod.InputMethodInfo;
@@ -17,11 +11,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import androidx.annotation.Nullable;
-
-import com.google.common.base.Charsets;
-
-import org.json.JSONArray;
-import org.json.JSONTokener;
 
 //import com.google.mlkit.common.model.RemoteModelManager;
 //import com.google.mlkit.common.sdkinternal.MlKitContext;
@@ -43,20 +32,8 @@ import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.PhotoViewer;
-import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ChatActivity;
-import org.telegram.ui.Components.Bulletin;
-import org.telegram.ui.Components.BulletinFactory;
-import org.telegram.ui.Components.TranslateAlert2;
-import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,9 +49,9 @@ import java.util.Set;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.TranslatorProvider;
-import it.octogram.android.translator.QueueTranslationManager;
-import it.octogram.android.translator.SingleTranslationManager;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.translator.QueueTranslationsHandler;
+import it.octogram.android.utils.translator.SingleTranslationsHandler;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 
 public class TranslateController extends BaseController {
 
@@ -355,22 +332,15 @@ public class TranslateController extends BaseController {
         //TranslateAlert2.setToLanguage(language);
     }
 
-    public int getDialogsWithUnavailableLanguage() {
+    public int fixChatsWithUnavailableLanguage() {
         int i = 0;
         for (Long dialogId : translateDialogLanguage.keySet()) {
-            if (TranslationsWrapper.isLanguageUnavailable(translateDialogLanguage.get(dialogId))) {
+            if (MainTranslationsHandler.isLanguageUnavailable(translateDialogLanguage.get(dialogId))) {
+                translateDialogLanguage.remove(dialogId);
                 i++;
             }
         }
         return i;
-    }
-
-    public void fixChatsWithUnavailableLanguage() {
-        for (Long dialogId : translateDialogLanguage.keySet()) {
-            if (TranslationsWrapper.isLanguageUnavailable(translateDialogLanguage.get(dialogId))) {
-                translateDialogLanguage.remove(dialogId);
-            }
-        }
     }
 
     public void updateDialogFull(long dialogId) {
@@ -482,7 +452,7 @@ public class TranslateController extends BaseController {
     public static ArrayList<Language> getLanguages() {
         ArrayList<Language> result = new ArrayList<>();
         for (int i = 0; i < allLanguages.size(); ++i) {
-            if (OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEFAULT.getValue() && TranslationsWrapper.isLanguageUnavailable(allLanguages.get(i))) {
+            if (OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEFAULT.getValue() && MainTranslationsHandler.isLanguageUnavailable(allLanguages.get(i))) {
                 continue;
             }
 
@@ -551,7 +521,7 @@ public class TranslateController extends BaseController {
         }
 
         if (OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEFAULT.getValue()) {
-            langs.removeIf(lang -> !TranslationsWrapper.isLanguageUnavailable(lang));
+            langs.removeIf(lang -> !MainTranslationsHandler.isLanguageUnavailable(lang));
         }
 
         suggestedLanguageCodes = langs;
@@ -1042,10 +1012,10 @@ public class TranslateController extends BaseController {
                     }
                 }
 
-                QueueTranslationManager queueTranslationManager = new QueueTranslationManager();
-                queueTranslationManager.peer = getMessagesController().getInputPeer(dialogId);
-                queueTranslationManager.translations = pendingTranslation1;
-                queueTranslationManager.initQueueTranslation(new QueueTranslationManager.OnQueueTranslationResultCallback() {
+                QueueTranslationsHandler queueTranslationsHandler = new QueueTranslationsHandler();
+                queueTranslationsHandler.peer = getMessagesController().getInputPeer(dialogId);
+                queueTranslationsHandler.translations = pendingTranslation1;
+                queueTranslationsHandler.initQueueTranslation(new QueueTranslationsHandler.OnQueueTranslationResultCallback() {
                     @Override
                     public void onGotReqId(int reqId) {
                         synchronized (TranslateController.this) {
@@ -1889,15 +1859,16 @@ public class TranslateController extends BaseController {
 
         final long start = System.currentTimeMillis();
         int provider = OctoConfig.INSTANCE.translatorProvider.getValue();
-        TranslationsWrapper.translate(UserConfig.selectedAccount, toLang, messageObject.messageOwner.message, messageObject.messageOwner.entities, new SingleTranslationManager.OnTranslationResultCallback() {
-            @Override
-            public void onGotReqId(int reqId) {
-
-            }
+        MainTranslationsHandler.translate(UserConfig.selectedAccount, toLang, messageObject.messageOwner.message, messageObject.messageOwner.entities, new SingleTranslationsHandler.OnTranslationResultCallback() {
 
             @Override
             public void onResponseReceived() {
                 translatingPhotos.remove(key);
+            }
+
+            @Override
+            public void onExtensionNeedUpdate() {
+
             }
 
             @Override
@@ -1911,8 +1882,7 @@ public class TranslateController extends BaseController {
                 }
             }
 
-            @Override
-            public void onError() {
+            public void onError(int error) {
                 messageObject.messageOwner.translatedToLanguage = toLang;
                 messageObject.messageOwner.translatedText = null;
                 messageObject.messageOwner.translatedProviderId = provider;
@@ -1920,19 +1890,22 @@ public class TranslateController extends BaseController {
                 if (done != null) {
                     AndroidUtilities.runOnUIThread(done, Math.max(0, 400L - (System.currentTimeMillis() - start)));
                 }
-                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorFailed)).show();
+                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(error)).show();
+            }
+
+            @Override
+            public void onError() {
+                onError(R.string.TranslatorFailed);
             }
 
             @Override
             public void onUnavailableLanguage() {
-                messageObject.messageOwner.translatedToLanguage = toLang;
-                messageObject.messageOwner.translatedText = null;
-                messageObject.messageOwner.translatedProviderId = provider;
-                getMessagesStorage().updateMessageCustomParams(key.dialogId, messageObject.messageOwner);
-                if (done != null) {
-                    AndroidUtilities.runOnUIThread(done, Math.max(0, 400L - (System.currentTimeMillis() - start)));
-                }
-                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.TranslatorUnsupportedLanguage)).show();
+                onError(R.string.TranslatorUnsupportedLanguage);
+            }
+
+            @Override
+            public void onExtensionError() {
+                onError(R.string.TranslatorExtensionFailed);
             }
         });
 

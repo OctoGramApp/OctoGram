@@ -23,8 +23,6 @@ import java.io.RandomAccessFile;
 import java.text.MessageFormat;
 import java.util.Locale;
 
-import it.octogram.android.logs.OctoLogging;
-
 public class CustomDevicePerformanceManager {
     /**
      * List of device hardware IDs (probably based on some system property or build characteristics)

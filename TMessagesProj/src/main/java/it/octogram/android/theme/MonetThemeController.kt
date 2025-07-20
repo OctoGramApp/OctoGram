@@ -15,7 +15,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.PatternMatcher
 import androidx.annotation.RequiresApi
-import it.octogram.android.logs.OctoLogging
+import it.octogram.android.utils.OctoLogging
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.R
 import org.telegram.ui.ActionBar.Theme

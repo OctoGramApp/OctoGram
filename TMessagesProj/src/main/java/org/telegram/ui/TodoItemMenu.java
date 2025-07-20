@@ -661,7 +661,7 @@ public class TodoItemMenu extends Dialog {
 
         if (hasExtraOptions) {
             messageOptions.addGap();
-            messageOptions.addText(getString(R.string.ContextMenuElements_MoreHidden), 14);
+            messageOptions.addText(getString(R.string.ContextMenuElements_MoreHidden), 13, dp(200));
         }
 
         messageOptions.setupSelectors();

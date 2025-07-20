@@ -13,7 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IntDef
 import androidx.annotation.StringDef
 import androidx.core.graphics.toColorInt
-import it.octogram.android.preferences.fragment.OctoAnimationFragment
+import it.octogram.android.app.fragment.OctoAnimationFragment
 import org.telegram.messenger.LocaleController.getString
 import org.telegram.messenger.R
 
@@ -242,7 +242,8 @@ enum class TranslatorProvider(val value: Int) {
     DEEPL(3),
     BAIDU(4),
     LINGO(5),
-    DEVICE_TRANSLATION(7)
+    DEVICE_TRANSLATION(7),
+    GOOGLE_CLOUD(8)
 }
 
 enum class TranslatorFormality(val value: Int) {
@@ -474,6 +475,7 @@ enum class StickerUi(val value: Int) {
     DUCK_OK(32),
     NEW_MODEL_GENERATION(33),
     OCTO_LOGS_PLACEHOLDER(34),
+    COMMUNICATION(35),
 }
 
 enum class DrawerBackgroundState(val value: Int) {

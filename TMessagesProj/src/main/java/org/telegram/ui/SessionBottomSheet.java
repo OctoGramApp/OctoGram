@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.preferences.ui.custom.CustomDeviceNameBottomSheet;
+import it.octogram.android.app.ui.bottomsheets.CustomDeviceNameBottomSheet;
 import it.octogram.android.utils.SessionIconUtils;
 
 public class SessionBottomSheet extends BottomSheet {

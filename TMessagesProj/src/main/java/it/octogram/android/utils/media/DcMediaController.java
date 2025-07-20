@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import it.octogram.android.logs.OctoLogging;
-import it.octogram.android.preferences.ui.custom.DatacenterStatus;
+import it.octogram.android.app.ui.cells.SingleDatacenterStatusPreview;
+import it.octogram.android.utils.OctoLogging;
 
 /**
  * @noinspection SequencedCollectionMethodCanBeUsed
@@ -80,7 +80,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
 
         for (int i = 1; i <= 5; i++) {
             if (specificDcId == 0 || specificDcId == i) {
-                callback.onUpdate(i, DatacenterStatus.DOWNLOADING);
+                callback.onUpdate(i, SingleDatacenterStatusPreview.DOWNLOADING);
             }
         }
 
@@ -107,7 +107,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         if (callback != null && promptInterrupt) {
             for (int i = 1; i <= 5; i++) {
                 if (!parsedDcs.contains(i)) {
-                    callback.onUpdate(i, DatacenterStatus.INTERRUPTED);
+                    callback.onUpdate(i, SingleDatacenterStatusPreview.INTERRUPTED);
                 }
             }
         }
@@ -223,13 +223,13 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
                 downloadingMedias.add(message.media.document);
                 assocFileNames.put(FileLoader.getAttachFileName(message.media.document), dcIdAssoc);
                 getFileLoader().loadFile(message.media.document, "dc_id_test", FileLoader.PRIORITY_NORMAL, 1);
-                callback.onUpdate(dcIdAssoc, DatacenterStatus.DOWNLOADING, 0);
+                callback.onUpdate(dcIdAssoc, SingleDatacenterStatusPreview.DOWNLOADING, 0);
             }
         }
         for (int i = 1; i <= 5; i++) {
             if (!parsedDcIds.contains(i) && (specificDcId == 0 || specificDcId == i)) {
                 parsedDcs.add(i);
-                callback.onUpdate(i, DatacenterStatus.DOWNLOAD_FAILED);
+                callback.onUpdate(i, SingleDatacenterStatusPreview.DOWNLOAD_FAILED);
             }
         }
     }
@@ -273,14 +273,14 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         if (id == NotificationCenter.fileLoaded) {
             int time = (int) ((System.currentTimeMillis() - startedAt) / 1000F);
             parsedDcs.add(dcId);
-            callback.onUpdate(dcId, DatacenterStatus.DOWNLOAD_END, time, parsedDcs.size());
+            callback.onUpdate(dcId, SingleDatacenterStatusPreview.DOWNLOAD_END, time, parsedDcs.size());
         } else if (id == NotificationCenter.fileLoadProgressChanged) {
             Float p = ImageLoader.getInstance().getFileProgress(path);
-            callback.onUpdate(dcId, DatacenterStatus.DOWNLOADING, p != null ? ((int) (p * 100)) : 0);
+            callback.onUpdate(dcId, SingleDatacenterStatusPreview.DOWNLOADING, p != null ? ((int) (p * 100)) : 0);
         } else if (id == NotificationCenter.fileLoadFailed) {
             int reason = (int) args[1];
             parsedDcs.add(dcId);
-            callback.onUpdate(dcId, reason == 2 ? DatacenterStatus.DOWNLOAD_FAILED_TRY_LATER : DatacenterStatus.DOWNLOAD_FAILED, parsedDcs.size());
+            callback.onUpdate(dcId, reason == 2 ? SingleDatacenterStatusPreview.DOWNLOAD_FAILED_TRY_LATER : SingleDatacenterStatusPreview.DOWNLOAD_FAILED, parsedDcs.size());
         }
     }
 

@@ -86,6 +86,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <uses-permission android:name="it.octogram.ondevice.permission.USE_TRANSLATION_SERVICE"/>
+
     <uses-sdk tools:overrideLibrary="androidx.camera.video, androidx.camera.view, androidx.camera.extensions, androidx.camera.lifecycle, androidx.camera.camera2, androidx.camera.core, com.google.mlkit.vision.segmentation.subject" />
 
     <queries>
@@ -93,6 +95,12 @@
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="ton"/>
+        </intent>
+
+        <package android:name="it.octogram.ondevice" />
+        <intent>
+            <action android:name="it.octogram.ondevice.ACTION_TRANSLATE" />
+            <category android:name="android.intent.category.DEFAULT" />
         </intent>
     </queries>
 
@@ -582,17 +590,6 @@
                 android:resource="@xml/contacts" />
         </service>
 
-        <!--<service android:name=".KeepAliveJob"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <service android:name=".BringAppForegroundService" android:enabled="true"  android:exported="true"/>
-        <service android:name=".NotificationsService" android:enabled="true"  android:exported="true"/>
-        <service android:name=".NotificationRepeat" android:exported="false"/>
-        <service android:name=".VideoEncodingService" android:enabled="true" android:exported="true"/>
-        <service android:name="org.telegram.ui.Stories.recorder.StoryUploadingService" android:enabled="true" android:exported="true"/>
-        <service android:name=".ImportingService" android:enabled="true" android:exported="true"/>
-        <service android:name=".LocationSharingService"
-            android:foregroundServiceType="location"-->
         <service
             android:name=".KeepAliveJob"
             android:exported="false"

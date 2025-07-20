@@ -119,7 +119,6 @@ import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BirthdayController;
 import org.telegram.messenger.BotWebViewVibrationEffect;
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
@@ -206,12 +205,12 @@ import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.DefaultMicrophoneButtonAction;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PromptBeforeSendMedia;
-import it.octogram.android.ai.MainAiHelper;
-import it.octogram.android.ai.CustomModelsMenuWrapper;
-import it.octogram.android.preferences.ui.DestinationLanguageSettings;
+import it.octogram.android.utils.ai.MainAiHelper;
+import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
+import it.octogram.android.app.ui.OctoChatsTranslatorDestinationUI;
 import it.octogram.android.utils.PopupPromptUtils;
-import it.octogram.android.translator.SingleTranslationManager;
-import it.octogram.android.translator.TranslationsWrapper;
+import it.octogram.android.utils.translator.SingleTranslationsHandler;
+import it.octogram.android.utils.translator.MainTranslationsHandler;
 import it.octogram.android.utils.chat.DragAndDropImageHandler;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate, SuggestEmojiView.AnchorViewDelegate {
@@ -4750,7 +4749,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             messageSendPreview = null;
         }
 
-        DestinationLanguageSettings destinationSettings = new DestinationLanguageSettings();
+        OctoChatsTranslatorDestinationUI destinationSettings = new OctoChatsTranslatorDestinationUI();
         destinationSettings.setCallback(this::executeMessageTranslation);
         AndroidUtilities.runOnUIThread(() -> {
             parentFragment.presentFragment(destinationSettings);
@@ -4768,22 +4767,22 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         final AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
         progressDialog.showDelayed(500);
 
-        TranslationsWrapper.translate(UserConfig.selectedAccount, realDestination, messageEditText.getText().toString().trim(), new SingleTranslationManager.OnTranslationResultCallback() {
+        MainTranslationsHandler.translate(UserConfig.selectedAccount, realDestination, messageEditText.getText().toString().trim(), new SingleTranslationsHandler.OnTranslationResultCallback() {
             @Override
-            public void onGotReqId(int reqId) {
+            public void onResponseReceived() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    progressDialog.dismiss();
 
+                    if (messageSendPreview != null) {
+                        messageSendPreview.dismiss(false);
+                        messageSendPreview = null;
+                    }
+                });
             }
 
             @Override
-            public void onResponseReceived() {
-                progressDialog.dismiss();
+            public void onExtensionNeedUpdate() {
 
-                if (messageSendPreview != null) {
-                    AndroidUtilities.runOnUIThread(() -> {
-                        messageSendPreview.dismiss(false);
-                        messageSendPreview = null;
-                    });
-                }
             }
 
             @Override
@@ -4802,6 +4801,11 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             @Override
             public void onUnavailableLanguage() {
                 AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString("TranslatorUnsupportedLanguage", R.string.TranslatorUnsupportedLanguage)));
+            }
+
+            @Override
+            public void onExtensionError() {
+                AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString("TranslatorExtensionFailed", R.string.TranslatorExtensionFailed)));
             }
         });
     }
@@ -11508,15 +11512,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             if (!shouldDrawBackground) {
                 index = sizeNotifierLayout.getChildCount();
             }
-//            if (!OctoConfig.INSTANCE.roundedTextBox.getValue()) {
             sizeNotifierLayout.addView(emojiView, index);
-//            } else {
-//                FrameLayout.LayoutParams layoutParams = LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT);
-//                layoutParams.leftMargin = AndroidUtilities.dp(10);
-//                layoutParams.rightMargin = AndroidUtilities.dp(10);
-//                layoutParams.bottomMargin = AndroidUtilities.dp(8);
-//                sizeNotifierLayout.addView(emojiView, index, layoutParams);
-//            }
         }
     }
 

@@ -73,7 +73,7 @@ import org.telegram.ui.bots.BotBiometrySettings;
 
 import java.util.ArrayList;
 
-import it.octogram.android.preferences.ui.custom.DeleteAccountBottomSheet;
+import it.octogram.android.app.ui.bottomsheets.DeleteAccountBottomSheet;
 
 public class PrivacySettingsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 

@@ -44,7 +44,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
@@ -64,7 +63,6 @@ import android.media.MediaCodecList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -87,7 +85,6 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -159,7 +156,6 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
-import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -326,11 +322,11 @@ import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
 import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
-import it.octogram.android.preferences.fragment.PreferencesFragment;
-import it.octogram.android.preferences.ui.OctoMainSettingsUI;
-import it.octogram.android.preferences.ui.components.CustomFab;
-import it.octogram.android.preferences.ui.components.OutlineProvider;
-import it.octogram.android.preferences.ui.custom.DatacenterCell;
+import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.OctoMainSettingsUI;
+import it.octogram.android.app.ui.components.CustomFab;
+import it.octogram.android.app.ui.components.OutlineProvider;
+import it.octogram.android.app.ui.cells.ProfileDatacenterPreviewCell;
 import it.octogram.android.utils.CustomDevicePerformanceManager;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.UserAccountInfoController;
@@ -12057,7 +12053,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     view.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
                     break;
                 case VIEW_TYPE_DATACENTER_INFO: {
-                    view = new DatacenterCell(mContext, resourcesProvider);
+                    view = new ProfileDatacenterPreviewCell(mContext, resourcesProvider);
                     break;
                 }
                 case VIEW_TYPE_CHANNEL:
@@ -12825,7 +12821,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     textCheckCell.setTextAndCheck(LocaleController.getString(R.string.Notifications), !getMessagesController().isDialogMuted(getDialogId(), topicId), false);
                     break;
                 case VIEW_TYPE_DATACENTER_INFO:
-                    DatacenterCell dc = (DatacenterCell) holder.itemView;
+                    ProfileDatacenterPreviewCell dc = (ProfileDatacenterPreviewCell) holder.itemView;
                     TLRPC.User currentUser = getMessagesController().getUser(userId);
                     UserAccountInfoController.UserAccountInfo info = currentChat != null ? UserAccountInfoController.getDcInfo(currentChat) : UserAccountInfoController.getDcInfo(currentUser);
                     boolean withDivider = (chatInfo != null && !TextUtils.isEmpty(chatInfo.about)) || (currentChat != null && !TextUtils.isEmpty(currentChat.username)) || currentUser != null && (UserObject.isUserSelf(currentUser) || !TextUtils.isEmpty(currentUser.username));

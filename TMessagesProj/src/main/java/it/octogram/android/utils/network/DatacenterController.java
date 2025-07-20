@@ -15,8 +15,8 @@ import org.telegram.messenger.Utilities;
 import java.net.SocketException;
 
 import it.octogram.android.Datacenter;
+import it.octogram.android.app.ui.cells.SingleDatacenterStatusPreview;
 import it.octogram.android.http.StandardHTTPRequest;
-import it.octogram.android.preferences.ui.custom.DatacenterStatus;
 
 public class DatacenterController {
     public static class DatacenterStatusChecker {
@@ -48,9 +48,9 @@ public class DatacenterController {
 
                             try {
                                 var ping = StandardHTTPRequest.ping(dcInfo.getIp());
-                                updateCallback.onUpdate(i, DatacenterStatus.AVAILABLE, ping);
+                                updateCallback.onUpdate(i, SingleDatacenterStatusPreview.AVAILABLE, ping);
                             } catch (SocketException e) {
-                                updateCallback.onUpdate(i, DatacenterStatus.UNAVAILABLE);
+                                updateCallback.onUpdate(i, SingleDatacenterStatusPreview.UNAVAILABLE);
                             }
 
                             SystemClock.sleep(500L);

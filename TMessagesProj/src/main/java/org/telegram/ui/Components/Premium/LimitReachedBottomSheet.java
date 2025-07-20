@@ -1211,16 +1211,16 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView imp
             } else {
                 if (StoryRecorder.isVisible()) {
                     ChatActivity chatFragment = ChatActivity.of(-chat.id);
+                    /*LaunchActivity.getLastFragment().presentFragment(chatFragment, false, false);
+                    StoryRecorder.destroyInstance();
+                    dismiss();
+                    BoostDialogs.showBulletin(chatFragment, chat, false);*/
                     LaunchActivity.getLastFragment().presentFragment(new INavigationLayout.NavigationParams(chatFragment).setRemoveLast(false).setNoAnimation(false).setOnFragmentOpen(() -> {
                         LaunchActivity.getLastFragment().presentFragment(chatFragment, false, false);
                         StoryRecorder.destroyInstance();
                         dismiss();
                         BoostDialogs.showBulletin(chatFragment, chat, false);
                     }));
-//                    LaunchActivity.getLastFragment().presentFragment(chatFragment, false, false);
-//                    StoryRecorder.destroyInstance();
-//                    dismiss();
-//                    BoostDialogs.showBulletin(chatFragment, chat, false);
                 } else {
                     dismiss();
                     BoostDialogs.showBulletin(LaunchActivity.getLastFragment(), chat, false);
@@ -2135,9 +2135,9 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView imp
                     addView(rootLayout, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 38, Gravity.CENTER, 0, -4, 0, 12));
                     ScaleStateListAnimator.apply(rootLayout);
                     rootLayout.setOnClickListener(v -> {
-                        getBaseFragment().presentFragment(new INavigationLayout.NavigationParams(ChatActivity.of(dialogId)).setOnFragmentOpen(() -> dismiss()));
-//                        getBaseFragment().presentFragment(ChatActivity.of(dialogId));
-//                        dismiss();
+                        /*getBaseFragment().presentFragment(ChatActivity.of(dialogId));
+                        dismiss();*/
+                        getBaseFragment().presentFragment(new INavigationLayout.NavigationParams(ChatActivity.of(dialogId)).setOnFragmentOpen(LimitReachedBottomSheet.this::dismiss));
                     });
                 }
             } else {

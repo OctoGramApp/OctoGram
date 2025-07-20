@@ -89,8 +89,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import it.octogram.android.preferences.ui.PinnedEmojisActivity;
-import it.octogram.android.preferences.ui.PinnedReactionsActivity;
+import it.octogram.android.app.ui.OctoChatsPinnedEmojisActivity;
+import it.octogram.android.app.ui.OctoChatsPinnedReactionsActivity;
 
 public class StickersActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -427,9 +427,9 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
             } else if (position == emojiPacksRow) {
                 presentFragment(new StickersActivity(MediaDataController.TYPE_EMOJIPACKS, null));
             } else if (position == pinnedEmojisListRow) {
-                presentFragment(new PinnedEmojisActivity());
+                presentFragment(new OctoChatsPinnedEmojisActivity());
             } else if (position == pinnedReactionsListRow) {
-                presentFragment(new PinnedReactionsActivity());
+                presentFragment(new OctoChatsPinnedReactionsActivity());
             } else if (position == suggestRow) {
                 if (getParentActivity() == null) {
                     return;
@@ -1193,10 +1193,10 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                             settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.Emoji), count > 0 ? Integer.toString(count) : "", R.drawable.msg2_smile_status, true);
                         } else if (position == pinnedEmojisListRow) {
                             settingsCell.imageView.setTranslationX(-AndroidUtilities.dp(2));
-                            settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.PinnedEmojisList), PinnedEmojisActivity.getRowDescription(), R.drawable.chats_pin, true);
+                            settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.PinnedEmojisList), OctoChatsPinnedEmojisActivity.getRowDescription(), R.drawable.chats_pin, true);
                         } else if (position == pinnedReactionsListRow) {
                             settingsCell.imageView.setTranslationX(-AndroidUtilities.dp(2));
-                            settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.PinnedReactions), PinnedReactionsActivity.getRowDescription(), R.drawable.msg_reactions, true);
+                            settingsCell.setTextAndValueAndIcon(LocaleController.getString(R.string.PinnedReactions), OctoChatsPinnedReactionsActivity.getRowDescription(), R.drawable.msg_reactions, true);
                         } else if (position == suggestRow) {
                             String value;
                             switch (SharedConfig.suggestStickers) {

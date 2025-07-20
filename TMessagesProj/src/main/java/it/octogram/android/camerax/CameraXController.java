@@ -82,7 +82,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.octogram.android.CameraPreview;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.logs.OctoLogging;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.media.JpegImageUtils;
 
 public class CameraXController {

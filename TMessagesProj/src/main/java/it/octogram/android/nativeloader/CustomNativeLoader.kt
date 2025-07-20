@@ -10,7 +10,7 @@ package it.octogram.android.nativeloader
 
 import android.content.Context
 import com.getkeepsafe.relinker.ReLinker
-import it.octogram.android.logs.OctoLogging
+import it.octogram.android.utils.OctoLogging
 import org.telegram.messenger.NativeLoader
 
 object CustomNativeLoader {
