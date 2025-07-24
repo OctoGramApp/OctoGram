@@ -169,7 +169,7 @@ import org.telegram.ui.Components.AppIconBulletinLayout;
 import org.telegram.ui.Components.AttachBotIntroTopView;
 import org.telegram.ui.Components.AudioPlayerAlert;
 import org.telegram.ui.Components.BatteryDrawable;
-import org.telegram.ui.Components.BlockingUpdateView;
+//import org.telegram.ui.Components.BlockingUpdateView;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -244,6 +244,7 @@ import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.crashlytics.Crashlytics;
+import it.octogram.android.tgastandaloneexport.UpdateLayout;
 import it.octogram.android.utils.deeplink.DeepLinkManager;
 import it.octogram.android.utils.icons.IconsResources;
 import it.octogram.android.utils.OctoLogging;
@@ -316,7 +317,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     private PasscodeViewDialog passcodeDialog;
     private List<PasscodeView> overlayPasscodeViews = new ArrayList<>();
     private TermsOfServiceView termsOfServiceView;
-    private BlockingUpdateView blockingUpdateView;
+//    private BlockingUpdateView blockingUpdateView;
     public final ArrayList<Dialog> visibleDialogs = new ArrayList<>();
     private Dialog proxyErrorDialog;
     private RecyclerListView sideMenu;
@@ -867,7 +868,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             }
             return false;
         });
-        updateLayout = ApplicationLoader.applicationLoaderInstance.takeUpdateLayout(this, sideMenu, sideMenuContainer);
+        updateLayout = new UpdateLayout(this, sideMenu, sideMenuContainer);
         drawerLayoutContainer.setParentActionBarLayout(actionBarLayout);
         actionBarLayout.setDrawerLayoutContainer(drawerLayoutContainer);
         actionBarLayout.setFragmentStack(mainFragmentsStack);
@@ -1029,9 +1030,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
         MediaController.getInstance().setBaseActivity(this, true);
         ApplicationLoader.startAppCenter(this);
-        if (updateLayout != null) {
-            updateLayout.updateAppUpdateViews(currentAccount, false);
-        }
+//        if (updateLayout != null) {
+//            updateLayout.updateAppUpdateViews(currentAccount, false);
+//        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             FingerprintController.checkKeyReady();
@@ -1739,22 +1740,22 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
     }
 
-    private void showUpdateActivity(int account, TLRPC.TL_help_appUpdate update, boolean check) {
-        if (blockingUpdateView == null) {
-            blockingUpdateView = new BlockingUpdateView(LaunchActivity.this) {
-                @Override
-                public void setVisibility(int visibility) {
-                    super.setVisibility(visibility);
-                    if (visibility == View.GONE) {
-                        drawerLayoutContainer.setAllowOpenDrawer(true, false);
-                    }
-                }
-            };
-            drawerLayoutContainer.addView(blockingUpdateView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-        }
-        blockingUpdateView.show(account, update, check);
-        drawerLayoutContainer.setAllowOpenDrawer(false, false);
-    }
+//    private void showUpdateActivity(int account, TLRPC.TL_help_appUpdate update, boolean check) {
+//        if (blockingUpdateView == null) {
+//            blockingUpdateView = new BlockingUpdateView(LaunchActivity.this) {
+//                @Override
+//                public void setVisibility(int visibility) {
+//                    super.setVisibility(visibility);
+//                    if (visibility == View.GONE) {
+//                        drawerLayoutContainer.setAllowOpenDrawer(true, false);
+//                    }
+//                }
+//            };
+//            drawerLayoutContainer.addView(blockingUpdateView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+//        }
+//        blockingUpdateView.show(account, update, check);
+//        drawerLayoutContainer.setAllowOpenDrawer(false, false);
+//    }
 
     private void showTosActivity(int account, TLRPC.TL_help_termsOfService tos) {
         if (termsOfServiceView == null) {
@@ -5977,52 +5978,86 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             return;
         }
 
+        AtomicBoolean isStillValid = new AtomicBoolean(true);
+        if (force) {
+            UpdatesManager.INSTANCE.addCallback(new UpdatesManager.UpdatesManagerCallback() {
+                @Override
+                public boolean isStillValid() {
+                    return isStillValid.get();
+                }
+
+                @Override
+                public void onNoUpdateAvailable() {
+                    isStillValid.set(false);
+                    AndroidUtilities.runOnUIThread(() -> {
+                        BulletinFactory.of(LaunchActivity.getLastFragment()).createSimpleBulletin(R.raw.done, LocaleController.formatString("UpdatesSettingsCheckUpdated", R.string.UpdatesSettingsCheckUpdated)).show();
+                    });
+                }
+
+                @Override
+                public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
+                    isStillValid.set(false);
+                }
+
+                @Override
+                public void onUpdateDownloading(float percent) {
+                    isStillValid.set(false);
+                }
+
+                @Override
+                public void onUpdateReady() {
+                    isStillValid.set(false);
+                }
+            });
+        }
+        UpdatesManager.INSTANCE.checkForUpdates();
+
         /*if (!force && BuildVars.DEBUG_VERSION || !force && !BuildVars.CHECK_UPDATES) {
             return;
         }*/
 
-        SharedConfig.lastUpdateCheckTime = System.currentTimeMillis();
-        SharedConfig.saveConfig();
-        UpdatesManager.isUpdateAvailable(new UpdatesManager.UpdatesManagerCheckInterface() {
-            @Override
-            public void onThereIsUpdate(JSONObject updateData) {
-                if (updateData != null) {
-                    UpdatesManager.getTLRPCUpdateFromObject(updateData, update -> {
-                        handleNewUpdate(update, progress);
-                    });
-                }
-            }
-
-            @Override
-            public void onThereIsUpdate(TLRPC.TL_help_appUpdate appUpdate) {
-                handleNewUpdate(appUpdate, progress);
-            }
-
-            @Override
-            public void onNoUpdate() {
-                AndroidUtilities.runOnUIThread(() -> {
-                    resetUpdateInstance();
-
-                    if (force) {
-                        BulletinFactory.of(LaunchActivity.getLastFragment()).createSimpleBulletin(R.raw.done, LocaleController.formatString("UpdatesSettingsCheckUpdated", R.string.UpdatesSettingsCheckUpdated)).show();
-                    }
-                });
-            }
-
-            @Override
-            public void onError() {
-                if (force) {
-                    AndroidUtilities.runOnUIThread(() -> {
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LaunchActivity.this);
-                        alertDialogBuilder.setTitle(LocaleController.getString("AppName", R.string.AppName));
-                        alertDialogBuilder.setMessage(LocaleController.getString("UpdatesSettingsCheckFailed", R.string.UpdatesSettingsCheckFailed));
-                        alertDialogBuilder.setPositiveButton("OK", null);
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
-                    });
-                }
-            }
-        });
+//        SharedConfig.lastUpdateCheckTime = System.currentTimeMillis();
+//        SharedConfig.saveConfig();
+//        UpdatesManager.INSTANCE.isUpdateAvailable(new UpdatesManager.INSTANCE.UpdatesManagerCheckInterface() {
+//            @Override
+//            public void onThereIsUpdate(JSONObject updateData) {
+//                if (updateData != null) {
+//                    UpdatesManager.INSTANCE.getTLRPCUpdateFromObject(updateData, update -> {
+//                        handleNewUpdate(update, progress);
+//                    });
+//                }
+//            }
+//
+//            @Override
+//            public void onThereIsUpdate(TLRPC.TL_help_appUpdate appUpdate) {
+//                handleNewUpdate(appUpdate, progress);
+//            }
+//
+//            @Override
+//            public void onNoUpdate() {
+//                AndroidUtilities.runOnUIThread(() -> {
+//                    resetUpdateInstance();
+//
+//                    if (force) {
+//                        BulletinFactory.of(LaunchActivity.getLastFragment()).createSimpleBulletin(R.raw.done, LocaleController.formatString("UpdatesSettingsCheckUpdated", R.string.UpdatesSettingsCheckUpdated)).show();
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onError() {
+//                if (force) {
+//                    AndroidUtilities.runOnUIThread(() -> {
+//                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LaunchActivity.this);
+//                        alertDialogBuilder.setTitle(LocaleController.getString("AppName", R.string.AppName));
+//                        alertDialogBuilder.setMessage(LocaleController.getString("UpdatesSettingsCheckFailed", R.string.UpdatesSettingsCheckFailed));
+//                        alertDialogBuilder.setPositiveButton("OK", null);
+//                        AlertDialog alertDialog = alertDialogBuilder.create();
+//                        alertDialog.show();
+//                    });
+//                }
+//            }
+//        });
         /*
         TLRPC.TL_help_getAppUpdate req = new TLRPC.TL_help_getAppUpdate();
         if (!ApplicationLoader.isStandaloneBuild() && !ApplicationLoader.isBetaBuild()) {
@@ -6122,52 +6157,52 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }*/
     }
 
-    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress, boolean forceShowPopup) {
-        if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.version.equals(res.version)) {
-            if (forceShowPopup && !FileLoader.getInstance(currentAccount).isLoadingFile(FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document))) {
-                AndroidUtilities.runOnUIThread(() -> {
-                    ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
-                });
-            }
-
-            return;
-        }
-
-        final boolean newVersionAvailable = SharedConfig.setNewAppVersionAvailable(res);
-        SharedConfig.saveConfig();
-        if (newVersionAvailable) {
-            AndroidUtilities.runOnUIThread(() -> {
-                if (res.can_not_skip) {
-                    showUpdateActivity(currentAccount, res, false);
-                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION && !StoreUtils.isDownloadedFromAnyStore()) {
-                    drawerLayoutAdapter.notifyDataSetChanged();
-
-                    File updateFile = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
-                    if (!updateFile.exists()) {
-                        ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
-                    }
-                }
-                NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.appUpdateAvailable);
-            });
-        }
-        if (progress != null) {
-            progress.end();
-            if (!newVersionAvailable) {
-                BaseFragment fragment = getLastFragment();
-                if (fragment != null) {
-                    BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString(R.string.YourVersionIsLatest)).show();
-                }
-            }
-        }
-    }
-
-    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress) {
-        handleNewUpdate(res, progress, false);
-    }
-
-    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, boolean forceShowPopup) {
-        handleNewUpdate(res, null, forceShowPopup);
-    }
+//    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress, boolean forceShowPopup) {
+//        if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.version.equals(res.version)) {
+//            if (forceShowPopup && !FileLoader.getInstance(currentAccount).isLoadingFile(FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document))) {
+//                AndroidUtilities.runOnUIThread(() -> {
+//                    ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
+//                });
+//            }
+//
+//            return;
+//        }
+//
+//        final boolean newVersionAvailable = SharedConfig.setNewAppVersionAvailable(res);
+//        SharedConfig.saveConfig();
+//        if (newVersionAvailable) {
+//            AndroidUtilities.runOnUIThread(() -> {
+//                if (res.can_not_skip) {
+//                    showUpdateActivity(currentAccount, res, false);
+//                } else if (ApplicationLoader.isStandaloneBuild() || BuildVars.DEBUG_VERSION && !StoreUtils.isDownloadedFromAnyStore()) {
+//                    drawerLayoutAdapter.notifyDataSetChanged();
+//
+//                    File updateFile = FileLoader.getInstance(UpdatesManager.INSTANCE.getFirstAccountId()).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
+//                    if (!updateFile.exists()) {
+//                        ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, currentAccount);
+//                    }
+//                }
+//                NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.appUpdateAvailable);
+//            });
+//        }
+//        if (progress != null) {
+//            progress.end();
+//            if (!newVersionAvailable) {
+//                BaseFragment fragment = getLastFragment();
+//                if (fragment != null) {
+//                    BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString(R.string.YourVersionIsLatest)).show();
+//                }
+//            }
+//        }
+//    }
+//
+//    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, Browser.Progress progress) {
+//        handleNewUpdate(res, progress, false);
+//    }
+//
+//    public void handleNewUpdate(TLRPC.TL_help_appUpdate res, boolean forceShowPopup) {
+//        handleNewUpdate(res, null, forceShowPopup);
+//    }
 
     public void resetUpdateInstance() {
         SharedConfig.setNewAppVersionAvailable(null);
@@ -7004,17 +7039,17 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
         if (UserConfig.getInstance(UserConfig.selectedAccount).unacceptedTermsOfService != null) {
             showTosActivity(UserConfig.selectedAccount, UserConfig.getInstance(UserConfig.selectedAccount).unacceptedTermsOfService);
-        } else if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.can_not_skip) {
-            showUpdateActivity(UserConfig.selectedAccount, SharedConfig.pendingAppUpdate, true);
+//        } else if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.can_not_skip) {
+//            showUpdateActivity(UpdatesManager.INSTANCE.getFirstAccountId(), SharedConfig.pendingAppUpdate, true);
         }
         LanguageController.loadRemoteLanguageFromCache(LocaleController.getInstance().getCurrentLocale(), false);
         // checkAppUpdate(false, null);
 
-        if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.canReceivePrivateBetaUpdates()) {
+        if (OctoConfig.INSTANCE.autoCheckUpdateStatus.getValue() || UpdatesManager.INSTANCE.canReceivePrivateBetaUpdates()) {
             checkAppUpdate(false, null);
         }
         AndroidUtilities.runOnUIThread(() -> {
-            UpdatesManager.handleUpdateSignaling();
+            UpdatesManager.INSTANCE.handleUpdateSignaling();
             OctoConfig.INSTANCE.handleDoubleBottomMigration();
         }, 3000);
 
@@ -7479,19 +7514,19 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             } catch (Throwable ignore) {
 
             }
-        } else if (id == NotificationCenter.appUpdateLoading) {
-            if (updateLayout != null) {
-                updateLayout.updateFileProgress(null);
-                updateLayout.updateAppUpdateViews(currentAccount, true);
-            }
+//        } else if (id == NotificationCenter.appUpdateLoading) {
+//            if (updateLayout != null) {
+//                updateLayout.updateFileProgress(null);
+//                updateLayout.updateAppUpdateViews(currentAccount, true);
+//            }
         } else if (id == NotificationCenter.fileLoaded) {
             String path = (String) args[0];
-            if (SharedConfig.isAppUpdateAvailable()) {
-                String name = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-                if (name.equals(path) && updateLayout != null) {
-                    updateLayout.updateAppUpdateViews(currentAccount, true);
-                }
-            }
+//            if (SharedConfig.isAppUpdateAvailable()) {
+//                String name = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
+//                if (name.equals(path) && updateLayout != null) {
+//                    updateLayout.updateAppUpdateViews(currentAccount, true);
+//                }
+//            }
             if (loadingThemeFileName != null) {
                 if (loadingThemeFileName.equals(path)) {
                     loadingThemeFileName = null;
@@ -7557,12 +7592,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             if (path.equals(loadingThemeFileName) || path.equals(loadingThemeWallpaperName)) {
                 onThemeLoadFinish();
             }
-            if (SharedConfig.isAppUpdateAvailable()) {
-                String name = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-                if (name.equals(path) && updateLayout != null) {
-                    updateLayout.updateAppUpdateViews(currentAccount, true);
-                }
-            }
+//            if (SharedConfig.isAppUpdateAvailable()) {
+//                String name = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
+//                if (name.equals(path) && updateLayout != null) {
+//                    updateLayout.updateAppUpdateViews(currentAccount, true);
+//                }
+//            }
         } else if (id == NotificationCenter.screenStateChanged) {
             if (ApplicationLoader.mainInterfacePaused) {
                 return;
@@ -7668,13 +7703,13 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         } else if (id == NotificationCenter.groupCallUpdated) {
             checkWasMutedByAdmin(false);
         } else if (id == NotificationCenter.fileLoadProgressChanged) {
-            if (updateLayout != null) {
-                updateLayout.updateFileProgress(args);
-            }
+//            if (updateLayout != null) {
+//                updateLayout.updateFileProgress(args);
+//            }
         } else if (id == NotificationCenter.appUpdateAvailable) {
-            if (updateLayout != null) {
-                updateLayout.updateAppUpdateViews(currentAccount, mainFragmentsStack.size() == 1);
-            }
+//            if (updateLayout != null) {
+//                updateLayout.updateAppUpdateViews(currentAccount, mainFragmentsStack.size() == 1);
+//            }
         } else if (id == NotificationCenter.currentUserShowLimitReachedDialog) {
             if (!mainFragmentsStack.isEmpty()) {
                 BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);

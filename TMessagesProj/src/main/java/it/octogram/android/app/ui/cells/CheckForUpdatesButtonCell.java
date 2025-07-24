@@ -21,45 +21,66 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.ImageLoader;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SharedConfig;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.LayoutHelper;
 
-import java.io.File;
+import it.octogram.android.utils.UpdatesManager;
 
 @SuppressLint("ViewConstructor")
-public class CheckForUpdatesButtonCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
+public class CheckForUpdatesButtonCell extends FrameLayout {
     private final AnimatedTextView leftTextView;
     private final TextView checkAvailableUpdatesView;
     private int state;
+    private UpdatesManager.UpdatesManagerCallback callback;
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoaded);
-        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoadProgressChanged);
-        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoadFailed);
+        UpdatesManager.INSTANCE.addCallback(callback = new UpdatesManager.UpdatesManagerCallback() {
+            @Override
+            public boolean onGetStateAfterAdd() {
+                return true;
+            }
+
+            @Override
+            public void onNoUpdateAvailable() {
+                AndroidUtilities.runOnUIThread(() -> updateState(CheckCellState.NO_UPDATE_AVAILABLE));
+            }
+
+            @Override
+            public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
+                AndroidUtilities.runOnUIThread(() -> updateState(CheckCellState.UPDATE_NEED_DOWNLOAD));
+            }
+
+            @Override
+            public void onUpdateDownloading(float percent) {
+                AndroidUtilities.runOnUIThread(() -> updateState(CheckCellState.UPDATE_IS_DOWNLOADING, percent));
+            }
+
+            @Override
+            public void onUpdateReady() {
+                AndroidUtilities.runOnUIThread(() -> updateState(CheckCellState.UPDATE_IS_READY));
+            }
+        });
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoaded);
-        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoadProgressChanged);
-        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoadFailed);
+        UpdatesManager.INSTANCE.removeCallback(callback);
+        callback = null;
     }
 
-    public CheckForUpdatesButtonCell(Context context, CheckAvailableUpdatesDelegate callback) {
-        this(context, 21, callback);
+    public CheckForUpdatesButtonCell(Context context) {
+        this(context, 21);
     }
 
-    public CheckForUpdatesButtonCell(Context context, int padding, CheckAvailableUpdatesDelegate callback) {
+    public CheckForUpdatesButtonCell(Context context, int padding) {
         super(context);
 
         leftTextView = new AnimatedTextView(context);
@@ -86,7 +107,7 @@ public class CheckForUpdatesButtonCell extends FrameLayout implements Notificati
         checkAvailableUpdatesView.setGravity(Gravity.CENTER_VERTICAL);
         checkAvailableUpdatesView.setSingleLine(true);
         checkAvailableUpdatesView.setEllipsize(TextUtils.TruncateAt.END);
-        checkAvailableUpdatesView.setOnClickListener(view -> callback.onClick());
+        checkAvailableUpdatesView.setOnClickListener(view -> UpdatesManager.INSTANCE.onUpdateButtonPressed());
         checkAvailableUpdatesView.setPadding(dp(16), 0, dp(16), 0);
         layoutRight.addView(checkAvailableUpdatesView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 35));
 
@@ -161,48 +182,6 @@ public class CheckForUpdatesButtonCell extends FrameLayout implements Notificati
         checkAvailableUpdatesView.setClickable(false);
         checkAvailableUpdatesView.setEnabled(false);
         checkAvailableUpdatesView.setVisibility(GONE);
-    }
-
-    @Override
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (!SharedConfig.isAppUpdateAvailable()) {
-            return;
-        }
-
-        String path = (String) args[0];
-        String name = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-
-        if (!name.equals(path)) {
-            return;
-        }
-
-        if (id == NotificationCenter.fileLoaded) {
-            updateState(CheckCellState.UPDATE_IS_READY);
-        } else if (id == NotificationCenter.fileLoadProgressChanged) {
-            Long loadedSize = (Long) args[1];
-            Long totalSize = (Long) args[2];
-            float loadProgress = loadedSize / (float) totalSize;
-
-            updateState(CheckCellState.UPDATE_IS_DOWNLOADING, loadProgress);
-        } else if (id == NotificationCenter.fileLoadFailed) {
-            // force re-check data from the beginning
-
-            File completePathFileName = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
-            if (completePathFileName.exists()) {
-                updateState(CheckCellState.UPDATE_IS_READY);
-            } else {
-                if (FileLoader.getInstance(0).isLoadingFile(name)) {
-                    Float p = ImageLoader.getInstance().getFileProgress(name);
-                    updateState(CheckCellState.UPDATE_IS_DOWNLOADING, (p != null ? p : 0.0f));
-                } else {
-                    updateState(CheckCellState.UPDATE_NEED_DOWNLOAD);
-                }
-            }
-        }
-    }
-
-    public interface CheckAvailableUpdatesDelegate {
-        void onClick();
     }
 
     public static class CheckCellState {

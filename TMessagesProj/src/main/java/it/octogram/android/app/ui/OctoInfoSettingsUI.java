@@ -53,7 +53,7 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
-        TLRPC.Chat pbetaChatInstance = UpdatesManager.getPrivateBetaChatInstance();
+        TLRPC.Chat pbetaChatInstance = UpdatesManager.INSTANCE.getPrivateBetaChatInstance();
 
         return OctoPreferences.builder(getString(R.string.OctoInfoSettingsHeader))
                 .deepLink(DeepLinkDef.INFO)

@@ -30,11 +30,9 @@ import android.widget.TextView;
 import androidx.annotation.Keep;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.SharedConfig;
-import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -42,7 +40,9 @@ import org.telegram.ui.Components.MediaActionDrawable;
 import org.telegram.ui.Components.RadialProgress2;
 import org.telegram.ui.IUpdateButton;
 
-import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import it.octogram.android.utils.UpdatesManager;
 
 public class UpdateButton extends IUpdateButton {
 
@@ -61,10 +61,10 @@ public class UpdateButton extends IUpdateButton {
             setBackground(Theme.getSelectorDrawable(0x40ffffff, false));
         }
         setOnClickListener(v -> {
-            if (!SharedConfig.isAppUpdateAvailable()) return;
+            //if (!UpdatesManager.INSTANCE.) return;
             Activity activity = AndroidUtilities.findActivity(getContext());
             if (activity == null) return;
-            AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, activity);
+            UpdatesManager.INSTANCE.installUpdate();
         });
 
         icon = new RadialProgress2(this);
@@ -129,16 +129,61 @@ public class UpdateButton extends IUpdateButton {
         this.onTranslationUpdate = onTranslationUpdate;
     }
 
+    private UpdatesManager.UpdatesManagerCallback callback;
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        AtomicBoolean wasVisible = new AtomicBoolean(false);
+        UpdatesManager.INSTANCE.addCallback(callback = new UpdatesManager.UpdatesManagerCallback() {
+            @Override
+            public boolean onGetStateAfterAdd() {
+                return true;
+            }
+
+            @Override
+            public void onNoUpdateAvailable() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    update(false, wasVisible.get());
+                    wasVisible.set(false);
+                });
+            }
+
+            @Override
+            public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    update(false, wasVisible.get());
+                    wasVisible.set(false);
+                });
+            }
+
+            @Override
+            public void onUpdateDownloading(float percent) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    update(false, wasVisible.get());
+                    wasVisible.set(false);
+                });
+            }
+
+            @Override
+            public void onUpdateReady() {
+                AndroidUtilities.runOnUIThread(() -> {
+                    update(true, !wasVisible.get());
+                    wasVisible.set(true);
+                });
+            }
+        });
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        UpdatesManager.INSTANCE.removeCallback(callback);
+        callback = null;
+    }
+
     @Keep
-    public void update(boolean animated) {
-        final boolean show;
-        if (SharedConfig.isAppUpdateAvailable()) {
-            final String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-            final File path = FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
-            show = path.exists();
-        } else {
-            show = false;
-        }
+    public void update(boolean show, boolean animated) {
         if (show) {
             if (getTag() != null) {
                 return;

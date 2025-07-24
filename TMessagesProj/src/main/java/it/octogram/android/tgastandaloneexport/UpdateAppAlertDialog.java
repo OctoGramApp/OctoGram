@@ -33,18 +33,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BottomSheet;
@@ -53,16 +51,14 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 
-import java.io.File;
-
 import it.octogram.android.app.ui.cells.CheckForUpdatesButtonCell;
 import it.octogram.android.utils.UpdatesManager;
 
 @SuppressLint("ViewConstructor")
-public class UpdateAppAlertDialog extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
+public class UpdateAppAlertDialog extends BottomSheet {
 
+    @Nullable
     private final TLRPC.TL_help_appUpdate appUpdate;
-    private final int accountNum;
 
     private final Drawable shadowDrawable;
     private final NestedScrollView scrollView;
@@ -79,6 +75,8 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
 
     private final BottomSheetCell doneButton;
     private final BottomSheetCell scheduleButton;
+
+    public static boolean isVisible = false;
 
     public static class BottomSheetCell extends FrameLayout {
 
@@ -221,10 +219,9 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         }
     }
 
-    public UpdateAppAlertDialog(Context context, TLRPC.TL_help_appUpdate update, int account) {
+    public UpdateAppAlertDialog(Context context, TLRPC.TL_help_appUpdate update) {
         super(context, false);
         appUpdate = update;
-        accountNum = account;
         setCanceledOnTouchOutside(false);
 
         setApplyTopPadding(false);
@@ -350,13 +347,7 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         container.addView(shadow, frameLayoutParams);
 
         doneButton = new BottomSheetCell(context, false, false);
-        doneButton.background.setOnClickListener(v -> {
-            if (doneButton.getState() == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY) {
-                UpdatesManager.installUpdate();
-            } else if (doneButton.getState() == CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
-                FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
-            }
-        });
+        doneButton.background.setOnClickListener(v -> UpdatesManager.INSTANCE.onUpdateButtonPressed());
         container.addView(doneButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 50, Gravity.LEFT | Gravity.BOTTOM, 0, 0, 0, 50));
 
         scheduleButton = new BottomSheetCell(context, true, true);
@@ -364,9 +355,6 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         container.addView(scheduleButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 50, Gravity.LEFT | Gravity.BOTTOM, 0, 0, 0, 0));
 
         updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
-        if (UpdatesManager.canAutoDownloadUpdates()) {
-            FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_NORMAL, 1);
-        }
     }
 
     @NonNull
@@ -406,58 +394,46 @@ public class UpdateAppAlertDialog extends BottomSheet implements NotificationCen
         return container;
     }
 
+    private UpdatesManager.UpdatesManagerCallback callback;
+
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoaded);
-        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoadProgressChanged);
-        NotificationCenter.getInstance(0).addObserver(this, NotificationCenter.fileLoadFailed);
+        isVisible = true;
+        UpdatesManager.INSTANCE.addCallback(callback = new UpdatesManager.UpdatesManagerCallback() {
+            @Override
+            public boolean onGetStateAfterAdd() {
+                return true;
+            }
+
+            @Override
+            public void onNoUpdateAvailable() {
+                AndroidUtilities.runOnUIThread(() -> dismiss());
+            }
+
+            @Override
+            public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
+                AndroidUtilities.runOnUIThread(() -> updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD));
+            }
+
+            @Override
+            public void onUpdateDownloading(float percent) {
+                AndroidUtilities.runOnUIThread(() -> updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, percent));
+            }
+
+            @Override
+            public void onUpdateReady() {
+                AndroidUtilities.runOnUIThread(() -> updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY));
+            }
+        });
     }
 
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoaded);
-        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoadProgressChanged);
-        NotificationCenter.getInstance(0).removeObserver(this, NotificationCenter.fileLoadFailed);
-    }
-
-    @Override
-    public void didReceivedNotification(int id, int account, Object... args) {
-        if (!SharedConfig.isAppUpdateAvailable()) {
-            return;
-        }
-
-        String path = (String) args[0];
-        String name = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-
-        if (!name.equals(path)) {
-            return;
-        }
-
-        if (id == NotificationCenter.fileLoaded) {
-            updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY);
-        } else if (id == NotificationCenter.fileLoadProgressChanged) {
-            Long loadedSize = (Long) args[1];
-            Long totalSize = (Long) args[2];
-            float loadProgress = loadedSize / (float) totalSize;
-
-            updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, loadProgress);
-        } else if (id == NotificationCenter.fileLoadFailed) {
-            // force re-check data from the beginning
-
-            File completePathFileName = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
-            if (completePathFileName.exists()) {
-                updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY);
-            } else {
-                if (FileLoader.getInstance(0).isLoadingFile(name)) {
-                    Float p = ImageLoader.getInstance().getFileProgress(name);
-                    updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, (p != null ? p : 0.0f));
-                } else {
-                    updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
-                }
-            }
-        }
+        isVisible = false;
+        UpdatesManager.INSTANCE.removeCallback(callback);
+        callback = null;
     }
 
     private void updateState(int state, float loadProgress) {

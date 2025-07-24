@@ -262,7 +262,9 @@ import it.octogram.android.app.ui.cells.LockedChatsIntroductionCell;
 import it.octogram.android.app.ui.components.OutlineProvider;
 import it.octogram.android.app.ui.bottomsheets.AppLinkVerifyBottomSheet;
 import it.octogram.android.app.ui.cells.MonetAndroidFixDialog;
+import it.octogram.android.tgastandaloneexport.UpdateButton;
 import it.octogram.android.theme.MonetIconController;
+import it.octogram.android.utils.UpdatesManager;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ForwardContext;
 import it.octogram.android.utils.chat.RapidActionsHelper;
@@ -1676,6 +1678,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (statusDrawable != null) {
                 statusDrawable.attach();
             }
+            if (menuDrawable != null) {
+                menuDrawable.onAttached();
+            }
         }
 
         @Override
@@ -1683,6 +1688,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             super.onDetachedFromWindow();
             if (statusDrawable != null) {
                 statusDrawable.detach();
+            }
+            if (menuDrawable != null) {
+                menuDrawable.onDetached();
             }
         }
     }
@@ -5298,7 +5306,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         if (searchString == null && initialDialogsType == DIALOGS_TYPE_DEFAULT) {
-            updateButton = ApplicationLoader.applicationLoaderInstance.takeUpdateButton(context);
+            updateButton = new UpdateButton(context);
             if (updateButton != null) {
                 contentView.addView(updateButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.LEFT | Gravity.BOTTOM));
                 updateButton.onTranslationUpdate(ty -> {
@@ -5397,7 +5405,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             AppLinkVerifyBottomSheet.checkBottomSheet(this);
         }
-        updateMenuButton(false);
+        //updateMenuButton(false);
         actionBar.setDrawBlurBackground(contentView);
 
         rightSlidingDialogContainer = new RightSlidingDialogContainer(context) {
@@ -11104,16 +11112,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 }
             }
             SuggestClearDatabaseBottomSheet.dismissDialog();
-        } else if (id == NotificationCenter.appUpdateAvailable || id == NotificationCenter.appUpdateLoading) {
-            updateMenuButton(true);
-        } else if (id == NotificationCenter.fileLoaded || id == NotificationCenter.fileLoadFailed || id == NotificationCenter.fileLoadProgressChanged) {
-            String name = (String) args[0];
-            if (SharedConfig.isAppUpdateAvailable()) {
-                String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-                if (fileName.equals(name)) {
-                    updateMenuButton(true);
-                }
-            }
+//        } else if (id == NotificationCenter.appUpdateAvailable || id == NotificationCenter.appUpdateLoading) {
+//            updateMenuButton(true);
+//        } else if (id == NotificationCenter.fileLoaded || id == NotificationCenter.fileLoadFailed || id == NotificationCenter.fileLoadProgressChanged) {
+//            String name = (String) args[0];
+//            if (SharedConfig.isAppUpdateAvailable()) {
+//                String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
+//                if (fileName.equals(name)) {
+//                    updateMenuButton(true);
+//                }
+//            }
         } else if (id == NotificationCenter.onDatabaseMigration) {
             boolean startMigration = (boolean) args[0];
             if (fragmentView != null) {
@@ -11207,43 +11215,43 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     View databaseMigrationHint;
 
-    private void updateMenuButton(boolean animated) {
-        if (menuDrawable == null || updateButton == null) {
-            return;
-        }
-        int type;
-        float downloadProgress;
-        if (ApplicationLoader.applicationLoaderInstance.isCustomUpdate()) {
-            if (ApplicationLoader.applicationLoaderInstance.getUpdate() != null) {
-                if (ApplicationLoader.applicationLoaderInstance.isDownloadingUpdate()) {
-                    type = MenuDrawable.TYPE_UDPATE_DOWNLOADING;
-                    downloadProgress = ApplicationLoader.applicationLoaderInstance.getDownloadingUpdateProgress();
-                } else {
-                    type = MenuDrawable.TYPE_UDPATE_AVAILABLE;
-                    downloadProgress = 0.0f;
-                }
-            } else {
-                type = MenuDrawable.TYPE_DEFAULT;
-                downloadProgress = 0.0f;
-            }
-        } else if (SharedConfig.isAppUpdateAvailable()) {
-            String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-            if (getFileLoader().isLoadingFile(fileName)) {
-                type = MenuDrawable.TYPE_UDPATE_DOWNLOADING;
-                Float p = ImageLoader.getInstance().getFileProgress(fileName);
-                downloadProgress = p != null ? p : 0.0f;
-            } else {
-                type = MenuDrawable.TYPE_UDPATE_AVAILABLE;
-                downloadProgress = 0.0f;
-            }
-        } else {
-            type = MenuDrawable.TYPE_DEFAULT;
-            downloadProgress = 0.0f;
-        }
-        updateButton.update(animated);
-        menuDrawable.setType(type, animated);
-        menuDrawable.setUpdateDownloadProgress(downloadProgress, animated);
-    }
+//    private void updateMenuButton(boolean animated) {
+//        if (menuDrawable == null || updateButton == null) {
+//            return;
+//        }
+//        int type;
+//        float downloadProgress;
+//        if (ApplicationLoader.applicationLoaderInstance.isCustomUpdate()) {
+//            if (ApplicationLoader.applicationLoaderInstance.getUpdate() != null) {
+//                if (ApplicationLoader.applicationLoaderInstance.isDownloadingUpdate()) {
+//                    type = MenuDrawable.TYPE_UDPATE_DOWNLOADING;
+//                    downloadProgress = ApplicationLoader.applicationLoaderInstance.getDownloadingUpdateProgress();
+//                } else {
+//                    type = MenuDrawable.TYPE_UDPATE_AVAILABLE;
+//                    downloadProgress = 0.0f;
+//                }
+//            } else {
+//                type = MenuDrawable.TYPE_DEFAULT;
+//                downloadProgress = 0.0f;
+//            }
+//        } else if (SharedConfig.isAppUpdateAvailable()) {
+//            String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
+//            if (FileLoader.getInstance(UpdatesManager.INSTANCE.getFirstAccountId()).isLoadingFile(fileName)) {
+//                type = MenuDrawable.TYPE_UDPATE_DOWNLOADING;
+//                Float p = ImageLoader.getInstance().getFileProgress(fileName);
+//                downloadProgress = p != null ? p : 0.0f;
+//            } else {
+//                type = MenuDrawable.TYPE_UDPATE_AVAILABLE;
+//                downloadProgress = 0.0f;
+//            }
+//        } else {
+//            type = MenuDrawable.TYPE_DEFAULT;
+//            downloadProgress = 0.0f;
+//        }
+//        updateButton.update(animated);
+//        menuDrawable.setType(type, animated);
+//        menuDrawable.setUpdateDownloadProgress(downloadProgress, animated);
+//    }
 
     private String showingSuggestion;
 

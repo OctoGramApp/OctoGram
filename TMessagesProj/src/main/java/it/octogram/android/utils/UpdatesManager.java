@@ -10,6 +10,8 @@ package it.octogram.android.utils;
 
 import static org.telegram.messenger.LocaleController.getString;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import org.json.JSONArray;
@@ -19,17 +21,20 @@ import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.FileLoader;
+import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.LaunchActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,134 +45,176 @@ import java.util.Objects;
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.tgastandaloneexport.UpdateAppAlertDialog;
 import it.octogram.android.utils.network.BrowserUtils;
 
 /**
  * @noinspection SequencedCollectionMethodCanBeUsed
  */
-public class UpdatesManager {
-    private static final String TAG = "UpdatesManager";
-    private static final long privateChatId = -1733655252L;
-    private static final long privateBotId = 6563667131L;
+public class UpdatesManager implements NotificationCenter.NotificationCenterDelegate {
+    public static UpdatesManager INSTANCE = new UpdatesManager();
 
-    public static Map<String, String> pbetaVersionsReplacement;
+    private final String TAG = "UpdatesManager";
+    private final long privateChatId = -1733655252L;
+    private final long privateBotId = 6563667131L;
 
-    static {
+    public Map<String, String> pbetaVersionsReplacement;
+
+    {
         pbetaVersionsReplacement = new HashMap<>();
         pbetaVersionsReplacement.put("arm64-v8a", "arm64");
     }
 
-    private static JSONObject updatesData;
-    private static boolean checkingForChanges;
-    private static long lastUpdateCheck;
+    private JSONObject updatesData;
+    private long lastUpdateCheck;
 
-    private static String currentChannelUsername;
-    private static long currentChannelId;
-    private static int pbetaStickerId;
+    private String currentChannelUsername;
+    private long currentChannelId;
+    private int pbetaStickerId;
 
-    private static boolean isLoadingTLRPCAppUpdate;
-    private static TLRPC.TL_help_appUpdate currentUpdateData;
-    public static final int FIRST_ACCOUNT_ID = 0;
+    private boolean isLoadingTLRPCAppUpdate;
+    private TLRPC.TL_help_appUpdate currentUpdateData;
+    private boolean didInitFirstAccount = false;
+    private int DETECTED_ACCOUNT_ID = 0;
 
-    protected static MessagesController getMessagesController() {
-        return MessagesController.getInstance(FIRST_ACCOUNT_ID);
+    private boolean isCheckingForUpdates = false;
+    private boolean hasShownPopupForUpdate = false;
+
+    private final ArrayList<UpdatesManagerCallback> callbacks = new ArrayList<>();
+
+    protected FileLoader getFileLoader() {
+        return FileLoader.getInstance(getFirstAccountId());
     }
 
-    protected static ConnectionsManager getConnectionsManager() {
-        return ConnectionsManager.getInstance(FIRST_ACCOUNT_ID);
+    protected MessagesController getMessagesController() {
+        return MessagesController.getInstance(getFirstAccountId());
     }
 
-    protected static MessagesStorage getMessagesStorage() {
-        return MessagesStorage.getInstance(FIRST_ACCOUNT_ID);
+    protected ConnectionsManager getConnectionsManager() {
+        return ConnectionsManager.getInstance(getFirstAccountId());
     }
 
-    public static boolean canReceivePrivateBetaUpdates() {
-        if (!OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
-            return false;
-        }
-
-        if (getPrivateBetaChatInstance() == null) {
-            OctoConfig.INSTANCE.receivePBetaUpdates.updateValue(false);
-            return false;
-        }
-
-        return true;
+    protected MessagesStorage getMessagesStorage() {
+        return MessagesStorage.getInstance(getFirstAccountId());
     }
 
-    public static TLRPC.Chat getPrivateBetaChatInstance() {
-        TLRPC.Chat chat = getMessagesController().getChat(-privateChatId);
-
-        boolean hasPrivateBetaAccessC = chat != null;
-        OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
-        if (!hasPrivateBetaAccessC) {
-            OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE: chat empty");
-            OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
+    public void addCallback(UpdatesManagerCallback callback) {
+        if (!callbacks.contains(callback)) {
+            callbacks.add(callback);
         }
 
-        if (hasPrivateBetaAccessC) {
-            hasPrivateBetaAccessC = chat.id != 0;
-            hasPrivateBetaAccessC &= chat.access_hash != 0;
-            if (!hasPrivateBetaAccessC) {
-                OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + chat.id + " - " + chat.access_hash);
-                OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
-            }
+        if (callback.onGetStateAfterAdd()) {
+            updateStateChange();
         }
-
-        if (hasPrivateBetaAccessC) {
-            hasPrivateBetaAccessC = ChatObject.isInChat(chat);
-            hasPrivateBetaAccessC &= ChatObject.isChannel(chat);
-            hasPrivateBetaAccessC &= !ChatObject.isPublic(chat);
-            if (!hasPrivateBetaAccessC) {
-                OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + ChatObject.isInChat(chat) + ChatObject.isChannel(chat) + ChatObject.isPublic(chat));
-                OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
-            }
-        }
-
-        return hasPrivateBetaAccessC ? chat : null;
     }
 
-    public static void isUpdateAvailable(UpdatesManagerCheckInterface callback) {
-        if (updatesData == null) {
-            checkForUpdates(new UpdatesManagerPrepareInterface() {
-                @Override
-                public void onSuccess() {
-                    isUpdateAvailableAfterDataEnsure(callback);
-                }
-
-                @Override
-                public void onError() {
-                    callback.onError();
-                }
-            });
-            return;
-        }
-
-        isUpdateAvailableAfterDataEnsure(callback);
+    public void removeCallback(UpdatesManagerCallback callback) {
+        callbacks.remove(callback);
     }
 
-    // after data is available
-    private static void isUpdateAvailableAfterDataEnsure(UpdatesManagerCheckInterface callback) {
-        try {
-            JSONArray versionsHistory = updatesData.getJSONArray("versions");
+    private InternalUpdateState getUpdateRecord() {
+        boolean isUpdateAvailable = false;
+        boolean isDownloading = false;
+        boolean isReady = false;
+        float downloadProgress = 0;
 
-            for (int i = 0; i < versionsHistory.length(); i++) {
-                JSONObject update = versionsHistory.getJSONObject(i);
+        if (currentUpdateData != null && !isCheckingForUpdates) {
+            isUpdateAvailable = true;
+            String fileName = FileLoader.getAttachFileName(currentUpdateData.document);
+            File path = getFileLoader().getPathToAttach(currentUpdateData.document, true);
+            if (path.exists()) {
+                isReady = true;
+                hasShownPopupForUpdate = true;
+            } else {
+                isDownloading = getFileLoader().isLoadingFile(fileName);
+                Float p = ImageLoader.getInstance().getFileProgress(fileName);
+                downloadProgress = p != null ? p : 0.0f;
 
-                if (!isUpdateCorrupted(update) && isNewerVersion(update.getInt("versionCode")) && canUpdate(update)) {
-                    callback.onThereIsUpdate(update);
-                    return;
+                if (isDownloading) {
+                    hasShownPopupForUpdate = true;
                 }
             }
+            initNotificationCenter();
+        } else {
+            hasShownPopupForUpdate = false;
+        }
 
-            checkPrivateBetaData(callback);
-        } catch (JSONException e) {
-            OctoLogging.e(TAG, "Update check failed due to invalid data!", e);
-            callback.onError();
+        OctoLogging.e(TAG, String.format(Locale.US, "Update State - isChecking: %b, isUpdateAvailable: %b, isDownloading: %b, downloadProgress: %.2f, isReady: %b", isCheckingForUpdates, isUpdateAvailable, isDownloading, downloadProgress, isReady));
+
+        return new InternalUpdateState(isCheckingForUpdates, isUpdateAvailable, isDownloading, downloadProgress, isReady);
+    }
+
+    private void updateStateChange() {
+        InternalUpdateState state = getUpdateRecord();
+
+        for (UpdatesManagerCallback callback : callbacks) {
+            if (!callback.isStillValid()) {
+                continue;
+            }
+
+            if (state.isChecking()) {
+                callback.checkingForUpdates();
+            } else if (state.isUpdateAvailable()) {
+                if (state.isReady()) {
+                    callback.onUpdateReady();
+                } else if (state.isDownloading()) {
+                    callback.onUpdateDownloading(state.downloadProgress());
+                } else {
+                    callback.onUpdateAvailable(currentUpdateData);
+                }
+            } else {
+                callback.onNoUpdateAvailable();
+            }
+        }
+        callbacks.removeIf(x -> !x.isStillValid());
+
+        if (!state.isChecking() && state.isUpdateAvailable() && !state.isReady() && !state.isDownloading() && state.downloadProgress() < 0.1f && !UpdateAppAlertDialog.isVisible && !hasShownPopupForUpdate && currentUpdateData != null) {
+            AndroidUtilities.runOnUIThread(() -> new UpdateAppAlertDialog(LaunchActivity.instance, currentUpdateData).show());
+            hasShownPopupForUpdate = true;
+            if (canAutoDownloadUpdates()) {
+                getFileLoader().loadFile(currentUpdateData.document, "update", FileLoader.PRIORITY_NORMAL, 1);
+            }
         }
     }
 
-    private static void checkForUpdates(UpdatesManagerPrepareInterface callback) {
-        if (checkingForChanges || (new Date().getTime() - lastUpdateCheck) < 30000) { // 30s
+    public void onUpdateButtonPressed() {
+        InternalUpdateState state = getUpdateRecord();
+        if (state.isUpdateAvailable() && state.isReady()) {
+            installUpdate();
+        } else if (state.isUpdateAvailable() && state.isDownloading()) {
+            getFileLoader().cancelLoadFile(currentUpdateData.document);
+            updateStateChange();
+        } else if (state.isUpdateAvailable()) {
+            getFileLoader().loadFile(currentUpdateData.document, "update", FileLoader.PRIORITY_NORMAL, 1);
+        } else if (!state.isChecking()) {
+            checkForUpdates();
+        }
+    }
+
+    public void checkForUpdates() {
+        isCheckingForUpdates = true;
+        updateStateChange();
+        initServerRequest(new UpdatesManagerPrepareInterface() {
+            @Override
+            public void onSuccess() {
+                OctoLogging.e(TAG, "Server request for updates data completed successfully");
+                checkIsUpdateAvailableAfterDataEnsure();
+            }
+
+            @Override
+            public void onError() {
+                OctoLogging.e(TAG, "Server request for updates data failed");
+                isCheckingForUpdates = false;
+                currentUpdateData = null;
+                updateStateChange();
+            }
+        });
+    }
+
+    private void initServerRequest(UpdatesManagerPrepareInterface callback) {
+        OctoLogging.e(TAG, "initServerRequest called");
+
+        if ((new Date().getTime() - lastUpdateCheck) < 30000) { // 30s
             // FORCE 1 REQUEST TO GITHUB EVERY 30S
 
             if (updatesData != null) {
@@ -179,16 +226,20 @@ public class UpdatesManager {
             return;
         }
 
+        OctoLogging.e(TAG, "Proceeding in server request for updates data");
+
         lastUpdateCheck = new Date().getTime();
-        checkingForChanges = true;
 
         new Thread() {
             @Override
             public void run() {
                 try {
+                    OctoLogging.e(TAG, "Starting to fetch updates data from server");
                     String reqUrl = String.format(Locale.getDefault(), "https://raw.githubusercontent.com/OctoGramApp/assets/ota/version_history/history.json?ms=%d", System.currentTimeMillis());
                     String reqResponse = new StandardHTTPRequest.Builder(reqUrl).build().request();
                     updatesData = new JSONObject(reqResponse);
+
+                    OctoLogging.e(TAG, "Updates data fetched successfully");
 
                     if (!isResponseCorrupted(updatesData)) {
                         currentChannelUsername = updatesData.getString("channel_username");
@@ -202,14 +253,38 @@ public class UpdatesManager {
 
                 } catch (Exception ignored) {
                     callback.onError();
-                } finally {
-                    checkingForChanges = false;
                 }
             }
         }.start();
     }
 
-    private static boolean isResponseCorrupted(JSONObject object) {
+    private void checkIsUpdateAvailableAfterDataEnsure() {
+        isCheckingForUpdates = false;
+
+        try {
+            JSONArray versionsHistory = updatesData.getJSONArray("versions");
+
+            for (int i = 0; i < versionsHistory.length(); i++) {
+                JSONObject update = versionsHistory.getJSONObject(i);
+
+                if (!isUpdateCorrupted(update) && isNewerVersion(update.getInt("versionCode")) && canUpdate(update)) {
+                    getTLRPCUpdateFromObject(update, arg -> {
+                        currentUpdateData = arg;
+                        updateStateChange();
+                    });
+                    return;
+                }
+            }
+
+            checkPrivateBetaData();
+        } catch (JSONException e) {
+            OctoLogging.e(TAG, "Update check failed due to invalid data!", e);
+            currentUpdateData = null;
+            updateStateChange();
+        }
+    }
+
+    private boolean isResponseCorrupted(JSONObject object) {
         try {
             if (object.has("channel_username")) {
                 if (object.getString("channel_username").length() < 5) {
@@ -243,7 +318,7 @@ public class UpdatesManager {
         }
     }
 
-    private static boolean isUpdateCorrupted(JSONObject object) {
+    private boolean isUpdateCorrupted(JSONObject object) {
         try {
             if (object.has("version")) {
                 object.getString("version");
@@ -302,7 +377,7 @@ public class UpdatesManager {
         }
     }
 
-    private static void checkPrivateBetaData(UpdatesManagerCheckInterface callback) {
+    private void checkPrivateBetaData() {
         /*
         shouldn't be needed
         TLRPC.TL_channels_getChannels req1 = new TLRPC.TL_channels_getChannels();
@@ -324,14 +399,16 @@ public class UpdatesManager {
         });*/
 
         if (!OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
-            callback.onNoUpdate();
+            currentUpdateData = null;
+            updateStateChange();
             return;
         }
 
         TLRPC.Chat chatInstance = getPrivateBetaChatInstance();
 
         if (chatInstance == null) {
-            callback.onNoUpdate();
+            currentUpdateData = null;
+            updateStateChange();
             return;
         }
 
@@ -443,7 +520,8 @@ public class UpdatesManager {
                             }
 
                             if (update.sticker != null) {
-                                callback.onThereIsUpdate(update);
+                                currentUpdateData = update;
+                                updateStateChange();
                             }
                         });
 
@@ -454,22 +532,96 @@ public class UpdatesManager {
             }
 
             if (!foundUpdate) {
-                callback.onNoUpdate();
+                currentUpdateData = null;
+                updateStateChange();
             }
         });
     }
 
-    private static boolean isNewerVersion(int versionCode) {
+    private boolean isDidInitNotificationCenter = false;
+    private void initNotificationCenter() {
+        if (isDidInitNotificationCenter) {
+            return;
+        }
+        isDidInitNotificationCenter = true;
+        new Handler(Looper.getMainLooper()).post(() -> {
+            NotificationCenter.getInstance(getFirstAccountId()).addObserver(this, NotificationCenter.fileLoadProgressChanged);
+            NotificationCenter.getInstance(getFirstAccountId()).addObserver(this, NotificationCenter.fileLoadFailed);
+            NotificationCenter.getInstance(getFirstAccountId()).addObserver(this, NotificationCenter.fileLoaded);
+        });
+    }
+
+    public int getFirstAccountId() {
+        if (!didInitFirstAccount) {
+            didInitFirstAccount = true;
+            long userId = 0;
+            for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
+                if (UserConfig.getInstance(i).isClientActivated() && !ConnectionsManager.getInstance(i).isTestBackend()) {
+                    DETECTED_ACCOUNT_ID = i;
+                    userId = UserConfig.getInstance(i).clientUserId;
+                }
+            }
+            OctoLogging.d(TAG, String.format(Locale.US, "Detected first account ID: %d - User ID: %d", DETECTED_ACCOUNT_ID, userId));
+        }
+        return DETECTED_ACCOUNT_ID;
+    }
+
+    public boolean canReceivePrivateBetaUpdates() {
+        if (!OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
+            return false;
+        }
+
+        if (getPrivateBetaChatInstance() == null) {
+            OctoConfig.INSTANCE.receivePBetaUpdates.updateValue(false);
+            return false;
+        }
+
+        return true;
+    }
+
+    public TLRPC.Chat getPrivateBetaChatInstance() {
+        TLRPC.Chat chat = getMessagesController().getChat(-privateChatId);
+
+        boolean hasPrivateBetaAccessC = chat != null;
+        OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
+        if (!hasPrivateBetaAccessC) {
+            OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE: chat empty");
+            OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
+        }
+
+        if (hasPrivateBetaAccessC) {
+            hasPrivateBetaAccessC = chat.id != 0;
+            hasPrivateBetaAccessC &= chat.access_hash != 0;
+            if (!hasPrivateBetaAccessC) {
+                OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + chat.id + " - " + chat.access_hash);
+                OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
+            }
+        }
+
+        if (hasPrivateBetaAccessC) {
+            hasPrivateBetaAccessC = ChatObject.isInChat(chat);
+            hasPrivateBetaAccessC &= ChatObject.isChannel(chat);
+            hasPrivateBetaAccessC &= !ChatObject.isPublic(chat);
+            if (!hasPrivateBetaAccessC) {
+                OctoLogging.d(TAG, "ACCESS HAS BEEN FORBIDDEN - STATE:" + ChatObject.isInChat(chat) + ChatObject.isChannel(chat) + ChatObject.isPublic(chat));
+                OctoLogging.d(TAG, String.format("Account Selected: %s - %s", UserConfig.selectedAccount, AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().clientUserId));
+            }
+        }
+
+        return hasPrivateBetaAccessC ? chat : null;
+    }
+
+    private boolean isNewerVersion(int versionCode) {
         return versionCode > BuildConfig.BUILD_VERSION;
     }
 
-    public static void getTLRPCUpdateFromObject(JSONObject object, UpdatesManagerTLRPCReadyInterface callback) {
+    private void getTLRPCUpdateFromObject(JSONObject object, Utilities.Callback<TLRPC.TL_help_appUpdate> appUpdateCallback) {
         if (isLoadingTLRPCAppUpdate) {
             return;
         }
 
         if (currentUpdateData != null) {
-            callback.onTLRPCReady(currentUpdateData);
+            appUpdateCallback.run(currentUpdateData);
             return;
         }
 
@@ -506,7 +658,7 @@ public class UpdatesManager {
                 if (update.sticker != null && update.document != null) {
                     currentUpdateData = update;
                     isLoadingTLRPCAppUpdate = false;
-                    callback.onTLRPCReady(update);
+                    appUpdateCallback.run(update);
                 }
             });
         } catch (JSONException e) {
@@ -514,7 +666,7 @@ public class UpdatesManager {
         }
     }
 
-    private static void tryToGetContent(ArrayList<Integer> messageIds, UpdatesManagerGetMessagesInterface callback) {
+    private void tryToGetContent(ArrayList<Integer> messageIds, UpdatesManagerGetMessagesInterface callback) {
         TLRPC.InputPeer currentPeer = getMessagesController().getInputPeer(currentChannelId);
         if (currentPeer == null || currentPeer.peer == null || currentPeer.peer.access_hash == 0) {
             TLRPC.TL_contacts_resolveUsername resolve = new TLRPC.TL_contacts_resolveUsername();
@@ -545,7 +697,7 @@ public class UpdatesManager {
         }
     }
 
-    private static void getMessagesData(TLRPC.InputChannel peer, ArrayList<Integer> messageIds, UpdatesManagerGetMessagesInterface callback) {
+    private void getMessagesData(TLRPC.InputChannel peer, ArrayList<Integer> messageIds, UpdatesManagerGetMessagesInterface callback) {
         TLRPC.TL_channels_getMessages req = new TLRPC.TL_channels_getMessages();
         req.channel = peer;
         req.id = messageIds;
@@ -565,7 +717,7 @@ public class UpdatesManager {
         });
     }
 
-    private static int getFileMessageId(JSONObject object) {
+    private int getFileMessageId(JSONObject object) {
         try {
             String currentAbi = OctoUtils.getCurrentAbi(false);
             JSONObject filesObject = object.getJSONObject("files");
@@ -577,7 +729,7 @@ public class UpdatesManager {
         }
     }
 
-    private static Boolean canUpdate(JSONObject object) {
+    private Boolean canUpdate(JSONObject object) {
         if (OctoConfig.INSTANCE.preferBetaVersion.getValue()) {
             return true;
         }
@@ -585,7 +737,7 @@ public class UpdatesManager {
         return !isBetaUpdate(object);
     }
 
-    private static Boolean isBetaUpdate(JSONObject object) {
+    private Boolean isBetaUpdate(JSONObject object) {
         try {
             return object.has("beta") && object.getBoolean("beta");
         } catch (JSONException e) {
@@ -593,7 +745,7 @@ public class UpdatesManager {
         }
     }
 
-    private static Boolean canNotSkipUpdate(JSONObject object) {
+    private Boolean canNotSkipUpdate(JSONObject object) {
         try {
             return object.has("can_not_skip") && object.getBoolean("can_not_skip");
         } catch (JSONException e) {
@@ -601,7 +753,7 @@ public class UpdatesManager {
         }
     }
 
-    private static String getUpdateText(JSONObject object) {
+    private String getUpdateText(JSONObject object) {
         try {
             JSONObject localizedChangelogs = object.getJSONObject("localized_changelogs");
             String myLanguageCode = LocaleController.getInstance().getCurrentLocale().getLanguage();
@@ -616,7 +768,7 @@ public class UpdatesManager {
         }
     }
 
-    public static boolean canAutoDownloadUpdates() {
+    public boolean canAutoDownloadUpdates() {
         int autoDownloadUpdatesStatus = OctoConfig.INSTANCE.autoDownloadUpdatesStatus.getValue();
 
         if (autoDownloadUpdatesStatus == AutoDownloadUpdate.ALWAYS.getValue()) {
@@ -630,20 +782,18 @@ public class UpdatesManager {
         return false;
     }
 
-    public static void installUpdate() {
-        if (SharedConfig.pendingAppUpdate != null) {
-            TLRPC.TL_help_appUpdate update = SharedConfig.pendingAppUpdate;
-
-            if (!TextUtils.isEmpty(update.text)) {
+    public void installUpdate() {
+        if (currentUpdateData != null) {
+            if (!TextUtils.isEmpty(currentUpdateData.text)) {
                 OctoConfig.INSTANCE.updateSignalingCommitID.updateValue(BuildConfig.GIT_COMMIT_HASH);
-                OctoConfig.INSTANCE.updateSignalingChangelog.updateValue(update.text);
+                OctoConfig.INSTANCE.updateSignalingChangelog.updateValue(currentUpdateData.text);
             }
 
-            AndroidUtilities.runOnUIThread(() -> AndroidUtilities.openForView(update.document, true, LaunchActivity.instance));
+            AndroidUtilities.runOnUIThread(() -> AndroidUtilities.openForView(currentUpdateData.document, true, LaunchActivity.instance));
         }
     }
 
-    public static void handleUpdateSignaling() {
+    public void handleUpdateSignaling() {
         if (OctoConfig.INSTANCE != null) {
 
             boolean isValidUpdate = !Objects.equals(OctoConfig.INSTANCE.updateSignalingCommitID.getValue(), BuildConfig.GIT_COMMIT_HASH);
@@ -670,10 +820,47 @@ public class UpdatesManager {
         }
     }
 
-    public interface UpdatesManagerPrepareInterface {
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (currentUpdateData == null) {
+            return;
+        }
+        if (id == NotificationCenter.fileLoaded || id == NotificationCenter.fileLoadFailed || id == NotificationCenter.fileLoadProgressChanged) {
+            String path = (String) args[0];
+            String name = FileLoader.getAttachFileName(currentUpdateData.document);
+            OctoLogging.e(TAG, String.format("Notification received: %d, Account: %d, Path: %s, Name: %s", id, account, path, name));
+            if (name.equals(path)) {
+                updateStateChange();
+            }
+        }
+    }
+
+    private interface UpdatesManagerPrepareInterface {
         void onSuccess();
 
         void onError();
+    }
+
+    public interface UpdatesManagerCallback {
+        default boolean isStillValid() {
+            return true;
+        }
+
+        default boolean onGetStateAfterAdd() {
+            return false;
+        }
+
+        default void checkingForUpdates() {
+
+        }
+        void onNoUpdateAvailable();
+        void onUpdateAvailable(TLRPC.TL_help_appUpdate update);
+        void onUpdateDownloading(float percent);
+        void onUpdateReady();
+    }
+
+    private record InternalUpdateState(boolean isChecking, boolean isUpdateAvailable, boolean isDownloading, float downloadProgress, boolean isReady) {
+
     }
 
     public interface UpdatesManagerCheckInterface {
@@ -684,10 +871,6 @@ public class UpdatesManager {
         void onNoUpdate();
 
         void onError();
-    }
-
-    public interface UpdatesManagerTLRPCReadyInterface {
-        void onTLRPCReady(TLRPC.TL_help_appUpdate update);
     }
 
     private interface UpdatesManagerGetMessagesInterface {

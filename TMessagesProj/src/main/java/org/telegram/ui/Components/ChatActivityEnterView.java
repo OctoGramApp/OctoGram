@@ -10742,9 +10742,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             sizeNotifierLayout.removeView(emojiView);
             emojiView = null;
         }
-        if (parentFragment == null) { // octogram impl
-            return; // octogram impl
-        } // octogram impl
         if (emojiView != null) {
             return;
         }

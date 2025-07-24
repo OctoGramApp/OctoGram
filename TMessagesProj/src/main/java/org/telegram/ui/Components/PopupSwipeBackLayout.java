@@ -435,7 +435,8 @@ public class PopupSwipeBackLayout extends FrameLayout {
         int s = canvas.save();
         mPath.rewind();
 //        var rad = ActionBarPopupWindow.ActionBarPopupWindowLayout.USE_NEW_BACKGROUND ? 40f : AndroidUtilities.dp(6);
-        int rad = AndroidUtilities.dp(6);
+//        int rad = AndroidUtilities.dp(6);
+        int rad = AndroidUtilities.dp(10);
         if (stickToRight) {
             mRect.set(getWidth() - w, y, getWidth(), y + h);
         } else {

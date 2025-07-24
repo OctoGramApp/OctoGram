@@ -763,7 +763,7 @@ public class OctoConfig {
             case "translatorMode" ->
                     isValidInRange(value, TranslatorMode.DEFAULT.getValue(), TranslatorMode.EXTERNAL.getValue());
             case "translatorProvider" ->
-                    isValidInRange(value, TranslatorProvider.DEFAULT.getValue(), TranslatorProvider.LINGO.getValue());
+                    isValidInRange(value, TranslatorProvider.DEFAULT.getValue(), TranslatorProvider.GOOGLE_CLOUD.getValue());
             case "translatorFormality" ->
                     isValidInRange(value, TranslatorFormality.DEFAULT.getValue(), TranslatorFormality.HIGH.getValue());
             case "defaultEmojiButtonAction" ->

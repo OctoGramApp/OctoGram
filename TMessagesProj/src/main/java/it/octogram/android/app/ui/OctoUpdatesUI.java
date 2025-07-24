@@ -15,18 +15,11 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.FileLoader;
-import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SharedConfig;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.Components.BulletinFactory;
-import org.telegram.ui.LaunchActivity;
 
-import java.io.File;
 import java.util.List;
 import java.util.Locale;
 
@@ -50,16 +43,19 @@ import it.octogram.android.utils.deeplink.DeepLinkDef;
 
 public class OctoUpdatesUI implements PreferencesEntry {
     private CheckForUpdatesButtonCell checkCell;
+    private PreferencesFragment fragment;
     private final static String TAG = "OctoUpdatesUI";
 
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
-        TLRPC.Chat pbetaChatInstance = UpdatesManager.getPrivateBetaChatInstance();
+        this.fragment = fragment;
+
+        TLRPC.Chat pbetaChatInstance = UpdatesManager.INSTANCE.getPrivateBetaChatInstance();
         ConfigProperty<Boolean> isPbetaUser = new ConfigProperty<>(null, pbetaChatInstance != null);
 
         if (pbetaChatInstance == null && OctoConfig.INSTANCE.receivePBetaUpdates.getValue()) {
-            OctoLogging.d(TAG, String.format(Locale.US, "%s: %s LINE: 62", isPbetaUser.getValue(), (pbetaChatInstance == null && OctoConfig.INSTANCE.receivePBetaUpdates.getValue())));
+            OctoLogging.d(TAG, String.format(Locale.US, "%s: %s LINE: 62", isPbetaUser.getValue(), OctoConfig.INSTANCE.receivePBetaUpdates.getValue()));
             OctoConfig.INSTANCE.receivePBetaUpdates.updateValue(false);
         }
 
@@ -69,13 +65,13 @@ public class OctoUpdatesUI implements PreferencesEntry {
                 .deepLink(DeepLinkDef.UPDATE)
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.UPDATES, true, getString(R.string.UpdatesSettingsHeader))
                 .row(new CustomCellRow.CustomCellRowBuilder()
-                        .layout(checkCell = new CheckForUpdatesButtonCell(context, () -> checkForUpdates(fragment, context)))
+                        .layout(checkCell = new CheckForUpdatesButtonCell(context))
+                        .avoidReDraw(true)
                         .build())
                 .row(new ShadowRow())
                 .category(R.string.UpdatesOptions, category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.autoDownloadUpdatesStatus)
-                            .onSelected(this::checkAutoDownloadState)
                             .options(List.of(
                                     new PopupChoiceDialogOption()
                                             .setId(AutoDownloadUpdate.ALWAYS.getValue())
@@ -97,13 +93,13 @@ public class OctoUpdatesUI implements PreferencesEntry {
                             .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> checkForUpdates(fragment, context, true))
+                            .onPostUpdate(() -> UpdatesManager.INSTANCE.checkForUpdates())
                             .preferenceValue(OctoConfig.INSTANCE.preferBetaVersion)
                             .title(getString(R.string.UpdatesSettingsBeta))
                             .showIf(OctoConfig.INSTANCE.receivePBetaUpdates, true)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> checkForUpdates(fragment, context, true))
+                            .onPostUpdate(() -> UpdatesManager.INSTANCE.checkForUpdates())
                             .preferenceValue(OctoConfig.INSTANCE.receivePBetaUpdates)
                             .title(getString(R.string.UpdatesSettingsPBeta))
                             .showIf(isPbetaUser)
@@ -123,97 +119,34 @@ public class OctoUpdatesUI implements PreferencesEntry {
     }
 
     private void preUpdateUI() {
-        if (SharedConfig.isAppUpdateAvailable()) {
-            String fileName = FileLoader.getAttachFileName(SharedConfig.pendingAppUpdate.document);
-            File path = FileLoader.getInstance(0).getPathToAttach(SharedConfig.pendingAppUpdate.document, true);
-            if (path.exists()) {
-                AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY));
-            } else {
-                boolean isDownloading = FileLoader.getInstance(0).isLoadingFile(fileName);
-                if (isDownloading) {
-                    Float p = ImageLoader.getInstance().getFileProgress(fileName);
-                    AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, p != null ? p : 0.0f));
-                } else {
-                    AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD));
-                }
-            }
-        }
-    }
-
-    private void checkAutoDownloadState() {
-        if (UpdatesManager.canAutoDownloadUpdates() && SharedConfig.isAppUpdateAvailable()) {
-            preUpdateUI();
-
-            if (checkCell.getCurrentState() == CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
-                LaunchActivity.instance.handleNewUpdate(SharedConfig.pendingAppUpdate, true);
-            }
-        }
-    }
-
-    private void checkForUpdates(PreferencesFragment fragment, Context context, boolean ignoreTelegramCache) {
-        if (SharedConfig.isAppUpdateAvailable() && !ignoreTelegramCache) {
-            preUpdateUI();
-
-            int currentState = checkCell.getCurrentState();
-            switch (currentState) {
-                case CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
-                    LaunchActivity.instance.handleNewUpdate(SharedConfig.pendingAppUpdate, true);
-                    break;
-                case CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY:
-                    UpdatesManager.installUpdate();
-            }
-
-            return;
-        }
-
-        AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.CHECKING_UPDATES));
-
-        UpdatesManager.isUpdateAvailable(new UpdatesManager.UpdatesManagerCheckInterface() {
+        UpdatesManager.INSTANCE.addCallback(new UpdatesManager.UpdatesManagerCallback() {
             @Override
-            public void onThereIsUpdate(JSONObject updateData) {
-                if (updateData == null) {
-                    return;
-                }
-
-                AndroidUtilities.runOnUIThread(() -> UpdatesManager.getTLRPCUpdateFromObject(updateData, update -> {
-                    LaunchActivity.instance.handleNewUpdate(update, true);
-                    preUpdateUI();
-                }));
+            public void checkingForUpdates() {
+                AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.CHECKING_UPDATES));
             }
 
             @Override
-            public void onThereIsUpdate(TLRPC.TL_help_appUpdate update) {
+            public void onNoUpdateAvailable() {
                 AndroidUtilities.runOnUIThread(() -> {
-                    LaunchActivity.instance.handleNewUpdate(update, true);
-                    preUpdateUI();
-                });
-            }
-
-            @Override
-            public void onNoUpdate() {
-                AndroidUtilities.runOnUIThread(() -> {
-                    LaunchActivity.instance.resetUpdateInstance();
                     checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.NO_UPDATE_AVAILABLE);
                     BulletinFactory.of(fragment).createSimpleBulletin(R.raw.done, getString(R.string.UpdatesSettingsCheckUpdated)).show();
                 });
             }
 
             @Override
-            public void onError() {
-                AndroidUtilities.runOnUIThread(() -> {
-                    checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.NO_UPDATE_AVAILABLE);
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-                    alertDialogBuilder.setTitle(getString(R.string.AppName));
-                    alertDialogBuilder.setMessage(getString(R.string.UpdatesSettingsCheckFailed));
-                    alertDialogBuilder.setPositiveButton(getString(R.string.OK), null);
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                });
+            public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
+                AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD));
+            }
+
+            @Override
+            public void onUpdateDownloading(float percent) {
+                AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, percent));
+            }
+
+            @Override
+            public void onUpdateReady() {
+                AndroidUtilities.runOnUIThread(() -> checkCell.updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY));
             }
         });
-    }
-
-    private void checkForUpdates(PreferencesFragment fragment, Context context) {
-        checkForUpdates(fragment, context, false);
     }
 }

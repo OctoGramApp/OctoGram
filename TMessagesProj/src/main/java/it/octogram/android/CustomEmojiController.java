@@ -203,32 +203,45 @@ public class CustomEmojiController {
             return;
         }
         statusLoading = LOADING;
+
         new Thread() {
             @Override
             public void run() {
                 ArrayList<EmojiPackBase> tmp = loadCustomEmojiPacks();
                 invalidateCache(false);
                 statusLoading = LOADED_LOCAL;
+
                 synchronized (emojiPacksInfo) {
                     emojiPacksInfo.addAll(tmp);
                     AndroidUtilities.runOnUIThread(listener::onLoaded);
-                    try {
-                        String json = new StandardHTTPRequest.Builder("https://raw.githubusercontent.com/OctoGramApp/assets/emojiPacks/EmojiPacks/emoji_packs.json").build().request();
-                        preferences.edit().putString("emoji_packs", json).apply();
-                        invalidateCache(true);
-                        emojiPacksInfo.addAll(loadFromJson(json));
-                    } catch (Exception e) {
+
+                    if (ApplicationLoader.isNetworkOnline()) {
+                        try {
+                            String json = new StandardHTTPRequest.Builder("https://raw.githubusercontent.com/OctoGramApp/assets/emojiPacks/EmojiPacks/emoji_packs.json").build().request();
+                            preferences.edit().putString("emoji_packs", json).apply();
+                            invalidateCache(true);
+                            emojiPacksInfo.addAll(loadFromJson(json));
+                        } catch (Exception e) {
+                            try {
+                                invalidateCache(true);
+                                emojiPacksInfo.addAll(loadFromJson(preferences.getString("emoji_packs", "[]")));
+                            } catch (JSONException ignored) {
+                                statusLoading = FAILED;
+                            }
+                            OctoLogging.e("Error loading emoji packs", e);
+                        }
+                    } else {
                         try {
                             invalidateCache(true);
                             emojiPacksInfo.addAll(loadFromJson(preferences.getString("emoji_packs", "[]")));
-                        } catch (JSONException ignored) {
+                        } catch (JSONException e) {
                             statusLoading = FAILED;
+                            OctoLogging.e("Error loading emoji packs from cache", e);
                         }
-                        OctoLogging.e("Error loading emoji packs", e);
-                    } finally {
-                        statusLoading = LOADED_REMOTE;
-                        AndroidUtilities.runOnUIThread(listener::onLoaded);
                     }
+
+                    statusLoading = LOADED_REMOTE;
+                    AndroidUtilities.runOnUIThread(listener::onLoaded);
                 }
             }
         }.start();

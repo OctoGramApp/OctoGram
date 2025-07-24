@@ -35,8 +35,6 @@ import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -46,6 +44,7 @@ import org.telegram.ui.Components.ExtendedGridLayoutManager;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.ai.icons.AiFeatureIcons;
 import it.octogram.android.utils.appearance.FolderIconController;
@@ -176,7 +175,7 @@ public class IconStyleSelectorCell extends BottomSheet {
             protected void onMeasure(int widthSpec, int heightSpec) {
                 super.onMeasure(widthSpec, heightSpec);
                 gridAdapter.notifyDataSetChanged();
-                Log.e("a", "dstchang");
+                OctoLogging.e("IconStyleSelectorCell", "dstchang");
             }
         };
         recyclerListView.setLayoutParams(new LinearLayout.LayoutParams(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));

@@ -2379,11 +2379,16 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             int showUserIconsW = dp(18) + dp(4); // 4 => padding
             messageNameLeft += showUserIconsW;
 
-            if (!SharedConfig.useThreeLinesLayout || hasTags()) {
+            if (LocaleController.isRTL) {
+                messageLeft += showUserIconsW;
+                messageWidth -= showUserIconsW;
+            } else if (!SharedConfig.useThreeLinesLayout || hasTags()) {
                 messageLeft += showUserIconsW;
                 messageWidth -= showUserIconsW;
             }
         }
+
+        messageWidth = Math.max(dp(12), messageWidth);
 
         if (checkMessage) {
             if (messageString == null) {
@@ -2509,15 +2514,19 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
             Layout.Alignment align = isForum && LocaleController.isRTL ? Layout.Alignment.ALIGN_OPPOSITE : Layout.Alignment.ALIGN_NORMAL;
             if ((useForceThreeLines || SharedConfig.useThreeLinesLayout) && !hasTags()) {
-                if (thumbsCount > 0 && messageNameString != null) {
-                    messageWidth += dp(5);
+                if (!OctoConfig.INSTANCE.showUserIconsInChatsList.getValue()) {
+                    if (thumbsCount > 0 && messageNameString != null) {
+                        messageWidth += dp(5);
+                    }
                 }
                 messageLayout = StaticLayoutEx.createStaticLayout(messageStringFinal, currentMessagePaint, messageWidth, align, 1.0f, dp(1), false, TextUtils.TruncateAt.END, messageWidth, messageNameString != null ? 1 : 2);
             } else {
-                if (thumbsCount > 0) {
-                    messageWidth += dp((thumbsCount * (thumbSize + 2) - 2) + 5);
-                    if (LocaleController.isRTL && !isForumCell()) {
-                        messageLeft -= dp((thumbsCount * (thumbSize + 2) - 2) + 5);
+                if (!OctoConfig.INSTANCE.showUserIconsInChatsList.getValue()) {
+                    if (thumbsCount > 0) {
+                        messageWidth += dp((thumbsCount * (thumbSize + 2) - 2) + 5);
+                        if (LocaleController.isRTL && !isForumCell()) {
+                            messageLeft -= dp((thumbsCount * (thumbSize + 2) - 2) + 5);
+                        }
                     }
                 }
                 messageLayout = new StaticLayout(messageStringFinal, currentMessagePaint, messageWidth, align, 1.0f, 0.0f, false);

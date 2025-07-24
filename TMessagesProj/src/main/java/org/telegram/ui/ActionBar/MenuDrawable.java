@@ -15,13 +15,21 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.view.animation.DecelerateInterpolator;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.MediaActionDrawable;
+
+import it.octogram.android.utils.UpdatesManager;
 
 public class MenuDrawable extends Drawable {
 
@@ -71,6 +79,7 @@ public class MenuDrawable extends Drawable {
         previousType = TYPE_DEFAULT;
         this.type = type;
         typeAnimationProgress = 1.0f;
+        onAttached();
     }
 
     public void setRotateToBack(boolean value) {
@@ -118,12 +127,12 @@ public class MenuDrawable extends Drawable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         long newTime = SystemClock.elapsedRealtime();
         long dt = newTime - lastFrameTime;
         if (currentRotation != finalRotation) {
             if (lastFrameTime != 0) {
-                currentAnimationTime += dt;
+                currentAnimationTime += (int) dt;
                 if (currentAnimationTime >= 200) {
                     currentRotation = finalRotation;
                 } else {
@@ -147,7 +156,7 @@ public class MenuDrawable extends Drawable {
 
         canvas.save();
 
-        canvas.translate(getIntrinsicWidth() / 2 - dp(9) - dp(1) * currentRotation, getIntrinsicHeight() / 2);
+        canvas.translate((float) getIntrinsicWidth() / 2 - dp(9) - dp(1) * currentRotation, (float) getIntrinsicHeight() / 2);
         float endYDiff;
         float endXDiff;
         float startYDiff;
@@ -333,5 +342,44 @@ public class MenuDrawable extends Drawable {
 
     public void setMiniIcon(boolean miniIcon) {
         this.miniIcon = miniIcon;
+    }
+
+    private UpdatesManager.UpdatesManagerCallback callback;
+
+    public void onAttached() {
+        if (callback != null) {
+            return;
+        }
+
+        UpdatesManager.INSTANCE.addCallback(callback = new UpdatesManager.UpdatesManagerCallback() {
+            @Override
+            public void onNoUpdateAvailable() {
+                setType(TYPE_DEFAULT, true);
+                setUpdateDownloadProgress(0f, true);
+            }
+
+            @Override
+            public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
+                setType(TYPE_UDPATE_AVAILABLE, true);
+                setUpdateDownloadProgress(0f, true);
+            }
+
+            @Override
+            public void onUpdateDownloading(float percent) {
+                setType(TYPE_UDPATE_DOWNLOADING, true);
+                setUpdateDownloadProgress(percent, true);
+            }
+
+            @Override
+            public void onUpdateReady() {
+                setType(TYPE_UDPATE_AVAILABLE, true);
+                setUpdateDownloadProgress(1f, true);
+            }
+        });
+    }
+
+    public void onDetached() {
+        UpdatesManager.INSTANCE.removeCallback(callback);
+        callback = null;
     }
 }
