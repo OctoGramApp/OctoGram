@@ -65,6 +65,8 @@ public class OctoConfig {
     public static final String CRASH_MIME_TYPE = "message/rfc822";
     public static final String EXPORT_BACKUP_MIME_TYPE = "text/json";
     public static final String AI_EXAMPLE_CHANNEL_TAG = "OctoModels";
+    public static final String EXTENSION_CHANNEL_TAG = "OctoGramBeta";
+    public static final int EXTENSION_CHANNEL_ID = 247;
 
     /*General*/
     public final ConfigProperty<Boolean> showDcId = newConfigProperty("showDcId", true);

@@ -246,7 +246,7 @@ public class OctoChatsTranslatorUI implements PreferencesEntry {
                 })
                 .row(new TextDetailRow.TextDetailRowBuilder()
                     .onClick(() -> {
-                        if (!OnDeviceHelper.checkVersionCode(context, 123)) {
+                        if (!OnDeviceHelper.checkVersionCode(context, OnDeviceHelper.MIN_ONDEVICE_VERSION_CODE)) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(context);
                             builder.setTitle(getString(R.string.Warning));
                             builder.setMessage(AndroidUtilities.replaceTags(String.format(Locale.US, getString(R.string.OnDeviceTranslationModels_UnsupportedVersion), OnDeviceHelper.MIN_ONDEVICE_VERSION, OnDeviceHelper.MIN_ONDEVICE_VERSION_CODE)));

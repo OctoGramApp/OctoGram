@@ -145,12 +145,12 @@ public class UpdateAppAlertDialog extends BottomSheet {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
                     }
-                    setText("You can close this popup during the download.", !isFirstUpdate);
+                    setText(getString(R.string.UpdatesAlertSafeClose), !isFirstUpdate);
                 } else if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
                     }
-                    setText("Install the update by pressing the above button.", !isFirstUpdate);
+                    setText(getString(R.string.UpdatesAlertSafeUpdate), !isFirstUpdate);
                 }
             } else {
                 switch (state) {

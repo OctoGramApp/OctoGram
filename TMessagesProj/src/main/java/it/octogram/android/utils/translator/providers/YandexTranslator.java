@@ -54,7 +54,7 @@ public class YandexTranslator implements BaseTranslator {
     }
 
     @Override
-    public int getMaxPoolState() {
+    public int getMaxExecutionPoolSize() {
         return 4;
     }
 

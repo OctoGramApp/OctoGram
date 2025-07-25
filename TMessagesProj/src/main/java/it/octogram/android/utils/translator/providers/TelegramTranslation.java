@@ -28,7 +28,7 @@ public class TelegramTranslation implements BaseTranslator {
     }
 
     @Override
-    public int getMaxPoolState() {
+    public int getMaxExecutionPoolSize() {
         return 4;
     }
 

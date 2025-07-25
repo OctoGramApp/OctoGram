@@ -8,6 +8,8 @@
 
 package it.octogram.android.utils.translator.localhelper;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
@@ -15,6 +17,7 @@ import android.text.TextUtils;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.R;
 import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
@@ -26,6 +29,7 @@ import it.octogram.android.StoreUtils;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.translator.SingleTranslationsHandler;
 import it.octogram.android.utils.translator.providers.BaseTranslator;
+import it.octogram.android.utils.translator.providers.GoogleTranslator;
 
 public class LocalTranslator implements BaseTranslator {
     public static final LocalTranslator INSTANCE = new LocalTranslator();
@@ -57,12 +61,12 @@ public class LocalTranslator implements BaseTranslator {
 
     @Override
     public String getName() {
-        return "Device Translation";
+        return getString(R.string.TranslatorProviderTelegramDevice);
     }
 
     @Override
-    public int getMaxPoolState() {
-        return 0;
+    public int getMaxExecutionPoolSize() {
+        return GoogleTranslator.INSTANCE.getMaxExecutionPoolSize();
     }
 
     @Override

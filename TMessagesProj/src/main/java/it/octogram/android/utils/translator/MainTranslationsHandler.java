@@ -122,12 +122,12 @@ public class MainTranslationsHandler {
         return getInstanceForTranslation(translationProvider).getName();
     }
 
-    public static int getMaxPoolState() {
-        return getMaxPoolState(OctoConfig.INSTANCE.translatorProvider.getValue());
+    public static int getMaxExecutionPoolSize() {
+        return getMaxExecutionPoolSize(OctoConfig.INSTANCE.translatorProvider.getValue());
     }
 
-    public static int getMaxPoolState(int translationProvider) {
-        return getInstanceForTranslation(translationProvider).getMaxPoolState();
+    public static int getMaxExecutionPoolSize(int translationProvider) {
+        return getInstanceForTranslation(translationProvider).getMaxExecutionPoolSize();
     }
 
     public static void suggestProviderUpdate(Context context, BaseFragment fragment, Runnable providerChanged) {

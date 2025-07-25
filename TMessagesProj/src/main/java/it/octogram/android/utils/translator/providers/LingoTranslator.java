@@ -42,7 +42,7 @@ public class LingoTranslator implements BaseTranslator {
     }
 
     @Override
-    public int getMaxPoolState() {
+    public int getMaxExecutionPoolSize() {
         return 3;
     }
 

@@ -56,6 +56,8 @@ import org.telegram.ui.Components.StickerImageView;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.LaunchActivity;
 
+import java.util.Locale;
+
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.TranslatorProvider;
@@ -150,7 +152,7 @@ public class TranslatorConfigBottomSheet extends BottomSheet {
         buttonTextView.setOnClickListener(view -> {
             if (isFromLocalTranslation) {
                 dismiss();
-                Browser.openUrl(LaunchActivity.instance, "https://t.me/OctoGramBeta/244");
+                Browser.openUrl(LaunchActivity.instance, String.format(Locale.US, "https://t.me/%s/%d", OctoConfig.EXTENSION_CHANNEL_TAG, OctoConfig.EXTENSION_CHANNEL_ID));
                 return;
             }
 

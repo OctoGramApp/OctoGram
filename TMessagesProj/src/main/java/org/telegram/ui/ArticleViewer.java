@@ -118,6 +118,7 @@ import com.google.android.exoplayer2.util.Log;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.app.ui.bottomsheets.ArticleTranslationsBottomSheet;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.translator.ArticleTranslationsHandler;
 import it.octogram.android.utils.translator.MainTranslationsHandler;
 
@@ -2547,7 +2548,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             if (isPageTranslated && ArticleTranslationsHandler.getTranslatedText(finalText) != null) {
                 finalText = ArticleTranslationsHandler.getTranslatedText(finalText);
             } else {
-                Log.e("a", "failed to translate item "+finalText);
+                OctoLogging.e("ArticleTranslator", "failed to translate item "+finalText);
             }
             return finalText;
             //return ((TLRPC.TL_textPlain) richText).text;

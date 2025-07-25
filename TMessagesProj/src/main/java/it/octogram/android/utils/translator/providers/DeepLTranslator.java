@@ -41,7 +41,7 @@ public class DeepLTranslator implements BaseTranslator {
     }
 
     @Override
-    public int getMaxPoolState() {
+    public int getMaxExecutionPoolSize() {
         return 2;
     }
 

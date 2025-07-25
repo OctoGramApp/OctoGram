@@ -44,6 +44,7 @@ import java.util.Objects;
 
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.StoreUtils;
 import it.octogram.android.http.StandardHTTPRequest;
 import it.octogram.android.tgastandaloneexport.UpdateAppAlertDialog;
 import it.octogram.android.utils.network.BrowserUtils;
@@ -192,6 +193,13 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
     }
 
     public void checkForUpdates() {
+        if (StoreUtils.isFromPlayStore()) {
+            isCheckingForUpdates = false;
+            currentUpdateData = null;
+            updateStateChange();
+            return;
+        }
+
         isCheckingForUpdates = true;
         updateStateChange();
         initServerRequest(new UpdatesManagerPrepareInterface() {

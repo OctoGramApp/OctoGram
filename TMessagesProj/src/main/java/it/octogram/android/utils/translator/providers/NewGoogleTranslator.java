@@ -59,7 +59,7 @@ public class NewGoogleTranslator implements BaseTranslator {
     }
 
     @Override
-    public int getMaxPoolState() {
+    public int getMaxExecutionPoolSize() {
         return 10;
     }
 

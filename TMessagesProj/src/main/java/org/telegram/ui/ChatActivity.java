@@ -8980,7 +8980,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         flagSecure = new FlagSecureReason(getParentActivity().getWindow(), () ->
             currentEncryptedChat != null ||
             getMessagesController().isChatNoForwards(currentChat) ||
-            /*OctoLogic*/ (OctoConfig.INSTANCE.lockedChatsLockScreenshots.getValue() && FingerprintUtils.hasFingerprintCached() && FingerprintUtils.isChatLocked(currentUser, currentChat))
+            /*OctoLogic*/ (OctoConfig.INSTANCE.lockedChatsLockScreenshots.getValue() && FingerprintUtils.hasFingerprintCached() && (currentUser != null || currentChat != null) && FingerprintUtils.isChatLocked(currentUser, currentChat))
         );
 
         if (oldMessage != null) {

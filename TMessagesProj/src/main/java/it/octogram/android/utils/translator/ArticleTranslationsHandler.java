@@ -47,7 +47,7 @@ public class ArticleTranslationsHandler {
         AtomicInteger translatedItems = new AtomicInteger(0);
         AtomicInteger failedTranslations = new AtomicInteger(0);
         HashMap<Object, TLRPC.PageBlock> textToBlocks = pageLayout.adapter.textToBlocks;
-        ExecutorService transPool = Executors.newFixedThreadPool(MainTranslationsHandler.getMaxPoolState());
+        ExecutorService transPool = Executors.newFixedThreadPool(MainTranslationsHandler.getMaxExecutionPoolSize());
         ArrayList<Future<?>> futures = new ArrayList<>();
 
         new Thread(() -> {
@@ -146,6 +146,10 @@ public class ArticleTranslationsHandler {
 
     public static String getTranslatedText(String originalText) {
         return tempTranslations.get(originalText.trim());
+    }
+
+    public static void clearTranslations() {
+        tempTranslations.clear();
     }
 
     private static class TranslationCompletable {

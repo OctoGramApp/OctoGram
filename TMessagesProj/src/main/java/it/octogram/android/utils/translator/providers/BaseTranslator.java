@@ -17,7 +17,7 @@ import it.octogram.android.utils.translator.SingleTranslationsHandler;
 
 public interface BaseTranslator {
     String getName();
-    int getMaxPoolState();
+    int getMaxExecutionPoolSize();
     default void executeTranslation(MessageObject object, TLRPC.InputPeer peer, int msgId, String text, ArrayList<TLRPC.MessageEntity> entities, String toLanguage, SingleTranslationsHandler.OnTranslationResultCallback callback) {
         executeTranslation(text, entities, toLanguage, callback);
     }

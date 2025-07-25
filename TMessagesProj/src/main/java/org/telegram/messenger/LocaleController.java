@@ -31,6 +31,7 @@ import androidx.annotation.StringRes;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.translator.ArticleTranslationsHandler;
 import it.octogram.android.utils.translator.MainTranslationsHandler;
 import it.octogram.android.utils.data.LanguageController;
 
@@ -1398,6 +1399,7 @@ public class LocaleController {
                 MainTranslationsHandler.suggestProviderUpdate(LaunchActivity.instance, LaunchActivity.getSafeLastFragment(), null);
             });
         }
+        ArticleTranslationsHandler.clearTranslations();
 
         return requestId;
     }

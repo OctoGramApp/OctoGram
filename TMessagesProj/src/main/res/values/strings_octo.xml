@@ -53,6 +53,7 @@
     <string name="TranslatorProvider">Provider</string>
     <string name="TranslatorProviderTelegramOptions">Telegram Options</string>
     <string name="TranslatorProviderTelegramDefault">Default</string>
+    <string name="TranslatorProviderTelegramDevice">Device</string>
     <string name="TranslatorProviderTelegramOptions_Desc">If enabled, the app follows Telegram\'s default translation. Telegram developers can choose to use ChatGPT, Google Translate as appropriate and this choice is in no way dependent on OctoGram. It\'s the default option and is recommended for most users.</string>
     <string name="TranslatorProviderOctoGramOptions">OctoGram Options</string>
     <string name="TranslatorProviderCloudOptions">Cloud Options</string>
@@ -65,7 +66,7 @@
     <string name="TranslatorProviderUnsupported">The currently set language (%s) is not supported by the selected provider.</string>
     <string name="TranslatorProviderUnsupportedDialogs">The translation target language of some chats has been changed because the previously set language is not supported by the selected provider.</string>
 
-    <string name="TranslatorArticlePartiallyUntranslated">%d% of page hasn\'t been translated due to an internal error. Please try again later.</string>
+    <string name="TranslatorArticlePartiallyUntranslated">%1$d% of page hasn\'t been translated due to an internal error. Please try again later.</string>
 
     <string name="TranslatorProvider_GoogleCloud_1">Open Google Cloud Console</string>
     <string name="TranslatorProvider_GoogleCloud_1_Desc">Access the Google Cloud Console through this link: <![CDATA[<a href="https://console.cloud.google.com/apis/library/translate.googleapis.com">console.cloud.google.com</a>]]>.</string>
@@ -300,6 +301,8 @@
     <string name="UpdatesSettingsPbetaDescription">Your main account is part of OctoGram\'s private beta program.\n\nBy activating this option, you can receive updates from the private beta program directly via OTA like other stable and beta updates, but some updates settings (like "%s") will be forcibly activated.</string>
     <string name="UpdatesPbetaWarning">Please note that the update you are installing is part of the private beta program you joined and may have instabilities. If so, please report it in our official internal testing group.</string>
     <string name="UpdatesOptions">Options</string>
+    <string name="UpdatesAlertSafeClose">You can close this popup during the download.</string>
+    <string name="UpdatesAlertSafeUpdate">Install the update by pressing the above button.</string>
 
     <!--Emoji Sets-->
     <string name="MyEmojiSets">My Emoji Sets</string>
