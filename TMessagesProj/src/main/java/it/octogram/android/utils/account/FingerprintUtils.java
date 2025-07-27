@@ -124,7 +124,7 @@ public class FingerprintUtils {
         });
         BiometricPrompt.PromptInfo.Builder builder = new BiometricPrompt.PromptInfo.Builder();
         builder.setTitle(getString(getStringByAction(reason)));
-        if (OctoConfig.INSTANCE.allowUsingDevicePIN.getValue()) {
+        if (OctoConfig.INSTANCE.allowUsingDevicePIN.getValue() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             builder.setAllowedAuthenticators(getAuthenticationStatus() | BiometricManager.Authenticators.DEVICE_CREDENTIAL);
         } else {
             builder.setNegativeButtonText(getString(R.string.Cancel));

@@ -247,6 +247,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import it.octogram.android.ActionBarTitleOption;
@@ -264,6 +265,7 @@ import it.octogram.android.app.ui.bottomsheets.AppLinkVerifyBottomSheet;
 import it.octogram.android.app.ui.cells.MonetAndroidFixDialog;
 import it.octogram.android.tgastandaloneexport.UpdateButton;
 import it.octogram.android.theme.MonetIconController;
+import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.UpdatesManager;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ForwardContext;
@@ -5402,7 +5404,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             CrashlyticsBottomSheet.showCrash(this);
         } else if (MonetIconController.INSTANCE.needMonetMigration()) {
             MonetAndroidFixDialog.showDialog(this);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        } else if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             AppLinkVerifyBottomSheet.checkBottomSheet(this);
         }
         //updateMenuButton(false);

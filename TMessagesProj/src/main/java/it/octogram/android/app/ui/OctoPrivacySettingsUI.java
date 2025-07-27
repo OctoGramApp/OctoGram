@@ -84,6 +84,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
     private boolean isFirstFingerprintAsk = true;
 
     private final ConfigProperty<Boolean> canShowOptions = new ConfigProperty<>(null, true);
+    private final ConfigProperty<Boolean> canShowUseDevicePIN = new ConfigProperty<>(null, true);
     private final ConfigProperty<Boolean> showFingerprintFailedAlert = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canShowBiometricLockedChatsExpand = new ConfigProperty<>(null, true);
     private final ConfigProperty<Boolean> canShowBiometricLockedChatsMoreOptions = new ConfigProperty<>(null, false);
@@ -240,7 +241,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             .onClick(() -> checkAvailability(OctoConfig.INSTANCE.allowUsingDevicePIN))
                             .preferenceValue(OctoConfig.INSTANCE.allowUsingDevicePIN)
                             .title(getString(R.string.BiometricSettingsAllowDevicePIN))
-                            .showIf(canShowOptions)
+                            .showIf(canShowUseDevicePIN)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkAvailability(OctoConfig.INSTANCE.allowUsingFaceUnlock))
@@ -466,6 +467,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
         boolean hasFingerprint = FingerprintUtils.hasFingerprintCached();
 
         boolean hasChanged = updateWithHasChangesCheck(canShowOptions, Build.VERSION.SDK_INT >= 23);
+        hasChanged |= updateWithHasChangesCheck(canShowUseDevicePIN, canShowOptions.getValue() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
         hasChanged |= updateWithHasChangesCheck(showFingerprintFailedAlert, !hasFingerprint || !canShowOptions.getValue());
         hasChanged |= updateWithHasChangesCheck(canShowBiometricLockedChatsMoreOptionsNotifications, canShowOptions.getValue() && canShowBiometricLockedChatsMoreOptions.getValue() && OctoConfig.INSTANCE.lockedChatsShowNotifications.getValue());
         hasChanged |= updateWithHasChangesCheck(canShowLockedAccountsOptions, canShowOptions.getValue() && FingerprintUtils.hasLockedAccounts());

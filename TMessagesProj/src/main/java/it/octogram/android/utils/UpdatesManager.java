@@ -194,9 +194,11 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
 
     public void checkForUpdates() {
         if (StoreUtils.isFromPlayStore()) {
-            isCheckingForUpdates = false;
-            currentUpdateData = null;
-            updateStateChange();
+            AndroidUtilities.runOnUIThread(() -> {
+                isCheckingForUpdates = false;
+                currentUpdateData = null;
+                updateStateChange();
+            }, 1500);
             return;
         }
 
