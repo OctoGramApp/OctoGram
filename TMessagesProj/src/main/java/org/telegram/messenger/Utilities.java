@@ -20,6 +20,7 @@ import android.os.Build;
 import com.carrotsearch.randomizedtesting.Xoroshiro128PlusRandom;
 
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -628,6 +629,12 @@ public class Utilities {
         } catch (Exception ignore) {
             return null;
         }
+    }
+
+    public static <T> void swapItems(List<T> list, int index1, int index2) {
+        T temp = list.get(index1);
+        list.set(index1, list.get(index2));
+        list.set(index2, temp);
     }
 
 }

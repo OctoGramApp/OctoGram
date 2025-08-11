@@ -169,16 +169,19 @@ android {
             resValue "string", "BuildAppName", "@string/AppNameBeta"
             buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "true"
             buildConfigField "String", "BUILD_VERSION_STRING", "\"${getVersionPBetaName()}\""
+            buildConfigField "int", "VERSION_NUM", "0"
         }
 
         pbeta {
             resValue "string", "BuildAppName", "@string/AppNameBeta"
             buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "true"
             buildConfigField "String", "BUILD_VERSION_STRING", "\"${getVersionPBetaName()}\""
+            buildConfigField "int", "VERSION_NUM", "2"
         }
 
         release {
             resValue "string", "BuildAppName", "@string/AppName"
+            buildConfigField "int", "VERSION_NUM", "1"
         }
     }
 
