@@ -13977,6 +13977,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         @Override
         public void dismiss(boolean tabs) {
             if (dismissing) return;
+            if (OctoConfig.INSTANCE.disableTelegramTabsStack.getValue()) {
+                tabs = false;
+            }
             dismissing = true;
             dismissingIntoTabs = tabs;
             if (tabs) {

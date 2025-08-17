@@ -165,12 +165,6 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesCustomModels.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.hasFingerprintSavedState.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesUseGroqAPIs.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesUseGroqAPIKey.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesGroqSelectedModel.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesUseOllamaAPIs.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesOllamaSelectedModel.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.aiFeaturesOllamaApiUrl.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.usePredictiveGestures.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.roundedTextBox.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.useSmoothPopupBackground.getKey());

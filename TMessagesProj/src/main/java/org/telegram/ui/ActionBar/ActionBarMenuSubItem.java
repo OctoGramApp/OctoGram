@@ -28,6 +28,7 @@ import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
+import org.telegram.messenger.AndroidUtilities;
 
 public class ActionBarMenuSubItem extends FrameLayout {
 

@@ -4453,7 +4453,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
             if (currentChat != null) {
                 headerItem.lazilyAddSubItem(open_direct, R.drawable.msg_markunread, getString(R.string.ChannelOpenDirect));
-                headerItem.setSubItemShown(open_direct, ChatObject.isChannel(currentChat) && !ChatObject.isMonoForum(currentChat) && currentChat.linked_monoforum_id != 0 && ChatObject.canManageMonoForum(currentAccount, -currentChat.linked_monoforum_id));
+                headerItem.setSubItemShown(open_direct, canShowDirectMessagesActionBar());
             }
 
             if (currentUser != null && chatMode != MODE_SAVED) {
@@ -11642,6 +11642,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         } else {
             name = searchingChatMessages.title;
+        }
+        if (UserObject.isDeleted(user)) {
+            name = LocaleController.getString(R.string.HiddenName);
         }
         if (name == null) {
             return;
@@ -22353,7 +22356,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 updateTopPanel(true);
             }
             if (headerItem != null) {
-                headerItem.setSubItemShown(open_direct, ChatObject.isChannel(currentChat) && !ChatObject.isMonoForum(currentChat) && currentChat.linked_monoforum_id != 0 && ChatObject.canManageMonoForum(currentAccount, -currentChat.linked_monoforum_id));
+                headerItem.setSubItemShown(open_direct, canShowDirectMessagesActionBar());
             }
         } else if (id == NotificationCenter.didReceiveNewMessages) {
             FileLog.d("ChatActivity didReceiveNewMessages start");
@@ -27718,7 +27721,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (!ChatObject.canManageTopic(currentAccount, currentChat, forumTopic)) {
                         Drawable lock = getContext().getResources().getDrawable(R.drawable.msg_mini_lock2).mutate();
                         lock.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_windowBackgroundWhiteGrayText), PorterDuff.Mode.MULTIPLY));
-                        bottomOverlayChatText.setTextInfo(lock, LocaleController.getString(R.string.TopicClosedByAdmin));
                         bottomOverlayChatText.setEnabled(false);
                     }
                     showBottomOverlayProgress(false, false);
@@ -31423,7 +31425,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             final boolean isReactionsAvailableFinal = !suggestEdit && isReactionsAvailable;
 
             int flags = 0;
-            if (isReactionsViewAvailable || showMessageSeen || showSponsorInfo || ContextMenuHelper.mustUseSwipeback()) {
+            if (isReactionsViewAvailable || showMessageSeen || showSponsorInfo || ContextMenuHelper.mustUseSwipeBack()) {
                 flags |= ActionBarPopupWindow.ActionBarPopupWindowLayout.FLAG_USE_SWIPEBACK;
             }
 
@@ -44662,6 +44664,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             if (giftUpdate || suggestUpdate) {
                 updateBottomOverlay(true);
             }
+
+            if (headerItem != null) {
+                headerItem.setSubItemShown(open_direct, canShowDirectMessagesActionBar());
+            }
         }
     }
 
@@ -45338,7 +45344,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             if (currentEncryptedChat == null) {
                 if (chatMode != ChatActivity.MODE_SCHEDULED && MainAiHelper.canUseAiFeatures()) {
                     items.add(0, LocaleController.getString(R.string.AiFeatures_Brief));
-                    options.add(0, ChatActivity.OPTION_AI_FEATURES);
+                    options.add(0, OPTION_AI_FEATURES);
                     icons.add(0, R.drawable.aifeatures_solar);
                 }
 
@@ -45442,6 +45448,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         icons.add(R.drawable.msg_gif);
                     }
                 } else if (type == 4) {
+                    if (OctoConfig.INSTANCE.contextClearFromCache.getValue() && !selectedObject.needDrawBluredPreview() && selectedObject.getDocument() != null) {
+                        items.add(LocaleController.getString(R.string.ClearFromCache));
+                        options.add(OPTION_CLEAR_FROM_CACHE);
+                        icons.add(R.drawable.msg_clear);
+                    }
                     if (!noforwardsOrPaidMedia && !selectedObject.hasRevealedExtendedMedia()) {
                         if (selectedObject.isVideo()) {
                             if (!selectedObject.needDrawBluredPreview()) {
@@ -45478,7 +45489,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 icons.add(R.drawable.msg_gallery);
                                 if (OctoConfig.INSTANCE.contextCopyPhoto.getValue() && !selectedObject.needDrawBluredPreview() && !selectedObject.isVideo() && !selectedObject.isMusic() && selectedObject.getDocument() == null) {
                                     items.add(LocaleController.getString(R.string.CopyPhoto));
-                                    options.add(ChatActivity.OPTION_COPY_PHOTO);
+                                    options.add(OPTION_COPY_PHOTO);
                                     icons.add(R.drawable.msg_copy);
                                 }
                             }
@@ -45511,7 +45522,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else if (type == 6) {
                     if (OctoConfig.INSTANCE.contextClearFromCache.getValue() && !noforwardsOrPaidMedia && !selectedObject.isVoiceOnce() && !selectedObject.isRoundOnce()) {
                         items.add(LocaleController.getString(R.string.ClearFromCache));
-                        options.add(ChatActivity.OPTION_CLEAR_FROM_CACHE);
+                        options.add(OPTION_CLEAR_FROM_CACHE);
                         icons.add(R.drawable.msg_clear);
                     }
                     if (!noforwardsOrPaidMedia && !selectedObject.hasRevealedExtendedMedia() && !selectedObject.needDrawBluredPreview() && !selectedObject.isVoiceOnce() && !selectedObject.isRoundOnce()) {
@@ -45597,7 +45608,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                     if (OctoConfig.INSTANCE.contextSaveMessage.getValue() && !UserObject.isUserSelf(currentUser)) {
                         items.add(LocaleController.getString(R.string.AddToSavedMessages));
-                        options.add(ChatActivity.OPTION_SAVE_TO_SAVED_MESSAGES);
+                        options.add(OPTION_SAVE_TO_SAVED_MESSAGES);
                         icons.add(R.drawable.msg_saved);
                     }
                 }
@@ -45696,7 +45707,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (type == 4 && !noforwardsOrPaidMedia && !selectedObject.hasRevealedExtendedMedia() && !selectedObject.needDrawBluredPreview()) {
                     if (OctoConfig.INSTANCE.contextClearFromCache.getValue() && selectedObject.getDocument() != null && !selectedObject.isVoiceOnce() && !selectedObject.isRoundOnce()) {
                         items.add(LocaleController.getString(R.string.ClearFromCache));
-                        options.add(ChatActivity.OPTION_CLEAR_FROM_CACHE);
+                        options.add(OPTION_CLEAR_FROM_CACHE);
                         icons.add(R.drawable.msg_clear);
                     }
                     if (selectedObject.isVideo()) {
@@ -45869,5 +45880,28 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             default -> false;
         };
+    }
+
+    private boolean canShowDirectMessagesActionBar() {
+        boolean baseCondition = ChatObject.isChannel(currentChat) && !ChatObject.isMonoForum(currentChat) && currentChat.linked_monoforum_id != 0 && ChatObject.canManageMonoForum(currentAccount, -currentChat.linked_monoforum_id);
+        if (!baseCondition && (OctoConfig.INSTANCE.hideBottomBarChannels.getValue() || OctoConfig.INSTANCE.hideChatButtonChannels.getValue())) {
+            boolean altCondition = false;
+            if (ChatObject.isChannel(currentChat) && !(currentChat instanceof TLRPC.TL_channelForbidden)) {
+                if (ChatObject.isNotInChat(currentChat) && (ChatObject.isForum(currentChat) || !isThreadChat() || currentChat.join_to_send)) {
+                    if (!getMessagesController().isJoiningChannel(currentChat.id) && !currentChat.join_request) {
+                        altCondition = currentChat.broadcast_messages_allowed && currentChat.linked_monoforum_id != 0;
+                    }
+                } else if (!isThreadChat()) {
+                    altCondition = currentChat.broadcast_messages_allowed && currentChat.linked_monoforum_id != 0;
+                }
+            }
+            if (currentChat != null && currentChat.gigagroup && !isReport() && !isAiModelSelection() && chatMode == 0) {
+                altCondition = false;
+            }
+            if (altCondition && !baseCondition) {
+                baseCondition = true;
+            }
+        }
+        return baseCondition;
     }
 }

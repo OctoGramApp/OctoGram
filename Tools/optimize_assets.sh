@@ -527,6 +527,11 @@ png_files=(
     "./TMessagesProj/src/main/res/mipmap-xxxhdpi/icon_yuki_launcher.png"
     "./TMessagesProj/src/main/res/mipmap-xxxhdpi/icon_yuki_launcher_round.png"
     "./TMessagesProj/src/main/res/mipmap-xxxhdpi/icon_yuki_launcher_sa.png"
+    "./TMessagesProj/src/main/res/mipmap-mdpi/ic_launcher_glass_foreground.png"
+    "./TMessagesProj/src/main/res/mipmap-hdpi/ic_launcher_glass_foreground.png"
+    "./TMessagesProj/src/main/res/mipmap-xhdpi/ic_launcher_glass_foreground.png"
+    "./TMessagesProj/src/main/res/mipmap-xxhdpi/ic_launcher_glass_foreground.png"
+    "./TMessagesProj/src/main/res/mipmap-xxxhdpi/ic_launcher_glass_foreground.png"
 )
 
 webp_files=(
@@ -554,6 +559,8 @@ webp_files=(
 )
 
 vector_drawable_files=(
+    "./TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher_glass.xml"
+    "./TMessagesProj/src/main/res/drawable/ic_launcher_glass.xml"
     "./TMessagesProj/src/main/res/drawable/account_circle_24px.xml"
     "./TMessagesProj/src/main/res/drawable/account_circle_unsolid_24px.xml"
     "./TMessagesProj/src/main/res/drawable/add_a_photo_24px.xml"
@@ -1266,7 +1273,7 @@ compress_png() {
     fi
 
     check_tool "pngquant" || return 1
-    check_tool "optipng" || return 1
+    check_tool "oxipng" || return 1
     echo
 
     for file in "${files_to_process[@]}"; do
@@ -1294,23 +1301,23 @@ compress_png() {
             file_to_optimize="$temp_png_file"
         fi
 
-        local optipng_success=true
-        if ! optipng -o3 -strip all -quiet -- "$file_to_optimize"; then
-            echo -e " ${BOLD_RED}optipng failed!${RESET}"
+        local oxipng_success=true
+        if ! oxipng -o max --strip all "$file_to_optimize"; then
+            echo -e " ${BOLD_RED}oxipng failed!${RESET}"
             if [ "$file_to_optimize" = "$temp_png_file" ]; then rm "$file_to_optimize"; fi
             ((failed_count++))
-            optipng_success=false
+            oxipng_success=false
             continue
         fi
 
-        if [ "$pngquant_success" = true ] && [ "$optipng_success" = true ] && [ "$file_to_optimize" = "$temp_png_file" ]; then
+        if [ "$pngquant_success" = true ] && [ "$oxipng_success" = true ] && [ "$file_to_optimize" = "$temp_png_file" ]; then
              if ! mv "$temp_png_file" "$file"; then
                   echo -e " ${BOLD_RED}Failed to move optimized file!${RESET}"
                   rm "$temp_png_file"
                   ((failed_count++))
                   continue
              fi
-        elif [ "$pngquant_success" = false ] && [ "$optipng_success" = false ]; then
+        elif [ "$pngquant_success" = false ] && [ "$oxipng_success" = false ]; then
              echo -e " ${YELLOW}Failed (both tools)${RESET}"
              ((failed_count++))
              continue
@@ -1541,7 +1548,7 @@ usage() {
     echo -e "  Searches within TARGET_DIRECTORY (defaults to './app/src/main/res')."
     echo
     echo -e "${CYAN}Options:${RESET}"
-    echo -e "  ${YELLOW}--png${RESET}          Compress PNG files (pngquant + optipng)."
+    echo -e "  ${YELLOW}--png${RESET}          Compress PNG files (pngquant + oxipng)."
     echo -e "  ${YELLOW}--webp${RESET}         Compress WebP files (cwebp)."
     echo -e "  ${YELLOW}--vector${RESET}       Compress Vector Drawable XML files (svgo)."
     echo -e "  ${YELLOW}--metadata${RESET}     Remove metadata from PNG/WebP files (exiftool)."
@@ -1549,8 +1556,8 @@ usage() {
     echo -e "  ${YELLOW}--help, -h${RESET}     Show this help message."
     echo
     echo -e "${CYAN}Example:${RESET}"
-    echo -e "  ${BOLD}./optimize_res.sh --all /path/to/my/android/project${RESET}"
-    echo -e "  ${BOLD}./optimize_res.sh --png --metadata ./src/main/res${RESET}"
+    echo -e "  ${BOLD}./optimize_assets.sh --all /path/to/my/android/project${RESET}"
+    echo -e "  ${BOLD}./optimize_assets.sh --png --metadata ./src/main/res${RESET}"
     exit 0
 }
 
@@ -1614,7 +1621,7 @@ echo -e "${BOLD_CYAN}--- Checking Required Tools ---${RESET}"
 all_tools_ok=true
 if [ "$DO_PNG" = true ]; then
     check_tool "pngquant" || all_tools_ok=false
-    check_tool "optipng" || all_tools_ok=false
+    check_tool "oxipng" || all_tools_ok=false
 fi
 if [ "$DO_WEBP" = true ]; then
      check_tool "cwebp" || all_tools_ok=false

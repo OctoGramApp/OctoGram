@@ -247,7 +247,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import it.octogram.android.ActionBarTitleOption;
@@ -265,8 +264,6 @@ import it.octogram.android.app.ui.bottomsheets.AppLinkVerifyBottomSheet;
 import it.octogram.android.app.ui.cells.MonetAndroidFixDialog;
 import it.octogram.android.tgastandaloneexport.UpdateButton;
 import it.octogram.android.theme.MonetIconController;
-import it.octogram.android.utils.OctoLogging;
-import it.octogram.android.utils.UpdatesManager;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ForwardContext;
 import it.octogram.android.utils.chat.RapidActionsHelper;
@@ -3400,7 +3397,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 } else if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.EMPTY.getValue()) {
                     actionBar.setTitle("", statusDrawable);
                 } else if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue()) {
-                    actionBar.setTitle(OctoConfig.INSTANCE.actionBarCustomTitle.getValue(), statusDrawable);
+                    actionBar.setTitle(Emoji.replaceEmoji(OctoConfig.INSTANCE.actionBarCustomTitle.getValue(), actionBar.getTitleFontMetricsInt(), false), statusDrawable);
                 } else {
                     actionBar.setTitle(LocaleController.getString(R.string.BuildAppName), statusDrawable);
                 }
@@ -3781,7 +3778,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 public void onTabSelected(FilterTabsView.Tab tab, boolean forward, boolean animated) {
                     FilterTabsView.FilterTabsViewDelegate.super.onTabSelected(tab, forward, animated);
                     if (OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.FOLDER_NAME.getValue()) {
-                        actionBar.setTitleAnimated2(tab.isDefault ? LocaleController.getString(R.string.AllChats) : tab.realTitle, tab.isDefault ? statusDrawable : null, forward);
+                        actionBar.setTitleAnimated2(tab.isDefault ? LocaleController.getString(R.string.AllChats) : tab.defaultOriginalTitle, tab.isDefault ? statusDrawable : null, forward);
                     }
                 }
             });

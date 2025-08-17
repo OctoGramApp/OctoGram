@@ -934,6 +934,8 @@ public class TranslateController extends BaseController {
         public ArrayList<Utilities.Callback3<Integer, TLRPC.TL_textWithEntities, String>> callbacks = new ArrayList<>();
         public String language;
 
+        public ArrayList<QueueTranslationsHandler> queueHandlers = new ArrayList<>();
+
         int delay = GROUPING_TRANSLATIONS_TIMEOUT;
         int symbolsCount;
 
@@ -1015,14 +1017,8 @@ public class TranslateController extends BaseController {
                 QueueTranslationsHandler queueTranslationsHandler = new QueueTranslationsHandler();
                 queueTranslationsHandler.peer = getMessagesController().getInputPeer(dialogId);
                 queueTranslationsHandler.translations = pendingTranslation1;
+                pendingTranslation1.queueHandlers.add(queueTranslationsHandler);
                 queueTranslationsHandler.initQueueTranslation(new QueueTranslationsHandler.OnQueueTranslationResultCallback() {
-                    @Override
-                    public void onGotReqId(int reqId) {
-                        synchronized (TranslateController.this) {
-                            pendingTranslation1.reqId = reqId;
-                        }
-                    }
-
                     @Override
                     public void onTelegramUniqueResult(TLObject res, TLRPC.TL_error err) {
                         final ArrayList<Integer> ids;
@@ -1506,10 +1502,15 @@ public class TranslateController extends BaseController {
                 if (translations != null) {
                     for (PendingTranslation pendingTranslation : translations) {
                         AndroidUtilities.cancelRunOnUIThread(pendingTranslation.runnable);
+                        for (Integer messageId : pendingTranslation.messageIds) {
+                            loadingTranslations.remove(messageId);
+                        }
                         if (pendingTranslation.reqId != -1) {
                             getConnectionsManager().cancelRequest(pendingTranslation.reqId, true);
-                            for (Integer messageId : pendingTranslation.messageIds) {
-                                loadingTranslations.remove(messageId);
+                        }
+                        if (!pendingTranslation.queueHandlers.isEmpty()) {
+                            for (QueueTranslationsHandler handler : pendingTranslation.queueHandlers) {
+                                handler.destroyInstance();
                             }
                         }
                     }
@@ -1868,7 +1869,8 @@ public class TranslateController extends BaseController {
 
             @Override
             public void onExtensionNeedUpdate() {
-
+                onError(0);
+                SingleTranslationsHandler.OnTranslationResultCallback.super.onExtensionNeedUpdate();
             }
 
             @Override
@@ -1890,7 +1892,9 @@ public class TranslateController extends BaseController {
                 if (done != null) {
                     AndroidUtilities.runOnUIThread(done, Math.max(0, 400L - (System.currentTimeMillis() - start)));
                 }
-                BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(error)).show();
+                if (error != 0) {
+                    BulletinFactory.of(containerView, resourcesProvider).createSimpleBulletin(R.raw.info, LocaleController.getString(error)).show();
+                }
             }
 
             @Override

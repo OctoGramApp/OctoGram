@@ -45,7 +45,6 @@ import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.ai.CustomModelsHelper;
-import it.octogram.android.utils.ai.groq.GroqModels;
 import it.octogram.android.utils.ai.openrouter.OpenRouterModels;
 import it.octogram.android.utils.config.DrawerOrderController;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
@@ -218,6 +217,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
     public final ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.CAMERA_X.getValue());
     public final ConfigProperty<Integer> cameraPreview = newConfigProperty("cameraPreview", CameraPreview.DEFAULT);
+    public final ConfigProperty<Boolean> useSystemCameraToRecord = newConfigProperty("useSystemCameraToRecord", false);
     // public final ConfigProperty<Boolean> cameraXLowLightBoost = newConfigProperty("cameraXLowLightBoost", false);
 
     /*Experiments*/
@@ -239,6 +239,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> mediaInGroupCall = newConfigProperty("mediaInGroupCall", false);
     public final ConfigProperty<Integer> maxRecentStickers = newConfigProperty("maxRecentStickers", 0);
     public final ConfigProperty<Boolean> showRPCErrors = newConfigProperty("showRPCErrors", false);
+    public final ConfigProperty<Boolean> disableTelegramTabsStack = newConfigProperty("disableTelegramTabsStack", false);
     public final ConfigProperty<Boolean> useTranslationsArgsFix = newConfigProperty("useTranslationsArgsFix", true);
     public final ConfigProperty<Boolean> forceHideLockScreenPopup = newConfigProperty("forceHideLockScreenPopup", false);
     public final ConfigProperty<Integer> uiTitleCenteredState = newConfigProperty("uiTitleCenteredState", ActionBarCenteredTitle.NEVER.getValue());
@@ -256,6 +257,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> rapidActionsMainButtonActionLongPress = newConfigProperty("rapidActionsMainButtonActionLongPress", InterfaceRapidButtonsActions.SAVED_MESSAGES.getValue());
     public final ConfigProperty<Integer> rapidActionsSecondaryButtonAction = newConfigProperty("rapidActionsSecondaryButtonAction", InterfaceRapidButtonsActions.SEND_MESSAGE.getValue());
     public final ConfigProperty<Boolean> roundedTextBox = newConfigProperty("roundedTextBox", false);
+    public final ConfigProperty<Boolean> disableTextBoxBlur = newConfigProperty("disableTextBoxBlur", false);
     public final ConfigProperty<Boolean> useSmoothPopupBackground = newConfigProperty("useSmoothPopupBackground", false);
 
     /*Updates*/
@@ -267,6 +269,8 @@ public class OctoConfig {
     /* Updates: Signaling */
     public final ConfigProperty<String> updateSignalingCommitID = newConfigProperty("updateSignalingCommitID", BuildConfig.GIT_COMMIT_HASH);
     public final ConfigProperty<String> updateSignalingChangelog = newConfigProperty("updateSignalingChangelog", null);
+    public final ConfigProperty<Integer> ignoredExtensionUpdateVersion = newConfigProperty("ignoredExtensionUpdateVersion", -1);
+    public final ConfigProperty<Boolean> isUpdaterXiaomiBlockedInstaller = newConfigProperty("isUpdaterXiaomiBlockedInstaller", false);
 
     /*Translator*/
     public final ConfigProperty<Integer> translatorMode = newConfigProperty("translatorMode", TranslatorMode.DEFAULT.getValue());
@@ -274,6 +278,8 @@ public class OctoConfig {
     public final ConfigProperty<String> googleCloudKeyTranslator = newConfigProperty("googleCloudKeyTranslator", "");
     public final ConfigProperty<Integer> translatorFormality = newConfigProperty("translatorFormality", TranslatorFormality.DEFAULT.getValue());
     public final ConfigProperty<Boolean> translatorKeepMarkdown = newConfigProperty("translatorKeepMarkdown", true);
+    public final ConfigProperty<Boolean> translatorOptimizedWay = newConfigProperty("translatorOptimizedWay", true);
+    public final ConfigProperty<Boolean> translatorShowOriginalContent = newConfigProperty("translatorShowOriginalContent", false);
     public final ConfigProperty<String> lastTranslatePreSendLanguage = newConfigProperty("lastTranslatePreSendLanguage", null);
     public final ConfigProperty<Long> translatorUninstallExtensionHideTime = newConfigProperty("translatorUninstallExtensionHideTime", 0L);
 
@@ -284,6 +290,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> aiFeaturesTranslateMessages = newConfigProperty("aiFeaturesTranslateMessages", true);
     public final ConfigProperty<Boolean> aiFeaturesChatContext = newConfigProperty("aiFeaturesChatContext", true);
     public final ConfigProperty<Boolean> aiFeaturesAskOnMedia = newConfigProperty("aiFeaturesAskOnMedia", true);
+    public final ConfigProperty<Integer> aiFeaturesTranscribeVoice = newConfigProperty("aiFeaturesTranscribeVoice", AiTranscriptionState.DISABLED.getValue());
     public final ConfigProperty<String> aiFeaturesCustomModels = newConfigProperty("aiFeaturesCustomModels", "[]");
 
     public final ConfigProperty<String> aiFeaturesLastUsedLanguage = newConfigProperty("aiFeaturesLastUsedLanguage", "");
@@ -302,16 +309,6 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> aiFeaturesUseOpenRouterAPIs = newConfigProperty("aiFeaturesUseOpenRouterAPIs", false);
     public final ConfigProperty<String> aiFeaturesOpenRouterAPIKey = newConfigProperty("aiFeaturesOpenRouterAPIKey", "");
     public final ConfigProperty<String> aiFeaturesOpenRouterSelectedModel = newConfigProperty("aiFeaturesOpenRouterSelectedModel", OpenRouterModels.GOOGLE_GEMINI_2_0_FLASH_EXP_FREE);
-
-    /* Groq */
-    public final ConfigProperty<Boolean> aiFeaturesUseGroqAPIs = newConfigProperty("aiFeaturesUseGroqAPIs", false);
-    public final ConfigProperty<String> aiFeaturesUseGroqAPIKey = newConfigProperty("aiFeaturesUseGroqAPIKey", "");
-    public final ConfigProperty<String> aiFeaturesGroqSelectedModel = newConfigProperty("aiFeaturesGroqSelectedModel", GroqModels.LLAMA3_70B_8192);
-
-    /* Ollama */
-    public final ConfigProperty<Boolean> aiFeaturesUseOllamaAPIs = newConfigProperty("aiFeaturesUseOllamaAPIs", false);
-    public final ConfigProperty<String> aiFeaturesOllamaApiUrl = newConfigProperty("aiFeaturesOllamaApiUrl", "");
-    public final ConfigProperty<String> aiFeaturesOllamaSelectedModel = newConfigProperty("aiFeaturesOllamaSelectedModel", "NO_MODEL");
 
     /*Lite Mode: sync power saver with device settings*/
     public final ConfigProperty<Boolean> syncPowerSaver = newConfigProperty("syncPowerSaver", false);

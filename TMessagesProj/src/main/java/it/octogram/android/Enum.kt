@@ -252,6 +252,12 @@ enum class TranslatorFormality(val value: Int) {
     HIGH(2)
 }
 
+enum class AiTranscriptionState(val value: Int) {
+    DISABLED(0),
+    ENABLED_SEPARATELY(1),
+    ENABLED_UNIFIED(2);
+}
+
 enum class TabMode(val value: Int) {
     TEXT(0),
     MIXED(1),
@@ -476,6 +482,7 @@ enum class StickerUi(val value: Int) {
     NEW_MODEL_GENERATION(33),
     OCTO_LOGS_PLACEHOLDER(34),
     COMMUNICATION(35),
+    NO_SPOILER(36)
 }
 
 enum class DrawerBackgroundState(val value: Int) {

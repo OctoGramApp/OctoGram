@@ -6152,11 +6152,6 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             }
 
             @Override
-            public void onExtensionNeedUpdate() {
-
-            }
-
-            @Override
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 AndroidUtilities.runOnUIThread(() -> {
                     replaceWithText(0, getCommentView().length(), finalText.text, true);

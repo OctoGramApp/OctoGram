@@ -15,7 +15,6 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
@@ -23,13 +22,11 @@ import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.MediaActionDrawable;
 
-import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.updater.UpdatesManager;
 
 public class MenuDrawable extends Drawable {
 
@@ -354,26 +351,34 @@ public class MenuDrawable extends Drawable {
         UpdatesManager.INSTANCE.addCallback(callback = new UpdatesManager.UpdatesManagerCallback() {
             @Override
             public void onNoUpdateAvailable() {
-                setType(TYPE_DEFAULT, true);
-                setUpdateDownloadProgress(0f, true);
+                AndroidUtilities.runOnUIThread(() -> {
+                    setType(TYPE_DEFAULT, true);
+                    setUpdateDownloadProgress(0f, true);
+                });
             }
 
             @Override
             public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
-                setType(TYPE_UDPATE_AVAILABLE, true);
-                setUpdateDownloadProgress(0f, true);
+                AndroidUtilities.runOnUIThread(() -> {
+                    setType(TYPE_UDPATE_AVAILABLE, true);
+                    setUpdateDownloadProgress(0f, true);
+                });
             }
 
             @Override
             public void onUpdateDownloading(float percent) {
-                setType(TYPE_UDPATE_DOWNLOADING, true);
-                setUpdateDownloadProgress(percent, true);
+                AndroidUtilities.runOnUIThread(() -> {
+                    setType(TYPE_UDPATE_DOWNLOADING, true);
+                    setUpdateDownloadProgress(percent, true);
+                });
             }
 
             @Override
             public void onUpdateReady() {
-                setType(TYPE_UDPATE_AVAILABLE, true);
-                setUpdateDownloadProgress(1f, true);
+                AndroidUtilities.runOnUIThread(() -> {
+                    setType(TYPE_UDPATE_AVAILABLE, true);
+                    setUpdateDownloadProgress(1f, true);
+                });
             }
         });
     }

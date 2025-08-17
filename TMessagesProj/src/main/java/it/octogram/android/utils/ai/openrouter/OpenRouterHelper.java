@@ -27,6 +27,11 @@ public class OpenRouterHelper {
             return;
         }
 
+        if (!aiPrompt.getFilePath().isEmpty()) {
+            callback.onMediaUploadUnavailable();
+            return;
+        }
+
         // TODO: Migrate to DispatchQueue (use Utilities.globalQueue() -> {})
         new Thread() {
             @Override

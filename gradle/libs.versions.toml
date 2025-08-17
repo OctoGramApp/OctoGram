@@ -1,14 +1,14 @@
 [versions]
 # Gradle plugins
-android-application = "8.8.0" # App Bundle build fails with 8.9.x; use 8.8.0 for stable builds
+android-application = "8.12.0"
 desugar_jdk_libs_nio = "2.1.5"
-google-services = "4.4.2"
+google-services = "4.4.3"
 secrets-gradle-plugin = "2.0.1"
 kotlin-android = "2.0.21"
 
 # AndroidX dependencies
-androidx_fragment = "1.8.6"
-androidx_core = "1.13.0"
+androidx_fragment = "1.8.8"
+androidx_core = "1.16.0"
 androidx_palette = "1.0.0"
 androidx_exifinterface = "1.4.1"
 androidx_dynamicanimation = "1.1.0"
@@ -16,8 +16,8 @@ androidx_sharetarget = "1.2.0"
 androidx_interpolator = "1.0.0"
 androidx_biometric = "1.1.0"
 androidx_cardview = "1.0.0"
-androidx_browser = "1.8.0"
-androidx_mediarouter = "1.7.0"
+androidx_browser = "1.9.0"
+androidx_mediarouter = "1.8.1"
 
 # Google Play Integrity e RecyclerView
 google_play_integrity = "1.4.0"
@@ -29,22 +29,22 @@ checker_qual = "2.5.2"
 checker_compat_qual = "2.5.0"
 
 # Firebase dependencies
-firebase_messaging = "24.1.0"
+firebase_messaging = "24.1.2"
 firebase_config = "22.0.1"
 firebase_datatransport = "19.0.0"
 firebase_appindexing = "20.0.0"
 firebase-bom = "32.7.0"
-firebase-crashlytics = "18.6.0"
+firebase-crashlytics = "19.4.4"
 
 # Google Play Services dependencies
 play_services_maps = "19.2.0"
-play_services_auth = "21.3.0"
+play_services_auth = "21.4.0"
 play_services_vision = "20.1.3"
 play_services_wearable = "19.0.0"
 play_services_location = "21.3.0" # NOT YET SUPPORTED BY TELEGRAM
 play_services_wallet = "19.4.0"
 play_services_safetynet = "18.1.0"
-play_services_cast_framework = "21.4.0"
+play_services_cast_framework = "22.1.0"
 play_services_recaptcha = "18.4.0"
 
 # Other dependencies
@@ -58,7 +58,7 @@ guava = "33.4.8-android"
 nanohttpd = "2.3.1"
 
 # CameraX Implementation
-camerax_version = "1.5.0-beta01"
+camerax_version = "1.5.0-beta02"
 
 # Native libs e ML Kit
 relinker = "1.4.5"

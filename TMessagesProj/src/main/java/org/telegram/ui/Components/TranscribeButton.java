@@ -34,6 +34,7 @@ import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
@@ -47,11 +48,22 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.PremiumPreviewFragment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
+import it.octogram.android.AiModelMessagesState;
+import it.octogram.android.AiTranscriptionState;
+import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.ai.AiPrompt;
+import it.octogram.android.utils.ai.CustomModelsHelper;
+import it.octogram.android.utils.ai.MainAiHelper;
+
 public class TranscribeButton {
+    private static int TRANSCRIPTION_AI_ID = -555;
+    private static int TRANSCRIPTION_AI_ID_ERROR = -556;
 
     private final static int[] pressedState = new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed};
 
@@ -226,6 +238,11 @@ public class TranscribeButton {
         }
         pressed = false;
         if (processClick) {
+            if (MainAiHelper.canUseAiFeatures() && OctoConfig.INSTANCE.aiFeaturesTranscribeVoice.getValue() == AiTranscriptionState.ENABLED_UNIFIED.getValue()) {
+                transcribePressed(parent.getMessageObject(), toOpen, parent.getDelegate());
+                return;
+            }
+
             if (!premium && toOpen) {
                 if (canTranscribeTrial(parent.getMessageObject()) || parent.getMessageObject() != null && parent.getMessageObject().messageOwner != null && !TextUtils.isEmpty(parent.getMessageObject().messageOwner.voiceTranscription)) {
                     transcribePressed(parent.getMessageObject(), toOpen, parent.getDelegate());
@@ -402,7 +419,7 @@ public class TranscribeButton {
     private Path lockHandlePath;
 
     private void drawLock(Canvas canvas) {
-        final float alpha = animatedDrawLock.set(drawLock && !isOpen && !loading);
+        final float alpha = animatedDrawLock.set(drawLock && !isOpen && !loading && !canUseOctoGramTranscription());
         if (alpha <= 0) {
             return;
         }
@@ -666,7 +683,14 @@ public class TranscribeButton {
         long dialogId = DialogObject.getPeerDialogId(peer);
         int messageId = messageObject.messageOwner.id;
         if (open) {
-            if (messageObject.messageOwner.voiceTranscription != null && messageObject.messageOwner.voiceTranscriptionFinal) {
+            boolean canBypassReTranscribe = messageObject.messageOwner.voiceTranscription != null && messageObject.messageOwner.voiceTranscriptionFinal;
+
+            if (canUseOctoGramTranscription() && canBypassReTranscribe) {
+                canBypassReTranscribe = messageObject.messageOwner.voiceTranscriptionId == TRANSCRIPTION_AI_ID && TextUtils.isEmpty(messageObject.messageOwner.voiceTranscriptionError);
+            }
+
+            //if (messageObject.messageOwner.voiceTranscription != null && messageObject.messageOwner.voiceTranscriptionFinal) {
+            if (canBypassReTranscribe) {
                 TranscribeButton.openVideoTranscription(messageObject);
                 messageObject.messageOwner.voiceTranscriptionOpen = true;
                 MessagesStorage.getInstance(account).updateMessageVoiceTranscriptionOpen(dialogId, messageId, messageObject.messageOwner);
@@ -674,6 +698,11 @@ public class TranscribeButton {
                     NotificationCenter.getInstance(account).postNotificationName(NotificationCenter.voiceTranscriptionUpdate, messageObject, null, null, (Boolean) true, (Boolean) true);
                 });
             } else {
+
+                if (handleOctoGramTranscription(messageObject, open, delegate)) {
+                    return;
+                }
+
                 if (BuildVars.LOGS_ENABLED) {
                     FileLog.d("sending Transcription request, msg_id=" + messageId + " dialog_id=" + dialogId);
                 }
@@ -742,6 +771,7 @@ public class TranscribeButton {
                     TranscribeButton.openVideoTranscription(messageObject);
                     messageObject.messageOwner.voiceTranscriptionOpen = true;
                     messageObject.messageOwner.voiceTranscriptionFinal = isFinal;
+                    messageObject.messageOwner.voiceTranscriptionError = null;
                     if (BuildVars.LOGS_ENABLED) {
                         FileLog.d("Transcription request sent, received final=" + isFinal + " id=" + finalId + " text=" + finalText);
                     }
@@ -762,6 +792,92 @@ public class TranscribeButton {
                 NotificationCenter.getInstance(account).postNotificationName(NotificationCenter.voiceTranscriptionUpdate, messageObject, null, null, (Boolean) false, null);
             });
         }
+    }
+
+    public static boolean canUseOctoGramTranscription() {
+        return MainAiHelper.canUseAiFeatures() && OctoConfig.INSTANCE.aiFeaturesTranscribeVoice.getValue() == AiTranscriptionState.ENABLED_UNIFIED.getValue();
+    }
+
+    private static boolean handleOctoGramTranscription(MessageObject messageObject, boolean open, ChatMessageCell.ChatMessageCellDelegate delegate) {
+        if (canUseOctoGramTranscription()) {
+            CustomModelsHelper.CustomModel model = CustomModelsHelper.getModelById(CustomModelsHelper.VIRTUAL_TRANSCRIBE_MODEL_ID);
+            if (model != null) {
+                if (transcribeOperationsByDialogPosition == null) {
+                    transcribeOperationsByDialogPosition = new HashMap<>();
+                }
+                transcribeOperationsByDialogPosition.put((Integer) reqInfoHash(messageObject), messageObject);
+
+                if (!messageObject.isOut() && messageObject.isContentUnread()) {
+                    MessagesController.getInstance(messageObject.currentAccount).markMessageContentAsRead(messageObject);
+                }
+
+                String filePath = "";
+                String mimeType = "";
+                final long start = SystemClock.elapsedRealtime();
+                long minDuration = 350;
+                File finalFile = OctoUtils.getFileContentFromMessage(messageObject);
+                if (finalFile != null && finalFile.exists()) {
+                    filePath = finalFile.getAbsolutePath();
+                    mimeType = messageObject.getMimeType();
+                } else {
+                    return true;
+                }
+
+                AiPrompt prompt = new AiPrompt(
+                        MainAiHelper.systemInstructions,
+                        model.prompt.replaceAll("#language", TranslateAlert2.capitalFirst(TranslateAlert2.languageName(MainAiHelper.getDestinationLanguage()))),
+                        filePath,
+                        mimeType,
+                        false
+                );
+                MainAiHelper.request(prompt, MainAiHelper.getPreferredProvider(), new MainAiHelper.OnResultState() {
+                    public void onSuccess(String result, boolean isError) {
+                        final long duration = SystemClock.elapsedRealtime() - start;
+
+                        TranscribeButton.openVideoTranscription(messageObject);
+                        messageObject.messageOwner.voiceTranscriptionOpen = true;
+                        messageObject.messageOwner.voiceTranscriptionId = TRANSCRIPTION_AI_ID;
+                        messageObject.messageOwner.voiceTranscriptionFinal = true;
+                        messageObject.messageOwner.voiceTranscriptionError = isError ? result : null;
+
+                        TLRPC.InputPeer peer = MessagesController.getInstance(messageObject.currentAccount).getInputPeer(messageObject.messageOwner.peer_id);
+                        MessagesStorage.getInstance(messageObject.currentAccount).updateMessageVoiceTranscription(DialogObject.getPeerDialogId(peer), messageObject.messageOwner.id, isError ? "" : result, messageObject.messageOwner);
+                        AndroidUtilities.runOnUIThread(() -> finishTranscription(messageObject, TRANSCRIPTION_AI_ID, isError ? "" : result), Math.max(0, minDuration - duration));
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        onSuccess(result, false);
+                    }
+
+                    private void onFailedState(int string) {
+                        onSuccess(LocaleController.getString(string), true);
+                    }
+
+                    @Override
+                    public void onFailed() {
+                        onFailedState(R.string.AiFeatures_CustomModels_Generate_Failed);
+                    }
+
+                    @Override
+                    public void onTooManyRequests() {
+                        onFailedState(R.string.FloodWait);
+                    }
+
+                    @Override
+                    public void onModelOverloaded() {
+                        onFailedState(R.string.AiFeatures_CustomModels_Feature_Failed_Overloaded);
+                    }
+
+                    @Override
+                    public void onMediaUploadUnavailable() {
+                        onFailedState(R.string.AiFeatures_CustomModels_Feature_Failed_Upload);
+                    }
+                });
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean finishTranscription(MessageObject messageObject, long transcription_id, String text) {

@@ -473,6 +473,10 @@ public class OctoChatsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.hideCustomEmojis)
                             .title(getString(R.string.HideCustomEmojis))
                             .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.disableTextBoxBlur)
+                            .title(getString(R.string.DisableTextBoxBlur))
+                            .build());
                 })
                 .category(R.string.BottomBar, category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()

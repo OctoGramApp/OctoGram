@@ -445,7 +445,10 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
 
             @Override
             public void onExtensionNeedUpdate() {
-
+                AndroidUtilities.runOnUIThread(() -> {
+                    dismiss();
+                    SingleTranslationsHandler.OnTranslationResultCallback.super.onExtensionNeedUpdate();
+                }, 2000);
             }
         });
 

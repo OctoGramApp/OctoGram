@@ -26,7 +26,6 @@ public class GeminiModels {
     }
 
     // -- Gemini Models
-    public static final String GEMINI_1_0_PRO_VISION_LATEST = "models/gemini-1.0-pro-vision-latest";
     public static final String GEMINI_1_5_FLASH = "models/gemini-1.5-flash";
     public static final String GEMINI_1_5_FLASH_002 = "models/gemini-1.5-flash-002";
     public static final String GEMINI_1_5_FLASH_8B = "models/gemini-1.5-flash-8b";
@@ -49,8 +48,8 @@ public class GeminiModels {
     public static final String GEMINI_2_0_PRO_EXP = "models/gemini-2.0-pro-exp";
     public static final String GEMINI_2_0_PRO_EXP_02_05 = "models/gemini-2.0-pro-exp-02-05";
     public static final String GEMINI_2_5_FLASH = "models/gemini-2.5-flash";
+    public static final String GEMINI_2_5_FLASH_LITE = "models/gemini-2.5-flash-lite";
     public static final String GEMINI_2_5_FLASH_LITE_PREVIEW_06_17 = "models/gemini-2.5-flash-lite-preview-06-17";
-    public static final String GEMINI_2_5_FLASH_PREVIEW_04_17 = "models/gemini-2.5-flash-preview-04-17";
     public static final String GEMINI_2_5_FLASH_PREVIEW_05_20 = "models/gemini-2.5-flash-preview-05-20";
     public static final String GEMINI_2_5_FLASH_PREVIEW_TTS = "models/gemini-2.5-flash-preview-tts";
     public static final String GEMINI_2_5_PRO = "models/gemini-2.5-pro";
@@ -59,7 +58,6 @@ public class GeminiModels {
     public static final String GEMINI_2_5_PRO_PREVIEW_06_05 = "models/gemini-2.5-pro-preview-06-05";
     public static final String GEMINI_2_5_PRO_PREVIEW_TTS = "models/gemini-2.5-pro-preview-tts";
     public static final String GEMINI_EXP_1206 = "models/gemini-exp-1206";
-    public static final String GEMINI_PRO_VISION = "models/gemini-pro-vision";
 
     // -- Gemma Models
     public static final String GEMMA_3_12B_IT = "models/gemma-3-12b-it";
@@ -73,7 +71,6 @@ public class GeminiModels {
     public static final String LEARNLM_2_0_FLASH_EXPERIMENTAL = "models/learnlm-2.0-flash-experimental";
 
     @StringDef({
-            GEMINI_1_0_PRO_VISION_LATEST,
             GEMINI_1_5_FLASH,
             GEMINI_1_5_FLASH_002,
             GEMINI_1_5_FLASH_8B,
@@ -96,8 +93,8 @@ public class GeminiModels {
             GEMINI_2_0_PRO_EXP,
             GEMINI_2_0_PRO_EXP_02_05,
             GEMINI_2_5_FLASH,
+            GEMINI_2_5_FLASH_LITE,
             GEMINI_2_5_FLASH_LITE_PREVIEW_06_17,
-            GEMINI_2_5_FLASH_PREVIEW_04_17,
             GEMINI_2_5_FLASH_PREVIEW_05_20,
             GEMINI_2_5_FLASH_PREVIEW_TTS,
             GEMINI_2_5_PRO,
@@ -106,7 +103,6 @@ public class GeminiModels {
             GEMINI_2_5_PRO_PREVIEW_06_05,
             GEMINI_2_5_PRO_PREVIEW_TTS,
             GEMINI_EXP_1206,
-            GEMINI_PRO_VISION,
             GEMMA_3_12B_IT,
             GEMMA_3_1B_IT,
             GEMMA_3_27B_IT,
@@ -120,7 +116,6 @@ public class GeminiModels {
     }
 
     public static final List<String> ALL_MODELS = Arrays.asList(
-            GEMINI_1_0_PRO_VISION_LATEST,
             GEMINI_1_5_FLASH,
             GEMINI_1_5_FLASH_002,
             GEMINI_1_5_FLASH_8B,
@@ -143,8 +138,8 @@ public class GeminiModels {
             GEMINI_2_0_PRO_EXP,
             GEMINI_2_0_PRO_EXP_02_05,
             GEMINI_2_5_FLASH,
+            GEMINI_2_5_FLASH_LITE,
             GEMINI_2_5_FLASH_LITE_PREVIEW_06_17,
-            GEMINI_2_5_FLASH_PREVIEW_04_17,
             GEMINI_2_5_FLASH_PREVIEW_05_20,
             GEMINI_2_5_FLASH_PREVIEW_TTS,
             GEMINI_2_5_PRO,
@@ -153,7 +148,6 @@ public class GeminiModels {
             GEMINI_2_5_PRO_PREVIEW_06_05,
             GEMINI_2_5_PRO_PREVIEW_TTS,
             GEMINI_EXP_1206,
-            GEMINI_PRO_VISION,
             GEMMA_3_12B_IT,
             GEMMA_3_1B_IT,
             GEMMA_3_27B_IT,

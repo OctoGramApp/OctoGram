@@ -4288,7 +4288,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         if (!OctoConfig.INSTANCE.roundedTextBox.getValue()) {
             if (allowBlur) {
                 backgroundPaint.setColor(getThemedColor(Theme.key_chat_messagePanelBackground));
-                if (SharedConfig.chatBlurEnabled() && sizeNotifierLayout != null) {
+                if (!OctoConfig.INSTANCE.disableTextBoxBlur.getValue() && (SharedConfig.chatBlurEnabled() && sizeNotifierLayout != null)) {
                     blurBounds.set(0, bottom, getWidth(), getHeight());
                     sizeNotifierLayout.drawBlurRect(canvas, getTop(), blurBounds, backgroundPaint, false);
                 } else {
@@ -4298,15 +4298,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 canvas.drawRect(0, bottom, getWidth(), getHeight(), getThemedPaint(Theme.key_paint_chatComposeBackground));
             }
         } else {
-            float cornerRadius;
-            RectF roundRect;
-            Paint paintToUse = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-            cornerRadius = AndroidUtilities.dp(28);
-            roundRect = new RectF(0, bottom, getWidth(), getHeight());
-            paintToUse.setColor(getThemedColor(Theme.key_color_text_box));
-
-            canvas.drawRoundRect(roundRect, cornerRadius, cornerRadius, paintToUse);
+            float cornerRadius = AndroidUtilities.dp(28);
+            RectF roundRect = new RectF(0, bottom, getWidth(), getHeight());
+            canvas.drawRoundRect(roundRect, cornerRadius, cornerRadius, getThemedPaint(Theme.key_paint_chatComposeBackground));
         }
     }
 
@@ -4778,11 +4772,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                         messageSendPreview = null;
                     }
                 });
-            }
-
-            @Override
-            public void onExtensionNeedUpdate() {
-
             }
 
             @Override

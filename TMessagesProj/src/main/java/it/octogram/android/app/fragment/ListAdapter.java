@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
@@ -312,7 +313,7 @@ public class ListAdapter extends AdapterWithDiffUtils {
             case LIST:
                 TextSettingsCell listCell = (TextSettingsCell) holder.itemView;
                 ListRow listRow = (ListRow) currentShownItems.get(position);
-                listCell.setTextAndValue(listRow.getTitle(), listRow.getTextFromInteger(listRow.getCurrentValue().getValue()), true, listRow.hasDivider());
+                listCell.setTextAndValue(listRow.getTitle(), Emoji.replaceEmoji(listRow.getTextFromInteger(listRow.getCurrentValue().getValue()), listCell.getValueTextView().getPaint().getFontMetricsInt(), false), listRow.hasDivider());
                 additionalItems.add(listCell.getValueTextView());
 
                 if (listRow.getIcon() != -1) {

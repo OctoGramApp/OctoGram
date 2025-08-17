@@ -16,6 +16,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
@@ -34,6 +35,7 @@ import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
@@ -42,11 +44,13 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MediaActionDrawable;
 import org.telegram.ui.Components.RadialProgress2;
 import org.telegram.ui.IUpdateLayout;
+import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.updater.UpdatesManager;
 
 public class UpdateLayout extends IUpdateLayout {
 
@@ -55,6 +59,9 @@ public class UpdateLayout extends IUpdateLayout {
     private SimpleTextView[] updateTextViews;
     private TextView updateSizeTextView;
     private AnimatorSet updateTextAnimator;
+
+    private boolean hasClassicUpdate = false;
+    private UpdatesManager.ExtensionUpdateState extensionUpdateState;
 
     private final Activity activity;
     private final ViewGroup sideMenu;
@@ -80,6 +87,8 @@ public class UpdateLayout extends IUpdateLayout {
             private LinearGradient updateGradient;
             private int lastGradientWidth;
 
+            private boolean lastHasClassicUpdate = false;
+
             @Override
             public void draw(@NonNull Canvas canvas) {
                 if (updateGradient != null) {
@@ -93,13 +102,15 @@ public class UpdateLayout extends IUpdateLayout {
                 super.draw(canvas);
             }
 
+            @SuppressLint("DrawAllocation")
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
                 int width = MeasureSpec.getSize(widthMeasureSpec);
-                if (lastGradientWidth != width) {
-                    updateGradient = new LinearGradient(0, 0, width, 0, new int[]{0xff663dff, 0xffcc4499}, new float[]{0.0f, 1.0f}, Shader.TileMode.CLAMP);
+                if (lastGradientWidth != width || lastHasClassicUpdate != hasClassicUpdate) {
+                    updateGradient = new LinearGradient(0, 0, width, 0, hasClassicUpdate ? new int[]{0xff663dff, 0xffcc4499} : new int[]{0xff57c785, 0xffeddd53}, new float[]{0.0f, 1.0f}, Shader.TileMode.CLAMP);
                     lastGradientWidth = width;
+                    lastHasClassicUpdate = hasClassicUpdate;
                 }
             }
 
@@ -114,7 +125,18 @@ public class UpdateLayout extends IUpdateLayout {
         updateLayout.setTranslationY(dp(44));
         updateLayout.setBackground(Theme.getSelectorDrawable(0x40ffffff, false));
         sideMenuContainer.addView(updateLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44, Gravity.LEFT | Gravity.BOTTOM));
-        updateLayout.setOnClickListener(v -> UpdatesManager.INSTANCE.onUpdateButtonPressed());
+        updateLayout.setOnClickListener(v -> {
+            if (extensionUpdateState != null && !hasClassicUpdate) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    if (LaunchActivity.instance.drawerLayoutContainer != null) {
+                        LaunchActivity.instance.drawerLayoutContainer.closeDrawer(true);
+                    }
+                    Browser.openUrl(LaunchActivity.instance, String.format(Locale.US, "https://t.me/%s/%d", extensionUpdateState.channelUsername(), extensionUpdateState.messageID()));
+                }, 10);
+            } else {
+                UpdatesManager.INSTANCE.onUpdateButtonPressed();
+            }
+        });
         updateLayoutIcon = new RadialProgress2(updateLayout);
         updateLayoutIcon.setColors(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
         updateLayoutIcon.setProgressRect(dp(22), dp(11), dp(22 + 22), dp(11 + 22));
@@ -156,6 +178,7 @@ public class UpdateLayout extends IUpdateLayout {
 
             @Override
             public void onNoUpdateAvailable() {
+                hasClassicUpdate = false;
                 AndroidUtilities.runOnUIThread(() -> {
                     if (updateLayout == null || updateLayout.getTag() == null) {
                         return;
@@ -176,22 +199,26 @@ public class UpdateLayout extends IUpdateLayout {
                     }
                     sideMenu.setPadding(0, 0, 0, 0);
                     isFirstDataResult.set(false);
+                    updateLayout.requestLayout();
                 });
             }
 
             @Override
             public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
+                hasClassicUpdate = true;
                 AndroidUtilities.runOnUIThread(() -> {
                     boolean animated = !isFirstDataResult.get();
                     updateLayoutIcon.setIcon(MediaActionDrawable.ICON_DOWNLOAD, true, animated);
                     setUpdateText(getString(R.string.AppUpdate), animated);
                     showSize = true;
                     restartSizing(animated);
+                    updateLayout.requestLayout();
                 });
             }
 
             @Override
             public void onUpdateDownloading(float percent) {
+                hasClassicUpdate = true;
                 AndroidUtilities.runOnUIThread(() -> {
                     boolean animated = !isFirstDataResult.get();
                     updateLayoutIcon.setIcon(MediaActionDrawable.ICON_CANCEL, true, animated);
@@ -204,12 +231,14 @@ public class UpdateLayout extends IUpdateLayout {
 
             @Override
             public void onUpdateReady() {
+                hasClassicUpdate = true;
                 AndroidUtilities.runOnUIThread(() -> {
                     boolean animated = !isFirstDataResult.get();
                     updateLayoutIcon.setIcon(MediaActionDrawable.ICON_UPDATE, true, animated);
                     setUpdateText(getString(R.string.AppUpdateNow), animated);
                     showSize = false;
                     restartSizing(true);
+                    updateLayout.requestLayout();
                 });
             }
 
@@ -249,6 +278,32 @@ public class UpdateLayout extends IUpdateLayout {
                     updateLayout.setTranslationY(0);
                 }
                 sideMenu.setPadding(0, 0, 0, dp(44));
+            }
+
+            @Override
+            public void onExtensionUpdateAvailable(UpdatesManager.ExtensionUpdateState state, boolean hasAlsoClassicUpdate) {
+                hasClassicUpdate = hasAlsoClassicUpdate;
+                extensionUpdateState = state;
+                if (!hasAlsoClassicUpdate) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        boolean animated = !isFirstDataResult.get();
+                        updateLayoutIcon.setIcon(MediaActionDrawable.ICON_DOWNLOAD, true, animated);
+                        setUpdateText(getString(R.string.UpdatesSettingsCheckButtonUpdateExtension), animated);
+                        showSize = false;
+                        restartSizing(animated);
+                        updateLayout.requestLayout();
+                    });
+                }
+            }
+
+            @Override
+            public void onNoExtensionUpdateAvailable(boolean hasAlsoClassicUpdate) {
+                hasClassicUpdate = hasAlsoClassicUpdate;
+                extensionUpdateState = null;
+                if (!hasAlsoClassicUpdate) {
+                    onNoUpdateAvailable();
+                    AndroidUtilities.runOnUIThread(() -> updateLayout.requestLayout());
+                }
             }
         });
     }

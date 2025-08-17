@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import it.octogram.android.OctoConfig;
+
 public class BottomSheetTabs extends FrameLayout {
 
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);

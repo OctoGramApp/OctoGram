@@ -29,6 +29,11 @@ public class ChatGPTHelper {
             return;
         }
 
+        if (!aiPrompt.getFilePath().isEmpty()) {
+            callback.onMediaUploadUnavailable();
+            return;
+        }
+
         new Thread() {
             @Override
             public void run() {

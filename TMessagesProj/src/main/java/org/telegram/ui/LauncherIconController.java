@@ -40,6 +40,8 @@ public class LauncherIconController {
         FOXGRAM("FoxgramIcon", R.drawable.icon_7_launcher_background, R.mipmap.icon_foreground_sa, R.string.AppIconFoxgram, false, true),
         AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconAqua),
         DEV("DevIcon", R.mipmap.ic_dev_icon_background, R.mipmap.icon_foreground_sa, R.string.AppIconDev, false, false),
+        GLASS("GlassIcon", R.drawable.ic_launcher_glass, R.mipmap.ic_launcher_glass_foreground, R.string.AppIconGlass, false, false),
+
         CHUPA("ChupaIcon", R.drawable.icon_9_background_sa, R.mipmap.icon_9_launcher_foreground_sa, R.string.AppIconChupa, false, true),
         YUKI("YukiIcon", R.drawable.icon_yuki_background_sa, R.mipmap.icon_yuki_foreground_sa, R.string.AppIconYuki, false, true),
         CONFETTI("ConfettiIcon", R.mipmap.ic_octo_confetti_background, R.mipmap.icon_foreground_sa, R.string.AppIconConfetti, false, true),

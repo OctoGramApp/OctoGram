@@ -51,8 +51,7 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 
-import it.octogram.android.app.ui.cells.CheckForUpdatesButtonCell;
-import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.updater.UpdatesManager;
 
 @SuppressLint("ViewConstructor")
 public class UpdateAppAlertDialog extends BottomSheet {
@@ -128,25 +127,25 @@ public class UpdateAppAlertDialog extends BottomSheet {
         }
 
         public void updateState(int state, float loadProgress) {
-            boolean isCellEnabled = state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING;
+            boolean isCellEnabled = state != UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING;
             if (isScheduleButton) {
-                isCellEnabled = state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD;
+                isCellEnabled = state == UpdatesManager.CheckCellState.UPDATE_NEED_DOWNLOAD;
             }
             background.setClickable(isCellEnabled);
             background.setEnabled(isCellEnabled);
 
             if (isScheduleButton) {
-                if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD) {
+                if (state == UpdatesManager.CheckCellState.UPDATE_NEED_DOWNLOAD && this.state != UpdatesManager.CheckCellState.UPDATE_NEED_DOWNLOAD) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                     }
                     setText(getString(R.string.AppUpdateRemindMeLater), !isFirstUpdate);
-                } else if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                } else if (state == UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
                     }
                     setText(getString(R.string.UpdatesAlertSafeClose), !isFirstUpdate);
-                } else if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY) {
+                } else if (state == UpdatesManager.CheckCellState.UPDATE_IS_READY && this.state != UpdatesManager.CheckCellState.UPDATE_IS_READY) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
                     }
@@ -154,24 +153,24 @@ public class UpdateAppAlertDialog extends BottomSheet {
                 }
             } else {
                 switch (state) {
-                    case CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD:
+                    case UpdatesManager.CheckCellState.UPDATE_NEED_DOWNLOAD:
                         setText(formatString(R.string.AppUpdateDownloadNow), !isFirstUpdate);
                         break;
-                    case CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING:
+                    case UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING:
                         setText(formatString(R.string.AppUpdateDownloading, (int) (loadProgress * 100)), !isFirstUpdate);
                         break;
-                    case CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY:
+                    case UpdatesManager.CheckCellState.UPDATE_IS_READY:
                         setText(getString(R.string.UpdatesSettingsCheckButtonInstall), !isFirstUpdate);
                         break;
                 }
 
-                if (state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                if (state == UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING && this.state != UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
                     }
                     background.setAlpha(1f);
                     background.animate().alpha(0f).setDuration(200).start();
-                } else if (state != CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING && this.state == CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING) {
+                } else if (state != UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING && this.state == UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING) {
                     for (int a = 0; a < 2; a++) {
                         textView[a].setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
                     }
@@ -354,7 +353,7 @@ public class UpdateAppAlertDialog extends BottomSheet {
         scheduleButton.background.setOnClickListener(v -> dismiss());
         container.addView(scheduleButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 50, Gravity.LEFT | Gravity.BOTTOM, 0, 0, 0, 0));
 
-        updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD);
+        updateState(UpdatesManager.CheckCellState.UPDATE_NEED_DOWNLOAD);
     }
 
     @NonNull
@@ -413,17 +412,17 @@ public class UpdateAppAlertDialog extends BottomSheet {
 
             @Override
             public void onUpdateAvailable(TLRPC.TL_help_appUpdate update) {
-                AndroidUtilities.runOnUIThread(() -> updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_NEED_DOWNLOAD));
+                AndroidUtilities.runOnUIThread(() -> updateState(UpdatesManager.CheckCellState.UPDATE_NEED_DOWNLOAD));
             }
 
             @Override
             public void onUpdateDownloading(float percent) {
-                AndroidUtilities.runOnUIThread(() -> updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_DOWNLOADING, percent));
+                AndroidUtilities.runOnUIThread(() -> updateState(UpdatesManager.CheckCellState.UPDATE_IS_DOWNLOADING, percent));
             }
 
             @Override
             public void onUpdateReady() {
-                AndroidUtilities.runOnUIThread(() -> updateState(CheckForUpdatesButtonCell.CheckCellState.UPDATE_IS_READY));
+                AndroidUtilities.runOnUIThread(() -> updateState(UpdatesManager.CheckCellState.UPDATE_IS_READY));
             }
         });
     }

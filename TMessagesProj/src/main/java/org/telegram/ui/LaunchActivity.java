@@ -92,7 +92,6 @@ import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.AssistActionBuilder;
 
-import org.json.JSONObject;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -255,7 +254,7 @@ import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.app.fragment.ActionBarOverride;
 import it.octogram.android.app.ui.components.DrawerPreviewCell;
 import it.octogram.android.theme.MonetThemeController;
-import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.updater.UpdatesManager;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ForwardContext;
 import it.octogram.android.utils.data.LanguageController;
@@ -1291,13 +1290,13 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         FloatingDebugController.setActive(this, SharedConfig.isFloatingDebugActive, false);
     }
 
-    public void addOnUserLeaveHintListener(Runnable callback) {
+    /*public void addOnUserLeaveHintListener(Runnable callback) {
         onUserLeaveHintListeners.add(callback);
     }
 
     public void removeOnUserLeaveHintListener(Runnable callback) {
         onUserLeaveHintListeners.remove(callback);
-    }
+    }*/
 
     private BaseFragment getClientNotActivatedFragment() {
         if (LoginActivity.loadCurrentState(false, currentAccount).getInt("currentViewNum", 0) != 0) {

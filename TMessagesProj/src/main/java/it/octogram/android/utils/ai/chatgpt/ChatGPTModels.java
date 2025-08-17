@@ -48,14 +48,14 @@ public class ChatGPTModels {
     public static final String GPT_4_1_MINI_2025_04_14 = "gpt-4.1-mini-2025-04-14";
     public static final String GPT_4_1_NANO = "gpt-4.1-nano";
     public static final String GPT_4_1_NANO_2025_04_14 = "gpt-4.1-nano-2025-04-14";
-    public static final String GPT_4_5_PREVIEW = "gpt-4.5-preview";
-    public static final String GPT_4_5_PREVIEW_2025_02_27 = "gpt-4.5-preview-2025-02-27";
     public static final String GPT_4O = "gpt-4o";
     public static final String GPT_4O_2024_05_13 = "gpt-4o-2024-05-13";
     public static final String GPT_4O_2024_08_06 = "gpt-4o-2024-08-06";
     public static final String GPT_4O_2024_11_20 = "gpt-4o-2024-11-20";
     public static final String GPT_4O_AUDIO_PREVIEW = "gpt-4o-audio-preview";
     public static final String GPT_4O_AUDIO_PREVIEW_2024_10_01 = "gpt-4o-audio-preview-2024-10-01";
+    public static final String GPT_4O_AUDIO_PREVIEW_2024_12_17 = "gpt-4o-audio-preview-2024-12-17";
+    public static final String GPT_4O_AUDIO_PREVIEW_2025_06_03 = "gpt-4o-audio-preview-2025-06-03";
     public static final String GPT_4O_MINI = "gpt-4o-mini";
     public static final String GPT_4O_MINI_2024_07_18 = "gpt-4o-mini-2024-07-18";
     public static final String GPT_4O_MINI_AUDIO_PREVIEW = "gpt-4o-mini-audio-preview";
@@ -67,13 +67,30 @@ public class ChatGPTModels {
     public static final String GPT_4O_SEARCH_PREVIEW = "gpt-4o-search-preview";
     public static final String GPT_4O_SEARCH_PREVIEW_2025_03_11 = "gpt-4o-search-preview-2025-03-11";
     public static final String GPT_4O_TRANSCRIBE = "gpt-4o-transcribe";
+    public static final String GPT_5 = "gpt-5";
+    public static final String GPT_5_2025_08_07 = "gpt-5-2025-08-07";
+    public static final String GPT_5_CHAT_LATEST = "gpt-5-chat-latest";
+    public static final String GPT_5_MINI = "gpt-5-mini";
+    public static final String GPT_5_MINI_2025_08_07 = "gpt-5-mini-2025-08-07";
+    public static final String GPT_5_NANO = "gpt-5-nano";
+    public static final String GPT_5_NANO_2025_08_07 = "gpt-5-nano-2025-08-07";
     public static final String GPT_IMAGE_1 = "gpt-image-1";
 
     // -- O1 Models
+    public static final String O1 = "o1";
+    public static final String O1_2024_12_17 = "o1-2024-12-17";
     public static final String O1_MINI = "o1-mini";
     public static final String O1_MINI_2024_09_12 = "o1-mini-2024-09-12";
-    public static final String O1_PREVIEW = "o1-preview";
-    public static final String O1_PREVIEW_2024_09_12 = "o1-preview-2024-09-12";
+
+    // -- O3 Models
+    public static final String O3 = "o3";
+    public static final String O3_2025_04_16 = "o3-2025-04-16";
+    public static final String O3_MINI = "o3-mini";
+    public static final String O3_MINI_2025_01_31 = "o3-mini-2025-01-31";
+
+    // -- O4 Models
+    public static final String O4_MINI = "o4-mini";
+    public static final String O4_MINI_2025_04_16 = "o4-mini-2025-04-16";
 
     // -- Omni Models
     public static final String OMNI_MODERATION_2024_09_26 = "omni-moderation-2024-09-26";
@@ -110,14 +127,14 @@ public class ChatGPTModels {
             GPT_4_1_MINI_2025_04_14,
             GPT_4_1_NANO,
             GPT_4_1_NANO_2025_04_14,
-            GPT_4_5_PREVIEW,
-            GPT_4_5_PREVIEW_2025_02_27,
             GPT_4O,
             GPT_4O_2024_05_13,
             GPT_4O_2024_08_06,
             GPT_4O_2024_11_20,
             GPT_4O_AUDIO_PREVIEW,
             GPT_4O_AUDIO_PREVIEW_2024_10_01,
+            GPT_4O_AUDIO_PREVIEW_2024_12_17,
+            GPT_4O_AUDIO_PREVIEW_2025_06_03,
             GPT_4O_MINI,
             GPT_4O_MINI_2024_07_18,
             GPT_4O_MINI_AUDIO_PREVIEW,
@@ -129,11 +146,24 @@ public class ChatGPTModels {
             GPT_4O_SEARCH_PREVIEW,
             GPT_4O_SEARCH_PREVIEW_2025_03_11,
             GPT_4O_TRANSCRIBE,
+            GPT_5,
+            GPT_5_2025_08_07,
+            GPT_5_CHAT_LATEST,
+            GPT_5_MINI,
+            GPT_5_MINI_2025_08_07,
+            GPT_5_NANO,
+            GPT_5_NANO_2025_08_07,
             GPT_IMAGE_1,
+            O1,
+            O1_2024_12_17,
             O1_MINI,
             O1_MINI_2024_09_12,
-            O1_PREVIEW,
-            O1_PREVIEW_2024_09_12,
+            O3,
+            O3_2025_04_16,
+            O3_MINI,
+            O3_MINI_2025_01_31,
+            O4_MINI,
+            O4_MINI_2025_04_16,
             OMNI_MODERATION_2024_09_26,
             OMNI_MODERATION_LATEST,
             TEXT_EMBEDDING_3_LARGE,
@@ -166,14 +196,14 @@ public class ChatGPTModels {
             GPT_4_1_MINI_2025_04_14,
             GPT_4_1_NANO,
             GPT_4_1_NANO_2025_04_14,
-            GPT_4_5_PREVIEW,
-            GPT_4_5_PREVIEW_2025_02_27,
             GPT_4O,
             GPT_4O_2024_05_13,
             GPT_4O_2024_08_06,
             GPT_4O_2024_11_20,
             GPT_4O_AUDIO_PREVIEW,
             GPT_4O_AUDIO_PREVIEW_2024_10_01,
+            GPT_4O_AUDIO_PREVIEW_2024_12_17,
+            GPT_4O_AUDIO_PREVIEW_2025_06_03,
             GPT_4O_MINI,
             GPT_4O_MINI_2024_07_18,
             GPT_4O_MINI_AUDIO_PREVIEW,
@@ -185,11 +215,24 @@ public class ChatGPTModels {
             GPT_4O_SEARCH_PREVIEW,
             GPT_4O_SEARCH_PREVIEW_2025_03_11,
             GPT_4O_TRANSCRIBE,
+            GPT_5,
+            GPT_5_2025_08_07,
+            GPT_5_CHAT_LATEST,
+            GPT_5_MINI,
+            GPT_5_MINI_2025_08_07,
+            GPT_5_NANO,
+            GPT_5_NANO_2025_08_07,
             GPT_IMAGE_1,
+            O1,
+            O1_2024_12_17,
             O1_MINI,
             O1_MINI_2024_09_12,
-            O1_PREVIEW,
-            O1_PREVIEW_2024_09_12,
+            O3,
+            O3_2025_04_16,
+            O3_MINI,
+            O3_MINI_2025_01_31,
+            O4_MINI,
+            O4_MINI_2025_04_16,
             OMNI_MODERATION_2024_09_26,
             OMNI_MODERATION_LATEST,
             TEXT_EMBEDDING_3_LARGE,

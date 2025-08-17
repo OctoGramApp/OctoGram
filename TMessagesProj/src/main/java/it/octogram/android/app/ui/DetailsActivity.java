@@ -160,6 +160,16 @@ public class DetailsActivity extends BaseFragment implements NotificationCenter.
         super.onFragmentCreate();
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
         updateRowsId();
+// TODO: Implement secure flag handling
+//        if (getParentActivity() != null) {
+//            AndroidUtilities.logFlagSecure();
+//            if (fromChat != null && getMessagesController().isChatNoForwards(fromChat)) {
+//                getParentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+//            } else {
+//                getParentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+//            }
+//        }
+
         return true;
     }
 

@@ -1055,7 +1055,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     openCamera(true);
                 } else {
                     if (parentAlert.delegate != null) {
-                        parentAlert.delegate.didPressedButton(0, false, true, 0, 0, parentAlert.isCaptionAbove(), false, 0);
+                        parentAlert.delegate.didPressedButton(OctoConfig.INSTANCE.useSystemCameraToRecord.getValue() ? 2 : 0, false, true, 0, 0, parentAlert.isCaptionAbove(), false, 0);
                     }
                 }
             }

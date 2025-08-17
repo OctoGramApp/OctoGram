@@ -33,3 +33,6 @@ TMessagesProj_App/play/
 *.jks
 move_icon.sh
 /keys/
+/backup_unused_*
+check_unused_assets.sh
+full_octo_asset_list.txt

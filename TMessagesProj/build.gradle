@@ -54,7 +54,9 @@ def getCCacheExecutable = {
             logger.lifecycle("Found ccache in system path: ${output}")
             return file(output)
         }
-    } catch (Exception ignored) {}
+    } catch (Exception error) {
+        println("Error finding ccache in system path: ${error.message}")
+    }
 
     def platformFolder = isWindows ? "windows" : isMacOs ? "macOs" : "linux"
     def executableName = isWindows ? "ccache.exe" : "ccache"
@@ -118,7 +120,7 @@ dependencies {
     implementation libs.billing
     implementation libs.commons.text
     implementation libs.gson
-    implementation (libs.guava) {
+    implementation(libs.guava) {
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
         exclude group: 'org.checkerframework', module: 'checker-compat-qual'
         exclude group: 'org.checkerframework', module: 'checker-qual'
@@ -198,7 +200,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                version = '3.31.6+'
+                version = '4.0.0+'
             }
         }
 

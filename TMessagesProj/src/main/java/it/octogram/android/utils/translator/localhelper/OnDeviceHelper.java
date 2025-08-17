@@ -26,6 +26,7 @@ import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
 
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
@@ -142,19 +143,29 @@ public class OnDeviceHelper {
         }
     }
 
-    public static boolean checkVersionCode(Context context, int minVersionCode) {
+    public static int getVersionCode() throws PackageManager.NameNotFoundException {
+        return getVersionCode(ApplicationLoader.applicationContext);
+    }
+
+    public static int getVersionCode(Context context) throws PackageManager.NameNotFoundException {
         PackageManager pm = context.getPackageManager();
+        PackageInfo info = pm.getPackageInfo(PACKAGE_NAME, 0);
+
+        int versionCode;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            versionCode = (int) info.getLongVersionCode();
+        } else {
+            versionCode = info.versionCode;
+        }
+
+        OctoLogging.d(TAG, "Found package " + PACKAGE_NAME + " with versionCode: " + versionCode);
+
+        return versionCode;
+    }
+
+    public static boolean checkVersionCode(Context context, int minVersionCode) {
         try {
-            PackageInfo info = pm.getPackageInfo(PACKAGE_NAME, 0);
-
-            int versionCode;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                versionCode = (int) info.getLongVersionCode();
-            } else {
-                versionCode = info.versionCode;
-            }
-
-            OctoLogging.d(TAG, "Found package " + PACKAGE_NAME + " with versionCode: " + versionCode);
+            int versionCode = getVersionCode(context);
 
             if (versionCode >= minVersionCode) {
                 return true;
@@ -166,6 +177,10 @@ public class OnDeviceHelper {
             OctoLogging.w(TAG, "Package not found: " + PACKAGE_NAME);
             return false;
         }
+    }
+
+    public static boolean isAvailable() {
+        return isAvailable(ApplicationLoader.applicationContext);
     }
 
     public static boolean isAvailable(Context context) {

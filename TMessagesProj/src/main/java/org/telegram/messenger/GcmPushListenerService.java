@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.updater.UpdatesManager;
 
 public class GcmPushListenerService extends FirebaseMessagingService {
 

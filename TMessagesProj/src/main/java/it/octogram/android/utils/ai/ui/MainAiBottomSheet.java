@@ -184,13 +184,7 @@ public class MainAiBottomSheet extends BottomSheet {
     public MainAiBottomSheet(CustomModelsMenuWrapper.FillStateData data) {
         super(data.context, true, null);
 
-        toLanguage = TranslateAlert2.getToLanguage();
-        if (!OctoConfig.INSTANCE.aiFeaturesLastUsedLanguage.getValue().isEmpty()) {
-            String temp = TranslateAlert2.languageName(OctoConfig.INSTANCE.aiFeaturesLastUsedLanguage.getValue());
-            if (temp != null && !temp.isEmpty()) {
-                toLanguage = OctoConfig.INSTANCE.aiFeaturesLastUsedLanguage.getValue();
-            }
-        }
+        toLanguage = MainAiHelper.getDestinationLanguage();
 
         backgroundPaddingLeft = 0;
         favoriteAiProvider = MainAiHelper.getPreferredProvider();
@@ -605,13 +599,8 @@ public class MainAiBottomSheet extends BottomSheet {
             boolean loadAsImage = false;
             AiModelMessagesState currentState = CustomModelsMenuWrapper.getAvailableStates(data);
             if (modelData.modelType == AiModelType.RELATED_TO_MESSAGES && modelData.uploadMedia && currentState != AiModelMessagesState.TEXT_MESSAGES) {
-                if (favoriteAiProvider != AiProvidersDetails.GEMINI) {
-                    AndroidUtilities.runOnUIThread(() -> {
-                        textView.setTextColor(getThemedColor(Theme.key_dialogTextGray3));
-                        textView.setText(getString(R.string.AiFeatures_CustomModels_Feature_Failed_Upload));
-                        adapter.updateMainView(textViewContainer);
-                    });
-                    return;
+                if (data.messageObject.isVoice() && !data.messageObject.isOut() && data.messageObject.isContentUnread()) {
+                    MessagesController.getInstance(data.messageObject.currentAccount).markMessageContentAsRead(data.messageObject);
                 }
 
                 File finalFile = OctoUtils.getFileContentFromMessage(data.messageObject);
@@ -633,8 +622,7 @@ public class MainAiBottomSheet extends BottomSheet {
                 promptAsString = replaceTags(promptAsString);
             }
 
-            String mainSystemInstruction = "Return plain text only or use markdown with double ** or __ for italic like Telegram markdown styling.\nTelegram-supported markdown formatting:\n\nBasic formatting:\n- **bold text** (double asterisks) for emphasis\n- __italic text__ (double underscores) for nuanced meaning\n- `inline code` (single backtick) for technical terms\n- ```code blocks``` (triple backticks) for longer code\n- [text](URL) for links";
-            prompt = new AiPrompt(mainSystemInstruction, promptAsString, filePath, mimeType, loadAsImage);
+            prompt = new AiPrompt(MainAiHelper.systemInstructions, promptAsString, filePath, mimeType, loadAsImage);
         } else {
             prompt = AiUtils.getTranslationPrompt(true, false, data.messageText, toLanguage);
         }
@@ -666,6 +654,11 @@ public class MainAiBottomSheet extends BottomSheet {
             @Override
             public void onModelOverloaded() {
                 onFailedState(R.string.AiFeatures_CustomModels_Feature_Failed_Overloaded);
+            }
+
+            @Override
+            public void onMediaUploadUnavailable() {
+                onFailedState(R.string.AiFeatures_CustomModels_Feature_Failed_Upload);
             }
 
             private void onFailedState(int str) {
@@ -1116,6 +1109,8 @@ public class MainAiBottomSheet extends BottomSheet {
                                 focusKey = OctoConfig.INSTANCE.aiFeaturesAskOnMedia.getKey();
                             } else if (data.modelID.equals(CustomModelsHelper.VIRTUAL_CHAT_CONTEXT_MODEL_ID)) {
                                 focusKey = OctoConfig.INSTANCE.aiFeaturesChatContext.getKey();
+                            } else if (data.modelID.equals(CustomModelsHelper.VIRTUAL_TRANSCRIBE_MODEL_ID)) {
+                                focusKey = OctoConfig.INSTANCE.aiFeaturesTranscribeVoice.getKey();
                             }
                             LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI(), focusKey));
                         } else {

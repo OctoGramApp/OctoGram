@@ -22,6 +22,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -324,11 +325,25 @@ public class EditEmojiTextCell extends FrameLayout {
         moveImageView.setOnClickListener(onChangeIcon);
         moveImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
         moveImageView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        addView(moveImageView, LayoutHelper.createFrame(48, 48, Gravity.LEFT | Gravity.CENTER_VERTICAL, 12, 0, 8, 0));
+        addView(moveImageView, LayoutHelper.createFrame(48, 48, Gravity.LEFT | Gravity.CENTER_VERTICAL, 0, 0, 0, 0));
     }
 
     public void setIcon(int icon, boolean animated) {
-        moveImageView.setImageResource(icon);
+        ViewGroup.LayoutParams lp = moveImageView.getLayoutParams();
+        if (lp instanceof ViewGroup.MarginLayoutParams) {
+            int sizeInPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, moveImageView.getResources().getDisplayMetrics());
+
+            lp.width = sizeInPx;
+            lp.height = sizeInPx;
+            ((MarginLayoutParams) lp).leftMargin = dp(19);
+            ((MarginLayoutParams) lp).rightMargin = dp(3);
+            ((MarginLayoutParams) lp).topMargin = 0;
+            ((MarginLayoutParams) lp).bottomMargin = 0;
+
+            moveImageView.setImageResource(icon);
+            moveImageView.setLayoutParams(lp);
+            moveImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        }
         AndroidUtilities.updateViewVisibilityAnimated(moveImageView, true, 0.5f, animated);
     }
 

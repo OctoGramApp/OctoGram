@@ -42,7 +42,7 @@ import org.telegram.ui.IUpdateButton;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import it.octogram.android.utils.UpdatesManager;
+import it.octogram.android.utils.updater.UpdatesManager;
 
 public class UpdateButton extends IUpdateButton {
 
@@ -61,7 +61,6 @@ public class UpdateButton extends IUpdateButton {
             setBackground(Theme.getSelectorDrawable(0x40ffffff, false));
         }
         setOnClickListener(v -> {
-            //if (!UpdatesManager.INSTANCE.) return;
             Activity activity = AndroidUtilities.findActivity(getContext());
             if (activity == null) return;
             UpdatesManager.INSTANCE.installUpdate();

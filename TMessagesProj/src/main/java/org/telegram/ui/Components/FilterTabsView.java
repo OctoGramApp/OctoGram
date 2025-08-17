@@ -119,6 +119,7 @@ public class FilterTabsView extends FrameLayout {
         public int id;
         public CharSequence title;
         public CharSequence realTitle;
+        public CharSequence defaultOriginalTitle;
         public int titleWidth;
         public String emoticon;
         public int iconWidth;
@@ -129,6 +130,7 @@ public class FilterTabsView extends FrameLayout {
 
         public Tab(int i, CharSequence title, String emoticon, boolean noanimate) {
             this.id = i;
+            this.defaultOriginalTitle = title;
             this.title = ((customTabMode != null ? customTabMode.getValue() : OctoConfig.INSTANCE.tabMode.getValue()) == TabMode.ICON.getValue()) ? "" : title;
             this.noanimate = noanimate;
             this.emoticon = (i != Integer.MAX_VALUE) ? (emoticon != null ? emoticon : "") : "\uD83D\uDCAC";

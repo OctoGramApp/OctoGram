@@ -22701,11 +22701,6 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
 
             @Override
-            public void onExtensionNeedUpdate() {
-
-            }
-
-            @Override
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 AndroidUtilities.runOnUIThread(() -> {
                     if (captionEdit != null) {

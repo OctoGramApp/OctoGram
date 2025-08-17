@@ -126,6 +126,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import it.octogram.android.OctoConfig;
+
 public class BotWebViewSheet extends Dialog implements NotificationCenter.NotificationCenterDelegate, BottomSheetTabsOverlay.Sheet {
     public final static int TYPE_WEB_VIEW_BUTTON = 0, TYPE_SIMPLE_WEB_VIEW_BUTTON = 1, TYPE_BOT_MENU_BUTTON = 2, TYPE_WEB_VIEW_BOT_APP = 3, TYPE_WEB_VIEW_BOT_MAIN = 4;
 
@@ -2049,6 +2051,9 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.didSetNewTheme);
 
         if (intoTabs && (LaunchActivity.instance == null || LaunchActivity.instance.getBottomSheetTabsOverlay() == null)) {
+            intoTabs = false;
+        }
+        if (OctoConfig.INSTANCE.disableTelegramTabsStack.getValue()) {
             intoTabs = false;
         }
         if (intoTabs) {

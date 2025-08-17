@@ -13,9 +13,11 @@ import static org.telegram.messenger.LocaleController.getString;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SavedMessagesController;
 import org.telegram.messenger.UserConfig;
+import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.ContactsActivity;
@@ -136,6 +138,10 @@ public class RapidActionsHelper {
                 if (fragment instanceof DialogsActivity f2) {
                     f2.showSearch(true, false, true);
                     f2.getActionBar().openSearchField(true);
+                    ActionBarMenuItem searchItem = f2.getSearchItem();
+                    if (searchItem != null) {
+                        AndroidUtilities.showKeyboard(searchItem.getSearchField());
+                    }
                 }
             }
         }

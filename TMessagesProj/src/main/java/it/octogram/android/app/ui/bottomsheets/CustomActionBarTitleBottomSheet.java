@@ -27,6 +27,7 @@ import android.widget.TextView;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
@@ -94,7 +95,7 @@ public class CustomActionBarTitleBottomSheet extends BottomSheet {
         editText.setCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
         editText.setCursorSize(dp(20));
         editText.setCursorWidth(1.5f);
-        editText.setText(OctoConfig.INSTANCE.actionBarCustomTitle.getValue());
+        editText.setText(Emoji.replaceEmoji(OctoConfig.INSTANCE.actionBarCustomTitle.getValue(), editText.getPaint().getFontMetricsInt(), false));
         InputFilter[] inputFilters = new InputFilter[1];
         inputFilters[0] = new CodepointsLengthInputFilter(40) {
             @Override

@@ -23,6 +23,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.ActionBarLayout;
 import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.BottomSheetTabs;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import it.octogram.android.utils.deeplink.DeepLinkDef;
 public class OctoExperimentsUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> canShowMonetIconSwitch = new ConfigProperty<>(null, Build.VERSION.SDK_INT == Build.VERSION_CODES.S || Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2);
     private final ConfigProperty<Boolean> isMonetSelected = new ConfigProperty<>(null, MonetIconController.INSTANCE.isSelectedMonet());
+    //private final static boolean ENABLE_EXP_FEATURE = false;
 
     @NonNull
     @Override
@@ -90,20 +92,29 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
                             .title(getString(R.string.MediaStream))
                             .build());
-                    if (BuildConfig.DEBUG) {
+                    /*if (ENABLE_EXP_FEATURE) {
                         category.row(new SwitchRow.SwitchRowBuilder()
-                                .onClick(() -> checkExperimentsEnabled(context))
+                                .onClick(() -> handleExperimentalAlert(context, fragment,
+                                        OctoConfig.INSTANCE.roundedTextBox,
+                                        R.string.ExperimentalFeature,
+                                        R.string.EnableRoundedTextBox_Desc
+                                ))
                                 .preferenceValue(OctoConfig.INSTANCE.roundedTextBox)
-                                .title("Enable Rounded TextBox")
-                                .requiresRestart(true)
+                                .title(getString(R.string.EnableRoundedTextBox))
+                                .description(getString(R.string.EnableRoundedTextBox_Desc))
                                 .build());
+
                         category.row(new SwitchRow.SwitchRowBuilder()
-                                .onClick(() -> checkExperimentsEnabled(context))
+                                .onClick(() -> handleExperimentalAlert(context, fragment,
+                                        OctoConfig.INSTANCE.useSmoothPopupBackground,
+                                        R.string.ExperimentalFeature,
+                                        R.string.UseSmoothPopupBackground_Desc
+                                ))
                                 .preferenceValue(OctoConfig.INSTANCE.useSmoothPopupBackground)
-                                .title("Use Smooth Popup Background")
-                                        .requiresRestart(true)
+                                .title(getString(R.string.UseSmoothPopupBackground))
+                                .description(getString(R.string.UseSmoothPopupBackground_Desc))
                                 .build());
-                    }
+                    }*/
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.showRPCErrors)
@@ -178,6 +189,19 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .title(getString(R.string.AlternativeNavigation))
                             .build()
                     );
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onClick(() -> checkExperimentsEnabled(context))
+                            .onPostUpdate(() -> {
+                                if (OctoConfig.INSTANCE.disableTelegramTabsStack.getValue()) {
+                                    BottomSheetTabs tabs = LaunchActivity.instance.getBottomSheetTabs();
+                                    if (tabs != null) {
+                                        tabs.removeAll();
+                                    }
+                                }
+                            })
+                            .preferenceValue(OctoConfig.INSTANCE.disableTelegramTabsStack)
+                            .title(getString(R.string.DisableTabsStack))
+                            .build());
                 })
                 .row(new SwitchRow.SwitchRowBuilder()
                         .onClick(() -> {
@@ -314,4 +338,22 @@ public class OctoExperimentsUI implements PreferencesEntry {
         options.add(new PopupChoiceDialogOption().setId(values.length + 1).setItemTitle(getString(R.string.MaxRecentSticker_Unlimited)));
         return options;
     }
+
+    /*private boolean handleExperimentalAlert(Context context, PreferencesFragment fragment, ConfigProperty<Boolean> featureProperty, int titleRes, int messageRes) {
+        if (!checkExperimentsEnabled(context)) return false;
+
+        if (!featureProperty.getValue()) {
+            new AlertDialog.Builder(context, fragment.getResourceProvider())
+                    .setTitle(getString(titleRes))
+                    .setMessage(getString(messageRes))
+                    .setPositiveButton(getString(R.string.OK), (d, w) -> {
+                        featureProperty.setValue(true);
+                        fragment.reloadUIAfterValueUpdate();
+                    })
+                    .setNegativeButton(getString(android.R.string.cancel), null)
+                    .show();
+            return false;
+        }
+        return true;
+    }*/
 }

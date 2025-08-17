@@ -241,6 +241,9 @@ public class PreferencesFragment extends BaseFragment {
                 return Bulletin.Delegate.super.getBottomOffset(tag);
             }
         });
+        try {
+            entry.onFragmentCreate();
+        } catch (Exception ignored) {}
         return true;
     }
 
@@ -248,6 +251,9 @@ public class PreferencesFragment extends BaseFragment {
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
         Bulletin.removeDelegate(this);
+        try {
+            entry.onFragmentDestroy();
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -473,21 +479,9 @@ public class PreferencesFragment extends BaseFragment {
     }
 
     @Override
-    public void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
-        super.onTransitionAnimationEnd(isOpen, backward);
-        entry.onTransitionAnimationEnd(isOpen, backward);
-    }
-
-    @Override
     public void onBecomeFullyVisible() {
         super.onBecomeFullyVisible();
         entry.onBecomeFullyVisible();
-    }
-
-    @Override
-    public void onBecomeFullyHidden() {
-        super.onBecomeFullyHidden();
-        entry.onBecomeFullyHidden();
     }
 
     private void updateIsSelectingItems() {

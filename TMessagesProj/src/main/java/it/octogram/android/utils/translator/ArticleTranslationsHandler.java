@@ -106,7 +106,7 @@ public class ArticleTranslationsHandler {
 
                             @Override
                             public void onExtensionNeedUpdate() {
-
+                                throw new UnsupportedOperationException();
                             }
                         });
                         try {
@@ -152,7 +152,7 @@ public class ArticleTranslationsHandler {
         tempTranslations.clear();
     }
 
-    private static class TranslationCompletable {
+    public static class TranslationCompletable {
         private final Object lock = new Object();
         private boolean isCompleted = false;
         private boolean asError = false;

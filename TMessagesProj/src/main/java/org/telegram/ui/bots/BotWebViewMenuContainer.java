@@ -73,6 +73,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import it.octogram.android.OctoConfig;
+
 public class BotWebViewMenuContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate, BottomSheetTabsOverlay.Sheet, BottomSheetTabsOverlay.SheetView {
     private final static int POLL_PERIOD = 60000;
 
@@ -1029,6 +1031,9 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
         dismissed = true;
 
         if (intoTabs && (LaunchActivity.instance == null || LaunchActivity.instance.getBottomSheetTabsOverlay() == null)) {
+            intoTabs = false;
+        }
+        if (OctoConfig.INSTANCE.disableTelegramTabsStack.getValue()) {
             intoTabs = false;
         }
         if (intoTabs) {

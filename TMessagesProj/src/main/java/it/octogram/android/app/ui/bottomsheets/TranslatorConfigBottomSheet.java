@@ -277,7 +277,7 @@ public class TranslatorConfigBottomSheet extends BottomSheet {
 
                         @Override
                         public void onExtensionNeedUpdate() {
-
+                            onFailedState(false);
                         }
 
                         @Override
@@ -392,7 +392,7 @@ public class TranslatorConfigBottomSheet extends BottomSheet {
         AppCompatTextView textView2 = new AppCompatTextView(getContext());
         textView2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
         textView2.setTextSize(TypedValue.COMPLEX_UNIT_PX, dp(14));
-        textView2.setLinkTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+        textView2.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
         textView2.setHighlightColor(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_featuredStickers_buttonText), 100));
         textLayout.addView(textView2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 2.6f, 0, 0));
         hint.addView(textLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL, 41, 0, 0, 0));

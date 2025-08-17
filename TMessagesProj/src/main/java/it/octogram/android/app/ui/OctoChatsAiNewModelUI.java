@@ -269,12 +269,11 @@ public class OctoChatsAiNewModelUI implements PreferencesEntry {
     }
 
     @Override
-    public void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
-        if (isOpen && !backward && currentModelData != null && currentModelId == null) {
+    public void onFragmentCreate() {
+        if (currentModelData != null && currentModelId == null) {
             fragment.updateDoneButtonVisibility(true, true);
         }
     }
-
     private boolean supportsMediaUpload(ArrayList<AiModelMessagesState> list) {
         if (!isRelatedToMessages.getValue()) {
             return false;

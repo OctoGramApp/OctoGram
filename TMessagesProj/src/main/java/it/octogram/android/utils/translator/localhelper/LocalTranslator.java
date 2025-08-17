@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
 
-import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
@@ -78,7 +77,7 @@ public class LocalTranslator implements BaseTranslator {
             return;
         }
 
-        if (!OnDeviceHelper.isAvailable(ApplicationLoader.applicationContext)) {
+        if (!OnDeviceHelper.isAvailable()) {
             OctoLogging.w(TAG, "Local translator service not available.");
             callback.onResponseReceived();
             callback.onExtensionNeedInstall();

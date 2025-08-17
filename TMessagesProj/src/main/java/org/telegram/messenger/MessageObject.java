@@ -115,6 +115,7 @@ import java.util.regex.Pattern;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
+import it.octogram.android.utils.OctoUtils;
 
 public class MessageObject {
 
@@ -3523,7 +3524,7 @@ public class MessageObject {
             }
             translated = true;
             if (messageOwner.translatedText != null) {
-                applyNewText(messageOwner.translatedText.text);
+                applyNewText(OctoUtils.handleTranslatorShowOriginal(messageOwner.message, messageOwner.translatedText.text));
                 generateCaption();
             }
             return replyUpdated || true;
@@ -3570,23 +3571,34 @@ public class MessageObject {
     }
 
     private ArrayList<TLRPC.MessageEntity> reparseMessageEntities(ArrayList<TLRPC.MessageEntity> translatedEntities) {
-        if (!OctoConfig.INSTANCE.translatorKeepMarkdown.getValue()) {
-            ArrayList<TLRPC.MessageEntity> entities = new ArrayList<>();
-            for (TLRPC.MessageEntity entity : translatedEntities) {
-                boolean isMarkdownEntity = entity instanceof TLRPC.TL_messageEntitySpoiler;
-                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityBold;
-                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityItalic;
-                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityCode;
-                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityStrike;
-                isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityUnderline;
-                if (!isMarkdownEntity) {
-                    entities.add(entity);
-                }
-            }
-            return entities;
+        ArrayList<TLRPC.MessageEntity> entities = new ArrayList<>();
+
+        if (OctoConfig.INSTANCE.translatorShowOriginalContent.getValue()) {
+            entities.addAll(messageOwner.entities);
         }
 
-        return translatedEntities;
+        int newOffset = messageOwner.message.length() + OctoUtils.getTranslatorShowOriginalOffset();
+
+        for (TLRPC.MessageEntity entity : translatedEntities) {
+            boolean isMarkdownEntity = entity instanceof TLRPC.TL_messageEntitySpoiler;
+            isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityBold;
+            isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityItalic;
+            isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityCode;
+            isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityStrike;
+            isMarkdownEntity |= entity instanceof TLRPC.TL_messageEntityUnderline;
+
+            if (OctoConfig.INSTANCE.translatorShowOriginalContent.getValue()) {
+                entity.offset += newOffset;
+            }
+
+            if (!isMarkdownEntity && !OctoConfig.INSTANCE.translatorKeepMarkdown.getValue()) {
+                entities.add(entity);
+            } else if (OctoConfig.INSTANCE.translatorKeepMarkdown.getValue()) {
+                entities.add(entity);
+            }
+        }
+
+        return entities;
     }
 
     private boolean allowsBigEmoji() {
@@ -6676,6 +6688,10 @@ public class MessageObject {
                 ssb = new SpannableString(getString(R.string.TranscriptionTooLong));
             }
 
+            if (!TextUtils.isEmpty(messageOwner.voiceTranscriptionError)) {
+                ssb = new SpannableString(messageOwner.voiceTranscriptionError);
+            }
+
             ssb.setSpan(new CharacterStyle() {
                 @Override
                 public void updateDrawState(TextPaint textPaint) {
@@ -6743,7 +6759,7 @@ public class MessageObject {
             text = messageOwner.message = messageOwner.media.description;
         }
         if (messageOwner.translatedText != null && (captionTranslated = translated)) {
-            text = messageOwner.translatedText.text;
+            text = OctoUtils.handleTranslatorShowOriginal(text, messageOwner.translatedText.text);
             //entities = messageOwner.translatedText.entities;
             entities = reparseMessageEntities(messageOwner.translatedText.entities);
         }

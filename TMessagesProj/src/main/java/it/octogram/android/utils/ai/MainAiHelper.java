@@ -8,6 +8,8 @@
 
 package it.octogram.android.utils.ai;
 
+import org.telegram.ui.Components.TranslateAlert2;
+
 import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.OctoLogging;
@@ -16,7 +18,8 @@ import it.octogram.android.utils.ai.gemini.GeminiHelper;
 import it.octogram.android.utils.ai.openrouter.OpenRouterHelper;
 
 public class MainAiHelper {
-    static final String TAG = "MainAiHelper";
+    public static final String systemInstructions = "Use only plain text or Telegram-supported MarkdownV2.\n\nAllowed formatting (Telegram MarkdownV2):\n- **bold** → wrap text with double asterisks (**text**)\n- __italic__ → wrap text with double underscores (__text__)\n- `inline code` → wrap text with single backticks (`text`)\n- ```code block``` → wrap text with triple backticks (```code```)\n- Lists → start each item with a dash and a space (e.g. '- item')\n\nDo NOT use:\n- Lists with '*' or '+'\n- Headings with '#' (e.g. ###)\n- Blockquotes with '>'\n- Links, tables, or any unsupported Markdown features\n\nExamples:\n✅ **bold text**\n✅ __italic text__\n✅ `inline code`\n✅ ```\ncode block\n```\n✅ - item one\n✅ - item two\n❌ * item one\n❌ + item two\n❌ ### heading\n❌ > quote\n\nOnly the rules above are valid.";
+    private static final String TAG = "MainAiHelper";
     private static boolean frozenState = false;
 
     public static boolean canUseAiFeatures() {
@@ -124,6 +127,17 @@ public class MainAiHelper {
         }, true);
     }
 
+    public static String getDestinationLanguage() {
+        String toLanguage = TranslateAlert2.getToLanguage();
+        if (!OctoConfig.INSTANCE.aiFeaturesLastUsedLanguage.getValue().isEmpty()) {
+            String temp = TranslateAlert2.languageName(OctoConfig.INSTANCE.aiFeaturesLastUsedLanguage.getValue());
+            if (temp != null && !temp.isEmpty()) {
+                toLanguage = OctoConfig.INSTANCE.aiFeaturesLastUsedLanguage.getValue();
+            }
+        }
+        return toLanguage;
+    }
+
     public interface OnResultState {
         void onSuccess(String result);
 
@@ -138,6 +152,10 @@ public class MainAiHelper {
         }
 
         default void onModelOverloaded() {
+            onFailed();
+        }
+
+        default void onMediaUploadUnavailable() {
             onFailed();
         }
     }

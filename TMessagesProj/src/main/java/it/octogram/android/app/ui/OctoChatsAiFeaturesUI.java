@@ -32,6 +32,7 @@ import org.telegram.ui.Components.ItemOptions;
 import java.util.HashMap;
 import java.util.List;
 
+import it.octogram.android.AiTranscriptionState;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
@@ -41,6 +42,7 @@ import it.octogram.android.app.PreferencesEntry;
 import it.octogram.android.app.fragment.PreferencesFragment;
 import it.octogram.android.app.rows.impl.CustomAIModelRow;
 import it.octogram.android.app.rows.impl.FooterInformativeRow;
+import it.octogram.android.app.rows.impl.ListRow;
 import it.octogram.android.app.rows.impl.ShadowRow;
 import it.octogram.android.app.rows.impl.SwitchRow;
 import it.octogram.android.app.rows.impl.TextDetailRow;
@@ -48,6 +50,7 @@ import it.octogram.android.app.rows.impl.TextIconRow;
 import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.utils.ai.ui.GenerateModelBottomSheet;
 import it.octogram.android.utils.appearance.MessageStringHelper;
+import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 import it.octogram.android.utils.chat.FileShareHelper;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
 
@@ -120,6 +123,24 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
                             .onClick(() -> handleSwitch(OctoConfig.INSTANCE.aiFeaturesAskOnMedia))
                             .preferenceValue(OctoConfig.INSTANCE.aiFeaturesAskOnMedia)
                             .title(getString(R.string.AiFeatures_Features_AskOnPhoto))
+                            .showIf(OctoConfig.INSTANCE.aiFeatures)
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.aiFeaturesTranscribeVoice)
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(AiTranscriptionState.DISABLED.getValue())
+                                            .setItemTitle(getString(R.string.AiFeatures_Features_TranscribeVoice_Disabled)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(AiTranscriptionState.ENABLED_SEPARATELY.getValue())
+                                            .setItemTitle(getString(R.string.AiFeatures_Features_TranscribeVoice_Separated))
+                                            .setItemDescription(getString(R.string.AiFeatures_Features_TranscribeVoice_Separated_Desc)),
+                                    new PopupChoiceDialogOption()
+                                            .setId(AiTranscriptionState.ENABLED_UNIFIED.getValue())
+                                            .setItemTitle(getString(R.string.AiFeatures_Features_TranscribeVoice_Unified))
+                                            .setItemDescription(getString(R.string.AiFeatures_Features_TranscribeVoice_Unified_Desc))
+                            ))
+                            .title(getString(R.string.AiFeatures_Features_TranscribeVoice))
                             .showIf(OctoConfig.INSTANCE.aiFeatures)
                             .build());
                 })

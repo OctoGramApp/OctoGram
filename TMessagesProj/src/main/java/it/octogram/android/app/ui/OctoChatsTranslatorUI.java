@@ -30,6 +30,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
@@ -38,6 +39,7 @@ import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.Components.spoilers.SpoilersTextView;
+import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
@@ -67,19 +69,25 @@ import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
 import it.octogram.android.utils.translator.MainTranslationsHandler;
 import it.octogram.android.utils.translator.localhelper.OnDeviceHelper;
+import it.octogram.android.utils.updater.UpdatesManager;
 
 
 public class OctoChatsTranslatorUI implements PreferencesEntry {
     private PreferencesFragment fragment;
     private Context context;
 
+    private UpdatesManager.UpdatesManagerCallback updaterCallback = null;
+    private UpdatesManager.ExtensionUpdateState extensionUpdateState = null;
+
     private final ConfigProperty<Boolean> showButtonBool = new ConfigProperty<>("showTranslateButton", false);
     private final ConfigProperty<Boolean> translateEntireChat = new ConfigProperty<>("canTranslateEntireChat", false);
+    private final ConfigProperty<Boolean> canShowUpdateExtension = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canShowUninstallExtension = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectDoNotTranslate = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectProvider = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectFormality = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectKeepMarkdown = new ConfigProperty<>(null, false);
+    private final ConfigProperty<Boolean> canSelectShowOriginalContent = new ConfigProperty<>(null, false);
     private final ConfigProperty<Boolean> canSelectOnDeviceModels = new ConfigProperty<>(null, false);
 
     @NonNull
@@ -143,6 +151,22 @@ public class OctoChatsTranslatorUI implements PreferencesEntry {
                         .title(getString(R.string.TranslateMessagesInfo1))
                         .build()
                 )
+                .row(new TextIconRow.TextIconRowBuilder()
+                        .isBlue(true)
+                        .icon(R.drawable.msg_openin)
+                        .onClick(() -> {
+                            if (extensionUpdateState == null) {
+                                canShowUpdateExtension.updateValue(false);
+                                fragment.reloadUIAfterValueUpdate();
+                            } else {
+                                Browser.openUrl(LaunchActivity.instance, String.format(Locale.US, "https://t.me/%s/%d", extensionUpdateState.channelUsername(), extensionUpdateState.messageID()));
+                            }
+                        })
+                        .showIf(canShowUpdateExtension)
+                        .title(getString(R.string.UpdatesSettingsCheckButtonUpdateExtension))
+                        .build()
+                )
+                .row(new ShadowRow(canShowUpdateExtension))
                 .row(new CustomCellRow.CustomCellRowBuilder()
                         .layout(getExtensionUninstallSuggestion())
                         .showIf(canShowUninstallExtension)
@@ -243,6 +267,19 @@ public class OctoChatsTranslatorUI implements PreferencesEntry {
                             .title(getString(R.string.TranslatorKeepMarkdown))
                             .build()
                     );
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.translatorShowOriginalContent)
+                            .showIf(canSelectShowOriginalContent)
+                            .title("Show original content")
+                            .build()
+                    );
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.translatorOptimizedWay)
+                            .showIf(canSelectDoNotTranslate)
+                            .title(getString(R.string.EntireChatsTranslationsOptimization))
+                            .description(getString(R.string.EntireChatsTranslationsOptimizationDesc))
+                            .build()
+                    );
                 })
                 .row(new TextDetailRow.TextDetailRowBuilder()
                     .onClick(() -> {
@@ -266,6 +303,40 @@ public class OctoChatsTranslatorUI implements PreferencesEntry {
 
 
     private boolean isFirstDraw = true;
+
+    @Override
+    public void onFragmentCreate() {
+        UpdatesManager.INSTANCE.addCallback(updaterCallback = new UpdatesManager.UpdatesManagerCallback() {
+            @Override
+            public boolean onGetStateAfterAdd() {
+                return true;
+            }
+
+            @Override
+            public void onExtensionUpdateAvailable(UpdatesManager.ExtensionUpdateState state, boolean hasAlsoClassicUpdate) {
+                extensionUpdateState = state;
+                updateItemsVisibility();
+                fragment.reloadUIAfterValueUpdate();
+            }
+
+            @Override
+            public void onNoExtensionUpdateAvailable(boolean hasAlsoClassicUpdate) {
+                if (extensionUpdateState != null) {
+                    extensionUpdateState = null;
+                    updateItemsVisibility();
+                    fragment.reloadUIAfterValueUpdate();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onFragmentDestroy() {
+        if (updaterCallback != null) {
+            UpdatesManager.INSTANCE.removeCallback(updaterCallback);
+            updaterCallback = null;
+        }
+    }
 
     @Override
     public void onBecomeFullyVisible() {
@@ -355,8 +426,14 @@ public class OctoChatsTranslatorUI implements PreferencesEntry {
             OctoLogging.d("updateItemsVisibility", "translateEntireChat -> " + isTranslateEntireChatEnabled);
         }
 
+        if (except != canShowUpdateExtension) {
+            boolean value = OnDeviceHelper.isAvailable(context) && extensionUpdateState != null;
+            canShowUpdateExtension.updateValue(value);
+            OctoLogging.d("updateItemsVisibility", "canShowUpdateExtension -> " + value);
+        }
+
         if (except != canShowUninstallExtension) {
-            boolean value = OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEVICE_TRANSLATION.getValue() && OnDeviceHelper.isAvailable(context);
+            boolean value = OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEVICE_TRANSLATION.getValue() && OnDeviceHelper.isAvailable(context) && !canShowUpdateExtension.getValue();
             if (value) {
                 long lastTimeHideAlert = OctoConfig.INSTANCE.translatorUninstallExtensionHideTime.getValue();
                 if (lastTimeHideAlert > 0 && System.currentTimeMillis() - lastTimeHideAlert < 24 * 60 * 60 * 1000) {
@@ -388,6 +465,12 @@ public class OctoChatsTranslatorUI implements PreferencesEntry {
             boolean value = canShowOtherOptions && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.LINGO.getValue() && OctoConfig.INSTANCE.translatorProvider.getValue() != TranslatorProvider.DEVICE_TRANSLATION.getValue() && OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.EXTERNAL.getValue();
             canSelectKeepMarkdown.updateValue(value);
             OctoLogging.d("updateItemsVisibility", "canSelectKeepMarkdown -> " + value);
+        }
+
+        if (except != canSelectShowOriginalContent) {
+            boolean value = canShowOtherOptions && OctoConfig.INSTANCE.translatorMode.getValue() == TranslatorMode.INLINE.getValue();
+            canSelectShowOriginalContent.updateValue(value);
+            OctoLogging.d("updateItemsVisibility", "canSelectShowOriginalContent -> " + value);
         }
 
         if (except != canSelectOnDeviceModels) {

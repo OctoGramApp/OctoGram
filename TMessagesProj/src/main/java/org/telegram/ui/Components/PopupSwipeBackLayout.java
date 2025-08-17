@@ -31,6 +31,7 @@ import org.telegram.ui.ActionBar.Theme;
 
 import java.util.ArrayList;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.OctoLogging;
 
 public class PopupSwipeBackLayout extends FrameLayout {
@@ -434,9 +435,8 @@ public class PopupSwipeBackLayout extends FrameLayout {
 
         int s = canvas.save();
         mPath.rewind();
-//        var rad = ActionBarPopupWindow.ActionBarPopupWindowLayout.USE_NEW_BACKGROUND ? 40f : AndroidUtilities.dp(6);
-//        int rad = AndroidUtilities.dp(6);
-        int rad = AndroidUtilities.dp(10);
+        var rad = OctoConfig.INSTANCE.useSmoothPopupBackground.getValue() ? 40f : AndroidUtilities.dp(6);
+        //int rad = AndroidUtilities.dp(10);
         if (stickToRight) {
             mRect.set(getWidth() - w, y, getWidth(), y + h);
         } else {

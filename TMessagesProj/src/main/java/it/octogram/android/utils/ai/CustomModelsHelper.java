@@ -47,6 +47,7 @@ public class CustomModelsHelper {
     public static final String VIRTUAL_CHAT_CONTEXT_MODEL_ID = "vcm";
     public static final String VIRTUAL_ASK_ON_MEDIA_MODEL_ID = "aom";
     public static final String VIRTUAL_TRANSLATE_MODEL_ID = "tov";
+    public static final String VIRTUAL_TRANSCRIBE_MODEL_ID = "tsc";
 
     public static List<Pair<String, String>> getAvailableHashtags(int currentModelType) {
         ArrayList<Pair<String, String>> list = new ArrayList<>();
@@ -111,7 +112,7 @@ public class CustomModelsHelper {
     }
 
     public static CustomModel getModelById(String id) {
-        if (id != null && (id.equals(VIRTUAL_CHAT_CONTEXT_MODEL_ID) || id.equals(VIRTUAL_ASK_ON_MEDIA_MODEL_ID))) {
+        if (id != null && (id.equals(VIRTUAL_CHAT_CONTEXT_MODEL_ID) || id.equals(VIRTUAL_ASK_ON_MEDIA_MODEL_ID) || id.equals(VIRTUAL_TRANSCRIBE_MODEL_ID))) {
             CustomModel model = new CustomModel();
             model.saveFromVirtualID(id);
             return model;
@@ -276,24 +277,39 @@ public class CustomModelsHelper {
         }
 
         public void saveFromVirtualID(String id) {
-            if (id.equals(VIRTUAL_CHAT_CONTEXT_MODEL_ID)) {
-                isVirtualModel = true;
-                title = LocaleController.getString(R.string.AiFeatures_Features_ChatContext);
-                prompt = "Recap these messages in #language";
-                modelType = AiModelType.RELATED_TO_CHATS;
-                messagesToPass = 60;
-            } else if (id.equals(VIRTUAL_ASK_ON_MEDIA_MODEL_ID)) {
-                isVirtualModel = true;
-                title = LocaleController.getString(R.string.AiFeatures_Features_AskOnPhoto);
-                prompt = null;
-                modelType = AiModelType.RELATED_TO_MESSAGES;
-                appearsInList.add(AiModelMessagesState.PHOTOS);
-                appearsInList.add(AiModelMessagesState.STICKERS);
-                appearsInList.add(AiModelMessagesState.MUSIC);
-                appearsInList.add(AiModelMessagesState.VOICE_MESSAGES);
-                appearsInList.add(AiModelMessagesState.VIDEOS);
-                appearsInList.add(AiModelMessagesState.GIFS);
-                uploadMedia = true;
+            switch (id) {
+                case VIRTUAL_CHAT_CONTEXT_MODEL_ID -> {
+                    isVirtualModel = true;
+                    title = LocaleController.getString(R.string.AiFeatures_Features_ChatContext);
+                    prompt = "Recap these messages in #language using '-' for all bullet points";
+                    modelType = AiModelType.RELATED_TO_CHATS;
+                    messagesToPass = 60;
+                }
+                case VIRTUAL_ASK_ON_MEDIA_MODEL_ID -> {
+                    isVirtualModel = true;
+                    title = LocaleController.getString(R.string.AiFeatures_Features_AskOnPhoto);
+                    prompt = null;
+                    modelType = AiModelType.RELATED_TO_MESSAGES;
+                    appearsInList.addAll(
+                            List.of(
+                                    AiModelMessagesState.PHOTOS,
+                                    AiModelMessagesState.STICKERS,
+                                    AiModelMessagesState.MUSIC,
+                                    AiModelMessagesState.VOICE_MESSAGES,
+                                    AiModelMessagesState.VIDEOS,
+                                    AiModelMessagesState.GIFS
+                            )
+                    );
+                    uploadMedia = true;
+                }
+                case VIRTUAL_TRANSCRIBE_MODEL_ID -> {
+                    isVirtualModel = true;
+                    title = "Transcribe Voice Message";
+                    prompt = "Accurately transcribe the voice message in its original language to #language. For an even more precise and accurate transcription, consider the context and the type of language used (formal, informal, colloquial, etc.). The transcription must be absolutely flawless, even if it takes significantly more time. Punctuation must be perfect. Furthermore, if the voice message contains sounds or noises, use the corresponding onomatopoeia in the transcription, enclosed between two asterisks (e.g., if a diesel engine is heard, transcribe the onomatopoeia of the engine). Of course, if the message contains only sounds or noises, transcribe ONLY the onomatopoeia, and nothing else.";
+                    modelType = AiModelType.RELATED_TO_MESSAGES;
+                    appearsInList.add(AiModelMessagesState.VOICE_MESSAGES);
+                    uploadMedia = true;
+                }
             }
         }
 

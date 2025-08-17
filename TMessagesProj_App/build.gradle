@@ -128,7 +128,8 @@ android {
     }
 
     splits.abi {
-        enable = true
+        var isBuildingBundle = gradle.startParameter.taskNames.any { it.contains("bundle") } // Thanks to https://issuetracker.google.com/issues/402800800#comment16
+        enable = !isBuildingBundle
         universalApk = true
 
         reset()

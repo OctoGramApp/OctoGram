@@ -16,6 +16,7 @@ public class MessageCustomParamsHelper {
             !message.voiceTranscriptionRated &&
             !message.voiceTranscriptionForce &&
             message.voiceTranscriptionId == 0 &&
+            message.voiceTranscriptionError == null &&
             !message.premiumEffectWasPlayed &&
             message.originalLanguage == null &&
             message.translatedToLanguage == null &&
@@ -34,6 +35,7 @@ public class MessageCustomParamsHelper {
         toMessage.voiceTranscriptionForce = fromMessage.voiceTranscriptionForce;
         toMessage.voiceTranscriptionRated = fromMessage.voiceTranscriptionRated;
         toMessage.voiceTranscriptionId = fromMessage.voiceTranscriptionId;
+        toMessage.voiceTranscriptionError = fromMessage.voiceTranscriptionError;
         toMessage.premiumEffectWasPlayed = fromMessage.premiumEffectWasPlayed;
         toMessage.originalLanguage = fromMessage.originalLanguage;
         toMessage.translatedToLanguage = fromMessage.translatedToLanguage;
@@ -97,6 +99,8 @@ public class MessageCustomParamsHelper {
 
             flags |= message.errorAllowedPriceStars != 0 ? 64 : 0;
             flags |= message.errorNewPriceStars != 0 ? 128 : 0;
+
+            flags |= message.voiceTranscriptionError != null ? 512 : 0;
         }
 
         @Override
@@ -137,6 +141,9 @@ public class MessageCustomParamsHelper {
             if ((flags & 256) != 0) {
                 message.translatedPoll.serializeToStream(stream);
             }
+            if ((flags & 512) != 0) {
+                stream.writeString(message.voiceTranscriptionError);
+            }
         }
 
         @Override
@@ -174,6 +181,9 @@ public class MessageCustomParamsHelper {
             }
             if ((flags & 256) != 0) {
                 message.translatedPoll = TranslateController.PollText.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if ((flags & 512) != 0) {
+                message.voiceTranscriptionError = stream.readString(exception);
             }
         }
 

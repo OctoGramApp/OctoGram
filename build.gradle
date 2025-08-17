@@ -21,9 +21,9 @@ subprojects {
     afterEvaluate {
         if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
             android {
-                compileSdk = 35
-                buildToolsVersion = "35.0.1"
-                ndkVersion = "27.2.12479018"
+                compileSdk 36
+                buildToolsVersion "36.0.0"
+                ndkVersion = "28.2.13676358"
 
                 lint {
                     checkReleaseBuilds = false
@@ -36,6 +36,10 @@ subprojects {
 
                     coreLibraryDesugaringEnabled = true
                 }
+
+                // tasks.withType(JavaCompile).configureEach {
+                //     options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']
+                // }
 
                 defaultConfig {
                     minSdk = 21

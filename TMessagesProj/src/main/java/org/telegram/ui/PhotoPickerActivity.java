@@ -1868,11 +1868,6 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
             }
 
             @Override
-            public void onExtensionNeedUpdate() {
-
-            }
-
-            @Override
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 AndroidUtilities.runOnUIThread(() -> commentTextView.setText(finalText.text));
             }

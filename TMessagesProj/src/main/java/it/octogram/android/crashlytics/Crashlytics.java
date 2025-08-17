@@ -170,6 +170,7 @@ public class Crashlytics {
                 .append("Performance Class: ").append(getPerformanceClassString()).append("\n")
                 .append("Locale: ").append(LocaleController.getSystemLocaleStringIso639()).append("\n")
                 .append("Language CW: ").append(Resources.getSystem().getConfiguration().locale.getLanguage()).append("\n")
+                // TODO .append("VersionId: ").append(getVersionName(BuildConfig.VERSION_NUM))
                 .append("Installation Source: ").append(OctoUtils.getInstallerPackageName(ApplicationLoader.applicationContext)).append("\n");
 
         if (includeConfiguration) {

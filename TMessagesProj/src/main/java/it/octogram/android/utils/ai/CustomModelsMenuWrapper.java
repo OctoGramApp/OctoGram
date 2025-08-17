@@ -49,6 +49,7 @@ import java.util.function.Consumer;
 
 import it.octogram.android.AiModelMessagesState;
 import it.octogram.android.AiModelType;
+import it.octogram.android.AiTranscriptionState;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.ai.icons.AiFeatureIcons;
 import it.octogram.android.utils.ai.ui.MainAiBottomSheet;
@@ -75,7 +76,7 @@ public class CustomModelsMenuWrapper {
         data.originalSubItem.setMinimumWidth(AndroidUtilities.dp(196));
         data.applyColors();
 
-        if ((availableModels.size() + (data.canAskOnMedia() ? 1 : 0) + (data.canTranslate() ? 1 : 0)) == 1) {
+        if ((availableModels.size() + (data.canAskOnMedia() ? 1 : 0) + (data.canTranslate() ? 1 : 0) + (data.canTranscribe() ? 1 : 0)) == 1) {
             data.originalSubItem.setRightIcon(R.drawable.msg_arrowright);
             data.originalSubItem.setSubtext(getString(R.string.AiFeatures_Brief));
             if (!availableModels.isEmpty()) {
@@ -102,6 +103,10 @@ public class CustomModelsMenuWrapper {
                 data.originalSubItem.setIcon(R.drawable.msg_translate);
                 data.originalSubItem.setText(getString(R.string.AiFeatures_Features_TranslateAI2));
                 data.originalSubItem.setOnClickListener(view -> handleAiTranslation(data));
+            } else if (data.canTranscribe()) {
+                data.originalSubItem.setIcon(R.drawable.menu_feature_transfer);
+                data.originalSubItem.setText("Transcribe");
+                data.originalSubItem.setOnClickListener(view -> handleTrascription(data));
             }
             data.originalSubItem.invalidate();
             return;
@@ -318,6 +323,11 @@ public class CustomModelsMenuWrapper {
         handleOnClick(data.modelID, null, null, data);
     }
 
+    private static void handleTrascription(FillStateData data) {
+        data.modelID = CustomModelsHelper.VIRTUAL_TRANSCRIBE_MODEL_ID;
+        handleOnClick(data.modelID, null, null, data);
+    }
+
     private static void fixIcon(ActionBarMenuSubItem item) {
         var imageView = item.getImageView();
 
@@ -369,7 +379,13 @@ public class CustomModelsMenuWrapper {
                 data.applyColors(item);
             }
 
-            if (data.canTranslate() || data.canAskOnMedia()) {
+            if (data.canTranscribe()) {
+                ActionBarMenuSubItem item = ActionBarMenuItem.addItem(windowLayout, R.drawable.menu_feature_transfer, "Transcribe", false, null);
+                item.setOnClickListener(view -> handleTrascription(data));
+                data.applyColors(item);
+            }
+
+            if ((data.canTranslate() || data.canAskOnMedia() || data.canTranscribe()) && !eligibleModels.isEmpty()) {
                 ActionBarMenuItem.addGap(0, windowLayout);
             }
 
@@ -455,6 +471,10 @@ public class CustomModelsMenuWrapper {
 
         public boolean canTranslate() {
             return !isChat && OctoConfig.INSTANCE.aiFeaturesTranslateMessages.getValue() && messageText != null && !messageText.toString().trim().isEmpty();
+        }
+
+        public boolean canTranscribe() {
+            return !isChat && OctoConfig.INSTANCE.aiFeaturesTranscribeVoice.getValue() == AiTranscriptionState.ENABLED_SEPARATELY.getValue() && getAvailableStates(this) != null && getAvailableStates(this) == AiModelMessagesState.VOICE_MESSAGES;
         }
     }
 }

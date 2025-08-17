@@ -429,11 +429,6 @@ public class SendMessageOptions extends LinearLayout {
             }
 
             @Override
-            public void onExtensionNeedUpdate() {
-
-            }
-
-            @Override
             public void onSuccess(TLRPC.TL_textWithEntities finalText) {
                 AndroidUtilities.runOnUIThread(() -> {
                     if (commentTextView instanceof ChatActivityEnterView) {

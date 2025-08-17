@@ -35,16 +35,16 @@ public interface PreferencesEntry {
 
     }
 
-    default void onTransitionAnimationEnd(boolean isOpen, boolean backward) {
-
-    }
-
     default void onBecomeFullyVisible() {
 
     }
 
-    default void onBecomeFullyHidden() {
-        
+    default void onFragmentCreate() {
+
+    }
+
+    default void onFragmentDestroy() {
+
     }
 
 }

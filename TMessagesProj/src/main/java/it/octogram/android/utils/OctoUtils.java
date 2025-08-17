@@ -39,7 +39,6 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
-import org.telegram.ui.Components.BulletinFactory;
 import org.webrtc.voiceengine.WebRtcAudioTrack;
 
 import java.io.File;
@@ -54,6 +53,7 @@ import it.octogram.android.IconsUIType;
 import it.octogram.android.MediaFilter;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.PhoneNumberAlternative;
+import it.octogram.android.TranslatorMode;
 import kotlin.uuid.Uuid;
 
 public class OctoUtils {
@@ -392,14 +392,6 @@ public class OctoUtils {
         return canShowCenteredTitle(parentFragment.getChatActivity());
     }
 
-    public static void featureNotAvailable(Theme.ResourcesProvider resourceProvider) {
-        BulletinFactory.global().createErrorBulletin("This feature is currently not available", resourceProvider).show();
-    }
-
-    public static void featureNotAvailable() {
-        BulletinFactory.global().createErrorBulletin("This feature is currently not available", null).show();
-    }
-
     public static int getCustomStreamType(TLRPC.Chat chat) {
         if (chat != null && OctoConfig.INSTANCE.mediaInGroupCall.getValue()) {
             WebRtcAudioTrack.setAudioTrackUsageAttribute(AudioAttributes.USAGE_MEDIA);
@@ -410,7 +402,7 @@ public class OctoUtils {
         }
     }
 
-    public static int getPetIconFixed() {
+    public static int getPetIconFixed() { // TODO: REMOVE
         if (OctoConfig.INSTANCE.uiIconsType.getValue() == IconsUIType.SOLAR.getValue()) {
             return R.drawable.solar_msg_emoji_cat_ui;
         } else {
@@ -519,6 +511,18 @@ public class OctoUtils {
             OctoLogging.w(TAG, "Failed to get installer package name via legacy API", e);
             return null;
         }
+    }
+
+    public static int getTranslatorShowOriginalOffset() {
+        return String.format(Locale.getDefault(), "\n\n%s\n\n", "=".repeat(15)).length();
+    }
+
+    public static String handleTranslatorShowOriginal(String original, String translated) {
+        if (!OctoConfig.INSTANCE.translatorShowOriginalContent.getValue() || OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.INLINE.getValue()) {
+            return translated;
+        }
+
+        return String.format(Locale.getDefault(), "%s\n\n%s\n\n%s", original, "=".repeat(15), translated);
     }
 }
 

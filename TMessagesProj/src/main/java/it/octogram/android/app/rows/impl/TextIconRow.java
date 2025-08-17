@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
+import org.telegram.messenger.Emoji;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Cells.TextCell;
 
@@ -72,6 +73,8 @@ public class TextIconRow extends BaseRow implements Clickable {
     }
 
     public void bindCell(TextCell cell) {
+        CharSequence valueWithEmoji = Emoji.replaceEmoji(value, cell.textView.getPaint().getFontMetricsInt(), false);
+
         if (dynamicDataUpdate != null) {
             setTitle(dynamicDataUpdate.getTitle());
             value = dynamicDataUpdate.getValue();
@@ -88,9 +91,9 @@ public class TextIconRow extends BaseRow implements Clickable {
             }
         } else {
             if (icon != -1 && value != null) {
-                cell.setTextAndValueAndIcon(rebindTitle(), value, icon, hasDivider());
+                cell.setTextAndValueAndIcon(rebindTitle(), valueWithEmoji, icon, hasDivider());
             } else if (value != null) {
-                cell.setTextAndValue(rebindTitle(), value, hasDivider());
+                cell.setTextAndValue(rebindTitle(), valueWithEmoji, hasDivider());
             } else if (icon != -1) {
                 cell.setTextAndIcon(rebindTitle(), icon, hasDivider());
             } else {

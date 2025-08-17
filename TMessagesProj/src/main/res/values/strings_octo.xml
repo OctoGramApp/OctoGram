@@ -100,6 +100,8 @@
     <string name="TranslatorUnsupportedLanguage">Selected language isn\'t supported by the selected provider.</string>
     <string name="TranslatorUnsupportedLanguageChange">Edit provider</string>
     <string name="TranslatorUnsupportedLanguageChangeDone">Provider has been updated successfully.</string>
+    <string name="EntireChatsTranslationsOptimization">Optimize entire chats translations</string>
+    <string name="EntireChatsTranslationsOptimizationDesc">Entire chats translation will be optimized to be faster and send more messages at once, but it may not work correctly in some cases.</string>
 
     <string name="DownloadingTranslationModelsTextAnd">%1$s and %2$s</string>
     <string name="DownloadingTranslationModelsText_one">%2$s language model is needed for local translation</string>
@@ -174,6 +176,12 @@
     <string name="AiFeatures_Features_AskOnPhoto">Ask on Media</string>
     <string name="AiFeatures_Features_TranslateAI2">AI Translation</string>
     <string name="AiFeatures_Features_TranslateAI_MoreProviders">You can configure more AI providers **here**.</string>
+    <string name="AiFeatures_Features_TranscribeVoice">AI Transcription</string>
+    <string name="AiFeatures_Features_TranscribeVoice_Disabled">Disabled</string>
+    <string name="AiFeatures_Features_TranscribeVoice_Unified">Unified</string>
+    <string name="AiFeatures_Features_TranscribeVoice_Unified_Desc">AI-generated message transcriptions will fully replace Telegram’s standard transcription.</string>
+    <string name="AiFeatures_Features_TranscribeVoice_Separated">Separated</string>
+    <string name="AiFeatures_Features_TranscribeVoice_Separated_Desc">AI-generated message transcriptions will be shown separately from Telegram’s standard transcription.</string>
     <string name="AiFeatures_Features_Empty">At least one feature must be enabled to use AI features.</string>
     <string name="AiFeatures_CustomModels">Custom Models</string>
     <string name="AiFeatures_CustomModels_Full">Custom AI Models</string>
@@ -276,18 +284,18 @@
 
     <!--Updates-->
     <string name="AppUpdateCustomTitle">Update OctoGram</string>
-    <string name="UpdatesSettingsHeader">Stay up to date with the latest news from OctoGram.</string>
-    <string name="UpdatesSettingsVerify">Verify</string>
     <string name="UpdatesSettingsCheck">Search for updates</string>
-    <string name="UpdatesSettingsCheckAvailable">Update is available</string>
-    <string name="UpdatesSettingsCheckReady">Update is ready</string>
-    <string name="UpdatesSettingsCheckButton">Check</string>
-    <string name="UpdatesSettingsCheckButtonDownload">Download</string>
-    <string name="UpdatesSettingsCheckButtonInstall">Install</string>
+    <string name="UpdatesSettingsCheckButton">Check for updates</string>
+    <string name="UpdatesSettingsCheckButtonDownload">Download update</string>
+    <string name="UpdatesSettingsCheckButtonInstall">Install update</string>
     <string name="UpdatesSettingsCheckButtonUpdate">Update</string>
+    <string name="UpdatesSettingsCheckButtonUpdateExtension">Update Extension</string>
     <string name="UpdatesSettingsCheckButtonChecking">Checking…</string>
     <string name="UpdatesSettingsCheckUpdated">You are using the latest version available.</string>
-    <string name="UpdatesSettingsCheckFailed">An error occurred while checking for updates. Please try again later.</string>
+    <string name="UpdatesSettingsCheckUpdateAvailable">A new app update is available.</string>
+    <string name="UpdatesSettingsCheckUpdateDownloading">Please wait for the download to finish.</string>
+    <string name="UpdatesSettingsCheckUpdateReady">Update has been downloaded.</string>
+    <string name="UpdatesSettingsCheckFailed">An error occurred while checking for updates.</string>
     <string name="UpdatesSettingsBeta">Prefer beta version</string>
     <string name="UpdatesSettingsAuto">Automatically check</string>
     <string name="UpdatesSettingsAutoDescription">If enabled, server will notify the app when to check for new updates.</string>
@@ -303,6 +311,16 @@
     <string name="UpdatesOptions">Options</string>
     <string name="UpdatesAlertSafeClose">You can close this popup during the download.</string>
     <string name="UpdatesAlertSafeUpdate">Install the update by pressing the above button.</string>
+    <string name="UpdatesSettingsExtensionUpdate">Extension update available</string>
+    <string name="UpdatesSettingsExtensionUpdate_Desc">A new update for your extension is available. Click below to go to the file.</string>
+    <string name="UpdatesSettingsExtensionUpdate_Ignored">This extension update will no longer be suggested here.</string>
+    <string name="UpdatesInstallationDoingTitle">Updating...</string>
+    <string name="UpdatesInstallationDoingDesc">We\'re going to update the app to the latest version. Please wait a moment.</string>
+    <string name="UpdatesInstallationGeneric">It appears that the automatic installation failed. Please press the button below to try again manually.</string>
+    <string name="UpdatesInstallationBlocked">It appears that the automatic installation has been blocked by the system. Please press the button below to try again manually.</string>
+    <string name="UpdatesInstallationIncompatible">It appears that the new version is not compatible with your device. Please press the button below to try again manually.</string>
+    <string name="UpdatesInstallationConflict">It appears that a more recent version of the app is installed on your device. Please press the button below to try again manually.</string>
+    <string name="UpdatesInstallationNoSpace">It appears that there is insufficient space on your device for installation. Please press the button below to try again manually.</string>
 
     <!--Emoji Sets-->
     <string name="MyEmojiSets">My Emoji Sets</string>
@@ -389,6 +407,7 @@
     <string name="ShowOnlineStatus">Show online status</string>
     <string name="ShowOnlineStatus_Desc">Shows the online status of other people next to their profile picture in groups</string>
     <string name="HideCustomEmojis">Hide custom emojis</string>
+    <string name="DisableTextBoxBlur">Disable text box blur</string>
     <string name="VoiceImprovements">Noise suppression in calls</string>
     <string name="UnmuteWithVolumeDown">Unmute videos with volume down</string>
     <string name="RemoveTimeOnStickers">Hide sent time on stickers</string>
@@ -583,6 +602,8 @@
     <string name="RestrictionReason">Restriction Reason</string>
     <string name="RegistrationDate">Registration Date</string>
     <string name="OctoGramVersion">OctoGram %1$s\nBased on Telegram %2$s</string>
+
+    <!--App Icon-->
     <string name="MonetIcon">Force Monet Icon</string>
     <string name="MonetIconDesc">Use Material You\'s dynamic icon on Android 12</string>
     <string name="AppIconChupa">Chupa Icon</string>
@@ -590,10 +611,12 @@
     <string name="AppIconConfetti">Confetti</string>
     <string name="AppIconDev">Dev Icon</string>
     <string name="AppIconFoxgram">Shy Fox</string>
+    <string name="AppIconGlass">Glass Icon</string>
     <string name="UnlockedHiddenChupaIcon">You were chuped! Chupa\'s icon is now available in settings.</string>
     <string name="UnlockedHiddenFoxIcon">You have unlocked the shy fox icon! Activate it from settings.</string>
     <string name="UnlockedHiddenYukiIcon">Hehe, you found me~. Go to the settings and change the icon!</string>
     <string name="UnlockedHiddenConfettiIcon">You have unlocked confetti! Activate the new secret icon from settings.</string>
+
     <string name="OctoExperimentsSettingsHeader">Try out new and shiny features</string>
     <string name="OctoExperimentsDialogMessage">These features are experimental and may not work as expected. You may experience crashes and other issues. Please report any issues you encounter to the developers</string>
     <string name="OctoExperimentsDialogButton">Enable experimental settings</string>
@@ -608,6 +631,7 @@
     <string name="AlternativeNavigation_Desc">Use a different navigation style when navigating through the app</string>
     <string name="SmootherNavigation">Smoothness</string>
     <string name="SmootherNavigation_Desc">Choose the fluidity of individual screens in the app</string>
+    <string name="DisableTabsStack">Disable Telegram Tabs Stack</string>
     <string name="BounceNavigation">Bounce level</string>
     <string name="AnimatedActionBar">Animated action bar</string>
     <string name="AnimatedActionBarn_Desc">Make the action bar transition animation more linear</string>
@@ -1031,6 +1055,9 @@
     <string name="StartWithRearCamera">Start with rear camera</string>
     <string name="StartWithRearCamera_Desc">Start recording video messages with the rear camera instead of the front camera</string>
 
+    <string name="UseSystemCameraVideo">System Camera (Video Mode)</string>
+    <string name="UseSystemCameraVideo_Desc">Open the system camera directly in video recording mode</string>
+
     <string name="CameraButtonPosition">Camera Button Position</string>
     <string name="CameraButtonPosition_Desc">Choose the position of the camera button</string>
     <string name="CameraButtonPosition_Default">Default</string>
@@ -1117,4 +1144,13 @@
     <string name="FailedToDeleteModel">Could not delete the model. Please try again later.</string>
     <string name="Error">Error</string>
     <string name="OnDeviceTranslationModels_UnsupportedVersion">You\'re using an outdated version of the OctoGram Extension – OnDevice. Please update to at least version **%1$s** (**%2$d**).</string>
+
+    <!--
+    <string name="ExperimentalFeature">Experimental Feature</string>
+    <string name="UseSmoothPopupBackground">Smooth Rounded Context Menus</string>
+    <string name="UseSmoothPopupBackground_Desc">Adds smoother, more rounded corners to context menus.\nMay cause minor visual glitches.</string>
+
+    <string name="EnableRoundedTextBox">Rounded Text Boxes</string>
+    <string name="EnableRoundedTextBox_Desc">Applies a rounded style to text boxes. \nSome text may overlap or be cut off.</string>
+    -->
 </resources>

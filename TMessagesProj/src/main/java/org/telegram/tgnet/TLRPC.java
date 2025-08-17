@@ -61344,6 +61344,7 @@ public class TLRPC {
         public boolean voiceTranscriptionRated; //custom
         public boolean voiceTranscriptionFinal; //custom
         public boolean voiceTranscriptionForce; //custom
+        public String voiceTranscriptionError; //custom
         public long voiceTranscriptionId; //custom
         public boolean premiumEffectWasPlayed; //custom
         public String originalLanguage; //custom

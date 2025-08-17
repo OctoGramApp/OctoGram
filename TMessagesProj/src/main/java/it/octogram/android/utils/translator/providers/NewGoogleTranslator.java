@@ -19,9 +19,6 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.TranslateAlert2;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -164,13 +161,11 @@ public class NewGoogleTranslator implements BaseTranslator {
 
         try {
             object.put("format", "text");
-            object.put("q", URLEncoder.encode(part, StandardCharsets.UTF_8.name()));
+            object.put("q", part);
             object.put("target", toTranslate);
             object.put("key", OctoConfig.INSTANCE.googleCloudKeyTranslator.getValue());
         } catch (JSONException ignored) {
             throw new IOException("json failed");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
         }
 
         return object.toString();
