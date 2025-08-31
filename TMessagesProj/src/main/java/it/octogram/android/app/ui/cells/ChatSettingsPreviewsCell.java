@@ -61,14 +61,17 @@ import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.ChatActivityEnterView;
 import org.telegram.ui.Components.ChatAvatarContainer;
 import org.telegram.ui.Components.CubicBezierInterpolator;
+import org.telegram.ui.Components.FilterTabsView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.UnreadCounterTextView;
+import org.telegram.ui.Components.ViewPagerFixed;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
@@ -76,8 +79,12 @@ import java.util.Random;
 import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.ContextMenuBriefingState;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.TabMode;
+import it.octogram.android.TabStyle;
 import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.OctoGeneralSearchOrderUI;
 import it.octogram.android.utils.chat.ContextMenuHelper;
+import it.octogram.android.utils.config.SearchOptionsOrderController;
 
 @SuppressLint({"ClickableViewAccessibility", "ViewConstructor"})
 public class ChatSettingsPreviewsCell extends FrameLayout {
@@ -101,6 +108,8 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
     private boolean wasChatHidden = false;
     private boolean wasGiftHidden = false;
 
+    private ViewPagerFixed.TabsView filterTabsView;
+
     private final ImageView gradientBackground;
 
     public static class PreviewType {
@@ -110,6 +119,7 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
         public static int INPUT_BOX = 3;
         public static int DISCUSS = 4;
         public static int CONTEXT_MENU = 5;
+        public static int SEARCH_ORDER = 6;
     }
 
     public ChatSettingsPreviewsCell(Context context, int viewType) {
@@ -208,6 +218,8 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
             handleInputBox(navigationFrame);
         } else if (viewType == PreviewType.DISCUSS) {
             handleDiscuss(navigationFrame);
+        } else if (viewType == PreviewType.SEARCH_ORDER) {
+            handleSearchOrder(navigationFrame);
         } else {
             messages = new StickerSizePreviewMessages(context);
             navigationFrame.addView(messages, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
@@ -281,6 +293,44 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
         }, 500);
     }
 
+    private void handleSearchOrder(LinearLayout navigationFrame) {
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        ActionBar actionBar = new ActionBar(context);
+        actionBar.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+        actionBar.setItemsBackgroundColor(Theme.getColor(Theme.key_actionBarActionModeDefaultSelector), false);
+        actionBar.setItemsBackgroundColor(Theme.getColor(Theme.key_actionBarActionModeDefaultSelector), true);
+        actionBar.setItemsColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon), false);
+        actionBar.setItemsColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon), true);
+        actionBar.setBackButtonImage(R.drawable.ic_ab_back);
+        actionBar.setAllowOverlayTitle(false);
+        actionBar.setOccupyStatusBar(false);
+        ActionBarMenu menu = actionBar.createMenu();
+        menu.addItem(0, R.drawable.ic_ab_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener()).setSearchFieldHint("Search chats...");
+        layout.addView(actionBar, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, ActionBar.getCurrentActionBarHeight()));
+
+        filterTabsView = new ViewPagerFixed.TabsView(context, false, 8, null);
+        filterTabsView.setDelegate(new ViewPagerFixed.TabsView.TabsViewDelegate() {
+            @Override
+            public boolean canPerformActions() {
+                return false;
+            }
+        });
+
+        layout.addView(filterTabsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44));
+
+        menu.setSearchCursorColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon));
+        menu.setSearchTextColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon), false);
+        menu.setSearchTextColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon), true);
+
+        navigationFrame.addView(layout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+        actionBar.setSearchTextColor(Theme.getColor(Theme.key_actionBarDefaultArchivedSearch), false);
+        actionBar.openSearchField(false);
+        reloadSearchOrderTabs();
+    }
+
     private boolean isCenteredTitle() {
         int centeredTitle = OctoConfig.INSTANCE.uiTitleCenteredState.getValue();
         return centeredTitle == ActionBarCenteredTitle.ALWAYS.getValue() || centeredTitle == ActionBarCenteredTitle.JUST_IN_CHATS.getValue();
@@ -291,6 +341,7 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
         reloadMessages();
         reloadInputBox();
         reloadDiscuss();
+        reloadSearchOrderTabs();
     }
 
     public void reloadSingleActionBarMembersCount() {
@@ -386,6 +437,24 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
         set.setDuration(200);
         set.playTogether(animators);
         set.start();
+    }
+
+    private void reloadSearchOrderTabs() {
+        if (viewType != PreviewType.SEARCH_ORDER) {
+            return;
+        }
+
+        filterTabsView.removeTabs();
+
+        int a = 0;
+        List<Integer> orders = SearchOptionsOrderController.getCurrentOrder();
+        for (int order : orders) {
+            filterTabsView.addTab(a, OctoGeneralSearchOrderUI.getItemName(order));
+            a++;
+        }
+
+        filterTabsView.finishAddingTabs();
+        filterTabsView.selectTabWithId(0, 1f);
     }
 
     @Override

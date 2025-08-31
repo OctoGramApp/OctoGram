@@ -16,7 +16,6 @@ import java.net.SocketException;
 
 import it.octogram.android.Datacenter;
 import it.octogram.android.app.ui.cells.SingleDatacenterStatusPreview;
-import it.octogram.android.http.StandardHTTPRequest;
 
 public class DatacenterController {
     public static class DatacenterStatusChecker {

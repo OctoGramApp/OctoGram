@@ -54,7 +54,7 @@ import it.octogram.android.utils.deeplink.DeepLinkDef;
 public class OctoExperimentsUI implements PreferencesEntry {
     private final ConfigProperty<Boolean> canShowMonetIconSwitch = new ConfigProperty<>(null, Build.VERSION.SDK_INT == Build.VERSION_CODES.S || Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2);
     private final ConfigProperty<Boolean> isMonetSelected = new ConfigProperty<>(null, MonetIconController.INSTANCE.isSelectedMonet());
-    //private final static boolean ENABLE_EXP_FEATURE = false;
+    private final static boolean ENABLE_EXP_FEATURE = BuildConfig.DEBUG;
 
     @NonNull
     @Override
@@ -92,29 +92,27 @@ public class OctoExperimentsUI implements PreferencesEntry {
                             .preferenceValue(OctoConfig.INSTANCE.mediaInGroupCall)
                             .title(getString(R.string.MediaStream))
                             .build());
-                    /*if (ENABLE_EXP_FEATURE) {
+                    if (ENABLE_EXP_FEATURE) {
                         category.row(new SwitchRow.SwitchRowBuilder()
                                 .onClick(() -> handleExperimentalAlert(context, fragment,
                                         OctoConfig.INSTANCE.roundedTextBox,
-                                        R.string.ExperimentalFeature,
-                                        R.string.EnableRoundedTextBox_Desc
+                                        "Applies a rounded style to text boxes. \nSome text may overlap or be cut off."
                                 ))
                                 .preferenceValue(OctoConfig.INSTANCE.roundedTextBox)
-                                .title(getString(R.string.EnableRoundedTextBox))
-                                .description(getString(R.string.EnableRoundedTextBox_Desc))
+                                .title("Rounded Text Boxes")
+                                .description("Applies a rounded style to text boxes. \nSome text may overlap or be cut off.")
                                 .build());
 
                         category.row(new SwitchRow.SwitchRowBuilder()
                                 .onClick(() -> handleExperimentalAlert(context, fragment,
                                         OctoConfig.INSTANCE.useSmoothPopupBackground,
-                                        R.string.ExperimentalFeature,
-                                        R.string.UseSmoothPopupBackground_Desc
+                                        "Adds smoother, more rounded corners to context menus.\nMay cause minor visual glitches."
                                 ))
                                 .preferenceValue(OctoConfig.INSTANCE.useSmoothPopupBackground)
-                                .title(getString(R.string.UseSmoothPopupBackground))
-                                .description(getString(R.string.UseSmoothPopupBackground_Desc))
+                                .title("Smooth Rounded Context Menus")
+                                .description("Adds smoother, more rounded corners to context menus.\nMay cause minor visual glitches.")
                                 .build());
-                    }*/
+                    }
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> checkExperimentsEnabled(context))
                             .preferenceValue(OctoConfig.INSTANCE.showRPCErrors)
@@ -339,13 +337,13 @@ public class OctoExperimentsUI implements PreferencesEntry {
         return options;
     }
 
-    /*private boolean handleExperimentalAlert(Context context, PreferencesFragment fragment, ConfigProperty<Boolean> featureProperty, int titleRes, int messageRes) {
+    private boolean handleExperimentalAlert(Context context, PreferencesFragment fragment, ConfigProperty<Boolean> featureProperty, String messageRes) {
         if (!checkExperimentsEnabled(context)) return false;
 
         if (!featureProperty.getValue()) {
             new AlertDialog.Builder(context, fragment.getResourceProvider())
-                    .setTitle(getString(titleRes))
-                    .setMessage(getString(messageRes))
+                    .setTitle("Experimental Feature")
+                    .setMessage(messageRes)
                     .setPositiveButton(getString(R.string.OK), (d, w) -> {
                         featureProperty.setValue(true);
                         fragment.reloadUIAfterValueUpdate();
@@ -355,5 +353,5 @@ public class OctoExperimentsUI implements PreferencesEntry {
             return false;
         }
         return true;
-    }*/
+    }
 }

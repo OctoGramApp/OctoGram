@@ -375,6 +375,11 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
                     }
                     return super.dispatchTouchEvent(ev);
                 }
+
+                @Override
+                protected boolean isCentered() {
+                    return false;
+                }
             };
             actionBar.setBackgroundColor(getThemedColor(Theme.key_dialogBackground));
             actionBar.setTitleColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));

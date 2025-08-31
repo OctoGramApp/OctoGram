@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 

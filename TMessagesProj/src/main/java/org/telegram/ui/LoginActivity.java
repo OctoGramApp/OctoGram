@@ -208,6 +208,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.app.ui.components.CustomFab;
 import it.octogram.android.app.ui.components.OutlineProvider;
@@ -2528,7 +2529,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 if (index1 != -1 && index2 != -1 && index1 != index2) {
                     text.replace(index2, index2 + 1, "");
                     text.replace(index1, index1 + 1, "");
-                    text.setSpan(new URLSpanNoUnderline(String.format("https://%s/privacy", OctoUtils.getDomain())), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    text.setSpan(new URLSpanNoUnderline(String.format("https://%s/privacy", OctoConfig.MAIN_DOMAIN)), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 privacyView.setText(text);
                 privacyLayout.addView(privacyView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 56, Gravity.LEFT | Gravity.BOTTOM, 14, 0, 70, 32));

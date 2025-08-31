@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.tgastandaloneexport;
+package it.octogram.android.app.ui.cells;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.formatString;
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.octogram.android.utils.updater.UpdatesManager;
 
-public class UpdateLayout extends IUpdateLayout {
+public class DrawerPageUpdateButtonCell extends IUpdateLayout {
 
     private FrameLayout updateLayout;
     private RadialProgress2 updateLayoutIcon;
@@ -67,7 +67,7 @@ public class UpdateLayout extends IUpdateLayout {
     private final ViewGroup sideMenu;
     private final ViewGroup sideMenuContainer;
 
-    public UpdateLayout(Activity activity, ViewGroup sideMenu, ViewGroup sideMenuContainer) {
+    public DrawerPageUpdateButtonCell(Activity activity, ViewGroup sideMenu, ViewGroup sideMenuContainer) {
         super(activity, sideMenu, sideMenuContainer);
         this.activity = activity;
         this.sideMenu = sideMenu;

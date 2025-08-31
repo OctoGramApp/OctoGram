@@ -52,6 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.OctoUtils;
 
 public class ContactsController extends BaseController {
@@ -374,7 +375,7 @@ public class ContactsController extends BaseController {
     }
 
     public String getInviteText(int contacts) {
-        String link = inviteLink == null ? String.format("https://%s", OctoUtils.getDomain()) : inviteLink;
+        String link = inviteLink == null ? String.format("https://%s", OctoConfig.MAIN_DOMAIN) : inviteLink;
         if (contacts <= 1) {
             return LocaleController.formatString("InviteText2", R.string.InviteText2, link);
         } else {

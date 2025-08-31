@@ -17,6 +17,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Process;
 
+import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.LaunchActivity;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -25,6 +28,10 @@ public final class AppRestartHelper extends Activity {
     private static final String KEY_MAIN_PROCESS_PID = "octogram_main_process_pid";
 
     public static void triggerRebirth(Context context, Intent... nextIntents) {
+        AlertDialog progressDialog = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
+        progressDialog.setCanCancel(false);
+        progressDialog.show();
+
         nextIntents[0].addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
         Intent intent = new Intent(context, AppRestartHelper.class);
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK);

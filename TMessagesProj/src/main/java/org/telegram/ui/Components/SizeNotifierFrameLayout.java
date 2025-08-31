@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoLogging;
 
 public class SizeNotifierFrameLayout extends FrameLayout {
 
@@ -945,11 +946,16 @@ public class SizeNotifierFrameLayout extends FrameLayout {
     }
 
     public void drawBlurRect(Canvas canvas, float y, Rect rectTmp, Paint blurScrimPaint, boolean top) {
+        drawBlurRect(canvas, y, rectTmp, blurScrimPaint, top, false);
+    }
+
+    public void drawBlurRect(Canvas canvas, float y, Rect rectTmp, Paint blurScrimPaint, boolean top, boolean skipBlur) {
         int blurAlpha = Color.alpha(Theme.getColor(DRAW_USING_RENDERNODE() && SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_HIGH ? Theme.key_chat_BlurAlpha : Theme.key_chat_BlurAlphaSlow, getResourceProvider()));
         if (OctoConfig.INSTANCE.forceChatBlurEffect.getValue()) {
             blurAlpha = OctoConfig.INSTANCE.blurEffectStrength.getValue();
         }
-        if (!SharedConfig.chatBlurEnabled()) {
+        if (!SharedConfig.chatBlurEnabled() || skipBlur) {
+            OctoLogging.d("SizeNotifierFrameLayout", "skip blur");
             canvas.drawRect(rectTmp, blurScrimPaint);
             return;
         }

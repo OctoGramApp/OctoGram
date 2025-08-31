@@ -4285,12 +4285,14 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
         bottom += chatSearchExpandOffset;
 
-        if (!OctoConfig.INSTANCE.roundedTextBox.getValue()) {
+        boolean roundedBox = OctoConfig.INSTANCE.roundedTextBox.getValue();
+
+        if (!roundedBox) {
             if (allowBlur) {
                 backgroundPaint.setColor(getThemedColor(Theme.key_chat_messagePanelBackground));
-                if (!OctoConfig.INSTANCE.disableTextBoxBlur.getValue() && (SharedConfig.chatBlurEnabled() && sizeNotifierLayout != null)) {
+                if (SharedConfig.chatBlurEnabled() && sizeNotifierLayout != null) {
                     blurBounds.set(0, bottom, getWidth(), getHeight());
-                    sizeNotifierLayout.drawBlurRect(canvas, getTop(), blurBounds, backgroundPaint, false);
+                    sizeNotifierLayout.drawBlurRect(canvas, getTop(), blurBounds, backgroundPaint, false, OctoConfig.INSTANCE.disableTextBoxBlur.getValue());
                 } else {
                     canvas.drawRect(0, bottom, getWidth(), getHeight(), backgroundPaint);
                 }

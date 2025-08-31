@@ -600,8 +600,8 @@ public class MessageObject {
                     "sensitive".equals(reason.reason) &&
                     (
                         "all".equals(reason.platform) ||
-                        ("android".equals(reason.platform) && (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && StoreUtils.isDownloadedFromAnyStore()) ||
-                        ("android-all".equals(reason.platform) && StoreUtils.isDownloadedFromAnyStore())
+                        "android".equals(reason.platform) && ((!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && StoreUtils.isDownloadedFromAnyStore()) || BuildVars.DEBUG_PRIVATE_VERSION) ||
+                        "android-all".equals(reason.platform)
                     )
                 ) {
                     return isSensitiveCached = true;
@@ -615,15 +615,10 @@ public class MessageObject {
                     TLRPC.RestrictionReason reason = chat.restriction_reason.get(i);
                     if (
                         "sensitive".equals(reason.reason) &&
-                        /*(
-                            "all".equals(reason.platform) ||
-                            "android".equals(reason.platform) && (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) ||
-                            "android-all".equals(reason.platform)
-                        )*/
                         (
                             "all".equals(reason.platform) ||
-                            ("android".equals(reason.platform) && (!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() || BuildVars.DEBUG_PRIVATE_VERSION) && StoreUtils.isDownloadedFromAnyStore()) ||
-                            ("android-all".equals(reason.platform) && StoreUtils.isDownloadedFromAnyStore())
+                            "android".equals(reason.platform) && ((!ApplicationLoader.isStandaloneBuild() && !BuildVars.isBetaApp() && StoreUtils.isDownloadedFromAnyStore()) || BuildVars.DEBUG_PRIVATE_VERSION) ||
+                            "android-all".equals(reason.platform)
                         )
                     ) {
                         return isSensitiveCached = true;

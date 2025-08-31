@@ -434,12 +434,7 @@ public class ImportSettingsUI extends BaseFragment {
         }
 
         if (changedOptions > 0) {
-            Runnable restart = () -> {
-                AlertDialog progressDialog = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
-                progressDialog.setCanCancel(false);
-                progressDialog.show();
-                AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
-            };
+            Runnable restart = () -> AppRestartHelper.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
 
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getParentActivity());
             alertDialogBuilder.setTitle(getString(R.string.ImportReadyImportDonePopup));

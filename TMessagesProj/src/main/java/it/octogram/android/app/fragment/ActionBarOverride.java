@@ -37,8 +37,6 @@ public class ActionBarOverride extends ActionBarLayout {
     private long lastUnlockedAccount = 0;
     private BlockingAccountDialog accountView;
     private BlockingAccountDialog pageView;
-    public static int GENERIC_BACK_EVENT_STATE = 99393939;
-    public static int FORCE_BACK_INVOKED_META_STATE = 993939;
 
     public ActionBarOverride(Context context, boolean main) {
         super(context, main);

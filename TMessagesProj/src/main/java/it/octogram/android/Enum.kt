@@ -173,7 +173,8 @@ enum class AiProvidersDetails(
     val statusProperty: ConfigProperty<Boolean>,
     val keyProperty: ConfigProperty<String>? = null,
     val urlProperty: ConfigProperty<String>? = null,
-    val needWarningZone: Boolean
+    val needWarningZone: Boolean = false,
+    var isSuggested: Boolean = false
 ) {
     GEMINI(
         id = 0,
@@ -184,7 +185,7 @@ enum class AiProvidersDetails(
         animationScope = OctoAnimationFragment.OctoAnimationScopes.GEMINI,
         statusProperty = OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIs,
         keyProperty = OctoConfig.INSTANCE.aiFeaturesUseGoogleAPIKey,
-        needWarningZone = false
+        isSuggested = true
     ),
     CHATGPT(
         id = 1,
@@ -482,7 +483,8 @@ enum class StickerUi(val value: Int) {
     NEW_MODEL_GENERATION(33),
     OCTO_LOGS_PLACEHOLDER(34),
     COMMUNICATION(35),
-    NO_SPOILER(36)
+    NO_SPOILER(36),
+    BROKEN(37)
 }
 
 enum class DrawerBackgroundState(val value: Int) {

@@ -64,36 +64,36 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
                 .row(new ShadowRow())
                 .category(getString(R.string.OctoMainSettingsChats), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramApp", fragment, 1))
-                            .value("@OctoGramApp")
+                            .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName(OctoConfig.MAIN_CHANNEL_TAG, fragment, 1))
+                            .value("@"+OctoConfig.MAIN_CHANNEL_TAG)
                             .icon(R.drawable.msg_channel)
                             .title(getString(R.string.OfficialChannel))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName("OctoGramChat", fragment, 1))
-                            .value("@OctoGramChat")
+                            .onClick(() -> MessagesController.getInstance(fragment.getCurrentAccount()).openByUserName(OctoConfig.MAIN_CHAT_TAG, fragment, 1))
+                            .value("@"+OctoConfig.MAIN_CHAT_TAG)
                             .icon(R.drawable.msg_groups)
                             .title(getString(R.string.OfficialGroup))
                             .build());
                 })
                 .category(getString(R.string.OctoMainSettingsInfo), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://github.com/OctoGramApp/OctoGram/tree/%s", BuildConfig.GIT_COMMIT_HASH))))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://github.com/%s/tree/%s", OctoConfig.GITHUB_MAIN_REPO, BuildConfig.GIT_COMMIT_HASH))))
                             .icon(R.drawable.outline_source_white_28)
                             .title(getString(R.string.SourceCode))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/privacy", OctoUtils.getDomain()))))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/privacy", OctoConfig.MAIN_DOMAIN))))
                             .icon(R.drawable.msg2_policy)
                             .title(getString(R.string.PrivacyPolicy))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe("https://github.com/OctoGramApp/OctoGram/blob/main/LICENSE")))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://github.com/%s/blob/main/LICENSE", OctoConfig.GITHUB_MAIN_REPO))))
                             .icon(R.drawable.msg_report_personal)
                             .title(getString(R.string.CodeLicense))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/translate", OctoUtils.getDomain()))))
+                            .onClick(() -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/translate", OctoConfig.MAIN_DOMAIN))))
                             .icon(R.drawable.msg_translate)
                             .title(getString(R.string.TranslateOcto))
                             .build());
@@ -145,11 +145,12 @@ public class OctoInfoSettingsUI implements PreferencesEntry {
         textViewButton.setOnClickListener(v -> {
             if (pbetaChatInstance != null) {
                 boolean hadToSwitch = false;
-                if (UserConfig.selectedAccount != 0) {
+                int accountId = UpdatesManager.INSTANCE.getFirstAccountId();
+                if (UserConfig.selectedAccount != accountId) {
                     hadToSwitch = true;
-                    LaunchActivity.instance.switchToAccount(0, true);
+                    LaunchActivity.instance.switchToAccount(accountId, true);
                 }
-                AndroidUtilities.runOnUIThread(() -> MessagesController.getInstance(0).openChatOrProfileWith(null, pbetaChatInstance, fragment, 1, false), hadToSwitch ? 1500 : 0);
+                AndroidUtilities.runOnUIThread(() -> MessagesController.getInstance(accountId).openChatOrProfileWith(null, pbetaChatInstance, fragment, 1, false), hadToSwitch ? 1500 : 0);
             } else {
                 Browser.openUrl(context, "tg://join?invite=" + OctoConfig.PRIVATE_BETA_GROUP_HASH);
             }

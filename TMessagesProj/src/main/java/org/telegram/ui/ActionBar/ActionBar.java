@@ -204,7 +204,7 @@ public class ActionBar extends FrameLayout {
         backButtonImageView.setContentDescription(LocaleController.getString(R.string.AccDescrGoBack));
     }
 
-    private boolean isCentered() {
+    protected boolean isCentered() {
         return OctoConfig.INSTANCE.uiTitleCenteredState.getValue() == ActionBarCenteredTitle.ALWAYS.getValue() || OctoConfig.INSTANCE.uiTitleCenteredState.getValue() == ActionBarCenteredTitle.JUST_IN_SETTINGS.getValue();
     }
 

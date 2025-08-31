@@ -395,3 +395,4 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
         return !recyclerListView.canScrollVertically(-1);
     }
 }
+

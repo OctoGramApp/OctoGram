@@ -90,7 +90,7 @@ public class AiConfigBottomSheet extends BottomSheet {
 
     private boolean shouldShowSuccessBulletin = false;
 
-    private boolean skipToApiKeyConfig = false;
+    private boolean skipToApiKeyConfig;
 
     public AiConfigBottomSheet(Context context, BaseFragment fragment, AiProvidersDetails provider, AiConfigInterface callback) {
         super(context, true);
@@ -102,7 +102,7 @@ public class AiConfigBottomSheet extends BottomSheet {
         this.callback = callback;
         this.fragment = fragment;
 
-        skipToApiKeyConfig = provider.getStatusProperty().getValue();
+        skipToApiKeyConfig = provider.getStatusProperty().getValue() && !provider.getKeyProperty().getValue().isEmpty();
 
         TextView textView;
 
@@ -179,6 +179,16 @@ public class AiConfigBottomSheet extends BottomSheet {
             textView.setText(formatString(R.string.AiFeatures_AccessVia_Login_DisableS, provider.getTitle()));
             textView.setTextColor(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_dialogTextBlack), 150));
             textView.setOnClickListener(view -> {
+                if (MainAiHelper.getEnabledProvidersCount() == 1) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(fragment.getParentActivity());
+                    alertDialogBuilder.setTitle(getString(R.string.AppName));
+                    alertDialogBuilder.setMessage(getString(R.string.AiFeatures_AccessVia_Empty));
+                    alertDialogBuilder.setPositiveButton(getString(R.string.OK), null);
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                    return;
+                }
+
                 provider.getStatusProperty().updateValue(false);
                 callback.onStateUpdated();
 

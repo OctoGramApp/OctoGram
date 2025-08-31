@@ -252,8 +252,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import it.octogram.android.ActionBarTitleOption;
 import it.octogram.android.InterfaceRapidButtonsActions;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.crashlytics.Crashlytics;
-import it.octogram.android.crashlytics.CrashlyticsBottomSheet;
+import it.octogram.android.app.ui.OctoLogsSettingsUI;
+import it.octogram.android.utils.Crashlytics;
 import it.octogram.android.app.fragment.ActionBarOverride;
 import it.octogram.android.app.fragment.PreferencesFragment;
 import it.octogram.android.app.ui.OctoPrivacySettingsUI;
@@ -262,7 +262,7 @@ import it.octogram.android.app.ui.cells.LockedChatsIntroductionCell;
 import it.octogram.android.app.ui.components.OutlineProvider;
 import it.octogram.android.app.ui.bottomsheets.AppLinkVerifyBottomSheet;
 import it.octogram.android.app.ui.cells.MonetAndroidFixDialog;
-import it.octogram.android.tgastandaloneexport.UpdateButton;
+import it.octogram.android.app.ui.cells.DialogsPageUpdateButtonCell;
 import it.octogram.android.theme.MonetIconController;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.chat.ForwardContext;
@@ -5316,7 +5316,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         if (searchString == null && initialDialogsType == DIALOGS_TYPE_DEFAULT) {
-            updateButton = new UpdateButton(context);
+            updateButton = new DialogsPageUpdateButtonCell(context);
             if (updateButton != null) {
                 contentView.addView(updateButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.LEFT | Gravity.BOTTOM));
                 updateButton.onTranslationUpdate(ty -> {
@@ -5408,9 +5408,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             FilesMigrationService.checkBottomSheet(this);
         }
-        if (Crashlytics.getLatestCrashFile().exists()) {
-            CrashlyticsBottomSheet.showCrash(this);
-        } else if (MonetIconController.INSTANCE.needMonetMigration()) {
+        if (MonetIconController.INSTANCE.needMonetMigration()) {
             MonetAndroidFixDialog.showDialog(this);
         } else if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             AppLinkVerifyBottomSheet.checkBottomSheet(this);
@@ -6054,6 +6052,25 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 false,
                 true
             );
+            updateAuthHintCellVisibility(false);
+        }else if (folderId == 0 && Crashlytics.hasPendingCrash()) {
+            dialogsHintCellVisible = true;
+            dialogsHintCell.setVisibility(View.VISIBLE);
+            dialogsHintCell.setCompact(true);
+            dialogsHintCell.setText(LocaleController.getString(R.string.OctoCrashedTitle), LocaleController.getString(R.string.OctoCrashedDesc));
+            dialogsHintCell.setOnClickListener(v -> {
+                OctoLogsSettingsUI ui = new OctoLogsSettingsUI();
+                ui.setForceCrashedRecentlyPage(true);
+                ui.setOnCrashedRecentlyHideRunnable(() -> updateDialogsHint());
+                presentFragment(new PreferencesFragment(ui));
+            });
+            dialogsHintCell.setOnCloseListener(v -> {
+                Crashlytics.resetPendingCrash();
+                ChangeBounds transition = new ChangeBounds();
+                transition.setDuration(200);
+                TransitionManager.beginDelayedTransition((ViewGroup) dialogsHintCell.getParent(), transition);
+                updateDialogsHint();
+            });
             updateAuthHintCellVisibility(false);
         }else if (folderId == 0 && getMessagesController().pendingSuggestions.contains("PREMIUM_GRACE")) {
             dialogsHintCellVisible = true;

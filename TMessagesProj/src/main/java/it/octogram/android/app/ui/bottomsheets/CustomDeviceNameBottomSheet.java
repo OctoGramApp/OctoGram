@@ -36,13 +36,14 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CodepointsLengthInputFilter;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.OutlineEditText;
 import org.telegram.ui.Components.StickerImageView;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 
 public class CustomDeviceNameBottomSheet extends BottomSheet {
-    private final EditTextBoldCursor editText;
+    private final OutlineEditText editText;
     private final CustomDeviceNameCallback callback;
     private final String currentDeviceModel;
 
@@ -80,29 +81,21 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
         textView.setPadding(dp(30), dp(10), dp(30), dp(21));
         linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        editText = new EditTextBoldCursor(context);
-        editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-        editText.setHintTextColor(getThemedColor(Theme.key_windowBackgroundWhiteHintText));
-        editText.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
-        editText.setMaxLines(1);
-        editText.setLines(1);
-        editText.setPadding(0, 0, 0, 0);
-        editText.setSingleLine(true);
-        editText.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
-        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        editText.setHint(getDeviceDefaultName());
-        editText.setCursorColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        editText.setCursorSize(dp(20));
-        editText.setCursorWidth(1.5f);
-        editText.setText(currentDeviceModel);
+        editText = new OutlineEditText(context);
+        editText.getEditText().setMinHeight(AndroidUtilities.dp(58));
+        editText.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+        editText.getEditText().setMaxLines(1);
+        editText.getEditText().setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setHint(getString(R.string.UseCustomDeviceNameTitle));
+        editText.getEditText().setHint(getDeviceDefaultName());
+        editText.getEditText().setText(currentDeviceModel);
+
         InputFilter[] inputFilters = new InputFilter[1];
         inputFilters[0] = new CodepointsLengthInputFilter(40) {
             @Override
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
                 if (source != null && !TextUtils.isEmpty(source) && TextUtils.indexOf(source, '\n') == source.length() - 1) {
-                    setCustomName(editText.getText().toString().trim());
+                    setCustomName(editText.getEditText().getText().toString().trim());
                     return "";
                 }
                 CharSequence result = super.filter(source, start, end, dest, dstart, dend);
@@ -116,15 +109,15 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
                 return result;
             }
         };
-        editText.setFilters(inputFilters);
-        editText.setOnEditorActionListener((currentTextView, i, keyEvent) -> {
+        editText.getEditText().setFilters(inputFilters);
+        editText.getEditText().setOnEditorActionListener((currentTextView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_DONE) {
-                setCustomName(editText.getText().toString().trim());
+                setCustomName(editText.getEditText().getText().toString().trim());
                 return true;
             }
             return false;
         });
-        linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.LEFT | Gravity.TOP, 17, 15, 17, 0));
+        linearLayout.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 58, Gravity.LEFT | Gravity.TOP, 17, 7, 17, 7));
 
         TextView buttonTextView = new TextView(context);
         buttonTextView.setPadding(dp(34), 0, dp(34), 0);
@@ -134,7 +127,7 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
         buttonTextView.setText(getString(R.string.UseCustomDeviceNameRename));
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         buttonTextView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(6), Theme.getColor(Theme.key_featuredStickers_addButton), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_windowBackgroundWhite), 120)));
-        buttonTextView.setOnClickListener(view -> setCustomName(editText.getText().toString().trim()));
+        buttonTextView.setOnClickListener(view -> setCustomName(editText.getEditText().getText().toString().trim()));
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         textView = new TextView(context);
@@ -161,7 +154,7 @@ public class CustomDeviceNameBottomSheet extends BottomSheet {
             ConnectionsManager.setSessionName(customDeviceName);
         }
 
-        AndroidUtilities.hideKeyboard(editText);
+        AndroidUtilities.hideKeyboard(editText.getEditText());
         dismiss();
         callback.didRenameSuccessfully(customDeviceName);
     }

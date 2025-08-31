@@ -35,6 +35,7 @@ import it.octogram.android.InterfaceRapidButtonsActions;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.app.OctoPreferences;
+import it.octogram.android.app.PreferenceType;
 import it.octogram.android.app.PreferencesEntry;
 import it.octogram.android.app.fragment.PreferencesFragment;
 import it.octogram.android.app.rows.impl.CustomCellRow;
@@ -42,7 +43,9 @@ import it.octogram.android.app.rows.impl.ListRow;
 import it.octogram.android.app.rows.impl.SwitchRow;
 import it.octogram.android.app.rows.impl.TextIconRow;
 import it.octogram.android.app.ui.bottomsheets.CustomActionBarTitleBottomSheet;
+import it.octogram.android.app.ui.cells.ChatSettingsPreviewsCell;
 import it.octogram.android.app.ui.cells.RapidActionsPreviewLayout;
+import it.octogram.android.app.ui.components.DrawerPreviewCell;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
@@ -50,12 +53,13 @@ import it.octogram.android.utils.deeplink.DeepLinkDef;
 
 public class OctoGeneralSettingsUI implements PreferencesEntry {
     private RapidActionsPreviewLayout rapidActionsPreviewLayout;
+    private ChatSettingsPreviewsCell chatSettingsPreviewsCell;
+    private final ConfigProperty<Boolean> showCustomTitleRow = new ConfigProperty<>(null, false);
 
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
-        ConfigProperty<Boolean> showCustomTitleRow = new ConfigProperty<>(null, OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
-
+        showCustomTitleRow.updateValue(OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
         ConfigProperty<Boolean> canChooseSecondaryButtonAction = new ConfigProperty<>(null, false);
 
         Runnable restartStates = () -> canChooseSecondaryButtonAction.updateValue(!OctoConfig.INSTANCE.rapidActionsDefaultConfig.getValue() && OctoConfig.INSTANCE.rapidActionsMainButtonAction.getValue() != InterfaceRapidButtonsActions.HIDDEN.getValue());
@@ -106,12 +110,24 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             ))
                             .onSelected(() -> {
                                 showCustomTitleRow.setValue(OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
-                                fragment.rebuildAllFragmentsWithLast();
+                                fragment.reloadUIAfterValueUpdate();
+                                fragment.rebuildAllFragmentsExceptLast();
                             })
                             .title(getString(R.string.ActionBarTitle))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> editCustomName(fragment, context))
+                            .setDynamicDataUpdate(new TextIconRow.OnDynamicDataUpdate() {
+                                @Override
+                                public String getTitle() {
+                                    return getString(R.string.ActionBarTitleCustom);
+                                }
+
+                                @Override
+                                public String getValue() {
+                                    return getCustomNameStatus();
+                                }
+                            })
                             .value(getCustomNameStatus())
                             .showIf(showCustomTitleRow)
                             .title(getString(R.string.ActionBarTitleCustom))
@@ -129,6 +145,17 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             })
                             .preferenceValue(OctoConfig.INSTANCE.disableDividers)
                             .title(getString(R.string.HideDividers))
+                            .build());
+                })
+                .category("Search items", category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(chatSettingsPreviewsCell = new ChatSettingsPreviewsCell(context, ChatSettingsPreviewsCell.PreviewType.SEARCH_ORDER))
+                            .build());
+                    category.row(new TextIconRow.TextIconRowBuilder()
+                            .isBlue(true)
+                            .onClick(() -> fragment.presentFragment(new OctoGeneralSearchOrderUI()))
+                            .icon(R.drawable.media_draw)
+                            .title("Customize search items order")
                             .build());
                 })
                 .category(R.string.ImproveRapidActions, category -> {
@@ -267,6 +294,19 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
         };
     }
 
+    private boolean isFirstDraw = true;
+    @Override
+    public void onBecomeFullyVisible() {
+        if (isFirstDraw) {
+            isFirstDraw = false;
+            return;
+        }
+
+        AndroidUtilities.runOnUIThread(() -> {
+            chatSettingsPreviewsCell.invalidate();
+        });
+    }
+
     private void checkButtonActions(boolean isMainButton, boolean isLongPress, PopupChoiceDialogOption data) {
         if (data.id == InterfaceRapidButtonsActions.HIDDEN.getValue()) {
             return;
@@ -317,14 +357,22 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
             public void didRenameSuccessfully(String customName) {
                 OctoConfig.INSTANCE.actionBarCustomTitle.updateValue(customName);
                 OctoConfig.INSTANCE.actionBarTitleOption.updateValue(ActionBarTitleOption.CUSTOM.getValue());
-                fragment.rebuildAllFragmentsWithLast();
+                showCustomTitleRow.updateValue(true);
+                update();
             }
 
             @Override
             public void didReset() {
-                OctoConfig.INSTANCE.actionBarCustomTitle.updateValue("Home");
-                OctoConfig.INSTANCE.actionBarTitleOption.updateValue(ActionBarTitleOption.EMPTY.getValue());
-                fragment.rebuildAllFragmentsWithLast();
+                OctoConfig.INSTANCE.actionBarCustomTitle.clear();
+                OctoConfig.INSTANCE.actionBarTitleOption.clear();
+                showCustomTitleRow.updateValue(false);
+                update();
+            }
+
+            private void update() {
+                fragment.reloadUIAfterValueUpdate();
+                AndroidUtilities.runOnUIThread(() -> fragment.notifyItemChanged(PreferenceType.TEXT_ICON.getAdapterType()), 15);
+                fragment.rebuildAllFragmentsExceptLast();
             }
         });
         bottomSheet.show();

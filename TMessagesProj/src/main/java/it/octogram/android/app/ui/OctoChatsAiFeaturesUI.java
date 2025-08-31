@@ -31,7 +31,9 @@ import org.telegram.ui.Components.ItemOptions;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
+import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.AiTranscriptionState;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
@@ -48,6 +50,8 @@ import it.octogram.android.app.rows.impl.SwitchRow;
 import it.octogram.android.app.rows.impl.TextDetailRow;
 import it.octogram.android.app.rows.impl.TextIconRow;
 import it.octogram.android.utils.ai.CustomModelsHelper;
+import it.octogram.android.utils.ai.MainAiHelper;
+import it.octogram.android.utils.ai.ui.AiConfigBottomSheet;
 import it.octogram.android.utils.ai.ui.GenerateModelBottomSheet;
 import it.octogram.android.utils.appearance.MessageStringHelper;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
@@ -55,17 +59,15 @@ import it.octogram.android.utils.chat.FileShareHelper;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
 
 public class OctoChatsAiFeaturesUI implements PreferencesEntry {
+    private final HashMap<Integer, ConfigProperty<Boolean>> addedCategoryVisibility = new HashMap<>();
+    private final HashMap<Integer, ConfigProperty<Boolean>> availableCategoryVisibility = new HashMap<>();
+
     private final HashMap<String, CustomAIModelRow> modelsAssoc = new HashMap<>();
     private FooterInformativeRow footerInformativeRow;
 
     private PreferencesFragment fragment;
     private Context context;
-
-    private final List<ConfigProperty<Boolean>> features = List.of(
-            OctoConfig.INSTANCE.aiFeaturesTranslateMessages,
-            OctoConfig.INSTANCE.aiFeaturesChatContext,
-            OctoConfig.INSTANCE.aiFeaturesAskOnMedia
-    );
+    private boolean showEnabledBulletin = false;
 
     @NonNull
     @Override
@@ -73,57 +75,54 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
         this.fragment = fragment;
         this.context = context;
 
-        if (OctoConfig.INSTANCE.aiFeatures.getValue() && !OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getValue()) {
-            OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
-        }
-
         modelsAssoc.clear();
+
+        if (!OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getValue()) {
+            OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
+            // they have been accepted in intro page
+        }
 
         return OctoPreferences.builder(getString(R.string.AiFeatures_Brief))
                 .deepLink(DeepLinkDef.AI_FEATURES)
                 .row(new SwitchRow.SwitchRowBuilder()
                         .isMainPageAction(true)
                         .onClick(() -> {
-                            if (OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getValue() || OctoConfig.INSTANCE.aiFeatures.getValue()) {
-                                return true;
+                            if (OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getValue()) {
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(fragment.getParentActivity());
+                                alertDialogBuilder.setTitle(getString(R.string.AiFeatures_Brief_Disable));
+                                alertDialogBuilder.setMessage(getString(R.string.AiFeatures_Brief_Disable_Desc));
+                                alertDialogBuilder.setPositiveButton(getString(R.string.AiFeatures_Brief_Disable_Button), (dialog, which) -> {
+                                    dialog.dismiss();
+                                    OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(false);
+                                    fragment.presentFragment(new OctoChatsAiFeaturesIntroUI(), true);
+                                });
+                                alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
+                                AlertDialog alertDialog = alertDialogBuilder.create();
+                                alertDialog.show();
+                                ((TextView) alertDialog.getButton(DialogInterface.BUTTON_POSITIVE)).setTextColor(Theme.getColor(Theme.key_text_RedBold));
                             }
-
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(fragment.getParentActivity());
-                            alertDialogBuilder.setTitle(getString(R.string.AiFeatures_EnableOptionsTerms));
-                            alertDialogBuilder.setMessage(getString(R.string.AiFeatures_EnableOptionsTerms_Desc));
-                            alertDialogBuilder.setPositiveButton(getString(R.string.AiFeatures_EnableOptionsTerms_Accept), (dialog, which) -> {
-                                OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
-                                OctoConfig.INSTANCE.aiFeatures.updateValue(true);
-                                fragment.reloadUIAfterValueUpdate();
-                            });
-                            alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-                            alertDialog.show();
                             return false;
                         })
-                        .preferenceValue(OctoConfig.INSTANCE.aiFeatures)
+                        .preferenceValue(OctoConfig.INSTANCE.aiFeaturesAcceptedTerms)
                         .title(getString(R.string.AiFeatures))
                         .build()
                 )
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.TRANSLATOR_GEMINI, true, getString(R.string.AiFeatures_Desc_Brief))
-                .category(getString(R.string.AiFeatures_Features), OctoConfig.INSTANCE.aiFeatures, category -> {
+                .category(getString(R.string.AiFeatures_Features), category -> {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> handleSwitch(OctoConfig.INSTANCE.aiFeaturesTranslateMessages))
                             .preferenceValue(OctoConfig.INSTANCE.aiFeaturesTranslateMessages)
                             .title(getString(R.string.TranslateMessages))
-                            .showIf(OctoConfig.INSTANCE.aiFeatures)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> handleSwitch(OctoConfig.INSTANCE.aiFeaturesChatContext))
                             .preferenceValue(OctoConfig.INSTANCE.aiFeaturesChatContext)
                             .title(getString(R.string.AiFeatures_Features_ChatContext))
-                            .showIf(OctoConfig.INSTANCE.aiFeatures)
                             .build());
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .onClick(() -> handleSwitch(OctoConfig.INSTANCE.aiFeaturesAskOnMedia))
                             .preferenceValue(OctoConfig.INSTANCE.aiFeaturesAskOnMedia)
                             .title(getString(R.string.AiFeatures_Features_AskOnPhoto))
-                            .showIf(OctoConfig.INSTANCE.aiFeatures)
                             .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.aiFeaturesTranscribeVoice)
@@ -141,26 +140,14 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
                                             .setItemDescription(getString(R.string.AiFeatures_Features_TranscribeVoice_Unified_Desc))
                             ))
                             .title(getString(R.string.AiFeatures_Features_TranscribeVoice))
-                            .showIf(OctoConfig.INSTANCE.aiFeatures)
                             .build());
                 })
-                .row(new TextDetailRow.TextDetailRowBuilder()
-                        .propertySelectionTag("providers")
-                        .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsAiProvidersUI())))
-                        .icon(R.drawable.msg_payment_provider)
-                        .title(getString(R.string.TranslatorProvider))
-                        .description(getString(R.string.AiFeatures_AccessVia_Desc))
-                        .showIf(OctoConfig.INSTANCE.aiFeatures)
-                        .build()
-                )
-                .row(new ShadowRow())
-                .categoryWithoutShadow(getString(R.string.AiFeatures_CustomModels), OctoConfig.INSTANCE.aiFeatures, category -> {
+                .categoryWithoutShadow(getString(R.string.AiFeatures_CustomModels),category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .isBlue(true)
                             .onClick(() -> openModel(null))
                             .propertySelectionTag("createModel")
                             .icon(R.drawable.msg_add)
-                            .showIf(OctoConfig.INSTANCE.aiFeatures)
                             .title(getString(R.string.AiFeatures_CustomModels_Create))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -168,7 +155,6 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
                             .onClick(this::openGenerateModel)
                             .propertySelectionTag("generateModel")
                             .icon(R.drawable.aifeatures_solar)
-                            .showIf(OctoConfig.INSTANCE.aiFeatures)
                             .title(getString(R.string.AiFeatures_CustomModels_Generate) + " (beta)")
                             .build());
 
@@ -190,9 +176,23 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
                                         )
                                 )
                         ))
-                        .showIf(OctoConfig.INSTANCE.aiFeatures)
+                        .build())
+                .categoryWithoutShadow(getString(R.string.TranslatorProvider), this::listProviders)
+                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
+                        .title(getString(R.string.AiFeatures_AccessVia_AddMore))
                         .build())
                 .build();
+    }
+
+    public void setShowEnabledBulletin(boolean showEnabledBulletin) {
+        this.showEnabledBulletin = showEnabledBulletin;
+    }
+
+    @Override
+    public void onFragmentCreate() {
+        if (showEnabledBulletin) {
+            AndroidUtilities.runOnUIThread(() -> BulletinFactory.of(fragment).createSuccessBulletin(getString(R.string.AiFeatures_Brief_StartUsing_Done)).show(), 300);
+        }
     }
 
     private boolean handleSwitch(ConfigProperty<Boolean> currentProperty) {
@@ -208,25 +208,7 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
             return false;
         }
 
-        if (features.contains(currentProperty) && !areThereEnabledFeatures(currentProperty)) {
-            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.chats_infotip, getString(R.string.AiFeatures_Features_Empty), getString(R.string.AiFeatures_AccessVia_Empty_Disable), () -> {
-                OctoConfig.INSTANCE.aiFeatures.updateValue(false);
-                fragment.reloadUIAfterValueUpdate();
-            }).show();
-            return false;
-        }
-
         return true;
-    }
-
-    private boolean areThereEnabledFeatures(ConfigProperty<Boolean> currentProperty) {
-        for (ConfigProperty<Boolean> property : features) {
-            if (currentProperty != property && property.getValue()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void openGenerateModel() {
@@ -308,7 +290,6 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
                 .modelID(modelID)
                 .onClick(() -> openModel(modelID))
                 .onShowOptions(v -> showModelOptions(v, modelID))
-                .showIf(OctoConfig.INSTANCE.aiFeatures)
                 .build();
     }
 
@@ -359,5 +340,61 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
             }
         };
         FileShareHelper.init(data);
+    }
+
+    private void listProviders(OctoPreferences.OctoPreferencesBuilder category) {
+        for (AiProvidersDetails provider : AiProvidersDetails.getEntries()) {
+            boolean isAdded = MainAiHelper.isProviderAvailable(provider);
+
+            ConfigProperty<Boolean> property = new ConfigProperty<>(null, isAdded);
+            addedCategoryVisibility.put(provider.getId(), property);
+            category.row(new SwitchRow.SwitchRowBuilder()
+                    .onClick(() -> openPropertyConfig(provider))
+                    .preferenceValue(provider.getStatusProperty())
+                    .title(provider.getUseThisProviderString())
+                    .showIf(property)
+                    .build());
+
+            property = new ConfigProperty<>(null, !isAdded);
+            availableCategoryVisibility.put(provider.getId(), property);
+            category.row(new TextIconRow.TextIconRowBuilder()
+                    .isBlue(true)
+                    .onClick(() -> openPropertyConfig(provider))
+                    .propertySelectionTag(provider.getStatusProperty().getKey())
+                    .icon(R.drawable.msg_add)
+                    .showIf(property)
+                    .title(provider.getUseThisProviderString())
+                    .build());
+        }
+    }
+
+    private void updateProvidersState() {
+        if (!addedCategoryVisibility.isEmpty() || !availableCategoryVisibility.isEmpty()) {
+            for (AiProvidersDetails provider : AiProvidersDetails.getEntries()) {
+                boolean isAdded = MainAiHelper.isProviderAvailable(provider);
+                if (addedCategoryVisibility.containsKey(provider.getId())) {
+                    Objects.requireNonNull(addedCategoryVisibility.get(provider.getId())).updateValue(isAdded);
+                }
+                if (availableCategoryVisibility.containsKey(provider.getId())) {
+                    Objects.requireNonNull(availableCategoryVisibility.get(provider.getId())).updateValue(!isAdded);
+                }
+            }
+        }
+    }
+
+    private boolean openPropertyConfig(AiProvidersDetails property) {
+        new AiConfigBottomSheet(context, fragment, property, new AiConfigBottomSheet.AiConfigInterface() {
+            @Override
+            public void onStateUpdated() {
+                updateProvidersState();
+                fragment.reloadUIAfterValueUpdate();
+            }
+
+            @Override
+            public boolean canShowSuccessBulletin() {
+                return MainAiHelper.hasAvailableProviders();
+            }
+        }).show();
+        return false;
     }
 }

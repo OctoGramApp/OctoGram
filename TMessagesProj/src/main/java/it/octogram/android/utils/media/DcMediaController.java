@@ -72,9 +72,11 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
 
     public void startFetching(int specificDcId) {
         if (callback == null) {
+            OctoLogging.w("DcMediaController", "Cannot start fetching - callback is null");
             return;
         }
 
+        OctoLogging.d("DcMediaController", "Starting fetch for DC " + (specificDcId == 0 ? "all" : specificDcId));
         destroy(false);
         this.specificDcId = specificDcId;
 
@@ -100,6 +102,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
     }
 
     public void destroy(boolean promptInterrupt) {
+        OctoLogging.d("DcMediaController", "Destroying controller, promptInterrupt: " + promptInterrupt);
         getNotificationCenter().removeObserver(this, NotificationCenter.fileLoaded);
         getNotificationCenter().removeObserver(this, NotificationCenter.fileLoadProgressChanged);
         getNotificationCenter().removeObserver(this, NotificationCenter.fileLoadFailed);
@@ -128,12 +131,14 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
     }
 
     private void resolveUsername(Utilities.Callback<TLRPC.TL_inputChannel> run) {
+        OctoLogging.d("DcMediaController", "Resolving username: " + CHANNEL_USERNAME);
         TLRPC.TL_contacts_resolveUsername req = new TLRPC.TL_contacts_resolveUsername();
         req.username = CHANNEL_USERNAME;
         getConnectionsManager().sendRequest(req, (response, error) -> {
             if (error == null) {
                 TLRPC.TL_contacts_resolvedPeer res = (TLRPC.TL_contacts_resolvedPeer) response;
                 if (!res.chats.isEmpty()) {
+                    OctoLogging.d("DcMediaController", "Username resolved successfully");
                     getMessagesController().putChat(res.chats.get(0), false);
                     getMessagesStorage().putUsersAndChats(null, res.chats, true, true);
 
@@ -142,15 +147,22 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
                     channel.access_hash = res.chats.get(0).access_hash;
                     run.run(channel);
                 } else {
-                    callback.onFailed();
+                    OctoLogging.e("DcMediaController", "Username resolution returned no chats");
+                    if (callback != null) {
+                        callback.onFailed();
+                    }
                 }
             } else {
-                callback.onFailed();
+                OctoLogging.e("DcMediaController", "Username resolution request failed: " + (error != null ? error.text : "unknown"));
+                if (callback != null) {
+                    callback.onFailed();
+                }
             }
         });
     }
 
     private void fetchContent(TLRPC.InputChannel inputChannel) {
+        OctoLogging.d("DcMediaController", "Starting content fetch for channel: " + inputChannel.channel_id);
         startedAt = System.currentTimeMillis();
 
         TLRPC.TL_channels_getMessages req = new TLRPC.TL_channels_getMessages();
@@ -162,14 +174,23 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
             tempList.add(ASSOC_DC_IDS.get(specificDcId - 1));
             req.id = tempList;
         }
+        OctoLogging.d("DcMediaController", "Requesting messages for ids: " + req.id);
         getConnectionsManager().sendRequest(req, (response, error) -> {
             if (error == null) {
                 TLRPC.messages_Messages messagesRes = (TLRPC.messages_Messages) response;
                 if (!messagesRes.messages.isEmpty()) {
                     handleCacheDeleteFromChannel(messagesRes, () -> handleMessagesFromChannels(messagesRes));
+                } else {
+                    OctoLogging.e("DcMediaController", "No messages received from channel response");
+                    if (callback != null) {
+                        callback.onFailed();
+                    }
                 }
             } else {
-                callback.onFailed();
+                OctoLogging.e("DcMediaController", "Error fetching messages: " + (error != null ? error.text : "unknown"));
+                if (callback != null) {
+                    callback.onFailed();
+                }
             }
         });
     }
@@ -210,6 +231,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
     }
 
     private void handleMessagesFromChannels(TLRPC.messages_Messages messagesRes) {
+        OctoLogging.d("DcMediaController", "Processing messages from channels");
         ArrayList<Integer> parsedDcIds = new ArrayList<>();
         for (TLRPC.Message message : messagesRes.messages) {
             int dcIdAssoc = getDcIdByMessage(message);
@@ -221,7 +243,10 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
             if (message.media != null && message.media.document != null) {
                 parsedDcIds.add(dcIdAssoc);
                 downloadingMedias.add(message.media.document);
-                assocFileNames.put(FileLoader.getAttachFileName(message.media.document), dcIdAssoc);
+                String fileName = FileLoader.getAttachFileName(message.media.document);
+                OctoLogging.d("DcMediaController", "Queueing download: doc_id=" + message.media.document.id + " file=" + fileName + " dc=" + dcIdAssoc);
+                assocFileNames.put(fileName, dcIdAssoc);
+                OctoLogging.d("DcMediaController", "Mapped file to DC: " + fileName + " -> " + dcIdAssoc);
                 getFileLoader().loadFile(message.media.document, "dc_id_test", FileLoader.PRIORITY_NORMAL, 1);
                 callback.onUpdate(dcIdAssoc, SingleDatacenterStatusPreview.DOWNLOADING, 0);
             }
@@ -239,6 +264,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         if (f != null) {
             return new CacheModel.FileInfo(f);
         } else {
+            OctoLogging.d("DcMediaController", "Downloaded file instance not found for message id: " + message.id);
             return null;
         }
     }
@@ -248,6 +274,7 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         for (int i = 0; i < ASSOC_DC_IDS.size(); i++) {
             if (ASSOC_DC_IDS.get(i) == message.id) {
                 dcIdAssoc = i + 1;
+                OctoLogging.d("DcMediaController", "Found DC association for message " + message.id + ": DC" + dcIdAssoc);
                 break;
             }
         }
@@ -257,11 +284,13 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
     @Override
     public void didReceivedNotification(int id, int account, Object... args) {
         if (account != FIRST_ACCOUNT_ID) {
+            OctoLogging.d("DcMediaController", "Ignoring notification for non-first account: " + account);
             return;
         }
 
         String path = (String) args[0];
         if (!assocFileNames.containsKey(path)) {
+            OctoLogging.d("DcMediaController", "Ignoring notification for unknown file: " + path);
             return;
         }
 
@@ -273,12 +302,15 @@ public class DcMediaController implements NotificationCenter.NotificationCenterD
         if (id == NotificationCenter.fileLoaded) {
             int time = (int) ((System.currentTimeMillis() - startedAt) / 1000F);
             parsedDcs.add(dcId);
+            OctoLogging.d("DcMediaController", "File loaded for DC " + dcId + " in " + time + "s (path=" + path + ")");
             callback.onUpdate(dcId, SingleDatacenterStatusPreview.DOWNLOAD_END, time, parsedDcs.size());
         } else if (id == NotificationCenter.fileLoadProgressChanged) {
             Float p = ImageLoader.getInstance().getFileProgress(path);
+            OctoLogging.d("DcMediaController", "Progress for " + path + " -> " + (p != null ? (p * 100) + "%" : "unknown"));
             callback.onUpdate(dcId, SingleDatacenterStatusPreview.DOWNLOADING, p != null ? ((int) (p * 100)) : 0);
         } else if (id == NotificationCenter.fileLoadFailed) {
             int reason = (int) args[1];
+            OctoLogging.e("DcMediaController", "File load failed for path=" + path + " reason=" + reason);
             parsedDcs.add(dcId);
             callback.onUpdate(dcId, reason == 2 ? SingleDatacenterStatusPreview.DOWNLOAD_FAILED_TRY_LATER : SingleDatacenterStatusPreview.DOWNLOAD_FAILED, parsedDcs.size());
         }

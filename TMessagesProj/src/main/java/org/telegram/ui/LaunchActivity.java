@@ -246,8 +246,8 @@ import java.util.zip.ZipInputStream;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
-import it.octogram.android.crashlytics.Crashlytics;
-import it.octogram.android.tgastandaloneexport.UpdateLayout;
+import it.octogram.android.utils.Crashlytics;
+import it.octogram.android.app.ui.cells.DrawerPageUpdateButtonCell;
 import it.octogram.android.utils.deeplink.DeepLinkManager;
 import it.octogram.android.utils.icons.IconsResources;
 import it.octogram.android.utils.OctoLogging;
@@ -871,7 +871,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             }
             return false;
         });
-        updateLayout = new UpdateLayout(this, sideMenu, sideMenuContainer);
+        updateLayout = new DrawerPageUpdateButtonCell(this, sideMenu, sideMenuContainer);
         drawerLayoutContainer.setParentActionBarLayout(actionBarLayout);
         actionBarLayout.setDrawerLayoutContainer(drawerLayoutContainer);
         actionBarLayout.setFragmentStack(mainFragmentsStack);

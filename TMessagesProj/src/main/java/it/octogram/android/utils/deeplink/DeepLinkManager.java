@@ -45,8 +45,8 @@ import it.octogram.android.app.ui.DcStatusActivity;
 import it.octogram.android.app.ui.OctoAppearanceDrawerSettingsUI;
 import it.octogram.android.app.ui.OctoAppearanceUI;
 import it.octogram.android.app.ui.OctoCameraSettingsUI;
+import it.octogram.android.app.ui.OctoChatsAiFeaturesIntroUI;
 import it.octogram.android.app.ui.OctoChatsAiFeaturesUI;
-import it.octogram.android.app.ui.OctoChatsAiProvidersUI;
 import it.octogram.android.app.ui.OctoChatsContextMenuSettingsUI;
 import it.octogram.android.app.ui.OctoChatsPinnedEmojisActivity;
 import it.octogram.android.app.ui.OctoChatsPinnedHashtagsActivity;
@@ -57,12 +57,12 @@ import it.octogram.android.app.ui.OctoExperimentsNavigationUI;
 import it.octogram.android.app.ui.OctoExperimentsUI;
 import it.octogram.android.app.ui.OctoGeneralSettingsUI;
 import it.octogram.android.app.ui.OctoInfoSettingsUI;
-import it.octogram.android.app.ui.OctoLogsActivity;
+import it.octogram.android.app.ui.OctoLogsSettingsUI;
 import it.octogram.android.app.ui.OctoMainSettingsUI;
 import it.octogram.android.app.ui.OctoPrivacySettingsUI;
-import it.octogram.android.crashlytics.CrashViewType;
-import it.octogram.android.crashlytics.Crashlytics;
+import it.octogram.android.utils.Crashlytics;
 import it.octogram.android.utils.OctoLogging;
+import it.octogram.android.utils.ai.MainAiHelper;
 import it.octogram.android.utils.network.BrowserUtils;
 
 /**
@@ -83,14 +83,6 @@ public class DeepLinkManager extends LaunchActivity {
     static final String TAG = "DeepLinkManager";
     static long profileUserId = 0;
 
-    /**
-     * Handles deep links received by the application.
-     * <p>
-     * This method processes deep links and performs actions based on the link content.
-     * It supports various deep links for accessing specific features, settings, or user profiles.
-     *
-     * @param deepLink The deep link URL to handle.
-     */
     public static boolean handleDeepLink(String deepLink) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             OctoLogging.d(TAG, "handleDeepLink: " + deepLink);
@@ -176,11 +168,11 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
             }
             case DeepLinkDef.AI_FEATURES -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI(), parameter));
-                return true;
-            }
-            case DeepLinkDef.AI_FEATURES_PROVIDERS -> {
-                fragment.presentFragment(new PreferencesFragment(new OctoChatsAiProvidersUI(), parameter));
+                if (MainAiHelper.hasAvailableProviders()) {
+                    fragment.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI(), parameter));
+                } else {
+                    fragment.presentFragment(new OctoChatsAiFeaturesIntroUI(parameter));
+                }
                 return true;
             }
             case DeepLinkDef.INFO -> {
@@ -232,12 +224,14 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
             }
             case DeepLinkDef.OCTO_CRASH_LOGS -> {
-                fragment.presentFragment(new OctoLogsActivity(CrashViewType.CRASH_LOGS));
+                fragment.presentFragment(new PreferencesFragment(new OctoLogsSettingsUI()));
                 return true;
             }
             case DeepLinkDef.OCTO_LOGS -> {
                 if (BuildVars.DEBUG_PRIVATE_VERSION) {
-                    fragment.presentFragment(new OctoLogsActivity(CrashViewType.DEBUG_LOGS));
+                    OctoLogsSettingsUI ui = new OctoLogsSettingsUI();
+                    ui.setDebugLogs(true);
+                    fragment.presentFragment(new PreferencesFragment(ui));
                 } else {
                     BulletinFactory.of(fragment).createSimpleBulletin(R.raw.error, "Debug logs are not available in production builds.").show();
                 }
@@ -256,6 +250,14 @@ public class DeepLinkManager extends LaunchActivity {
                 }
                 return true;
             }
+            case DeepLinkDef.ENABLE_BLURRED -> {
+                handleBlurred(fragment);
+                return true;
+            }
+            case DeepLinkDef.SEND_LAST_CRASHLOG -> {
+                Crashlytics.sendLastLogFromDeepLink(fragment);
+                return true;
+            }
         }
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             OctoLogging.d(TAG, "Deep link not recognized: " + deepLink);
@@ -263,15 +265,6 @@ public class DeepLinkManager extends LaunchActivity {
         profileUserId = 0;
         return false;
     }
-
-    /**
-     * Handles the Francesco deep link action.
-     * <p>
-     * This method toggles the "useTranslationsArgsFix" configuration property
-     * and displays a bulletin to inform the user about the change.
-     *
-     * @param fragment The fragment associated with the Francesco deep link event.
-     */
     static void handleFrancesco(BaseFragment fragment) {
         var bulletinText = "";
         if (OctoConfig.INSTANCE.useTranslationsArgsFix.getValue()) {
@@ -283,14 +276,16 @@ public class DeepLinkManager extends LaunchActivity {
         OctoConfig.INSTANCE.useTranslationsArgsFix.updateValue(!OctoConfig.INSTANCE.useTranslationsArgsFix.getValue());
     }
 
-    /**
-     * Handles the Ximi deep link action.
-     * <p>
-     * This method toggles the "forceHideLockScreenPopup" configuration property
-     * and displays a bulletin to inform the user about the change.
-     *
-     * @param fragment The fragment associated with the Ximi deep link event.
-     */
+    static void handleBlurred(BaseFragment fragment) {
+        var bulletinText = "";
+        if (OctoConfig.INSTANCE.useBlurredContextMenu.getValue()) {
+            bulletinText = "Blurred context menu has been disabled.";
+        } else {
+            bulletinText = "Blurred context menu has been enabled.";
+        }
+        BulletinFactory.of(fragment).createSimpleBulletin(R.raw.info, bulletinText).show();
+        OctoConfig.INSTANCE.useBlurredContextMenu.updateValue(!OctoConfig.INSTANCE.useBlurredContextMenu.getValue());
+    }
     static void handleXimi(BaseFragment fragment) {
         final String bulletinText = OctoConfig.INSTANCE.forceHideLockScreenPopup.getValue()
                 ? "Force hide lock screen popup has been disabled."
@@ -304,34 +299,11 @@ public class DeepLinkManager extends LaunchActivity {
                 !OctoConfig.INSTANCE.forceHideLockScreenPopup.getValue()
         );
     }
-
-    /**
-     * Handles the update checker action.
-     * <p>
-     * This method triggers the app update checker to verify if a new version is available.
-     * If a new version is found, the user is prompted to update the app.
-     */
     static void handleUpdateChecker() {
         if (LaunchActivity.instance != null) {
             LaunchActivity.instance.checkAppUpdate(true, null);
         }
     }
-
-    /**
-     * Handles the unlocking and display of a new app icon.
-     * <p>
-     * This method checks if the specified icon has been unlocked previously. If not, it:
-     * - Creates a bulletin (notification) to inform the user about the unlocked icon.
-     * - Triggers haptic feedback to provide tactile confirmation.
-     * - Starts a fireworks animation (if available in the current activity).
-     * - Displays the bulletin for a short duration.
-     * - Updates the icon's unlocked status to true.
-     *
-     * @param fragment      The fragment associated with the icon unlock event.
-     * @param configValue   The configuration property representing the icon's unlocked state.
-     * @param icon          The LauncherIcon object representing the unlocked icon.
-     * @param iconStringRes The resource ID of the string to display in the unlock notification.
-     */
     static void handleIconUnlock(BaseFragment fragment, ConfigProperty<Boolean> configValue, LauncherIconController.LauncherIcon icon, int iconStringRes) {
         if (LaunchActivity.instance != null) {
             if (!configValue.getValue()) {
@@ -344,24 +316,6 @@ public class DeepLinkManager extends LaunchActivity {
             }
         }
     }
-
-    /**
-     * Handles a deep link that refers to a Telegram user.
-     * <p>
-     * This method extracts the user ID from the deep link and stores it in the `profileUserId` variable.
-     * <p>
-     * The deep link is expected to be in one of the following formats:
-     * - `tg:user?id=<user_id>`
-     * - `tg://user?id=<user_id>`
-     * <p>
-     * The method replaces the `tg:user` and `tg://user` prefixes with `tg://telegram.org`
-     * to ensure the deep link is parsed correctly.
-     * <p>
-     * If the deep link contains a valid user ID, it is parsed and stored in `profileUserId`.
-     * If the user ID is invalid (e.g., not a number), an error is logged.
-     *
-     * @param deepLink The deep link string to handle.
-     */
     static void handleUserDeepLink(String deepLink) {
         deepLink = deepLink.replace("tg:user", "tg://telegram.org").replace("tg://user", "tg://telegram.org");
         Uri data = Utilities.uriParseSafe(deepLink);
@@ -379,17 +333,6 @@ public class DeepLinkManager extends LaunchActivity {
             }
         }
     }
-
-    /**
-     * Determines the deep link type based on the provided deep link URI.
-     * <p>
-     * This method checks the deep link against a predefined list of deep link patterns
-     * and returns the corresponding deep link type defined in {@link DeepLinkDef}.
-     * If the deep link does not match any known pattern, it returns null.
-     *
-     * @param uri The deep link URI to analyze.
-     * @return The deep link type as a String, or null if the deep link is not recognized.
-     */
     @DeepLinkType
     static String getDeepLinkType(Uri uri) {
         if (uri == null) {
@@ -442,13 +385,7 @@ public class DeepLinkManager extends LaunchActivity {
             case "pinned_hashtags" -> DeepLinkDef.PINNED_HASHTAGS;
             case "octogram" -> DeepLinkDef.INFO;
             case "dc" -> DeepLinkDef.DC_STATUS;
-            case "ai" -> {
-                if (uri.getPath() != null) {
-                    if (uri.getPath().equalsIgnoreCase("/providers"))
-                        yield DeepLinkDef.AI_FEATURES_PROVIDERS;
-                }
-                yield DeepLinkDef.AI_FEATURES;
-            }
+            case "ai" -> DeepLinkDef.AI_FEATURES;
             case "privacy" -> {
                 if (uri.getPath() != null) {
                     if (uri.getPath().equalsIgnoreCase("/chats")) yield DeepLinkDef.PRIVACY_CHATS;
@@ -459,6 +396,8 @@ public class DeepLinkManager extends LaunchActivity {
             case "crashlogs" -> DeepLinkDef.OCTO_CRASH_LOGS;
             case "debuglogs" -> DeepLinkDef.OCTO_LOGS;
             case "reportdetails" -> DeepLinkDef.COPY_REPORT_DETAILS;
+            case "sendcrashlog" -> DeepLinkDef.SEND_LAST_CRASHLOG;
+            case "enableblurredcm" -> DeepLinkDef.ENABLE_BLURRED;
             default -> {
                 if (authority.startsWith("user")) {
                     yield DeepLinkDef.USER;
@@ -467,29 +406,10 @@ public class DeepLinkManager extends LaunchActivity {
             }
         };
     }
-
-    /**
-     * Retrieves the currently active fragment.
-     * <p>
-     * This method returns the fragment at the top of the main fragments stack.
-     * If the stack is empty, it returns null, indicating no active fragment.
-     *
-     * @return The currently active fragment, or null if no fragment is active.
-     */
     static BaseFragment getCurrentFragment() {
         if (mainFragmentsStack.isEmpty()) return null;
         return mainFragmentsStack.get(mainFragmentsStack.size() - 1);
     }
-
-    /**
-     * Handles opening a user profile by their ID.
-     * <p>
-     * This method is triggered when a deep link or internal navigation request is made to open a specific user's profile.
-     * It checks if a valid user ID is present and, if so, creates a new ProfileActivity instance with the user ID as an argument.
-     * The ProfileActivity is then presented to the user, and the drawer behavior is adjusted based on whether the device is a tablet or not.
-     *
-     * @param launchActivity The LaunchActivity instance from which the profile should be opened.
-     */
     public static void handleOpenProfileById(LaunchActivity launchActivity) {
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             OctoLogging.d(TAG, "handleOpenProfileById: " + profileUserId);
@@ -552,7 +472,11 @@ public class DeepLinkManager extends LaunchActivity {
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
             case MenuActionDef.AI_FEATURE:
-                fragment.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI()));
+                if (MainAiHelper.hasAvailableProviders()) {
+                    fragment.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI()));
+                } else {
+                    fragment.presentFragment(new OctoChatsAiFeaturesIntroUI());
+                }
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
             case MenuActionDef.QR_LOGIN_ID:
@@ -585,17 +509,6 @@ public class DeepLinkManager extends LaunchActivity {
         return false;
     }
 
-    /**
-     * Creates and configures an ActionIntroActivity for QR code login.
-     * <p>
-     * This method initializes an ActionIntroActivity, sets it up for QR code login, and assigns a delegate
-     * to handle the scanned QR code data. The delegate processes the login token embedded in the QR code
-     * and sends an authentication request to the Telegram server.
-     *
-     * @param currentAccount The ID of the account to log in to.
-     * @param launchActivity The parent activity launching the QR login activity.
-     * @return The configured ActionIntroActivity instance for QR code login.
-     */
     @NonNull
     static ActionIntroActivity getQrActivity(int currentAccount, LaunchActivity launchActivity) {
         var fg = new ActionIntroActivity(ActionIntroActivity.ACTION_TYPE_QR_LOGIN);

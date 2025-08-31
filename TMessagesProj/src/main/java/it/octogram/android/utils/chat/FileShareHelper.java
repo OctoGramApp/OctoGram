@@ -66,10 +66,14 @@ public class FileShareHelper implements NotificationCenter.NotificationCenterDel
 
         try {
             FileOutputStream fos = new FileOutputStream(cacheFile);
-            if (BuildConfig.DEBUG) {
-                fos.write(data.fileContent.toString(4).getBytes());
-            } else {
-                fos.write(data.fileContent.toString().getBytes());
+            if (data.fileContent != null) {
+                if (BuildConfig.DEBUG) {
+                    fos.write(data.fileContent.toString(4).getBytes());
+                } else {
+                    fos.write(data.fileContent.toString().getBytes());
+                }
+            } else if (data.rawFileContent != null) {
+                fos.write(data.rawFileContent.getBytes());
             }
             fos.close();
 
@@ -151,7 +155,9 @@ public class FileShareHelper implements NotificationCenter.NotificationCenterDel
 
             StringBuilder baseInfo = new StringBuilder();
             baseInfo.append(data.caption);
-            baseInfo.append(String.format(Locale.US, " - https://%s/", OctoUtils.getDomain()));
+            if (data.addOctoLink) {
+                baseInfo.append(String.format(Locale.US, " - https://%s/", OctoConfig.MAIN_DOMAIN));
+            }
 
             for (int i = 0; i < sharingDid.size(); i++) {
                 TLRPC.TL_messages_sendMedia req = new TLRPC.TL_messages_sendMedia();
@@ -185,13 +191,15 @@ public class FileShareHelper implements NotificationCenter.NotificationCenterDel
     public static class FileShareData {
         public String fileName;
         public String fileExtension;
-        public JSONObject fileContent;
+        public JSONObject fileContent = null;
+        public String rawFileContent = null;
         public String caption = "";
 
         public BaseFragment fragment;
         public FileShareDelegate delegate;
 
         public boolean shareToSavedMessages = false;
+        public boolean addOctoLink = true;
 
         public interface FileShareDelegate {
             default void onChatSelectSheetOpen() {

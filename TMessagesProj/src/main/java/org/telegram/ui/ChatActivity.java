@@ -312,11 +312,11 @@ import it.octogram.android.ShortcutsPosition;
 import it.octogram.android.StoreUtils;
 import it.octogram.android.TranslatorMode;
 import it.octogram.android.TranslatorProvider;
+import it.octogram.android.app.ui.bottomsheets.MessageDetailsBottomSheet;
 import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
 import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.utils.ai.MainAiHelper;
 import it.octogram.android.app.fragment.PreferencesFragment;
-import it.octogram.android.app.ui.DetailsActivity;
 import it.octogram.android.app.ui.ImportSettingsUI;
 import it.octogram.android.app.ui.OctoChatsAiNewModelUI;
 import it.octogram.android.app.ui.components.CustomMediaFilterDialog;
@@ -346,9 +346,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
     public boolean justCreatedTopic = false;
     public boolean justCreatedChat = false;
-    protected TLRPC.Chat currentChat;
-    protected TLRPC.User currentUser;
-    protected TLRPC.EncryptedChat currentEncryptedChat;
+    public TLRPC.Chat currentChat;
+    public TLRPC.User currentUser;
+    public TLRPC.EncryptedChat currentEncryptedChat;
     private boolean userBlocked;
 
     private long chatInviterId;
@@ -8033,7 +8033,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 Theme.chat_composeShadowDrawable.setBounds(0, 0, getMeasuredWidth(), bottom);
                 Theme.chat_composeShadowDrawable.draw(canvas);
                 blurBounds.set(0, bottom, getMeasuredWidth(), getMeasuredHeight());
-                contentView.drawBlurRect(canvas, getY(), blurBounds, getThemedPaint(Theme.key_paint_chatComposeBackground), false);
+                contentView.drawBlurRect(canvas, getY(), blurBounds, getThemedPaint(Theme.key_paint_chatComposeBackground), false, OctoConfig.INSTANCE.disableTextBoxBlur.getValue());
             }
         };
         bottomMessagesActionContainer.drawBlur = false;
@@ -8683,7 +8683,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                     backgroundPaint.setColor(getThemedColor(Theme.key_chat_messagePanelBackground));
                     blurBounds.set(0, bottom, getMeasuredWidth(), getMeasuredHeight());
-                    contentView.drawBlurRect(canvas, getY(), blurBounds, backgroundPaint, false);
+                    contentView.drawBlurRect(canvas, getY(), blurBounds, backgroundPaint, false, OctoConfig.INSTANCE.disableTextBoxBlur.getValue());
                 } else {
                     canvas.drawRect(0, bottom, getMeasuredWidth(), getMeasuredHeight(), getThemedPaint(Theme.key_paint_chatComposeBackground));
                 }
@@ -10749,7 +10749,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     Theme.chat_composeShadowDrawable.draw(canvas);
                 }
                 blurBounds.set(0, bottom, getMeasuredWidth(), getMeasuredHeight());
-                contentView.drawBlurRect(canvas, getY(), blurBounds, getThemedPaint(Theme.key_paint_chatComposeBackground), false);
+                contentView.drawBlurRect(canvas, getY(), blurBounds, getThemedPaint(Theme.key_paint_chatComposeBackground), false, OctoConfig.INSTANCE.disableTextBoxBlur.getValue());
             }
 
             @Override
@@ -31105,7 +31105,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         MessageObject message;
         MessageObject primaryMessage;
+        ChatMessageCell vCell2 = null;
         if (v instanceof ChatMessageCell) {
+            vCell2 = (ChatMessageCell) v;
             message = ((ChatMessageCell) v).getMessageObject();
             primaryMessage = ((ChatMessageCell) v).getPrimaryMessageObject();
         } else if (v instanceof ChatActionCell) {
@@ -31124,6 +31126,27 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 TLRPC.TL_messageActionGiftStars.class)) {
             return false;
         }
+
+        if (vCell2 != null && OctoConfig.INSTANCE.useBlurredContextMenu.getValue() && !longpress) {
+            TodoItemMenu menu = new TodoItemMenu(getContext(), getResourceProvider());
+            menu.setCell(ChatActivity.this, vCell2, -1);
+
+            selectedObject = message;
+            selectedObjectGroup = getValidGroupedMessage(message);
+
+            ArrayList<Integer> icons = new ArrayList<>();
+            ArrayList<CharSequence> items = new ArrayList<>();
+            final ArrayList<Integer> options = new ArrayList<>();
+            fillMessageMenu(message, icons, items, options);
+            menu.setupMessageOptions(ChatActivity.this, icons, items, options, ChatActivity.this::processSelectedOption);
+            menu.setOnDismissListener(() -> {
+                selectedObject = null;
+                selectedObjectGroup = null;
+            });
+            menu.show();
+            return true;
+        }
+
         if (factCheckHint != null) {
             factCheckHint.hide(false);
         }
@@ -32129,7 +32152,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             data.popupWindowLayout = popupLayout;
                             data.messageObject = message;
                             data.messageText = message.getMessageTextToTranslate(groupedMessages, new int[] { message.getId() });
-                            data.noforwards = noforwards;
+                            data.noForwards = noforwards;
                             data.onLinkPress = onLinkPress;
                             CustomModelsMenuWrapper.initState(data);
                         }
@@ -34615,7 +34638,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 break;
             }
             case OPTION_MESSAGE_DETAILS: {
-                presentFragment(new DetailsActivity(selectedObject));
+                new MessageDetailsBottomSheet(ChatActivity.this, selectedObject).show();
                 break;
             }
             case OPTION_COPY_PHOTO: {

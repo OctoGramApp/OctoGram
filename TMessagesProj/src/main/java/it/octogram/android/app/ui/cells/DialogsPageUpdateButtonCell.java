@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.tgastandaloneexport;
+package it.octogram.android.app.ui.cells;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 
@@ -21,13 +21,13 @@ import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
-import android.os.Build;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -44,22 +44,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.octogram.android.utils.updater.UpdatesManager;
 
-public class UpdateButton extends IUpdateButton {
+public class DialogsPageUpdateButtonCell extends IUpdateButton {
 
     private AnimatorSet animator;
-    private RadialProgress2 icon;
-    private TextView textView;
+    private final RadialProgress2 icon;
+    private final TextView textView;
 
     @Keep
-    public UpdateButton(Context context) {
+    public DialogsPageUpdateButtonCell(Context context) {
         super(context);
 
         setWillNotDraw(false);
         setVisibility(View.INVISIBLE);
         setTranslationY(dp(48));
-        if (Build.VERSION.SDK_INT >= 21) {
-            setBackground(Theme.getSelectorDrawable(0x40ffffff, false));
-        }
+        setBackground(Theme.getSelectorDrawable(0x40ffffff, false));
         setOnClickListener(v -> {
             Activity activity = AndroidUtilities.findActivity(getContext());
             if (activity == null) return;
@@ -82,13 +80,13 @@ public class UpdateButton extends IUpdateButton {
     }
 
 
-    private Paint paint = new Paint();
-    private Matrix matrix = new Matrix();
+    private final Paint paint = new Paint();
+    private final Matrix matrix = new Matrix();
     private LinearGradient updateGradient;
     private int lastGradientWidth;
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         if (updateGradient != null) {
             paint.setColor(0xffffffff);
             paint.setShader(updateGradient);

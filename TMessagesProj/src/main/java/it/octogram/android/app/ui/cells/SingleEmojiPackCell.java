@@ -45,7 +45,7 @@ import org.telegram.ui.Components.RadialProgressView;
 import java.util.Objects;
 
 import it.octogram.android.CustomEmojiController;
-import it.octogram.android.http.FileDownloader;
+import it.octogram.android.utils.network.FileDownloader;
 import it.octogram.android.utils.data.FileUnzip;
 
 public class SingleEmojiPackCell extends FrameLayout {

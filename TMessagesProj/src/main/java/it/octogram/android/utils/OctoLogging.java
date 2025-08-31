@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Locale;
 
 /**
@@ -296,45 +299,22 @@ public class OctoLogging {
         isInitialized = true;
     }
 
-    public static File[] getLogFiles() {
-        return filesDir.listFiles((dir, name) -> name.endsWith(FILE_EXTENSION));
-    }
+    public static ArrayList<File> getLogFiles() {
+        File[] files = filesDir.listFiles((dir, name) -> name.endsWith(FILE_EXTENSION));
 
-    public static File[] getLogDumpFiles() {
-        return filesDir.listFiles((dir, name) -> name.endsWith(FILE_EXTENSION_HEAP_DUMP));
+        if (files != null) {
+            ArrayList<File> list = new ArrayList<>(Arrays.asList(files));
+            list.sort(Comparator.comparingLong(File::lastModified).reversed());
+
+            return list;
+        }
+        return new ArrayList<>();
     }
 
     public static void deleteLogs() {
-        File[] logFiles = getLogFiles();
-        if (logFiles.length == 0) {
-            d(TAG, "No crash logs to delete.");
-            return;
-        }
-
+        ArrayList<File> logFiles = getLogFiles();
         for (File file : logFiles) {
-            if (file.delete()) {
-                d(TAG, "Deleted log file: " + file.getAbsolutePath());
-            } else {
-                e(TAG, "Failed to delete file: " + file.getAbsolutePath());
-            }
+            boolean ignored = file.delete();
         }
-    }
-
-    public static File shareLogFile(File logFile) throws IOException {
-        d(TAG, "shareLog: Sharing log file: " + logFile.getAbsolutePath());
-        File sharedLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), logFile.getName());
-        try (BufferedReader logFileReader = new BufferedReader(new FileReader(logFile));
-             BufferedWriter sharedLogFileWriter = new BufferedWriter(new FileWriter(sharedLogFile))) {
-
-            StringBuilder logContent = new StringBuilder();
-            String logLine;
-            while ((logLine = logFileReader.readLine()) != null) {
-                logContent.append(logLine).append("\n");
-            }
-            sharedLogFileWriter.write(logContent.toString());
-
-        }
-        d(TAG, "shareLog: Log file shared to: " + sharedLogFile.getAbsolutePath());
-        return sharedLogFile;
     }
 }

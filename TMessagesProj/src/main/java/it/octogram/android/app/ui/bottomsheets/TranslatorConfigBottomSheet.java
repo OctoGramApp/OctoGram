@@ -64,6 +64,7 @@ import it.octogram.android.TranslatorProvider;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.translator.SingleTranslationsHandler;
 import it.octogram.android.utils.translator.providers.NewGoogleTranslator;
+import it.octogram.android.utils.updater.UpdatesManager;
 
 public class TranslatorConfigBottomSheet extends BottomSheet {
     private static final String SERVICE_NAME = "Google Cloud";
@@ -151,8 +152,25 @@ public class TranslatorConfigBottomSheet extends BottomSheet {
         buttonTextView.setBackground(Theme.AdaptiveRipple.filledRectByKey(Theme.key_featuredStickers_addButton, 4));
         buttonTextView.setOnClickListener(view -> {
             if (isFromLocalTranslation) {
-                dismiss();
-                Browser.openUrl(LaunchActivity.instance, String.format(Locale.US, "https://t.me/%s/%d", OctoConfig.EXTENSION_CHANNEL_TAG, OctoConfig.EXTENSION_CHANNEL_ID));
+                AlertDialog progress = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
+                progress.setCanCancel(false);
+                progress.show();
+                UpdatesManager.INSTANCE.getLastExtensionUpdate(new UpdatesManager.ExtensionGetStateCallback() {
+                    @Override
+                    public void onExtensionResultReceived(UpdatesManager.ExtensionUpdateState state) {
+                        dismiss();
+                        progress.dismiss();
+                        Browser.openUrl(LaunchActivity.instance, String.format(Locale.US, "https://t.me/%s/%d", state.channelUsername(), state.messageID()));
+                    }
+
+                    @Override
+                    public void onFailed() {
+                        dismiss();
+                        progress.dismiss();
+                        Browser.openUrl(LaunchActivity.instance, String.format(Locale.US, "https://t.me/%s/%d", OctoConfig.EXTENSION_CHANNEL_TAG, OctoConfig.EXTENSION_CHANNEL_ID));
+                    }
+                });
+
                 return;
             }
 

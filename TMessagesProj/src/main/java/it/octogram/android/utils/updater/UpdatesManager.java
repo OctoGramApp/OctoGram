@@ -47,8 +47,8 @@ import java.util.Objects;
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
-import it.octogram.android.http.StandardHTTPRequest;
-import it.octogram.android.tgastandaloneexport.UpdateAppAlertDialog;
+import it.octogram.android.utils.network.StandardHTTPRequest;
+import it.octogram.android.app.ui.bottomsheets.NewUpdateAvailableBottomSheet;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.network.BrowserUtils;
@@ -59,7 +59,7 @@ import it.octogram.android.utils.translator.localhelper.OnDeviceHelper;
  */
 public class UpdatesManager implements NotificationCenter.NotificationCenterDelegate {
     public static UpdatesManager INSTANCE = new UpdatesManager();
-    public static WeakReference<UpdateAppAlertDialog> updateAppAlertDialog;
+    public static WeakReference<NewUpdateAvailableBottomSheet> updateAppAlertDialog;
 
     private final String TAG = "UpdatesManager";
     private final long privateChatId = -1733655252L;
@@ -81,7 +81,8 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
 
     private boolean isLoadingTLRPCAppUpdate;
     private TLRPC.TL_help_appUpdate currentUpdateData;
-    private ExtensionUpdateState currentExtensionUpdateData;
+    private boolean hasExtensionUpdate = false;
+    private ExtensionUpdateState lastFetchedExtensionUpdateData;
     private boolean didInitFirstAccount = false;
     private int DETECTED_ACCOUNT_ID = 0;
 
@@ -153,7 +154,7 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
                 hasShownPopupForUpdate = false;
             }
 
-            hasExtensionUpdate = currentExtensionUpdateData != null;
+            hasExtensionUpdate = hasExtensionUpdate && lastFetchedExtensionUpdateData != null;
         }
 
         OctoLogging.e(TAG, String.format(Locale.US, "Update State - isChecking: %b, isUpdateAvailable: %b, isDownloading: %b, downloadProgress: %.2f, isReady: %b", isCheckingForUpdates, isUpdateAvailable, isDownloading, downloadProgress, isReady));
@@ -193,7 +194,7 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
                 }
 
                 if (state.hasExtensionUpdate()) {
-                    callback.onExtensionUpdateAvailable(currentExtensionUpdateData, state.isUpdateAvailable());
+                    callback.onExtensionUpdateAvailable(lastFetchedExtensionUpdateData, state.isUpdateAvailable());
                 } else {
                     callback.onNoExtensionUpdateAvailable(state.isUpdateAvailable());
                 }
@@ -201,9 +202,9 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
         }
         callbacks.removeIf(x -> !x.isStillValid());
 
-        if (!state.isChecking() && state.isUpdateAvailable() && !state.isReady() && !state.isDownloading() &&  !UpdateAppAlertDialog.isVisible && !hasShownPopupForUpdate && currentUpdateData != null) {
+        if (!state.isChecking() && state.isUpdateAvailable() && !state.isReady() && !state.isDownloading() &&  !NewUpdateAvailableBottomSheet.isVisible && !hasShownPopupForUpdate && currentUpdateData != null) {
             AndroidUtilities.runOnUIThread(() -> {
-                UpdateAppAlertDialog dialog = new UpdateAppAlertDialog(LaunchActivity.instance, currentUpdateData);
+                NewUpdateAvailableBottomSheet dialog = new NewUpdateAvailableBottomSheet(LaunchActivity.instance, currentUpdateData);
                 dialog.show();
                 updateAppAlertDialog = new WeakReference<>(dialog);
             });
@@ -229,6 +230,10 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
     }
 
     public void checkForUpdates() {
+        checkForUpdates(null);
+    }
+
+    private void checkForUpdates(Runnable onCompletedServerSync) {
         if (StoreUtils.isFromPlayStore()) {
             AndroidUtilities.runOnUIThread(() -> {
                 isCheckingForUpdates = false;
@@ -245,6 +250,9 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
             public void onSuccess() {
                 OctoLogging.e(TAG, "Server request for updates data completed successfully");
                 checkIsUpdateAvailableAfterDataEnsure();
+                if (onCompletedServerSync != null) {
+                    onCompletedServerSync.run();
+                }
             }
 
             @Override
@@ -252,7 +260,11 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
                 OctoLogging.e(TAG, "Server request for updates data failed");
                 isCheckingForUpdates = false;
                 currentUpdateData = null;
+                hasExtensionUpdate = false;
                 updateStateChange();
+                if (onCompletedServerSync != null) {
+                    onCompletedServerSync.run();
+                }
             }
         });
     }
@@ -310,12 +322,13 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
         boolean definedExtensionUpdate = false;
         try {
             JSONObject extensionUpdate = updatesData.getJSONObject("extension_update");
+            ExtensionUpdateState extensionState = getExtensionStateFromObject(extensionUpdate);
+            lastFetchedExtensionUpdateData = extensionState;
             if (OnDeviceHelper.isAvailable()) {
                 int versionCode = OnDeviceHelper.getVersionCode();
-                ExtensionUpdateState extensionState = getExtensionStateFromObject(extensionUpdate);
                 if (extensionState.versionCode() > versionCode && !OctoConfig.INSTANCE.ignoredExtensionUpdateVersion.getValue().equals(versionCode)) {
                     definedExtensionUpdate = true;
-                    currentExtensionUpdateData = extensionState;
+                    hasExtensionUpdate = true;
                 }
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -324,7 +337,7 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
             OctoLogging.e(TAG, "Check of extension update failed due to invalid data!", e);
         } finally {
             if (!definedExtensionUpdate) {
-                currentExtensionUpdateData = null;
+                hasExtensionUpdate = false;
             }
         }
 
@@ -938,6 +951,16 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
         }
     }
 
+    public void getLastExtensionUpdate(ExtensionGetStateCallback callback) {
+        checkForUpdates(() -> {
+            if (lastFetchedExtensionUpdateData != null) {
+                callback.onExtensionResultReceived(lastFetchedExtensionUpdateData);
+            } else {
+                callback.onFailed();
+            }
+        });
+    }
+
     @Override
     public void didReceivedNotification(int id, int account, Object... args) {
         if (currentUpdateData == null) {
@@ -990,6 +1013,13 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
 
         }
         default void onNoExtensionUpdateAvailable(boolean hasAlsoClassicUpdate) {
+
+        }
+    }
+
+    public interface ExtensionGetStateCallback {
+        void onExtensionResultReceived(ExtensionUpdateState state);
+        default void onFailed() {
 
         }
     }

@@ -56,14 +56,11 @@ import it.octogram.android.app.PreferencesEntry;
 import it.octogram.android.app.fragment.PreferencesFragment;
 import it.octogram.android.app.rows.impl.TextDetailRow;
 import it.octogram.android.app.rows.impl.TextIconRow;
-import it.octogram.android.app.ui.bottomsheets.ArticleTranslationsBottomSheet;
 import it.octogram.android.app.ui.bottomsheets.ExportDoneReadyBottomSheet;
-import it.octogram.android.crashlytics.CrashViewType;
 import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.chat.FileShareHelper;
-import it.octogram.android.utils.data.LogsMigrator;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
 
 /**
@@ -83,6 +80,9 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
 
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
                 .deepLink(DeepLinkDef.OCTOSETTINGS)
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_saved, getString(R.string.Export), () -> openExportSettingsProcedure(fragment, context)))
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_customize, getString(R.string.ImportReady), () -> openImportSettingsProcedure(fragment, context)))
+                .addContextMenuItem(new OctoPreferences.OctoContextMenuElement(R.drawable.msg_reset, getString(R.string.ResetSettings), () -> openResetSettingsProcedure(fragment, context)).asDanger())
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.MAIN_SETTINGS, true, getString(R.string.OctoMainSettingsHeader))
                 .category(getString(R.string.Settings), category -> {
                     if (BuildConfig.DEBUG) {
@@ -108,17 +108,6 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                                 .title("Test app signaling")
                                 .description("Check update message")
                                 .build());
-                        category.row(new TextDetailRow.TextDetailRowBuilder()
-                                .onClick(() -> {
-                                    ArticleTranslationsBottomSheet sheet = new ArticleTranslationsBottomSheet(context, true);
-                                    sheet.show();
-                                    AndroidUtilities.runOnUIThread(() -> sheet.setProgress(0.5f), 1000);
-                                })
-                                .icon(R.drawable.msg_translate)
-                                .title("Test translations bottom sheet")
-                                .description("Check progress bar")
-                                .build());
-
                     }
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI())))
@@ -167,44 +156,11 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                             .title(getString(R.string.Updates))
                             .build());
                 })
-                .category(getString(R.string.OctoMainSettingsManageCategory), category -> {
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> openExportSettingsProcedure(fragment, context))
-                            .icon(R.drawable.msg_saved)
-                            .title(getString(R.string.Export))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> openImportSettingsProcedure(fragment, context))
-                            .icon(R.drawable.msg_customize)
-                            .title(getString(R.string.ImportReady))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> openResetSettingsProcedure(fragment, context))
-                            .icon(R.drawable.msg_reset)
-                            .title(getString(R.string.ResetSettings))
-                            .build());
-                })
                 .category(getString(R.string.OctoMainSettingsInfo), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new DcStatusActivity()))
                             .icon(R.drawable.datacenter_status)
                             .title(getString(R.string.DatacenterStatus))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> {
-                                LogsMigrator.migrateOldLogs();
-                                fragment.presentFragment(new OctoLogsActivity(CrashViewType.CRASH_LOGS));
-                            })
-                            .icon(R.drawable.msg2_help)
-                            .title(getString(R.string.CrashHistory))
-                            .description(getString(R.string.CrashHistory_Desc))
-                            .build());
-                    category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new OctoLogsActivity(CrashViewType.DEBUG_LOGS)))
-                            .icon(R.drawable.msg_log)
-                            .title("Debug Logs (PBETA only)")
-                            .description("View debug logs")
-                            .showIf(logsOnlyPbeta)
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoInfoSettingsUI())))

@@ -23,7 +23,7 @@ public class MainAiHelper {
     private static boolean frozenState = false;
 
     public static boolean canUseAiFeatures() {
-        return OctoConfig.INSTANCE.aiFeatures.getValue() && hasAvailableProviders();
+        return OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.getValue() && hasAvailableProviders();
     }
 
     public static int getEnabledProvidersCount() {

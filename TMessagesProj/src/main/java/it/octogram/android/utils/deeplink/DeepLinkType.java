@@ -40,10 +40,11 @@ import java.lang.annotation.RetentionPolicy;
         DeepLinkDef.PRIVACY,
         DeepLinkDef.PRIVACY_CHATS,
         DeepLinkDef.AI_FEATURES,
-        DeepLinkDef.AI_FEATURES_PROVIDERS,
         DeepLinkDef.OCTO_CRASH_LOGS,
         DeepLinkDef.OCTO_LOGS,
-        DeepLinkDef.COPY_REPORT_DETAILS
+        DeepLinkDef.COPY_REPORT_DETAILS,
+        DeepLinkDef.SEND_LAST_CRASHLOG,
+        DeepLinkDef.ENABLE_BLURRED
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface DeepLinkType {

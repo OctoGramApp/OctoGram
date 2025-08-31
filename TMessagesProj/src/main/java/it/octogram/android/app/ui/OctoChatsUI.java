@@ -54,6 +54,7 @@ import it.octogram.android.app.rows.impl.TextIconRow;
 import it.octogram.android.app.ui.cells.ChatSettingsPreviewsCell;
 import it.octogram.android.app.ui.cells.DcIdTypeSelectorCell;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.ai.MainAiHelper;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 import it.octogram.android.utils.config.ExpandableRowsOption;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
@@ -92,7 +93,13 @@ public class OctoChatsUI implements PreferencesEntry {
                             .title(getString(R.string.Translator))
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI())))
+                            .onClick(() -> {
+                                if (MainAiHelper.canUseAiFeatures()) {
+                                    fragment.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI()));
+                                } else {
+                                    fragment.presentFragment(new OctoChatsAiFeaturesIntroUI());
+                                }
+                            })
                             .icon(R.drawable.cup_star_solar)
                             .title(getString(R.string.AiFeatures_Brief))
                             .build());

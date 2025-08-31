@@ -6,7 +6,9 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.crashlytics;
+package it.octogram.android.utils;
+
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -17,47 +19,49 @@ import android.content.res.Resources;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
-import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationsController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.LaunchActivity;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.OctoLogging;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.NotificationColorize;
+import it.octogram.android.utils.chat.FileShareHelper;
 
 public class Crashlytics {
 
     private static final String TAG = "Crashlytics";
     private static final String NOTIFICATION_CHANNEL_ID = NotificationsController.OTHER_NOTIFICATIONS_CHANNEL;
     private static final int CRASH_NOTIFICATION_ID = 1278927891;
-    private static final String LATEST_CRASH_LOG_FILE_NAME = "latest_crash.log";
     private static final String LOG_FILE_EXTENSION = ".log";
     private static final String CRASH_NOTIFICATION_TITLE = "OctoGram just crashed!";
     private static final String CRASH_NOTIFICATION_TEXT = "Sorry about that!";
 
     private final static File filesDir = OctoUtils.getLogsDir();
+
+    private static boolean _hasPendingCrashForThisSession = false;
 
     public static void init() {
         OctoLogging.d(TAG, "init: Initializing Crashlytics");
@@ -110,12 +114,39 @@ public class Crashlytics {
     }
 
     private static void saveCrashLogs(String stacktrace) throws IOException, IllegalAccessException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(getLatestCrashFile()));
-        OctoLogging.d(TAG, "saveCrashLogs: Saving crash logs to: " + getLatestCrashFile().getAbsolutePath());
-        writer.write(getSystemInfo(false));
-        writer.write(stacktrace);
-        writer.flush();
-        writer.close();
+        File archived = new File(filesDir, "Crash20_" + System.currentTimeMillis() + LOG_FILE_EXTENSION);
+
+        FileOutputStream fos = new FileOutputStream(archived);
+        fos.write(getSystemInfo(false).getBytes());
+        fos.write(stacktrace.getBytes());
+        fos.close();
+
+        File tempFile = new File(filesDir, "pending_crash.txt");
+        boolean ignored = tempFile.createNewFile();
+    }
+
+    public static boolean hasPendingCrash() {
+        if (_hasPendingCrashForThisSession) {
+            return true;
+        }
+
+        File tempFile = new File(filesDir, "pending_crash.txt");
+        if (tempFile.exists()) {
+            _hasPendingCrashForThisSession = true;
+            boolean ignored = tempFile.delete();
+            return true;
+        }
+
+        _hasPendingCrashForThisSession = false;
+        return false;
+    }
+
+    public static void resetPendingCrash() {
+        _hasPendingCrashForThisSession = false;
+        File tempFile = new File(filesDir, "pending_crash.txt");
+        if (tempFile.exists()) {
+            _hasPendingCrashForThisSession = true;
+        }
     }
 
     private static void showCrashNotification(String stacktrace) {
@@ -180,12 +211,6 @@ public class Crashlytics {
         return baseInfo.toString();
     }
 
-    /**
-     * Reflectively retrieves and formats the OctoConfig properties.
-     *
-     * @return A JSON-like string representation of OctoConfig.
-     * @throws IllegalAccessException If reflection access fails.
-     */
     private static String getOctoConfiguration() throws IllegalAccessException {
         OctoLogging.d(TAG, "getOctoConfiguration: Getting Octo configuration");
         StringBuilder builder = new StringBuilder("{\n");
@@ -217,105 +242,103 @@ public class Crashlytics {
         };
     }
 
-    public static void deleteCrashLogs() {
-        OctoLogging.d(TAG, "deleteCrashLogs: Deleting crash logs");
-        File[] files = getArchivedCrashFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (!file.delete()) {
-                    OctoLogging.e(TAG, "deleteCrashLogs: Failed to delete crash log file: " + file.getAbsolutePath());
-                } else {
-                    OctoLogging.d(TAG, "deleteCrashLogs: Deleted crash log file: " + file.getAbsolutePath());
-                }
-            }
-        } else {
-            OctoLogging.d(TAG, "deleteCrashLogs: No archived crash log files found to delete");
-        }
-    }
-
-    public static File getLatestArchivedCrashFile() {
-        OctoLogging.d(TAG, "getLatestArchivedCrashFile: Getting latest archived crash file");
-        File[] files = getArchivedCrashFiles();
-        if (files != null && files.length > 0) {
-            return files[files.length - 1];
-        }
-        OctoLogging.d(TAG, "getLatestArchivedCrashFile: No archived crash files found");
-        return null;
-    }
-
-    public static String getLatestCrashDate() {
-        OctoLogging.d(TAG, "getLatestCrashDate: Getting latest crash date from log file");
-        File latestCrashFile = getLatestCrashFile();
-        if (!latestCrashFile.exists()) {
-            OctoLogging.w(TAG, "getLatestCrashDate: Latest crash file does not exist, returning 'No_Crash_Log_Found'");
-            return "No_Crash_Log_Found";
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader(latestCrashFile))) {
-            String line = reader.readLine();
-            if (line != null) {
-                String date = line.replace(" ", "_").replace(",", "").replace(":", "_");
-                OctoLogging.d(TAG, "getLatestCrashDate: Latest crash date found: " + date);
-                return date;
-            } else {
-                OctoLogging.w(TAG, "getLatestCrashDate: Date not found in crash log file, returning 'Date_Not_Found_in_Log'");
-                return "Date_Not_Found_in_Log";
-            }
-        } catch (IOException e) {
-            OctoLogging.e(TAG, "getLatestCrashDate: Error reading latest crash log file", e);
-            return "Error_Reading_Log_Date";
-        }
-    }
-
-    @Nullable
-    public static File[] getArchivedCrashFiles() {
-        OctoLogging.d(TAG, "getArchivedCrashFiles: Getting archived crash files");
+    public static ArrayList<File> getArchivedCrashFiles() {
         if (filesDir != null && filesDir.exists()) {
             File[] files = filesDir.listFiles((dir, name) -> name.endsWith(LOG_FILE_EXTENSION));
-            OctoLogging.d(TAG, "getArchivedCrashFiles: Found " + (files != null ? files.length : 0) + " archived crash files");
-            return files;
-        }
-        OctoLogging.d(TAG, "getArchivedCrashFiles: Logs directory does not exist or is null, returning null for archived crash files");
-        return null;
-    }
 
-    public static File getLatestCrashFile() {
-        File latestCrashFile = new File(filesDir, LATEST_CRASH_LOG_FILE_NAME);
-        OctoLogging.d(TAG, "getLatestCrashFile: Getting latest crash file: " + latestCrashFile.getAbsolutePath());
-        return latestCrashFile;
-    }
+            if (files != null) {
+                ArrayList<File> list = new ArrayList<>(Arrays.asList(files));
+                list.sort(Comparator.comparingLong(File::lastModified).reversed());
 
-    public static void archiveLatestCrash() {
-        OctoLogging.d(TAG, "archiveLatestCrash: Archiving latest crash log");
-        File file = getLatestCrashFile();
-        if (file.exists()) {
-            String timestamp = getLatestCrashDate();
-            String sanitizedTimestamp = timestamp.replaceAll("[\\\\/:*?\"<>|]", "_");
-            File archived = new File(filesDir, sanitizedTimestamp + LOG_FILE_EXTENSION);
-            if (!file.renameTo(archived)) {
-                OctoLogging.e(TAG, "archiveLatestCrash: Failed to archive crash log file: " + file.getAbsolutePath());
-            } else {
-                OctoLogging.d(TAG, "archiveLatestCrash: Successfully archived crash log to: " + archived.getAbsolutePath());
+                return list;
             }
+        }
+        return new ArrayList<>();
+    }
+
+    public static void deleteCrashLogs() {
+        ArrayList<File> logFiles = getArchivedCrashFiles();
+        for (File file : logFiles) {
+            boolean ignored = file.delete();
+        }
+    }
+
+    public static String getLogContent(File logFile) throws IOException {
+        FileInputStream downloadedFileStream = new FileInputStream(logFile);
+
+        StringBuilder fileBuilder = new StringBuilder();
+        int character;
+        while ((character = downloadedFileStream.read()) != -1) {
+            fileBuilder.append((char) character);
+        }
+
+        downloadedFileStream.close();
+        return fileBuilder.toString();
+    }
+
+    public static void sendLastLogFromDeepLink(BaseFragment fragment) {
+        ArrayList<File> files = getArchivedCrashFiles();
+        if (!files.isEmpty()) {
+            sendLog(fragment, files.get(0), false);
         } else {
-            OctoLogging.w(TAG, "archiveLatestCrash: Latest crash file does not exist, cannot archive");
+            BulletinFactory.of(fragment).createSimpleBulletin(R.raw.error, "Debug logs are not available in production builds.").show();
         }
     }
 
-    public static File shareLog(File logFile) throws IOException {
-        OctoLogging.d(TAG, "shareLog: Sharing log file: " + logFile.getAbsolutePath());
-        File sharedLogFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), logFile.getName());
-        try (BufferedReader logFileReader = new BufferedReader(new FileReader(logFile));
-             BufferedWriter sharedLogFileWriter = new BufferedWriter(new FileWriter(sharedLogFile))) {
+    public static void sendLog(BaseFragment fragment, File file) {
+        sendLog(fragment, file, true);
+    }
 
-            StringBuilder logContent = new StringBuilder();
-            String logLine;
-            while ((logLine = logFileReader.readLine()) != null) {
-                logContent.append(logLine).append("\n");
-            }
-            sharedLogFileWriter.write(logContent.toString());
-
+    private static void sendLog(BaseFragment fragment, File file, boolean useGeneric) {
+        if (file == null || !file.exists()) {
+            return;
         }
-        OctoLogging.d(TAG, "shareLog: Log file shared to: " + sharedLogFile.getAbsolutePath());
-        return sharedLogFile;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getParentActivity());
+        builder.setTitle(getString(R.string.OctoSendLastLogTitle));
+        builder.setMessage(getString(useGeneric ? R.string.OctoSendLastLogDescGeneric : R.string.OctoSendLastLogDesc));
+        builder.setPositiveButton(getString(R.string.OctoSendLastLogShare), (dialogInterface, i) -> {
+            try {
+                if (!file.exists()) {
+                    return;
+                }
+
+                String content = Crashlytics.getLogContent(file);
+
+                FileShareHelper.FileShareData data = new FileShareHelper.FileShareData();
+                data.fragment = fragment;
+                data.rawFileContent = content;
+                data.fileName = file.getName();
+                data.fileExtension = "";
+                data.addOctoLink = false;
+                try {
+                    data.caption = Crashlytics.getSystemInfo(false);
+                } catch (IllegalAccessException ignored) {
+
+                }
+                FileShareHelper.init(data);
+            } catch (IOException ignored) {}
+        });
+        builder.setNegativeButton(getString(R.string.Cancel), null);
+        builder.show();
+    }
+
+    public static String getFileName(File file) {
+        if (file == null) {
+            return "-";
+        }
+
+        String fileName = file.getName();
+        if (fileName.startsWith("Crash20_") && fileName.endsWith(LOG_FILE_EXTENSION)) {
+            String time = fileName.split("Crash20_")[1].split(LOG_FILE_EXTENSION)[0];
+            try {
+                long newTime = Long.parseLong(time);
+                if (newTime > 0) {
+                    return LocaleController.getInstance().getFormatterBannedUntil().format(newTime);
+                }
+            } catch (Exception ignored) {}
+        }
+
+        return LocaleController.getInstance().getFormatterBannedUntil().format(file.lastModified());
     }
 }

@@ -183,7 +183,7 @@ public class DcStatusActivity extends BaseFragment {
                 contentLayout.addView(reloadStateCell = new ReloadStateCell(context));
             }
 
-            var htmlParsed = new SpannableString(MessageStringHelper.fromHtml(formatString(R.string.DatacenterStatusSection_TermsAccept, OctoUtils.getDomain())));
+            var htmlParsed = new SpannableString(MessageStringHelper.fromHtml(formatString(R.string.DatacenterStatusSection_TermsAccept, OctoConfig.MAIN_DOMAIN)));
             TextInfoPrivacyCell textInfo = new TextInfoPrivacyCell(context);
             textInfo.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
             textInfo.setText(MessageStringHelper.getUrlNoUnderlineText(htmlParsed));
@@ -785,7 +785,7 @@ public class DcStatusActivity extends BaseFragment {
         termsButton.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarWhiteSelector), Theme.RIPPLE_MASK_CIRCLE_20DP));
         termsButton.setImageResource(R.drawable.msg_info);
         termsButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
-        termsButton.setOnClickListener(v -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/dcterms", OctoUtils.getDomain()))));
+        termsButton.setOnClickListener(v -> Browser.openUrl(LaunchActivity.instance, Utilities.uriParseSafe(String.format(Locale.US, "https://%s/dcterms", OctoConfig.MAIN_DOMAIN))));
         actionBarContainer.addView(termsButton, LayoutHelper.createFrame(54, 54, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
 
         FrameLayout contentView;

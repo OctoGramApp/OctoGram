@@ -100,6 +100,7 @@
     <string name="TranslatorUnsupportedLanguage">Selected language isn\'t supported by the selected provider.</string>
     <string name="TranslatorUnsupportedLanguageChange">Edit provider</string>
     <string name="TranslatorUnsupportedLanguageChangeDone">Provider has been updated successfully.</string>
+    <string name="ShowOriginalTranslation">Show original content</string>
     <string name="EntireChatsTranslationsOptimization">Optimize entire chats translations</string>
     <string name="EntireChatsTranslationsOptimizationDesc">Entire chats translation will be optimized to be faster and send more messages at once, but it may not work correctly in some cases.</string>
 
@@ -114,11 +115,16 @@
     <!--AI Features-->
     <string name="AiFeatures">Integrate AI features</string>
     <string name="AiFeatures_Brief">AI Features</string>
+    <string name="AiFeatures_Brief_Disable">Disable AI Features</string>
+    <string name="AiFeatures_Brief_StartUsing">Start using AI Features</string>
+    <string name="AiFeatures_Brief_StartUsing_Done">AI features have been successfully enabled.</string>
+    <string name="AiFeatures_Brief_Disable_Desc">All AI features will be hidden from the interface until reactivated. Are you sure you want to proceed?</string>
+    <string name="AiFeatures_Brief_Disable_Button">Disable</string>
     <string name="AiFeatures_Brief_Settings">AI Settings</string>
     <string name="AiFeatures_Desc">You can integrate more features through AI to have a more true-to-life result.</string>
     <string name="AiFeatures_Desc_Brief">You can integrate more features through AI.</string>
     <string name="AiFeatures_EnableOptionsTerms">AI Terms</string>
-    <string name="AiFeatures_EnableOptionsTerms_Desc">By enabling the option, the app will make requests to external services but only and exclusively when you use one of the AI features. We will not make automatic requests to Gemini, OpenRouter and ChatGPT in other cases. Do you want to consent?</string>
+    <string name="AiFeatures_EnableOptionsTerms_Desc2">By proceeding, you affirm that you have read the AI category on the <![CDATA[<a href="https://%s/privacy">Privacy Policy</a>]]> page.</string>
     <string name="AiFeatures_EnableOptionsTerms_Accept">Accept</string>
     <string name="AiFeatures_AccessVia_Desc">Manage providers for AI features</string>
     <string name="AiFeatures_AccessVia_Available">Available providers</string>
@@ -126,7 +132,6 @@
     <string name="AiFeatures_AccessVia_GoogleAPI">Google API</string>
     <string name="AiFeatures_AccessVia_ChatGPTAPI">ChatGPT API</string>
     <string name="AiFeatures_AccessVia_OpenRouterAPI">OpenRouter API</string>
-    <string name="AiFeatures_AccessVia_SelectableOne">You can select the provider to use directly when using the AI feature. The app will remember the last option.</string>
     <string name="AiFeatures_AccessVia_Empty">At least one provider must be enabled to use AI features.</string>
     <string name="AiFeatures_AccessVia_AddMore">You can add multiple providers and choose the one you prefer individually when using an AI feature.</string>
     <string name="AiFeatures_AccessVia_Empty_Disable">Disable</string>
@@ -174,6 +179,7 @@
     <string name="AiFeatures_Features_ChatContext">Chat Context</string>
     <string name="AiFeatures_Features_ChatContext_Available">tap to see chat context</string>
     <string name="AiFeatures_Features_AskOnPhoto">Ask on Media</string>
+    <string name="AiFeatures_Features_TranscribeAI">AI Transcription</string>
     <string name="AiFeatures_Features_TranslateAI2">AI Translation</string>
     <string name="AiFeatures_Features_TranslateAI_MoreProviders">You can configure more AI providers **here**.</string>
     <string name="AiFeatures_Features_TranscribeVoice">AI Transcription</string>
@@ -269,7 +275,9 @@
     <string name="AiFeatures_CustomModels_Create_Duplicate_Import">Import</string>
     <string name="AiFeatures_CustomModels_Desc">You can speed up your workflow with custom AI prompts. Check out examples at %s.</string>
 
-    <!--Chat Context-->
+    <string name="AiFeatures_PreDistribInitial">AI functions make your life easier with tons of ready-to-use prompts. Here’s a quick look at what you get out of the box:</string>
+    <string name="AiFeatures_PreDistrib">Before using AI features, you need to set up a provider, which is the service that will provide the answers. Pick the one you like — we recommend Gemini.</string>
+    <string name="AiFeatures_PreDistrib_Suggested">Suggested</string>
 
     <!--Devices: Custom device name-->
     <string name="UseCustomDeviceName">Use custom name</string>
@@ -347,13 +355,6 @@
     <string name="UseSystemEmojisDesc">Use system\'s emoji instead of the chosen ones</string>
     <string name="DownloadUpdate">Download</string>
     <string name="DownloadingUpdate">Downloading…</string>
-
-    <!--Crashlytics-->
-    <string name="OctoCrashedTitle">OctoGram has stopped working!</string>
-    <string name="OctoCrashedSubTitle">OctoGram has crashed, and we\'re sorry for the trouble. Please report this crash by going to the "Crash History" tab in the OctoGram settings page</string>
-    <string name="SendLogsButton">Send logs</string>
-    <string name="CancelArchiveButton">Cancel &amp; Archive logs</string>
-    <string name="ErrorSendingCrashContent">There was an error while sending crash logs</string>
 
     <string name="OctoMainSettingsHeader">Welcome to the OctoGram Settings! Here you can customize your experience with the app</string>
     <string name="OctoMainSettingsInfoWorld">Discover more on the OctoGram world</string>
@@ -845,44 +846,26 @@
     <!-- Crash history -->
     <string name="CrashHistory">Crash History</string>
     <string name="CrashHistory_Desc">View crash logs and configuration</string>
-    <string name="NoCrashLogFound">No crash log found</string>
-    <string name="CouldNotCopyFile">Could not copy file</string>
-    <string name="CopyLatestCrashLog">Copy Latest Crash Log</string>
-    <string name="CrashLogInfo">Crash Logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
+    <string name="CrashHistoryReport">You can report any crashes you encounter here in our official group: %s.</string>
     <string name="CrashesDeleteConfirmation">Do you want to delete %s crash logs? This action is irreversible</string>
-    <string name="CrashDeleteConfirmation">Do you want to delete one crash log? This action is irreversible</string>
     <string name="CrashesDeleted">%s crash logs have been cleared</string>
-    <string name="CrashesUnableToDelete">Could not delete %s crash logs!</string>
-    <string name="CrashDeleted">One crash log has been cleared</string>
-    <string name="AllCrashDeleted">All crash logs has been cleared</string>
-    <string name="CrashedOnDate">Crashed on: %s</string>
-    <string name="CrashLogCopied">Crash log copied to clipboard</string>
-    <string name="OpenCrashLog">Open crash log</string>
-    <string name="SendCrashLog">Send crash log</string>
-    <string name="SendCrashLogDone">Crash log has been sent successfully.</string>
-    <string name="CopyCrashLog">Copy crash log</string>
-    <string name="ReportCrash">Report crash</string>
-    <string name="NoLogsSelectedForDeletion">No logs selected for deletion</string>
-
-    <!-- Debug history -->
-    <string name="DebugHistory">Debug Logs History</string>
-    <string name="NoDebugLogFound">No debug log found</string>
-    <string name="CouldNotCopyDebugFile">Could not copy file</string>
-    <string name="DebugLogInfo">Debug Logs are stored locally on your device. You can copy them to your clipboard or delete them by long clicking.</string>
-    <string name="DebugsDeleteConfirmation">Do you want to delete %s debug logs? This action is irreversible</string>
-    <string name="DebugDeleteConfirmation">Do you want to delete one debug log? This action is irreversible</string>
-    <string name="DebugsDeleted">%s debug logs have been cleared</string>
-    <string name="DebugsUnableToDelete">Could not delete %s debug logs!</string>
-    <string name="DebugDeleted">One debug log has been cleared</string>
-    <string name="AllDebugDeleted">All debug logs have been cleared</string>
-    <string name="DebugLogsGeneratedOnDate">Debug Logs generated on: %s</string>
-    <string name="DebugLogCopied">Debug log copied to clipboard</string>
-    <string name="OpenDebugLog">Open debug log</string>
-    <string name="SendDebugLog">Send debug log</string>
-    <string name="SendDebugLogDone">Debug log has been sent successfully.</string>
-    <string name="CopyDebugLog">Copy debug log</string>
-    <string name="NoDebugLogsSelectedForDeletion">No debug logs selected for deletion</string>
+    <string name="DeviceInformationsCopied">System info copied to clipboard</string>
     <string name="CopySystemInfo">Copy system info</string>
+    <string name="DebugHistory">Debug Logs History</string>
+    <string name="DebugsDeleteConfirmation">Do you want to delete %s debug logs? This action is irreversible</string>
+    <string name="DebugsDeleted">%s debug logs have been cleared</string>
+
+    <!--Crashlytics-->
+    <string name="OctoCrashedTitle">OctoGram has stopped working!</string>
+    <string name="OctoCrashedLongDesc">Octogram recently crashed unexpectedly. You can share the crash log with our developers by pressing the button below.</string>
+    <string name="OctoCrashedDesc">Click to open crash history page</string>
+    <string name="SendLogsButton">Send logs</string>
+    <string name="CancelArchiveButton">Cancel &amp; Archive logs</string>
+    <string name="ErrorSendingCrashContent">There was an error while sending crash logs</string>
+    <string name="OctoSendLastLogTitle">Share crashlogs</string>
+    <string name="OctoSendLastLogDesc">Use the button below to share the latest crash log.\nIt is recommended that you only share the file in official OctoGram chats.</string>
+    <string name="OctoSendLastLogDescGeneric">Use the button below to share the selected crash log.\nIt is recommended that you only share the file in official OctoGram chats.</string>
+    <string name="OctoSendLastLogShare">Share</string>
 
     <!-- Permissions -->
     <string name="SendMediaPermissionStickers">Stickers</string>
@@ -1145,12 +1128,19 @@
     <string name="Error">Error</string>
     <string name="OnDeviceTranslationModels_UnsupportedVersion">You\'re using an outdated version of the OctoGram Extension – OnDevice. Please update to at least version **%1$s** (**%2$d**).</string>
 
-    <!--
-    <string name="ExperimentalFeature">Experimental Feature</string>
-    <string name="UseSmoothPopupBackground">Smooth Rounded Context Menus</string>
-    <string name="UseSmoothPopupBackground_Desc">Adds smoother, more rounded corners to context menus.\nMay cause minor visual glitches.</string>
-
-    <string name="EnableRoundedTextBox">Rounded Text Boxes</string>
-    <string name="EnableRoundedTextBox_Desc">Applies a rounded style to text boxes. \nSome text may overlap or be cut off.</string>
-    -->
+    <!-- Message Details Bottom Sheet -->
+    <string name="ExpandReplyDetails">Show replied message details</string>
+    <string name="ExpandChatDetails">Show chat details</string>
+    <string name="ExpandUserDetails">Show user details</string>
+    <string name="ForwardDate">Forward Date</string>
+    <string name="ForwardText">Forward Text</string>
+    <string name="ForwardTextLength">Forward Text Length</string>
+    <string name="ForwardsCount">Forwards Count</string>
+    <string name="RepliedUser">Replied User</string>
+    <string name="ReplyMessage">Reply Message</string>
+    <string name="ReplyFrom">Reply from</string>
+    <string name="ClickToCopy">Click to copy</string>
+    <string name="OpenPath">Open path</string>
+    <string name="IsBot">Bot</string>
+    <string name="ChatId">ID</string>
 </resources>

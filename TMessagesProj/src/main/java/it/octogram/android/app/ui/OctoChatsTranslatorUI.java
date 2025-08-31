@@ -270,7 +270,7 @@ public class OctoChatsTranslatorUI implements PreferencesEntry {
                     category.row(new SwitchRow.SwitchRowBuilder()
                             .preferenceValue(OctoConfig.INSTANCE.translatorShowOriginalContent)
                             .showIf(canSelectShowOriginalContent)
-                            .title("Show original content")
+                            .title(getString(R.string.ShowOriginalTranslation))
                             .build()
                     );
                     category.row(new SwitchRow.SwitchRowBuilder()

@@ -37,6 +37,7 @@ public class TextIconRow extends BaseRow implements Clickable {
     private boolean wasNewBadgeVisible = false;
     private final OnDynamicDataUpdate dynamicDataUpdate;
     private final boolean isBlue;
+    private final boolean isDanger;
 
     public interface OnDynamicDataUpdate {
         String getTitle();
@@ -60,7 +61,8 @@ public class TextIconRow extends BaseRow implements Clickable {
                         Runnable onClick,
                         String newID,
                         OnDynamicDataUpdate dynamicDataUpdate,
-                        boolean isBlue) {
+                        boolean isBlue,
+                        boolean isDanger) {
         super(title, null, requiresRestart, showIf, showIfReverse, divider, PreferenceType.TEXT_ICON);
         this.icon = icon;
         this.onClick = onClick;
@@ -70,6 +72,7 @@ public class TextIconRow extends BaseRow implements Clickable {
         this.newID = newID;
         this.dynamicDataUpdate = dynamicDataUpdate;
         this.isBlue = isBlue;
+        this.isDanger = isDanger;
     }
 
     public void bindCell(TextCell cell) {
@@ -104,6 +107,10 @@ public class TextIconRow extends BaseRow implements Clickable {
 
     public boolean isBlue() {
         return isBlue;
+    }
+
+    public boolean isDanger() {
+        return isDanger;
     }
 
     public ConfigProperty<Boolean> getPreference() {
@@ -161,6 +168,7 @@ public class TextIconRow extends BaseRow implements Clickable {
         private OnDynamicDataUpdate dynamicDataUpdate;
         private String propertySelectionTag;
         private boolean isBlue;
+        private boolean isDanger;
 
         public TextIconRowBuilder onClick(Runnable onClick) {
             this.onClick = onClick;
@@ -197,8 +205,13 @@ public class TextIconRow extends BaseRow implements Clickable {
             return this;
         }
 
+        public TextIconRowBuilder isDanger(boolean isDanger) {
+            this.isDanger = isDanger;
+            return this;
+        }
+
         public TextIconRow build() {
-            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, propertySelectionTag, onClick, newID, dynamicDataUpdate, isBlue);
+            return new TextIconRow(title, showIf, showIfReverse, divider, icon, value, requiresRestart, preferenceValue, propertySelectionTag, onClick, newID, dynamicDataUpdate, isBlue, isDanger);
         }
     }
 

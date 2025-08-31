@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.app.ui.bottomsheets.UpdatingAppBottomSheet;
-import it.octogram.android.tgastandaloneexport.UpdateAppAlertDialog;
+import it.octogram.android.app.ui.bottomsheets.NewUpdateAvailableBottomSheet;
 import it.octogram.android.utils.OctoLogging;
 
 public class ApkInstaller {
@@ -71,7 +71,7 @@ public class ApkInstaller {
             UpdatingAppBottomSheet sheet = new UpdatingAppBottomSheet(LaunchActivity.instance, true);
             sheet.show();
             currentBottomSheet = new WeakReference<>(sheet);
-            if (UpdateAppAlertDialog.isVisible && UpdatesManager.updateAppAlertDialog != null && UpdatesManager.updateAppAlertDialog.get() != null) {
+            if (NewUpdateAvailableBottomSheet.isVisible && UpdatesManager.updateAppAlertDialog != null && UpdatesManager.updateAppAlertDialog.get() != null) {
                 UpdatesManager.updateAppAlertDialog.get().dismiss();
             }
         }

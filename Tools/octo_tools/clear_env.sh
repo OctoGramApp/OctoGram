@@ -6,7 +6,7 @@ if command -v ccache >/dev/null 2>&1; then
   CCACHE_BIN="$(command -v ccache)"
 else
   OS_TYPE=$(uname)
-  BASE_DIR="$SCRIPT_DIR/ccache"
+  BASE_DIR="$(cd "$SCRIPT_DIR/../ccache" && pwd)"
 
   case "$OS_TYPE" in
     Linux)
@@ -33,7 +33,7 @@ fi
 echo "Using ccache binary: $CCACHE_BIN"
 "$CCACHE_BIN" -c -C
 
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 DIRS=(
   "$PROJECT_ROOT/.kotlin"

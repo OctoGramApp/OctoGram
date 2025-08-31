@@ -973,6 +973,15 @@ public class PreferencesFragment extends BaseFragment {
         listView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
     }
 
+    public void rebuildAllFragmentsExceptLast() {
+        Parcelable recyclerViewState = null;
+        if (listView.getLayoutManager() != null) {
+            recyclerViewState = listView.getLayoutManager().onSaveInstanceState();
+        }
+        parentLayout.rebuildAllFragmentViews(false, true);
+        listView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+    }
+
     public void reloadInterface() {
         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
     }

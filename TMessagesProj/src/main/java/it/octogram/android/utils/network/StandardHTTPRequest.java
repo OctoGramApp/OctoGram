@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.http;
+package it.octogram.android.utils.network;
 
 import androidx.annotation.Nullable;
 

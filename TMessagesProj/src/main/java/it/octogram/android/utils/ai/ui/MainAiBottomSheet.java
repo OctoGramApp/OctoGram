@@ -1063,7 +1063,7 @@ public class MainAiBottomSheet extends BottomSheet {
             addItemFromEligibleVariations(lengthRecord, layout, () -> dismiss[0]);
         }
 
-        if (!isProcessingData && (isCustomModel() || !data.noforwards)) {
+        if (!isProcessingData && (isCustomModel() || !data.noForwards)) {
             item = ActionBarMenuItem.addItem(layout, R.drawable.msg_copy, getString(R.string.Copy), false, resourcesProvider);
             item.setOnClickListener(view -> {
                 dismiss[0].run();
@@ -1104,14 +1104,12 @@ public class MainAiBottomSheet extends BottomSheet {
                     }
                     AndroidUtilities.runOnUIThread(() -> {
                         if (isVirtualModel) {
-                            String focusKey = "";
-                            if (data.modelID.equals(CustomModelsHelper.VIRTUAL_ASK_ON_MEDIA_MODEL_ID)) {
-                                focusKey = OctoConfig.INSTANCE.aiFeaturesAskOnMedia.getKey();
-                            } else if (data.modelID.equals(CustomModelsHelper.VIRTUAL_CHAT_CONTEXT_MODEL_ID)) {
-                                focusKey = OctoConfig.INSTANCE.aiFeaturesChatContext.getKey();
-                            } else if (data.modelID.equals(CustomModelsHelper.VIRTUAL_TRANSCRIBE_MODEL_ID)) {
-                                focusKey = OctoConfig.INSTANCE.aiFeaturesTranscribeVoice.getKey();
-                            }
+                            String focusKey = switch (data.modelID) {
+                                case CustomModelsHelper.VIRTUAL_ASK_ON_MEDIA_MODEL_ID -> OctoConfig.INSTANCE.aiFeaturesAskOnMedia.getKey();
+                                case CustomModelsHelper.VIRTUAL_CHAT_CONTEXT_MODEL_ID -> OctoConfig.INSTANCE.aiFeaturesChatContext.getKey();
+                                case CustomModelsHelper.VIRTUAL_TRANSCRIBE_MODEL_ID -> OctoConfig.INSTANCE.aiFeaturesTranscribeVoice.getKey();
+                                default -> "";
+                            };
                             LaunchActivity.instance.presentFragment(new PreferencesFragment(new OctoChatsAiFeaturesUI(), focusKey));
                         } else {
                             OctoChatsAiNewModelUI newModelUI = new OctoChatsAiNewModelUI();

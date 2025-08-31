@@ -14,6 +14,7 @@ import android.os.Build;
 import androidx.annotation.Nullable;
 
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildConfig;
 
 import it.octogram.android.utils.OctoLogging;
 
@@ -35,7 +36,7 @@ public class StoreUtils {
     }
 
     public static boolean isFromPlayStore() {
-        return PLAY_STORE_PACKAGE.equalsIgnoreCase(getInstallerPackageName());
+        return PLAY_STORE_PACKAGE.equalsIgnoreCase(getInstallerPackageName()) || BuildConfig.BUILD_TYPE.equalsIgnoreCase("play");
     }
 
     public static boolean isFromHuaweiStore() {

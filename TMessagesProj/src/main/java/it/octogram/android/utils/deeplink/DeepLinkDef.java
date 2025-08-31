@@ -30,7 +30,6 @@ public class DeepLinkDef {
     public static final String PINNED_HASHTAGS = "pinned_hashtags";
     public static final String TRANSLATOR = "translator";
     public static final String AI_FEATURES = "ai";
-    public static final String AI_FEATURES_PROVIDERS = "ai/providers";
     public static final String INFO = "octogram";
     public static final String DC_STATUS = "dc";
     public static final String PRIVACY = "privacy";
@@ -38,6 +37,8 @@ public class DeepLinkDef {
     public static final String OCTO_CRASH_LOGS = "crashlogs";
     public static final String OCTO_LOGS = "debuglogs";
     public static final String COPY_REPORT_DETAILS = "reportdetails";
+    public static final String SEND_LAST_CRASHLOG = "sendcrashlog";
+    public static final String ENABLE_BLURRED = "enableblurredcm";
 
     // deprecated
     public static final String APPEARANCE_APP = "appearance/app";

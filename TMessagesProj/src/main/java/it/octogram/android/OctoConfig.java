@@ -56,18 +56,22 @@ public class OctoConfig {
     public static final int ROUND_MESSAGE_BITRATE = 512;
     public static final String OCTOMODEL_EXTENSION = ".octomodel";
     public static final String OCTOEXPORT_EXTENSION = ".octoexport";
+    public static final String EXPORT_BACKUP_MIME_TYPE = "text/json";
     private final List<ConfigProperty<?>> properties = new ArrayList<>();
     private boolean loadedConfig = false;
     private final SharedPreferences PREFS = ApplicationLoader.applicationContext.getSharedPreferences("octoconfig", Activity.MODE_PRIVATE);
     public static final String STICKERS_PLACEHOLDER_PACK_NAME = "octo_placeholders_android";
+    public static final String GITHUB_MAIN_REPO = "OctoGramApp/OctoGram";
     public static final String PRIVATE_BETA_GROUP_HASH = "61-fnrres2ExNWFk";
-    public static final String CRASH_MIME_TYPE = "message/rfc822";
-    public static final String EXPORT_BACKUP_MIME_TYPE = "text/json";
+    public static final String MAIN_DOMAIN = "octogramapp.github.io";
+    public static final String MAIN_CHANNEL_TAG = "OctoGramApp";
+    public static final String MAIN_CHAT_TAG = "OctoGramChat";
     public static final String AI_EXAMPLE_CHANNEL_TAG = "OctoModels";
     public static final String EXTENSION_CHANNEL_TAG = "OctoGramBeta";
     public static final int EXTENSION_CHANNEL_ID = 247;
 
     /*General*/
+    public final ConfigProperty<String> searchOptionsOrder = newConfigProperty("searchOptionsOrder", "[]");
     public final ConfigProperty<Boolean> showDcId = newConfigProperty("showDcId", true);
     public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM.getValue());
     public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API.getValue());
@@ -175,6 +179,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> promptBeforeSendingGIFs = newConfigProperty("promptBeforeSendingGIFs", false);
     public final ConfigProperty<Boolean> promptBeforeSendingVoiceMessages = newConfigProperty("promptBeforeSendingVoiceMessages", false);
     public final ConfigProperty<Boolean> promptBeforeSendingVideoMessages = newConfigProperty("promptBeforeSendingVideoMessages", false);
+    public final ConfigProperty<Boolean> useBlurredContextMenu = newConfigProperty("useBlurredContextMenu", false);
 
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
@@ -284,7 +289,6 @@ public class OctoConfig {
     public final ConfigProperty<Long> translatorUninstallExtensionHideTime = newConfigProperty("translatorUninstallExtensionHideTime", 0L);
 
     /*AI Features */
-    public final ConfigProperty<Boolean> aiFeatures = newConfigProperty("aiFeatures", false);
     public final ConfigProperty<Boolean> aiFeaturesAcceptedTerms = newConfigProperty("aiFeaturesAcceptedTerms", false);
     public final ConfigProperty<Integer> aiFeaturesRecentProvider = newConfigProperty("aiFeaturesRecentProvider", -1);
     public final ConfigProperty<Boolean> aiFeaturesTranslateMessages = newConfigProperty("aiFeaturesTranslateMessages", true);
@@ -721,10 +725,7 @@ public class OctoConfig {
                 }
 
                 OctoConfig.INSTANCE.experimentsEnabled.updateValue(true);
-
-                if (OctoConfig.INSTANCE.aiFeatures.getValue()) {
-                    OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
-                }
+                OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
 
                 DrawerOrderController.reloadConfig();
             }

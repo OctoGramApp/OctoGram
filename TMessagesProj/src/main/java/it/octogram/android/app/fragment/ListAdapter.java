@@ -14,6 +14,8 @@ import static org.telegram.ui.Components.LayoutHelper.createLinear;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -302,6 +304,8 @@ public class ListAdapter extends AdapterWithDiffUtils {
 
                 if (textIconRow.isBlue()) {
                     v.setColors(Theme.key_windowBackgroundWhiteBlueText4, Theme.key_windowBackgroundWhiteBlueText4);
+                } else if (textIconRow.isDanger()) {
+                    v.setColors(Theme.key_text_RedRegular, Theme.key_text_RedRegular);
                 }
 
                 textIconRow.bindCell(v);

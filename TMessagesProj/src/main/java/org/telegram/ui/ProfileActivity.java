@@ -333,6 +333,7 @@ import it.octogram.android.app.ui.components.CustomFab;
 import it.octogram.android.app.ui.components.OutlineProvider;
 import it.octogram.android.app.ui.cells.ProfileDatacenterPreviewCell;
 import it.octogram.android.utils.CustomDevicePerformanceManager;
+import it.octogram.android.utils.CustomEmojiStatuses;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.UserAccountInfoController;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
@@ -10165,6 +10166,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 emojiStatusDrawable[a].set(getPremiumCrossfadeDrawable(a), animated);
                 emojiStatusDrawable[a].setParticles(false, animated);
             }
+        } else if (CustomEmojiStatuses.hasCustomEmojiId(chatId)) {
+            emojiStatusDrawable[a].set(CustomEmojiStatuses.getCustomEmojiId(chatId), animated);
+            emojiStatusDrawable[a].setParticles(true, animated);
         } else {
             emojiStatusDrawable[a].set(getPremiumCrossfadeDrawable(a), animated);
             emojiStatusDrawable[a].setParticles(false, animated);
@@ -10744,7 +10748,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[a].setRightDrawable2(null);
                         nameTextViewRightDrawableContentDescription = null;
                     }
-                    if (DialogObject.getEmojiStatusDocumentId(chat.emoji_status) != 0) {
+                    if (DialogObject.getEmojiStatusDocumentId(chat.emoji_status) != 0 || CustomEmojiStatuses.hasCustomEmojiId(chat)) {
                         nameTextView[a].setRightDrawable(getEmojiStatusDrawable(chat.emoji_status, true, false, a));
                         nameTextView[a].setRightDrawableOutside(true);
                         nameTextViewRightDrawableContentDescription = null;

@@ -18,30 +18,22 @@ import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.RadialGradient;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Shader;
-import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Layout;
 import android.text.TextUtils;
+import android.text.style.URLSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,16 +42,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.util.Util;
-
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
-import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -76,31 +62,24 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.BaseCell;
 import org.telegram.ui.Cells.ChatActionCell;
 import org.telegram.ui.Cells.ChatMessageCell;
-import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.AudioVisualizerDrawable;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CubicBezierInterpolator;
-import org.telegram.ui.Components.EarListener;
 import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MessagePreviewView;
 import org.telegram.ui.Components.MessagePrivateSeenView;
-import org.telegram.ui.Components.PopupSwipeBackLayout;
-import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Components.ReactionsContainerLayout;
 import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.Components.ScaleStateListAnimator;
-import org.telegram.ui.Components.ThanosEffect;
-import org.telegram.ui.Components.TimerParticles;
-import org.telegram.ui.Components.VideoPlayer;
 import org.telegram.ui.Components.ViewPagerFixed;
-import org.telegram.ui.Stories.recorder.HintView2;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
+import it.octogram.android.utils.chat.ContextMenuHelper;
 
 public class TodoItemMenu extends Dialog {
 
@@ -357,61 +336,68 @@ public class TodoItemMenu extends Dialog {
             final int finalWidth = width;
             final int finalHeight = height;
 
-            myTaskCell = new ChatMessageCell(getContext(), UserConfig.selectedAccount, false, null, cell.getResourcesProvider()) {
-                @Override
-                public void setPressed(boolean pressed) {}
+            if (taskId != -1) {
+                myTaskCell = new ChatMessageCell(getContext(), UserConfig.selectedAccount, false, null, cell.getResourcesProvider()) {
+                    @Override
+                    public void setPressed(boolean pressed) {}
 
-                private final Path clipPath = new Path();
-                private final Paint shadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                @Override
-                protected void onDraw(@NonNull Canvas canvas) {
-                    canvas.save();
-                    final int index = getTodoIndex(taskId);
-                    final float top = getPollButtonTop(index);
-                    final float bottom = getPollButtonBottom(index);
-                    AndroidUtilities.rectTmp.set(getPollButtonsLeft(), top, getPollButtonsRight(), bottom);
-                    clipPath.rewind();
-                    clipPath.addRoundRect(AndroidUtilities.rectTmp, dp(8), dp(8), Path.Direction.CW);
-                    shadowPaint.setColor(0);
-                    shadowPaint.setShadowLayer(dp(2), 0, dp(.66f), Theme.multAlpha(0xFF000000, .20f * openProgress));
-                    canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(8), dp(8), shadowPaint);
-                    canvas.clipPath(clipPath);
-                    super.onDraw(canvas);
-                    canvas.restore();
-                }
+                    private final Path clipPath = new Path();
+                    private final Paint shadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    @Override
+                    protected void onDraw(@NonNull Canvas canvas) {
+                        canvas.save();
+                        final int index = getTodoIndex(taskId);
+                        final float top = getPollButtonTop(index);
+                        final float bottom = getPollButtonBottom(index);
+                        AndroidUtilities.rectTmp.set(getPollButtonsLeft(), top, getPollButtonsRight(), bottom);
+                        clipPath.rewind();
+                        clipPath.addRoundRect(AndroidUtilities.rectTmp, dp(8), dp(8), Path.Direction.CW);
+                        shadowPaint.setColor(0);
+                        shadowPaint.setShadowLayer(dp(2), 0, dp(.66f), Theme.multAlpha(0xFF000000, .20f * openProgress));
+                        canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(8), dp(8), shadowPaint);
+                        canvas.clipPath(clipPath);
+                        super.onDraw(canvas);
+                        canvas.restore();
+                    }
 
-                @Override
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    setMeasuredDimension(finalWidth, finalHeight);
-                }
-            };
-            cell.copyParamsTo(myTaskCell);
-            myTaskCell.copySpoilerEffect2AttachIndexFrom(cell);
-            myTaskCell.setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
-                @Override
-                public boolean canPerformActions() {
-                    return false;
-                }
-
-                @Override
-                public boolean didPressToDoButton(ChatMessageCell cell, TLRPC.TodoItem task, boolean enable) {
-                    if (TodoItemMenu.this.cell.getDelegate() != null) {
-                        return TodoItemMenu.this.cell.getDelegate().didPressToDoButton(TodoItemMenu.this.cell, task, enable);
-                    } else {
+                    @Override
+                    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                        setMeasuredDimension(finalWidth, finalHeight);
+                    }
+                };
+                cell.copyParamsTo(myTaskCell);
+                myTaskCell.copySpoilerEffect2AttachIndexFrom(cell);
+                myTaskCell.setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
+                    @Override
+                    public boolean canPerformActions() {
                         return false;
                     }
-                }
-            });
-            myTaskCell.setMessageObject(messageObject, cell.getCurrentMessagesGroup(), cell.pinnedBottom, cell.pinnedTop, cell.firstInChat);
-            containerView.addView(myTaskCell, new FrameLayout.LayoutParams(cell.getWidth(), height, Gravity.TOP | Gravity.LEFT));
 
-            myCell = new ChatMessageCell(getContext(), UserConfig.selectedAccount, false, null, cell.getResourcesProvider()) {
+                    @Override
+                    public boolean didPressToDoButton(ChatMessageCell cell, TLRPC.TodoItem task, boolean enable) {
+                        if (TodoItemMenu.this.cell.getDelegate() != null) {
+                            return TodoItemMenu.this.cell.getDelegate().didPressToDoButton(TodoItemMenu.this.cell, task, enable);
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+                myTaskCell.setMessageObject(messageObject, cell.getCurrentMessagesGroup(), cell.pinnedBottom, cell.pinnedTop, cell.firstInChat);
+                containerView.addView(myTaskCell, new FrameLayout.LayoutParams(cell.getWidth(), height, Gravity.TOP | Gravity.LEFT));
+            }
+
+            myCell = new ChatMessageCell(getContext(), UserConfig.selectedAccount, taskId == -1, null, cell.getResourcesProvider()) {
                 @Override
                 public void setPressed(boolean pressed) {}
 
                 @Override
                 protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                     setMeasuredDimension(finalWidth, finalHeight);
+                }
+
+                @Override
+                public boolean needDrawAvatar() {
+                    return messageCell.isAvatarVisible || messageCell.needDrawAvatar();
                 }
             };
             cell.copyVisiblePartTo(myCell);
@@ -430,117 +416,123 @@ public class TodoItemMenu extends Dialog {
         viewPager.bringToFront();
         menuContainer.bringToFront();
         tabsView.bringToFront();
+        if (taskId == -1) {
+            tabsView.setVisibility(View.GONE);
+            viewPager.setPosition(1);
+        }
         viewPager.onTabAnimationUpdate(false);
 
-        ItemOptions taskOptions = ItemOptions.makeOptions(containerView, resourcesProvider, null);
+        if (taskId != -1) {
+            ItemOptions taskOptions = ItemOptions.makeOptions(containerView, resourcesProvider, null);
 
-        TLRPC.TodoItem _task = null;
-        TLRPC.TodoCompletion _completion = null;
-        int _index = -1;
-        TLRPC.TL_messageMediaToDo media = (TLRPC.TL_messageMediaToDo) MessageObject.getMedia(messageObject);
-        for (int i = 0; i < media.todo.list.size(); ++i) {
-            if (media.todo.list.get(i).id == taskId) {
-                _task = media.todo.list.get(_index = i);
-                break;
+            TLRPC.TodoItem _task = null;
+            TLRPC.TodoCompletion _completion = null;
+            int _index = -1;
+            TLRPC.TL_messageMediaToDo media = (TLRPC.TL_messageMediaToDo) MessageObject.getMedia(messageObject);
+            for (int i = 0; i < media.todo.list.size(); ++i) {
+                if (media.todo.list.get(i).id == taskId) {
+                    _task = media.todo.list.get(_index = i);
+                    break;
+                }
             }
-        }
-        for (int i = 0; i < media.completions.size(); ++i) {
-            if (media.completions.get(i).id == taskId) {
-                _completion = media.completions.get(i);
-                break;
+            for (int i = 0; i < media.completions.size(); ++i) {
+                if (media.completions.get(i).id == taskId) {
+                    _completion = media.completions.get(i);
+                    break;
+                }
             }
-        }
-        final TLRPC.TodoItem task = _task;
-        final TLRPC.TodoCompletion completion = _completion;
-        final int index = _index;
-        if (messageObject.canCompleteTodo()) {
-            if (completion != null) {
-                taskOptions.addText(LocaleController.formatTodoCompletedDate(completion.date), 14);
-                taskOptions.addGap();
-                taskOptions.add(R.drawable.msg_cancel, getString(R.string.TodoUncheck), () -> {
-                    if (chatActivity.isInScheduleMode()) {
-                        Toast.makeText(getContext(), getString(R.string.MessageScheduledTodo), Toast.LENGTH_LONG).show();
-                    } else {
-                        myTaskCell.toggleTodoCheck(myTaskCell.getTodoIndex(taskId), false);
-                    }
+            final TLRPC.TodoItem task = _task;
+            final TLRPC.TodoCompletion completion = _completion;
+            final int index = _index;
+            if (messageObject.canCompleteTodo()) {
+                if (completion != null) {
+                    taskOptions.addText(LocaleController.formatTodoCompletedDate(completion.date), 14);
+                    taskOptions.addGap();
+                    taskOptions.add(R.drawable.msg_cancel, getString(R.string.TodoUncheck), () -> {
+                        if (chatActivity.isInScheduleMode()) {
+                            Toast.makeText(getContext(), getString(R.string.MessageScheduledTodo), Toast.LENGTH_LONG).show();
+                        } else {
+                            myTaskCell.toggleTodoCheck(myTaskCell.getTodoIndex(taskId), false);
+                        }
+                        dismiss(true);
+                    });
+                } else {
+                    taskOptions.add(R.drawable.msg_select, getString(R.string.TodoCheck), () -> {
+                        if (chatActivity.isInScheduleMode()) {
+                            Toast.makeText(getContext(), getString(R.string.MessageScheduledTodo), Toast.LENGTH_LONG).show();
+                        } else {
+                            myTaskCell.toggleTodoCheck(myTaskCell.getTodoIndex(taskId), false);
+                        }
+                        dismiss(true);
+                    });
+                }
+            }
+            if (task != null) {
+                if (chatActivity != null) {
+                    taskOptions.add(R.drawable.menu_reply, getString(R.string.TodoItemQuote), () -> {
+                        chatActivity.showFieldPanelForReplyQuote(messageObject, ChatActivity.ReplyQuote.from(messageObject, task.id));
+                        dismiss(false);
+                    });
+                }
+                if (messageObject.getDialogId() < 0) {
+                    final MessagesController messagesController = MessagesController.getInstance(messageObject.currentAccount);
+                    final String username = DialogObject.getPublicUsername(messagesController.getUserOrChat(messageObject.getDialogId()));
+                    final String link = "https://" + messagesController.linkPrefix + "/" + (TextUtils.isEmpty(username) ? "c/" + (-messageObject.getDialogId()) : username) + "/" + messageObject.getId() + "?task=" + task.id;
+                    taskOptions.add(R.drawable.msg_link, getString(R.string.CopyLink), () -> {
+                        AndroidUtilities.addToClipboard(link);
+                        dismiss(true);
+                    });
+                }
+                taskOptions.add(R.drawable.msg_copy, getString(R.string.Copy), () -> {
+                    AndroidUtilities.addToClipboard(MessageObject.formatTextWithEntities(task.title, false));
                     dismiss(true);
                 });
-            } else {
-                taskOptions.add(R.drawable.msg_select, getString(R.string.TodoCheck), () -> {
-                    if (chatActivity.isInScheduleMode()) {
-                        Toast.makeText(getContext(), getString(R.string.MessageScheduledTodo), Toast.LENGTH_LONG).show();
-                    } else {
-                        myTaskCell.toggleTodoCheck(myTaskCell.getTodoIndex(taskId), false);
-                    }
-                    dismiss(true);
-                });
             }
-        }
-        if (task != null) {
-            if (chatActivity != null) {
-                taskOptions.add(R.drawable.menu_reply, getString(R.string.TodoItemQuote), () -> {
-                    chatActivity.showFieldPanelForReplyQuote(messageObject, ChatActivity.ReplyQuote.from(messageObject, task.id));
+            if (messageObject.canEditMessage(chatActivity.currentChat)) {
+                taskOptions.add(R.drawable.msg_edit, getString(R.string.TodoEditItem), () -> {
+                    PollCreateActivity pollCreateActivity = new PollCreateActivity(chatActivity, true, false);
+                    pollCreateActivity.setEditing(MessageObject.getMedia(messageObject), false, index);
+                    pollCreateActivity.setDelegate((poll, params, notify, scheduleDate) -> {
+                        if (poll instanceof TLRPC.TL_messageMediaToDo && messageObject.messageOwner.media instanceof TLRPC.TL_messageMediaToDo) {
+                            ((TLRPC.TL_messageMediaToDo) poll).completions = ((TLRPC.TL_messageMediaToDo) messageObject.messageOwner.media).completions;
+                        }
+                        messageObject.messageOwner.media = poll;
+                        chatActivity.getSendMessagesHelper().editMessage(messageObject, null, null, null, null, null, null, false, false, null);
+                    });
+                    chatActivity.presentFragment(pollCreateActivity);
                     dismiss(false);
                 });
-            }
-            if (messageObject.getDialogId() < 0) {
-                final MessagesController messagesController = MessagesController.getInstance(messageObject.currentAccount);
-                final String username = DialogObject.getPublicUsername(messagesController.getUserOrChat(messageObject.getDialogId()));
-                final String link = "https://" + messagesController.linkPrefix + "/" + (TextUtils.isEmpty(username) ? "c/" + (-messageObject.getDialogId()) : username) + "/" + messageObject.getId() + "?task=" + task.id;
-                taskOptions.add(R.drawable.msg_link, getString(R.string.CopyLink), () -> {
-                    AndroidUtilities.addToClipboard(link);
-                    dismiss(true);
-                });
-            }
-            taskOptions.add(R.drawable.msg_copy, getString(R.string.Copy), () -> {
-                AndroidUtilities.addToClipboard(MessageObject.formatTextWithEntities(task.title, false));
-                dismiss(true);
-            });
-        }
-        if (messageObject.canEditMessage(chatActivity.currentChat)) {
-            taskOptions.add(R.drawable.msg_edit, getString(R.string.TodoEditItem), () -> {
-                PollCreateActivity pollCreateActivity = new PollCreateActivity(chatActivity, true, false);
-                pollCreateActivity.setEditing(MessageObject.getMedia(messageObject), false, index);
-                pollCreateActivity.setDelegate((poll, params, notify, scheduleDate) -> {
-                    if (poll instanceof TLRPC.TL_messageMediaToDo && messageObject.messageOwner.media instanceof TLRPC.TL_messageMediaToDo) {
-                        ((TLRPC.TL_messageMediaToDo) poll).completions = ((TLRPC.TL_messageMediaToDo) messageObject.messageOwner.media).completions;
-                    }
-                    messageObject.messageOwner.media = poll;
-                    chatActivity.getSendMessagesHelper().editMessage(messageObject, null, null, null, null, null, null, false, false, null);
-                });
-                chatActivity.presentFragment(pollCreateActivity);
-                dismiss(false);
-            });
-            if (media.todo.list.size() > 1) {
-                taskOptions.add(R.drawable.msg_delete, getString(R.string.TodoDeleteItem), () -> {
-                    for (int i = 0; i < media.todo.list.size(); ++i) {
-                        final TLRPC.TodoItem item = media.todo.list.get(i);
-                        if (item.id == taskId) {
-                            media.todo.list.remove(i);
-                            i--;
+                if (media.todo.list.size() > 1) {
+                    taskOptions.add(R.drawable.msg_delete, getString(R.string.TodoDeleteItem), () -> {
+                        for (int i = 0; i < media.todo.list.size(); ++i) {
+                            final TLRPC.TodoItem item = media.todo.list.get(i);
+                            if (item.id == taskId) {
+                                media.todo.list.remove(i);
+                                i--;
+                            }
                         }
-                    }
-                    for (int i = 0; i < media.completions.size(); ++i) {
-                        final TLRPC.TodoCompletion c = media.completions.get(i);
-                        if (c.id == taskId) {
-                            media.completions.remove(i);
-                            i--;
+                        for (int i = 0; i < media.completions.size(); ++i) {
+                            final TLRPC.TodoCompletion c = media.completions.get(i);
+                            if (c.id == taskId) {
+                                media.completions.remove(i);
+                                i--;
+                            }
                         }
-                    }
-                    messageObject.messageOwner.media = media;
-                    chatActivity.getSendMessagesHelper().editMessage(messageObject, null, null, null, null, null, null, false, false, null);
-                    chatActivity.updateVisibleRows();
+                        messageObject.messageOwner.media = media;
+                        chatActivity.getSendMessagesHelper().editMessage(messageObject, null, null, null, null, null, null, false, false, null);
+                        chatActivity.updateVisibleRows();
 
-                    dismiss(false);
-                });
+                        dismiss(false);
+                    });
+                }
             }
-        }
 
-        taskOptions.setupSelectors();
-        taskOptionsView = taskOptions.getLayout();
-        taskOptionsView.setPivotX(0);
-        taskOptionsView.setPivotY(0);
-        menuContainer.addView(taskOptionsView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT));
+            taskOptions.setupSelectors();
+            taskOptionsView = taskOptions.getLayout();
+            taskOptionsView.setPivotX(0);
+            taskOptionsView.setPivotY(0);
+            menuContainer.addView(taskOptionsView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT));
+        }
     }
 
     public void setupMessageOptions(
@@ -571,7 +563,7 @@ public class TodoItemMenu extends Dialog {
         final boolean showMessageAuthor = chatActivity.currentChat != null && !message.isOut() && ChatObject.isMonoForum(chatActivity.currentChat) && ChatObject.canManageMonoForum(chatActivity.getCurrentAccount(), chatActivity.currentChat) && -chatActivity.currentChat.linked_monoforum_id == message.getFromChatId();
         final boolean showPrivateMessageSeen = !isReactionsViewAvailable && chatActivity.currentChat == null && chatActivity.currentEncryptedChat == null && (chatActivity.currentUser != null && !UserObject.isUserSelf(chatActivity.currentUser) && !UserObject.isReplyUser(chatActivity.currentUser) && !UserObject.isAnonymous(chatActivity.currentUser) && !chatActivity.currentUser.bot && !UserObject.isService(chatActivity.currentUser.id)) && (chatActivity.userInfo == null || !chatActivity.userInfo.read_dates_private) && !chatActivity.isInScheduleMode() && message.isOutOwner() && message.isSent() && !message.isEditing() && !message.isSending() && !message.isSendError() && !message.isContentUnread() && !message.isUnread() && (chatActivity.getConnectionsManager().getCurrentTime() - message.messageOwner.date < chatActivity.getMessagesController().pmReadDateExpirePeriod) && !(message.messageOwner.action instanceof TLRPC.TL_messageActionChatJoinedByRequest);
         final boolean showPrivateMessageEdit = (chatActivity.currentUser == null || !UserObject.isReplyUser(chatActivity.currentUser) && !UserObject.isAnonymous(chatActivity.currentUser)) && !chatActivity.isInScheduleMode() && message.isEdited() && !(message.messageOwner.action instanceof TLRPC.TL_messageActionChatJoinedByRequest);
-        ItemOptions messageOptions = ItemOptions.makeOptions(containerView, chatActivity.getResourceProvider(), null, isReactionsViewAvailable || showMessageSeen);
+        ItemOptions messageOptions = ItemOptions.makeOptions(containerView, chatActivity.getResourceProvider(), null, isReactionsViewAvailable || showMessageSeen || ContextMenuHelper.mustUseSwipeBack());
 
         MessageSeenView messageSeenView;
         if (showMessageSeen) {
@@ -659,30 +651,195 @@ public class TodoItemMenu extends Dialog {
             messageOptions.addGap();
         }
 
-        boolean hasExtraOptions = false;
-        for (int i = 0, N = icons.size(); i < N; ++i) {
-            final int option = options.get(i);
-            if (option == ChatActivity.OPTION_AI_FEATURES) {
-                hasExtraOptions = true;
-                continue;
-            }
-            messageOptions.add(icons.get(i), items.get(i), () -> {
-                onOptionClick.run(option);
-                dismiss(option == ChatActivity.OPTION_DELETE || option == ChatActivity.OPTION_PIN);
-            });
-        }
-
-        if (hasExtraOptions) {
-            messageOptions.addGap();
-            messageOptions.addText(getString(R.string.ContextMenuElements_MoreHidden), 13, dp(200));
-        }
+//        boolean hasExtraOptions = false;
+//        for (int i = 0, N = icons.size(); i < N; ++i) {
+//            final int option = options.get(i);
+//            messageOptions.add(icons.get(i), items.get(i), () -> {
+//                onOptionClick.run(option);
+//                dismiss(option == ChatActivity.OPTION_DELETE || option == ChatActivity.OPTION_PIN);
+//            });
+//        }
 
         messageOptions.setupSelectors();
         messageOptionsView = messageOptions.getLayout();
         messageOptionsView.setPivotX(0);
         messageOptionsView.setPivotY(0);
         menuContainer.addView(messageOptionsView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT));
-        if (messageOptionsView instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
+        if (messageOptionsView instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout) {
+            ContextMenuHelper.fillMenu(context, items, options, icons, new ContextMenuHelper.OnItemAddReady() {
+                @Override
+                public ActionBarPopupWindow.ActionBarPopupWindowLayout getPopupWindowLayout() {
+                    return popupLayout;
+                }
+
+                @Override
+                public void onItemAdd(int id, ActionBarMenuSubItem item) {
+                    popupLayout.addView(item);
+
+                    if (id == ChatActivity.OPTION_AI_FEATURES) {
+                        Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress = (link) -> {
+                            //chatActivity.didPressMessageUrl(link, false, message, cell);
+                            return true;
+                        };
+                        CustomModelsMenuWrapper.FillStateData data = new CustomModelsMenuWrapper.FillStateData();
+                        data.context = getContext();
+                        data.onSheetOpen = () -> dismiss(true);
+                        data.supportsActivityRelatedDimBehind = false;
+                        data.originalSubItem = item;
+                        data.popupWindowLayout = popupLayout;
+                        data.messageObject = message;
+                        data.messageText = message.getMessageTextToTranslate(chatActivity.getValidGroupedMessage(message), new int[] { message.getId() });
+                        data.noForwards = false;
+                        data.onLinkPress = onLinkPress;
+                        CustomModelsMenuWrapper.initState(data);
+                    }
+
+//                    if (id == OPTION_UNTRANSLATE) {
+//                        final TranslateController translateController = getMessagesController().getTranslateController();
+//
+//                        if (selectedObject != null && selectedObject.translated && !translateController.isTranslatingDialog(selectedObject.getDialogId())) {
+//                            item.setOnClickListener(e -> {
+//                                MainTranslationsHandler.hideTranslationItem(currentAccount, selectedObject);
+//                                closeMenu(true);
+//                            });
+//                        } else {
+//                            item.setVisibility(View.GONE);
+//                        }
+//                    }
+//
+//                    if (id == OPTION_TRANSLATE) {
+//                        final boolean translateEnabled = getMessagesController().getTranslateController().isContextTranslateEnabled();
+//                        String toLangDefault = LocaleController.getInstance().getCurrentLocale().getLanguage();
+//                        String toLang = TranslateAlert2.getToLanguage();
+//                        int[] messageIdToTranslate = new int[] { message.getId() };
+//                        final CharSequence finalMessageText = message.getMessageTextToTranslate(groupedMessages, messageIdToTranslate);
+//                        Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress = (link) -> {
+//                            didPressMessageUrl(link, false, selectedObject, v instanceof ChatMessageCell ? (ChatMessageCell) v : null);
+//                            return true;
+//                        };
+//
+//                        TLRPC.InputPeer inputPeer = selectedObject != null && (selectedObject.isPoll() || selectedObject.isVoiceTranscriptionOpen() || selectedObject.isSponsored() || selectedObject.scheduled || chatMode == MODE_QUICK_REPLIES) ? null : getMessagesController().getInputPeer(dialog_id);
+//                        if (selectedObject != null && selectedObject.messageOwner != null && selectedObject.messageOwner.originalLanguage != null) {
+//                            waitForLangDetection.set(false);
+//                            String fromLang = selectedObject.messageOwner.originalLanguage;
+//                            item.setVisibility(
+//                                    fromLang != null && (!fromLang.equals(toLang) || !fromLang.equals(toLangDefault) || fromLang.equals(TranslateController.UNKNOWN_LANGUAGE)) && (
+//                                            translateEnabled && !RestrictedLanguagesSelectActivity.getRestrictedLanguages().contains(fromLang) ||
+//                                                    (currentChat != null && (currentChat.has_link || ChatObject.isPublic(currentChat)) || selectedObject.messageOwner.fwd_from != null) && ("uk".equals(fromLang) || "ru".equals(fromLang))
+//                                    ) ? View.VISIBLE : View.GONE
+//                            );
+//                            item.setOnClickListener(e -> {
+//                                if (selectedObject == null || getParentActivity() == null) {
+//                                    return;
+//                                }
+//                                String toLangValue = fromLang != null && fromLang.equals(toLang) ? toLangDefault : toLang;
+//                                ArrayList<TLRPC.MessageEntity> entities = selectedObject != null && selectedObject.messageOwner != null ? selectedObject.messageOwner.entities : null;
+//                                MainTranslationsHandler.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], fromLang, toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
+//                                closeMenu(OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.DEFAULT.getValue());
+//                                    /*TranslateAlert2 alert = TranslateAlert2.showAlert(getParentActivity(), this, currentAccount, inputPeer, messageIdToTranslate[0], fromLang, toLangValue, finalMessageText, entities, noforwardsOrPaidMedia, onLinkPress, () -> dimBehindView(false));
+//                                    alert.setDimBehind(false);
+//                                    closeMenu(false);*/
+//
+//                                int hintCount = MessagesController.getNotificationsSettings(currentAccount).getInt("dialog_show_translate_count" + getDialogId(), 5);
+//                                if (hintCount > 0) {
+//                                    hintCount--;
+//                                    MessagesController.getNotificationsSettings(currentAccount).edit().putInt("dialog_show_translate_count" + getDialogId(), hintCount).apply();
+//                                    updateTopPanel(true);
+//                                }
+//                            });
+//                        } else if (LanguageDetector.hasSupport()) {
+//                            final String[] fromLang = {null};
+//                            item.setVisibility(View.GONE);
+//                            waitForLangDetection.set(true);
+//                            LanguageDetector.detectLanguage(
+//                                    finalMessageText.toString(),
+//                                    (String lang) -> {
+//                                        fromLang[0] = lang;
+//                                        if (fromLang[0] != null && (!fromLang[0].equals(toLang) || !fromLang[0].equals(toLangDefault) || fromLang[0].equals(TranslateController.UNKNOWN_LANGUAGE)) && (
+//                                                translateEnabled && !RestrictedLanguagesSelectActivity.getRestrictedLanguages().contains(fromLang[0]) ||
+//                                                        (currentChat != null && (currentChat.has_link || ChatObject.isPublic(currentChat)) || selectedObject.messageOwner.fwd_from != null) && ("uk".equals(fromLang[0]) || "ru".equals(fromLang[0]))
+//                                        )) {
+//                                            item.setVisibility(View.VISIBLE);
+//                                        }
+//                                        waitForLangDetection.set(false);
+//                                        if (onLangDetectionDone.get() != null) {
+//                                            onLangDetectionDone.get().run();
+//                                            onLangDetectionDone.set(null);
+//                                        }
+//                                    },
+//                                    (Exception e) -> {
+//                                        FileLog.e("mlkit: failed to detect language in message");
+//                                        waitForLangDetection.set(false);
+//                                        if (onLangDetectionDone.get() != null) {
+//                                            onLangDetectionDone.get().run();
+//                                            onLangDetectionDone.set(null);
+//                                        }
+//                                    }
+//                            );
+//                            item.setOnClickListener(e -> {
+//                                if (selectedObject == null || getParentActivity() == null) {
+//                                    return;
+//                                }
+//                                String toLangValue = fromLang[0] != null && fromLang[0].equals(toLang) ? toLangDefault : toLang;
+//                                ArrayList<TLRPC.MessageEntity> entities = selectedObject != null && selectedObject.messageOwner != null ? selectedObject.messageOwner.entities : null;
+//                                MainTranslationsHandler.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], fromLang[0], toLangValue, finalMessageText, entities, noforwards, onLinkPress, () -> dimBehindView(false));
+//                                closeMenu(OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.DEFAULT.getValue());
+//                                    /*TranslateAlert2 alert = TranslateAlert2.showAlert(getParentActivity(), this, currentAccount, inputPeer, messageIdToTranslate[0], fromLang[0], toLangValue, finalMessageText, entities, noforwardsOrPaidMedia, onLinkPress, () -> dimBehindView(false));
+//                                    alert.setDimBehind(false);
+//                                    closeMenu(false);*/
+//
+//                                int hintCount = MessagesController.getNotificationsSettings(currentAccount).getInt("dialog_show_translate_count" + getDialogId(), 5);
+//                                if (hintCount > 0) {
+//                                    hintCount--;
+//                                    MessagesController.getNotificationsSettings(currentAccount).edit().putInt("dialog_show_translate_count" + getDialogId(), hintCount).apply();
+//                                    updateTopPanel(true);
+//                                }
+//                            });
+//                            item.postDelayed(() -> {
+//                                if (onLangDetectionDone.get() != null) {
+//                                    onLangDetectionDone.getAndSet(null).run();
+//                                }
+//                            }, 250);
+//                        } else if (translateEnabled) {
+//                            item.setOnClickListener(e -> {
+//                                if (selectedObject == null || getParentActivity() == null) {
+//                                    return;
+//                                }
+//                                MainTranslationsHandler.initTranslationItem(getParentActivity(), ChatActivity.this, selectedObject, currentAccount, inputPeer, messageIdToTranslate[0], "und", toLang, finalMessageText, null, noforwards, onLinkPress, () -> dimBehindView(false));
+//                                closeMenu(OctoConfig.INSTANCE.translatorMode.getValue() != TranslatorMode.DEFAULT.getValue());
+//                                    /*TranslateAlert2 alert = TranslateAlert2.showAlert(getParentActivity(), this, currentAccount, inputPeer, messageIdToTranslate[0], "und", toLang, finalMessageText, null, noforwardsOrPaidMedia, onLinkPress, () -> dimBehindView(false));
+//                                    alert.setDimBehind(false);
+//                                    closeMenu(false);*/
+//
+//                                int hintCount = MessagesController.getNotificationsSettings(currentAccount).getInt("dialog_show_translate_count" + getDialogId(), 5);
+//                                if (hintCount > 0) {
+//                                    hintCount--;
+//                                    MessagesController.getNotificationsSettings(currentAccount).edit().putInt("dialog_show_translate_count" + getDialogId(), hintCount).apply();
+//                                    updateTopPanel(true);
+//                                }
+//                            });
+//                        } else {
+//                            item.setVisibility(View.GONE);
+//                        }
+//                    }
+                }
+
+                @Override
+                public void onShortcutsAdd(ContextMenuHelper.ShortcutsLayout shortcutsLayout) {
+                    popupLayout.addView(shortcutsLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+                }
+
+                @Override
+                public void onSeparatorAdd() {
+                    popupLayout.addView(new ActionBarPopupWindow.GapView(context, null), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
+                }
+
+                @Override
+                public void onItemClick(int id) {
+                    onOptionClick.run(id);
+                    dismiss(id == ChatActivity.OPTION_DELETE || id == ChatActivity.OPTION_PIN);
+                }
+            });
             ((ActionBarPopupWindow.ActionBarPopupWindowLayout) messageOptionsView).setOnSizeChangedListener(this::updateTranslation);
             messageOptionsView.setOnTouchListener((v, e) -> {
                 if (messageOptionsView != null && e.getAction() == MotionEvent.ACTION_DOWN) {
@@ -741,8 +898,13 @@ public class TodoItemMenu extends Dialog {
             });
             menuContainer.addView(reactionsView = reactionsLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, (int) (52 + reactionsLayout.getTopOffset() / AndroidUtilities.density + pad), Gravity.TOP | Gravity.LEFT));
 
-            reactionsLayout.setMessage(message, chatActivity.chatInfo, true);
-            reactionsView.setTransitionProgress(1);
+            if (taskId == -1) {
+                reactionsLayout.skipEnterAnimation = true;
+            }
+            reactionsLayout.setMessage(message, chatActivity.chatInfo, taskId != -1);
+            if (taskId != -1) {
+                reactionsView.setTransitionProgress(1);
+            }
         }
 
         updateTranslation();
@@ -770,17 +932,19 @@ public class TodoItemMenu extends Dialog {
                     dty1 = windowView.getHeight() - insets.top - insets.bottom - dp(66) - cell.getHeight() - messageOptionsView.getHeight();
                 }
 
-                final int index = myTaskCell.getTodoIndex(taskId);
-                final float top = myTaskCell.getPollButtonTop(index);
-                final float bottom = myTaskCell.getPollButtonBottom(index);
+                if (taskId != -1) {
+                    final int index = myTaskCell.getTodoIndex(taskId);
+                    final float top = myTaskCell.getPollButtonTop(index);
+                    final float bottom = myTaskCell.getPollButtonBottom(index);
 
-                dtx2 = 0;
-                dty2 = ty;
-                if (dty2 + (int) bottom > windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight()) {
-                    dty2 = windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight() - (int) bottom;
-                }
-                if (taskOptionsView != null && dty2 + (int) bottom + taskOptionsView.getHeight() > windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight()) {
-                    dty2 = windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight() - (int) bottom - taskOptionsView.getHeight();
+                    dtx2 = 0;
+                    dty2 = ty;
+                    if (dty2 + (int) bottom > windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight()) {
+                        dty2 = windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight() - (int) bottom;
+                    }
+                    if (taskOptionsView != null && dty2 + (int) bottom + taskOptionsView.getHeight() > windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight()) {
+                        dty2 = windowView.getHeight() - insets.top - insets.bottom - dp(66 + 12) - hintTextView.getHeight() - (int) bottom - taskOptionsView.getHeight();
+                    }
                 }
             }
             updateTranslation();
@@ -822,27 +986,31 @@ public class TodoItemMenu extends Dialog {
             messageOptionsView.setScaleY(s);
         }
 
-        myTaskCell.setTranslationX(lerp(tx, dtx2, dismissingWithAlpha ? 1.0f : openProgress) + page0x);
-        myTaskCell.setTranslationY(lerp(ty, dty2, dismissingWithAlpha ? 1.0f : openProgress));
-        if (taskOptionsView != null) {
-            final int index = myTaskCell.getTodoIndex(taskId);
-            final float top = myTaskCell.getPollButtonTop(index);
-            final float bottom = myTaskCell.getPollButtonBottom(index);
-            if (isOut) {
-                taskOptionsView.setTranslationX(page0x + dtx2 + myTaskCell.getLeft() + myTaskCell.getPollButtonsLeft() - dp(8) - taskOptionsView.getLeft());
-            } else {
-                taskOptionsView.setTranslationX(page0x + dtx2 + (myTaskCell.needDrawAvatar() ? dp(48) : 0) + myTaskCell.getLeft() - taskOptionsView.getLeft());
+        if (taskId != -1) {
+            myTaskCell.setTranslationX(lerp(tx, dtx2, dismissingWithAlpha ? 1.0f : openProgress) + page0x);
+            myTaskCell.setTranslationY(lerp(ty, dty2, dismissingWithAlpha ? 1.0f : openProgress));
+            if (taskOptionsView != null) {
+                final int index = myTaskCell.getTodoIndex(taskId);
+                final float top = myTaskCell.getPollButtonTop(index);
+                final float bottom = myTaskCell.getPollButtonBottom(index);
+                if (isOut) {
+                    taskOptionsView.setTranslationX(page0x + dtx2 + myTaskCell.getLeft() + myTaskCell.getPollButtonsLeft() - dp(8) - taskOptionsView.getLeft());
+                } else {
+                    taskOptionsView.setTranslationX(page0x + dtx2 + (myTaskCell.needDrawAvatar() ? dp(48) : 0) + myTaskCell.getLeft() - taskOptionsView.getLeft());
+                }
+                taskOptionsViewMaxWidth = menuContainer.getMeasuredWidth() - (taskOptionsView.getX() - page1x);
+                taskOptionsView.setTranslationY(myTaskCell.getY() + (int) bottom - taskOptionsView.getTop() - menuContainer.getTop());
+                taskOptionsView.setAlpha(openProgress);
+                final float s = lerp(0.75f, 1.0f, openProgress);
+                taskOptionsView.setScaleX(s);
+                taskOptionsView.setScaleY(s);
             }
-            taskOptionsViewMaxWidth = menuContainer.getMeasuredWidth() - (taskOptionsView.getX() - page1x);
-            taskOptionsView.setTranslationY(myTaskCell.getY() + (int) bottom - taskOptionsView.getTop() - menuContainer.getTop());
-            taskOptionsView.setAlpha(openProgress);
-            final float s = lerp(0.75f, 1.0f, openProgress);
-            taskOptionsView.setScaleX(s);
-            taskOptionsView.setScaleY(s);
         }
         if (dismissingWithAlpha) {
             myCell.setAlpha(openProgress);
-            myTaskCell.setAlpha(openProgress);
+            if (taskId != -1) {
+                myTaskCell.setAlpha(openProgress);
+            }
         }
 
         if (reactionsView != null) {
@@ -879,7 +1047,7 @@ public class TodoItemMenu extends Dialog {
             blurBitmapPaint.setShader(blurBitmapShader = new BitmapShader(blurBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
             ColorMatrix colorMatrix = new ColorMatrix();
             AndroidUtilities.adjustSaturationColorMatrix(colorMatrix, Theme.isCurrentThemeDark() ? .05f : +.25f);
-            AndroidUtilities.adjustBrightnessColorMatrix(colorMatrix, Theme.isCurrentThemeDark() ? -.02f : -.04f);
+            AndroidUtilities.adjustBrightnessColorMatrix(colorMatrix, Theme.isCurrentThemeDark() ? -.02f : -.08f);
             blurBitmapPaint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
             blurMatrix = new Matrix();
         }, 14);

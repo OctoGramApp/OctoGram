@@ -64,6 +64,7 @@ import org.telegram.ui.TopicsFragment;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.octogram.android.utils.CustomEmojiStatuses;
 import it.octogram.android.utils.OctoLogging;
 
 public class ChatAvatarContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
@@ -928,7 +929,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
             rightDrawableIsScamOrVerified = false;
             rightDrawable2ContentDescription = null;
         }
-        if (premium || DialogObject.getEmojiStatusDocumentId(emojiStatus) != 0) {
+        if (premium || DialogObject.getEmojiStatusDocumentId(emojiStatus) != 0 || (parentFragment != null && CustomEmojiStatuses.hasCustomEmojiId(parentFragment.getCurrentChat()))) {
             if (titleTextView.getRightDrawable() instanceof AnimatedEmojiDrawable.WrapSizeDrawable &&
                 ((AnimatedEmojiDrawable.WrapSizeDrawable) titleTextView.getRightDrawable()).getDrawable() instanceof AnimatedEmojiDrawable) {
                 ((AnimatedEmojiDrawable) ((AnimatedEmojiDrawable.WrapSizeDrawable) titleTextView.getRightDrawable()).getDrawable()).removeView(titleTextView);
@@ -939,6 +940,8 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
                 Drawable drawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, R.drawable.msg_premium_liststar).mutate();
                 drawable.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_profile_verifiedBackground), PorterDuff.Mode.MULTIPLY));
                 emojiStatusDrawable.set(drawable, animated);
+            } else if (parentFragment != null && CustomEmojiStatuses.hasCustomEmojiId(parentFragment.getCurrentChat())) {
+                emojiStatusDrawable.set(CustomEmojiStatuses.getCustomEmojiId(parentFragment.getCurrentChat()), animated);
             } else {
                 emojiStatusDrawable.set((Drawable) null, animated);
             }

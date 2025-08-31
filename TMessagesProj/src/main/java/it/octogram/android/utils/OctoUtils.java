@@ -43,6 +43,7 @@ import org.webrtc.voiceengine.WebRtcAudioTrack;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
@@ -206,10 +207,6 @@ public class OctoUtils {
 
     public static String getCurrentAbi() {
         return getCurrentAbi(true);
-    }
-
-    public static String getDomain() {
-        return "octogramapp.github.io";
     }
 
     private static final String LOGS_DIRECTORY = "octologs";
@@ -524,5 +521,22 @@ public class OctoUtils {
 
         return String.format(Locale.getDefault(), "%s\n\n%s\n\n%s", original, "=".repeat(15), translated);
     }
+
+    public static CharSequence safeTrim(CharSequence text, int maxLen) {
+        if (text == null || text.length() <= maxLen) {
+            return text;
+        }
+
+        BreakIterator it = BreakIterator.getCharacterInstance(Locale.getDefault());
+        it.setText(text.toString());
+
+        int end = it.preceding(maxLen + 1);
+        if (end <= 0) {
+            end = maxLen;
+        }
+
+        return text.subSequence(0, end) + "...";
+    }
+
 }
 

@@ -362,6 +362,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
     private Drawable searchIconDrawable;
     private Drawable searchIconDotDrawable;
     private boolean allowAnimatedEmoji;
+    private boolean allowExtraEmojis;
 
     private Long emojiScrollToStickerId;
 
@@ -1488,11 +1489,15 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
     }
 
     public EmojiView(BaseFragment fragment, boolean needAnimatedEmoji, boolean needStickers, boolean needGif, final Context context, boolean needSearch, final TLRPC.ChatFull chatFull, ViewGroup parentView, boolean shouldDrawBackground, Theme.ResourcesProvider resourcesProvider, boolean frozenAtStart) {
+        this(fragment, needAnimatedEmoji, !OctoConfig.INSTANCE.hideCustomEmojis.getValue(), needStickers, needGif, context, needSearch, chatFull, parentView, shouldDrawBackground, resourcesProvider, frozenAtStart);
+    }
+
+    public EmojiView(BaseFragment fragment, boolean needAnimatedEmoji, boolean needExtraEmojis, boolean needStickers, boolean needGif, Context context, boolean needSearch, TLRPC.ChatFull chatFull, ViewGroup parentView, boolean shouldDrawBackground, Theme.ResourcesProvider resourcesProvider, boolean frozenAtStart) {
         super(context);
         this.shouldDrawBackground = shouldDrawBackground;
         this.fragment = fragment;
-        //this.allowAnimatedEmoji = needAnimatedEmoji;
-        this.allowAnimatedEmoji = !OctoConfig.INSTANCE.hideCustomEmojis.getValue();
+        this.allowExtraEmojis = needExtraEmojis;
+        this.allowAnimatedEmoji = needAnimatedEmoji && (UserConfig.getInstance(currentAccount).isPremium() || allowExtraEmojis);
         this.resourcesProvider = resourcesProvider;
 
         if (frozenAtStart) {
@@ -1575,7 +1580,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         emojiTab.view = emojiContainer;
         allTabs.add(emojiTab);
 
-        if (needAnimatedEmoji) {
+        if (allowExtraEmojis) {
             MediaDataController.getInstance(currentAccount).checkStickers(MediaDataController.TYPE_EMOJIPACKS);
             MediaDataController.getInstance(currentAccount).checkFeaturedEmoji();
             animatedEmojiTextColorFilter = new PorterDuffColorFilter(getThemedColor(Theme.key_featuredStickers_addButton), PorterDuff.Mode.SRC_IN);
@@ -1754,7 +1759,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             }
         });
 
-        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, false, true, needAnimatedEmoji, 0, fragment != null ? () -> {
+        emojiTabs = new EmojiTabsStrip(context, resourcesProvider, true, false, true, allowExtraEmojis, 0, fragment != null ? () -> {
             if (delegate != null) {
                 delegate.onEmojiSettingsClick(emojiAdapter.frozenEmojiPacks);
             }
@@ -7447,7 +7452,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             featuredEmojiSets.clear();
             for (int a = 0, N = featured.size(); a < N; a++) {
                 TLRPC.StickerSetCovered set = featured.get(a);
-                if (!mediaDataController.isStickerPackInstalled(set.set.id) || installedEmojiSets.contains(set.set.id)) {
+                if (shouldShowEmojiSet(set)) {
                     featuredEmojiSets.add(set);
                 }
             }
@@ -7492,6 +7497,10 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             }
         }
         return packs;
+    }
+
+    private boolean shouldShowEmojiSet(TLRPC.StickerSetCovered set) {
+        return allowEmojisForNonPremium || UserConfig.getInstance(currentAccount).isPremium() || !MediaDataController.getInstance(currentAccount).isStickerPackInstalled(set.set.id);
     }
 
     private class EmojiSearchAdapter extends RecyclerListView.SelectionAdapter {

@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import it.octogram.android.utils.CustomEmojiStatuses;
+
 public class ChatObject {
 
     public static final int CHAT_TYPE_CHAT = 0;
@@ -2428,6 +2430,8 @@ public class ChatObject {
 
     public static int getProfileColorId(TLRPC.Chat chat) {
         if (chat == null) return 0;
+        int colorId = CustomEmojiStatuses.getCustomColorId(chat);
+        if (colorId != 0) return colorId;
         if (chat.profile_color != null && (chat.profile_color.flags & 1) != 0) return chat.profile_color.color;
         return -1;
     }
@@ -2437,6 +2441,7 @@ public class ChatObject {
             return ((TLRPC.TL_emojiStatusCollectible) chat.emoji_status).pattern_document_id;
         }
         if (chat != null && chat.profile_color != null && (chat.profile_color.flags & 2) != 0) return chat.profile_color.background_emoji_id;
+        if (CustomEmojiStatuses.hasCustomEmojiId(chat)) return CustomEmojiStatuses.getBackgroundEmojiId(chat);
         return 0;
     }
 

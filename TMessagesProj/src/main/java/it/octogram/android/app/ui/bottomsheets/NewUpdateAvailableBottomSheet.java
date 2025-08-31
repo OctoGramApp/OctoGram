@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.tgastandaloneexport;
+package it.octogram.android.app.ui.bottomsheets;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.formatString;
@@ -22,7 +22,6 @@ import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -33,7 +32,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 
@@ -41,7 +39,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
-import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.tgnet.TLRPC;
@@ -54,10 +51,7 @@ import org.telegram.ui.Components.LayoutHelper;
 import it.octogram.android.utils.updater.UpdatesManager;
 
 @SuppressLint("ViewConstructor")
-public class UpdateAppAlertDialog extends BottomSheet {
-
-    @Nullable
-    private final TLRPC.TL_help_appUpdate appUpdate;
+public class NewUpdateAvailableBottomSheet extends BottomSheet {
 
     private final Drawable shadowDrawable;
     private final NestedScrollView scrollView;
@@ -218,9 +212,8 @@ public class UpdateAppAlertDialog extends BottomSheet {
         }
     }
 
-    public UpdateAppAlertDialog(Context context, TLRPC.TL_help_appUpdate update) {
+    public NewUpdateAvailableBottomSheet(Context context, TLRPC.TL_help_appUpdate update) {
         super(context, false);
-        appUpdate = update;
         setCanceledOnTouchOutside(false);
 
         setApplyTopPadding(false);
@@ -290,16 +283,16 @@ public class UpdateAppAlertDialog extends BottomSheet {
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(linearLayout, LayoutHelper.createScroll(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
 
-        if (appUpdate.sticker != null) {
+        if (update.sticker != null) {
             BackupImageView imageView = new BackupImageView(context);
-            SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(appUpdate.sticker.thumbs, Theme.key_windowBackgroundGray, 1.0f);
-            TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(appUpdate.sticker.thumbs, 90);
-            ImageLocation imageLocation = ImageLocation.getForDocument(thumb, appUpdate.sticker);
+            SvgHelper.SvgDrawable svgThumb = DocumentObject.getSvgThumb(update.sticker.thumbs, Theme.key_windowBackgroundGray, 1.0f);
+            TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(update.sticker.thumbs, 90);
+            ImageLocation imageLocation = ImageLocation.getForDocument(thumb, update.sticker);
 
             if (svgThumb != null) {
-                imageView.setImage(ImageLocation.getForDocument(appUpdate.sticker), "250_250", svgThumb, 0, "update");
+                imageView.setImage(ImageLocation.getForDocument(update.sticker), "250_250", svgThumb, 0, "update");
             } else {
-                imageView.setImage(ImageLocation.getForDocument(appUpdate.sticker), "250_250", imageLocation, null, 0, "update");
+                imageView.setImage(ImageLocation.getForDocument(update.sticker), "250_250", imageLocation, null, 0, "update");
             }
             linearLayout.addView(imageView, LayoutHelper.createLinear(160, 160, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 17, 8, 17, 0));
         }
@@ -318,7 +311,7 @@ public class UpdateAppAlertDialog extends BottomSheet {
         messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         messageTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
         messageTextView.setLinkTextColor(Theme.getColor(Theme.key_dialogTextLink));
-        messageTextView.setText(formatString(R.string.AppUpdateVersionAndSize, appUpdate.version, AndroidUtilities.formatFileSize(appUpdate.document.size)));
+        messageTextView.setText(formatString(R.string.AppUpdateVersionAndSize, update.version, AndroidUtilities.formatFileSize(update.document.size)));
         messageTextView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP);
         linearLayout.addView(messageTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 23, 0, 23, 5));
 
@@ -327,12 +320,10 @@ public class UpdateAppAlertDialog extends BottomSheet {
         changelogTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         changelogTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
         changelogTextView.setLinkTextColor(Theme.getColor(Theme.key_dialogTextLink));
-        if (TextUtils.isEmpty(appUpdate.text)) {
+        if (TextUtils.isEmpty(update.text)) {
             changelogTextView.setText(AndroidUtilities.replaceTags(getString(R.string.AppUpdateChangelogEmpty)));
         } else {
-            SpannableStringBuilder builder = new SpannableStringBuilder(appUpdate.text);
-            MessageObject.addEntitiesToText(builder, update.entities, false, false, false, false);
-            changelogTextView.setText(builder);
+            changelogTextView.setText(AndroidUtilities.replaceTags(update.text));
         }
         changelogTextView.setGravity(Gravity.LEFT | Gravity.TOP);
         linearLayout.addView(changelogTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 23, 15, 23, 0));

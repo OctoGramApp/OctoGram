@@ -57,8 +57,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import it.octogram.android.app.ui.cells.EmojiSetBulletinLayout;
-import it.octogram.android.http.FileDownloader;
-import it.octogram.android.http.StandardHTTPRequest;
+import it.octogram.android.utils.network.FileDownloader;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.data.FileUnzip;
 import it.octogram.android.utils.fonts.FontFileReader;

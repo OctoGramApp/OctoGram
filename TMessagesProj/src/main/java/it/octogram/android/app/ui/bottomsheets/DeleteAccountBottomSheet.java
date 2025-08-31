@@ -274,7 +274,7 @@ public class DeleteAccountBottomSheet extends BottomSheet {
                 progressDialog.setCanCancel(false);
 
                 TL_account.deleteAccount req = new TL_account.deleteAccount();
-                req.reason = String.format(Locale.US, "deletion requested by the user via %s - request made after 2fa confirmation", OctoUtils.getDomain());
+                req.reason = String.format(Locale.US, "deletion requested by the user via %s - request made after 2fa confirmation", OctoConfig.MAIN_DOMAIN);
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                     if (response instanceof TLRPC.TL_boolTrue) {
                         AccountInstance accountInstance = AccountInstance.getInstance(currentAccount);

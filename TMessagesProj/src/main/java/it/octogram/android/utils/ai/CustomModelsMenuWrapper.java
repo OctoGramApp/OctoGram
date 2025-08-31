@@ -105,8 +105,8 @@ public class CustomModelsMenuWrapper {
                 data.originalSubItem.setOnClickListener(view -> handleAiTranslation(data));
             } else if (data.canTranscribe()) {
                 data.originalSubItem.setIcon(R.drawable.menu_feature_transfer);
-                data.originalSubItem.setText("Transcribe");
-                data.originalSubItem.setOnClickListener(view -> handleTrascription(data));
+                data.originalSubItem.setText(getString(R.string.AiFeatures_Features_TranscribeAI));
+                data.originalSubItem.setOnClickListener(view -> handleTranscription(data));
             }
             data.originalSubItem.invalidate();
             return;
@@ -323,7 +323,7 @@ public class CustomModelsMenuWrapper {
         handleOnClick(data.modelID, null, null, data);
     }
 
-    private static void handleTrascription(FillStateData data) {
+    private static void handleTranscription(FillStateData data) {
         data.modelID = CustomModelsHelper.VIRTUAL_TRANSCRIBE_MODEL_ID;
         handleOnClick(data.modelID, null, null, data);
     }
@@ -381,7 +381,7 @@ public class CustomModelsMenuWrapper {
 
             if (data.canTranscribe()) {
                 ActionBarMenuSubItem item = ActionBarMenuItem.addItem(windowLayout, R.drawable.menu_feature_transfer, "Transcribe", false, null);
-                item.setOnClickListener(view -> handleTrascription(data));
+                item.setOnClickListener(view -> handleTranscription(data));
                 data.applyColors(item);
             }
 
@@ -430,7 +430,7 @@ public class CustomModelsMenuWrapper {
         public Runnable onSheetOpen;
         public Runnable onSheetClose;
         public Runnable onNewFragmentOpen;
-        public boolean noforwards = false;
+        public boolean noForwards = false;
         public boolean supportsActivityRelatedDimBehind = false;
         public ActionBarPopupWindow.ActionBarPopupWindowLayout popupWindowLayout;
         public ActionBarMenuSubItem originalSubItem;

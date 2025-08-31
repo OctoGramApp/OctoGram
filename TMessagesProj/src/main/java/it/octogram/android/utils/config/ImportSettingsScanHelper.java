@@ -201,7 +201,6 @@ public class ImportSettingsScanHelper {
     }
 
     private void fillChatsAiFeaturesOptions(SettingsScanCategory category) {
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.aiFeatures, R.string.AiFeatures));
         category.options.add(SettingsScanOption.asTitle(R.string.AiFeatures_Features));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.aiFeaturesTranslateMessages, R.string.TranslateMessages));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.aiFeaturesChatContext, R.string.AiFeatures_Features_ChatContext));

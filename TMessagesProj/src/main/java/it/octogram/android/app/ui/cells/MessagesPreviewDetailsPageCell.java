@@ -19,7 +19,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
+
+import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
@@ -34,6 +37,8 @@ import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
 
+import java.util.ArrayList;
+
 @SuppressLint("ViewConstructor")
 public class MessagesPreviewDetailsPageCell extends LinearLayout {
     private BackgroundGradientDrawable.Disposable backgroundGradientDisposable;
@@ -41,101 +46,97 @@ public class MessagesPreviewDetailsPageCell extends LinearLayout {
 
     private Drawable backgroundDrawable;
     private Drawable oldBackgroundDrawable;
+    private final ArrayList<View> cells;
+    private final ArrayList<MessageObject> messageObjects;
     private final Drawable shadowDrawable;
     private final INavigationLayout parentLayout;
-
-    private final ChatMessageCell replyMessageCell;
-    private final ChatMessageCell mainMessageCell;
-    private final ChatActionCell replyActionCell;
-    private final ChatActionCell mainActionCell;
-
-    private MessageObject currentMainMessage;
 
     public MessagesPreviewDetailsPageCell(Context context, INavigationLayout layout) {
         super(context);
 
         parentLayout = layout;
+        cells = new ArrayList<>();
+        messageObjects = new ArrayList<>();
 
         setWillNotDraw(false);
         setOrientation(LinearLayout.VERTICAL);
         setPadding(0, dp(11), 0, dp(11));
 
         shadowDrawable = Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
-
-        replyMessageCell = createNewChatMessageCell();
-        replyMessageCell.setVisibility(View.GONE);
-        addView(replyMessageCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-
-        replyActionCell = createNewChatActionCell();
-        replyActionCell.setVisibility(View.GONE);
-        addView(replyActionCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-
-        mainMessageCell = createNewChatMessageCell();
-        mainMessageCell.setVisibility(View.GONE);
-        addView(mainMessageCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-
-        mainActionCell = createNewChatActionCell();
-        mainActionCell.setVisibility(View.GONE);
-        addView(mainActionCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
     public void setMessages(MessageObject messageObject) {
-        if (currentMainMessage != null && currentMainMessage.getId() == messageObject.getId()) {
-            return;
-        }
-        currentMainMessage = messageObject;
-
+        messageObjects.clear();
+        cells.clear();
         if (messageObject.replyMessageObject != null) {
-            MessageObject replyObject = messageObject.replyMessageObject;
-            if (replyObject.messageOwner.reply_to != null) {
-                replyObject.messageOwner.reply_to.reply_to_msg_id = 0;
+            if (messageObject.replyMessageObject.messageOwner.reply_to != null) {
+                messageObject.replyMessageObject.messageOwner.reply_to.reply_to_msg_id = 0;
             }
-            replyObject.replyMessageObject = null;
-
-            if (isActionMessage(replyObject)) {
-                replyActionCell.setVisibility(View.VISIBLE);
-                replyActionCell.setMessageObject(replyObject);
-                replyMessageCell.setVisibility(View.GONE);
-            } else {
-                replyMessageCell.setVisibility(View.VISIBLE);
-                replyMessageCell.setMessageObject(replyObject, null, false, false, false);
-                replyActionCell.setVisibility(View.GONE);
-            }
-        } else {
-            replyMessageCell.setVisibility(View.GONE);
-            replyActionCell.setVisibility(View.GONE);
+            messageObject.replyMessageObject.replyMessageObject = null;
+            messageObjects.add(messageObject.replyMessageObject);
         }
+        messageObjects.add(messageObject);
+        removeAllViews();
 
-        if (isActionMessage(messageObject)) {
-            mainActionCell.setVisibility(View.VISIBLE);
-            mainActionCell.setMessageObject(messageObject);
-            mainMessageCell.setVisibility(View.GONE);
+        for (MessageObject obj : messageObjects) {
+            if (obj.type == 10 || obj.type == MessageObject.TYPE_ACTION_PHOTO || obj.type == MessageObject.TYPE_PHONE_CALL) {
+                ChatActionCell cell = getChatActionCell(obj);
+            addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+            cells.add(cell);
         } else {
-            mainMessageCell.setVisibility(View.VISIBLE);
-            mainMessageCell.setMessageObject(messageObject, null, false, false, false);
-            mainActionCell.setVisibility(View.GONE);
-        }
-    }
-
-    private boolean isActionMessage(MessageObject obj) {
-        return obj.type == 10 || obj.type == MessageObject.TYPE_ACTION_PHOTO || obj.type == MessageObject.TYPE_PHONE_CALL;
-    }
-
-    private ChatMessageCell createNewChatMessageCell() {
         ChatMessageCell cell = new ChatMessageCell(getContext(), UserConfig.selectedAccount);
+        cell.setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
+            @Override
+            public boolean canPerformActions() {
+                return true;
+            }
+
+            @Override
+            public void didLongPress(ChatMessageCell cell, float x, float y) {
+                cell.resetPressedLink(-1);
+            }
+        });
         cell.isChat = true;
         cell.setFullyDraw(true);
-        return cell;
+        cell.setMessageObject(obj, null, false, false, false);
+                addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+                cells.add(cell);
+            }
+        }
     }
-    private ChatActionCell createNewChatActionCell() {
-        ChatActionCell cell = new ChatActionCell(getContext());
+
+    @NonNull
+    private ChatActionCell getChatActionCell(MessageObject obj) {
+        ChatActionCell cell = new ChatActionCell(getContext()) {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(info);
+                info.setVisibleToUser(true);
+            }
+        };
         cell.setDelegate(new ChatActionCell.ChatActionCellDelegate() {
             @Override
             public long getDialogId() {
-                return currentMainMessage != null ? currentMainMessage.getDialogId() : 0;
+                return obj.getDialogId();
             }
         });
+        cell.setMessageObject(obj);
         return cell;
+    }
+
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        for (int a = 0; a < cells.size(); a++) {
+            View cell = cells.get(a);
+            if (cell instanceof ChatMessageCell) {
+                ((ChatMessageCell) cell).setMessageObject(messageObjects.get(a), null, false, false, false);
+            } else if (cell instanceof ChatActionCell) {
+                ((ChatActionCell) cell).setMessageObject(messageObjects.get(a), true);
+            }
+            cell.invalidate();
+        }
     }
 
     @Override
@@ -148,7 +149,7 @@ public class MessagesPreviewDetailsPageCell extends LinearLayout {
             } else if (backgroundGradientDisposable != null) {
                 backgroundGradientDisposable.dispose();
                 backgroundGradientDisposable = null;
-            }
+        }
             backgroundDrawable = newDrawable;
         }
         float themeAnimationValue = parentLayout.getThemeAnimationValue();
@@ -202,31 +203,30 @@ public class MessagesPreviewDetailsPageCell extends LinearLayout {
         }
         shadowDrawable.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
         shadowDrawable.draw(canvas);
+        for (View view : cells) {
+            if (view instanceof ChatMessageCell cell) {
+                ImageReceiver imageReceiver = cell.getAvatarImage();
+                if (imageReceiver != null) {
+                    int top = cell.getTop();
+                    float tx = cell.getTranslationX();
+                    int y = cell.getTop() + cell.getLayoutHeight();
 
-        drawAvatarForCell(canvas, replyMessageCell);
-        drawAvatarForCell(canvas, mainMessageCell);
-    }
+                    if (y - dp(48) < top) {
+                        y = top + dp(48);
+                    }
 
-    private void drawAvatarForCell(Canvas canvas, ChatMessageCell cell) {
-        if (cell.getVisibility() != View.VISIBLE) {
-            return;
-        }
-        ImageReceiver imageReceiver = cell.getAvatarImage();
-        if (imageReceiver != null) {
-            int top = cell.getTop();
-            float tx = cell.getTranslationX();
-            int y = cell.getTop() + cell.getLayoutHeight();
-            if (y - dp(48) < top) {
-                y = top + dp(48);
-            }
-            if (tx != 0) {
-                canvas.save();
-                canvas.translate(tx, 0);
-            }
-            imageReceiver.setImageY(y - dp(44));
-            imageReceiver.draw(canvas);
-            if (tx != 0) {
-                canvas.restore();
+                    if (tx != 0) {
+                        canvas.save();
+                        canvas.translate(tx, 0);
+                    }
+
+                    imageReceiver.setImageY(y - dp(44));
+                    imageReceiver.draw(canvas);
+
+                    if (tx != 0) {
+                        canvas.restore();
+                    }
+                }
             }
         }
     }
@@ -246,5 +246,6 @@ public class MessagesPreviewDetailsPageCell extends LinearLayout {
 
     @Override
     protected void dispatchSetPressed(boolean pressed) {
+
     }
 }
