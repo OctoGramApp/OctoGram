@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.utils.ai.ui;
+package it.octogram.android.app.ui.bottomsheets;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.runOnUIThread;
@@ -53,10 +53,10 @@ import it.octogram.android.utils.ai.AiPrompt;
 import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.utils.ai.MainAiHelper;
 
-public class GenerateModelBottomSheet extends BottomSheet {
+public class GenerateNewAiModelBottomSheet extends BottomSheet {
     private final Context context;
 
-    public GenerateModelBottomSheet(Context context, Consumer<CustomModelsHelper.CustomModel> consumer) {
+    public GenerateNewAiModelBottomSheet(Context context, Consumer<CustomModelsHelper.CustomModel> consumer) {
         super(context, true);
         this.context = context;
 

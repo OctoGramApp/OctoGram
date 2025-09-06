@@ -158,7 +158,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                 })
                 .category(getString(R.string.OctoMainSettingsInfo), category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
-                            .onClick(() -> fragment.presentFragment(new DcStatusActivity()))
+                            .onClick(() -> fragment.presentFragment(new OctoDcStatusActivity()))
                             .icon(R.drawable.datacenter_status)
                             .title(getString(R.string.DatacenterStatus))
                             .build());
@@ -197,7 +197,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
 
     private void startImportActivity(File firstFile) {
         if (firstFile.getName().endsWith(OctoConfig.OCTOEXPORT_EXTENSION) && OctoConfig.isValidExport(firstFile)) {
-            ImportSettingsUI ui = new ImportSettingsUI();
+            OctoImportSettingsUI ui = new OctoImportSettingsUI();
             ui.setData(null, firstFile);
             fragment.presentFragment(ui);
         } else {
@@ -285,10 +285,6 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
     }
 
     private void openResetSettingsProcedure(BaseFragment fragment, Context context) {
-        openResetSettingsProcedure(fragment, context, false);
-    }
-
-    public static void openResetSettingsProcedure(BaseFragment fragment, Context context, boolean resetExperimentalSettings) {
         boolean[] saveBackup = {false};
 
         FrameLayout frameLayout = new FrameLayout(context);
@@ -305,7 +301,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
 
         AlertDialog.Builder warningBuilder = new AlertDialog.Builder(context);
         warningBuilder.setTitle(getString(R.string.ResetSettingsTitle));
-        warningBuilder.setMessage(getString(resetExperimentalSettings ? R.string.ResetSettingsDescriptionExperimental : R.string.ResetSettingsDescription));
+        warningBuilder.setMessage(getString(R.string.ResetSettingsDescription));
         warningBuilder.setView(frameLayout).setCustomViewOffset(9);
         warningBuilder.setPositiveButton(getString(R.string.ResetSettingsButton), (dialog1, which1) -> {
             AlertDialog progressDialog = new AlertDialog(LaunchActivity.instance, AlertDialog.ALERT_TYPE_SPINNER);
@@ -323,7 +319,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                 data.delegate = new FileShareHelper.FileShareData.FileShareDelegate() {
                     @Override
                     public void onSuccess() {
-                        completeReset(context, resetExperimentalSettings);
+                        completeReset(context);
                     }
 
                     @Override
@@ -343,7 +339,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                 return;
             }
 
-            completeReset(context, resetExperimentalSettings);
+            completeReset(context);
         });
         warningBuilder.setNeutralButton(getString(R.string.Cancel), null);
         AlertDialog dialog = warningBuilder.create();
@@ -372,13 +368,8 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
         dialog.redPositive();
     }
 
-    private static void completeReset(Context context, boolean resetExperimentalSettings) {
-        if (resetExperimentalSettings) {
-            OctoExperimentsUI.resetSettings();
-        } else {
-            OctoConfig.INSTANCE.resetConfig();
-        }
-
+    private static void completeReset(Context context) {
+        OctoConfig.INSTANCE.resetConfig();
         AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
     }
 }

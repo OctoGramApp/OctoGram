@@ -57,7 +57,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.utils.OctoLogging;
-import it.octogram.android.utils.OctoUtils;
 
 public class DeleteAccountBottomSheet extends BottomSheet {
 

@@ -37,8 +37,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.app.ui.bottomsheets.UpdatingAppBottomSheet;
 import it.octogram.android.app.ui.bottomsheets.NewUpdateAvailableBottomSheet;
+import it.octogram.android.app.ui.bottomsheets.UpdatingAppBottomSheet;
 import it.octogram.android.utils.OctoLogging;
 
 public class ApkInstaller {

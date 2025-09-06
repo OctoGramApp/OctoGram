@@ -8,6 +8,9 @@
 
 package it.octogram.android.utils;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
@@ -19,6 +22,8 @@ import android.os.Environment;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -37,6 +42,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
 import org.webrtc.voiceengine.WebRtcAudioTrack;
@@ -538,5 +544,35 @@ public class OctoUtils {
         return text.subSequence(0, end) + "...";
     }
 
+    public interface OnCameraModeSelected {
+        void onSelected(int value);
+    }
+
+    public static void showAlertSystemCameraMode(Context context, OnCameraModeSelected listener) {
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setItems(
+                        new CharSequence[]{getString(R.string.TakePhoto), getString(R.string.RecordVideo)},
+                        (d, index) -> {
+                            int which = index == 0 ? 0 : 2;
+                            if (listener != null) {
+                                listener.onSelected(which);
+                            }
+                        }
+                )
+                .setDialogButtonColorKey(Theme.key_dialogButton)
+                .setAdditionalHorizontalPadding(dp(0))
+                .setTopAnimationIsNew(false)
+                .show();
+
+        for (int i = 0; i < dialog.getItemsCount(); i++) {
+            View cellView = dialog.getContainerView().findViewWithTag(i);
+            if (cellView instanceof AlertDialog.AlertDialogCell cell) {
+                ViewGroup.LayoutParams lp = cell.getLayoutParams();
+                lp.height = dp(56);
+                cell.setLayoutParams(lp);
+                cell.setPadding(dp(24), 0, dp(24), 0);
+            }
+        }
+    }
 }
 

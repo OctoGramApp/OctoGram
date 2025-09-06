@@ -64,7 +64,7 @@ import it.octogram.android.app.fragment.PreferencesFragment;
 import it.octogram.android.app.rows.impl.CustomCellRow;
 import it.octogram.android.app.rows.impl.ExpandableRows;
 import it.octogram.android.app.rows.impl.FooterInformativeRow;
-import it.octogram.android.app.rows.impl.HeaderRow;
+import it.octogram.android.app.rows.impl.HeaderWithoutStyleRow;
 import it.octogram.android.app.rows.impl.ListRow;
 import it.octogram.android.app.rows.impl.ShadowRow;
 import it.octogram.android.app.rows.impl.SliderChooseRow;
@@ -249,7 +249,7 @@ public class OctoPrivacySettingsUI implements PreferencesEntry {
                             .title(getString(R.string.BiometricSettingsAllowFaceUnlock))
                             .showIf(canShowFaceUnlock)
                             .build());
-                    category.row(new HeaderRow(getString(R.string.BiometricAskEvery), canShowOptions).headerStyle(false));
+                    category.row(new HeaderWithoutStyleRow(getString(R.string.BiometricAskEvery), canShowOptions));
                     category.row(new SliderChooseRow.SliderChooseRowBuilder()
                             .options(new ArrayList<>() {{
                                 add(new Pair<>(0, getString(R.string.BiometricAskEvery_Always)));

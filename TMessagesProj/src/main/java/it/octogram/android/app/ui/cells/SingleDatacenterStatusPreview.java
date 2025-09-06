@@ -50,7 +50,7 @@ import java.text.DecimalFormat;
 import java.util.Locale;
 
 import it.octogram.android.Datacenter;
-import it.octogram.android.app.ui.DcStatusActivity;
+import it.octogram.android.app.ui.OctoDcStatusActivity;
 import it.octogram.android.app.ui.components.RadialProgressView;
 
 @SuppressLint("ViewConstructor")
@@ -89,7 +89,7 @@ public class SingleDatacenterStatusPreview extends LinearLayout {
     private float loadingT = 0;
 
     @SuppressLint("SetTextI18n")
-    public SingleDatacenterStatusPreview(DcStatusActivity fragment, Context context, int dcId, boolean isMediaPage) {
+    public SingleDatacenterStatusPreview(OctoDcStatusActivity fragment, Context context, int dcId, boolean isMediaPage) {
         super(context);
 
         this.isMediaPage = isMediaPage;

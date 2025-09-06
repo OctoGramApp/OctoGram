@@ -91,7 +91,7 @@ void setICMPHeader(struct icmphdr *icmp_hdr) {
     icmp_hdr->un.echo.id = (__be16) getpid();
 }
 
-extern JNIEXPORT jint JNICALL Java_it_octogram_android_http_StandardHTTPRequest_ping(
+extern JNIEXPORT jint JNICALL Java_it_octogram_android_utils_network_StandardHTTPRequest_ping(
         JNIEnv *env,
         __attribute__((unused)) jclass clazz,
         jstring address

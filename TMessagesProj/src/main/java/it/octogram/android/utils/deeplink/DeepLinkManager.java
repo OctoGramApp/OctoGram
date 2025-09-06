@@ -41,7 +41,6 @@ import org.telegram.ui.SessionsActivity;
 import it.octogram.android.ConfigProperty;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.app.fragment.PreferencesFragment;
-import it.octogram.android.app.ui.DcStatusActivity;
 import it.octogram.android.app.ui.OctoAppearanceDrawerSettingsUI;
 import it.octogram.android.app.ui.OctoAppearanceUI;
 import it.octogram.android.app.ui.OctoCameraSettingsUI;
@@ -53,8 +52,10 @@ import it.octogram.android.app.ui.OctoChatsPinnedHashtagsActivity;
 import it.octogram.android.app.ui.OctoChatsPinnedReactionsActivity;
 import it.octogram.android.app.ui.OctoChatsTranslatorUI;
 import it.octogram.android.app.ui.OctoChatsUI;
+import it.octogram.android.app.ui.OctoDcStatusActivity;
 import it.octogram.android.app.ui.OctoExperimentsNavigationUI;
 import it.octogram.android.app.ui.OctoExperimentsUI;
+import it.octogram.android.app.ui.OctoGeneralSearchOrderUI;
 import it.octogram.android.app.ui.OctoGeneralSettingsUI;
 import it.octogram.android.app.ui.OctoInfoSettingsUI;
 import it.octogram.android.app.ui.OctoLogsSettingsUI;
@@ -133,6 +134,10 @@ public class DeepLinkManager extends LaunchActivity {
             }
             case DeepLinkDef.GENERAL -> {
                 fragment.presentFragment(new PreferencesFragment(new OctoGeneralSettingsUI(), parameter));
+                return true;
+            }
+            case DeepLinkDef.GENERAL_SEARCHORDER -> {
+                fragment.presentFragment(new OctoGeneralSearchOrderUI());
                 return true;
             }
             case DeepLinkDef.OCTOSETTINGS -> {
@@ -216,7 +221,7 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
             }
             case DeepLinkDef.DC_STATUS -> {
-                DcStatusActivity activity = new DcStatusActivity();
+                OctoDcStatusActivity activity = new OctoDcStatusActivity();
                 if (parameter != null) {
                     activity.handleParameter(parameter);
                 }
@@ -361,7 +366,12 @@ public class DeepLinkManager extends LaunchActivity {
                 yield DeepLinkDef.EXPERIMENTAL;
             }
             case "camera" -> DeepLinkDef.CAMERA;
-            case "general" -> DeepLinkDef.GENERAL;
+            case "general" -> {
+                if (uri.getPath() != null) {
+                    if (uri.getPath().equalsIgnoreCase("/search")) yield DeepLinkDef.GENERAL_SEARCHORDER;
+                }
+                yield DeepLinkDef.GENERAL;
+            }
             case "octosettings" -> DeepLinkDef.OCTOSETTINGS;
             case "chats" -> {
                 if (uri.getPath() != null) {
@@ -464,7 +474,7 @@ public class DeepLinkManager extends LaunchActivity {
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
             case MenuActionDef.DATACENTER_ID:
-                fragment.presentFragment(new DcStatusActivity());
+                fragment.presentFragment(new OctoDcStatusActivity());
                 drawerLayoutContainer.closeDrawer(false);
                 return true;
             case MenuActionDef.DATA_AND_STORAGE:

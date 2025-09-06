@@ -28,7 +28,6 @@ import java.util.Map;
 
 import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.ConfigProperty;
-import it.octogram.android.DcIdStyle;
 import it.octogram.android.DcIdType;
 import it.octogram.android.DefaultEmojiButtonAction;
 import it.octogram.android.DefaultMicrophoneButtonAction;
@@ -552,35 +551,15 @@ public class OctoChatsUI implements PreferencesEntry {
                             .title(getString(R.string.ShowDcID))
                             .build());
                     category.row(new ListRow.ListRowBuilder()
-                            .onSelected(() -> AndroidUtilities.runOnUIThread(() -> dcIdTypeSelectorCell.update()))
-                            .currentValue(OctoConfig.INSTANCE.dcIdStyle)
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdStyle.OWLGRAM.getValue())
-                                            .setItemTitle("OwlGram")
-                                            .setItemDescription(getString(R.string.DCStyleOwlGram_Desc)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdStyle.TELEGRAM.getValue())
-                                            .setItemTitle("Telegram")
-                                            .setItemDescription(getString(R.string.DCStyleTelegram_Desc)),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DcIdStyle.MINIMAL.getValue())
-                                            .setItemTitle("Minimal")
-                                            .setItemDescription(getString(R.string.DCStyleMinimal_Desc))
-                            ))
-                            .showIf(OctoConfig.INSTANCE.showDcId)
-                            .title(getString(R.string.Style))
-                            .build());
-                    category.row(new ListRow.ListRowBuilder()
                             .onSelected(() -> dcIdTypeSelectorCell.updateChatID())
                             .currentValue(OctoConfig.INSTANCE.dcIdType)
                             .options(List.of(
                                     new PopupChoiceDialogOption()
-                                            .setId(DcIdType.BOT_API.getValue())
+                                            .setId(DcIdType.BOT_API)
                                             .setItemTitle("Bot API")
                                             .setItemDescription(getString(R.string.DcIdTypeDescriptionBotapi)),
                                     new PopupChoiceDialogOption()
-                                            .setId(DcIdType.TELEGRAM.getValue())
+                                            .setId(DcIdType.TELEGRAM)
                                             .setItemTitle("Telegram")
                                             .setItemDescription(getString(R.string.DcIdTypeDescriptionTelegram))
                             ))

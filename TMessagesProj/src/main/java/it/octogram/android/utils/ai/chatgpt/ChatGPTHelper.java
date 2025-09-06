@@ -9,7 +9,6 @@
 package it.octogram.android.utils.ai.chatgpt;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.ai.AiPrompt;
 import it.octogram.android.utils.ai.GenericLLM.GenericLLMClient;
@@ -18,6 +17,7 @@ import it.octogram.android.utils.ai.GenericLLM.GenericLLMRequest;
 import it.octogram.android.utils.ai.GenericLLM.GenericLLMRequestBuilder;
 import it.octogram.android.utils.ai.GenericLLM.GenericLLMResponse;
 import it.octogram.android.utils.ai.MainAiHelper;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 
 public class ChatGPTHelper {
     private static final String TAG = "ChatGPTHelper";

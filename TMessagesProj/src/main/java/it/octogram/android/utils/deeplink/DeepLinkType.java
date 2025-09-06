@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
         DeepLinkDef.EXPERIMENTAL_NAVIGATION,
         DeepLinkDef.CAMERA,
         DeepLinkDef.GENERAL,
+        DeepLinkDef.GENERAL_SEARCHORDER,
         DeepLinkDef.OCTOSETTINGS,
         DeepLinkDef.APPEARANCE,
         DeepLinkDef.UPDATE,

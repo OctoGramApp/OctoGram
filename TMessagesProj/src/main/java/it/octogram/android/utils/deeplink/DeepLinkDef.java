@@ -18,6 +18,7 @@ public class DeepLinkDef {
     public static final String EXPERIMENTAL_NAVIGATION = "experimental/navigation";
     public static final String CAMERA = "camera";
     public static final String GENERAL = "general";
+    public static final String GENERAL_SEARCHORDER = "general/search";
     public static final String OCTOSETTINGS = "octosettings";
     public static final String CHATS = "chats";
     public static final String CHATS_CONTEXTMENU = "chats/cm";
@@ -41,6 +42,6 @@ public class DeepLinkDef {
     public static final String ENABLE_BLURRED = "enableblurredcm";
 
     // deprecated
-    public static final String APPEARANCE_APP = "appearance/app";
-    public static final String APPEARANCE_CHAT = "appearance/chat";
+    @Deprecated public static final String APPEARANCE_APP = "appearance/app";
+    @Deprecated public static final String APPEARANCE_CHAT = "appearance/chat";
 }

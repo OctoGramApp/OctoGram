@@ -147,12 +147,6 @@ public class OctoCameraSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.StartWithRearCamera))
                             .description(getString(R.string.StartWithRearCamera_Desc))
                             .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.useSystemCameraToRecord)
-                            .title(getString(R.string.UseSystemCameraVideo))
-                            .description(getString(R.string.UseSystemCameraVideo_Desc))
-                            .showIf(usingSystemCamera)
-                            .build());
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.cameraPreview)
                             .options(List.of(

@@ -42,6 +42,9 @@ public class ProfileMusicView extends View {
     private final Paint arrowPaint = new Paint();
     private final Path arrowPath = new Path();
     private final Drawable icon;
+    private int textColor;
+
+    private boolean usedCustomColorHandling = false;
 
     public ProfileMusicView(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -58,6 +61,7 @@ public class ProfileMusicView extends View {
         arrowPath.moveTo(0, -dpf2(3.33f));
         arrowPath.lineTo(dpf2(3.16f), 0);
         arrowPath.lineTo(0, dpf2(3.33f));
+        textColor = 0xFFFFFFFF;
 
         setColor(null);
         setText("Author", " - Title");
@@ -80,19 +84,52 @@ public class ProfileMusicView extends View {
     public void setColor(MessagesController.PeerColor peerColor) {
         int color1, color2;
         if (peerColor == null) {
-            if (!Theme.isCurrentThemeDark()) {
-                setBackgroundColor(Theme.getColor(Theme.key_actionBarDefault, resourcesProvider));
-                return;
+            int originalColor = Theme.getColor(Theme.key_avatar_backgroundActionBarBlue, resourcesProvider);
+            if (Theme.isMonetLightThemeActive() || ColorUtils.calculateLuminance(originalColor) > 0.75f) {
+                usedCustomColorHandling = true;
+                handleCustomMonetStyling(false, true);
             }
             color1 = Theme.getColor(Theme.key_actionBarDefault, resourcesProvider);
             color2 = Theme.getColor(Theme.key_actionBarDefault, resourcesProvider);
         } else {
             color1 = peerColor.getBgColor1(Theme.isCurrentThemeDark());
             color2 = peerColor.getBgColor2(Theme.isCurrentThemeDark());
+            if (usedCustomColorHandling) {
+                applyStateByMainColor(0xFFFFFFFF);
+                usedCustomColorHandling = false;
+            }
         }
         setBackgroundColor(
             Theme.adaptHSV(ColorUtils.blendARGB(color1, color2, .25f), +.02f, -.08f)
         );
+    }
+
+    private boolean _lastBlurState = false;
+    public void handleCustomMonetStyling(boolean isBlurEnabled) {
+        handleCustomMonetStyling(isBlurEnabled, false);
+    }
+
+    private void handleCustomMonetStyling(boolean isBlurEnabled, boolean forced) {
+        if (!usedCustomColorHandling) {
+            return;
+        }
+        if (_lastBlurState == isBlurEnabled && !forced) {
+            return;
+        }
+        _lastBlurState = isBlurEnabled;
+
+        int newColor = isBlurEnabled ? 0xFFFFFFFF : Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider);
+        applyStateByMainColor(newColor);
+
+        invalidate();
+    }
+
+    private void applyStateByMainColor(int newColor) {
+        icon.clearColorFilter();
+        icon.setColorFilter(new PorterDuffColorFilter(newColor, PorterDuff.Mode.SRC_IN));
+        iconPaint.setColor(newColor);
+        arrowPaint.setColor(Theme.multAlpha(newColor, 0.85f));
+        textColor = newColor;
     }
 
     public void setMusicDocument(TLRPC.Document document) {
@@ -219,9 +256,9 @@ public class ProfileMusicView extends View {
 //        canvas.drawRoundRect(dp(8), cy - hh * h3, dp(8) + w, cy + hh * h3, w, w, iconPaint);
 
         canvas.translate(dp(16.6f), 0);
-        this.author.draw(canvas, 0, cy, 0xFFFFFFFF, 1.0f);
+        this.author.draw(canvas, 0, cy, textColor, 1.0f);
         canvas.translate(this.author.getWidth(), 0);
-        this.title.draw(canvas, 0, cy, 0xFFFFFFFF, 0.85f);
+        this.title.draw(canvas, 0, cy, textColor, 0.85f);
         canvas.translate(this.title.getWidth(), 0);
 
         arrowPaint.setStrokeWidth(dpf2(1.16f));

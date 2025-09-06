@@ -22,30 +22,25 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkSpanDrawable;
-import org.telegram.ui.PeerColorActivity;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 import it.octogram.android.Datacenter;
-import it.octogram.android.DcIdStyle;
 import it.octogram.android.DcIdType;
 import it.octogram.android.OctoConfig;
 
@@ -53,13 +48,12 @@ import it.octogram.android.OctoConfig;
 public class DcIdTypeSelectorCell extends FrameLayout {
 
     public static final int height = dp(38);
-    private ProfileDatacenterPreviewCell owlgramView;
 
     private LinearLayout telegramView;
     private AnimatedTextView animatedIdView;
-    private FrameLayout profileViewFrame;
-    private PeerColorActivity.ProfilePreview profilePreview;
-    private int lastState = -1;
+    // private FrameLayout profileViewFrame;
+    // private PeerColorActivity.ProfilePreview profilePreview;
+    //private int lastState = DcIdStyle.NONE;
     private boolean wasShown = false;
     private final TLRPC.User user = AccountInstance.getInstance(UserConfig.selectedAccount).getUserConfig().getCurrentUser();
     private final Integer dc_id = AccountInstance.getInstance(UserConfig.selectedAccount).getConnectionsManager().getCurrentDatacenterId();
@@ -102,13 +96,13 @@ public class DcIdTypeSelectorCell extends FrameLayout {
         internalFrameLayout.addView(hiddenViewImage, LayoutHelper.createFrame(48, 48, Gravity.CENTER));
         wasShown = OctoConfig.INSTANCE.showDcId.getValue();
 
-        if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue()) {
+        /*if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL) {
             MessagesController.PeerColor color = getOwnPeerColorState();
             if (color != null) {
                 hiddenViewImage.setColorFilter(new PorterDuffColorFilter(color.getStoryColor1(Theme.isCurrentThemeDark()), PorterDuff.Mode.SRC_IN));
                 editedColorFix = true;
             }
-        }
+        }*/
 
         setPadding(dp(15), dp(15), dp(15), dp(15));
         addView(internalFrameLayout, new FrameLayout.LayoutParams(
@@ -130,14 +124,14 @@ public class DcIdTypeSelectorCell extends FrameLayout {
         Datacenter dcInfo = Datacenter.Companion.getDcInfo(dc_id);
         String longCaption = String.format(Locale.ENGLISH, "dc%d (%s)", dcInfo.getDcId(), dcInfo.getDcName());
 
-        owlgramView = new ProfileDatacenterPreviewCell(context, null, true);
-        owlgramView.setCustomPreviewModeData(dcInfo.getIcon(), longCaption, getCurrentChatIDFormat());
-        navigationFrame.addView(owlgramView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, height, Gravity.CENTER_VERTICAL));
+//        owlgramView = new ProfileDatacenterPreviewCell(context, null, true);
+//        owlgramView.setCustomPreviewModeData(dcInfo.getIcon(), longCaption, getCurrentChatIDFormat());
+//        navigationFrame.addView(owlgramView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, height, Gravity.CENTER_VERTICAL));
 
         telegramView = composeTelegramView(context, longCaption, getCurrentChatIDFormat());
         navigationFrame.addView(telegramView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.LEFT));
 
-        MessagesController.PeerColor peerColor = getOwnPeerColorState();
+        /*MessagesController.PeerColor peerColor = getOwnPeerColorState();
 
         profileViewFrame = new FrameLayout(context);
         GradientDrawable border2 = new GradientDrawable(
@@ -154,14 +148,14 @@ public class DcIdTypeSelectorCell extends FrameLayout {
         profilePreview.setEmoji(UserObject.getProfileEmojiId(user), false, false);
         profilePreview.setCustomInfoText(String.format(Locale.ENGLISH, "id: %s (dc%s)", getCurrentChatIDFormat(), dc_id));
         profileViewFrame.addView(profilePreview, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER_VERTICAL));
-        navigationFrame.addView(profileViewFrame, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER_VERTICAL));
+        navigationFrame.addView(profileViewFrame, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER_VERTICAL));*/
 
-        preloadUI();
+        //preloadUI();
 
         return navigationFrame;
     }
 
-    private MessagesController.PeerColor getOwnPeerColorState() {
+    /*private MessagesController.PeerColor getOwnPeerColorState() {
         if (!UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
             return null;
         }
@@ -176,13 +170,13 @@ public class DcIdTypeSelectorCell extends FrameLayout {
         }
 
         return canUsePeerColors ? peerColor : null;
-    }
+    }*/
 
     private LinearLayout composeTelegramView(Context context, String valueText, String idText) {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setGravity(Gravity.CENTER);
-        linearLayout.setPadding(dp(23), 0, dp(23), 0);
+        linearLayout.setPadding(dp(23), dp(5), dp(23), dp(5));
         linearLayout.setLayoutParams(LayoutHelper.createLinear(LayoutParams.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         int colorText = Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourceProvider);
@@ -216,34 +210,35 @@ public class DcIdTypeSelectorCell extends FrameLayout {
         return valueTextView;
     }
 
-    private void preloadUI() {
-        int currentState = OctoConfig.INSTANCE.dcIdStyle.getValue();
-        lastState = currentState;
-        owlgramView.setAlpha(currentState == DcIdStyle.OWLGRAM.getValue() ? 1f : 0f);
-        telegramView.setAlpha(currentState == DcIdStyle.TELEGRAM.getValue() ? 1f : 0f);
-        profileViewFrame.setAlpha(currentState == DcIdStyle.MINIMAL.getValue() ? 1f : 0f);
-    }
+//    private void preloadUI() {
+//        int currentState = OctoConfig.INSTANCE.dcIdStyle.getValue();
+//        lastState = currentState;
+//        //owlgramView.setAlpha(currentState == DcIdStyle.OWLGRAM ? 1f : 0f);
+//        //telegramView.setAlpha(currentState == DcIdStyle.TELEGRAM ? 1f : 0f);
+//        //profileViewFrame.setAlpha(currentState == DcIdStyle.MINIMAL) ? 1f : 0f);
+//    }
 
     public void update() {
-        int currentState = OctoConfig.INSTANCE.dcIdStyle.getValue();
+//        int currentState = OctoConfig.INSTANCE.dcIdStyle.getValue();
 
         updateShowDcId();
+        telegramView.setAlpha(1f);
 
-        if (lastState == currentState) {
-            return;
-        }
-
-        int lastStateSaved = lastState;
-        lastState = currentState;
-
-        View toHide, toShow;
-        if ((toHide = getAssocChild(lastStateSaved)) != null) {
-            animateChild(toHide, true);
-        }
-
-        if ((toShow = getAssocChild(currentState)) != null) {
-            animateChild(toShow, false);
-        }
+//        if (lastState == currentState) {
+//            return;
+//        }
+//
+//        @DcIdStyle.Style int lastStateSaved = lastState;
+//        lastState = currentState;
+//
+//        View toHide, toShow;
+//        if ((toHide = getAssocChild(lastStateSaved)) != null) {
+//            animateChild(toHide, true);
+//        }
+//
+//        if ((toShow = getAssocChild(currentState)) != null) {
+//            animateChild(toShow, false);
+//        }
     }
 
     private boolean editedColorFix = false;
@@ -253,18 +248,18 @@ public class DcIdTypeSelectorCell extends FrameLayout {
             return;
         }
 
-        if (!isShow) {
-            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL.getValue() && !editedColorFix) {
-                MessagesController.PeerColor color = getOwnPeerColorState();
-                if (color != null) {
-                    hiddenViewImage.setColorFilter(new PorterDuffColorFilter(color.getStoryColor1(Theme.isCurrentThemeDark()), PorterDuff.Mode.SRC_IN));
-                    editedColorFix = true;
-                }
-            } else if (OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.MINIMAL.getValue() && editedColorFix) {
-                hiddenViewImage.setColorFilter(defaultHiddenImageFilter);
-                editedColorFix = false;
-            }
-        }
+//        if (!isShow) {
+//            if (OctoConfig.INSTANCE.dcIdStyle.getValue() == DcIdStyle.MINIMAL && !editedColorFix) {
+//                MessagesController.PeerColor color = getOwnPeerColorState();
+//                if (color != null) {
+//                    hiddenViewImage.setColorFilter(new PorterDuffColorFilter(color.getStoryColor1(Theme.isCurrentThemeDark()), PorterDuff.Mode.SRC_IN));
+//                    editedColorFix = true;
+//                }
+//            } else if (OctoConfig.INSTANCE.dcIdStyle.getValue() != DcIdStyle.TELEGRAM && editedColorFix) {
+//                hiddenViewImage.setColorFilter(defaultHiddenImageFilter);
+//                editedColorFix = false;
+//            }
+//        }
 
         if (discussValueAnimator != null) {
             discussValueAnimator.cancel();
@@ -286,31 +281,32 @@ public class DcIdTypeSelectorCell extends FrameLayout {
     }
 
     public void updateChatID() {
-        owlgramView.updateIdView(getCurrentChatIDFormat());
+        //owlgramView.updateIdView(getCurrentChatIDFormat());
         animatedIdView.setText(getCurrentChatIDFormat());
-        profilePreview.setCustomInfoText(String.format(Locale.ENGLISH, "id: %s (dc4)", getCurrentChatIDFormat()));
+        //profilePreview.setCustomInfoText(String.format(Locale.US, "id: %s (dc4)", getCurrentChatIDFormat()));
     }
 
-    private View getAssocChild(int id) {
-        return switch (DcIdStyle.Companion.fromInt(id)) {
-            case DcIdStyle.OWLGRAM -> owlgramView;
-            case DcIdStyle.TELEGRAM -> telegramView;
-            case DcIdStyle.MINIMAL -> profileViewFrame;
-            default -> null;
-        };
-    }
+//    private View getAssocChild(@DcIdStyle.Style int id) {
+//        return switch (DcIdStyle.fromInt(id)) {
+//            case DcIdStyle.OWLGRAM -> owlgramView;
+//            case DcIdStyle.TELEGRAM -> telegramView;
+//            // case DcIdStyle.MINIMAL -> profileViewFrame;
+//            case DcIdStyle.NONE -> null;
+//            default -> telegramView;
+//        };
+//    }
 
 
     private String getCurrentChatIDFormat() {
-        return OctoConfig.INSTANCE.dcIdType.getValue() == DcIdType.BOT_API.getValue() ? telegramBotApiChatId : defaultChatId;
+        return OctoConfig.INSTANCE.dcIdType.getValue() == DcIdType.BOT_API ? telegramBotApiChatId : defaultChatId;
     }
 
-    private void animateChild(View view, boolean disappear) {
-        view.setAlpha(disappear ? 1f : 0f);
-        view.setScaleX(disappear ? 1f : 0.8f);
-        view.setScaleY(disappear ? 1f : 0.8f);
-        view.animate().alpha(disappear ? 0f : 1f).scaleX(disappear ? 1.2f : 1f).scaleY(disappear ? 1.2f : 1f).setDuration(200).start();
-    }
+//    private void animateChild(View view, boolean disappear) {
+//        view.setAlpha(disappear ? 1f : 0f);
+//        view.setScaleX(disappear ? 1f : 0.8f);
+//        view.setScaleY(disappear ? 1f : 0.8f);
+//        view.animate().alpha(disappear ? 0f : 1f).scaleX(disappear ? 1.2f : 1f).scaleY(disappear ? 1.2f : 1f).setDuration(200).start();
+//    }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {

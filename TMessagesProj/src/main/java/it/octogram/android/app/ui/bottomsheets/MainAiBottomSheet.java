@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.utils.ai.ui;
+package it.octogram.android.app.ui.bottomsheets;
 
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO;
 import static org.telegram.messenger.AndroidUtilities.dp;

@@ -61,7 +61,6 @@ import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.ChatActivityEnterView;
 import org.telegram.ui.Components.ChatAvatarContainer;
 import org.telegram.ui.Components.CubicBezierInterpolator;
-import org.telegram.ui.Components.FilterTabsView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
@@ -79,8 +78,6 @@ import java.util.Random;
 import it.octogram.android.ActionBarCenteredTitle;
 import it.octogram.android.ContextMenuBriefingState;
 import it.octogram.android.OctoConfig;
-import it.octogram.android.TabMode;
-import it.octogram.android.TabStyle;
 import it.octogram.android.app.fragment.PreferencesFragment;
 import it.octogram.android.app.ui.OctoGeneralSearchOrderUI;
 import it.octogram.android.utils.chat.ContextMenuHelper;
@@ -307,7 +304,7 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
         actionBar.setAllowOverlayTitle(false);
         actionBar.setOccupyStatusBar(false);
         ActionBarMenu menu = actionBar.createMenu();
-        menu.addItem(0, R.drawable.ic_ab_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener()).setSearchFieldHint("Search chats...");
+        menu.addItem(0, R.drawable.ic_ab_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener()).setSearchFieldHint(getString(R.string.Search));
         layout.addView(actionBar, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, ActionBar.getCurrentActionBarHeight()));
 
         filterTabsView = new ViewPagerFixed.TabsView(context, false, 8, null);
@@ -854,7 +851,14 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
                     if (property.viewType == ContextMenuPreviewItem.ITEM) {
                         ActionBarMenuSubItem item = (ActionBarMenuSubItem) holder.itemView;
                         item.setTextAndIcon(property.name, property.icon);
-                        item.setRightIcon(property.expandable ? R.drawable.msg_arrowright : 0);
+                        item.setRightIcon(property.expandable ? R.drawable.msg_arrowright : (property.mustSkip ? R.drawable.msg_archive_hide : 0));
+                        item.textView.setAlpha(property.mustSkip ? 0.5f : 1f);
+                        if (item.getRightIcon() != null) {
+                            item.getRightIcon().setAlpha(property.mustSkip ? 0.5f : 1f);
+                        }
+                        if (item.imageView != null) {
+                            item.imageView.setAlpha(property.mustSkip ? 0.5f : 1f);
+                        }
                     } else if (property.viewType == ContextMenuPreviewItem.GAP_SHADOW) {
                         ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
                         if (layoutParams == null) {
@@ -1012,13 +1016,14 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
         public CharSequence name;
         public Integer icon;
         public boolean expandable;
+        public boolean mustSkip;
 
         public static int ITEM = 0;
         public static int GAP_SHADOW = 1;
         public static int SHORTCUTS = 2;
 
         public ContextMenuPreviewItem(int viewType) {
-            super(viewType, true);
+            super(viewType, false);
         }
 
         @Override
@@ -1038,7 +1043,7 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
             if (viewType == ContextMenuPreviewItem.GAP_SHADOW) {
                 return true;
             }
-            return Objects.equals(name, item.name);
+            return Objects.equals(name, item.name) && mustSkip == item.mustSkip;
         }
     }
 }

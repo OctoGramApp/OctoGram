@@ -33,7 +33,7 @@ import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
-import it.octogram.android.app.ui.DcStatusActivity;
+import it.octogram.android.app.ui.OctoDcStatusActivity;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.MessageStringHelper;
 
@@ -70,10 +70,10 @@ public class DcStatusHeaderCell extends LinearLayout {
         textView.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection));
 
         String text;
-        if (pageType == DcStatusActivity.PAGE_NETWORK) {
+        if (pageType == OctoDcStatusActivity.PAGE_NETWORK) {
             rLottieImageView.setStickerNum(StickerUi.DATACENTER_STATUS.getValue());
             text = getString(R.string.DatacenterStatusSection_Desc);
-        } else if (pageType == DcStatusActivity.PAGE_MEDIA) {
+        } else if (pageType == OctoDcStatusActivity.PAGE_MEDIA) {
             rLottieImageView.setStickerNum(StickerUi.MEDIA_LOADING.getValue());
             text = getString(R.string.DatacenterStatusSection_Desc_Media);
         } else {
@@ -89,7 +89,7 @@ public class DcStatusHeaderCell extends LinearLayout {
         buttonWithCounterView.setPadding(dp(34), 0, dp(34), 0);
         updateStatus(true);
         buttonWithCounterView.setOnClickListener(view -> {
-            if (!_isWaiting && pageType != DcStatusActivity.PAGE_NETWORK) {
+            if (!_isWaiting && pageType != OctoDcStatusActivity.PAGE_NETWORK) {
                 return;
             }
 
@@ -107,16 +107,16 @@ public class DcStatusHeaderCell extends LinearLayout {
         }
         _isWaiting = isWaiting;
 
-        if (pageType != DcStatusActivity.PAGE_NETWORK) {
+        if (pageType != OctoDcStatusActivity.PAGE_NETWORK) {
             buttonWithCounterView.setLoading(!isWaiting);
         }
 
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-        int text = getText(isWaiting || pageType != DcStatusActivity.PAGE_NETWORK);
+        int text = getText(isWaiting || pageType != OctoDcStatusActivity.PAGE_NETWORK);
 
         spannableStringBuilder.append(".  ").append(getString(text));
-        spannableStringBuilder.setSpan((isWaiting || pageType != DcStatusActivity.PAGE_NETWORK) ? startMonitorSpan : stopMonitorSpan, 0, 1, 0);
-        buttonWithCounterView.setText(spannableStringBuilder, pageType == DcStatusActivity.PAGE_NETWORK);
+        spannableStringBuilder.setSpan((isWaiting || pageType != OctoDcStatusActivity.PAGE_NETWORK) ? startMonitorSpan : stopMonitorSpan, 0, 1, 0);
+        buttonWithCounterView.setText(spannableStringBuilder, pageType == OctoDcStatusActivity.PAGE_NETWORK);
 
     }
 
@@ -125,9 +125,9 @@ public class DcStatusHeaderCell extends LinearLayout {
             return R.string.DatacenterStatusSection_Stop;
         }
         return switch (pageType) {
-            case DcStatusActivity.PAGE_NETWORK -> R.string.DatacenterStatusSection_Start;
-            case DcStatusActivity.PAGE_MEDIA -> R.string.DatacenterStatusSection_Start_Media;
-            case DcStatusActivity.PAGE_WEB -> R.string.DatacenterStatusSection_Start_Ping;
+            case OctoDcStatusActivity.PAGE_NETWORK -> R.string.DatacenterStatusSection_Start;
+            case OctoDcStatusActivity.PAGE_MEDIA -> R.string.DatacenterStatusSection_Start_Media;
+            case OctoDcStatusActivity.PAGE_WEB -> R.string.DatacenterStatusSection_Start_Ping;
             default -> R.string.DatacenterStatusSection_Stop;
         };
     }

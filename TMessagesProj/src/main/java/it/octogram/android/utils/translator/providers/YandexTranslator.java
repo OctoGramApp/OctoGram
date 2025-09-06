@@ -25,9 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.translator.HTMLKeeper;
 import it.octogram.android.utils.translator.SingleTranslationsHandler;
 

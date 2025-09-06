@@ -77,9 +77,9 @@ import java.util.Objects;
 import it.octogram.android.CustomEmojiController;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.app.ui.cells.SingleEmojiPackCell;
-import it.octogram.android.utils.network.FileDownloader;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.data.FileUnzip;
+import it.octogram.android.utils.network.FileDownloader;
 
 public class OctoGeneralEmojiPackSettings extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
 

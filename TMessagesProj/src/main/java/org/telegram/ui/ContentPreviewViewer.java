@@ -690,7 +690,7 @@ public class ContentPreviewViewer {
                     icons.add(R.drawable.msg_send);
                     actions.add(0);
 
-                    if (delegate.canPinEmoji() && OctoConfig.INSTANCE.usePinnedEmojisFeature.getValue()) {
+                    if (delegate.canPinEmoji()) {
                         int emojiStatus = OctoConfig.INSTANCE.getEmojiStatus(currentDocument.id);
                         if (emojiStatus == EmojiStatus.CAN_BE_ADDED.getValue()) {
                             items.add(LocaleController.getString(R.string.PinnedEmojisList_AddButton));

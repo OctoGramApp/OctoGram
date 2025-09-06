@@ -17,13 +17,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 //import android.graphics.Paint;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -39,13 +41,13 @@ import android.widget.ScrollView;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.Utilities;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.PopupSwipeBackLayout;
 
@@ -53,6 +55,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import it.octogram.android.OctoConfig;
 
 public class ActionBarPopupWindow extends PopupWindow {
 
@@ -97,8 +101,9 @@ public class ActionBarPopupWindow extends PopupWindow {
     }
 
     public static class ActionBarPopupWindowLayout extends FrameLayout {
-        //private static final boolean USE_NEW_BACKGROUND = true;
-        //private static final Paint newBackgroundPaint = new Paint();
+        private static final boolean USE_NEW_BACKGROUND = OctoConfig.INSTANCE.useSmoothContextMenuStyling.getValue();
+        private final Paint newBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint newBackgroundShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         public final static int FLAG_USE_SWIPEBACK = 1;
         public final static int FLAG_SHOWN_FROM_BOTTOM = 2;
@@ -149,7 +154,7 @@ public class ActionBarPopupWindow extends PopupWindow {
         }
 
         public ActionBarPopupWindowLayout(Context context, Theme.ResourcesProvider resourcesProvider) {
-            this(context, R.drawable.popup_fixed_alert2, resourcesProvider);
+            this(context, R.drawable.popup_fixed_alert3, resourcesProvider);
         }
 
         public ActionBarPopupWindowLayout(Context context, int resId, Theme.ResourcesProvider resourcesProvider) {
@@ -167,9 +172,12 @@ public class ActionBarPopupWindow extends PopupWindow {
                 backgroundDrawable.getPadding(bgPaddings);
                 setBackgroundColor(getThemedColor(Theme.key_actionBarDefaultSubmenuBackground));
             }
-            /*if (USE_NEW_BACKGROUND) {
+            if (USE_NEW_BACKGROUND) {
                 newBackgroundPaint.setColor(getThemedColor(Theme.key_actionBarDefaultSubmenuBackground));
-            }*/
+            }
+
+            newBackgroundShadowPaint.setColor(Color.BLACK);
+            newBackgroundShadowPaint.setAlpha(50);
 
 
             setWillNotDraw(false);
@@ -293,11 +301,14 @@ public class ActionBarPopupWindow extends PopupWindow {
         }
 
         public void setBackgroundColor(int color) {
-            if (backgroundColor != color && backgroundDrawable != null) {
-                backgroundDrawable.setColorFilter(new PorterDuffColorFilter(backgroundColor = color, PorterDuff.Mode.MULTIPLY));
-                /*if (USE_NEW_BACKGROUND) {
-                    newBackgroundPaint.setColor(backgroundColor);
-                }*/
+            if (backgroundColor != color) {
+                if (backgroundDrawable != null) {
+                    backgroundDrawable.setColorFilter(new PorterDuffColorFilter(backgroundColor = color, PorterDuff.Mode.MULTIPLY));
+                }
+            }
+            if (USE_NEW_BACKGROUND) {
+                newBackgroundPaint.setColor(Color.WHITE);
+                newBackgroundPaint.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
             }
         }
 
@@ -378,9 +389,9 @@ public class ActionBarPopupWindow extends PopupWindow {
             backgroundDrawable = drawable;
             if (backgroundDrawable != null) {
                 backgroundDrawable.getPadding(bgPaddings);
-                /*if (USE_NEW_BACKGROUND && drawable.getColorFilter() instanceof PorterDuffColorFilter f1) {
+                if (USE_NEW_BACKGROUND && drawable.getColorFilter() instanceof PorterDuffColorFilter f1) {
                     newBackgroundPaint.setColorFilter(f1);
-                }*/
+                }
             }
         }
 
@@ -494,11 +505,11 @@ public class ActionBarPopupWindow extends PopupWindow {
                         canvas.save();
                         canvas.clipRect(0, bgPaddings.top, getMeasuredWidth(), getMeasuredHeight());
                     }
-                    /*if (USE_NEW_BACKGROUND) {
+                    if (USE_NEW_BACKGROUND) {
                         newBackgroundPaint.setAlpha(applyAlpha ? backAlpha : 255);
-                    } else {*/
+                    } else {
                         backgroundDrawable.setAlpha(applyAlpha ? backAlpha : 255);
-                    //}
+                    }
                     if (shownFromBottom) {
                         final int height = getMeasuredHeight();
                         AndroidUtilities.rectTmp2.set(0, (int) (height * (1.0f - backScaleY)), (int) (getMeasuredWidth() * backScaleX), height);
@@ -539,14 +550,39 @@ public class ActionBarPopupWindow extends PopupWindow {
                         rect.set(AndroidUtilities.rectTmp2.right, AndroidUtilities.rectTmp2.top, AndroidUtilities.rectTmp2.right, AndroidUtilities.rectTmp2.top);
                         AndroidUtilities.lerp(rect, AndroidUtilities.rectTmp2, reactionsEnterProgress, AndroidUtilities.rectTmp2);
                     }
-                    /*if (USE_NEW_BACKGROUND) {
-                        var pd = 80f;
-                        canvas.drawRoundRect(AndroidUtilities.rectTmp2.left + bgPaddings.left, AndroidUtilities.rectTmp2.top + bgPaddings.top, AndroidUtilities.rectTmp2.right - bgPaddings.right, AndroidUtilities.rectTmp2.bottom - bgPaddings.top, pd, pd, newBackgroundPaint);
+                    if (USE_NEW_BACKGROUND) {
+                        var pd = AndroidUtilities.dp(20);
+                        LinearGradient shadowGradient = new LinearGradient(
+                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
+                                (AndroidUtilities.rectTmp2.top + bgPaddings.top) + ((AndroidUtilities.rectTmp2.bottom - AndroidUtilities.rectTmp2.top) * 2/3),
+                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
+                                AndroidUtilities.rectTmp2.bottom - bgPaddings.bottom + 15,
+                                0x00000000,
+                                0x85000000,
+                                Shader.TileMode.CLAMP
+                        );
+                        newBackgroundShadowPaint.setShader(shadowGradient);
+                        canvas.drawRoundRect(
+                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
+                                (AndroidUtilities.rectTmp2.top + bgPaddings.top) + (AndroidUtilities.rectTmp2.bottom - AndroidUtilities.rectTmp2.top) / 2,
+                                AndroidUtilities.rectTmp2.right - bgPaddings.right,
+                                AndroidUtilities.rectTmp2.bottom - bgPaddings.bottom + 8,
+                                pd, pd,
+                                newBackgroundShadowPaint
+                        );
+                        canvas.drawRoundRect(
+                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
+                                AndroidUtilities.rectTmp2.top + bgPaddings.top,
+                                AndroidUtilities.rectTmp2.right - bgPaddings.right,
+                                AndroidUtilities.rectTmp2.bottom - bgPaddings.bottom,
+                                pd, pd,
+                                newBackgroundPaint
+                        );
                         backgroundDrawable.setBounds(AndroidUtilities.rectTmp2);
-                    } else {*/
+                    } else {
                         backgroundDrawable.setBounds(AndroidUtilities.rectTmp2);
                         backgroundDrawable.draw(canvas);
-                    //}
+                    }
                     if (clipChildren) {
                         AndroidUtilities.rectTmp2.left += bgPaddings.left;
                         AndroidUtilities.rectTmp2.top += bgPaddings.top;

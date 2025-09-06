@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -45,7 +46,6 @@ import it.octogram.android.app.rows.impl.TextIconRow;
 import it.octogram.android.app.ui.bottomsheets.CustomActionBarTitleBottomSheet;
 import it.octogram.android.app.ui.cells.ChatSettingsPreviewsCell;
 import it.octogram.android.app.ui.cells.RapidActionsPreviewLayout;
-import it.octogram.android.app.ui.components.DrawerPreviewCell;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
@@ -59,6 +59,7 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
+        ConfigProperty<Boolean> canShowSearchOptionsOrdering = new ConfigProperty<>(null, BuildConfig.BUILD_TYPE.equals("debug") || BuildConfig.BUILD_TYPE.equals("pbeta"));
         showCustomTitleRow.updateValue(OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
         ConfigProperty<Boolean> canChooseSecondaryButtonAction = new ConfigProperty<>(null, false);
 
@@ -147,15 +148,17 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.HideDividers))
                             .build());
                 })
-                .category("Search items", category -> {
+                .category(getString(R.string.SearchItems), canShowSearchOptionsOrdering, category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(chatSettingsPreviewsCell = new ChatSettingsPreviewsCell(context, ChatSettingsPreviewsCell.PreviewType.SEARCH_ORDER))
+                            .showIf(canShowSearchOptionsOrdering)
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .isBlue(true)
                             .onClick(() -> fragment.presentFragment(new OctoGeneralSearchOrderUI()))
                             .icon(R.drawable.media_draw)
-                            .title("Customize search items order")
+                            .title(getString(R.string.SearchItems_Customize_Redirect))
+                            .showIf(canShowSearchOptionsOrdering)
                             .build());
                 })
                 .category(R.string.ImproveRapidActions, category -> {

@@ -48,6 +48,7 @@ import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.utils.ai.openrouter.OpenRouterModels;
 import it.octogram.android.utils.config.DrawerOrderController;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
+import it.octogram.android.utils.config.SearchOptionsOrderController;
 
 @SuppressWarnings("unchecked")
 public class OctoConfig {
@@ -63,6 +64,7 @@ public class OctoConfig {
     public static final String STICKERS_PLACEHOLDER_PACK_NAME = "octo_placeholders_android";
     public static final String GITHUB_MAIN_REPO = "OctoGramApp/OctoGram";
     public static final String PRIVATE_BETA_GROUP_HASH = "61-fnrres2ExNWFk";
+    public static final String CHATS_FOLDER_SLUG = "8BWf2cqbi7lhNzE0";
     public static final String MAIN_DOMAIN = "octogramapp.github.io";
     public static final String MAIN_CHANNEL_TAG = "OctoGramApp";
     public static final String MAIN_CHAT_TAG = "OctoGramChat";
@@ -73,8 +75,7 @@ public class OctoConfig {
     /*General*/
     public final ConfigProperty<String> searchOptionsOrder = newConfigProperty("searchOptionsOrder", "[]");
     public final ConfigProperty<Boolean> showDcId = newConfigProperty("showDcId", true);
-    public final ConfigProperty<Integer> dcIdStyle = newConfigProperty("dcIdStyle", DcIdStyle.TELEGRAM.getValue());
-    public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API.getValue());
+    public final ConfigProperty<Integer> dcIdType = newConfigProperty("dcIdType", DcIdType.BOT_API);
     public final ConfigProperty<Boolean> registrationDateInProfiles = newConfigProperty("registrationDateInProfiles", false);
     public final ConfigProperty<Boolean> jumpToNextChannelOrTopic = newConfigProperty("jumpToNextChannel", true);
     public final ConfigProperty<Boolean> hideGreetingSticker = newConfigProperty("hideGreetingSticker", false);
@@ -133,6 +134,9 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> lockedChatsShowNotifications = newConfigProperty("lockedChatsShowNotifications", true);
     public final ConfigProperty<Boolean> lockedChatsSpoilerNotifications = newConfigProperty("lockedChatsSpoilerNotifications", true);
 
+    /*Join channels*/
+    public final ConfigProperty<Boolean> welcomeNewUserShownBottomSheet = newConfigProperty("welcomeNewUserShownBottomSheet", false);
+
     /*Hidden folders*/
     public final ConfigProperty<String> hiddenFolderAssoc = newConfigProperty("hiddenFolderAssoc", "{}");
 
@@ -180,6 +184,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> promptBeforeSendingVoiceMessages = newConfigProperty("promptBeforeSendingVoiceMessages", false);
     public final ConfigProperty<Boolean> promptBeforeSendingVideoMessages = newConfigProperty("promptBeforeSendingVideoMessages", false);
     public final ConfigProperty<Boolean> useBlurredContextMenu = newConfigProperty("useBlurredContextMenu", false);
+    public final ConfigProperty<Boolean> md3ChatActions = newConfigProperty("md3ChatActions", false);
 
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());
@@ -222,14 +227,13 @@ public class OctoConfig {
     public final ConfigProperty<Integer> cameraXResolution = newConfigProperty("cameraXResolution", CameraXUtils.getCameraResolution());
     public final ConfigProperty<Integer> cameraType = newConfigProperty("cameraType", CameraType.CAMERA_X.getValue());
     public final ConfigProperty<Integer> cameraPreview = newConfigProperty("cameraPreview", CameraPreview.DEFAULT);
-    public final ConfigProperty<Boolean> useSystemCameraToRecord = newConfigProperty("useSystemCameraToRecord", false);
     // public final ConfigProperty<Boolean> cameraXLowLightBoost = newConfigProperty("cameraXLowLightBoost", false);
 
     /*Experiments*/
+    public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
     public final ConfigProperty<Boolean> usePredictiveGestures = newConfigProperty("usePredictiveGestures", true);
     public final ConfigProperty<Boolean> useFluentNavigationBar = newConfigProperty("useFluentNavigationBar", false);
     public final ConfigProperty<Boolean> moreHapticFeedbacks = newConfigProperty("moreHapticFeedbacks", false);
-    public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
     public final ConfigProperty<Integer> navigationSmoothness = newConfigProperty("navigationSmoothness", 1000);
     public final ConfigProperty<Integer> navigationBounceLevel = newConfigProperty("navigationBounceLevel", 0);
@@ -263,7 +267,7 @@ public class OctoConfig {
     public final ConfigProperty<Integer> rapidActionsSecondaryButtonAction = newConfigProperty("rapidActionsSecondaryButtonAction", InterfaceRapidButtonsActions.SEND_MESSAGE.getValue());
     public final ConfigProperty<Boolean> roundedTextBox = newConfigProperty("roundedTextBox", false);
     public final ConfigProperty<Boolean> disableTextBoxBlur = newConfigProperty("disableTextBoxBlur", false);
-    public final ConfigProperty<Boolean> useSmoothPopupBackground = newConfigProperty("useSmoothPopupBackground", false);
+    public final ConfigProperty<Boolean> useSmoothContextMenuStyling = newConfigProperty("useSmoothContextMenuStyling", false);
 
     /*Updates*/
     public final ConfigProperty<Boolean> autoCheckUpdateStatus = newConfigProperty("autoCheckUpdateStatus", true);
@@ -348,17 +352,17 @@ public class OctoConfig {
         loadConfig();
     }
 
-    public static int getMaxRecentSticker() {
+    public int getMaxRecentSticker() {
         int[] sizes = {20, 30, 40, 50, 80, 100, 120, 150, 180, 200, 10000};
-        Integer value = OctoConfig.INSTANCE.maxRecentStickers.getValue();
+        Integer value = maxRecentStickers.getValue();
         if (value >= 0 && value < sizes.length) {
             return sizes[value];
         }
         return 20;
     }
 
-    public static int getAudioType() {
-        return OctoConfig.INSTANCE.gcOutputType.getValue() == AudioType.MONO.getValue()
+    public int getAudioType() {
+        return gcOutputType.getValue() == AudioType.MONO.getValue()
                 ? AudioFormat.CHANNEL_OUT_MONO
                 : AudioFormat.CHANNEL_OUT_STEREO;
     }
@@ -511,15 +515,6 @@ public class OctoConfig {
 
                     if (deprecatedOldValue) {
                         property.updateValue(AutoDownloadUpdate.ALWAYS.getValue());
-                        return true;
-                    }
-                }
-            } else if (property.getKey().equals(dcIdStyle.getKey())) {
-                if (PREFS.contains("dcIdStyle")) {
-                    int val = PREFS.getInt("dcIdStyle", 0);
-                    if (val == 0) {
-                        showDcId.updateValue(false);
-                        property.updateValue(DcIdStyle.OWLGRAM.getValue());
                         return true;
                     }
                 }
@@ -717,15 +712,16 @@ public class OctoConfig {
                                 } catch (JSONException ignored) {
                                 }
                             }
-                            OctoConfig.INSTANCE.aiFeaturesCustomModels.updateValue(object.toString());
+                            aiFeaturesCustomModels.updateValue(object.toString());
                         }
                     } catch (JSONException ignored) {
                     }
                     changed++;
                 }
 
-                OctoConfig.INSTANCE.experimentsEnabled.updateValue(true);
-                OctoConfig.INSTANCE.aiFeaturesAcceptedTerms.updateValue(true);
+                experimentsEnabled.updateValue(true);
+                aiFeaturesAcceptedTerms.updateValue(true);
+                welcomeNewUserShownBottomSheet.updateValue(true);
 
                 DrawerOrderController.reloadConfig();
             }
@@ -742,10 +738,7 @@ public class OctoConfig {
         return switch (fieldName) {
             case "blurEffectStrength" -> isValidInRange(value, 0, 255);
             case "cameraXResolution" -> isValidInRange(value, -1, 4096);
-            case "dcIdStyle" ->
-                    isValidInRange(value, DcIdStyle.OWLGRAM.getValue(), DcIdStyle.MINIMAL.getValue());
-            case "dcIdType" ->
-                    value == DcIdType.BOT_API.getValue() || value == DcIdType.TELEGRAM.getValue();
+            case "dcIdType" -> value == DcIdType.BOT_API || value == DcIdType.TELEGRAM;
             case "doubleTapAction", "doubleTapActionOut" ->
                     isValidInRange(value, DoubleTapAction.DISABLED.getValue(), DoubleTapAction.TRANSLATE.getValue());
             case "downloadBoostValue" ->
@@ -814,6 +807,7 @@ public class OctoConfig {
                     isValidInRange(value, InterfaceRapidButtonsActions.HIDDEN.getValue(), InterfaceRapidButtonsActions.SEARCH.getValue());
             case "contextMenuBriefingState" -> isValidInRange(value, ContextMenuBriefingState.DISABLED.getState(), ContextMenuBriefingState.ENABLED_SHORTCUTS.getState());
             case "navigationBounceLevel" -> value == 0 || value == 20 || value == 40 || value == 60 || value == 80;
+            case "aiFeaturesTranscribeVoice" -> isValidInRange(value, AiTranscriptionState.DISABLED.getValue(), AiTranscriptionState.ENABLED_UNIFIED.getValue());
             default -> false;
         };
     }
@@ -822,6 +816,7 @@ public class OctoConfig {
         return switch (fieldName) {
             case "drawerItems" -> DrawerOrderController.isMenuItemsImportValid(value);
             case "actionBarCustomTitle" -> value.length() <= 40;
+            case "searchOptionsOrder" -> SearchOptionsOrderController.isOrderValid(value);
             default -> false;
         };
     }
@@ -948,10 +943,6 @@ public class OctoConfig {
     }
 
     public int getEmojiStatus(Long documentId, boolean add, boolean remove) {
-        if (!usePinnedEmojisFeature.getValue()) {
-            return EmojiStatus.UNAVAILABLE.getValue();
-        }
-
         try {
             boolean isThereEmoji = false;
             JSONArray newWithExcludedStatus = new JSONArray();
@@ -967,16 +958,19 @@ public class OctoConfig {
 
             if (isThereEmoji) {
                 if (remove) {
-                    OctoConfig.INSTANCE.pinnedEmojisList.updateValue(newWithExcludedStatus.toString());
+                    pinnedEmojisList.updateValue(newWithExcludedStatus.toString());
+                    if (newWithExcludedStatus.length() == 0) {
+                        usePinnedEmojisFeature.updateValue(false);
+                    }
                 }
 
-                return EmojiStatus.CAN_BE_REMOVED.getValue();
+                return (!usePinnedEmojisFeature.getValue() ? EmojiStatus.CAN_BE_ADDED : EmojiStatus.CAN_BE_REMOVED).getValue();
             } else if (jsonArray.length() <= 25) {
                 if (add) {
                     JSONObject newObject = new JSONObject();
                     newObject.put("document_id", documentId);
                     jsonArray.put(newObject);
-                    OctoConfig.INSTANCE.pinnedEmojisList.updateValue(jsonArray.toString());
+                    pinnedEmojisList.updateValue(jsonArray.toString());
                 }
 
                 return EmojiStatus.CAN_BE_ADDED.getValue();
@@ -994,6 +988,7 @@ public class OctoConfig {
     public boolean pinEmoji(Long documentId) {
         boolean status = getEmojiStatus(documentId, true, false) == EmojiStatus.CAN_BE_ADDED.getValue();
         if (status) {
+            usePinnedEmojisFeature.updateValue(true);
             Emoji.sortEmoji();
         }
         return status;
@@ -1014,12 +1009,12 @@ public class OctoConfig {
     public ArrayList<String> getPinnedHashtags(String hashtagString) {
         ArrayList<String> hashtags = new ArrayList<>();
 
-        if (!OctoConfig.INSTANCE.usePinnedHashtagsFeature.getValue()) {
+        if (!usePinnedHashtagsFeature.getValue()) {
             return hashtags;
         }
 
         try {
-            String value = OctoConfig.INSTANCE.pinnedHashtagsList.getValue();
+            String value = pinnedHashtagsList.getValue();
             JSONArray list = new JSONArray(new JSONTokener(value));
 
             int successHandled = 0;
@@ -1048,12 +1043,12 @@ public class OctoConfig {
     public ArrayList<ReactionsLayoutInBubble.VisibleReaction> getFavoriteReactions(boolean isChannel) {
         ArrayList<ReactionsLayoutInBubble.VisibleReaction> reactions = new ArrayList<>();
 
-        if ((isChannel && !OctoConfig.INSTANCE.usePinnedReactionsChannels.getValue()) || (!isChannel && !OctoConfig.INSTANCE.usePinnedReactionsChats.getValue())) {
+        if ((isChannel && !usePinnedReactionsChannels.getValue()) || (!isChannel && !usePinnedReactionsChats.getValue())) {
             return reactions;
         }
 
         try {
-            String value = isChannel ? OctoConfig.INSTANCE.pinnedReactionsChannels.getValue() : OctoConfig.INSTANCE.pinnedReactionsChats.getValue();
+            String value = isChannel ? pinnedReactionsChannels.getValue() : pinnedReactionsChats.getValue();
             JSONArray list = new JSONArray(new JSONTokener(value));
 
             int successHandled = 0;

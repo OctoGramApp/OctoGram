@@ -28,9 +28,9 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 
 public class LanguageController {
     private static final String TAG = "LanguageController";

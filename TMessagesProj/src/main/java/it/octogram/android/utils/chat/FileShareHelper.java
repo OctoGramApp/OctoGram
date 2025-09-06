@@ -31,7 +31,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.OctoUtils;
 
 public class FileShareHelper implements NotificationCenter.NotificationCenterDelegate {
     private final FileShareData data;

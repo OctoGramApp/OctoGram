@@ -53,6 +53,7 @@ import it.octogram.android.app.rows.impl.SwitchRow;
 import it.octogram.android.app.rows.impl.TextIconRow;
 import it.octogram.android.app.ui.cells.FolderTypeSelectorCell;
 import it.octogram.android.app.ui.cells.IconsSelectorCell;
+import it.octogram.android.app.ui.cells.InterfaceChatActionsPreviewCell;
 import it.octogram.android.app.ui.cells.InterfaceUIPreviewCell;
 import it.octogram.android.app.ui.components.DrawerPreviewCell;
 import it.octogram.android.utils.appearance.MessageStringHelper;
@@ -70,6 +71,7 @@ public class OctoAppearanceUI implements PreferencesEntry {
     private DrawerPreviewCell drawerPreviewCell;
     private FolderTypeSelectorCell folderTypeSelectorCell;
     private InterfaceUIPreviewCell switchesPreview;
+    private InterfaceChatActionsPreviewCell chatActionsPreview;
 
     private boolean wasCentered = false;
     private boolean wasCenteredAtBeginning = false;
@@ -180,6 +182,15 @@ public class OctoAppearanceUI implements PreferencesEntry {
                             .onSelected(() -> AndroidUtilities.runOnUIThread(() -> switchesPreview.animateUpdate(), 100))
                             .currentValue(OctoConfig.INSTANCE.interfaceSliderUI)
                             .title(getString(R.string.ImproveInterfaceSlider))
+                            .build());
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .avoidReDraw(true)
+                            .layout(chatActionsPreview = new InterfaceChatActionsPreviewCell(context))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> chatActionsPreview.animateUpdate())
+                            .preferenceValue(OctoConfig.INSTANCE.md3ChatActions)
+                            .title(getString(R.string.ImproveInterfaceMD3ChatActions))
                             .build());
                 })
                 .category(R.string.DrawerTitle, category -> {

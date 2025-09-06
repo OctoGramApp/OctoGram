@@ -81,7 +81,6 @@ import it.octogram.android.app.rows.Clickable;
 import it.octogram.android.app.rows.impl.CustomCellRow;
 import it.octogram.android.app.rows.impl.ExpandableRows;
 import it.octogram.android.app.rows.impl.ExpandableRowsChild;
-import it.octogram.android.app.rows.impl.HeaderRow;
 import it.octogram.android.app.rows.impl.ListRow;
 import it.octogram.android.app.rows.impl.SliderChooseRow;
 import it.octogram.android.app.rows.impl.SliderRow;
@@ -90,6 +89,7 @@ import it.octogram.android.app.rows.impl.TextDetailRow;
 import it.octogram.android.app.rows.impl.TextIconRow;
 import it.octogram.android.app.ui.components.ExpandableRowIndex;
 import it.octogram.android.app.ui.components.SwitchCell;
+import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.config.ExpandableRowsOption;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
@@ -122,6 +122,8 @@ public class PreferencesFragment extends BaseFragment {
     private ActionBarMenuItem doneButton;
     private boolean _isSelectingItems = false;
     private boolean _isDoneButtonVisible = false;
+
+    private boolean pendingAppRestart = false;
 
     {
         typesWithDividerSupport.add(PreferenceType.SWITCH);
@@ -258,6 +260,11 @@ public class PreferencesFragment extends BaseFragment {
 
     @Override
     public boolean canBeginSlide() {
+        if (!isSelectingItems && pendingAppRestart) {
+            showRestartDialog();
+            return false;
+        }
+
         return !isSelectingItems && entry.canBeginSlide();
     }
 
@@ -266,6 +273,11 @@ public class PreferencesFragment extends BaseFragment {
         if (isSelectingItems) {
             isSelectingItems = false;
             updateIsSelectingItems();
+            return false;
+        }
+
+        if (pendingAppRestart) {
+            showRestartDialog();
             return false;
         }
 
@@ -680,8 +692,23 @@ public class PreferencesFragment extends BaseFragment {
     }
 
     public void showRestartTooltip() {
+        pendingAppRestart = true;
         //noinspection deprecation
         restartTooltip.showWithAction(0, UndoView.ACTION_NEED_RESTART, null, null);
+    }
+
+    public void showRestartDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setTitle(getString(R.string.AppName));
+        alertDialogBuilder.setMessage("Some edited options require app restart to be applied.");
+        alertDialogBuilder.setPositiveButton("Apply and restart", (v, d) -> {
+            v.dismiss();
+            AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
+        });
+        alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
+        AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
+        dialog.redPositive();
     }
 
     public void smoothScrollToEnd() {
@@ -773,7 +800,7 @@ public class PreferencesFragment extends BaseFragment {
 
             if (nextElement != null) {
                 boolean nextElementSupportDivider = typesWithDividerSupport.contains(nextElement.getType());
-                if (!nextElementSupportDivider && nextElement.getType() == PreferenceType.HEADER && !((HeaderRow) nextElement).getUseHeaderStyle()) {
+                if (!nextElementSupportDivider && nextElement.getType() == PreferenceType.HEADER) {
                     nextElementSupportDivider = true;
                 }
 

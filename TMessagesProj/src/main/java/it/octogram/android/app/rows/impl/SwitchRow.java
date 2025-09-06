@@ -36,7 +36,7 @@ public class SwitchRow extends BaseRow implements Clickable {
     private CachedState cachedState;
 
     private SwitchRow(@Nullable CharSequence title, @Nullable String summary, boolean requiresRestart, ConfigProperty<Boolean> showIf, boolean showIfReverse, boolean divider, ConfigProperty<Boolean> preferenceValue, Supplier<Boolean> supplierClickable, Runnable runnablePostUpdate, boolean premium, boolean autoShowPremiumAlert, boolean locked, Runnable lockedAction, boolean isMainPageAction, int... posts) {
-        super(title, summary, requiresRestart, showIf, showIfReverse, divider, PreferenceType.SWITCH, premium, autoShowPremiumAlert, posts);
+        super(title, summary, requiresRestart, showIf, showIfReverse, divider, isMainPageAction ? PreferenceType.MAIN_PAGE_SWITCH : PreferenceType.SWITCH, premium, autoShowPremiumAlert, posts);
         this.preferenceValue = preferenceValue;
         this.supplierClickable = supplierClickable;
         this.runnablePostUpdate = runnablePostUpdate;

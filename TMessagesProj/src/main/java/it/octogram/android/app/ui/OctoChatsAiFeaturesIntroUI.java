@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.app.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -37,10 +45,9 @@ import it.octogram.android.AiProvidersDetails;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StickerUi;
 import it.octogram.android.app.fragment.PreferencesFragment;
+import it.octogram.android.app.ui.bottomsheets.AiProvidersConfigBottomSheet;
 import it.octogram.android.app.ui.components.FreeSpan;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.ai.MainAiHelper;
-import it.octogram.android.utils.ai.ui.AiConfigBottomSheet;
 import it.octogram.android.utils.appearance.MessageStringHelper;
 
 public class OctoChatsAiFeaturesIntroUI extends BaseFragment {
@@ -366,7 +373,7 @@ public class OctoChatsAiFeaturesIntroUI extends BaseFragment {
             if (!isAdded) {
                 TextCell v = new TextCell(context, 23, false, false, getResourceProvider());
                 v.setBackground(Theme.getSelectorDrawable(false));
-                v.setOnClickListener(view -> new AiConfigBottomSheet(context, OctoChatsAiFeaturesIntroUI.this, provider, new AiConfigBottomSheet.AiConfigInterface() {
+                v.setOnClickListener(view -> new AiProvidersConfigBottomSheet(context, OctoChatsAiFeaturesIntroUI.this, provider, new AiProvidersConfigBottomSheet.AiConfigInterface() {
                     @Override
                     public void onStateUpdated() {
                         if (MainAiHelper.hasAvailableProviders()) {

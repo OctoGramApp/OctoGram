@@ -52,7 +52,7 @@ public class UserAccountInfoController {
     }
 
     public static long getNiceId(TLRPC.Chat chat, long id) {
-        if (OctoConfig.INSTANCE.dcIdType.getValue() == DcIdType.BOT_API.getValue()) {
+        if (OctoConfig.INSTANCE.dcIdType.getValue() == DcIdType.BOT_API) {
             if (ChatObject.isChannel(chat)) {
                 id = -1000000000000L - id;
             }

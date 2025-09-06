@@ -51,8 +51,8 @@ import it.octogram.android.AiModelMessagesState;
 import it.octogram.android.AiModelType;
 import it.octogram.android.AiTranscriptionState;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.app.ui.bottomsheets.MainAiBottomSheet;
 import it.octogram.android.utils.ai.icons.AiFeatureIcons;
-import it.octogram.android.utils.ai.ui.MainAiBottomSheet;
 
 public class CustomModelsMenuWrapper {
     public static void initState(FillStateData data) {

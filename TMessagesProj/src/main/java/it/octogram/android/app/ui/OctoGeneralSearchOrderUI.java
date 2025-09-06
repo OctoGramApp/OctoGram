@@ -40,18 +40,22 @@ import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.FiltersView;
 import org.telegram.ui.Cells.HeaderCell;
+import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SearchViewPager;
+import org.telegram.ui.Components.ShareAlert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.app.ui.cells.ChatSettingsPreviewsCell;
 import it.octogram.android.utils.config.SearchOptionsOrderController;
+import it.octogram.android.utils.deeplink.DeepLinkDef;
 
 public class OctoGeneralSearchOrderUI extends BaseFragment {
 
@@ -143,13 +147,15 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
         oldItems.addAll(items);
         items.clear();
 
-        items.add(ItemInner.asMiniHeader("Search items"));
+        items.add(ItemInner.asMiniHeader(getString(R.string.SearchItems_items)));
         items.add(ItemInner.asPreview());
         filtersSectionStart = items.size();
         for (int option : availableOptions) {
             items.add(ItemInner.asItem(option));
         }
         filtersSectionEnd = items.size();
+
+        items.add(ItemInner.asInfo(getString(R.string.SearchItems_Customize)));
 
         if (adapter != null) {
             if (animated) {
@@ -164,7 +170,7 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
-        actionBar.setTitle("Search items");
+        actionBar.setTitle(getString(R.string.SearchItems));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -179,6 +185,13 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
             }
         });
 
+        actionBar.setLongClickable(true);
+        actionBar.setOnLongClickListener(v -> {
+            String link = String.format(Locale.US, "tg://%s", DeepLinkDef.GENERAL_SEARCHORDER);
+            showDialog(new ShareAlert(context, null, link, false, link, false, true));
+            return true;
+        });
+
         ActionBarMenu menu = actionBar.createMenu();
         ActionBarMenuItem menuItem = menu.addItem(OctoAppearanceDrawerOrderUI.SubItem.TREE_DOTS.ordinal(), R.drawable.ic_ab_other);
         menuItem.setContentDescription(getString(R.string.AccDescrMoreOptions));
@@ -191,7 +204,7 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
         listView = new RecyclerListView(context) {
             @Override
             protected void dispatchDraw(Canvas canvas) {
-                drawSectionBackground(canvas, filtersSectionStart, filtersSectionEnd, Theme.getColor(Theme.key_windowBackgroundWhite));
+                drawSectionBackground(canvas, filtersSectionStart, filtersSectionEnd - 1, Theme.getColor(Theme.key_windowBackgroundWhite));
                 super.dispatchDraw(canvas);
             }
         };
@@ -225,6 +238,7 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
     private static final int VIEW_TYPE_MINIHEADER = 1;
     private static final int VIEW_TYPE_ITEM = 2;
     private static final int VIEW_TYPE_PREVIEW = 3;
+    private static final int VIEW_TYPE_INFO = 4;
 
     private static class ItemInner extends AdapterWithDiffUtils.Item {
         public ItemInner(int viewType) {
@@ -240,6 +254,12 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
 
         public static ItemInner asMiniHeader(String text) {
             ItemInner item = new ItemInner(VIEW_TYPE_MINIHEADER);
+            item.text = text;
+            return item;
+        }
+
+        public static ItemInner asInfo(String text) {
+            ItemInner item = new ItemInner(VIEW_TYPE_INFO);
             item.text = text;
             return item;
         }
@@ -261,7 +281,7 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
             if (other.viewType != viewType) {
                 return false;
             }
-            if (viewType == VIEW_TYPE_MINIHEADER) {
+            if (viewType == VIEW_TYPE_MINIHEADER || viewType == VIEW_TYPE_INFO) {
                 if (!TextUtils.equals(text, other.text)) {
                     return false;
                 }
@@ -312,6 +332,10 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
                     });
                     view = cell;
                     break;
+                case VIEW_TYPE_INFO:
+                    view = new TextInfoPrivacyCell(mContext);
+                    view.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
+                    break;
                 case VIEW_TYPE_PREVIEW:
                     view = new ChatSettingsPreviewsCell(mContext, ChatSettingsPreviewsCell.PreviewType.SEARCH_ORDER);
                     break;
@@ -341,6 +365,9 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
                     cell.invalidate();
                     break;
                 }
+                case VIEW_TYPE_INFO:
+                    ((TextInfoPrivacyCell) holder.itemView).setText(item.text);
+                    break;
             }
         }
 

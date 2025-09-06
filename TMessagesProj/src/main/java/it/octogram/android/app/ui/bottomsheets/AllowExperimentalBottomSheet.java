@@ -28,10 +28,8 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
 
-import it.octogram.android.OctoConfig;
-
 public class AllowExperimentalBottomSheet extends BottomSheet {
-    public AllowExperimentalBottomSheet(Context context) {
+    public AllowExperimentalBottomSheet(Context context, Runnable runnable) {
         super(context, false);
 
         var frameLayout = new FrameLayout(context);
@@ -81,7 +79,9 @@ public class AllowExperimentalBottomSheet extends BottomSheet {
         textView.setText(getString(R.string.OctoExperimentsDialogButton));
         textView.setTextColor(Theme.getColor(Theme.key_color_red));
         textView.setOnClickListener(view -> {
-            OctoConfig.INSTANCE.experimentsEnabled.updateValue(!OctoConfig.INSTANCE.experimentsEnabled.getValue());
+            if (runnable != null) {
+                runnable.run();
+            }
             dismiss();
         });
         linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 0));

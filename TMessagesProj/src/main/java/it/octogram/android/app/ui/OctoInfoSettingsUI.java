@@ -45,7 +45,6 @@ import it.octogram.android.app.rows.impl.CustomCellRow;
 import it.octogram.android.app.rows.impl.FooterRow;
 import it.octogram.android.app.rows.impl.ShadowRow;
 import it.octogram.android.app.rows.impl.TextIconRow;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
 import it.octogram.android.utils.updater.UpdatesManager;
 

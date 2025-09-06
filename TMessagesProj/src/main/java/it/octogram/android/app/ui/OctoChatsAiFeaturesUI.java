@@ -45,14 +45,12 @@ import it.octogram.android.app.fragment.PreferencesFragment;
 import it.octogram.android.app.rows.impl.CustomAIModelRow;
 import it.octogram.android.app.rows.impl.FooterInformativeRow;
 import it.octogram.android.app.rows.impl.ListRow;
-import it.octogram.android.app.rows.impl.ShadowRow;
 import it.octogram.android.app.rows.impl.SwitchRow;
-import it.octogram.android.app.rows.impl.TextDetailRow;
 import it.octogram.android.app.rows.impl.TextIconRow;
+import it.octogram.android.app.ui.bottomsheets.AiProvidersConfigBottomSheet;
+import it.octogram.android.app.ui.bottomsheets.GenerateNewAiModelBottomSheet;
 import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.utils.ai.MainAiHelper;
-import it.octogram.android.utils.ai.ui.AiConfigBottomSheet;
-import it.octogram.android.utils.ai.ui.GenerateModelBottomSheet;
 import it.octogram.android.utils.appearance.MessageStringHelper;
 import it.octogram.android.utils.appearance.PopupChoiceDialogOption;
 import it.octogram.android.utils.chat.FileShareHelper;
@@ -212,7 +210,7 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
     }
 
     private void openGenerateModel() {
-        new GenerateModelBottomSheet(context, (model) -> {
+        new GenerateNewAiModelBottomSheet(context, (model) -> {
             OctoChatsAiNewModelUI newModelUI = new OctoChatsAiNewModelUI();
             newModelUI.setCallback(new OctoChatsAiNewModelUI.ModelCallback() {
                 @Override
@@ -383,7 +381,7 @@ public class OctoChatsAiFeaturesUI implements PreferencesEntry {
     }
 
     private boolean openPropertyConfig(AiProvidersDetails property) {
-        new AiConfigBottomSheet(context, fragment, property, new AiConfigBottomSheet.AiConfigInterface() {
+        new AiProvidersConfigBottomSheet(context, fragment, property, new AiProvidersConfigBottomSheet.AiConfigInterface() {
             @Override
             public void onStateUpdated() {
                 updateProvidersState();

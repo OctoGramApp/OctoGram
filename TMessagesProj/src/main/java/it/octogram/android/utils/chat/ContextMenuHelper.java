@@ -41,6 +41,10 @@ public class ContextMenuHelper {
         return false;
     }
 
+    public static boolean mustUseSwipeBack() {
+        return false;
+    }
+
     private static class ContextMenuComposer {
         private final ArrayList<ContextMenuPreviewItem> finalItems = new ArrayList<>();
 

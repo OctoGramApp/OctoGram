@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -38,6 +39,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import it.octogram.android.OctoConfig;
 
 public class ProfileActionsView extends View {
 
@@ -108,7 +111,15 @@ public class ProfileActionsView extends View {
     private RadialGradient radialGradient;
     private final Matrix matrix = new Matrix();
 
+    private boolean asPreview = false;
+
+    public void setAsPreview(boolean asPreview) {
+        this.asPreview = asPreview;
+    }
+
     public boolean myProfile;
+
+    private boolean usedCustomColorHandling = false;
 
     public ProfileActionsView(Context context, int targetHeight) {
         super(context);
@@ -150,11 +161,18 @@ public class ProfileActionsView extends View {
         this.onActionClickListener = onActionClickListener;
     }
 
+    private boolean didEstablishedState = false;
     public void setActionsColor(int color, boolean hasColorById) {
         if (radialGradient == null || this.color != color || this.hasColorById != hasColorById) {
             this.color = color;
             this.hasColorById = hasColorById;
             createColorShader();
+        }
+        if (!hasColorById && !didEstablishedState) {
+            didEstablishedState = true;
+            int originalColor = Theme.getColor(Theme.key_avatar_backgroundActionBarBlue);
+            usedCustomColorHandling = Theme.isMonetLightThemeActive() || ColorUtils.calculateLuminance(originalColor) > 0.75f;
+            handleCustomMonetStyling(false, true);
         }
     }
 
@@ -200,6 +218,30 @@ public class ProfileActionsView extends View {
         int w = getMeasuredWidth();
         float betweenPadding = xpadding / 2f;
         return (w - betweenPadding * (activeCount - 1) - xpadding * 2f) / activeCount;
+    }
+
+    private boolean _lastBlurState = false;
+    public void handleCustomMonetStyling(boolean isBlurEnabled) {
+        handleCustomMonetStyling(isBlurEnabled, false);
+    }
+
+    private void handleCustomMonetStyling(boolean isBlurEnabled, boolean forced) {
+        if (!usedCustomColorHandling) {
+            return;
+        }
+        if (_lastBlurState == isBlurEnabled && !forced) {
+            return;
+        }
+        _lastBlurState = isBlurEnabled;
+
+        for (Action action : actions) {
+            if (action.drawable != null) {
+                action.drawable.clearColorFilter();
+                action.drawable.setColorFilter(new PorterDuffColorFilter(_lastBlurState ? Color.WHITE : Color.BLACK, PorterDuff.Mode.SRC_IN));
+            }
+        }
+
+        invalidate();
     }
 
     @Override
@@ -250,13 +292,16 @@ public class ProfileActionsView extends View {
                     action.rect.width() / 2.0f * (1.0f - action.getScale()),
                     action.rect.height() / 2.0f * (1.0f - action.getScale())
                 );
+                if (OctoConfig.INSTANCE.md3ChatActions.getValue()) {
+                    AndroidUtilities.rectTmp.bottom = AndroidUtilities.rectTmp.top + getMeasuredHeight() / 2f;
+                }
                 clipPath.addRoundRect(AndroidUtilities.rectTmp, r, r, Path.Direction.CCW);
             }
         }
         firstAction = newFirstAction;
         lastAction = newLastAction;
 
-        float fraction = Utilities.clamp01(height / targetHeight);
+        float fraction = asPreview ? 1f : Utilities.clamp01(height / targetHeight);
         float alphaFraction1 = Utilities.clamp01((fraction - 0.2f) / 0.8f);
         if (alphaFraction1 <= 0f) {
             return;
@@ -267,6 +312,9 @@ public class ProfileActionsView extends View {
                 Action action = actions.get(i);
                 if (!action.isDeleted) {
                     AndroidUtilities.rectTmp.set(action.rect);
+                    if (OctoConfig.INSTANCE.md3ChatActions.getValue()) {
+                        AndroidUtilities.rectTmp.bottom = AndroidUtilities.rectTmp.top + currentHeight / 2f;
+                    }
                     AndroidUtilities.rectTmp.inset(
                         action.rect.width() / 2.0f * (1.0f - action.getScale()),
                         action.rect.height() / 2.0f * (1.0f - action.getScale())
@@ -352,7 +400,11 @@ public class ProfileActionsView extends View {
 
         action.text.setMaxWidth(action.rect.width() - dp(2));
         action.textScale = action.text.getLineCount() >= 3 ? 0.75f : action.text.getLineCount() >= 2 ? 0.85f : 1.0f;
-        final float drawableTop = Math.max(0, (targetHeight - action.text.getHeight() * action.textScale) / 3f);
+        float drawableTop = Math.max(0, (targetHeight - action.text.getHeight() * action.textScale) / 3f);
+
+        if (OctoConfig.INSTANCE.md3ChatActions.getValue()) {
+            drawableTop = getMeasuredHeight() / 4f - (mode == MODE_MY_PROFILE ? 28 : 24) / 2f;
+        }
 
         action.drawable.setBounds(
             (int) (cx - drawableR),
@@ -370,18 +422,28 @@ public class ProfileActionsView extends View {
         alpha *= action.getAlpha();
         final float cx = action.rect.centerX();
         final float cy = action.rect.centerY();
-        fraction *= action.getScale();
+        fraction *= OctoConfig.INSTANCE.md3ChatActions.getValue() ? 1f : action.getScale();
         canvas.scale(fraction, fraction, cx, cy);
         canvas.clipRect(action.rect);
 
         updateBounds(action);
 
-        final float textY = action.drawable.getBounds().bottom + action.drawable.getBounds().top - action.text.getHeight() * action.textScale / 2.0f;
+        float textY = action.drawable.getBounds().bottom + action.drawable.getBounds().top - action.text.getHeight() * action.textScale / 2.0f;
+        if (OctoConfig.INSTANCE.md3ChatActions.getValue()) {
+            textY = getTop() + getMeasuredHeight() - getMeasuredHeight() / 4f - action.text.getHeight() * action.textScale / 2.0f;
+        }
 
         canvas.save();
         canvas.scale(action.textScale, action.textScale, cx, textY + action.text.getHeight() * action.textScale / 2.0f);
-        action.text.draw(canvas, cx - action.text.getWidth() / 2f, textY, 0xFFFFFFFF, alpha);
+        action.text.draw(canvas, cx - action.text.getWidth() / 2f, textY, (usedCustomColorHandling && !_lastBlurState) ? 0xFF000000 : 0xFFFFFFFF, alpha);
         canvas.restore();
+
+        if (OctoConfig.INSTANCE.md3ChatActions.getValue()) {
+            fraction *= action.getScale();
+            canvas.scale(fraction, fraction, cx, cy);
+            canvas.clipRect(action.rect);
+            updateBounds(action);
+        }
 
         if (action.iconTranslationY != 0) {
             canvas.translate(0, action.iconTranslationY);
@@ -411,13 +473,20 @@ public class ProfileActionsView extends View {
 
         if (action.isLoading) {
             if (action.loadingDrawable == null) {
+                int loadingColor = (usedCustomColorHandling && _lastBlurState) ? Color.BLACK : Color.WHITE;
                 action.loadingDrawable = new LoadingDrawable();
                 action.loadingDrawable.setCallback(this);
-                action.loadingDrawable.setColors(
+                /*action.loadingDrawable.setColors(
                         Theme.multAlpha(Color.WHITE, .1f),
                         Theme.multAlpha(Color.WHITE, .3f),
                         Theme.multAlpha(Color.WHITE, .35f),
                         Theme.multAlpha(Color.WHITE, .8f)
+                );*/
+                action.loadingDrawable.setColors(
+                        Theme.multAlpha(loadingColor, .1f),
+                        Theme.multAlpha(loadingColor, .3f),
+                        Theme.multAlpha(loadingColor, .35f),
+                        Theme.multAlpha(loadingColor, .8f)
                 );
                 action.loadingDrawable.setAppearByGradient(true);
                 action.loadingDrawable.strokePaint.setStrokeWidth(AndroidUtilities.dpf2(1.25f));
@@ -430,15 +499,21 @@ public class ProfileActionsView extends View {
         }
 
         if (action.loadingDrawable != null) {
-            action.loadingDrawable.setBounds(action.rect);
-            action.loadingDrawable.setRadiiDp(8);
+            AndroidUtilities.rectTmp.set(action.rect);
+            if (OctoConfig.INSTANCE.md3ChatActions.getValue()) {
+                AndroidUtilities.rectTmp.bottom = AndroidUtilities.rectTmp.top + getMeasuredHeight() / 2f;
+            }
+            action.loadingDrawable.setBounds(AndroidUtilities.rectTmp);
+            action.loadingDrawable.setRadiiDp(OctoConfig.INSTANCE.md3ChatActions.getValue() ? 25 : 8);
+            //action.loadingDrawable.setBounds(action.rect);
+            //action.loadingDrawable.setRadiiDp(8);
             action.loadingDrawable.setAlpha((int) (0xFF * alpha));
             action.loadingDrawable.draw(canvas);
         }
     }
 
     public float getRoundRadius() {
-        return dp(8);
+        return dp(OctoConfig.INSTANCE.md3ChatActions.getValue() ? 25 : 8);
     }
 
     private Action hit = null;
@@ -466,6 +541,11 @@ public class ProfileActionsView extends View {
                     downY = y;
                     downTime = System.currentTimeMillis();
                     hit.bounce.setPressed(true);
+                    if (OctoConfig.INSTANCE.moreHapticFeedbacks.getValue()) {
+                        try {
+                            performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                        } catch (Exception ignore) {}
+                    }
 //                    try {
 //                        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
 //                    } catch (Exception ignore) {}
@@ -750,6 +830,7 @@ public class ProfileActionsView extends View {
 
             actions.clear();
             actions.addAll(out);
+            handleCustomMonetStyling(_lastBlurState, true);
             invalidate();
         });
     }
@@ -1047,11 +1128,14 @@ public class ProfileActionsView extends View {
                     false, null
                 );
                 drawable.setMasterParent(ProfileActionsView.this);
-                drawable.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+                drawable.setColorFilter(new PorterDuffColorFilter((usedCustomColorHandling && !_lastBlurState) ? Color.BLACK : Color.WHITE, PorterDuff.Mode.SRC_IN));
                 drawable.start();
                 this.drawable = drawable;
             } else {
                 this.drawable = getResources().getDrawable(drawableRes).mutate();
+                if (usedCustomColorHandling && !_lastBlurState) {
+                    drawable.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN));
+                }
             }
         }
 

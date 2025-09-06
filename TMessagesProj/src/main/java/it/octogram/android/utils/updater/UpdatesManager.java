@@ -47,11 +47,11 @@ import java.util.Objects;
 import it.octogram.android.AutoDownloadUpdate;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.StoreUtils;
-import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.app.ui.bottomsheets.NewUpdateAvailableBottomSheet;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.network.BrowserUtils;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.translator.localhelper.OnDeviceHelper;
 
 /**
@@ -154,7 +154,7 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
                 hasShownPopupForUpdate = false;
             }
 
-            hasExtensionUpdate = hasExtensionUpdate && lastFetchedExtensionUpdateData != null;
+            hasExtensionUpdate = this.hasExtensionUpdate && lastFetchedExtensionUpdateData != null;
         }
 
         OctoLogging.e(TAG, String.format(Locale.US, "Update State - isChecking: %b, isUpdateAvailable: %b, isDownloading: %b, downloadProgress: %.2f, isReady: %b", isCheckingForUpdates, isUpdateAvailable, isDownloading, downloadProgress, isReady));
@@ -295,6 +295,12 @@ public class UpdatesManager implements NotificationCenter.NotificationCenterDele
                     OctoLogging.e(TAG, "Starting to fetch updates data from server");
                     String reqUrl = String.format(Locale.getDefault(), "https://raw.githubusercontent.com/OctoGramApp/assets/ota/version_history/history.json?ms=%d", System.currentTimeMillis());
                     String reqResponse = new StandardHTTPRequest.Builder(reqUrl).build().request();
+                    if (reqResponse == null) {
+                        updatesData = null;
+                        callback.onError();
+                        return;
+                    }
+
                     updatesData = new JSONObject(reqResponse);
 
                     OctoLogging.e(TAG, "Updates data fetched successfully");

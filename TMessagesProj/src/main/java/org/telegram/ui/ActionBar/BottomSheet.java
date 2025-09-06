@@ -1425,8 +1425,22 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
         shadowDrawable.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
     }
 
+    private void applySecureFlagIfNeeded(boolean secureContent) {
+        Window w = getWindow();
+        if (w != null) {
+            w.setFlags(secureContent ? WindowManager.LayoutParams.FLAG_SECURE : 0, WindowManager.LayoutParams.FLAG_SECURE);
+        }
+    }
+
     @Override
     public void show() {
+        show(false);
+    }
+
+    public void show(boolean secureContent) {
+        if (secureContent) {
+            applySecureFlagIfNeeded(secureContent);
+        }
         if (!AndroidUtilities.isSafeToShow(getContext())) return;
         if (attachedFragment != null) {
             onCreateInternal();
@@ -1933,6 +1947,7 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
 
     @Override
     public void dismiss(boolean tabs) {
+        applySecureFlagIfNeeded(false);
         this.dismiss();
     }
 

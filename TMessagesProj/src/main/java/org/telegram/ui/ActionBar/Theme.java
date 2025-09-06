@@ -185,6 +185,14 @@ public class Theme {
         return Theme.chat_animatedEmojiTextColorFilter;
     }
 
+    public static boolean isMonetLightThemeActive() {
+        return currentTheme.isMonet && currentTheme.isDark != ThemeInfo.DARK;
+    }
+
+    public static boolean isMonetDarkThemeActive() {
+        return currentTheme.isMonet && currentTheme.isDark == ThemeInfo.DARK;
+    }
+
     public static class BackgroundDrawableSettings {
 
         public Drawable wallpaper;
@@ -2202,6 +2210,7 @@ public class Theme {
         public String pathToWallpaper;
         public String assetName;
         public String slug;
+        public boolean isMonet;
         public boolean badWallpaper;
         public boolean isBlured;
         public boolean isMotion;
@@ -2267,6 +2276,7 @@ public class Theme {
             this.pathToFile = other.pathToFile;
             this.pathToWallpaper = other.pathToWallpaper;
             this.assetName = other.assetName;
+            this.isMonet = other.isMonet;
             this.slug = other.slug;
             this.badWallpaper = other.badWallpaper;
             this.isBlured = other.isBlured;
@@ -4798,6 +4808,7 @@ public class Theme {
                 themeInfo.previewInColor = MonetThemeController.INSTANCE.getColor(previewColors[i][1]);
                 themeInfo.previewOutColor = MonetThemeController.INSTANCE.getColor(previewColors[i][2]);
                 themeInfo.sortIndex = sortIndices[i];
+                themeInfo.isMonet = true;
                 themes.add(themeInfo);
                 themesDict.put(monetThemes[i].getMonetThemeName(), themeInfo);
             }

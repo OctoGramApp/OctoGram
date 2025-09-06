@@ -149,6 +149,7 @@ import java.util.Objects;
 import it.octogram.android.CameraPreview;
 import it.octogram.android.CameraType;
 import it.octogram.android.OctoConfig;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
 import it.octogram.android.utils.ai.MainAiHelper;
 import it.octogram.android.utils.OctoLogging;
@@ -6302,7 +6303,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
     public void onCameraButtonLongPress() {
         if ((photosEnabled || videosEnabled || !checkCanRemoveRestrictionsByBoosts()) && delegate != null) {
-            delegate.didPressedButton(0, false, true, 0, 0, false, false, 0);
+            OctoUtils.showAlertSystemCameraMode(getContext(), value -> delegate.didPressedButton(value, false, true, 0, 0, false, false, 0));
         }
     }
 }

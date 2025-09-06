@@ -26,9 +26,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.octogram.android.OctoConfig;
-import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.OctoLogging;
 import it.octogram.android.utils.OctoUtils;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.translator.HTMLKeeper;
 import it.octogram.android.utils.translator.SingleTranslationsHandler;
 

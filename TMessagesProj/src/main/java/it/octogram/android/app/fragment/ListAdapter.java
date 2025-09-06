@@ -14,8 +14,6 @@ import static org.telegram.ui.Components.LayoutHelper.createLinear;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -46,6 +44,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SlideChooseView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.octogram.android.app.PreferenceType;
 import it.octogram.android.app.rows.BaseRow;
@@ -58,6 +57,7 @@ import it.octogram.android.app.rows.impl.ExpandableRows;
 import it.octogram.android.app.rows.impl.ExpandableRowsChild;
 import it.octogram.android.app.rows.impl.FooterInformativeRow;
 import it.octogram.android.app.rows.impl.HeaderRow;
+import it.octogram.android.app.rows.impl.HeaderWithoutStyleRow;
 import it.octogram.android.app.rows.impl.ListRow;
 import it.octogram.android.app.rows.impl.SliderChooseRow;
 import it.octogram.android.app.rows.impl.SliderRow;
@@ -72,18 +72,16 @@ import it.octogram.android.utils.OctoUtils;
 public class ListAdapter extends AdapterWithDiffUtils {
 
     private final PreferencesFragment fragment;
-    private ArrayList<BaseRow> currentShownItems = new ArrayList<>();
+    private List<BaseRow> currentShownItems = new ArrayList<>();
 
     public ListAdapter(PreferencesFragment fragment) {
         this.fragment = fragment;
     }
 
     public void setItems(ArrayList<? extends Item> oldItems, ArrayList<? extends Item> newItems) {
-        ArrayList<BaseRow> baseRowItems = new ArrayList<>();
+        List<BaseRow> baseRowItems = new ArrayList<>();
         for (Item item : newItems) {
-            if (item instanceof BaseRow) {
-                baseRowItems.add((BaseRow) item);
-            }
+            baseRowItems.add((BaseRow) item);
         }
         this.currentShownItems = baseRowItems;
         super.setItems(oldItems, newItems);
@@ -110,10 +108,12 @@ public class ListAdapter extends AdapterWithDiffUtils {
                 break;
             case EMPTY_CELL:
             case HEADER:
+            case HEADER_WITHOUT_STYLE:
                 view = new HeaderCell(context);
                 view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                 break;
             case SWITCH:
+            case MAIN_PAGE_SWITCH:
                 view = new TextCheckCell(context);
                 view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                 break;
@@ -211,50 +211,34 @@ public class ListAdapter extends AdapterWithDiffUtils {
 
                 // add custom view
                 CustomCellRow row = (CustomCellRow) currentShownItems.get(position);
-
-                if (!row.avoidReDraw() || frameLayout.getChildCount() == 0) {
-                    // remove the current view if it exists
-                    if (frameLayout.getChildCount() > 0) {
-                        frameLayout.removeAllViews();
-                    }
-
-                    if (row.getLayout() != null) {
-                        View customView = row.getLayout();
-                        ViewGroup parent = (ViewGroup) customView.getParent();
-                        if (parent != null) {
-                            parent.removeView(customView);
-                        }
-                        frameLayout.addView(customView);
-
-                        if (row.isEnabled()) {
-                            frameLayout.setClickable(true);
-                            frameLayout.setOnClickListener((v) -> {
-
-                            });
-                        }
-                    }
-                }
+                row.bind(frameLayout);
 
                 break;
             case SHADOW:
                 holder.itemView.setBackground(Theme.getThemedDrawable(fragment.getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                 break;
             case EMPTY_CELL:
-            case HEADER:
+            case HEADER: {
                 HeaderRow headerRow = (HeaderRow) currentShownItems.get(position);
                 HeaderCell headerCell = (HeaderCell) holder.itemView;
                 headerCell.setText(headerRow.getTitle());
-                if (!headerRow.getUseHeaderStyle()) {
-                    headerCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-                    headerCell.setTextSize(16);
-                    headerCell.getTextView().setTypeface(null);
-                    headerCell.setTopMargin(10);
-                }
                 break;
+            }
+            case HEADER_WITHOUT_STYLE: {
+                HeaderWithoutStyleRow headerRow = (HeaderWithoutStyleRow) currentShownItems.get(position);
+                HeaderCell headerCell = (HeaderCell) holder.itemView;
+                headerCell.setText(headerRow.getTitle());
+                headerCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+                headerCell.setTextSize(16);
+                headerCell.getTextView().setTypeface(null);
+                headerCell.setTopMargin(10);
+                break;
+            }
             case SWITCH:
+            case MAIN_PAGE_SWITCH:
                 TextCheckCell checkCell = (TextCheckCell) holder.itemView;
                 SwitchRow switchRow = (SwitchRow) currentShownItems.get(position);
-                if (switchRow.isMainPageAction()) {
+                if (type == PreferenceType.MAIN_PAGE_SWITCH) {
                     int clr = Theme.getColor(switchRow.getPreferenceValue() ? Theme.key_windowBackgroundChecked : Theme.key_windowBackgroundUnchecked);
 
                     if (!switchRow.getCachedState().isHasInitData()) {

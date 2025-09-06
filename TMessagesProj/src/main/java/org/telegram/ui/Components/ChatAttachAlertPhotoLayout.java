@@ -95,6 +95,7 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.BasePermissionsActivity;
@@ -127,6 +128,7 @@ import it.octogram.android.camerax.CameraXView;
 import it.octogram.android.camerax.components.EffectSelectorView;
 import it.octogram.android.camerax.components.LockAnimationView;
 import it.octogram.android.camerax.components.SlideControlView;
+import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.PermissionsUtils;
 
 @SuppressLint({"NotifyDataSetChanged", "ViewConstructor", "ClickableViewAccessibility"})
@@ -1055,7 +1057,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     openCamera(true);
                 } else {
                     if (parentAlert.delegate != null) {
-                        parentAlert.delegate.didPressedButton(OctoConfig.INSTANCE.useSystemCameraToRecord.getValue() ? 2 : 0, false, true, 0, 0, parentAlert.isCaptionAbove(), false, 0);
+                        OctoUtils.showAlertSystemCameraMode(context, value -> parentAlert.delegate.didPressedButton(value, false, true, 0, 0, parentAlert.isCaptionAbove(), false, 0));
                     }
                 }
             }

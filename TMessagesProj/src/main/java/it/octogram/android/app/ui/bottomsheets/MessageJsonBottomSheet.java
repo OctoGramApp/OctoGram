@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.app.ui.bottomsheets;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -22,7 +30,9 @@ import com.google.gson.GsonBuilder;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.CodeHighlighting;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BottomSheetWithRecyclerListView;
@@ -68,7 +78,7 @@ public class MessageJsonBottomSheet extends BottomSheetWithRecyclerListView {
         buttonContainer.setPadding(dp(10), dp(10), dp(10), dp(10));
         buttonContainer.setBackgroundColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
         ButtonWithCounterView actionButton = new ButtonWithCounterView(getContext(), resourcesProvider);
-        actionButton.setText("Close", false);
+        actionButton.setText(LocaleController.getString(R.string.Close), false);
         actionButton.setOnClickListener(v -> dismiss());
         buttonContainer.addView(actionButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
         containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
@@ -97,7 +107,7 @@ public class MessageJsonBottomSheet extends BottomSheetWithRecyclerListView {
 
     @Override
     protected CharSequence getTitle() {
-        return "Message JSON";
+        return LocaleController.getString(R.string.ShowJSON);
     }
 
     @Override

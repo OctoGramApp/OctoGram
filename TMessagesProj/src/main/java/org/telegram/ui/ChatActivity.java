@@ -318,7 +318,7 @@ import it.octogram.android.utils.ai.CustomModelsMenuWrapper;
 import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.utils.ai.MainAiHelper;
 import it.octogram.android.app.fragment.PreferencesFragment;
-import it.octogram.android.app.ui.ImportSettingsUI;
+import it.octogram.android.app.ui.OctoImportSettingsUI;
 import it.octogram.android.app.ui.OctoChatsAiNewModelUI;
 import it.octogram.android.app.ui.components.CustomMediaFilterDialog;
 import it.octogram.android.app.ui.cells.EmojiSetBulletinLayout;
@@ -41346,7 +41346,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (message.getDocumentName().toLowerCase().endsWith("octoexport")) {
                     boolean isValid = OctoConfig.isValidMessageExport(message);
                     if (isValid) {
-                        ImportSettingsUI ui = new ImportSettingsUI();
+                        OctoImportSettingsUI ui = new OctoImportSettingsUI();
                         ui.setData(message, null);
                         ChatActivity.this.presentFragment(ui);
                         handled = true;

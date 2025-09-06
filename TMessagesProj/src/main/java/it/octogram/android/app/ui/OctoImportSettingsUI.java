@@ -81,7 +81,7 @@ import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.account.FingerprintUtils;
 import it.octogram.android.utils.config.ImportSettingsScanHelper;
 
-public class ImportSettingsUI extends BaseFragment {
+public class OctoImportSettingsUI extends BaseFragment {
     private MessageObject message;
     private File file;
     private ImportButton actionButton;
@@ -1103,7 +1103,7 @@ public class ImportSettingsUI extends BaseFragment {
 
         public void setSize(boolean allSelected, long size, long total) {
             if (selectedCategory != null) {
-                textView.setText("Save");
+                textView.setText(getString(R.string.Save));
                 valueTextView.setText("");
             } else {
                 textView.setText((

@@ -21,6 +21,7 @@ import it.octogram.android.app.rows.impl.CustomAIModelRow;
 import it.octogram.android.app.rows.impl.CustomCellRow;
 import it.octogram.android.app.rows.impl.FooterInformativeRow;
 import it.octogram.android.app.rows.impl.HeaderRow;
+import it.octogram.android.app.rows.impl.HeaderWithoutStyleRow;
 import it.octogram.android.app.rows.impl.SwitchRow;
 
 public abstract class BaseRow extends AdapterWithDiffUtils.Item {
@@ -161,14 +162,17 @@ public abstract class BaseRow extends AdapterWithDiffUtils.Item {
         if (getType() != item.getType()) {
             return false;
         }
-        if (item instanceof CustomCellRow v2) {
-            return this instanceof CustomCellRow v3 && Objects.equals(v2.getLayout(), v3.getLayout());
+        if (item instanceof CustomCellRow) {
+            return false;
         }
         if (item instanceof CustomAIModelRow v2) {
             return this instanceof CustomAIModelRow v3 && Objects.equals(v2.getModelID(), v3.getModelID());
         }
-        if (item instanceof HeaderRow v1) {
-            return this instanceof HeaderRow v2 && Objects.equals(item.getTitle(), getTitle()) && v2.getUseHeaderStyle() == v1.getUseHeaderStyle();
+        if (item instanceof HeaderRow) {
+            return this instanceof HeaderRow && Objects.equals(item.getTitle(), getTitle());
+        }
+        if (item instanceof HeaderWithoutStyleRow) {
+            return this instanceof HeaderWithoutStyleRow && Objects.equals(item.getTitle(), getTitle());
         }
         if (item instanceof SwitchRow || item instanceof FooterInformativeRow) {
             return Objects.equals(item.getTitle(), getTitle());

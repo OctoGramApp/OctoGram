@@ -167,7 +167,14 @@ public class ImportSettingsScanHelper {
         excludedOptions.add(OctoConfig.INSTANCE.hasFingerprintSavedState.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.usePredictiveGestures.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.roundedTextBox.getKey());
-        excludedOptions.add(OctoConfig.INSTANCE.useSmoothPopupBackground.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.useSmoothContextMenuStyling.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.disableTextBoxBlur.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.googleCloudKeyTranslator.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.ignoredExtensionUpdateVersion.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.isUpdaterXiaomiBlockedInstaller.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.translatorUninstallExtensionHideTime.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.useBlurredContextMenu.getKey());
+        excludedOptions.add(OctoConfig.INSTANCE.welcomeNewUserShownBottomSheet.getKey());
         excludedOptions.add(OctoConfig.INSTANCE.hideOnlyAllChatsFolder.getKey()); // part of main settings page
     }
 
@@ -179,6 +186,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarTitleOption, R.string.ActionBarTitle));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.actionBarCustomTitle, R.string.ActionBarTitleCustom));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableDividers, R.string.HideDividers));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.searchOptionsOrder, R.string.SearchItems_Long));
         category.options.add(SettingsScanOption.asTitle(R.string.ImproveRapidActions));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.rapidActionsDefaultConfig, R.string.ImproveRapidActionsDefault));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.rapidActionsMainButtonAction, R.string.ImproveRapidActionsMainButtonAction));
@@ -198,6 +206,8 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.translatorProvider, R.string.TranslatorProvider));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.translatorFormality, R.string.TranslatorFormality));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.translatorKeepMarkdown, R.string.TranslatorKeepMarkdown));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.translatorShowOriginalContent, R.string.ShowOriginalTranslation));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.translatorOptimizedWay, R.string.EntireChatsTranslationsOptimization));
     }
 
     private void fillChatsAiFeaturesOptions(SettingsScanCategory category) {
@@ -205,6 +215,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.aiFeaturesTranslateMessages, R.string.TranslateMessages));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.aiFeaturesChatContext, R.string.AiFeatures_Features_ChatContext));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.aiFeaturesAskOnMedia, R.string.AiFeatures_Features_AskOnPhoto));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.aiFeaturesTranscribeVoice, R.string.AiFeatures_Features_TranscribeVoice));
     }
 
     private void fillAppearanceOptions(SettingsScanCategory category) {
@@ -213,6 +224,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceSwitchUI, R.string.ImproveInterfaceSwitch));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceCheckboxUI, R.string.ImproveInterfaceCheckbox));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.interfaceSliderUI, R.string.ImproveInterfaceSlider));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.md3ChatActions, R.string.ImproveInterfaceMD3ChatActions));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.uiIconsType, R.string.ImproveIconsShort));
         category.options.add(SettingsScanOption.asTitle(R.string.ManageFolders));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.tabMode, R.string.FolderType));
@@ -236,6 +248,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.repliesLinksShowEmojis, composeName(R.string.RepliesLinksHeader, R.string.RepliesLinksShowEmojis)));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.formatTimeWithSeconds, R.string.FormatTimeWithSeconds));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.pencilIconForEditedMessages, R.string.PencilIconForEdited));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showShareButtonForMessages, R.string.ShowShareButtonMessages));
         category.options.add(SettingsScanOption.asTitle(R.string.ContextMenu));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.contextMenuBriefingState, R.string.ContextMenuBriefingState));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.contextMenuShortcutsTitles, R.string.ContextMenuBriefingState_Shortcuts_Title));
@@ -277,7 +290,6 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.doubleTapAction, R.string.PreferredActionIncoming));
         category.options.add(SettingsScanOption.asTitle(R.string.DcIdHeader));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.showDcId, R.string.ShowDcID));
-        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.dcIdStyle, R.string.Style));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.dcIdType, R.string.Type));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.registrationDateInProfiles, R.string.ShowRegistrationDate));
         category.options.add(SettingsScanOption.asTitle(R.string.BlurHeader));
@@ -346,6 +358,7 @@ public class ImportSettingsScanHelper {
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.forceUseIpV6, R.string.TryConnectWithIPV6));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.deviceIdentifyState, R.string.DeviceIdentifyStatus));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.alternativeNavigation, R.string.AlternativeNavigation));
+        category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.disableTelegramTabsStack, R.string.DisableTabsStack));
         category.options.add(SettingsScanOption.asTitle(R.string.AlternativeNavigation));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.navigationSmoothness, R.string.SmootherNavigation));
         category.options.add(new SettingsScanOption(OctoConfig.INSTANCE.animatedActionBar, R.string.AnimatedActionBar));

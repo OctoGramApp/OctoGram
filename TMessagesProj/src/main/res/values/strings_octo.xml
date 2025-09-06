@@ -678,6 +678,7 @@
     <string name="ImproveInterfaceCheckboxRounded">Rounded</string>
     <string name="ImproveInterfaceCheckboxSemiTransparent">Semi transparent</string>
     <string name="ImproveInterfaceCheckboxAlwaysTransparent1">Transparent</string>
+    <string name="ImproveInterfaceMD3ChatActions">MD3 Chat Actions</string>
     <string name="ImproveInterfaceSlider">Select slider style</string>
     <string name="ImproveInterfaceSliderDefault">Default</string>
     <string name="ImproveInterfaceSliderModern">Modern</string>
@@ -725,6 +726,12 @@
     <string name="CallbackCopiedHint">Callback copied to clipboard.</string>
     <string name="IDCopied">ID copied to clipboard.</string>
     <string name="InlineQueryCopied">Inline Query copied to clipboard.</string>
+
+    <string name="UseExperimentalFeatures">Use Experimental Features</string>
+    <string name="UseExperimentalFeatures_Success">You can start using experimental features!</string>
+    <string name="DisableExperimentalFeatures">Disable Experimental Features</string>
+    <string name="DisableExperimentalFeatures_Text">Proceeding will reset all experimental features and restart the app.</string>
+    <string name="DisableExperimentalFeatures_Do">Disable and Restart</string>
     <string name="MediaStream">Use Media Stream in GroupCall</string>
     <string name="UseFluentNavigationBar">Use Fluent Navigation Bar</string>
     <string name="MoreHapticFeedbacks">Enable More Haptic Feedbacks</string>
@@ -924,7 +931,6 @@
     <string name="ResetSettings">Reset settings</string>
     <string name="ResetSettingsTitle">Reset settings</string>
     <string name="ResetSettingsDescription">Are you really sure you want to reset all OctoGram settings? Any options applied will not be retained after restart.\n\nKeep in mind that before resetting, you may want to make a backup so that you can recover these settings in the future.</string>
-    <string name="ResetSettingsDescriptionExperimental">Are you really sure you want to reset all the Experimental OctoGram settings? Any options applied will not be retained after restart.</string>
     <string name="ResetSettingsBackup">Save backup before resetting</string>
     <string name="ResetSettingsBackupFailed">An error occurred during backup generation and the settings were not reset.</string>
     <string name="ResetSettingsButton">Reset and restart</string>
@@ -1038,9 +1044,6 @@
     <string name="StartWithRearCamera">Start with rear camera</string>
     <string name="StartWithRearCamera_Desc">Start recording video messages with the rear camera instead of the front camera</string>
 
-    <string name="UseSystemCameraVideo">System Camera (Video Mode)</string>
-    <string name="UseSystemCameraVideo_Desc">Open the system camera directly in video recording mode</string>
-
     <string name="CameraButtonPosition">Camera Button Position</string>
     <string name="CameraButtonPosition_Desc">Choose the position of the camera button</string>
     <string name="CameraButtonPosition_Default">Default</string>
@@ -1143,4 +1146,16 @@
     <string name="OpenPath">Open path</string>
     <string name="IsBot">Bot</string>
     <string name="ChatId">ID</string>
+    <string name="ShowJSON">Message JSON</string>
+
+    <!--Search order UI-->
+    <string name="SearchItems">Search Items</string>
+    <string name="SearchItems_Long">Search Items Order</string>
+    <string name="SearchItems_items">Items</string>
+    <string name="SearchItems_Customize">You can customize the search options in the order you prefer.</string>
+    <string name="SearchItems_Customize_Redirect">Customize Search Items Order</string>
+
+    <!-- Choose SystemCamera Mode -->
+    <string name="TakePhoto">Take Photo</string>
+    <string name="RecordVideo">Record Video</string>
 </resources>

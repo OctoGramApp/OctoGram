@@ -40,6 +40,8 @@ import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.ChatObject;
@@ -48,10 +50,13 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.Vector;
@@ -69,6 +74,9 @@ import org.telegram.ui.FiltersSetupActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import it.octogram.android.OctoConfig;
+import it.octogram.android.app.fragment.OctoAnimationFragment;
 
 public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
 
@@ -346,6 +354,25 @@ public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
         containerView.addView(buttonShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 1f / AndroidUtilities.density, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 6, 0, 6, 68));
         recyclerListView.setPadding(dp(6), 0, dp(6), dp(button != null ? 68 : 0));
 
+        if (slug != null && slug.equals(OctoConfig.CHATS_FOLDER_SLUG)) {
+            OctoConfig.INSTANCE.welcomeNewUserShownBottomSheet.updateValue(true);
+
+            if (button != null) {
+                ((ViewGroup.MarginLayoutParams) button.getLayoutParams()).bottomMargin = dp(10+48+10);
+            }
+            recyclerListView.setPadding(dp(6), 0, dp(6), dp(button != null ? (68+48+10) : (48+10)));
+
+            TextView textView = new TextView(getContext());
+            textView.setGravity(Gravity.CENTER);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            textView.setText("Close");
+            textView.setTextColor(Theme.getColor(Theme.key_dialogTextGray3));
+            textView.setOnClickListener(view -> {
+                dismiss();
+            });
+            containerView.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 10, 16, 10));
+        }
+
         bulletinContainer = new FrameLayout(getContext());
         containerView.addView(bulletinContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 100, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 6, 0, 6, 68));
 
@@ -383,6 +410,26 @@ public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
             if (selectedPeers.contains(did)) {
                 inputPeers.add(getBaseFragment().getMessagesController().getInputPeer(did));
             }
+        }
+
+        if (slug != null && slug.equals(OctoConfig.CHATS_FOLDER_SLUG)) {
+            for (TLRPC.InputPeer peer : inputPeers) {
+                TLRPC.InputChannel channel = getBaseFragment().getMessagesController().getInputChannel(peer.channel_id);
+                if (channel != null) {
+                    final TLRPC.TL_channels_joinChannel req = new TLRPC.TL_channels_joinChannel();
+                    req.channel = channel;
+                    final int currentAccount = UserConfig.selectedAccount;
+                    ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
+                        if (error != null) {
+                            return;
+                        }
+                        TLRPC.Updates updates = (TLRPC.Updates) response;
+                        MessagesController.getInstance(currentAccount).processUpdates(updates, false);
+                    });
+                }
+            }
+            dismiss();
+            return;
         }
 
         final Utilities.Callback<Integer> after;
@@ -942,6 +989,8 @@ public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
     protected CharSequence getTitle() {
         if (deleting) {
             return getString(R.string.FolderLinkTitleRemove);
+        } else if (slug != null && slug.equals(OctoConfig.CHATS_FOLDER_SLUG)) {
+            return "Discover more...";
         } else if (invite instanceof TL_chatlists.TL_chatlists_chatlistInvite) {
             return getString(R.string.FolderLinkTitleAdd);
         } else if (peers == null || peers.isEmpty()) {
@@ -1158,7 +1207,19 @@ public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
                    right1Folder = getString(R.string.FolderLinkPreviewRight),
                    right2Folder = null;
             preview = new FoldersPreview(context, left2Folder, left1Folder, title == null ? "" : new SpannableStringBuilder(title), titleEntities, titleNoanimate, right1Folder, right2Folder);
-            addView(preview, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 17.33f, 0, 0));
+            //addView(preview, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 17.33f, 0, 0));
+
+            int additionalSpace = 0;
+            if (slug != null && slug.equals(OctoConfig.CHATS_FOLDER_SLUG)) {
+                additionalSpace = 100;
+                OctoAnimationFragment octoFragment = new OctoAnimationFragment(context, null, OctoAnimationFragment.OctoAnimationScopes.OCTO);
+                octoFragment.setDisableEffect(true);
+                addView(octoFragment, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, OctoAnimationFragment.sz_no_text, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0, 0, 0));
+            
+                title = "Discover more...";
+            } else {
+                addView(preview, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 17.33f, 0, 0));
+            }
 
             titleTextView = new AnimatedEmojiSpan.TextViewEmojis(context);
             titleTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
@@ -1171,15 +1232,15 @@ public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
             titleTextView.setText(getTitle());
             titleTextView.setCacheType(titleNoanimate ? AnimatedEmojiDrawable.CACHE_TYPE_NOANIMATE_FOLDER : AnimatedEmojiDrawable.CACHE_TYPE_MESSAGES);
             titleTextView.setEmojiColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
-            addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 32, 78.3f, 32, 0));
+            addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 32, 78.3f + additionalSpace, 32, 0));
 
             subtitleTextView = new AnimatedEmojiSpan.TextViewEmojis(context);
             subtitleTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
             subtitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            subtitleTextView.setLines(2);
+            subtitleTextView.setLines(slug != null && slug.equals(OctoConfig.CHATS_FOLDER_SLUG) ? 3 : 2);
             subtitleTextView.setGravity(Gravity.CENTER);
             subtitleTextView.setLineSpacing(0, 1.15f);
-            addView(subtitleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 32, 113, 32, 0));
+            addView(subtitleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 32, 113 + additionalSpace, 32, 0));
 
             setSelectedCount(0, false);
         }
@@ -1187,6 +1248,9 @@ public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
         public void setSelectedCount(int count, boolean animated) {
             if (deleting) {
                 subtitleTextView.setText(AndroidUtilities.replaceTags(formatSpannable(R.string.FolderLinkSubtitleRemove, title)));
+            } else if (slug != null && slug.equals(OctoConfig.CHATS_FOLDER_SLUG)) {
+                preview.setCount(0, false);
+                subtitleTextView.setText("Many OctoGram users are not part of our channel or support group. If you haven't already done so, join our community by clicking the button below...");
             } else if (already) {
                 preview.setCount(peers != null ? peers.size() : 0, false);
                 if (peers == null || peers.isEmpty()) {
@@ -1207,7 +1271,7 @@ public class FolderBottomSheet extends BottomSheetWithRecyclerListView {
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(
                 MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(dp(172), MeasureSpec.EXACTLY)
+                MeasureSpec.makeMeasureSpec(dp((slug != null && slug.equals(OctoConfig.CHATS_FOLDER_SLUG) ? (172 + 120) : 172)), MeasureSpec.EXACTLY)
             );
         }
 

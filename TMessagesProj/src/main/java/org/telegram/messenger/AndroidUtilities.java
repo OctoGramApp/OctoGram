@@ -112,7 +112,6 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -230,7 +229,7 @@ import it.octogram.android.DeviceIdentifyState;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.app.fragment.PreferencesFragment;
-import it.octogram.android.app.ui.ImportSettingsUI;
+import it.octogram.android.app.ui.OctoImportSettingsUI;
 import it.octogram.android.app.ui.OctoChatsAiNewModelUI;
 import it.octogram.android.utils.appearance.TypeFaceSupportChecker;
 
@@ -4162,7 +4161,7 @@ public class AndroidUtilities {
             if (parentFragment != null && message.getDocumentName().toLowerCase().endsWith("octoexport")) {
                 boolean isValid = OctoConfig.isValidMessageExport(message);
                 if (isValid) {
-                    ImportSettingsUI ui = new ImportSettingsUI();
+                    OctoImportSettingsUI ui = new OctoImportSettingsUI();
                     ui.setData(message, null);
                     parentFragment.presentFragment(ui);
                     return;

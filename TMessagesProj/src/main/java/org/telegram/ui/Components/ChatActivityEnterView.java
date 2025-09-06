@@ -4736,13 +4736,19 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     }
 
     private void executeTranslationToCustomDestination() {
+        executeTranslationToCustomDestination(messageSendPreview);
+    }
+
+    private void executeTranslationToCustomDestination(MessageSendPreview preview) {
         if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText().toString().trim())) {
             return;
         }
 
-        if (messageSendPreview != null) {
-            messageSendPreview.dismiss(false);
-            messageSendPreview = null;
+        if (preview != null) {
+            preview.dismiss(false);
+            if (preview == messageSendPreview) {
+                messageSendPreview = null;
+            }
         }
 
         OctoChatsTranslatorDestinationUI destinationSettings = new OctoChatsTranslatorDestinationUI();
@@ -4753,9 +4759,15 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     }
 
     private void executeMessageTranslation(String toLanguage) {
+        executeMessageTranslation(toLanguage, messageSendPreview);
+    }
+
+    private void executeMessageTranslation(String toLanguage, MessageSendPreview preview) {
         if (messageEditText == null || TextUtils.isEmpty(messageEditText.getText().toString().trim())) {
             return;
         }
+
+        final MessageSendPreview preview1 = preview;
 
         OctoConfig.INSTANCE.lastTranslatePreSendLanguage.updateValue(toLanguage);
         String realDestination = toLanguage == null ? TranslateAlert2.getToLanguage() : toLanguage;
@@ -4769,9 +4781,11 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 AndroidUtilities.runOnUIThread(() -> {
                     progressDialog.dismiss();
 
-                    if (messageSendPreview != null) {
-                        messageSendPreview.dismiss(false);
-                        messageSendPreview = null;
+                    if (preview1 != null) {
+                        preview1.dismiss(false);
+                        if (preview1 == messageSendPreview) {
+                            messageSendPreview = null;
+                        }
                     }
                 });
             }
@@ -9303,10 +9317,34 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             }
 
             doneButton.setOnLongClickListener(v -> {
-                if (messageObject.isMediaEmpty()) return false;
-                if (messageEditText == null || TextUtils.isEmpty(messageEditText.getTextToUse())) return false;
-                if (groupedMessages != null && (!groupedMessages.hasCaption || groupedMessages.isDocuments)) return false;
-                if (messageObject != null && messageObject.type != MessageObject.TYPE_PHOTO && messageObject.type != MessageObject.TYPE_VIDEO && messageObject.type != MessageObject.TYPE_GIF) return false;
+                boolean translateButtonValue = MessagesController.getInstance(UserConfig.selectedAccount).getTranslateController().isContextTranslateEnabled();
+
+                Utilities.Callback0Return<Boolean> canProceed = () -> {
+                    if (messageObject.isMediaEmpty()) return false;
+                    if (messageEditText == null || TextUtils.isEmpty(messageEditText.getTextToUse())) return false;
+                    if (groupedMessages != null && (!groupedMessages.hasCaption || groupedMessages.isDocuments)) return false;
+                    if (messageObject != null && messageObject.type != MessageObject.TYPE_PHOTO && messageObject.type != MessageObject.TYPE_VIDEO && messageObject.type != MessageObject.TYPE_GIF && !translateButtonValue) return false;
+                    return true;
+                };
+
+                boolean canUseTranslation;
+                boolean canUseMoveMedia = false;
+
+                if (canProceed.run()) {
+                    canUseMoveMedia = true;
+                    canUseTranslation = translateButtonValue;
+                } else {
+                    canUseTranslation = translateButtonValue && messageEditText != null && !TextUtils.isEmpty(messageEditText.getTextToUse());
+                }
+
+                if (!canUseMoveMedia && !canUseTranslation) {
+                    return false;
+                }
+
+//                if (messageObject.isMediaEmpty()) return false;
+//                if (messageEditText == null || TextUtils.isEmpty(messageEditText.getTextToUse())) return false;
+//                if (groupedMessages != null && (!groupedMessages.hasCaption || groupedMessages.isDocuments)) return false;
+//                if (messageObject != null && messageObject.type != MessageObject.TYPE_PHOTO && messageObject.type != MessageObject.TYPE_VIDEO && messageObject.type != MessageObject.TYPE_GIF && !translateButtonValue) return false;
 
                 MessageSendPreview sendPreview = new MessageSendPreview(getContext(), resourcesProvider);
                 sendPreview.allowRelayout = true;
@@ -9322,26 +9360,46 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 sendPreview.setMessageObjects(messageObjects);
 
                 ItemOptions options = ItemOptions.makeOptions(sizeNotifierLayout, resourcesProvider, doneButton);
-                MessagePreviewView.ToggleButton button = new MessagePreviewView.ToggleButton(
-                        getContext(),
-                        R.raw.position_below, getString(R.string.CaptionAbove),
-                        R.raw.position_above, getString(R.string.CaptionBelow),
-                        resourcesProvider
-                );
-                button.setState(!captionAbove, false);
-                button.setOnClickListener(v2 -> {
-                    captionAbove = !captionAbove;
-                    for (int i = 0; i < messageObjects.size(); ++i) {
-                        messageObjects.get(i).messageOwner.invert_media = captionAbove;
-                    }
-                    button.setState(!captionAbove, true);
-                    if (!messageObjects.isEmpty()) {
-                        sendPreview.changeMessage(messageObjects.get(0));
-                    }
-                    sendPreview.scrollTo(!captionAbove);
-                });
-                options.addView(button);
-                options.setupSelectors();
+                if (canUseMoveMedia) {
+                    MessagePreviewView.ToggleButton button = new MessagePreviewView.ToggleButton(
+                            getContext(),
+                            R.raw.position_below, getString(R.string.CaptionAbove),
+                            R.raw.position_above, getString(R.string.CaptionBelow),
+                            resourcesProvider
+                    );
+                    button.setState(!captionAbove, false);
+                    button.setOnClickListener(v2 -> {
+                        captionAbove = !captionAbove;
+                        for (int i = 0; i < messageObjects.size(); ++i) {
+                            messageObjects.get(i).messageOwner.invert_media = captionAbove;
+                        }
+                        button.setState(!captionAbove, true);
+                        if (!messageObjects.isEmpty()) {
+                            sendPreview.changeMessage(messageObjects.get(0));
+                        }
+                        sendPreview.scrollTo(!captionAbove);
+                    });
+                    options.addView(button);
+                    options.setupSelectors();
+                }
+                if (canUseTranslation) {
+                    String destinationLanguage = OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue() == null ? TranslateAlert2.getToLanguage() : OctoConfig.INSTANCE.lastTranslatePreSendLanguage.getValue();
+                    String translatedLanguageName = TranslateAlert2.languageName(destinationLanguage).toLowerCase();
+                    ActionBarMenuSubItem subItem = new ActionBarMenuSubItem(getContext(), false, false, resourcesProvider);
+                    subItem.setPadding(dp(18), 0, dp(18), 0);
+                    subItem.setTextAndIcon(LocaleController.formatString("TranslateToButton", R.string.TranslateToButton, translatedLanguageName), R.drawable.msg_translate, null);
+
+                    subItem.setColors(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, resourcesProvider), Theme.getColor(Theme.key_actionBarDefaultSubmenuItemIcon, resourcesProvider));
+                    subItem.setSelectorColor(Theme.multAlpha(Theme.getColor(Theme.key_actionBarDefaultSubmenuItemIcon, resourcesProvider), .12f));
+
+                    subItem.setOnClickListener(view1 -> executeMessageTranslation(destinationLanguage, sendPreview));
+                    subItem.setOnLongClickListener(d -> {
+                        executeTranslationToCustomDestination(sendPreview);
+                        return true;
+                    });
+
+                    options.addView(subItem, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+                }
                 sendPreview.setItemOptions(options);
                 sendPreview.setSendButton(doneButton, false, v2 -> {
                     if (groupedMessages != null) {

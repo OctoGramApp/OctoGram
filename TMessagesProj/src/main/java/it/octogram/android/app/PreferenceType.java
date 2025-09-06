@@ -27,7 +27,9 @@ public enum PreferenceType {
     CHECKBOX(16, true),
     EXPANDABLE_ROWS(17, true),
     EXPANDABLE_ROWS_CHILD(18, true),
-    CUSTOM_AI_MODEL(19, true);
+    CUSTOM_AI_MODEL(19, true),
+    HEADER_WITHOUT_STYLE(20, false),
+    MAIN_PAGE_SWITCH(21, true);
 
     private final int adapterType;
     private final boolean isEnabled;

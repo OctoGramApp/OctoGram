@@ -157,7 +157,7 @@ import java.util.HashSet;
 import it.octogram.android.OctoConfig;
 import it.octogram.android.utils.ai.CustomModelsHelper;
 import it.octogram.android.app.fragment.PreferencesFragment;
-import it.octogram.android.app.ui.ImportSettingsUI;
+import it.octogram.android.app.ui.OctoImportSettingsUI;
 import it.octogram.android.app.ui.OctoChatsAiNewModelUI;
 
 public class ChannelAdminLogActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
@@ -3213,7 +3213,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                             if (message.getDocumentName().toLowerCase().endsWith("octoexport")) {
                                 boolean isValid = OctoConfig.isValidMessageExport(message);
                                 if (isValid) {
-                                    ImportSettingsUI ui = new ImportSettingsUI();
+                                    OctoImportSettingsUI ui = new OctoImportSettingsUI();
                                     ui.setData(message, null);
                                     ChannelAdminLogActivity.this.presentFragment(ui);
                                     handled = true;

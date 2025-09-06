@@ -19,8 +19,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
-import it.octogram.android.utils.network.StandardHTTPRequest;
 import it.octogram.android.utils.OctoLogging;
+import it.octogram.android.utils.network.StandardHTTPRequest;
 
 public class GenericLLMClient {
 

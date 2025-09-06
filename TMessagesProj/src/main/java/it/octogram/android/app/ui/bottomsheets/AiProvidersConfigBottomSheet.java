@@ -6,7 +6,7 @@
  * Copyright OctoGram, 2023-2025.
  */
 
-package it.octogram.android.utils.ai.ui;
+package it.octogram.android.app.ui.bottomsheets;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.formatString;
@@ -78,7 +78,7 @@ import it.octogram.android.utils.ai.openrouter.OpenRouterModels;
 import it.octogram.android.utils.appearance.PopupChoiceDialogUtils;
 import kotlin.Pair;
 
-public class AiConfigBottomSheet extends BottomSheet {
+public class AiProvidersConfigBottomSheet extends BottomSheet {
     private final AiProvidersDetails provider;
 
     private int selectedPosition;
@@ -92,7 +92,7 @@ public class AiConfigBottomSheet extends BottomSheet {
 
     private boolean skipToApiKeyConfig;
 
-    public AiConfigBottomSheet(Context context, BaseFragment fragment, AiProvidersDetails provider, AiConfigInterface callback) {
+    public AiProvidersConfigBottomSheet(Context context, BaseFragment fragment, AiProvidersDetails provider, AiConfigInterface callback) {
         super(context, true);
         setApplyBottomPadding(false);
         setApplyTopPadding(false);

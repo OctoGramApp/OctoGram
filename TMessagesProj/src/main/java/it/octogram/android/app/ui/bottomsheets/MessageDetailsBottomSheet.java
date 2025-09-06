@@ -1,3 +1,11 @@
+/*
+ * This is the source code of OctoGram for Android
+ * It is licensed under GNU GPL v2 or later.
+ * You should have received a copy of the license in this archive (see LICENSE).
+ *
+ * Copyright OctoGram, 2023-2025.
+ */
+
 package it.octogram.android.app.ui.bottomsheets;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -12,6 +20,8 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -19,6 +29,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
@@ -74,6 +85,7 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
     private UserAccountInfoController.UserAccountInfo fromRepliedUserInfo;
     private UserAccountInfoController.UserAccountInfo fromUserInfo;
     private UserAccountInfoController.UserAccountInfo fromChatInfo;
+    private boolean secureContent;
 
     private final ArrayList<Integer> expandedRows = new ArrayList<>();
 
@@ -84,6 +96,7 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
 
         if (messageObject.getChatId() != 0) {
             fromChat = getMessagesController().getChat(messageObject.getChatId());
+            secureContent = getMessagesController().isChatNoForwards(fromChat);
             fromChatInfo = UserAccountInfoController.getDcInfo(fromChat);
         }
         if (messageObject.messageOwner.from_id instanceof TLRPC.TL_peerUser) {
@@ -103,6 +116,9 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
             fromRepliedUserInfo = UserAccountInfoController.getDcInfo(fromRepliedUser);
         }
 
+        applySecureFlagIfNeeded();
+        OctoLogging.d(TAG, "Restriction Content Status: " + secureContent);
+
         topPadding = 0.35f;
         fixNavigationBar();
         setShowHandle(true);
@@ -119,7 +135,7 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
             if (item.viewType == VIEW_TYPE_EXPANDABLE) {
                 if (item.expandableId == 35) {
                     dismiss();
-                    new MessageJsonBottomSheet(fragment, messageObject).show();
+                    new MessageJsonBottomSheet(fragment, messageObject).show(secureContent);
                     return;
                 }
 
@@ -167,6 +183,13 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
         recyclerListView.setPadding(backgroundPaddingLeft, 0, backgroundPaddingLeft, dp(68));
     }
 
+    private void applySecureFlagIfNeeded() {
+        Window w = getWindow();
+        if (w != null) {
+            w.setFlags(secureContent ? WindowManager.LayoutParams.FLAG_SECURE : 0, WindowManager.LayoutParams.FLAG_SECURE);
+        }
+    }
+
     private MessagesController getMessagesController() {
         return MessagesController.getInstance(UserConfig.selectedAccount);
     }
@@ -189,7 +212,6 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
         ArrayList<ItemInner> oldItems = new ArrayList<>(items);
         items.clear();
 
-        items.add(ItemInner.asShadow());
         items.add(ItemInner.asPreview());
 
         fillMessageRelatedItems(items);
@@ -197,10 +219,7 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
 
         fillForwardedMessageItems(items);
 
-        int addedFiles = fillFilesRelatedItems(items);
-        if (addedFiles > 0) {
-            items.add(ItemInner.asShadow());
-        }
+        fillFilesRelatedItems(items);
 
         int needScrollTo = -1;
 
@@ -208,36 +227,29 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
         if (!expandedRows.contains(2) && hasReply) {
             items.add(ItemInner.asExpandable(2, getString(R.string.ExpandReplyDetails)));
         } else if (expandedRows.contains(2) && hasReply) {
-            int addedReplyItems = fillRepliedMessageItems(items);
-            if (addedReplyItems > 0) {
-                items.add(ItemInner.asShadow());
-                if (justExpandedTo == 0) needScrollTo = items.size() - 1;
-            }
+            fillRepliedMessageItems(items);
+            if (justExpandedTo == 0) needScrollTo = items.size() - 1;
         }
 
         boolean hasChat = fromChat != null || fromUser != null;
         if (!expandedRows.contains(0) && hasChat) {
             items.add(ItemInner.asExpandable(0, getString(R.string.ExpandChatDetails)));
         } else if (expandedRows.contains(0) && hasChat) {
-            int addedChatItems = fillChatRelatedItems(items);
-            if (addedChatItems > 0) {
-                items.add(ItemInner.asShadow());
-                if (justExpandedTo == 0) needScrollTo = items.size() - 1;
-            }
+            fillChatRelatedItems(items);
+            if (justExpandedTo == 0) needScrollTo = items.size() - 1;
         }
 
         boolean hasUser = fromUser != null || fromRepliedUser != null;
         if (!expandedRows.contains(1) && hasUser) {
             items.add(ItemInner.asExpandable(1, getString(R.string.ExpandUserDetails)));
         } else if (expandedRows.contains(1) && hasUser) {
-            int addedUserItems = fillUserRelatedItems(items);
-            if (addedUserItems > 0) {
-                items.add(ItemInner.asShadow());
-                if (justExpandedTo == 1) needScrollTo = items.size() - 1;
-            }
+            fillUserRelatedItems(items);
+            if (justExpandedTo == 1) needScrollTo = items.size() - 1;
         }
 
-        items.add(ItemInner.asExpandable(35, R.drawable.input_bot1, "Show JSON"));
+        if (BuildConfig.BUILD_TYPE.equals("debug") || BuildConfig.BUILD_TYPE.equals("pbeta")) {
+            items.add(ItemInner.asExpandable(35, R.drawable.input_bot1, getString(R.string.ShowJSON)));
+        }
 
         for (int i = 1; i < items.size(); i++) {
             ItemInner previousItem = items.get(i-1);
@@ -245,9 +257,14 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
             if (currentItem.viewType == VIEW_TYPE_SHADOW && previousItem.viewType == VIEW_TYPE_ITEM) {
                 previousItem.useDivider = false;
             }
-            if (currentItem.viewType == VIEW_TYPE_EXPANDABLE && i == items.size() - 1) {
+            if (i == items.size() - 1) {
                 currentItem.useDivider = false;
             }
+        }
+
+        ItemInner lastItem = items.get(items.size() - 1);
+        if (lastItem.viewType == VIEW_TYPE_SHADOW) {
+            items.remove(lastItem);
         }
 
         if (adapter != null) {
@@ -259,13 +276,12 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
 
             if (needScrollTo != -1) {
                 int finalNeedScrollTo = needScrollTo;
-                AndroidUtilities.runOnUIThread(() -> recyclerListView.smoothScrollToPosition(finalNeedScrollTo), 200);
+                recyclerListView.post(() -> recyclerListView.smoothScrollToPosition(finalNeedScrollTo));
             }
         }
     }
 
-    private int fillChatRelatedItems(ArrayList<ItemInner> items) {
-        int initialNumber = items.size();
+    private void fillChatRelatedItems(ArrayList<ItemInner> items) {
         if ((fromChat != null && fromUser != null && fromChat.id != fromUser.id) || (fromChat != null && fromUser == null)) {
             items.add(ItemInner.asMiniHeader(fromChat.broadcast ? getString(R.string.AccDescrChannel) : getString(R.string.AccDescrGroup)));
             items.add(ItemInner.asItem(R.drawable.msg_message, getString(fromChat.broadcast ? R.string.EnterChannelName : R.string.GroupName), fromChat.title).withEmojiSupport());
@@ -280,8 +296,8 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
             if (fromChatInfo != null) {
                 items.add(ItemInner.asItem(R.drawable.menu_hashtag, "ID", String.valueOf(fromChatInfo.userId)));
             }
+            items.add(ItemInner.asShadow());
         }
-        return items.size() - initialNumber;
     }
 
     private void fillForwardedMessageItems(ArrayList<ItemInner> items) {
@@ -322,14 +338,12 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
             }
         }
     }
-    private int fillUserRelatedItems(ArrayList<ItemInner> items) {
-        int initialNumber = items.size();
+
+    private void fillUserRelatedItems(ArrayList<ItemInner> items) {
         OctoLogging.d(TAG, "fillUserRelatedItems: fromUser = " + fromUser + ", fromRepliedUser = " + fromRepliedUser);
 
         fillSingleUserItems(items, fromUser, fromUserInfo, getString(R.string.UserInfo));
         fillSingleUserItems(items, fromRepliedUser, fromRepliedUserInfo, getString(R.string.RepliedUser));
-
-        return items.size() - initialNumber;
     }
 
     private void fillSingleUserItems(ArrayList<ItemInner> items, TLRPC.User user, UserAccountInfoController.UserAccountInfo userInfo, String headerTitle) {
@@ -358,6 +372,8 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
         if (user.bot) {
             items.add(ItemInner.asItem(R.drawable.msg_info, getString(R.string.IsBot), getString(R.string.CheckPhoneNumberYes)));
         }
+
+        items.add(ItemInner.asShadow());
     }
 
     private void fillMessageRelatedItems(ArrayList<ItemInner> items) {
@@ -381,10 +397,11 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
         if (!TextUtils.isEmpty(messageObject.messageOwner.message)) {
             items.add(ItemInner.asItem(R.drawable.msg_info, getString(R.string.MessageTextLength), String.valueOf(messageObject.messageOwner.message.length())));
         }
+
+        items.add(ItemInner.asShadow());
     }
 
-    private int fillFilesRelatedItems(ArrayList<ItemInner> items) {
-        int initialNumber = items.size();
+    private void fillFilesRelatedItems(ArrayList<ItemInner> items) {
         if (messageObject.messageOwner.media != null && !(messageObject.messageOwner.media instanceof TLRPC.TL_messageMediaWebPage)) {
             items.add(ItemInner.asMiniHeader(getString(R.string.ChatDocument)));
             ArrayList<ItemInner> tempVideoDetails = new ArrayList<>();
@@ -490,12 +507,13 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
                 items.add(ItemInner.asMiniHeader(isTempDetailsForPhotos ? getString(R.string.AttachPhoto) : getString(R.string.AttachVideo)));
                 items.addAll(tempVideoDetails);
             }
+
+            items.add(ItemInner.asShadow());
         }
-        return items.size() - initialNumber;
     }
 
-    private int fillRepliedMessageItems(ArrayList<ItemInner> items) {
-        if (messageObject.replyMessageObject == null) return 0;
+    private void fillRepliedMessageItems(ArrayList<ItemInner> items) {
+        if (messageObject.replyMessageObject == null) return;
 
         items.add(ItemInner.asMiniHeader(getString(R.string.ReplyMessage)));
         items.add(ItemInner.asItem(R.drawable.menu_hashtag, "ID", String.valueOf(messageObject.replyMessageObject.getId())));
@@ -519,7 +537,7 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
             items.add(ItemInner.asItem(R.drawable.menu_hashtag, "ID", String.valueOf(fromRepliedUserInfo.userId)));
         }
 
-        return 1;
+        items.add(ItemInner.asShadow());
     }
 
     private String parseDate(int date) {
@@ -626,6 +644,9 @@ public class MessageDetailsBottomSheet extends BottomSheetWithRecyclerListView {
                 }
             }
             if (viewType == VIEW_TYPE_ITEM) {
+                return false;
+            }
+            if (viewType == VIEW_TYPE_SHADOW) {
                 return false;
             }
             return true;

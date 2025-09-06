@@ -74,20 +74,19 @@ import it.octogram.android.WebPages;
 import it.octogram.android.WebPagesCategory;
 import it.octogram.android.app.ui.cells.DcStatusHeaderCell;
 import it.octogram.android.app.ui.cells.SingleDatacenterStatusPreview;
-import it.octogram.android.utils.OctoUtils;
 import it.octogram.android.utils.appearance.MessageStringHelper;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
 import it.octogram.android.utils.media.DcMediaController;
 import it.octogram.android.utils.network.DatacenterController;
 import it.octogram.android.utils.network.WebPingController;
 
-public class DcStatusActivity extends BaseFragment {
+public class OctoDcStatusActivity extends BaseFragment {
 
     public static final int PAGE_NETWORK = 0;
     public static final int PAGE_MEDIA = 1;
     public static final int PAGE_WEB = 2;
 
-    private DcStatusActivity fragment;
+    private OctoDcStatusActivity fragment;
 
     public Page networkPage;
     public Page mediaPage;
@@ -525,7 +524,7 @@ public class DcStatusActivity extends BaseFragment {
                     return;
                 }
 
-                ItemOptions options = ItemOptions.makeOptions(DcStatusActivity.this.fragment, cell);
+                ItemOptions options = ItemOptions.makeOptions(OctoDcStatusActivity.this.fragment, cell);
                 options.addIf(_status != WebPingController.WAITING_FOR_USER, R.drawable.menu_browser_refresh, getString(R.string.Refresh), () -> webPage.webPingController.pingSites(page.getId()));
                 options.addIf(_status == WebPingController.WAITING_FOR_USER, R.drawable.media_photo_flash_on2, getString(R.string.DatacenterStatusSection_Start_Ping), () -> webPage.webPingController.pingSites(page.getId()));
                 options.addIf(page != null, R.drawable.open_in_new_24px, getString(R.string.OpenInExternalApp), () -> Browser.openUrl(context, page.getWebsite()));

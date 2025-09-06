@@ -23,21 +23,21 @@ enum class EmojiStatus(val value: Int) {
     UNAVAILABLE(2)
 }
 
-enum class DcIdStyle(val value: Int) {
-    OWLGRAM(1),
-    TELEGRAM(2),
-    MINIMAL(3);
+object DcIdType {
+    const val BOT_API = 0
+    const val TELEGRAM = 1
 
-    companion object {
-        fun fromInt(value: Int): DcIdStyle {
-            return DcIdStyle.entries.find { it.value == value } ?: OWLGRAM
+    @IntDef(BOT_API, TELEGRAM)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class Type
+
+    @Type
+    fun fromInt(value: Int): Int {
+        return when (value) {
+            TELEGRAM -> TELEGRAM
+            else -> BOT_API
         }
     }
-}
-
-enum class DcIdType(val value: Int) {
-    BOT_API(0),
-    TELEGRAM(1)
 }
 
 enum class DefaultEmojiButtonAction(val value: Int) {

@@ -5408,7 +5408,28 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             FilesMigrationService.checkBottomSheet(this);
         }
-        if (MonetIconController.INSTANCE.needMonetMigration()) {
+        if (!OctoConfig.INSTANCE.welcomeNewUserShownBottomSheet.getValue()) {
+            OctoConfig.INSTANCE.welcomeNewUserShownBottomSheet.updateValue(true);
+            TL_chatlists.TL_chatlists_checkChatlistInvite req = new TL_chatlists.TL_chatlists_checkChatlistInvite();
+            req.slug = OctoConfig.CHATS_FOLDER_SLUG;
+            ConnectionsManager.getInstance(getCurrentAccount()).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+                if (response instanceof TL_chatlists.chatlist_ChatlistInvite) {
+                    TL_chatlists.chatlist_ChatlistInvite inv = (TL_chatlists.chatlist_ChatlistInvite) response;
+                    ArrayList<TLRPC.Chat> chats = null;
+                    ArrayList<TLRPC.User> users = null;
+                    if (inv instanceof TL_chatlists.TL_chatlists_chatlistInvite) {
+                        chats = ((TL_chatlists.TL_chatlists_chatlistInvite) inv).chats;
+                        users = ((TL_chatlists.TL_chatlists_chatlistInvite) inv).users;
+                    } else if (inv instanceof TL_chatlists.TL_chatlists_chatlistInviteAlready) {
+                        chats = ((TL_chatlists.TL_chatlists_chatlistInviteAlready) inv).chats;
+                        users = ((TL_chatlists.TL_chatlists_chatlistInviteAlready) inv).users;
+                    }
+                    MessagesController.getInstance(getCurrentAccount()).putChats(chats, false);
+                    MessagesController.getInstance(getCurrentAccount()).putUsers(users, false);
+                    new FolderBottomSheet(this, OctoConfig.CHATS_FOLDER_SLUG, inv).show();
+                }
+            }));
+        } else if (MonetIconController.INSTANCE.needMonetMigration()) {
             MonetAndroidFixDialog.showDialog(this);
         } else if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             AppLinkVerifyBottomSheet.checkBottomSheet(this);

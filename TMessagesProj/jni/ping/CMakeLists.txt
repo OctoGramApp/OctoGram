@@ -17,3 +17,6 @@ set_target_properties(ping PROPERTIES
 
 target_include_directories(ping PUBLIC
         ./)
+
+target_link_options(ping PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_options(ping PRIVATE "-Wl,-z,common-page-size=16384")

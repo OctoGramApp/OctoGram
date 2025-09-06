@@ -175,7 +175,7 @@ public class TodoItemMenu extends Dialog {
         viewPager.setAdapter(new ViewPagerFixed.Adapter() {
             @Override
             public int getItemCount() {
-                return 2;
+                return taskId == -1 ? 1 : 2;
             }
 
             @Override
@@ -418,7 +418,6 @@ public class TodoItemMenu extends Dialog {
         tabsView.bringToFront();
         if (taskId == -1) {
             tabsView.setVisibility(View.GONE);
-            viewPager.setPosition(1);
         }
         viewPager.onTabAnimationUpdate(false);
 
@@ -954,7 +953,7 @@ public class TodoItemMenu extends Dialog {
         hasTranslation = true;
     }
     private void updateTranslation() {
-        final float t = viewPager.getPositionAnimated();
+        final float t = taskId == -1 ? 1 : viewPager.getPositionAnimated();
 
         final float page0x = lerp(0, -viewPager.getWidth(), t);
         final float page1x = lerp(viewPager.getWidth(), 0, t);
