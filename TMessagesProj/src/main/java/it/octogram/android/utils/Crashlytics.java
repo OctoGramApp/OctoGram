@@ -132,8 +132,11 @@ public class Crashlytics {
             _hasPendingCrashForThisSession = true;
 
             File archived = new File(filesDir, "Crash20_" + System.currentTimeMillis() + LOG_FILE_EXTENSION);
-            archived.deleteOnExit();
-            boolean ignored = tempFile.renameTo(archived);
+            boolean ignored;
+            if (archived.exists()) {
+                ignored = archived.delete();
+            }
+            ignored = tempFile.renameTo(archived);
 
             return true;
         }
