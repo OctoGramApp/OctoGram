@@ -19,9 +19,11 @@ import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.ProfileActionsView;
+import org.telegram.ui.PeerColorActivity;
 
 public class InterfaceChatActionsPreviewCell extends FrameLayout {
     private final ProfileActionsView actionsView;
@@ -35,7 +37,7 @@ public class InterfaceChatActionsPreviewCell extends FrameLayout {
         linearLayout.setClipToPadding(true);
         linearLayout.setClipToOutline(true);
         linearLayout.setClipChildren(true);
-        linearLayout.setPadding(0, dp(6), 0, 0);
+        linearLayout.setPadding(0, dp(6), 0, dp(1));
 
         GradientDrawable border = new GradientDrawable();
         border.setShape(GradientDrawable.RECTANGLE);
@@ -43,13 +45,23 @@ public class InterfaceChatActionsPreviewCell extends FrameLayout {
         border.setCornerRadius(dp(15));
         linearLayout.setBackground(border);
 
-        actionsView = new ProfileActionsView(context, dp(90));
+        int btnColor;
+        if (AndroidUtilities.computePerceivedBrightness(Theme.getColor(Theme.key_actionBarDefault)) > .8f) {
+            btnColor = Theme.multAlpha(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText), .15f);
+        } else if (AndroidUtilities.computePerceivedBrightness(Theme.getColor(Theme.key_actionBarDefault)) < .2f) {
+            btnColor = Theme.multAlpha(Theme.adaptHSV(Theme.getColor(Theme.key_actionBarDefault), +0.02f, +0.25f), .35f);
+        } else {
+            btnColor = Theme.multAlpha(PeerColorActivity.adaptProfileEmojiColor(Theme.getColor(Theme.key_actionBarDefault)), .15f);
+        }
+
+        actionsView = new ProfileActionsView(context, dp(95));
         actionsView.mode = ProfileActionsView.MODE_GROUP;
         actionsView.setAlpha(1f);
         actionsView.setNotifications(true);
-        actionsView.updatePosition(0, dp(90));
+        actionsView.updatePosition(0, dp(95));
         actionsView.setAsPreview(true);
         actionsView.drawingBlur(false);
+        actionsView.setActionsColor(btnColor, false);
 
         actionsView.beginApplyingActions();
         actionsView.set(ProfileActionsView.KEY_MESSAGE, true);

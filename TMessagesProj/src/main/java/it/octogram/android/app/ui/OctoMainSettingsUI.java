@@ -24,7 +24,6 @@ import androidx.annotation.NonNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildConfig;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
@@ -75,7 +74,6 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
         this.fragment = fragment;
 
-        ConfigProperty<Boolean> logsOnlyPbeta = new ConfigProperty<>(null, BuildVars.DEBUG_PRIVATE_VERSION);
         ConfigProperty<Boolean> canShowUpdatesPolicy = new ConfigProperty<>(null, !StoreUtils.isDownloadedFromAnyStore() || StoreUtils.isFromPlayStore());
 
         return OctoPreferences.builder(getString(R.string.OctoGramSettings))
@@ -145,7 +143,7 @@ public class OctoMainSettingsUI implements PreferencesEntry, ChatAttachAlertDocu
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .onClick(() -> {
                                 if (StoreUtils.isFromPlayStore()) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Utilities.uriParseSafe("https://play.google.com/store/apps/details?id=" + ApplicationLoader.applicationContext.getPackageName()));
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Utilities.uriParseSafe(String.format(Locale.US, "https://play.google.com/store/apps/details?id=%s", context.getPackageName())));
                                     context.startActivity(browserIntent);
                                 } else {
                                     fragment.presentFragment(new PreferencesFragment(new OctoUpdatesUI()));

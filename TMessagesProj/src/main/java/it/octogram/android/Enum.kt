@@ -159,7 +159,7 @@ object CameraXResolution {
 
 enum class OctoColors(val value: String) {
     AiColor("#8d3067"),
-    LogoColor("#251D7B"),
+    LogoColor("#5244eb"),
     LogoColor2("#594bcc"),
 }
 

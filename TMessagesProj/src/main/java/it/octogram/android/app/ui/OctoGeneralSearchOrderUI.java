@@ -13,6 +13,7 @@ import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -35,6 +36,7 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
@@ -47,6 +49,7 @@ import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SearchViewPager;
 import org.telegram.ui.Components.ShareAlert;
+import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +57,7 @@ import java.util.Locale;
 
 import it.octogram.android.OctoConfig;
 import it.octogram.android.app.ui.cells.ChatSettingsPreviewsCell;
+import it.octogram.android.utils.AppRestartHelper;
 import it.octogram.android.utils.config.SearchOptionsOrderController;
 import it.octogram.android.utils.deeplink.DeepLinkDef;
 
@@ -62,6 +66,9 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
     private RecyclerListView listView;
     private ListAdapter adapter;
     private ItemTouchHelper itemTouchHelper;
+
+    private boolean edited = false;
+    private Context context;
 
     private final List<Integer> availableOptions = new ArrayList<>();
     {
@@ -168,6 +175,8 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
 
     @Override
     public View createView(Context context) {
+        this.context = context;
+
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
         actionBar.setAllowOverlayTitle(true);
         actionBar.setTitle(getString(R.string.SearchItems));
@@ -177,6 +186,7 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
                 if (id == -1) {
                     finishFragment();
                 } else if (id == 1) {
+                    edited = SearchOptionsOrderController.isUsingCustomVersion();
                     SearchOptionsOrderController.resetOrdering();
                     availableOptions.clear();
                     availableOptions.addAll(SearchOptionsOrderController.getCurrentOrder());
@@ -225,6 +235,41 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
         updateRows(false);
 
         return fragmentView;
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (edited) {
+            showRestartDialog();
+            return false;
+        }
+
+        return super.onBackPressed();
+    }
+
+    @Override
+    public boolean canBeginSlide() {
+        if (edited) {
+            showRestartDialog();
+            return false;
+        }
+
+        return super.canBeginSlide();
+    }
+
+
+    public void showRestartDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setTitle(getString(R.string.AppName));
+        alertDialogBuilder.setMessage(getString(R.string.RestartAppToApplyChanges));
+        alertDialogBuilder.setPositiveButton(getString(R.string.RestartAppToApplyChangesButton), (v, d) -> {
+            v.dismiss();
+            AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
+        });
+        alertDialogBuilder.setNegativeButton(getString(R.string.Cancel), null);
+        AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
+        dialog.redPositive();
     }
 
     @Override
@@ -425,6 +470,7 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
             } else {
                 SearchOptionsOrderController.saveCurrentOrder(availableOptions);
                 adapter.notifyItemChanged(1);
+                edited = true;
             }
             super.onSelectedChanged(viewHolder, actionState);
         }

@@ -431,6 +431,7 @@ public class ProfileActionsView extends View {
         float textY = action.drawable.getBounds().bottom + action.drawable.getBounds().top - action.text.getHeight() * action.textScale / 2.0f;
         if (OctoConfig.INSTANCE.md3ChatActions.getValue()) {
             textY = getTop() + getMeasuredHeight() - getMeasuredHeight() / 4f - action.text.getHeight() * action.textScale / 2.0f;
+            if (asPreview) textY -= 3;
         }
 
         canvas.save();

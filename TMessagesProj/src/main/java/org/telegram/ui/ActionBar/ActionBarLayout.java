@@ -91,7 +91,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     private boolean isSheet;
     private Window window;
 
-    public static boolean CAN_USE_PREDICTIVE_GESTURES = BuildConfig.DEBUG;
+    public static boolean CAN_USE_PREDICTIVE_GESTURES = BuildConfig.BUILD_TYPE.equals("debug");
 
     private boolean USE_ALTERNATIVE_NAVIGATION = OctoConfig.INSTANCE.alternativeNavigation.getValue();
     private boolean USE_ACTIONBAR_CROSSFADE = OctoConfig.INSTANCE.animatedActionBar.getValue();

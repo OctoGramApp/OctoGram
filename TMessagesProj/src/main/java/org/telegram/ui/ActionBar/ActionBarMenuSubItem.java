@@ -30,6 +30,8 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.messenger.AndroidUtilities;
 
+import it.octogram.android.OctoConfig;
+
 public class ActionBarMenuSubItem extends FrameLayout {
 
     public AnimatedEmojiSpan.TextViewEmojis textView;
@@ -404,6 +406,10 @@ public class ActionBarMenuSubItem extends FrameLayout {
     }
 
     public void updateBackground() {
+        if (OctoConfig.INSTANCE.useSmoothContextMenuStyling.getValue()) {
+            selectorRad = 20;
+        }
+
         setBackground(Theme.createRadSelectorDrawable(selectorColor, top ? selectorRad : 0, bottom ? selectorRad : 0));
     }
 

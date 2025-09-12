@@ -103,7 +103,7 @@ public class ActionBarPopupWindow extends PopupWindow {
     public static class ActionBarPopupWindowLayout extends FrameLayout {
         private static final boolean USE_NEW_BACKGROUND = OctoConfig.INSTANCE.useSmoothContextMenuStyling.getValue();
         private final Paint newBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Paint newBackgroundShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        //private final Paint newBackgroundShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         public final static int FLAG_USE_SWIPEBACK = 1;
         public final static int FLAG_SHOWN_FROM_BOTTOM = 2;
@@ -174,10 +174,11 @@ public class ActionBarPopupWindow extends PopupWindow {
             }
             if (USE_NEW_BACKGROUND) {
                 newBackgroundPaint.setColor(getThemedColor(Theme.key_actionBarDefaultSubmenuBackground));
+                newBackgroundPaint.setShadowLayer(5f, 0, 2, 0x9e000000);
             }
 
-            newBackgroundShadowPaint.setColor(Color.BLACK);
-            newBackgroundShadowPaint.setAlpha(50);
+            //newBackgroundShadowPaint.setColor(Color.BLACK);
+            //newBackgroundShadowPaint.setAlpha(50);
 
 
             setWillNotDraw(false);
@@ -302,13 +303,16 @@ public class ActionBarPopupWindow extends PopupWindow {
 
         public void setBackgroundColor(int color) {
             if (backgroundColor != color) {
+                backgroundColor = color;
                 if (backgroundDrawable != null) {
-                    backgroundDrawable.setColorFilter(new PorterDuffColorFilter(backgroundColor = color, PorterDuff.Mode.MULTIPLY));
+                    backgroundDrawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
                 }
-            }
-            if (USE_NEW_BACKGROUND) {
-                newBackgroundPaint.setColor(Color.WHITE);
-                newBackgroundPaint.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
+                if (USE_NEW_BACKGROUND) {
+                    newBackgroundPaint.setColor(Color.WHITE);
+                    newBackgroundPaint.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+                    newBackgroundPaint.clearShadowLayer();
+                    newBackgroundPaint.setShadowLayer(5f, 0, 2, 0x9e000000);
+                }
             }
         }
 
@@ -552,24 +556,24 @@ public class ActionBarPopupWindow extends PopupWindow {
                     }
                     if (USE_NEW_BACKGROUND) {
                         var pd = AndroidUtilities.dp(20);
-                        LinearGradient shadowGradient = new LinearGradient(
-                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
-                                (AndroidUtilities.rectTmp2.top + bgPaddings.top) + ((AndroidUtilities.rectTmp2.bottom - AndroidUtilities.rectTmp2.top) * 2/3),
-                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
-                                AndroidUtilities.rectTmp2.bottom - bgPaddings.bottom + 15,
-                                0x00000000,
-                                0x85000000,
-                                Shader.TileMode.CLAMP
-                        );
-                        newBackgroundShadowPaint.setShader(shadowGradient);
-                        canvas.drawRoundRect(
-                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
-                                (AndroidUtilities.rectTmp2.top + bgPaddings.top) + (AndroidUtilities.rectTmp2.bottom - AndroidUtilities.rectTmp2.top) / 2,
-                                AndroidUtilities.rectTmp2.right - bgPaddings.right,
-                                AndroidUtilities.rectTmp2.bottom - bgPaddings.bottom + 8,
-                                pd, pd,
-                                newBackgroundShadowPaint
-                        );
+//                        LinearGradient shadowGradient = new LinearGradient(
+//                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
+//                                (AndroidUtilities.rectTmp2.top + bgPaddings.top) + ((AndroidUtilities.rectTmp2.bottom - AndroidUtilities.rectTmp2.top) * 2/3),
+//                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
+//                                AndroidUtilities.rectTmp2.bottom - bgPaddings.bottom + 15,
+//                                0x00000000,
+//                                0x85000000,
+//                                Shader.TileMode.CLAMP
+//                        );
+//                        newBackgroundShadowPaint.setShader(shadowGradient);
+//                        canvas.drawRoundRect(
+//                                AndroidUtilities.rectTmp2.left + bgPaddings.left,
+//                                (AndroidUtilities.rectTmp2.top + bgPaddings.top) + (AndroidUtilities.rectTmp2.bottom - AndroidUtilities.rectTmp2.top) / 2,
+//                                AndroidUtilities.rectTmp2.right - bgPaddings.right,
+//                                AndroidUtilities.rectTmp2.bottom - bgPaddings.bottom + 8,
+//                                pd, pd,
+//                                newBackgroundShadowPaint
+//                        );
                         canvas.drawRoundRect(
                                 AndroidUtilities.rectTmp2.left + bgPaddings.left,
                                 AndroidUtilities.rectTmp2.top + bgPaddings.top,

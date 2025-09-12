@@ -231,7 +231,7 @@ public class OctoConfig {
 
     /*Experiments*/
     public final ConfigProperty<Boolean> experimentsEnabled = newConfigProperty("experimentsEnabled", false);
-    public final ConfigProperty<Boolean> usePredictiveGestures = newConfigProperty("usePredictiveGestures", true);
+    public final ConfigProperty<Boolean> usePredictiveGestures = newConfigProperty("usePredictiveGestures", BuildConfig.BUILD_TYPE.equals("debug"));
     public final ConfigProperty<Boolean> useFluentNavigationBar = newConfigProperty("useFluentNavigationBar", false);
     public final ConfigProperty<Boolean> moreHapticFeedbacks = newConfigProperty("moreHapticFeedbacks", false);
     public final ConfigProperty<Boolean> alternativeNavigation = newConfigProperty("alternativeNavigation", false);
@@ -304,6 +304,7 @@ public class OctoConfig {
     public final ConfigProperty<String> aiFeaturesLastUsedLanguage = newConfigProperty("aiFeaturesLastUsedLanguage", "");
     public final ConfigProperty<Integer> aiFeaturesLastUsedFormality = newConfigProperty("aiFeaturesLastUsedFormality", 0);
     public final ConfigProperty<Integer> aiFeaturesLastUsedLength = newConfigProperty("aiFeaturesLastUsedLength", 0);
+    public final ConfigProperty<Boolean> aiFeaturesShowShortcuts = newConfigProperty("aiFeaturesShowShortcuts", true);
 
     /* Gemini */
     public final ConfigProperty<Boolean> aiFeaturesUseGoogleAPIs = newConfigProperty("aiFeaturesUseGoogleAPIs", false);

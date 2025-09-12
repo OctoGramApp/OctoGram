@@ -92,7 +92,7 @@ public class OctoExperimentsUI implements PreferencesEntry {
                         .build())
                 .sticker(context, OctoConfig.STICKERS_PLACEHOLDER_PACK_NAME, StickerUi.EXPERIMENTAL, true, getString(R.string.OctoExperimentsSettingsHeader))
                 .category(getString(R.string.ExperimentalSettings), OctoConfig.INSTANCE.experimentsEnabled, category -> {
-                    if (BuildConfig.DEBUG && ActionBarLayout.CAN_USE_PREDICTIVE_GESTURES) {
+                    if (ActionBarLayout.CAN_USE_PREDICTIVE_GESTURES) {
                         category.row(new SwitchRow.SwitchRowBuilder()
                                 .onPostUpdate(() -> {
                                     if (!OctoConfig.INSTANCE.usePredictiveGestures.getValue()) {

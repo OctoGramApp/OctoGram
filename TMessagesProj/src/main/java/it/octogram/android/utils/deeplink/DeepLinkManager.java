@@ -16,6 +16,7 @@ import android.view.HapticFeedbackConstants;
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
@@ -256,6 +257,10 @@ public class DeepLinkManager extends LaunchActivity {
                 return true;
             }
             case DeepLinkDef.ENABLE_BLURRED -> {
+                if (!BuildConfig.BUILD_TYPE.equals("debug") && !BuildConfig.BUILD_TYPE.equals("pbeta")) {
+                    return false;
+                }
+
                 handleBlurred(fragment);
                 return true;
             }

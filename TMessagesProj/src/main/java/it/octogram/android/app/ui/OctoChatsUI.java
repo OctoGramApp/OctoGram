@@ -74,11 +74,9 @@ public class OctoChatsUI implements PreferencesEntry {
         ConfigProperty<Boolean> canShowSelectReaction = new ConfigProperty<>(null, OctoConfig.INSTANCE.doubleTapAction.getValue() == DoubleTapAction.REACTION.getValue() || OctoConfig.INSTANCE.doubleTapActionOut.getValue() == DoubleTapAction.REACTION.getValue());
 
         ConfigProperty<Boolean> areShortcutsEnabled = new ConfigProperty<>(null, false);
-        ConfigProperty<Boolean> showTooManyOptionsAlert = new ConfigProperty<>(null, false);
 
         Runnable updateShortcutsState = () -> {
             areShortcutsEnabled.updateValue(areShortcutsEnabled());
-            showTooManyOptionsAlert.updateValue(getEnabledShortcutsCount() > 2 && OctoConfig.INSTANCE.shortcutsPosition.getValue() == ShortcutsPosition.CHAT_INFO.getId());
         };
         updateShortcutsState.run();
 
@@ -233,6 +231,93 @@ public class OctoChatsUI implements PreferencesEntry {
                             .title(getString(R.string.RemoveTimeOnStickers))
                             .build());
                 })
+                .category(R.string.BottomBar, category -> {
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(inputBoxCellPreview = new ChatSettingsPreviewsCell(context, fragment, ChatSettingsPreviewsCell.PreviewType.INPUT_BOX))
+                            .build()
+                    );
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.defaultEmojiButtonAction)
+                            .onSelected(() -> inputBoxCellPreview.invalidate())
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.DEFAULT.getValue())
+                                            .setItemTitle(getString(R.string.DefaultEmojiButtonTypeDefault))
+                                            .setItemIcon(R.drawable.msg_forward_replace),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.EMOJIS.getValue())
+                                            .setItemTitle(getString(R.string.Emoji))
+                                            .setItemIcon(R.drawable.msg_emoji_smiles),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.STICKERS.getValue())
+                                            .setItemTitle(getString(R.string.AttachSticker))
+                                            .setItemIcon(R.drawable.msg_sticker),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultEmojiButtonAction.GIFS.getValue())
+                                            .setItemTitle(getString(R.string.AttachGif))
+                                            .setItemIcon(R.drawable.msg_gif)
+                            ))
+                            .title(getString(R.string.DefaultEmojiButtonType2))
+                            .build());
+                    category.row(new ListRow.ListRowBuilder()
+                            .currentValue(OctoConfig.INSTANCE.defaultRightButtonAction)
+                            .onSelected(() -> inputBoxCellPreview.invalidate())
+                            .options(List.of(
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultMicrophoneButtonAction.DEFAULT.getValue())
+                                            .setItemTitle(getString(R.string.DefaultEmojiButtonTypeDefault))
+                                            .setItemIcon(R.drawable.msg_forward_replace),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultMicrophoneButtonAction.VOICE_MESSAGE.getValue())
+                                            .setItemTitle(getString(R.string.AccDescrVoiceMessage))
+                                            .setItemIcon(R.drawable.msg_voice_unmuted),
+                                    new PopupChoiceDialogOption()
+                                            .setId(DefaultMicrophoneButtonAction.VIDEO_MESSAGE.getValue())
+                                            .setItemTitle(getString(R.string.AccDescrVideoMessage))
+                                            .setItemIcon(R.drawable.msg_video)
+                            ))
+                            .title(getString(R.string.DefaultRightButtonType))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.hideKeyboardOnScroll)
+                            .title(getString(R.string.HideKeyboardOnScroll))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> inputBoxCellPreview.invalidate())
+                            .preferenceValue(OctoConfig.INSTANCE.hideSendAsChannel)
+                            .title(getString(R.string.HideSendAsChannel))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.hideCustomEmojis)
+                            .title(getString(R.string.HideCustomEmojis))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.disableTextBoxBlur)
+                            .title(getString(R.string.DisableTextBoxBlur))
+                            .build());
+                    category.row(new CustomCellRow.CustomCellRowBuilder()
+                            .layout(bottomBarCellPreview = new ChatSettingsPreviewsCell(context, fragment, ChatSettingsPreviewsCell.PreviewType.DISCUSS))
+                            .build()
+                    );
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> bottomBarCellPreview.invalidate())
+                            .preferenceValue(OctoConfig.INSTANCE.hideBottomBarChannels)
+                            .title(getString(R.string.HideBottomBarChannels))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> bottomBarCellPreview.invalidate())
+                            .preferenceValue(OctoConfig.INSTANCE.hideChatButtonChannels)
+                            .title(getString(R.string.HideChatButtonChannels))
+                            .showIf(OctoConfig.INSTANCE.hideBottomBarChannels, true)
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .onPostUpdate(() -> bottomBarCellPreview.invalidate())
+                            .preferenceValue(OctoConfig.INSTANCE.hideGiftButtonChannels)
+                            .title(getString(R.string.HideGiftButtonChannels))
+                            .showIf(OctoConfig.INSTANCE.hideBottomBarChannels, true)
+                            .build());
+                })
+
                 .row(new ShadowRow())
                 .category(R.string.PinnedElements, category -> {
                     category.row(new TextIconRow.TextIconRowBuilder()
@@ -415,112 +500,6 @@ public class OctoChatsUI implements PreferencesEntry {
                             .description(getString(R.string.OpenArchiveOnPull_Desc))
                             .build());
                 })
-                .row(new FooterInformativeRow.FooterInformativeRowBuilder()
-                        .title(getString(R.string.AdminShortcutsPositionChatInfo_Alert))
-                        .showIf(showTooManyOptionsAlert)
-                        .build())
-                .category(R.string.InputBoxSettings, category -> {
-                    category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(inputBoxCellPreview = new ChatSettingsPreviewsCell(context, fragment, ChatSettingsPreviewsCell.PreviewType.INPUT_BOX))
-                            .build()
-                    );
-                    category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.defaultEmojiButtonAction)
-                            .onSelected(() -> inputBoxCellPreview.invalidate())
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.DEFAULT.getValue())
-                                            .setItemTitle(getString(R.string.DefaultEmojiButtonTypeDefault))
-                                            .setItemIcon(R.drawable.msg_forward_replace),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.EMOJIS.getValue())
-                                            .setItemTitle(getString(R.string.Emoji))
-                                            .setItemIcon(R.drawable.msg_emoji_smiles),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.STICKERS.getValue())
-                                            .setItemTitle(getString(R.string.AttachSticker))
-                                            .setItemIcon(R.drawable.msg_sticker),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultEmojiButtonAction.GIFS.getValue())
-                                            .setItemTitle(getString(R.string.AttachGif))
-                                            .setItemIcon(R.drawable.msg_gif)
-                            ))
-                            .title(getString(R.string.DefaultEmojiButtonType2))
-                            .build());
-                    category.row(new ListRow.ListRowBuilder()
-                            .currentValue(OctoConfig.INSTANCE.defaultRightButtonAction)
-                            .onSelected(() -> inputBoxCellPreview.invalidate())
-                            .options(List.of(
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultMicrophoneButtonAction.DEFAULT.getValue())
-                                            .setItemTitle(getString(R.string.DefaultEmojiButtonTypeDefault))
-                                            .setItemIcon(R.drawable.msg_forward_replace),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultMicrophoneButtonAction.VOICE_MESSAGE.getValue())
-                                            .setItemTitle(getString(R.string.AccDescrVoiceMessage))
-                                            .setItemIcon(R.drawable.msg_voice_unmuted),
-                                    new PopupChoiceDialogOption()
-                                            .setId(DefaultMicrophoneButtonAction.VIDEO_MESSAGE.getValue())
-                                            .setItemTitle(getString(R.string.AccDescrVideoMessage))
-                                            .setItemIcon(R.drawable.msg_video)
-                            ))
-                            .title(getString(R.string.DefaultRightButtonType))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideKeyboardOnScroll)
-                            .title(getString(R.string.HideKeyboardOnScroll))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> inputBoxCellPreview.invalidate())
-                            .preferenceValue(OctoConfig.INSTANCE.hideSendAsChannel)
-                            .title(getString(R.string.HideSendAsChannel))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.hideCustomEmojis)
-                            .title(getString(R.string.HideCustomEmojis))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.disableTextBoxBlur)
-                            .title(getString(R.string.DisableTextBoxBlur))
-                            .build());
-                })
-                .category(R.string.BottomBar, category -> {
-                    category.row(new CustomCellRow.CustomCellRowBuilder()
-                            .layout(bottomBarCellPreview = new ChatSettingsPreviewsCell(context, fragment, ChatSettingsPreviewsCell.PreviewType.DISCUSS))
-                            .build()
-                    );
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> bottomBarCellPreview.invalidate())
-                            .preferenceValue(OctoConfig.INSTANCE.hideBottomBarChannels)
-                            .title(getString(R.string.HideBottomBarChannels))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> bottomBarCellPreview.invalidate())
-                            .preferenceValue(OctoConfig.INSTANCE.hideChatButtonChannels)
-                            .title(getString(R.string.HideChatButtonChannels))
-                            .showIf(OctoConfig.INSTANCE.hideBottomBarChannels, true)
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .onPostUpdate(() -> bottomBarCellPreview.invalidate())
-                            .preferenceValue(OctoConfig.INSTANCE.hideGiftButtonChannels)
-                            .title(getString(R.string.HideGiftButtonChannels))
-                            .showIf(OctoConfig.INSTANCE.hideBottomBarChannels, true)
-                            .build());
-                })
-                .category(getString(R.string.MediaTab), category -> {
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.activeNoiseSuppression)
-                            .title(getString(R.string.VoiceImprovements))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.playGifAsVideo)
-                            .title(getString(R.string.PlayGifsAsVideo))
-                            .build());
-                    category.row(new SwitchRow.SwitchRowBuilder()
-                            .preferenceValue(OctoConfig.INSTANCE.unmuteVideosWithVolumeDown)
-                            .title(getString(R.string.UnmuteWithVolumeDown))
-                            .build());
-                })
                 .category(getString(R.string.DoubleTapActionsHeader), category -> {
                     category.row(new ListRow.ListRowBuilder()
                             .currentValue(OctoConfig.INSTANCE.doubleTapAction)
@@ -539,6 +518,20 @@ public class OctoChatsUI implements PreferencesEntry {
                             .onClick(() -> fragment.presentFragment(new ReactionsDoubleTapManageActivity()))
                             .showIf(canShowSelectReaction)
                             .title(getString(R.string.CustomEmojiReaction))
+                            .build());
+                })
+                .category(getString(R.string.MediaTab), category -> {
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.activeNoiseSuppression)
+                            .title(getString(R.string.VoiceImprovements))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.playGifAsVideo)
+                            .title(getString(R.string.PlayGifsAsVideo))
+                            .build());
+                    category.row(new SwitchRow.SwitchRowBuilder()
+                            .preferenceValue(OctoConfig.INSTANCE.unmuteVideosWithVolumeDown)
+                            .title(getString(R.string.UnmuteWithVolumeDown))
                             .build());
                 })
                 .category(getString(R.string.DcIdHeader), category -> {

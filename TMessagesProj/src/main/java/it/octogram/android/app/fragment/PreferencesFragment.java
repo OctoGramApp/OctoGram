@@ -214,8 +214,8 @@ public class PreferencesFragment extends BaseFragment {
             menuItem.setContentDescription(getString(R.string.AccDescrMoreOptions));
 
             for (OctoPreferences.OctoContextMenuElement element : preferences.elements()) {
-                ActionBarMenuSubItem item = menuItem.addSubItem(++i, element.icon, element.title);
-                if (element.danger) {
+                ActionBarMenuSubItem item = menuItem.addSubItem(++i, element.getIcon(), element.getTitle());
+                if (element.isDanger()) {
                     item.setIconColor(Theme.getColor(Theme.key_text_RedRegular));
                     item.setTextColor(Theme.getColor(Theme.key_text_RedBold));
                     item.setSelectorColor(Theme.multAlpha(Theme.getColor(Theme.key_text_RedRegular), .12f));
@@ -338,7 +338,7 @@ public class PreferencesFragment extends BaseFragment {
 
                     OctoPreferences.OctoContextMenuElement element = preferences.elements().get(id - 1);
                     if (element != null) {
-                        element.run.run();
+                        element.getRunnable().run();
                     }
                 }
             }
@@ -700,8 +700,8 @@ public class PreferencesFragment extends BaseFragment {
     public void showRestartDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setTitle(getString(R.string.AppName));
-        alertDialogBuilder.setMessage("Some edited options require app restart to be applied.");
-        alertDialogBuilder.setPositiveButton("Apply and restart", (v, d) -> {
+        alertDialogBuilder.setMessage(getString(R.string.RestartAppToApplyChanges));
+        alertDialogBuilder.setPositiveButton(getString(R.string.RestartAppToApplyChangesButton), (v, d) -> {
             v.dismiss();
             AppRestartHelper.triggerRebirth(context, new Intent(context, LaunchActivity.class));
         });

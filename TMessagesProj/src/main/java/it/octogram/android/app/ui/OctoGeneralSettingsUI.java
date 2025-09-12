@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -59,7 +58,6 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
     @NonNull
     @Override
     public OctoPreferences getPreferences(@NonNull PreferencesFragment fragment, @NonNull Context context) {
-        ConfigProperty<Boolean> canShowSearchOptionsOrdering = new ConfigProperty<>(null, BuildConfig.BUILD_TYPE.equals("debug") || BuildConfig.BUILD_TYPE.equals("pbeta"));
         showCustomTitleRow.updateValue(OctoConfig.INSTANCE.actionBarTitleOption.getValue() == ActionBarTitleOption.CUSTOM.getValue());
         ConfigProperty<Boolean> canChooseSecondaryButtonAction = new ConfigProperty<>(null, false);
 
@@ -148,17 +146,15 @@ public class OctoGeneralSettingsUI implements PreferencesEntry {
                             .title(getString(R.string.HideDividers))
                             .build());
                 })
-                .category(getString(R.string.SearchItems), canShowSearchOptionsOrdering, category -> {
+                .category(getString(R.string.SearchItems), category -> {
                     category.row(new CustomCellRow.CustomCellRowBuilder()
                             .layout(chatSettingsPreviewsCell = new ChatSettingsPreviewsCell(context, ChatSettingsPreviewsCell.PreviewType.SEARCH_ORDER))
-                            .showIf(canShowSearchOptionsOrdering)
                             .build());
                     category.row(new TextIconRow.TextIconRowBuilder()
                             .isBlue(true)
                             .onClick(() -> fragment.presentFragment(new OctoGeneralSearchOrderUI()))
                             .icon(R.drawable.media_draw)
                             .title(getString(R.string.SearchItems_Customize_Redirect))
-                            .showIf(canShowSearchOptionsOrdering)
                             .build());
                 })
                 .category(R.string.ImproveRapidActions, category -> {

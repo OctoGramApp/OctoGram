@@ -28,4 +28,8 @@ public class SearchOptionsOrderController {
     public static boolean isOrderValid(String items) {
         return false;
     }
+
+    public static boolean isUsingCustomVersion() {
+        return false;
+    }
 }

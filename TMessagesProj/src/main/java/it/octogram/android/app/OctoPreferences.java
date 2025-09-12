@@ -13,6 +13,9 @@ import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.core.util.Consumer;
 
 import org.telegram.messenger.UserConfig;
@@ -31,39 +34,63 @@ import it.octogram.android.app.rows.impl.ShadowRow;
 import it.octogram.android.app.rows.impl.StickerHeaderRow;
 import it.octogram.android.utils.deeplink.DeepLinkType;
 
-public record OctoPreferences(CharSequence title, String deepLink, boolean hasSaveButton,
-                              List<BaseRow> preferences, List<OctoContextMenuElement> elements) {
-
-    public static OctoPreferencesBuilder builder(String name) {
+public record OctoPreferences(
+        @NonNull CharSequence title,
+        @DeepLinkType String deepLink,
+        boolean hasSaveButton,
+        @NonNull List<BaseRow> preferences,
+        @NonNull List<OctoContextMenuElement> elements
+) {
+    public static OctoPreferencesBuilder builder(@NonNull CharSequence name) {
         return new OctoPreferencesBuilder(name);
     }
 
-    public static class OctoContextMenuElement {
-        public int icon;
-        public String title;
-        public Runnable run;
-        public boolean danger = false;
+    public static final class OctoContextMenuElement {
+        private final @DrawableRes int icon;
+        private final @NonNull CharSequence title;
+        private final @NonNull Runnable run;
+        private final boolean danger;
 
-        public OctoContextMenuElement(int icon, String title, Runnable run) {
+        public OctoContextMenuElement(@DrawableRes int icon, @NonNull CharSequence title, @NonNull Runnable run) {
+            this(icon, title, run, false);
+        }
+
+        private OctoContextMenuElement(@DrawableRes int icon, @NonNull CharSequence title, @NonNull Runnable run, boolean danger) {
             this.icon = icon;
             this.title = title;
             this.run = run;
+            this.danger = danger;
         }
 
         public OctoContextMenuElement asDanger() {
-            danger = true;
-            return this;
+            return new OctoContextMenuElement(icon, title, run, true);
+        }
+
+        public @DrawableRes int getIcon() {
+            return icon;
+        }
+
+        public @NonNull CharSequence getTitle() {
+            return title;
+        }
+
+        public @NonNull Runnable getRunnable() {
+            return run;
+        }
+
+        public boolean isDanger() {
+            return danger;
         }
     }
 
-    public static class OctoPreferencesBuilder {
-        private final String name;
+    public static final class OctoPreferencesBuilder {
+        private final @NonNull CharSequence name;
         private @DeepLinkType String deepLink = null;
         private boolean saveButtonAvailable = false;
         private final List<OctoContextMenuElement> elements = new ArrayList<>();
         private final List<BaseRow> preferences = new ArrayList<>();
 
-        public OctoPreferencesBuilder(String name) {
+        public OctoPreferencesBuilder(@NonNull CharSequence name) {
             this.name = name;
         }
 
@@ -77,90 +104,83 @@ public record OctoPreferences(CharSequence title, String deepLink, boolean hasSa
             return this;
         }
 
-        public OctoPreferencesBuilder addContextMenuItem(OctoContextMenuElement element) {
+        public OctoPreferencesBuilder addContextMenuItem(@NonNull OctoContextMenuElement element) {
             elements.add(element);
             return this;
         }
 
-        public OctoPreferencesBuilder category(CharSequence title, Consumer<OctoPreferencesBuilder> consumer) {
-            preferences.add(new HeaderRow(title));
+        private OctoPreferencesBuilder addCategoryInternal(@NonNull HeaderRow header, ShadowRow shadow, @NonNull Consumer<OctoPreferencesBuilder> consumer
+        ) {
+            preferences.add(header);
             consumer.accept(this);
-            preferences.add(new ShadowRow());
+            if (shadow != null) {
+                preferences.add(shadow);
+            }
             return this;
         }
 
-        public OctoPreferencesBuilder category(int title, Consumer<OctoPreferencesBuilder> consumer) {
-            return category(getString(title), consumer);
+        public OctoPreferencesBuilder category(@NonNull CharSequence title, @NonNull Consumer<OctoPreferencesBuilder> consumer) {
+            return addCategoryInternal(new HeaderRow(title), new ShadowRow(), consumer);
         }
 
-        public OctoPreferencesBuilder category(CharSequence title, ConfigProperty<Boolean> showIfHeader, ConfigProperty<Boolean> showIfShadow, Consumer<OctoPreferencesBuilder> consumer) {
-            preferences.add(new HeaderRow(title, showIfHeader));
-            consumer.accept(this);
-            preferences.add(new ShadowRow(showIfShadow));
-            return this;
+        public OctoPreferencesBuilder category(@StringRes int titleRes, @NonNull Consumer<OctoPreferencesBuilder> consumer) {
+            return category(getString(titleRes), consumer);
         }
 
-        public OctoPreferencesBuilder category(CharSequence title, ConfigProperty<Boolean> showIf, Consumer<OctoPreferencesBuilder> consumer) {
-            preferences.add(new HeaderRow(title, showIf));
-            consumer.accept(this);
-            preferences.add(new ShadowRow(showIf));
-            return this;
+        public OctoPreferencesBuilder category(@NonNull CharSequence title, @NonNull ConfigProperty<Boolean> showIfHeader, @NonNull ConfigProperty<Boolean> showIfShadow, @NonNull Consumer<OctoPreferencesBuilder> consumer) {
+            return addCategoryInternal(new HeaderRow(title, showIfHeader), new ShadowRow(showIfShadow), consumer);
         }
 
-        public OctoPreferencesBuilder categoryWithoutShadow(CharSequence title, Consumer<OctoPreferencesBuilder> consumer) {
-            preferences.add(new HeaderRow(title));
-            consumer.accept(this);
-            return this;
+        public OctoPreferencesBuilder category(@NonNull CharSequence title, @NonNull ConfigProperty<Boolean> showIf, @NonNull Consumer<OctoPreferencesBuilder> consumer) {
+            return addCategoryInternal(new HeaderRow(title, showIf), new ShadowRow(showIf), consumer);
         }
 
-        public OctoPreferencesBuilder categoryWithoutShadow(CharSequence title, ConfigProperty<Boolean> showIf, Consumer<OctoPreferencesBuilder> consumer) {
-            preferences.add(new HeaderRow(title, showIf));
-            consumer.accept(this);
-            return this;
+        public OctoPreferencesBuilder categoryWithoutShadow(@NonNull CharSequence title, @NonNull Consumer<OctoPreferencesBuilder> consumer) {
+            return addCategoryInternal(new HeaderRow(title), null, consumer);
         }
 
-        public OctoPreferencesBuilder row(BaseRow row) {
+        public OctoPreferencesBuilder categoryWithoutShadow(@NonNull CharSequence title, @NonNull ConfigProperty<Boolean> showIf, @NonNull Consumer<OctoPreferencesBuilder> consumer) {
+            return addCategoryInternal(new HeaderRow(title, showIf), null, consumer);
+        }
+
+        public OctoPreferencesBuilder row(@NonNull BaseRow row) {
             preferences.add(row);
             return this;
         }
 
-        public OctoPreferencesBuilder sticker(Context context, String packName, StickerUi stickerNum, boolean autoRepeat, String description) {
-            StickerImageView stickerImageView = createStickerImageView(context, packName, stickerNum.getValue(), autoRepeat);
+        public OctoPreferencesBuilder sticker(@NonNull Context context, @NonNull String packName, @NonNull StickerUi stickerNum, boolean autoRepeat, @NonNull String description) {
+            StickerImageView sticker = StickerFactory.createSticker(context, packName, stickerNum.getValue(), autoRepeat);
             preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
-                    .stickerView(stickerImageView)
+                    .stickerView(sticker)
                     .description(description)
-                    .build()
-            );
+                    .build());
             preferences.add(new ShadowRow());
             return this;
         }
 
-        public OctoPreferencesBuilder sticker(Context context, String packName, StickerUi stickerNum, boolean autoRepeat, String description, ConfigProperty<Boolean> showIf) {
-            StickerImageView stickerImageView = createStickerImageView(context, packName, stickerNum.getValue(), autoRepeat);
+        public OctoPreferencesBuilder sticker(@NonNull Context context, @NonNull String packName, @NonNull StickerUi stickerNum, boolean autoRepeat, @NonNull String description, @NonNull ConfigProperty<Boolean> showIf) {
+            StickerImageView sticker = StickerFactory.createSticker(context, packName, stickerNum.getValue(), autoRepeat);
             preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
-                    .stickerView(stickerImageView)
+                    .stickerView(sticker)
                     .description(description)
                     .showIf(showIf)
-                    .build()
-            );
+                    .build());
             preferences.add(new ShadowRow(showIf));
             return this;
         }
 
-        public OctoPreferencesBuilder octoAnimation(String description) {
+        public OctoPreferencesBuilder octoAnimation(@NonNull String description) {
             preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
                     .useOctoAnimation(true)
                     .description(description)
-                    .build()
-            );
+                    .build());
             preferences.add(new ShadowRow());
             return this;
         }
 
-        public OctoPreferencesBuilder sticker(Context context, int packName, boolean autoRepeat, String description) {
-            RLottieImageView rLottieImageView = createRLottieImageView(context, packName, autoRepeat);
+        public OctoPreferencesBuilder sticker(@NonNull Context context, @DrawableRes int animationRes, boolean autoRepeat, @NonNull String description) {
             preferences.add(new StickerHeaderRow.StickerHeaderRowBuilder()
-                    .stickerView(rLottieImageView)
+                    .stickerView(StickerFactory.createRLottie(context, animationRes, autoRepeat))
                     .description(description)
                     .build());
             preferences.add(new EmptyCellRow());
@@ -168,26 +188,31 @@ public record OctoPreferences(CharSequence title, String deepLink, boolean hasSa
             return this;
         }
 
-        private RLottieImageView createRLottieImageView(Context context, int packName, boolean autoRepeat) {
-            RLottieImageView rlottieImageView = new RLottieImageView(context);
-            rlottieImageView.setAutoRepeat(autoRepeat);
-            rlottieImageView.setAnimation(packName, dp(130), dp(130));
-            rlottieImageView.playAnimation();
-            return rlottieImageView;
-        }
-
-        private StickerImageView createStickerImageView(Context context, String packName, int stickerNum, boolean autoRepeat) {
-            StickerImageView stickerImageView = new StickerImageView(context, UserConfig.selectedAccount);
-            stickerImageView.setStickerPackName(packName);
-            stickerImageView.setStickerNum(stickerNum);
-            if (autoRepeat) {
-                stickerImageView.getImageReceiver().setAutoRepeat(1);
-            }
-            return stickerImageView;
-        }
-
         public OctoPreferences build() {
-            return new OctoPreferences(name, deepLink, saveButtonAvailable, preferences, elements);
+            return new OctoPreferences(name, deepLink, saveButtonAvailable, List.copyOf(preferences), List.copyOf(elements));
+        }
+    }
+
+    public static final class StickerFactory {
+        private StickerFactory() {
+        }
+
+        public static @NonNull StickerImageView createSticker(@NonNull Context context, @NonNull String packName, int stickerNum, boolean autoRepeat) {
+            StickerImageView view = new StickerImageView(context, UserConfig.selectedAccount);
+            view.setStickerPackName(packName);
+            view.setStickerNum(stickerNum);
+            if (autoRepeat) {
+                view.getImageReceiver().setAutoRepeat(1);
+            }
+            return view;
+        }
+
+        public static @NonNull RLottieImageView createRLottie(@NonNull Context context, @DrawableRes int resId, boolean autoRepeat) {
+            RLottieImageView view = new RLottieImageView(context);
+            view.setAutoRepeat(autoRepeat);
+            view.setAnimation(resId, dp(130), dp(130));
+            view.playAnimation();
+            return view;
         }
     }
 }

@@ -114,15 +114,12 @@ public class Crashlytics {
     }
 
     private static void saveCrashLogs(String stacktrace) throws IOException, IllegalAccessException {
-        File archived = new File(filesDir, "Crash20_" + System.currentTimeMillis() + LOG_FILE_EXTENSION);
+        File tempFile = new File(filesDir, "pending_crash.txt");
 
-        FileOutputStream fos = new FileOutputStream(archived);
+        FileOutputStream fos = new FileOutputStream(tempFile);
         fos.write(getSystemInfo(false).getBytes());
         fos.write(stacktrace.getBytes());
         fos.close();
-
-        File tempFile = new File(filesDir, "pending_crash.txt");
-        boolean ignored = tempFile.createNewFile();
     }
 
     public static boolean hasPendingCrash() {
@@ -133,7 +130,11 @@ public class Crashlytics {
         File tempFile = new File(filesDir, "pending_crash.txt");
         if (tempFile.exists()) {
             _hasPendingCrashForThisSession = true;
-            boolean ignored = tempFile.delete();
+
+            File archived = new File(filesDir, "Crash20_" + System.currentTimeMillis() + LOG_FILE_EXTENSION);
+            archived.deleteOnExit();
+            boolean ignored = tempFile.renameTo(archived);
+
             return true;
         }
 

@@ -15,8 +15,6 @@ import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.ui.Components.LayoutHelper.createLinear;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -34,6 +32,7 @@ import android.os.Vibrator;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -44,6 +43,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -55,11 +55,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 import androidx.core.util.Supplier;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.exoplayer2.util.Log;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
@@ -71,6 +74,7 @@ import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
+import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -83,6 +87,7 @@ import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
+import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkPath;
@@ -99,6 +104,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import it.octogram.android.AiModelMessagesState;
 import it.octogram.android.AiModelType;
@@ -125,6 +131,7 @@ public class MainAiBottomSheet extends BottomSheet {
 
     private final CustomModelsMenuWrapper.FillStateData data;
     private boolean isProcessingData = false;
+    private boolean hasError = false;
 
     private String toLanguage;
 
@@ -138,11 +145,16 @@ public class MainAiBottomSheet extends BottomSheet {
     private final TranslateAlert2.PaddedAdapter adapter;
 
     private final View buttonShadowView;
-    private final TextView buttonTextView;
-    private final ImageView regenerateButton;
-    private final ImageView configButton;
+    private TextView buttonTextView;
 
     private OutlineEditText customPromptInputText;
+
+    private final TextView dotsButtonInMainRow;
+
+    private final AnimatedTextView bottomActionsText;
+    private final LinearLayout bottomActionsButtonContainer;
+    private TextView configButton;
+    private final ArrayList<TextView> singleButtons = new ArrayList<>();
 
     /**
      * @noinspection SequencedCollectionMethodCanBeUsed
@@ -190,7 +202,7 @@ public class MainAiBottomSheet extends BottomSheet {
         favoriteAiProvider = MainAiHelper.getPreferredProvider();
         this.data = data;
 
-        fixNavigationBar();
+        fixNavigationBar(getThemedColor(Theme.key_dialogBackground));
 
         containerView = new ContainerView(data.context);
         sheetTopAnimated = new AnimatedFloat(containerView, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -209,23 +221,6 @@ public class MainAiBottomSheet extends BottomSheet {
         };
         textView = new LinkSpanDrawable.LinksTextView(data.context, resourcesProvider);
         textView.setDisablePaddingsOffsetY(true);
-//        if (isCustomModel() && ((MessagesModelsWrapper.FillStateData) data).isInputBox) {
-//            textView.setOnCreateContextMenuListener((menu, v, menuInfo) -> menu.add(R.string.AiFeatures_CustomModels_Feature_UseAsText).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-//                @Override
-//                public boolean onMenuItemClick(@NonNull MenuItem item) {
-//                    int start = Selection.getSelectionStart(textView.getText());
-//                    int end = Selection.getSelectionEnd(textView.getText());
-//
-//                    if (start != end) {
-//                        CharSequence selectedText = textView.getText().subSequence(start, end);
-//                        ((MessagesModelsWrapper.FillStateData) data).setInputBoxText.run(selectedText.toString());
-//                        dismiss();
-//                        return true;
-//                    }
-//                    return false;
-//                }
-//            }));
-//        }
         textView.setPadding(dp(22), dp(12), dp(22), dp(6));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, SharedConfig.fontSize);
         textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
@@ -262,7 +257,7 @@ public class MainAiBottomSheet extends BottomSheet {
             }
         };
         listView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
-        listView.setPadding(0, AndroidUtilities.statusBarHeight + dp(56), 0, dp(80));
+        listView.setPadding(0, AndroidUtilities.statusBarHeight + dp(56), 0, dp(48+5+40+10+5+10));
         listView.setClipToPadding(true);
         listView.setLayoutManager(new LinearLayoutManager(data.context));
         listView.setAdapter(adapter = new TranslateAlert2.PaddedAdapter(data.context, loadingTextView));
@@ -291,26 +286,38 @@ public class MainAiBottomSheet extends BottomSheet {
         headerView = new HeaderView(data.context);
         containerView.addView(headerView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 78, Gravity.TOP | Gravity.FILL_HORIZONTAL));
 
-        FrameLayout buttonView = new FrameLayout(data.context);
-        buttonView.setBackgroundColor(getThemedColor(Theme.key_dialogBackground));
+        LinearLayout layout = new LinearLayout(data.context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setBackgroundColor(getThemedColor(Theme.key_dialogBackground));
 
         buttonShadowView = new View(data.context);
         buttonShadowView.setBackgroundColor(getThemedColor(Theme.key_dialogShadowLine));
         buttonShadowView.setAlpha(0);
-        buttonView.addView(buttonShadowView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, AndroidUtilities.getShadowHeight() / dpf2(1), Gravity.TOP | Gravity.FILL_HORIZONTAL));
+        layout.addView(buttonShadowView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, AndroidUtilities.getShadowHeight() / dpf2(1), Gravity.TOP | Gravity.FILL_HORIZONTAL));
 
-        buttonTextView = new TextView(data.context);
-        buttonTextView.setLines(1);
-        buttonTextView.setSingleLine(true);
-        buttonTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-        buttonTextView.setEllipsize(TextUtils.TruncateAt.END);
-        buttonTextView.setGravity(Gravity.CENTER);
-        buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
-        buttonTextView.setTypeface(AndroidUtilities.bold());
-        buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        buttonTextView.setText(getString(isCustomModel() ? R.string.AiFeatures_CustomModels_Feature_CloseModal : R.string.CloseTranslation));
-        buttonTextView.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
-        buttonTextView.setOnClickListener(e -> {
+        FrameLayout bottomLayout = new FrameLayout(data.context);
+        layout.addView(bottomLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 40, 1f, 0, 5, 0, 10));
+
+        bottomActionsButtonContainer = new LinearLayout(data.context);
+        bottomActionsButtonContainer.setOrientation(LinearLayout.HORIZONTAL);
+        bottomLayout.addView(bottomActionsButtonContainer, LayoutHelper.createFrame(
+                LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM
+        ));
+
+        bottomActionsText = new AnimatedTextView(data.context);
+        bottomActionsText.setTextColor(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_dialogTextBlack), 100));
+        bottomActionsText.setGravity(Gravity.CENTER_HORIZONTAL);
+        bottomActionsText.setTextSize(dp(12));
+        bottomActionsText.setPadding(dp(20), 0, dp(20), 0);
+        bottomActionsText.setText(formatString(R.string.AiFeatures_CustomModels_Feature_Verify, favoriteAiProvider.getTitle()));
+        bottomLayout.addView(bottomActionsText, LayoutHelper.createFrame(
+                LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP,
+                0, 10, 0, 8
+        ));
+
+        buttonTextView = null;
+        FrameLayout topActionsButtonContainer = new FrameLayout(data.context);
+        topActionsButtonContainer.addView(buttonTextView = createButtonView(getString(isCustomModel() ? R.string.AiFeatures_CustomModels_Feature_CloseModal : R.string.CloseTranslation), () -> {
             if (customPromptInputText != null) {
                 if (customPromptInputText.getEditText().getText().toString().trim().isEmpty()) {
                     shakeEditText();
@@ -318,34 +325,227 @@ public class MainAiBottomSheet extends BottomSheet {
                 }
 
                 AndroidUtilities.hideKeyboard(customPromptInputText.getEditText());
-                updateConfigButtonVisibility(true);
                 buttonTextView.setText(getString(isCustomModel() ? R.string.AiFeatures_CustomModels_Feature_CloseModal : R.string.CloseTranslation));
                 init();
             } else {
                 dismiss();
             }
-        });
-        buttonView.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 16, 16, 16 + 48 + 8 + 48 + 8, 16));
+        }), LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48));
 
-        regenerateButton = new ImageView(data.context);
-        regenerateButton.setScaleType(ImageView.ScaleType.CENTER);
-        regenerateButton.setImageResource(R.drawable.repeat_solar);
-        regenerateButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
-        regenerateButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
-        regenerateButton.setOnClickListener(v -> init());
-        buttonView.addView(regenerateButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16 + 48 + 8, 16));
+        topActionsButtonContainer.addView(dotsButtonInMainRow = createButtonView(R.drawable.mini_more_dots, null, true, this::openConfig), LayoutHelper.createFrame(48, 48, Gravity.CENTER_VERTICAL | Gravity.RIGHT, 0, 0, 0, 0));
 
-        configButton = new ImageView(data.context);
-        configButton.setScaleType(ImageView.ScaleType.CENTER);
-        configButton.setImageResource(R.drawable.msg_download_settings);
-        configButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_buttonText), PorterDuff.Mode.MULTIPLY));
-        configButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 6));
-        configButton.setOnClickListener(v -> openConfig());
-        buttonView.addView(configButton, LayoutHelper.createFrame(48, 48, Gravity.BOTTOM | Gravity.RIGHT, 0, 16, 16, 16));
+        layout.addView(topActionsButtonContainer, LayoutHelper.createFrame(
+                LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP,
+                16, 0, 16, 0
+        ));
 
-        containerView.addView(buttonView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
+        containerView.addView(layout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
 
         init();
+    }
+
+    private boolean isFirstTime = true;
+    private boolean _isVisible = false;
+    private boolean _shouldShowDotsButtonInMainRow = false;
+
+    private void updateConfigButtonVisibility(boolean isVisibleTemp) {
+        headerView.updateButtonsClickable(isVisibleTemp);
+
+        boolean shouldShowDotsButtonInMainRow = false;
+        if (!OctoConfig.INSTANCE.aiFeaturesShowShortcuts.getValue()) {
+            shouldShowDotsButtonInMainRow = isVisibleTemp;
+            isVisibleTemp = false;
+        }
+        final boolean isVisible = isVisibleTemp;
+
+        if (isFirstTime) {
+            isFirstTime = false;
+            _isVisible = isVisible;
+            bottomActionsText.setVisibility(isVisible ? View.GONE : View.VISIBLE);
+            if (isVisible) {
+                updateButtonsList();
+            }
+            for (int i = 0; i < singleButtons.size(); i++) {
+                final TextView button = singleButtons.get(i);
+                button.setAlpha(isVisible ? 1f : 0f);
+                button.setClickable(isVisible);
+                button.setEnabled(isVisible);
+            }
+
+            _shouldShowDotsButtonInMainRow = shouldShowDotsButtonInMainRow;
+            dotsButtonInMainRow.setAlpha(shouldShowDotsButtonInMainRow ? 1f : 0f);
+            dotsButtonInMainRow.setEnabled(shouldShowDotsButtonInMainRow);
+            dotsButtonInMainRow.setClickable(shouldShowDotsButtonInMainRow);
+
+            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
+            layoutParams.rightMargin = dp(shouldShowDotsButtonInMainRow ? 48+5 : 0);
+            buttonTextView.setLayoutParams(layoutParams);
+            buttonTextView.invalidate();
+        } else {
+            if (_isVisible != isVisible) {
+                _isVisible = isVisible;
+
+                if (isVisible) {
+                    updateButtonsList();
+                }
+
+                for (int i = 0; i < singleButtons.size(); i++) {
+                    final TextView button = singleButtons.get(i);
+                    button.setClickable(isVisible);
+                    button.setEnabled(isVisible);
+                    button.setAlpha(isVisible ? 0f : 1f);
+                }
+
+                Utilities.Callback<Runnable> handleTextViewVisibilityAnimation = (r) -> {
+                    if (bottomActionsText.getTag() instanceof ViewPropertyAnimator v2) {
+                        v2.cancel();
+                    }
+                    boolean isTextVisible = !isVisible;
+                    if (bottomActionsText.getVisibility() != View.VISIBLE) {
+                        bottomActionsText.setVisibility(View.VISIBLE);
+                    }
+                    bottomActionsText.setAlpha(isTextVisible ? 0f : 1f);
+                    bottomActionsText.setScaleX(isTextVisible ? 0.9f : 1f);
+                    bottomActionsText.setScaleY(isTextVisible ? 0.9f : 1f);
+                    ViewPropertyAnimator animator = bottomActionsText.animate().alpha(isTextVisible ? 1f : 0f).scaleX(isTextVisible ? 1f : 1.2f).scaleY(isTextVisible ? 1f : 1.2f).setDuration(200);
+                    if (r != null) {
+                        animator.withEndAction(r);
+                    }
+                    bottomActionsText.setTag(animator);
+                    animator.start();
+                };
+
+                Utilities.Callback<Runnable> handleSingleButtonsAnimation = (r) -> {
+                    AtomicInteger animated = new AtomicInteger(0);
+                    for (int i = 0; i < singleButtons.size(); i++) {
+                        final TextView button = singleButtons.get(i);
+                        if (button.getTag() instanceof ViewPropertyAnimator v2) {
+                            v2.cancel();
+                        }
+                        button.setAlpha(isVisible ? 0f : 1f);
+                        button.setScaleX(isVisible ? 0.9f : 1f);
+                        button.setScaleY(isVisible ? 0.9f : 1f);
+                        ViewPropertyAnimator animator = button.animate().alpha(isVisible ? 1f : 0f).scaleX(isVisible ? 1f : 1.05f).scaleY(isVisible ? 1f : 1.05f).setDuration(200).setStartDelay(50L * i);
+                        animator.withEndAction(() -> {
+                            if (button.getTag() == animator) {
+                                button.setTag(null);
+                            }
+                            if (r != null && animated.incrementAndGet() == singleButtons.size()) {
+                                r.run();
+                            }
+                        });
+                        button.setTag(animator);
+                        animator.start();
+                    }
+                };
+
+                if (isVisible) {
+                    handleTextViewVisibilityAnimation.run(() -> handleSingleButtonsAnimation.run(null));
+                } else {
+                    handleSingleButtonsAnimation.run(() -> handleTextViewVisibilityAnimation.run(null));
+                }
+            }
+
+            if (_shouldShowDotsButtonInMainRow != shouldShowDotsButtonInMainRow) {
+                if (buttonTextView.getTag() instanceof ValueAnimator v2) {
+                    v2.cancel();
+                }
+
+                _shouldShowDotsButtonInMainRow = shouldShowDotsButtonInMainRow;
+
+                dotsButtonInMainRow.setEnabled(shouldShowDotsButtonInMainRow);
+                dotsButtonInMainRow.setClickable(shouldShowDotsButtonInMainRow);
+
+                ValueAnimator animator = ValueAnimator.ofFloat(shouldShowDotsButtonInMainRow ? 0f : 1f, shouldShowDotsButtonInMainRow ? 1f : 0f);
+                animator.setDuration(200);
+                animator.addUpdateListener(animation -> {
+                    float value = (float) animation.getAnimatedValue();
+                    ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
+                    layoutParams.rightMargin = dp(((48 + 5) * value));
+                    buttonTextView.setLayoutParams(layoutParams);
+                    buttonTextView.invalidate();
+
+                    dotsButtonInMainRow.setAlpha(value);
+                    dotsButtonInMainRow.setTranslationX(dp(60) * (1f-value));
+                });
+                buttonTextView.setTag(animator);
+                animator.start();
+            }
+        }
+    }
+
+    private void updateButtonsList() {
+        singleButtons.clear();
+        int total = 1 + (((isCustomModel() || !data.noForwards) && !hasError) ? 1 : 0) + ((data.isInputBox && data.setInputBoxText != null && !hasError) ? 1 : 0) + 1;
+        int rowCount = -1;
+
+        bottomActionsButtonContainer.removeAllViews();
+        bottomActionsButtonContainer.addView(createButtonView(R.drawable.repeat_solar, getString(R.string.AiFeatures_CustomModels_Feature_Repeat), true, this::init), createParams(++rowCount, total));
+        if ((isCustomModel() || !data.noForwards) && !hasError) {
+            bottomActionsButtonContainer.addView(createButtonView(R.drawable.msg_copy, getString(R.string.Copy), true, () -> {
+                AndroidUtilities.addToClipboard(textView.getText());
+                BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createCopyBulletin(getString(R.string.TextCopied)).show();
+            }), createParams(++rowCount, total));
+        }
+        if (data.isInputBox && data.setInputBoxText != null && !hasError) {
+            bottomActionsButtonContainer.addView(createButtonView(R.drawable.msg_message, getString(R.string.AiFeatures_CustomModels_Feature_UseAsText), true, () -> {
+                MainAiBottomSheet.this.dismiss();
+                data.setInputBoxText.run(textView.getText().toString());
+            }), createParams(++rowCount, total));
+        }
+        boolean canShowExtendedConfig = rowCount == 0 && total == 2;
+        bottomActionsButtonContainer.addView(configButton = createButtonView(R.drawable.mini_more_dots, canShowExtendedConfig ? getString(R.string.AiFeatures_CustomModels_Feature_Options) : null, true, this::openConfig), createParams(++rowCount, total, !canShowExtendedConfig));
+    }
+
+    private LinearLayout.LayoutParams createParams(int buttonNumber, int total) {
+        return createParams(buttonNumber, total, false);
+    }
+
+    private LinearLayout.LayoutParams createParams(int buttonNumber, int total, boolean isConfig) {
+        int leftPadding = buttonNumber == 0 ? 16 : 0;
+        int rightPadding = buttonNumber == total-1 ? 16 : 5;
+
+        if (isConfig) {
+            return LayoutHelper.createLinear(40, 40, Gravity.RIGHT, leftPadding, 0, rightPadding, 0);
+        }
+
+        return LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 40, 1f/total, leftPadding, 0, rightPadding, 0);
+    }
+
+    private TextView createButtonView(String text, Runnable onClick) {
+        return createButtonView(0, text, false, onClick);
+    }
+
+    private TextView createButtonView(int icon, String text, boolean isSecondary, Runnable onClick) {
+        TextView buttonTextView = new TextView(data.context);
+        buttonTextView.setLines(1);
+        buttonTextView.setSingleLine(true);
+        buttonTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+        buttonTextView.setEllipsize(TextUtils.TruncateAt.END);
+        buttonTextView.setGravity(Gravity.CENTER);
+        buttonTextView.setTextColor(Theme.getColor(isSecondary ? Theme.key_featuredStickers_addButton : Theme.key_featuredStickers_buttonText));
+        buttonTextView.setTypeface(AndroidUtilities.bold());
+        buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, isSecondary ? 12 : 14);
+        if (icon == 0) {
+            buttonTextView.setText(text);
+        } else {
+            ColoredImageSpan span = new ColoredImageSpan(icon);
+            span.setSize(dp(17));
+            SpannableStringBuilder sb2 = new SpannableStringBuilder();
+            sb2.append(TextUtils.isEmpty(text) ? " G " : "G  ");
+            sb2.setSpan(span, TextUtils.isEmpty(text) ? 1 : 0, TextUtils.isEmpty(text) ? 2 : 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (!TextUtils.isEmpty(text)) {
+                sb2.append(text);
+            }
+            buttonTextView.setText(sb2);
+        }
+        buttonTextView.setBackground(Theme.AdaptiveRipple.filledRect(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_featuredStickers_addButton), isSecondary ? 70 : 255), 6));
+        buttonTextView.setOnClickListener(e -> onClick.run());
+        if (isSecondary) {
+            singleButtons.add(buttonTextView);
+            buttonTextView.setAlpha(0f);
+        }
+        return buttonTextView;
     }
 
     @Override
@@ -400,62 +600,6 @@ public class MainAiBottomSheet extends BottomSheet {
                 height += child.getHeight();
         }
         return height >= listView.getHeight() - listView.getPaddingTop() - listView.getPaddingBottom();
-    }
-
-    private boolean isFirstTime = true;
-
-    private void updateConfigButtonVisibility(boolean isVisible) {
-        List<ImageView> buttons = List.of(configButton, regenerateButton);
-
-        if (isFirstTime) {
-            isFirstTime = false;
-
-            for (ImageView button : buttons) {
-                button.setEnabled(isVisible);
-                button.setClickable(isVisible);
-                button.setAlpha(isVisible ? 1f : 0f);
-                button.setTranslationX(isVisible ? 0 : dp(60));
-            }
-
-            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
-            layoutParams.rightMargin = dp(16 + (isVisible ? (48 + 8 + 48 + 8) : 0));
-            buttonTextView.setLayoutParams(layoutParams);
-            buttonTextView.invalidate();
-        } else {
-            if (!isVisible) {
-                for (ImageView button : buttons) {
-                    button.setEnabled(false);
-                    button.setClickable(false);
-                }
-            }
-
-            ValueAnimator buttonAnimatorView = ValueAnimator.ofFloat(isVisible ? 0f : 1f, isVisible ? 1f : 0f);
-            buttonAnimatorView.addUpdateListener(animation -> {
-                float value = (float) animation.getAnimatedValue();
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) buttonTextView.getLayoutParams();
-                layoutParams.rightMargin = dp((16 + (48 + 8 + 48 + 8) * value));
-                buttonTextView.setLayoutParams(layoutParams);
-                buttonTextView.invalidate();
-
-                for (ImageView button : buttons) {
-                    button.setAlpha(value);
-                    button.setTranslationX(dp(60) * (1f - value));
-                }
-            });
-            if (isVisible) {
-                buttonAnimatorView.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        for (ImageView button : buttons) {
-                            button.setEnabled(true);
-                            button.setClickable(true);
-                        }
-                    }
-                });
-            }
-            buttonAnimatorView.setDuration(100);
-            buttonAnimatorView.start();
-        }
     }
 
     private Runnable loadingTextCycleStopRunnable;
@@ -528,7 +672,7 @@ public class MainAiBottomSheet extends BottomSheet {
         };
     }
 
-    private void destroyLoadingTextCycle() {
+    private void hideLoading() {
         if (loadingTextCycleStopRunnable != null) {
             loadingTextCycleStopRunnable.run();
             loadingTextCycleStopRunnable = null;
@@ -559,6 +703,8 @@ public class MainAiBottomSheet extends BottomSheet {
             loadingTextView.setText(Emoji.replaceEmoji(getOriginalText(), loadingTextView.getPaint().getFontMetricsInt(), true));
             adapter.updateMainView(loadingTextView);
         }
+        
+        updateConfigButtonVisibility(false);
     }
 
     private void init() {
@@ -566,8 +712,12 @@ public class MainAiBottomSheet extends BottomSheet {
             return;
         }
 
+        if (favoriteAiProvider.getId() != MainAiHelper.getPreferredProvider().getId()) {
+            bottomActionsText.setText(formatString(R.string.AiFeatures_CustomModels_Feature_Verify, favoriteAiProvider.getTitle()), true);
+        }
+
         headerView.updateView();
-        destroyLoadingTextCycle();
+        hideLoading();
 
         AiPrompt prompt;
         if (isCustomModel()) {
@@ -628,16 +778,19 @@ public class MainAiBottomSheet extends BottomSheet {
         }
 
         isProcessingData = true;
+        hasError = false;
         showLoading();
         MainAiHelper.request(prompt, favoriteAiProvider, new MainAiHelper.OnResultState() {
             @Override
             public void onSuccess(String result) {
                 isProcessingData = false;
-                destroyLoadingTextCycle();
+                hasError = false;
+                hideLoading();
                 AndroidUtilities.runOnUIThread(() -> {
                     textView.setText(AndroidUtilities.replaceTags(Emoji.replaceEmoji(result, textView.getPaint().getFontMetricsInt(), true)));
                     textView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
                     adapter.updateMainView(textViewContainer);
+                    updateConfigButtonVisibility(true);
                 });
             }
 
@@ -663,11 +816,13 @@ public class MainAiBottomSheet extends BottomSheet {
 
             private void onFailedState(int str) {
                 isProcessingData = false;
-                destroyLoadingTextCycle();
+                hasError = true;
+                hideLoading();
                 AndroidUtilities.runOnUIThread(() -> {
                     textView.setTextColor(getThemedColor(Theme.key_dialogTextGray3));
                     textView.setText(getString(str));
                     adapter.updateMainView(textViewContainer);
+                    updateConfigButtonVisibility(true);
                 });
             }
         });
@@ -843,7 +998,6 @@ public class MainAiBottomSheet extends BottomSheet {
             FrameLayout layout = createSuggestionRow(R.drawable.msg_translate, getString(R.string.AiFeatures_Features_TranslateAI2));
             layout.setOnClickListener((v) -> {
                 data.modelID = CustomModelsHelper.VIRTUAL_TRANSLATE_MODEL_ID;
-                updateConfigButtonVisibility(true);
                 init();
             });
             linearLayout.addView(layout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 50, 0f));
@@ -865,7 +1019,6 @@ public class MainAiBottomSheet extends BottomSheet {
             FrameLayout layout = createSuggestionRow(AiFeatureIcons.getModelIcon(model.icon), title);
             layout.setOnClickListener((v) -> {
                 data.modelID = modelID;
-                updateConfigButtonVisibility(true);
                 init();
             });
             linearLayout.addView(layout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 50, 0f));
@@ -886,11 +1039,11 @@ public class MainAiBottomSheet extends BottomSheet {
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         customPromptInputText = new OutlineEditText(data.context);
-        customPromptInputText.getEditText().setMinHeight(AndroidUtilities.dp(58));
+        customPromptInputText.getEditText().setMinHeight(dp(58));
         customPromptInputText.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         customPromptInputText.getEditText().setMaxLines(7);
         customPromptInputText.getEditText().setPadding(
-                AndroidUtilities.dp(15), AndroidUtilities.dp(15), AndroidUtilities.dp(15), AndroidUtilities.dp(15)
+                dp(15), dp(15), dp(15), dp(15)
         );
         customPromptInputText.setHint(getString(R.string.AiFeatures_CustomModels_Feature_SelectModel_Desc_Brief));
         linearLayout.addView(customPromptInputText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 17, 0, 17, 7));
@@ -962,7 +1115,7 @@ public class MainAiBottomSheet extends BottomSheet {
 
     @Override
     protected boolean canDismissWithSwipe() {
-        return false;
+        return !isProcessingData;
     }
 
     private final AnimatedFloat sheetTopAnimated;
@@ -992,7 +1145,9 @@ public class MainAiBottomSheet extends BottomSheet {
     }
 
     private void openConfig(boolean openLanguagesForeground, boolean openProviderForeground) {
-        if (configButton == null) {
+        View refConfig = _isVisible ? configButton : _shouldShowDotsButtonInMainRow ? dotsButtonInMainRow : null;
+
+        if (refConfig == null) {
             return;
         }
 
@@ -1018,7 +1173,7 @@ public class MainAiBottomSheet extends BottomSheet {
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 super.onMeasure(
-                        MeasureSpec.makeMeasureSpec(dp(200), MeasureSpec.AT_MOST),
+                        MeasureSpec.makeMeasureSpec(dp(250), MeasureSpec.AT_MOST),
                         heightMeasureSpec
                 );
             }
@@ -1063,7 +1218,15 @@ public class MainAiBottomSheet extends BottomSheet {
             addItemFromEligibleVariations(lengthRecord, layout, () -> dismiss[0]);
         }
 
-        if (!isProcessingData && (isCustomModel() || !data.noForwards)) {
+        if (!OctoConfig.INSTANCE.aiFeaturesShowShortcuts.getValue() && !isProcessingData) {
+            item = ActionBarMenuItem.addItem(layout, R.drawable.repeat_solar, getString(R.string.AiFeatures_CustomModels_Feature_Repeat), false, resourcesProvider);
+            item.setOnClickListener(view -> {
+                dismiss[0].run();
+                init();
+            });
+        }
+
+        if (!OctoConfig.INSTANCE.aiFeaturesShowShortcuts.getValue() && !isProcessingData && !hasError && (isCustomModel() || !data.noForwards)) {
             item = ActionBarMenuItem.addItem(layout, R.drawable.msg_copy, getString(R.string.Copy), false, resourcesProvider);
             item.setOnClickListener(view -> {
                 dismiss[0].run();
@@ -1072,7 +1235,7 @@ public class MainAiBottomSheet extends BottomSheet {
             });
         }
 
-        if (!isProcessingData && data.isInputBox && data.setInputBoxText != null) {
+        if (!OctoConfig.INSTANCE.aiFeaturesShowShortcuts.getValue() && !isProcessingData && data.isInputBox && data.setInputBoxText != null && !hasError) {
             item = ActionBarMenuItem.addItem(layout, R.drawable.msg_message, getString(R.string.AiFeatures_CustomModels_Feature_UseAsText), false, resourcesProvider);
             item.setOnClickListener(view -> {
                 dismiss[0].run();
@@ -1081,11 +1244,35 @@ public class MainAiBottomSheet extends BottomSheet {
             });
         }
 
+        FrameLayout gap = new FrameLayout(getContext());
+        gap.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefaultSubmenuSeparator));
+        View gapShadow = new View(getContext());
+        gapShadow.setBackground(Theme.getThemedDrawableByKey(getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
+        gap.addView(gapShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        gap.setTag(R.id.fit_width_tag, 1);
+        layout.addView(gap, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
+
+        item = ActionBarMenuItem.addItem(layout, 0, getString(R.string.AiFeatures_CustomModels_Feature_Options_DotsMenu), true, resourcesProvider);
+        item.setChecked(!OctoConfig.INSTANCE.aiFeaturesShowShortcuts.getValue());
+        item.setOnClickListener(view -> {
+            dismiss[0].run();
+            OctoConfig.INSTANCE.aiFeaturesShowShortcuts.updateValue(false);
+            updateConfigButtonVisibility(true);
+        });
+
+        item = ActionBarMenuItem.addItem(layout, 0, getString(R.string.AiFeatures_CustomModels_Feature_Options_Shortcuts), true, resourcesProvider);
+        item.setChecked(OctoConfig.INSTANCE.aiFeaturesShowShortcuts.getValue());
+        item.setOnClickListener(view -> {
+            dismiss[0].run();
+            OctoConfig.INSTANCE.aiFeaturesShowShortcuts.updateValue(true);
+            updateConfigButtonVisibility(true);
+        });
+
         if (isCustomModel()) {
             if (!data.isInputBox && data.modelID != null) {
-                FrameLayout gap = new FrameLayout(getContext());
+                gap = new FrameLayout(getContext());
                 gap.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefaultSubmenuSeparator));
-                View gapShadow = new View(getContext());
+                gapShadow = new View(getContext());
                 gapShadow.setBackground(Theme.getThemedDrawableByKey(getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                 gap.addView(gapShadow, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
                 gap.setTag(R.id.fit_width_tag, 1);
@@ -1130,7 +1317,7 @@ public class MainAiBottomSheet extends BottomSheet {
         window.setAnimationStyle(R.style.PopupContextAnimation);
         window.setFocusable(true);
         int[] location = new int[2];
-        configButton.getLocationInWindow(location);
+        refConfig.getLocationInWindow(location);
         layout.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.displaySize.x, View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.displaySize.y, View.MeasureSpec.AT_MOST));
         int height = layout.getMeasuredHeight();
         int y = location[1] > AndroidUtilities.displaySize.y * .9f - height ? location[1] - height + dp(8) : location[1] + headerView.toLanguageTextView.getMeasuredHeight() - dp(8);
@@ -1172,7 +1359,7 @@ public class MainAiBottomSheet extends BottomSheet {
         currentBackItem.setOnClickListener(z -> Objects.requireNonNull(originalLayout.getSwipeBack()).closeForeground());
 
         for (int i = 0; i < variations.eligibleVariations.size(); i++) {
-            ActionBarMenuSubItem button = getItem(variations, dismiss, i);
+            ActionBarMenuSubItem button = getSingleVariationItem(variations, dismiss, i);
             layout.addView(button);
         }
 
@@ -1180,7 +1367,7 @@ public class MainAiBottomSheet extends BottomSheet {
     }
 
     @NonNull
-    private ActionBarMenuSubItem getItem(EligibleVariations variations, Supplier<Runnable> dismiss, int i) {
+    private ActionBarMenuSubItem getSingleVariationItem(EligibleVariations variations, Supplier<Runnable> dismiss, int i) {
         String variation = variations.eligibleVariations.get(i);
 
         ActionBarMenuSubItem button = new ActionBarMenuSubItem(getContext(), 2, false, false, resourcesProvider) {
@@ -1227,7 +1414,7 @@ public class MainAiBottomSheet extends BottomSheet {
                 continue;
             }
 
-            ActionBarMenuSubItem button = getItem(dismiss, provider);
+            ActionBarMenuSubItem button = getSingleAIProviderItem(dismiss, provider);
             layout.addView(button);
         }
 
@@ -1242,7 +1429,7 @@ public class MainAiBottomSheet extends BottomSheet {
 
             LinkSpanDrawable.LinksTextView textView = new LinkSpanDrawable.LinksTextView(getContext());
             textView.setTag(R.id.fit_width_tag, 1);
-            textView.setPadding(AndroidUtilities.dp(13), 0, AndroidUtilities.dp(13), AndroidUtilities.dp(8));
+            textView.setPadding(dp(13), 0, dp(13), dp(8));
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             textView.setTextColor(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem));
             textView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -1264,7 +1451,7 @@ public class MainAiBottomSheet extends BottomSheet {
     }
 
     @NonNull
-    private ActionBarMenuSubItem getItem(Supplier<Runnable> dismiss, AiProvidersDetails provider) {
+    private ActionBarMenuSubItem getSingleAIProviderItem(Supplier<Runnable> dismiss, AiProvidersDetails provider) {
         ActionBarMenuSubItem button = new ActionBarMenuSubItem(getContext(), 2, false, false, resourcesProvider);
         button.setText(provider.getTitle());
         button.setChecked(favoriteAiProvider == provider);
@@ -1377,16 +1564,13 @@ public class MainAiBottomSheet extends BottomSheet {
         return layout;
     }
 
-    /**
-     * @noinspection rawtypes, unchecked
-     */
     private class HeaderView extends FrameLayout {
 
         private final ImageView backButton;
         private final AnimatedTextView titleTextView;
         private final LinearLayout subtitleView;
-        private AnimatedTextView toLanguageTextView;
-        private AnimatedTextView usedProviderTextView;
+        private HeaderRapidButtons toLanguageTextView;
+        private HeaderRapidButtons usedProviderTextView;
 
         private final View shadow;
         private final Context context;
@@ -1530,112 +1714,12 @@ public class MainAiBottomSheet extends BottomSheet {
                 }
             }
 
-            toLanguageTextView = new AnimatedTextView(context) {
-                private final Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                private final LinkSpanDrawable.LinkCollector links = new LinkSpanDrawable.LinkCollector();
-
-                @Override
-                protected void onDraw(Canvas canvas) {
-                    if (LocaleController.isRTL) {
-                        AndroidUtilities.rectTmp.set(getWidth() - width(), (getHeight() - dp(18)) / 2f, getWidth(), (getHeight() + dp(18)) / 2f);
-                    } else {
-                        AndroidUtilities.rectTmp.set(0, (getHeight() - dp(18)) / 2f, width(), (getHeight() + dp(18)) / 2f);
-                    }
-                    bgPaint.setColor(Theme.multAlpha(getThemedColor(Theme.key_player_actionBarSubtitle), .1175f));
-                    canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(4), dp(4), bgPaint);
-                    if (links.draw(canvas)) {
-                        invalidate();
-                    }
-
-                    super.onDraw(canvas);
-                }
-
-                @Override
-                public boolean onTouchEvent(MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        LinkSpanDrawable link = new LinkSpanDrawable(null, resourcesProvider, event.getX(), event.getY());
-                        link.setColor(Theme.multAlpha(getThemedColor(Theme.key_player_actionBarSubtitle), .1175f));
-                        LinkPath path = link.obtainNewPath();
-                        if (LocaleController.isRTL) {
-                            AndroidUtilities.rectTmp.set(getWidth() - width(), (getHeight() - dp(18)) / 2f, getWidth(), (getHeight() + dp(18)) / 2f);
-                        } else {
-                            AndroidUtilities.rectTmp.set(0, (getHeight() - dp(18)) / 2f, width(), (getHeight() + dp(18)) / 2f);
-                        }
-                        path.addRect(AndroidUtilities.rectTmp, Path.Direction.CW);
-                        links.addLink(link);
-                        invalidate();
-                        return true;
-                    } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                        if (event.getAction() == MotionEvent.ACTION_UP) {
-                            performClick();
-                        }
-                        links.clear();
-                        invalidate();
-                    }
-                    return super.onTouchEvent(event);
-                }
-            };
-            if (LocaleController.isRTL) {
-                toLanguageTextView.setGravity(Gravity.RIGHT);
-            }
-            toLanguageTextView.setAnimationProperties(.25f, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
-            toLanguageTextView.setTextColor(getThemedColor(Theme.key_player_actionBarSubtitle));
-            toLanguageTextView.setTextSize(dp(14));
+            toLanguageTextView = new HeaderRapidButtons(context);
             toLanguageTextView.setText(TranslateAlert2.capitalFirst(TranslateAlert2.languageName(toLanguage)));
             toLanguageTextView.setPadding(dp(4), dp(2), dp(4), dp(2));
             toLanguageTextView.setOnClickListener(e -> openConfig(true, false));
 
-            usedProviderTextView = new AnimatedTextView(context) {
-                private final Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                private final LinkSpanDrawable.LinkCollector links = new LinkSpanDrawable.LinkCollector();
-
-                @Override
-                protected void onDraw(Canvas canvas) {
-                    if (LocaleController.isRTL) {
-                        AndroidUtilities.rectTmp.set(getWidth() - width(), (getHeight() - dp(18)) / 2f, getWidth(), (getHeight() + dp(18)) / 2f);
-                    } else {
-                        AndroidUtilities.rectTmp.set(0, (getHeight() - dp(18)) / 2f, width(), (getHeight() + dp(18)) / 2f);
-                    }
-                    bgPaint.setColor(Theme.multAlpha(getThemedColor(Theme.key_player_actionBarSubtitle), .1175f));
-                    canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(4), dp(4), bgPaint);
-                    if (links.draw(canvas)) {
-                        invalidate();
-                    }
-
-                    super.onDraw(canvas);
-                }
-
-                @Override
-                public boolean onTouchEvent(MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        LinkSpanDrawable link = new LinkSpanDrawable(null, resourcesProvider, event.getX(), event.getY());
-                        link.setColor(Theme.multAlpha(getThemedColor(Theme.key_player_actionBarSubtitle), .1175f));
-                        LinkPath path = link.obtainNewPath();
-                        if (LocaleController.isRTL) {
-                            AndroidUtilities.rectTmp.set(getWidth() - width(), (getHeight() - dp(18)) / 2f, getWidth(), (getHeight() + dp(18)) / 2f);
-                        } else {
-                            AndroidUtilities.rectTmp.set(0, (getHeight() - dp(18)) / 2f, width(), (getHeight() + dp(18)) / 2f);
-                        }
-                        path.addRect(AndroidUtilities.rectTmp, Path.Direction.CW);
-                        links.addLink(link);
-                        invalidate();
-                        return true;
-                    } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                        if (event.getAction() == MotionEvent.ACTION_UP) {
-                            performClick();
-                        }
-                        links.clear();
-                        invalidate();
-                    }
-                    return super.onTouchEvent(event);
-                }
-            };
-            if (LocaleController.isRTL) {
-                usedProviderTextView.setGravity(Gravity.RIGHT);
-            }
-            usedProviderTextView.setAnimationProperties(.25f, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
-            usedProviderTextView.setTextColor(getThemedColor(Theme.key_player_actionBarSubtitle));
-            usedProviderTextView.setTextSize(dp(14));
+            usedProviderTextView = new HeaderRapidButtons(context);
             usedProviderTextView.setText(favoriteAiProvider.getTitle());
             usedProviderTextView.setPadding(dp(4), dp(2), dp(4), dp(2));
             usedProviderTextView.setOnClickListener(e -> openConfig(false, true));
@@ -1676,12 +1760,101 @@ public class MainAiBottomSheet extends BottomSheet {
             shadow.setAlpha(1f - t);
         }
 
+        public void updateButtonsClickable(boolean areClickable) {
+            if (toLanguageTextView != null) {
+                toLanguageTextView.updateClickable(areClickable);
+            }
+            if (usedProviderTextView != null) {
+                usedProviderTextView.updateClickable(areClickable);
+            }
+        }
+
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(
                     MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(dp(78), MeasureSpec.EXACTLY)
             );
+        }
+    }
+
+    private class HeaderRapidButtons extends AnimatedTextView {
+        private boolean _isClickable = false;
+        private final Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final LinkSpanDrawable.LinkCollector links = new LinkSpanDrawable.LinkCollector();
+
+        public HeaderRapidButtons(Context context) {
+            super(context);
+            init();
+        }
+
+        private void init() {
+            if (LocaleController.isRTL) {
+                setGravity(Gravity.RIGHT);
+            }
+            setAnimationProperties(.25f, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
+            setTextColor(getThemedColor(Theme.key_player_actionBarSubtitle));
+            setTextSize(dp(14));
+        }
+
+        public void updateClickable(boolean isClickable) {
+            _isClickable = isClickable;
+            invalidate();
+        }
+
+        private int progressToAlpha = 0;
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            if (_isClickable && progressToAlpha != 30) {
+                progressToAlpha += 1;
+            } else if (!_isClickable && progressToAlpha != 0) {
+                progressToAlpha -= 1;
+            }
+            progressToAlpha = Utilities.clamp(progressToAlpha, 30, 0);
+
+            if (LocaleController.isRTL) {
+                AndroidUtilities.rectTmp.set(getWidth() - width(), (getHeight() - dp(18)) / 2f, getWidth(), (getHeight() + dp(18)) / 2f);
+            } else {
+                AndroidUtilities.rectTmp.set(0, (getHeight() - dp(18)) / 2f, width(), (getHeight() + dp(18)) / 2f);
+            }
+            bgPaint.setAlpha(progressToAlpha);
+            bgPaint.setColor(ColorUtils.setAlphaComponent(Theme.multAlpha(getThemedColor(Theme.key_player_actionBarSubtitle), .1175f), progressToAlpha));
+            canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(4), dp(4), bgPaint);
+            if (links.draw(canvas)) {
+                invalidate();
+            }
+
+            if (progressToAlpha != 0 && progressToAlpha != 30) {
+                invalidate();
+            }
+
+            super.onDraw(canvas);
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                LinkSpanDrawable link = new LinkSpanDrawable(null, resourcesProvider, event.getX(), event.getY());
+                link.setColor(Theme.multAlpha(getThemedColor(Theme.key_player_actionBarSubtitle), .1175f));
+                LinkPath path = link.obtainNewPath();
+                if (LocaleController.isRTL) {
+                    AndroidUtilities.rectTmp.set(getWidth() - width(), (getHeight() - dp(18)) / 2f, getWidth(), (getHeight() + dp(18)) / 2f);
+                } else {
+                    AndroidUtilities.rectTmp.set(0, (getHeight() - dp(18)) / 2f, width(), (getHeight() + dp(18)) / 2f);
+                }
+                path.addRect(AndroidUtilities.rectTmp, Path.Direction.CW);
+                links.addLink(link);
+                invalidate();
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    performClick();
+                }
+                links.clear();
+                invalidate();
+            }
+            return super.onTouchEvent(event);
         }
     }
 
@@ -1739,7 +1912,7 @@ public class MainAiBottomSheet extends BottomSheet {
             Bulletin.addDelegate(this, new Bulletin.Delegate() {
                 @Override
                 public int getBottomOffset(int tag) {
-                    return AndroidUtilities.dp(16 + 48 + 16);
+                    return dp(16 + 48 + 16);
                 }
             });
         }

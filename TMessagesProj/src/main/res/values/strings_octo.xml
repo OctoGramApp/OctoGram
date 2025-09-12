@@ -206,6 +206,11 @@
     <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example4">Can you recap what it says?</string>
     <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Ask_Example5">What it says?</string>
     <string name="AiFeatures_CustomModels_Feature_CloseModal">Close AI suggestion</string>
+    <string name="AiFeatures_CustomModels_Feature_Verify">Check important information. %s can make mistakes.</string>
+    <string name="AiFeatures_CustomModels_Feature_Options">Options</string>
+    <string name="AiFeatures_CustomModels_Feature_Options_DotsMenu">Dots Menu</string>
+    <string name="AiFeatures_CustomModels_Feature_Options_Shortcuts">Shortcuts</string>
+    <string name="AiFeatures_CustomModels_Feature_Repeat">Repeat</string>
     <string name="AiFeatures_CustomModels_Feature_UseAsText">Use as text…</string>
     <string name="AiFeatures_CustomModels_Feature_Language">Language</string>
     <string name="AiFeatures_CustomModels_Feature_Formality">Formality</string>
@@ -652,6 +657,7 @@
     <string name="Extreme">Extreme</string>
     <string name="TabletMode">Force Tablet Mode</string>
     <string name="RestartAppToApplyChanges">Restart app to apply changes.</string>
+    <string name="RestartAppToApplyChangesButton">Apply and restart</string>
     <string name="FoldersType">Folders Type</string>
     <string name="FoldersTypeTitles">Titles</string>
     <string name="FoldersTypeIcons">Icons</string>

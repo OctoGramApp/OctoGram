@@ -1367,50 +1367,52 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         public void updateItems() {
             items.clear();
 
-            for (int option : SearchOptionsOrderController.getCurrentOrder()) {
-                if (option >= 0) {
-                    if (option == PUBLIC_POSTS_TYPE && !expandedPublicPosts) {
-                        continue;
-                    }
-                    if (option == DOWNLOADS_TYPE && (showOnlyDialogsAdapter || !includeDownloads())) {
-                        continue;
-                    }
-                    items.add(new Item(option));
-                } else if (!showOnlyDialogsAdapter) {
+            var _getCurrentOrder = SearchOptionsOrderController.getCurrentOrder();
+            if (_getCurrentOrder == null) {
+                items.add(new Item(DIALOGS_TYPE));
+                if (expandedPublicPosts) {
+                    items.add(new Item(PUBLIC_POSTS_TYPE));
+                }
+                items.add(new Item(CHANNELS_TYPE));
+                items.add(new Item(BOTS_TYPE));
+                items.add(new Item(POSTS_TYPE));
+                if (!showOnlyDialogsAdapter) {
                     Item item = new Item(FILTER_TYPE);
-                    item.filterIndex = -option - 1;
+                    item.filterIndex = 0;
+                    items.add(item);
+                    if (includeDownloads()) {
+                        items.add(new Item(DOWNLOADS_TYPE));
+                    }
+                    item = new Item(FILTER_TYPE);
+                    item.filterIndex = 1;
+                    items.add(item);
+                    item = new Item(FILTER_TYPE);
+                    item.filterIndex = 2;
+                    items.add(item);
+                    item = new Item(FILTER_TYPE);
+                    item.filterIndex = 3;
+                    items.add(item);
+                    item = new Item(FILTER_TYPE);
+                    item.filterIndex = 4;
                     items.add(item);
                 }
+            } else {
+                for (int option : _getCurrentOrder) {
+                    if (option >= 0) {
+                        if (option == PUBLIC_POSTS_TYPE && !expandedPublicPosts) {
+                            continue;
+                        }
+                        if (option == DOWNLOADS_TYPE && (showOnlyDialogsAdapter || !includeDownloads())) {
+                            continue;
+                        }
+                        items.add(new Item(option));
+                    } else if (!showOnlyDialogsAdapter) {
+                        Item item = new Item(FILTER_TYPE);
+                        item.filterIndex = -option - 1;
+                        items.add(item);
+                    }
+                }
             }
-
-
-//            items.add(new Item(DIALOGS_TYPE));
-//            if (expandedPublicPosts) {
-//                items.add(new Item(PUBLIC_POSTS_TYPE));
-//            }
-//            items.add(new Item(CHANNELS_TYPE));
-//            items.add(new Item(BOTS_TYPE));
-//            items.add(new Item(POSTS_TYPE));
-//            if (!showOnlyDialogsAdapter) {
-//                Item item = new Item(FILTER_TYPE);
-//                item.filterIndex = 0;
-//                items.add(item);
-//                if (includeDownloads()) {
-//                    items.add(new Item(DOWNLOADS_TYPE));
-//                }
-//                item = new Item(FILTER_TYPE);
-//                item.filterIndex = 1;
-//                items.add(item);
-//                item = new Item(FILTER_TYPE);
-//                item.filterIndex = 2;
-//                items.add(item);
-//                item = new Item(FILTER_TYPE);
-//                item.filterIndex = 3;
-//                items.add(item);
-//                item = new Item(FILTER_TYPE);
-//                item.filterIndex = 4;
-//                items.add(item);
-//            }
         }
 
         @Override
@@ -1498,6 +1500,16 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             }
             if (items.get(position).type == POSTS_TYPE) {
                 return 6;
+            }
+            if (items.get(position).type == FILTER_TYPE && SearchOptionsOrderController.isUsingCustomVersion()) {
+                switch (items.get(position).filterIndex) {
+                    case 0: return 34;
+                    case 1: return 36;
+                    case 2: return 37;
+                    case 3: return 38;
+                    case 4: return 39;
+                    default: break;
+                }
             }
             return items.get(position).type + position;
         }
