@@ -434,6 +434,7 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
             }
 
             mediaSession.setPlaybackState(playbackState.build());
+            TelegramMediaSession.getInstance(this).publishNativePlaybackState(playbackState.build());
             MediaMetadata.Builder meta = new MediaMetadata.Builder()
                     .putString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST, contentText)
                     .putString(MediaMetadata.METADATA_KEY_ARTIST, contentText)
@@ -445,6 +446,7 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
             }
 
             mediaSession.setMetadata(meta.build());
+            TelegramMediaSession.getInstance(this).publishMetadata(messageObject, audioInfo, fullAlbumArt);
 
             bldr.setVisibility(Notification.VISIBILITY_PUBLIC);
 
@@ -641,6 +643,7 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
                     .setActions(actions);
         }
         mediaSession.setPlaybackState(playbackState.build());
+        TelegramMediaSession.getInstance(this).publishNativePlaybackState(playbackState.build());
     }
 
     private float getPlaybackSpeed(boolean isPlaying, MessageObject messageObject) {
@@ -687,6 +690,10 @@ public class MusicPlayerService extends Service implements NotificationCenter.No
             audioManager.unregisterRemoteControlClient(remoteControlClient);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            TelegramMediaSession sessionHolder = TelegramMediaSession.peekInstance();
+            if (sessionHolder != null && MediaController.getInstance().getPlayingMessageObject() == null) {
+                sessionHolder.publishStoppedState();
+            }
             mediaSession.release();
         }
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {

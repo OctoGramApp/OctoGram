@@ -1875,6 +1875,8 @@
     <string name="DeleteAndExit">Delete and leave group</string>
     <string name="DeleteAndExitButton">Delete and Leave Group</string>
     <string name="Notifications">Notifications</string>
+    <string name="NoNewCarMessages">No new messages</string>
+    <string name="NoCarMusic">No music</string>
     <string name="ChangePermissions">Change permissions</string>
     <string name="KickFromGroup">Remove from group</string>
     <!--contact info view-->

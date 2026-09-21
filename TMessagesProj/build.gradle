@@ -83,6 +83,10 @@ dependencies {
     implementation libs.androidx.cardview
     implementation libs.androidx.browser
 
+    implementation libs.androidx.car.app
+    implementation libs.androidx.media
+    implementation libs.androidx.lifecycle.runtime
+
     // Google Play Integrity
     implementation libs.google.play.integrity
     implementation libs.androidx.recyclerview

@@ -19,6 +19,10 @@ androidx_cardview = "1.0.0"
 androidx_browser = "1.9.0"
 androidx_mediarouter = "1.8.1"
 
+androidx_car_app = "1.7.0"
+androidx_media = "1.7.0"
+androidx_lifecycle_runtime = "2.7.0"
+
 # Google Play Integrity e RecyclerView
 google_play_integrity = "1.4.0"
 androidx_recyclerview = "1.4.0"
@@ -101,6 +105,10 @@ androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "a
 androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "androidx_cardview" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 androidx-mediarouter = { module = "androidx.mediarouter:mediarouter", version.ref = "androidx_mediarouter" }
+
+androidx-car-app = { module = "androidx.car.app:app", version.ref = "androidx_car_app" }
+androidx-media = { module = "androidx.media:media", version.ref = "androidx_media" }
+androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime", version.ref = "androidx_lifecycle_runtime" }
 
 # Google Play Integrity e RecyclerView
 desugar_jdk_libs_nio = { module = "com.android.tools:desugar_jdk_libs_nio", version.ref = "desugar_jdk_libs_nio" }
